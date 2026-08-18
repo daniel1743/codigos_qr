@@ -3,6 +3,7 @@ import { QRCodeCanvas } from "qrcode.react";
 import { downloadQR } from "../../lib/downloadQR";
 import { getPublicProfileUrl } from "../../lib/url";
 import { Copy, Download, ExternalLink, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface ShareSectionProps {
   slug: string;
@@ -13,7 +14,11 @@ interface ShareSectionProps {
 }
 
 export function ShareSection({ slug, published, saving, onSave, isValid }: ShareSectionProps) {
-  const publicUrl = slug ? getPublicProfileUrl(slug) : "";
+  const [publicUrl, setPublicUrl] = useState("");
+
+  useEffect(() => {
+    setPublicUrl(slug ? getPublicProfileUrl(slug) : "");
+  }, [slug]);
 
   const handleCopy = () => {
     if (!publicUrl) return;
@@ -45,7 +50,7 @@ export function ShareSection({ slug, published, saving, onSave, isValid }: Share
         </p>
       )}
 
-      {published && slug && (
+      {published && slug && publicUrl && (
         <div className="p-6 border rounded-lg bg-card flex flex-col items-center space-y-6 mt-8">
           <h3 className="text-xl font-bold text-center">¡Tu código QR está listo!</h3>
           <p className="text-center text-muted-foreground text-sm max-w-sm">
