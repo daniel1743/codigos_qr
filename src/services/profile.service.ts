@@ -13,11 +13,14 @@ export const profileService = {
     return data;
   },
 
-  async getPublicProfileBySlug(supabase: SupabaseClient, slug: string): Promise<Profile | null> {
+  async getPublicProfileByPublicId(
+    supabase: SupabaseClient,
+    publicId: string,
+  ): Promise<Profile | null> {
     const { data, error } = await supabase
       .from("profiles")
       .select("*")
-      .eq("slug", slug)
+      .eq("public_id", publicId)
       .eq("published", true)
       .maybeSingle();
 
@@ -27,7 +30,12 @@ export const profileService = {
 
   async createProfile(
     supabase: SupabaseClient,
-    profileData: Partial<Profile> & { user_id: string; slug: string; display_name: string },
+    profileData: Partial<Profile> & {
+      user_id: string;
+      slug: string;
+      public_id: string;
+      display_name: string;
+    },
   ): Promise<Profile> {
     const { data, error } = await supabase.from("profiles").insert(profileData).select().single();
 

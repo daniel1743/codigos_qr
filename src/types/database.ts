@@ -5,6 +5,7 @@ export interface Profile {
   id: string; // UUID
   user_id: string; // UUID
   slug: string;
+  public_id: string;
   display_name: string;
   bio: string | null;
   avatar_url: string | null;

@@ -14,11 +14,27 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION generate_profile_public_id()
+RETURNS TEXT AS $$
+DECLARE
+    alphabet TEXT := 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
+    result TEXT := '';
+    i INTEGER;
+BEGIN
+    FOR i IN 1..7 LOOP
+        result := result || substr(alphabet, floor(random() * length(alphabet) + 1)::INTEGER, 1);
+    END LOOP;
+
+    RETURN result;
+END;
+$$ LANGUAGE plpgsql;
+
 -- 1. PROFILES
 CREATE TABLE profiles (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     slug TEXT NOT NULL UNIQUE,
+    public_id TEXT NOT NULL UNIQUE DEFAULT generate_profile_public_id(),
     display_name TEXT NOT NULL,
     bio TEXT,
     avatar_url TEXT,
@@ -35,7 +51,8 @@ CREATE TABLE profiles (
 
     -- Constraints
     CONSTRAINT no_empty_slug CHECK (char_length(slug) > 0),
-    CONSTRAINT slug_is_lowercase CHECK (slug = lower(slug))
+    CONSTRAINT slug_is_lowercase CHECK (slug = lower(slug)),
+    CONSTRAINT public_id_url_safe CHECK (public_id ~ '^[A-Za-z0-9]+$')
 );
 
 -- Trigger for profiles updated_at
@@ -67,6 +84,7 @@ EXECUTE FUNCTION set_updated_at();
 
 -- Indexes
 CREATE INDEX idx_profiles_slug ON profiles(slug);
+CREATE INDEX idx_profiles_public_id ON profiles(public_id);
 CREATE INDEX idx_profiles_user_id ON profiles(user_id);
 CREATE INDEX idx_profile_links_profile_id ON profile_links(profile_id);
 CREATE INDEX idx_profile_links_profile_id_sort_order ON profile_links(profile_id, sort_order);

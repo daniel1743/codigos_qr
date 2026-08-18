@@ -2,7 +2,7 @@
  * Descarga el canvas del código QR como una imagen PNG.
  * Espera que el elemento <canvas> del QR tenga el ID "qr-code-canvas".
  */
-export function downloadQR(slug: string) {
+export function downloadQR(publicId: string) {
   const canvas = document.getElementById("qr-code-canvas") as HTMLCanvasElement;
 
   if (!canvas) {
@@ -17,7 +17,7 @@ export function downloadQR(slug: string) {
     // Crear un enlace temporal para forzar la descarga
     const downloadLink = document.createElement("a");
     downloadLink.href = pngUrl;
-    downloadLink.download = `qr-${slug}.png`;
+    downloadLink.download = `qr-${publicId}.png`;
 
     // Anexar, hacer clic, y remover
     document.body.appendChild(downloadLink);

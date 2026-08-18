@@ -1,6 +1,7 @@
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
+import { toast } from "sonner";
 import type { Profile } from "../../types/database";
 import { getBrowserSupabaseClient } from "../../lib/supabase/client";
 import { useState } from "react";
@@ -34,8 +35,8 @@ export function ProfileSection({ profile, onChange, userId }: ProfileSectionProp
 
       onChange({ avatar_url: data.publicUrl });
     } catch (error) {
-      console.error("Error uploading avatar:", error);
-      alert("Hubo un error subiendo la imagen.");
+      console.error(error);
+      toast.error("Hubo un error subiendo la imagen.");
     } finally {
       setUploading(false);
     }
@@ -43,11 +44,14 @@ export function ProfileSection({ profile, onChange, userId }: ProfileSectionProp
 
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold">Información del Perfil</h2>
+      <div className="space-y-2">
+        <h2 className="text-xl font-semibold tracking-tight">Información del Perfil</h2>
+        <p className="text-sm text-muted-foreground">Configura tu avatar y descripción.</p>
+      </div>
 
       <div className="space-y-2">
         <Label>Avatar</Label>
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col gap-4 min-[380px]:flex-row min-[380px]:items-center">
           {profile.avatar_url ? (
             <img
               src={profile.avatar_url}
@@ -59,12 +63,13 @@ export function ProfileSection({ profile, onChange, userId }: ProfileSectionProp
               <span className="text-xs text-muted-foreground">Vacío</span>
             </div>
           )}
-          <div className="flex-1">
+          <div className="w-full flex-1">
             <Input
               type="file"
               accept="image/png, image/jpeg, image/webp"
               onChange={handleAvatarUpload}
               disabled={uploading}
+              className="h-11"
             />
             {uploading && (
               <div className="text-sm text-muted-foreground mt-1 flex items-center gap-2">
@@ -83,6 +88,7 @@ export function ProfileSection({ profile, onChange, userId }: ProfileSectionProp
           onChange={(e) => onChange({ display_name: e.target.value })}
           placeholder="Ej: Daniel Falcon"
           maxLength={60}
+          className="h-11"
           required
         />
       </div>
@@ -95,19 +101,8 @@ export function ProfileSection({ profile, onChange, userId }: ProfileSectionProp
           onChange={(e) => onChange({ bio: e.target.value })}
           placeholder="Un par de líneas sobre ti o tu negocio"
           maxLength={180}
+          className="min-h-28 resize-none"
         />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="slug">Slug (URL de tu página)</Label>
-        <Input
-          id="slug"
-          value={profile.slug || ""}
-          onChange={(e) => onChange({ slug: e.target.value.toLowerCase().replace(/\s+/g, "-") })}
-          placeholder="ejemplo-slug"
-          required
-        />
-        <p className="text-xs text-muted-foreground">Esta será la ruta de tu código QR.</p>
       </div>
     </div>
   );
