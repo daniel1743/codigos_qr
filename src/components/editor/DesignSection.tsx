@@ -1,111 +1,225 @@
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import { ScrollArea } from "../ui/scroll-area";
 import { Alert, AlertDescription } from "../ui/alert";
-import { AlertTriangle, PaintBucket, Palette, Sparkles, ChevronDown } from "lucide-react";
-import { useState, useMemo } from "react";
+import { AlertTriangle, PaintBucket, Palette, ChevronDown, Wand2 } from "lucide-react";
+import { useState, useMemo, useEffect } from "react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../ui/collapsible";
-import type { Profile } from "../../types/database";
+import { TemplatePicker } from "./TemplatePicker";
+import type { Profile, AvatarShape } from "../../types/database";
+import { getBrowserSupabaseClient } from "../../lib/supabase/client";
+import { toast } from "sonner";
+import { Loader2, Image as ImageIcon, CircleUserRound } from "lucide-react";
 
 interface DesignSectionProps {
   profile: Partial<Profile>;
   onChange: (updates: Partial<Profile>) => void;
+  userId: string;
 }
-
-const THEME_PRESETS = [
-  { id: "minimal-light", name: "Minimal", bg: "#FFFFFF", btn: "#111111", text: "#FFFFFF" },
-  { id: "midnight", name: "Midnight", bg: "#111827", btn: "#374151", text: "#FFFFFF" },
-  { id: "cream", name: "Cream", bg: "#F6E7D8", btn: "#432E16", text: "#FFFFFF" },
-  { id: "violet", name: "Violet", bg: "#F5ECFF", btn: "#7C3AED", text: "#FFFFFF" },
-  { id: "forest", name: "Forest", bg: "#E2F0CB", btn: "#2D5A27", text: "#FFFFFF" },
-];
 
 const GRADIENT_PRESETS = [
-  { name: "Sunset", value: "linear-gradient(135deg, #FF7A59, #FF3D81)" },
   { name: "Ocean", value: "linear-gradient(135deg, #2563EB, #06B6D4)" },
-  { name: "Aurora", value: "linear-gradient(135deg, #8B5CF6, #22D3EE)" },
+  { name: "Sunset", value: "linear-gradient(135deg, #FB7185, #FDBA74)" },
+  { name: "Lavender", value: "linear-gradient(135deg, #8B5CF6, #C4B5FD)" },
   { name: "Midnight", value: "linear-gradient(135deg, #111827, #312E81)" },
-  { name: "Cream", value: "linear-gradient(135deg, #F6E7D8, #FFF7ED)" },
+  { name: "Warm", value: "linear-gradient(135deg, #F2E4D5, #FFF7ED)" },
+  { name: "Forest", value: "linear-gradient(135deg, #14532D, #0F766E)" },
 ];
 
-const NEON_PRESETS = [
-  { name: "Neon Purple", bg: "#09090B", btn: "#7C3AED_NEON", text: "#FFFFFF" },
-  { name: "Neon Blue", bg: "#09090B", btn: "#3B82F6_NEON", text: "#FFFFFF" },
-  { name: "Neon Green", bg: "#022C22", btn: "#10B981_NEON", text: "#FFFFFF" },
+const QUICK_BG = ["#FFFFFF", "#F7F7F5", "#F4EFE8", "#ECEAE5", "#EEF4FF", "#111111"];
+const QUICK_BTN = ["#111111", "#FFFFFF", "#1F2937", "#1D4ED8", "#0F766E", "#7C3AED"];
+const QUICK_TEXT = ["#FFFFFF", "#111111", "#374151"];
+
+const GRADIENT_DIRECTIONS = [
+  { label: "↗", value: "135" },
+  { label: "↘", value: "45" },
+  { label: "→", value: "90" },
+  { label: "↓", value: "180" },
+  { label: "↑", value: "0" },
+  { label: "←", value: "270" },
 ];
 
-// Helper para parsear hex a rgb
-function hexToRgb(hex: string) {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result ? {
-    r: parseInt(result[1], 16),
-    g: parseInt(result[2], 16),
-    b: parseInt(result[3], 16)
-  } : null;
+import { evaluateContrast, getRecommendedTextColor, contrastRatio, extractSolidHex, mixColorsAlpha } from "../../lib/color-utils";
+
+function ColorControl({
+  value,
+  onChange,
+  compact = false,
+}: {
+  value: string;
+  onChange: (validHex: string) => void;
+  compact?: boolean;
+}) {
+  const [localVal, setLocalVal] = useState(value);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    setLocalVal(value);
+    setError(false);
+  }, [value]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newVal = e.target.value;
+    setLocalVal(newVal);
+    if (/^#[0-9A-Fa-f]{6}$/i.test(newVal)) {
+      setError(false);
+      onChange(newVal);
+    } else {
+      setError(true);
+    }
+  };
+
+  const handleBlur = () => {
+    if (!/^#[0-9A-Fa-f]{6}$/i.test(localVal)) {
+      setLocalVal(value);
+      setError(false);
+    }
+  };
+
+  const validColorForPicker = /^#[0-9A-Fa-f]{6}$/i.test(localVal) ? localVal : value;
+
+  const heightClass = compact ? "h-10" : "h-11";
+
+  return (
+    <div className={`flex ${compact ? "gap-2" : "gap-3"} mb-1`}>
+      <Input
+        type="color"
+        value={validColorForPicker}
+        onChange={(e) => {
+          setLocalVal(e.target.value);
+          onChange(e.target.value);
+        }}
+        className={`${heightClass} ${compact ? "w-10" : "w-11"} cursor-pointer rounded-lg p-1 shrink-0`}
+      />
+      <div className="flex-1 relative">
+        <Input
+          type="text"
+          value={localVal}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          className={`${heightClass} min-w-0 w-full font-mono text-sm uppercase ${error ? "border-destructive/60 focus-visible:ring-destructive/60" : ""}`}
+          maxLength={7}
+        />
+        {error && (
+          <span className="absolute -bottom-4 left-1 text-[10px] text-destructive">
+            Formato: #RRGGBB
+          </span>
+        )}
+      </div>
+    </div>
+  );
 }
 
-// Luminancia relativa
-function getLuminance(r: number, g: number, b: number) {
-  const a = [r, g, b].map((v) => {
-    v /= 255;
-    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
-  });
-  return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
-}
-
-// Contraste (1 a 21)
-function getContrastRatio(color1: string, color2: string) {
-  const rgb1 = hexToRgb(color1);
-  const rgb2 = hexToRgb(color2);
-  if (!rgb1 || !rgb2) return 21; // fallback
-  const lum1 = getLuminance(rgb1.r, rgb1.g, rgb1.b);
-  const lum2 = getLuminance(rgb2.r, rgb2.g, rgb2.b);
-  const brightest = Math.max(lum1, lum2);
-  const darkest = Math.min(lum1, lum2);
-  return (brightest + 0.05) / (darkest + 0.05);
-}
-
-export function DesignSection({ profile, onChange }: DesignSectionProps) {
-  const [bgTab, setBgTab] = useState<"solid" | "gradient">("solid");
-
+export function DesignSection({ profile, onChange, userId }: DesignSectionProps) {
   const rawBg = profile.background_color || "#ffffff";
   const rawBtn = profile.button_color || "#111111";
   const rawBtnText = profile.button_text_color || "#ffffff";
 
-  // Gradient parser
-  const gradientRegex = /linear-gradient\(\s*(\d+)deg\s*,\s*(#[0-9a-fA-F]{6})\s*,\s*(#[0-9a-fA-F]{6})\s*\)/;
-  const gradientMatch = rawBg.match(gradientRegex);
-  
-  const isGradient = !!gradientMatch;
-  const gradAngle = gradientMatch ? gradientMatch[1] : "135";
-  const gradColor1 = gradientMatch ? gradientMatch[2] : "#111111";
-  const gradColor2 = gradientMatch ? gradientMatch[3] : "#3B82F6";
+  const bgHex = extractSolidHex(rawBg);
+  const buttonStyle = profile.button_style || "solid";
+  let effectiveFg = rawBtn;
+  let effectiveBg = bgHex;
+  let fixProp: "button_color" | "button_text_color" = "button_color";
+
+  if (buttonStyle === "solid" || buttonStyle === "pill") {
+    effectiveFg = rawBtnText;
+    effectiveBg = rawBtn;
+    fixProp = "button_text_color";
+  } else if (buttonStyle === "soft") {
+    effectiveFg = rawBtn;
+    effectiveBg = mixColorsAlpha(rawBtn, bgHex, 0.08); 
+    fixProp = "button_color";
+  } else if (buttonStyle === "card") {
+    effectiveFg = rawBtn;
+    effectiveBg = mixColorsAlpha("#FFFFFF", bgHex, 0.9);
+    fixProp = "button_color";
+  } else {
+    // outline, minimal, line
+    effectiveFg = rawBtn;
+    effectiveBg = bgHex;
+    fixProp = "button_color";
+  }
+
+  const contrastState = evaluateContrast(effectiveFg, effectiveBg);
+  const recommendedFixColor = getRecommendedTextColor(effectiveBg);
+
+  const handleFixContrast = () => {
+    onChange({ [fixProp]: recommendedFixColor });
+  };
+
+  const supabase = getBrowserSupabaseClient();
+  const [uploadingCover, setUploadingCover] = useState(false);
+
+  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingCover(true);
+    try {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `banner-${Date.now()}.${fileExt}`;
+      const filePath = `${userId}/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage.from("banners").upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage.from("banners").getPublicUrl(filePath);
+
+      onChange({ banner_url: data.publicUrl });
+    } catch (error) {
+      console.error(error);
+      toast.error("Hubo un error subiendo la portada.");
+    } finally {
+      setUploadingCover(false);
+    }
+  };
+
+  const linearRegex =
+    /linear-gradient\(\s*(\d+)deg\s*,\s*(#[0-9a-fA-F]{6})\s*,\s*(#[0-9a-fA-F]{6})\s*\)/;
+  const radialRegex =
+    /radial-gradient\(\s*circle\s*,\s*(#[0-9a-fA-F]{6})\s*,\s*(#[0-9a-fA-F]{6})\s*\)/;
+
+  const linearMatch = rawBg.match(linearRegex);
+  const radialMatch = rawBg.match(radialRegex);
+
+  const isGradient = !!linearMatch || !!radialMatch;
+  const gradType = radialMatch ? "radial" : "linear";
+  const gradAngle = linearMatch ? linearMatch[1] || "135" : "135";
+  const gradColor1 = linearMatch
+    ? linearMatch[2] || "#111111"
+    : radialMatch
+      ? radialMatch[1] || "#111111"
+      : "#111111";
+  const gradColor2 = linearMatch
+    ? linearMatch[3] || "#3B82F6"
+    : radialMatch
+      ? radialMatch[2] || "#3B82F6"
+      : "#3B82F6";
+
+  const [bgTab, setBgTab] = useState<"solid" | "gradient">(isGradient ? "gradient" : "solid");
 
   const solidBgColor = isGradient ? "#ffffff" : rawBg;
-  const isNeon = rawBtn.endsWith("_NEON");
-  const pureBtnColor = isNeon ? rawBtn.replace("_NEON", "") : rawBtn;
 
-  // Warning de contraste
-  const contrastWarning = useMemo(() => {
-    const ratio = getContrastRatio(pureBtnColor, rawBtnText);
-    return ratio < 3.5;
-  }, [pureBtnColor, rawBtnText]);
+  // Mantenemos compatibilidad por si la base de datos trae un botón NEON
+  const pureBtnColor = rawBtn.replace("_NEON", "");
+
+
 
   const handleSolidChange = (val: string) => {
     onChange({ background_color: val });
   };
 
-  const handleGradientChange = (c1: string, c2: string, angle: string) => {
-    onChange({ background_color: `linear-gradient(${angle}deg, ${c1}, ${c2})` });
-  };
-
-  const applyTheme = (bg: string, btn: string, text: string) => {
-    onChange({ background_color: bg, button_color: btn, button_text_color: text });
-    if (bg.includes("gradient")) {
-      setBgTab("gradient");
+  const handleGradientChange = (
+    c1: string,
+    c2: string,
+    type: "linear" | "radial",
+    angle: string,
+  ) => {
+    if (type === "radial") {
+      onChange({ background_color: `radial-gradient(circle, ${c1}, ${c2})` });
     } else {
-      setBgTab("solid");
+      onChange({ background_color: `linear-gradient(${angle}deg, ${c1}, ${c2})` });
     }
   };
 
@@ -116,104 +230,291 @@ export function DesignSection({ profile, onChange }: DesignSectionProps) {
         <p className="text-sm text-muted-foreground">Personaliza colores y estilo visual.</p>
       </div>
 
-      {/* PRESETS */}
-      <div className="space-y-3">
-        <Label className="flex items-center gap-2"><Sparkles className="w-4 h-4 text-primary" /> Temas Rápidos</Label>
-        <ScrollArea className="w-full whitespace-nowrap pb-3 -mx-1 px-1">
-          <div className="flex gap-3">
-            {THEME_PRESETS.map((preset) => (
-              <button
-                key={preset.id}
-                onClick={() => applyTheme(preset.bg, preset.btn, preset.text)}
-                className="flex flex-col items-center gap-2 transition-transform active:scale-95"
-              >
-                <div 
-                  className="w-14 h-20 rounded-xl border-2 border-border shadow-sm flex items-end justify-center p-2 hover:border-primary/50 overflow-hidden relative"
-                  style={{ background: preset.bg }}
+      <TemplatePicker profile={profile} onChange={onChange} />
+
+      {/* PORTADA Y AVATAR */}
+      <div className="space-y-4 rounded-xl border bg-card p-3 shadow-sm sm:p-4">
+        <Label className="flex items-center gap-2">
+          <ImageIcon className="w-4 h-4" /> Portada y Avatar
+        </Label>
+
+        <div className="space-y-3">
+          <Label className="text-xs text-muted-foreground">Imagen de portada</Label>
+          <div className="flex flex-col gap-3">
+            {profile.banner_url ? (
+              <div className="relative w-full h-24 rounded-lg overflow-hidden border">
+                <img
+                  src={profile.banner_url}
+                  alt="Portada"
+                  className="w-full h-full object-cover"
+                />
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="absolute top-2 right-2 h-7 px-2 text-xs"
+                  onClick={() => onChange({ banner_url: null })}
                 >
-                  <div className="w-full h-3 rounded-full shadow-sm" style={{ background: preset.btn }}></div>
+                  Eliminar
+                </Button>
+              </div>
+            ) : (
+              <div className="relative w-full h-24 rounded-lg border-2 border-dashed border-muted flex flex-col items-center justify-center bg-muted/30">
+                <ImageIcon className="w-6 h-6 text-muted-foreground mb-1" />
+                <span className="text-xs text-muted-foreground">Sin portada</span>
+              </div>
+            )}
+
+            <div className="w-full">
+              <Input
+                type="file"
+                accept="image/png, image/jpeg, image/webp"
+                onChange={handleCoverUpload}
+                disabled={uploadingCover}
+                className="h-10 text-xs"
+              />
+              {uploadingCover && (
+                <div className="text-xs text-muted-foreground mt-1.5 flex items-center gap-2">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" /> Subiendo...
                 </div>
-                <span className="text-[10px] font-medium">{preset.name}</span>
-              </button>
-            ))}
+              )}
+            </div>
           </div>
-        </ScrollArea>
+        </div>
+
+        <div className="space-y-3 pt-3 border-t border-border/40">
+          <Label className="text-xs text-muted-foreground">Forma del avatar</Label>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => onChange({ avatar_shape: "circle" })}
+              className={`flex-1 h-9 flex flex-col items-center justify-center text-[11px] font-medium border rounded-md transition-all ${profile.avatar_shape === "circle" || !profile.avatar_shape ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground hover:bg-accent hover:text-accent-foreground"}`}
+            >
+              Redondo
+            </button>
+            <button
+              type="button"
+              onClick={() => onChange({ avatar_shape: "rounded" })}
+              className={`flex-1 h-9 flex flex-col items-center justify-center text-[11px] font-medium border rounded-md transition-all ${profile.avatar_shape === "rounded" ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground hover:bg-accent hover:text-accent-foreground"}`}
+            >
+              Cuadrado
+            </button>
+            <button
+              type="button"
+              onClick={() => onChange({ avatar_shape: "none" })}
+              className={`flex-1 h-9 flex flex-col items-center justify-center text-[11px] font-medium border rounded-md transition-all ${profile.avatar_shape === "none" ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground hover:bg-accent hover:text-accent-foreground"}`}
+            >
+              Sin avatar
+            </button>
+          </div>
+        </div>
+
+        {profile.avatar_shape !== "none" && (
+          <div className="space-y-3 pt-4 border-t border-border/40">
+            <Label className="text-xs text-muted-foreground">Aro del avatar</Label>
+            <div className="flex gap-2 mb-3">
+              <button
+                type="button"
+                onClick={() => onChange({ ring_enabled: false })}
+                className={`flex-1 h-9 flex flex-col items-center justify-center text-[11px] font-medium border rounded-md transition-all ${!profile.ring_enabled ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground hover:bg-accent hover:text-accent-foreground"}`}
+              >
+                Sin aro
+              </button>
+              <button
+                type="button"
+                onClick={() => onChange({ ring_enabled: true })}
+                className={`flex-1 h-9 flex flex-col items-center justify-center text-[11px] font-medium border rounded-md transition-all ${profile.ring_enabled ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground hover:bg-accent hover:text-accent-foreground"}`}
+              >
+                Con aro
+              </button>
+            </div>
+
+            {profile.ring_enabled && (
+              <div className="space-y-4 animate-in fade-in zoom-in-95 duration-200 bg-muted/30 p-3 rounded-lg border">
+                <div className="space-y-3">
+                  <Label className="text-[11px] text-muted-foreground">Color del aro</Label>
+                  <div className="flex flex-wrap gap-1.5 pb-1">
+                    {[
+                      { name: "Negro", value: "#111111" },
+                      { name: "Blanco", value: "#FFFFFF" },
+                      { name: "Dorado", value: "#D4AF37" },
+                      { name: "Azul", value: "#2563EB" },
+                      { name: "Rosa", value: "#EC4899" },
+                      { name: "Morado", value: "#7C3AED" },
+                    ].map((preset) => (
+                      <button
+                        key={preset.value}
+                        type="button"
+                        aria-label={`Color ${preset.name}`}
+                        title={preset.name}
+                        onClick={() => onChange({ ring_color: preset.value })}
+                        className={`w-6 h-6 rounded-full border shadow-sm transition-transform hover:scale-105 ${profile.ring_color?.toUpperCase() === preset.value.toUpperCase() ? "ring-2 ring-primary ring-offset-1" : ""}`}
+                        style={{ backgroundColor: preset.value }}
+                      />
+                    ))}
+                  </div>
+                  <ColorControl
+                    compact
+                    value={profile.ring_color || "#000000"}
+                    onChange={(val) => onChange({ ring_color: val })}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-[11px] text-muted-foreground">Grosor</Label>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => onChange({ ring_thickness: "thin" })}
+                      className={`flex-1 h-8 flex flex-col items-center justify-center text-[10px] font-medium border rounded-md transition-all ${profile.ring_thickness === "thin" || !profile.ring_thickness ? "bg-primary/20 text-primary border-primary" : "bg-background text-muted-foreground hover:bg-accent"}`}
+                    >
+                      Fino
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onChange({ ring_thickness: "medium" })}
+                      className={`flex-1 h-8 flex flex-col items-center justify-center text-[10px] font-medium border rounded-md transition-all ${profile.ring_thickness === "medium" ? "bg-primary/20 text-primary border-primary" : "bg-background text-muted-foreground hover:bg-accent"}`}
+                    >
+                      Medio
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* BACKGROUND */}
       <div className="space-y-4 rounded-xl border bg-card p-3 shadow-sm sm:p-4">
-        <div className="flex items-center justify-between mb-2">
-          <Label className="flex items-center gap-2"><PaintBucket className="w-4 h-4" /> Fondo</Label>
-        </div>
-        
+        <Label className="flex items-center gap-2">
+          <PaintBucket className="w-4 h-4" /> Fondo
+        </Label>
+
         <div className="flex p-1 bg-muted rounded-lg mb-4">
-          <button 
-            onClick={() => { setBgTab("solid"); handleSolidChange(solidBgColor); }}
+          <button
+            type="button"
+            onClick={() => {
+              setBgTab("solid");
+              handleSolidChange(solidBgColor);
+            }}
             className={`flex-1 text-xs py-1.5 font-medium rounded-md transition-colors ${bgTab === "solid" && !isGradient ? "bg-background shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
           >
             Sólido
           </button>
-          <button 
-            onClick={() => { setBgTab("gradient"); handleGradientChange(gradColor1, gradColor2, gradAngle); }}
+          <button
+            type="button"
+            onClick={() => {
+              setBgTab("gradient");
+              handleGradientChange(gradColor1, gradColor2, gradType, gradAngle);
+            }}
             className={`flex-1 text-xs py-1.5 font-medium rounded-md transition-colors ${bgTab === "gradient" || isGradient ? "bg-background shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
           >
             Degradado
           </button>
         </div>
 
-        {(!isGradient && bgTab === "solid") ? (
-          <div className="flex items-center gap-3">
-            <Input
-              type="color"
-              value={solidBgColor}
-              onChange={(e) => handleSolidChange(e.target.value)}
-              className="h-12 w-12 shrink-0 cursor-pointer rounded-lg p-1"
-            />
-            <Input
-              type="text"
-              value={solidBgColor}
-              onChange={(e) => handleSolidChange(e.target.value)}
-              className="h-11 min-w-0 flex-1 font-mono uppercase"
-              maxLength={7}
-            />
+        {!isGradient && bgTab === "solid" ? (
+          <div className="space-y-4">
+            <div className="flex flex-wrap gap-2 pb-1">
+              {QUICK_BG.map((color) => (
+                <button
+                  key={color}
+                  type="button"
+                  aria-label={`Fondo color ${color}`}
+                  title={color}
+                  onClick={() => handleSolidChange(color)}
+                  className={`w-8 h-8 rounded-full border shadow-sm transition-transform hover:scale-105 ${solidBgColor.toUpperCase() === color.toUpperCase() ? "ring-2 ring-primary ring-offset-2" : ""}`}
+                  style={{ backgroundColor: color }}
+                />
+              ))}
+            </div>
+            <ColorControl value={solidBgColor} onChange={handleSolidChange} />
           </div>
         ) : (
-          <div className="space-y-4 animate-in fade-in duration-200">
+          <div className="space-y-5 animate-in fade-in duration-200">
             <div className="grid grid-cols-1 gap-4 min-[420px]:grid-cols-2">
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">Color 1</Label>
-                <div className="flex gap-2">
-                  <Input type="color" value={gradColor1} onChange={(e) => handleGradientChange(e.target.value, gradColor2, gradAngle)} className="w-9 h-9 p-0.5 rounded" />
-                  <Input type="text" value={gradColor1} onChange={(e) => handleGradientChange(e.target.value, gradColor2, gradAngle)} className="h-10 min-w-0 text-xs uppercase" maxLength={7} />
-                </div>
+                <ColorControl
+                  compact
+                  value={gradColor1}
+                  onChange={(val) => handleGradientChange(val, gradColor2, gradType, gradAngle)}
+                />
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">Color 2</Label>
-                <div className="flex gap-2">
-                  <Input type="color" value={gradColor2} onChange={(e) => handleGradientChange(gradColor1, e.target.value, gradAngle)} className="w-9 h-9 p-0.5 rounded" />
-                  <Input type="text" value={gradColor2} onChange={(e) => handleGradientChange(gradColor1, e.target.value, gradAngle)} className="h-10 min-w-0 text-xs uppercase" maxLength={7} />
-                </div>
+                <ColorControl
+                  compact
+                  value={gradColor2}
+                  onChange={(val) => handleGradientChange(gradColor1, val, gradType, gradAngle)}
+                />
               </div>
             </div>
 
+            <div className="space-y-1.5">
+              <Label className="text-xs text-muted-foreground">Tipo</Label>
+              <div className="flex gap-1">
+                <button
+                  type="button"
+                  onClick={() => handleGradientChange(gradColor1, gradColor2, "linear", gradAngle)}
+                  className={`flex-1 h-8 rounded-md border text-sm font-medium transition-colors ${gradType === "linear" ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground hover:bg-accent hover:text-accent-foreground"}`}
+                >
+                  Lineal
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleGradientChange(gradColor1, gradColor2, "radial", gradAngle)}
+                  className={`flex-1 h-8 rounded-md border text-sm font-medium transition-colors ${gradType === "radial" ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground hover:bg-accent hover:text-accent-foreground"}`}
+                >
+                  Radial
+                </button>
+              </div>
+            </div>
+
+            {gradType === "linear" && (
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">Dirección</Label>
+                <div className="flex gap-1">
+                  {GRADIENT_DIRECTIONS.map((dir) => (
+                    <button
+                      key={dir.value}
+                      type="button"
+                      onClick={() =>
+                        handleGradientChange(gradColor1, gradColor2, "linear", dir.value)
+                      }
+                      className={`flex-1 h-8 rounded-md border text-sm font-medium transition-colors ${gradAngle === dir.value ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground hover:bg-accent hover:text-accent-foreground"}`}
+                    >
+                      {dir.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <Collapsible>
               <CollapsibleTrigger asChild>
-                <Button variant="ghost" size="sm" className="w-full text-xs text-muted-foreground h-8 flex justify-between">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full text-xs text-muted-foreground h-8 flex justify-between"
+                >
                   Degradados sugeridos <ChevronDown className="w-3 h-3" />
                 </Button>
               </CollapsibleTrigger>
               <CollapsibleContent className="pt-3 pb-1">
-                 <div className="grid grid-cols-5 gap-2 max-[360px]:grid-cols-3">
-                   {GRADIENT_PRESETS.map((gp, i) => (
-                     <button
-                       key={i}
-                       title={gp.name}
-                       onClick={() => onChange({ background_color: gp.value })}
-                       className="h-8 rounded-md shadow-sm border border-border/50 hover:scale-105 transition-transform"
-                       style={{ background: gp.value }}
-                     />
-                   ))}
-                 </div>
+                <div className="grid grid-cols-6 gap-2 max-[360px]:grid-cols-3">
+                  {GRADIENT_PRESETS.map((gp, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      aria-label={`Degradado ${gp.name}`}
+                      title={gp.name}
+                      onClick={() => onChange({ background_color: gp.value })}
+                      className="h-8 rounded-md shadow-sm border border-border/50 hover:scale-105 transition-transform"
+                      style={{ background: gp.value }}
+                    />
+                  ))}
+                </div>
               </CollapsibleContent>
             </Collapsible>
           </div>
@@ -222,97 +523,180 @@ export function DesignSection({ profile, onChange }: DesignSectionProps) {
 
       {/* BUTTONS */}
       <div className="space-y-4 rounded-xl border bg-card p-3 shadow-sm sm:p-4">
-        <Label className="flex items-center gap-2"><Palette className="w-4 h-4" /> Botones</Label>
-        
-        <div className="grid grid-cols-1 gap-4 min-[430px]:grid-cols-2 min-[430px]:gap-6">
-          <div className="space-y-2">
+        <Label className="flex items-center gap-2">
+          <Palette className="w-4 h-4" /> Botones
+        </Label>
+
+        <div className="grid grid-cols-1 gap-6 min-[430px]:grid-cols-2">
+          <div className="space-y-3">
             <Label className="text-xs text-muted-foreground">Color de botón</Label>
-            <div className="flex gap-2">
-              <Input
-                type="color"
-                value={pureBtnColor}
-                onChange={(e) => onChange({ button_color: isNeon ? `${e.target.value}_NEON` : e.target.value })}
-                className="h-11 w-11 cursor-pointer rounded-lg p-1"
-              />
-              <Input
-                type="text"
-                value={pureBtnColor}
-                onChange={(e) => onChange({ button_color: isNeon ? `${e.target.value}_NEON` : e.target.value })}
-                className="h-11 min-w-0 flex-1 font-mono text-sm uppercase"
-                maxLength={7}
-              />
+            <div className="flex flex-wrap gap-1.5 pb-1">
+              {QUICK_BTN.map((color) => (
+                <button
+                  key={color}
+                  type="button"
+                  aria-label={`Botón color ${color}`}
+                  title={color}
+                  onClick={() => onChange({ button_color: color })}
+                  className={`w-6 h-6 rounded-md border shadow-sm transition-transform hover:scale-105 ${pureBtnColor.toUpperCase() === color.toUpperCase() ? "ring-2 ring-primary ring-offset-1" : ""}`}
+                  style={{ backgroundColor: color }}
+                />
+              ))}
             </div>
+            <ColorControl
+              compact
+              value={pureBtnColor}
+              onChange={(val) => onChange({ button_color: val })}
+            />
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-3">
             <Label className="text-xs text-muted-foreground">Texto del botón</Label>
-            <div className="flex gap-2">
-              <Input
-                type="color"
-                value={rawBtnText}
-                onChange={(e) => onChange({ button_text_color: e.target.value })}
-                className="h-11 w-11 cursor-pointer rounded-lg p-1"
-              />
-              <Input
-                type="text"
-                value={rawBtnText}
-                onChange={(e) => onChange({ button_text_color: e.target.value })}
-                className="h-11 min-w-0 flex-1 font-mono text-sm uppercase"
-                maxLength={7}
-              />
+            <div className="flex flex-wrap gap-1.5 pb-1">
+              {QUICK_TEXT.map((color) => (
+                <button
+                  key={color}
+                  type="button"
+                  aria-label={`Texto color ${color}`}
+                  title={color}
+                  onClick={() => onChange({ button_text_color: color })}
+                  className={`w-6 h-6 rounded-md border shadow-sm transition-transform hover:scale-105 ${rawBtnText.toUpperCase() === color.toUpperCase() ? "ring-2 ring-primary ring-offset-1" : ""}`}
+                  style={{ backgroundColor: color }}
+                />
+              ))}
             </div>
+            <ColorControl
+              compact
+              value={rawBtnText}
+              onChange={(val) => onChange({ button_text_color: val })}
+            />
           </div>
         </div>
 
-        {contrastWarning && (
-          <Alert variant="destructive" className="py-2 px-3 bg-destructive/10 border-destructive/20 text-destructive mt-4 animate-in fade-in zoom-in-95 duration-300">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertDescription className="text-xs ml-2">
-              Bajo contraste detectado entre el texto y el botón. Podría ser difícil de leer.
+        {/* CONTRAST WARNING */}
+        {contrastState !== "PASS" && (
+          <Alert variant="default" className={`mt-4 border ${contrastState === "POOR" ? "bg-red-50 text-red-900 border-red-200" : "bg-amber-50 text-amber-900 border-amber-200"}`}>
+            <AlertTriangle className={`w-4 h-4 ${contrastState === "POOR" ? "text-red-600" : "text-amber-600"}`} />
+            <AlertDescription className="flex flex-col sm:flex-row sm:items-center justify-between text-[11px] ml-1 gap-2">
+              <span>Contraste {contrastState === "POOR" ? "muy bajo" : "bajo"}. El texto puede ser difícil de leer.</span>
+              <Button variant="outline" size="sm" onClick={handleFixContrast} className="h-6 text-[10px] px-2 shrink-0 bg-white hover:bg-muted">
+                <Wand2 className="w-3 h-3 mr-1" /> Usar color recomendado
+              </Button>
             </AlertDescription>
           </Alert>
         )}
 
-        <Collapsible>
-          <CollapsibleTrigger asChild>
-            <Button variant="outline" size="sm" className="w-full text-xs mt-4 h-9">
-              Ver Estilos Neón
-            </Button>
-          </CollapsibleTrigger>
-          <CollapsibleContent className="pt-3">
-             <div className="grid grid-cols-3 gap-2">
-                {NEON_PRESETS.map((neon, i) => (
-                  <button
-                    key={i}
-                    onClick={() => applyTheme(neon.bg, neon.btn, neon.text)}
-                    className="flex flex-col items-center gap-1.5 p-2 rounded-lg border bg-muted/30 hover:bg-muted transition-colors"
-                  >
-                    <div 
-                      className="w-full h-6 rounded-md" 
-                      style={{ 
-                        background: neon.bg,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}
-                    >
-                      <div className="w-3/4 h-2 rounded-full" style={{ 
-                         background: neon.btn.replace("_NEON", ""), 
-                         boxShadow: `0 0 8px ${neon.btn.replace("_NEON", "")}` 
-                      }}></div>
-                    </div>
-                    <span className="text-[9px] font-medium text-muted-foreground">{neon.name}</span>
-                  </button>
-                ))}
+        <div className="space-y-3 pt-4 mt-4 border-t border-border/40">
+          <Label className="text-xs text-muted-foreground">Forma del botón</Label>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => onChange({ button_radius: "none" })}
+              className={`flex-1 h-9 flex items-center justify-center text-xs font-medium border transition-all ${profile.button_radius === "none" ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground hover:bg-accent hover:text-accent-foreground"}`}
+            >
+              Recto
+            </button>
+            <button
+              type="button"
+              onClick={() => onChange({ button_radius: "rounded" })}
+              className={`flex-1 h-9 flex items-center justify-center text-xs font-medium border rounded-md transition-all ${profile.button_radius === "rounded" || !profile.button_radius ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground hover:bg-accent hover:text-accent-foreground"}`}
+            >
+              Curvo
+            </button>
+            <button
+              type="button"
+              onClick={() => onChange({ button_radius: "full" })}
+              className={`flex-1 h-9 flex items-center justify-center text-xs font-medium border rounded-full transition-all ${profile.button_radius === "full" ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground hover:bg-accent hover:text-accent-foreground"}`}
+            >
+              Píldora
+            </button>
+          </div>
+        </div>
+
+        <div className="space-y-3 pt-4 mt-4 border-t border-border/40">
+          <Label className="text-xs text-muted-foreground">Estilo de enlaces</Label>
+          <div className="grid grid-cols-2 gap-3 min-[430px]:grid-cols-3">
+            {[
+              { id: "solid", label: "Sólido" },
+              { id: "outline", label: "Outline" },
+              { id: "soft", label: "Soft" },
+              { id: "pill", label: "Pill" },
+              { id: "minimal", label: "Minimal" },
+              { id: "line", label: "Line" },
+              { id: "card", label: "Card" },
+            ].map((style) => {
+              const isActive = (profile.button_style || "solid") === style.id;
+
+              // Paleta neutral para demos (nunca falla el contraste visual)
+              const demoBtn = "#111827";
+              const demoText = "#FFFFFF";
+              const demoSoft = "#F1F5F9";
+              const demoBorder = "#CBD5E1";
+
+              let btnClass =
+                "flex items-center justify-center gap-2 h-10 w-full text-[10px] font-medium transition-all ";
+              let btnStyle: React.CSSProperties = {};
+
+              const radiusClass =
+                style.id === "pill"
+                  ? "rounded-full"
+                  : profile.button_radius === "none"
+                    ? "rounded-none"
+                    : profile.button_radius === "full"
+                      ? "rounded-full"
+                      : "rounded-md";
+
+              if (style.id === "solid" || style.id === "pill") {
+                btnClass += `${radiusClass} border border-transparent shadow-sm`;
+                btnStyle = { backgroundColor: demoBtn, color: demoText };
+              } else if (style.id === "outline") {
+                btnClass += `${radiusClass} border-2 bg-transparent`;
+                btnStyle = { borderColor: demoBtn, color: demoBtn };
+              } else if (style.id === "soft") {
+                btnClass += `${radiusClass} border border-transparent`;
+                btnStyle = { backgroundColor: demoSoft, color: demoBtn };
+              } else if (style.id === "minimal") {
+                btnClass += `${radiusClass} bg-transparent border-transparent`;
+                btnStyle = { color: demoBtn };
+              } else if (style.id === "line") {
+                btnClass += `rounded-none border-b bg-transparent justify-start px-2`;
+                btnStyle = { borderBottomColor: demoBorder, color: demoBtn };
+              } else if (style.id === "card") {
+                btnClass += `${radiusClass} bg-white shadow-sm border`;
+                btnStyle = { color: demoBtn, borderColor: demoBorder };
+              }
+
+              return (
                 <button
-                  onClick={() => onChange({ button_color: pureBtnColor })}
-                  className="flex flex-col items-center gap-1.5 p-2 rounded-lg border bg-muted/30 hover:bg-muted transition-colors col-span-3 mt-1"
+                  key={style.id}
+                  type="button"
+                  aria-pressed={isActive}
+                  onClick={() => onChange({ button_style: style.id as any })}
+                  className={`flex flex-col gap-2 p-2 rounded-xl border transition-all ${isActive ? "bg-primary/5 border-primary ring-1 ring-primary" : "bg-card hover:bg-accent border-border"}`}
                 >
-                  <span className="text-[10px] font-medium text-muted-foreground">Quitar efecto neón del botón actual</span>
+                  <div className="w-full bg-muted/30 rounded-lg p-2 flex items-center justify-center">
+                    <div className={btnClass} style={btnStyle}>
+                      {style.id === "card" && (
+                        <div className="w-3 h-3 rounded-sm bg-current opacity-20" />
+                      )}
+                      {style.id === "line" && (
+                        <div className="w-3 h-3 rounded-sm bg-current opacity-20" />
+                      )}
+                      <span>{style.label}</span>
+                    </div>
+                  </div>
+                  <span
+                    className={`text-[11px] font-medium text-center w-full ${isActive ? "text-primary" : "text-muted-foreground"}`}
+                  >
+                    {style.label}
+                  </span>
                 </button>
-             </div>
-          </CollapsibleContent>
-        </Collapsible>
+              );
+            })}
+          </div>
+        </div>
+
+
       </div>
     </div>
   );

@@ -101,9 +101,9 @@ useEffect(() => {
 Y el QR ahora solo se renderiza si `publicUrl` ya existe:
 
 ```tsx
-{published && slug && publicUrl && (
-  <QRCodeCanvas value={publicUrl} />
-)}
+{
+  published && slug && publicUrl && <QRCodeCanvas value={publicUrl} />;
+}
 ```
 
 Objetivo: impedir que el canvas del QR nazca con `localhost` durante el render inicial.
@@ -196,4 +196,3 @@ https://codigos-qr.vercel.app/p/{slug}
 ```
 
 No sirve probar con QRs descargados antes del cambio, porque esos PNG pueden tener `localhost` ya codificado.
-

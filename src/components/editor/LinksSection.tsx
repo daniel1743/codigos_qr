@@ -16,7 +16,16 @@ import {
   AlertDialogTrigger,
 } from "../ui/alert-dialog";
 import type { ProfileLink, PlatformType } from "../../types/database";
-import { ArrowUp, ArrowDown, Trash2, Plus, Globe, Link as LinkIcon, GripVertical, Linkedin } from "lucide-react";
+import {
+  ArrowUp,
+  ArrowDown,
+  Trash2,
+  Plus,
+  Globe,
+  Link as LinkIcon,
+  GripVertical,
+  Linkedin,
+} from "lucide-react";
 
 import {
   SiInstagram,
@@ -81,8 +90,8 @@ export function LinksSection({ links, onChange }: LinksSectionProps) {
     const newLinks = [...links];
     const targetIndex = direction === "up" ? index - 1 : index + 1;
 
-    const temp = newLinks[index];
-    newLinks[index] = newLinks[targetIndex];
+    const temp = newLinks[index] as Partial<ProfileLink>;
+    newLinks[index] = newLinks[targetIndex] as Partial<ProfileLink>;
     newLinks[targetIndex] = temp;
 
     onChange(newLinks.map((link, i) => ({ ...link, sort_order: i })));
@@ -99,7 +108,13 @@ export function LinksSection({ links, onChange }: LinksSectionProps) {
           <h2 className="text-xl font-semibold tracking-tight">Enlaces</h2>
           <p className="text-sm text-muted-foreground">{links.length} de 8 agregados</p>
         </div>
-        <Button onClick={handleAddLink} disabled={links.length >= 8} size="sm" variant="default" className="h-10 w-full rounded-full shadow-sm min-[380px]:w-auto">
+        <Button
+          onClick={handleAddLink}
+          disabled={links.length >= 8}
+          size="sm"
+          variant="default"
+          className="h-10 w-full rounded-full shadow-sm min-[380px]:w-auto"
+        >
           <Plus className="w-4 h-4 mr-2" /> Agregar
         </Button>
       </div>
@@ -121,9 +136,12 @@ export function LinksSection({ links, onChange }: LinksSectionProps) {
                 </div>
                 <AccordionTrigger className="flex-1 py-4 hover:no-underline">
                   <div className="flex min-w-0 items-center gap-3 w-full">
-                    <div 
+                    <div
                       className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
-                      style={{ backgroundColor: `${platformInfo.color}15`, color: platformInfo.color }}
+                      style={{
+                        backgroundColor: `${platformInfo.color}15`,
+                        color: platformInfo.color,
+                      }}
                     >
                       <IconComponent size={20} />
                     </div>
@@ -138,9 +156,12 @@ export function LinksSection({ links, onChange }: LinksSectionProps) {
                   </div>
                 </AccordionTrigger>
                 <div className="flex items-center gap-3 pl-2">
-                  <div className="flex flex-col items-center gap-1" onClick={(e) => e.stopPropagation()}>
-                     <Switch
-                      checked={link.enabled}
+                  <div
+                    className="flex flex-col items-center gap-1"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Switch
+                      checked={!!link.enabled}
                       onCheckedChange={(checked) => updateLink(index, { enabled: checked })}
                     />
                   </div>
@@ -150,55 +171,57 @@ export function LinksSection({ links, onChange }: LinksSectionProps) {
               <AccordionContent className="px-4 pb-4 pt-2 border-t">
                 <div className="space-y-4 mt-2">
                   <div className="mb-4 flex flex-col gap-2 min-[380px]:flex-row min-[380px]:items-center min-[380px]:justify-between">
-                     <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Configuración del enlace</p>
-                     <div className="flex items-center gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          disabled={index === 0}
-                          onClick={() => moveLink(index, "up")}
-                          className="h-8 w-8"
-                        >
-                          <ArrowUp className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          disabled={index === links.length - 1}
-                          onClick={() => moveLink(index, "down")}
-                          className="h-8 w-8"
-                        >
-                          <ArrowDown className="w-4 h-4" />
-                        </Button>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                      Configuración del enlace
+                    </p>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        disabled={index === 0}
+                        onClick={() => moveLink(index, "up")}
+                        className="h-8 w-8"
+                      >
+                        <ArrowUp className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        disabled={index === links.length - 1}
+                        onClick={() => moveLink(index, "down")}
+                        className="h-8 w-8"
+                      >
+                        <ArrowDown className="w-4 h-4" />
+                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent className="sm:max-w-md">
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>¿Eliminar este enlace?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Se quitará de tu página pública después de guardar los cambios.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter className="sm:justify-end gap-2">
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => removeLink(index)}
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                             >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent className="sm:max-w-md">
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>¿Eliminar este enlace?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Se quitará de tu página pública después de guardar los cambios.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter className="sm:justify-end gap-2">
-                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => removeLink(index)}
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                              >
-                                Eliminar
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                     </div>
+                              Eliminar
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -206,7 +229,43 @@ export function LinksSection({ links, onChange }: LinksSectionProps) {
                       <Label>Plataforma</Label>
                       <Select
                         value={link.platform as string}
-                        onValueChange={(val) => updateLink(index, { platform: val as PlatformType })}
+                        onValueChange={(val) => {
+                          const platformMapping: Record<string, string> = {
+                            instagram: "Instagram",
+                            twitter: "X",
+                            facebook: "Facebook",
+                            linkedin: "LinkedIn",
+                            tiktok: "TikTok",
+                            youtube: "YouTube",
+                            github: "GitHub",
+                            website: "Sitio web",
+                            whatsapp: "WhatsApp",
+                            email: "Email",
+                            telegram: "Telegram",
+                            other: "Mi enlace",
+                          };
+
+                          const newPlatformLabel = platformMapping[val] || "Mi enlace";
+                          const currentLabel = link.label?.trim() || "";
+
+                          // Consider it auto-generated if it's empty, or matches one of our known auto labels
+                          const knownAutoLabels = Object.values(platformMapping).concat([
+                            "X (Twitter)",
+                            "Sitio Web",
+                            "Otro",
+                          ]);
+                          const isAutoLabel =
+                            currentLabel === "" || knownAutoLabels.includes(currentLabel);
+
+                          if (isAutoLabel) {
+                            updateLink(index, {
+                              platform: val as PlatformType,
+                              label: newPlatformLabel,
+                            });
+                          } else {
+                            updateLink(index, { platform: val as PlatformType });
+                          }
+                        }}
                       >
                         <SelectTrigger className="h-11">
                           <SelectValue placeholder="Selecciona una red" />
@@ -260,7 +319,9 @@ export function LinksSection({ links, onChange }: LinksSectionProps) {
           </div>
           <div className="space-y-1">
             <p className="text-sm font-medium text-foreground">No hay enlaces</p>
-            <p className="text-xs text-muted-foreground">Agrega al menos 3 enlaces para poder publicar tu página.</p>
+            <p className="text-xs text-muted-foreground">
+              Agrega al menos 3 enlaces para poder publicar tu página.
+            </p>
           </div>
         </div>
       )}

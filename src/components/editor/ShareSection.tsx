@@ -40,7 +40,7 @@ export function ShareSection({ publicId, published, saving, onSave, isValid }: S
         <h2 className="text-xl font-semibold tracking-tight">Publicar y Compartir</h2>
         <p className="text-sm text-muted-foreground">Genera tu URL y código QR.</p>
       </div>
-      
+
       <div className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2">
         <Button
           className="h-11 w-full"

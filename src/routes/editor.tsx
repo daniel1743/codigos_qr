@@ -15,7 +15,20 @@ import { PublicProfileView } from "../components/profile/PublicProfileView";
 import { toast } from "sonner";
 import { generatePublicId, getInternalSlugFromPublicId } from "../lib/publicId";
 import { isValidUrl, normalizeUrl } from "../lib/validation";
-import { UserCircle, Link as LinkIcon, Palette, Type, Shapes, QrCode, X, ChevronDown, CheckCircle2 } from "lucide-react";
+import {
+  UserCircle,
+  Link as LinkIcon,
+  Palette,
+  Type,
+  Shapes,
+  QrCode,
+  X,
+  ChevronDown,
+  CheckCircle2,
+  ZoomIn,
+  ZoomOut,
+  Maximize,
+} from "lucide-react";
 import { Button } from "../components/ui/button";
 
 import type { Session } from "@supabase/supabase-js";
@@ -25,6 +38,8 @@ export const Route = createFileRoute("/editor")({
 });
 
 type TabId = "profile" | "links" | "design" | "text" | "elements" | "qr" | "preview";
+
+const ZOOM_STEPS = [0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.25];
 
 function EditorPage() {
   const [session, setSession] = useState<Session | null>(null);
@@ -43,23 +58,68 @@ function EditorPage() {
   const [isPublished, setIsPublished] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<TabId>("profile");
   const [panelOpen, setPanelOpen] = useState<boolean>(true);
+  const [zoomLevel, setZoomLevel] = useState<number>(1);
+  const [isDesktop, setIsDesktop] = useState(true); // Default true para evitar parpadeos en SSR si asumimos desktop
 
   const supabase = getBrowserSupabaseClient();
   const loadedUserId = useRef<string | null>(null);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (session) {
-        loadData(session.user.id);
-      } else {
-        setLoading(false);
-      }
-    });
+    setIsDesktop(window.innerWidth >= 768);
+    const handleResize = () => setIsDesktop(window.innerWidth >= 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const handleZoomIn = () => {
+    const currentIndex = ZOOM_STEPS.indexOf(zoomLevel);
+    if (currentIndex >= 0 && currentIndex < ZOOM_STEPS.length - 1) {
+      setZoomLevel(ZOOM_STEPS[currentIndex + 1] ?? 1);
+    }
+  };
+
+  const handleZoomOut = () => {
+    const currentIndex = ZOOM_STEPS.indexOf(zoomLevel);
+    if (currentIndex > 0) {
+      setZoomLevel(ZOOM_STEPS[currentIndex - 1] ?? 1);
+    }
+  };
+
+  const handleFit = () => {
+    const mainContainer = document.getElementById("preview-main-container");
+    if (!mainContainer) return;
+    const availableHeight = mainContainer.clientHeight - 64; // padding
+    const availableWidth = mainContainer.clientWidth - 64; 
+    
+    const phoneH = 750;
+    const phoneW = 375;
+    
+    const scaleH = availableHeight / phoneH;
+    const scaleW = availableWidth / phoneW;
+    let bestScale = Math.min(scaleH, scaleW);
+    
+    if (bestScale > 1.0) bestScale = 1.0;
+    if (bestScale < 0.5) bestScale = 0.5;
+    
+    const nearest = ZOOM_STEPS.reduce((prev, curr) => Math.abs(curr - bestScale) < Math.abs(prev - bestScale) ? curr : prev);
+    setZoomLevel(nearest);
+  };
+
+  useEffect(() => {
+    supabase.auth
+      .getSession()
+      .then(({ data: { session } }: { data: { session: Session | null } }) => {
+        setSession(session);
+        if (session) {
+          loadData(session.user.id);
+        } else {
+          setLoading(false);
+        }
+      });
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
+    } = supabase.auth.onAuthStateChange((event: string, session: Session | null) => {
       setSession(session);
       if (session) {
         if (loadedUserId.current !== session.user.id) {
@@ -76,11 +136,27 @@ function EditorPage() {
     };
     window.addEventListener("beforeunload", handleBeforeUnload);
 
+    const handleResize = () => {
+      // Opcionalmente reajustar o limpiar algo
+    };
+    window.addEventListener("resize", handleResize);
+
     return () => {
       subscription.unsubscribe();
       window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("resize", handleResize);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Autofit on mount for desktop
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.innerWidth >= 768) {
+      // Pequeno timeout para asegurar que el DOM pinto
+      setTimeout(() => {
+        handleFit();
+      }, 100);
+    }
   }, []);
 
   const loadData = async (userId: string) => {
@@ -202,7 +278,9 @@ function EditorPage() {
       if (e instanceof Error) {
         toast.error("Error al guardar", { description: e.message });
       } else {
-        toast.error("Error al guardar", { description: "Revisa la consola (F12) para más detalles." });
+        toast.error("Error al guardar", {
+          description: "Revisa la consola (F12) para más detalles.",
+        });
       }
     } finally {
       setSaving(false);
@@ -234,9 +312,17 @@ function EditorPage() {
       case "links":
         return <LinksSection links={links} onChange={setLinks} />;
       case "design":
-        return <DesignSection profile={profile} onChange={(u) => setProfile((p) => ({ ...p, ...u }))} />;
+        return (
+          <DesignSection
+            profile={profile}
+            onChange={(u) => setProfile((p) => ({ ...p, ...u }))}
+            userId={session.user.id}
+          />
+        );
       case "text":
-        return <TextSection profile={profile} onChange={(u) => setProfile((p) => ({ ...p, ...u }))} />;
+        return (
+          <TextSection profile={profile} onChange={(u) => setProfile((p) => ({ ...p, ...u }))} />
+        );
       case "elements":
         return <ElementsSection />;
       case "qr":
@@ -261,13 +347,12 @@ function EditorPage() {
 
   return (
     <div className="flex h-[100dvh] w-full flex-col overflow-hidden bg-background font-sans md:flex-row">
-      
       {/* SIDEBAR DESKTOP */}
       <nav className="hidden md:flex flex-col items-center w-[88px] border-r bg-card py-6 z-20 shrink-0">
         <div className="w-10 h-10 bg-primary text-primary-foreground rounded-xl flex items-center justify-center font-bold mb-8 shadow-sm">
           QR
         </div>
-        
+
         <div className="flex flex-col gap-4 w-full px-3">
           {TABS.map((tab) => {
             const Icon = tab.icon;
@@ -294,67 +379,94 @@ function EditorPage() {
         </div>
 
         <div className="mt-auto px-3 w-full">
-           <button 
-             onClick={() => supabase.auth.signOut()} 
-             className="flex flex-col items-center justify-center p-3 w-full rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200"
-           >
-             <X className="w-5 h-5 mb-1" />
-             <span className="text-[10px] font-medium">Salir</span>
-           </button>
+          <button
+            onClick={() => supabase.auth.signOut()}
+            className="flex flex-col items-center justify-center p-3 w-full rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200"
+          >
+            <X className="w-5 h-5 mb-1" />
+            <span className="text-[10px] font-medium">Salir</span>
+          </button>
         </div>
       </nav>
 
       {/* PANEL CONTEXTUAL DESKTOP */}
-      <div 
+      <div
         className={`hidden md:flex flex-col border-r bg-background shrink-0 h-full overflow-hidden transition-all duration-300 ease-in-out ${
           panelOpen ? "w-[360px] opacity-100" : "w-0 opacity-0 border-r-0"
         }`}
       >
         <div className="flex items-center justify-between px-6 py-5 border-b bg-card/50 backdrop-blur-sm shrink-0">
-           <h1 className="font-semibold">{TABS.find(t => t.id === activeTab)?.label}</h1>
-           <Button variant="ghost" size="icon" className="h-8 w-8 -mr-2 text-muted-foreground" onClick={() => setPanelOpen(false)}>
-             <X className="w-4 h-4" />
-           </Button>
+          <h1 className="font-semibold">{TABS.find((t) => t.id === activeTab)?.label}</h1>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 -mr-2 text-muted-foreground"
+            onClick={() => setPanelOpen(false)}
+          >
+            <X className="w-4 h-4" />
+          </Button>
         </div>
-        <div className="flex-1 overflow-y-auto p-6 scrollbar-thin">
-           {renderActiveSection()}
-        </div>
+        <div className="flex-1 overflow-y-auto p-6 scrollbar-thin">{renderActiveSection()}</div>
       </div>
 
       {/* GLOBAL PUBLISH BUTTON DESKTOP (Shortcut) */}
       <div className="hidden md:flex absolute top-4 right-4 z-30 gap-2">
-         {isPublished && (
-           <div className="flex items-center text-xs font-medium text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200 shadow-sm">
-             <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" /> Publicado
-           </div>
-         )}
-         <Button 
-            onClick={() => handleSave(true)} 
-            disabled={saving || !validate()}
-            className="shadow-sm rounded-full px-5"
-          >
-            {saving ? "Guardando..." : "Publicar Cambios"}
-         </Button>
+        {isPublished && (
+          <div className="flex items-center text-xs font-medium text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200 shadow-sm">
+            <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" /> Publicado
+          </div>
+        )}
+        <Button
+          onClick={() => handleSave(true)}
+          disabled={saving || !validate()}
+          className="shadow-sm rounded-full px-5"
+        >
+          {saving ? "Guardando..." : "Publicar Cambios"}
+        </Button>
       </div>
 
       {/* PREVIEW CONTAINER */}
-      <main className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden bg-muted/30 p-0 md:h-full md:p-8">
-         {/* Toggle button to reopen panel if closed */}
-         {!panelOpen && (
-           <Button 
-             variant="secondary" 
-             size="icon" 
-             className="hidden md:flex absolute left-4 top-4 shadow-md rounded-full z-10" 
-             onClick={() => setPanelOpen(true)}
-           >
-             <ChevronDown className="w-5 h-5 rotate-90" />
-           </Button>
-         )}
+      <main id="preview-main-container" className="relative flex min-h-0 flex-1 flex-col items-center justify-center overflow-hidden bg-muted/30 p-0 md:h-full md:p-8">
+        {/* Toggle button to reopen panel if closed */}
+        {!panelOpen && (
+          <Button
+            variant="secondary"
+            size="icon"
+            className="hidden md:flex absolute left-4 top-4 shadow-md rounded-full z-10"
+            onClick={() => setPanelOpen(true)}
+          >
+            <ChevronDown className="w-5 h-5 rotate-90" />
+          </Button>
+        )}
 
-         {/* Phone Frame */}
-         <div className="relative h-full w-full transform-gpu overflow-hidden border-0 border-black/10 bg-background transition-all duration-300 md:h-[750px] md:max-h-[90vh] md:w-[375px] md:rounded-[3rem] md:border-[8px] md:shadow-2xl">
-           <PublicProfileView profile={profile} links={links} isPreview={true} />
-         </div>
+        {/* Zoom Controls (Desktop Only) */}
+        <div className="hidden md:flex absolute right-6 top-1/2 -translate-y-1/2 z-20 flex-col items-center gap-1 bg-background/90 backdrop-blur-md p-1.5 rounded-full border shadow-sm">
+          <Button variant="ghost" size="icon" onClick={handleZoomIn} disabled={zoomLevel >= 1.25} className="h-8 w-8 rounded-full" aria-label="Acercar" title="Acercar">
+            <ZoomIn className="w-4 h-4" />
+          </Button>
+          <span className="text-[10px] font-medium w-full text-center py-1" aria-label="Nivel de zoom actual">{Math.round(zoomLevel * 100)}%</span>
+          <Button variant="ghost" size="icon" onClick={handleZoomOut} disabled={zoomLevel <= 0.5} className="h-8 w-8 rounded-full" aria-label="Alejar" title="Alejar">
+            <ZoomOut className="w-4 h-4" />
+          </Button>
+          <div className="w-4 h-[1px] bg-border my-1" />
+          <Button variant="ghost" size="icon" onClick={handleFit} className="h-8 w-8 rounded-full hover:bg-muted" aria-label="Ajustar a pantalla" title="Ajustar">
+            <Maximize className="w-4 h-4" />
+          </Button>
+        </div>
+
+        {/* Scalable Container */}
+        <div className="relative flex items-center justify-center w-full h-full">
+          {/* Phone Frame */}
+          <div 
+             className="relative h-full w-full transform-gpu overflow-hidden border-0 border-black/10 bg-background transition-transform duration-300 md:h-[750px] md:w-[375px] md:rounded-[3rem] md:border-[8px] md:shadow-2xl"
+             style={{ 
+               transform: isDesktop ? `scale(${zoomLevel})` : 'none',
+               transformOrigin: "top center"
+             }}
+          >
+            <PublicProfileView profile={profile} links={links} isPreview={true} />
+          </div>
+        </div>
       </main>
 
       {/* MOBILE BOTTOM NAVIGATION */}
@@ -378,34 +490,41 @@ function EditorPage() {
       </nav>
 
       {/* MOBILE BOTTOM SHEET (Panel Overlay) */}
-      <div 
+      <div
         className={`md:hidden absolute inset-0 z-20 flex flex-col justify-end pointer-events-none transition-opacity duration-300 ${
           panelOpen ? "opacity-100" : "opacity-0"
         }`}
       >
         {/* Backdrop */}
-        <div 
-           className={`absolute inset-0 bg-black/40 backdrop-blur-[2px] pointer-events-auto transition-opacity duration-300 ${panelOpen ? "opacity-100" : "opacity-0"}`} 
-           onClick={() => setPanelOpen(false)} 
+        <div
+          className={`absolute inset-0 bg-black/40 backdrop-blur-[2px] pointer-events-auto transition-opacity duration-300 ${panelOpen ? "opacity-100" : "opacity-0"}`}
+          onClick={() => setPanelOpen(false)}
         />
-        
+
         {/* Sheet Content */}
-        <div 
+        <div
           className={`pointer-events-auto flex h-auto max-h-[88dvh] min-h-[52dvh] w-full flex-col rounded-t-[1.5rem] bg-background shadow-2xl transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
             panelOpen ? "translate-y-0" : "translate-y-full"
           }`}
         >
           {/* Drag Handle & Header */}
           <div className="flex shrink-0 flex-col items-center rounded-t-[1.5rem] border-b bg-background pb-3 pt-3">
-             <div className="w-12 h-1.5 bg-muted rounded-full mb-4" />
-             <div className="flex w-full items-center justify-between px-4">
-                <h2 className="text-base font-semibold tracking-tight">{TABS.find(t => t.id === activeTab)?.label}</h2>
-                <Button variant="ghost" size="icon" className="-mr-2 text-muted-foreground rounded-full" onClick={() => setPanelOpen(false)}>
-                  <X className="w-5 h-5" />
-                </Button>
-             </div>
+            <div className="w-12 h-1.5 bg-muted rounded-full mb-4" />
+            <div className="flex w-full items-center justify-between px-4">
+              <h2 className="text-base font-semibold tracking-tight">
+                {TABS.find((t) => t.id === activeTab)?.label}
+              </h2>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="-mr-2 text-muted-foreground rounded-full"
+                onClick={() => setPanelOpen(false)}
+              >
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
           </div>
-          
+
           <div className="mb-16 flex-1 overflow-y-auto p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] scrollbar-thin sm:p-6">
             {renderActiveSection()}
           </div>

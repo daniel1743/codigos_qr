@@ -56,10 +56,12 @@ export function ProfileSection({ profile, onChange, userId }: ProfileSectionProp
             <img
               src={profile.avatar_url}
               alt="Avatar"
-              className="w-16 h-16 rounded-full object-cover"
+              className={`w-16 h-16 object-cover ${profile.avatar_shape === "rounded" || profile.avatar_shape === "square" ? "rounded-xl" : "rounded-full"}`}
             />
           ) : (
-            <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
+            <div
+              className={`w-16 h-16 bg-muted flex items-center justify-center ${profile.avatar_shape === "rounded" || profile.avatar_shape === "square" ? "rounded-xl" : "rounded-full"}`}
+            >
               <span className="text-xs text-muted-foreground">Vacío</span>
             </div>
           )}

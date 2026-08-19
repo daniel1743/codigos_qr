@@ -44,9 +44,9 @@ async function runTests() {
   } else {
     console.log("PASS: Tabla 'profile_links' existe y es consultable por anon (RLS activo).");
   }
-  
+
   // Check avatars bucket
-  const { data: buckets, error: bError } = await supabase.storage.getBucket('avatars');
+  const { data: buckets, error: bError } = await supabase.storage.getBucket("avatars");
   if (bError) {
     console.error("FAIL: Error consultando bucket avatars:", bError.message);
   } else {

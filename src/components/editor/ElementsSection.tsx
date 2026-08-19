@@ -15,12 +15,19 @@ export function ElementsSection() {
             viewBox="0 0 24 24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+            />
           </svg>
         </div>
         <div className="space-y-1">
           <p className="text-sm font-medium text-foreground">Próximamente</p>
-          <p className="text-xs text-muted-foreground">Los elementos decorativos estarán disponibles en futuras actualizaciones.</p>
+          <p className="text-xs text-muted-foreground">
+            Los elementos decorativos estarán disponibles en futuras actualizaciones.
+          </p>
         </div>
       </div>
     </div>

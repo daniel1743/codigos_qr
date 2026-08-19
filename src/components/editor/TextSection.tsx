@@ -11,25 +11,59 @@ interface TextSectionProps {
   onChange: (updates: Partial<Profile>) => void;
 }
 
-const FONT_CATEGORIES = ["Todas", "Sans", "Serif", "Elegante", "Rounded", "Display", "Manuscrita"] as const;
+const FONT_CATEGORIES = [
+  "Todas",
+  "Sans Modern",
+  "Clean",
+  "Serif",
+  "Rounded",
+  "Display",
+  "Manuscrita",
+] as const;
 
 const FONTS = [
-  { name: "Inter", category: "Sans" },
-  { name: "Manrope", category: "Sans" },
-  { name: "DM Sans", category: "Sans" },
-  { name: "Poppins", category: "Sans" },
+  // Sans Modern
+  { name: "Inter", category: "Sans Modern" },
+  { name: "Manrope", category: "Sans Modern" },
+  { name: "DM Sans", category: "Sans Modern" },
+  { name: "Poppins", category: "Sans Modern" },
+  { name: "Montserrat", category: "Sans Modern" },
+  { name: "Plus Jakarta Sans", category: "Sans Modern" },
+  { name: "Outfit", category: "Sans Modern" },
+  { name: "Rubik", category: "Sans Modern" },
+
+  // Clean Professional
+  { name: "Source Sans 3", category: "Clean" },
+  { name: "Work Sans", category: "Clean" },
+  { name: "Nunito Sans", category: "Clean" },
+  { name: "Public Sans", category: "Clean" },
+
+  // Serif / Elegantes
   { name: "Playfair Display", category: "Serif" },
   { name: "Lora", category: "Serif" },
-  { name: "Cormorant Garamond", category: "Elegante" },
+  { name: "Cormorant Garamond", category: "Serif" },
+  { name: "Libre Baskerville", category: "Serif" },
+  { name: "Merriweather", category: "Serif" },
+
+  // Rounded
   { name: "Nunito", category: "Rounded" },
-  { name: "Montserrat", category: "Display" },
+  { name: "Quicksand", category: "Rounded" },
+
+  // Display
+  { name: "Bebas Neue", category: "Display" },
+  { name: "Oswald", category: "Display" },
+  { name: "Archivo Black", category: "Display" },
+
+  // Manuscrita
   { name: "Caveat", category: "Manuscrita" },
+  { name: "Dancing Script", category: "Manuscrita" },
+  { name: "Pacifico", category: "Manuscrita" },
 ] as const;
 
 export function TextSection({ profile, onChange }: TextSectionProps) {
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<string>("Todas");
-  
+
   const currentFont = profile.font_family || "Inter";
 
   const filteredFonts = FONTS.filter((f) => {
@@ -62,11 +96,11 @@ export function TextSection({ profile, onChange }: TextSectionProps) {
 
       <div className="space-y-4 pt-4 border-t">
         <Label>Explorar fuentes</Label>
-        
+
         <div className="relative">
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input 
-            placeholder="Buscar fuente..." 
+          <Input
+            placeholder="Buscar fuente..."
             className="pl-9 bg-background"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -75,13 +109,13 @@ export function TextSection({ profile, onChange }: TextSectionProps) {
 
         <ScrollArea className="w-full whitespace-nowrap pb-2 -mx-1 px-1">
           <div className="flex gap-2">
-            {FONT_CATEGORIES.map(cat => (
+            {FONT_CATEGORIES.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
                 className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                  activeCategory === cat 
-                    ? "bg-primary text-primary-foreground" 
+                  activeCategory === cat
+                    ? "bg-primary text-primary-foreground"
                     : "bg-muted text-muted-foreground hover:bg-muted/80"
                 }`}
               >
@@ -99,8 +133,8 @@ export function TextSection({ profile, onChange }: TextSectionProps) {
                 key={font.name}
                 onClick={() => onChange({ font_family: font.name })}
                 className={`flex items-center justify-between p-3 rounded-xl border text-left transition-all ${
-                  isActive 
-                    ? "border-primary bg-primary/5 ring-1 ring-primary/20" 
+                  isActive
+                    ? "border-primary bg-primary/5 ring-1 ring-primary/20"
                     : "border-border bg-card hover:border-primary/30 hover:bg-accent/50"
                 }`}
               >
@@ -111,10 +145,7 @@ export function TextSection({ profile, onChange }: TextSectionProps) {
                       {font.category}
                     </span>
                   </div>
-                  <span 
-                    className="text-lg truncate opacity-80" 
-                    style={{ fontFamily: font.name }}
-                  >
+                  <span className="text-lg truncate opacity-80" style={{ fontFamily: font.name }}>
                     Tu página, tu estilo
                   </span>
                 </div>
@@ -122,7 +153,7 @@ export function TextSection({ profile, onChange }: TextSectionProps) {
               </button>
             );
           })}
-          
+
           {filteredFonts.length === 0 && (
             <div className="text-center p-6 text-sm text-muted-foreground border border-dashed rounded-xl">
               No se encontraron fuentes.
