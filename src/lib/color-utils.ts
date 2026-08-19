@@ -12,7 +12,9 @@ export function extractSolidHex(colorString: string): string {
  */
 export function hexToRgb(hexString: string): { r: number; g: number; b: number } {
   const hex = extractSolidHex(hexString);
-  let r = 255, g = 255, b = 255;
+  let r = 255,
+    g = 255,
+    b = 255;
   if (hex.length === 4) {
     r = parseInt(hex.charAt(1) + hex.charAt(1), 16);
     g = parseInt(hex.charAt(2) + hex.charAt(2), 16);
@@ -48,10 +50,10 @@ export function contrastRatio(hex1: string, hex2: string): number {
   const rgb2 = hexToRgb(hex2);
   const l1 = relativeLuminance(rgb1.r, rgb1.g, rgb1.b);
   const l2 = relativeLuminance(rgb2.r, rgb2.g, rgb2.b);
-  
+
   const lightest = Math.max(l1, l2);
   const darkest = Math.min(l1, l2);
-  
+
   return (lightest + 0.05) / (darkest + 0.05);
 }
 

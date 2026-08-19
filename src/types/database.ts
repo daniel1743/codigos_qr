@@ -22,6 +22,18 @@ export interface Profile {
   button_text_color: string;
   button_radius: ButtonRadius;
   button_style: ButtonStyle;
+  title_color?: string | null;
+  title_size?: string;
+  title_weight?: string;
+  title_align?: string;
+  bio_color?: string | null;
+  bio_size?: string;
+  bio_weight?: string;
+  bio_align?: string;
+  button_text_size?: string;
+  button_text_weight?: string;
+  button_content_align?: string;
+  button_icon_position?: string;
   published: boolean;
   created_at: string;
   updated_at: string;

@@ -41,10 +41,7 @@ function TemplateThumbnail({ style, name }: { style: TemplateStyle; name: string
       />
       {/* Name / Font mock (skeleton) */}
       <div className="flex flex-col items-center gap-1 w-full shrink-0 mt-0.5">
-        <div
-          className="w-14 h-2 rounded-sm"
-          style={{ backgroundColor: textColor, opacity: 0.7 }}
-        />
+        <div className="w-14 h-2 rounded-sm" style={{ backgroundColor: textColor, opacity: 0.7 }} />
         <div
           className="w-20 h-1.5 rounded-sm"
           style={{ backgroundColor: textColor, opacity: 0.4 }}

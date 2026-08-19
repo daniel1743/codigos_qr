@@ -72,16 +72,16 @@ function EditorPage() {
   }, []);
 
   const handleZoomIn = () => {
-    const currentIndex = ZOOM_STEPS.indexOf(zoomLevel);
-    if (currentIndex >= 0 && currentIndex < ZOOM_STEPS.length - 1) {
-      setZoomLevel(ZOOM_STEPS[currentIndex + 1] ?? 1);
+    const nextStep = ZOOM_STEPS.find((step) => step > zoomLevel + 0.01);
+    if (nextStep !== undefined) {
+      setZoomLevel(nextStep);
     }
   };
 
   const handleZoomOut = () => {
-    const currentIndex = ZOOM_STEPS.indexOf(zoomLevel);
-    if (currentIndex > 0) {
-      setZoomLevel(ZOOM_STEPS[currentIndex - 1] ?? 1);
+    const prevStep = [...ZOOM_STEPS].reverse().find((step) => step < zoomLevel - 0.01);
+    if (prevStep !== undefined) {
+      setZoomLevel(prevStep);
     }
   };
 
@@ -89,20 +89,19 @@ function EditorPage() {
     const mainContainer = document.getElementById("preview-main-container");
     if (!mainContainer) return;
     const availableHeight = mainContainer.clientHeight - 64; // padding
-    const availableWidth = mainContainer.clientWidth - 64; 
-    
+    const availableWidth = mainContainer.clientWidth - 64;
+
     const phoneH = 750;
     const phoneW = 375;
-    
+
     const scaleH = availableHeight / phoneH;
     const scaleW = availableWidth / phoneW;
     let bestScale = Math.min(scaleH, scaleW);
-    
+
     if (bestScale > 1.0) bestScale = 1.0;
-    if (bestScale < 0.5) bestScale = 0.5;
-    
-    const nearest = ZOOM_STEPS.reduce((prev, curr) => Math.abs(curr - bestScale) < Math.abs(prev - bestScale) ? curr : prev);
-    setZoomLevel(nearest);
+    if (bestScale < 0.3) bestScale = 0.3; // Allow smaller fit on very small screens
+
+    setZoomLevel(bestScale);
   };
 
   useEffect(() => {
@@ -149,10 +148,9 @@ function EditorPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Autofit on mount for desktop
+  // Autofit on mount
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.innerWidth >= 768) {
-      // Pequeno timeout para asegurar que el DOM pinto
+    if (typeof window !== "undefined") {
       setTimeout(() => {
         handleFit();
       }, 100);
@@ -346,7 +344,7 @@ function EditorPage() {
   };
 
   return (
-    <div className="flex h-[100dvh] w-full flex-col overflow-hidden bg-background font-sans md:flex-row">
+    <div className="relative flex h-[100dvh] w-full flex-col overflow-hidden overscroll-none bg-background font-sans md:flex-row">
       {/* SIDEBAR DESKTOP */}
       <nav className="hidden md:flex flex-col items-center w-[88px] border-r bg-card py-6 z-20 shrink-0">
         <div className="w-10 h-10 bg-primary text-primary-foreground rounded-xl flex items-center justify-center font-bold mb-8 shadow-sm">
@@ -426,7 +424,10 @@ function EditorPage() {
       </div>
 
       {/* PREVIEW CONTAINER */}
-      <main id="preview-main-container" className="relative flex min-h-0 flex-1 flex-col items-center justify-center overflow-hidden bg-muted/30 p-0 md:h-full md:p-8">
+      <main
+        id="preview-main-container"
+        className="relative flex min-h-0 flex-1 flex-col items-center justify-center overflow-hidden bg-muted/30 p-0 md:h-full md:p-8"
+      >
         {/* Toggle button to reopen panel if closed */}
         {!panelOpen && (
           <Button
@@ -439,17 +440,45 @@ function EditorPage() {
           </Button>
         )}
 
-        {/* Zoom Controls (Desktop Only) */}
-        <div className="hidden md:flex absolute right-6 top-1/2 -translate-y-1/2 z-20 flex-col items-center gap-1 bg-background/90 backdrop-blur-md p-1.5 rounded-full border shadow-sm">
-          <Button variant="ghost" size="icon" onClick={handleZoomIn} disabled={zoomLevel >= 1.25} className="h-8 w-8 rounded-full" aria-label="Acercar" title="Acercar">
+        {/* Zoom Controls */}
+        <div className="absolute right-4 top-4 z-40 flex items-center gap-1 rounded-full border bg-background/95 p-1.5 shadow-sm backdrop-blur-md md:top-1/2 md:-translate-y-1/2 md:flex-col">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleZoomIn}
+            disabled={zoomLevel >= 1.25}
+            className="h-11 w-11 rounded-full md:h-8 md:w-8"
+            aria-label="Acercar"
+            title="Acercar"
+          >
             <ZoomIn className="w-4 h-4" />
           </Button>
-          <span className="text-[10px] font-medium w-full text-center py-1" aria-label="Nivel de zoom actual">{Math.round(zoomLevel * 100)}%</span>
-          <Button variant="ghost" size="icon" onClick={handleZoomOut} disabled={zoomLevel <= 0.5} className="h-8 w-8 rounded-full" aria-label="Alejar" title="Alejar">
+          <span
+            className="min-w-10 py-1 text-center text-[10px] font-medium md:w-full"
+            aria-label="Nivel de zoom actual"
+          >
+            {Math.round(zoomLevel * 100)}%
+          </span>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleZoomOut}
+            disabled={zoomLevel <= 0.5}
+            className="h-11 w-11 rounded-full md:h-8 md:w-8"
+            aria-label="Alejar"
+            title="Alejar"
+          >
             <ZoomOut className="w-4 h-4" />
           </Button>
-          <div className="w-4 h-[1px] bg-border my-1" />
-          <Button variant="ghost" size="icon" onClick={handleFit} className="h-8 w-8 rounded-full hover:bg-muted" aria-label="Ajustar a pantalla" title="Ajustar">
+          <div className="h-4 w-[1px] bg-border md:my-1 md:h-[1px] md:w-4" />
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleFit}
+            className="h-11 w-11 rounded-full hover:bg-muted md:h-8 md:w-8"
+            aria-label="Ajustar a pantalla"
+            title="Ajustar"
+          >
             <Maximize className="w-4 h-4" />
           </Button>
         </div>
@@ -457,12 +486,12 @@ function EditorPage() {
         {/* Scalable Container */}
         <div className="relative flex items-center justify-center w-full h-full">
           {/* Phone Frame */}
-          <div 
-             className="relative h-full w-full transform-gpu overflow-hidden border-0 border-black/10 bg-background transition-transform duration-300 md:h-[750px] md:w-[375px] md:rounded-[3rem] md:border-[8px] md:shadow-2xl"
-             style={{ 
-               transform: isDesktop ? `scale(${zoomLevel})` : 'none',
-               transformOrigin: "top center"
-             }}
+          <div
+            className="relative h-[750px] w-[375px] shrink-0 transform-gpu overflow-hidden rounded-[3rem] border-[8px] border-black/10 bg-background shadow-2xl transition-transform duration-300"
+            style={{
+              transform: `scale(${zoomLevel})`,
+              transformOrigin: "center center",
+            }}
           >
             <PublicProfileView profile={profile} links={links} isPreview={true} />
           </div>
@@ -497,7 +526,7 @@ function EditorPage() {
       >
         {/* Backdrop */}
         <div
-          className={`absolute inset-0 bg-black/40 backdrop-blur-[2px] pointer-events-auto transition-opacity duration-300 ${panelOpen ? "opacity-100" : "opacity-0"}`}
+          className={`absolute inset-0 bg-black/40 backdrop-blur-[2px] transition-opacity duration-300 ${panelOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
           onClick={() => setPanelOpen(false)}
         />
 

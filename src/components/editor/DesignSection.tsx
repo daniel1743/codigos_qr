@@ -39,7 +39,13 @@ const GRADIENT_DIRECTIONS = [
   { label: "←", value: "270" },
 ];
 
-import { evaluateContrast, getRecommendedTextColor, contrastRatio, extractSolidHex, mixColorsAlpha } from "../../lib/color-utils";
+import {
+  evaluateContrast,
+  getRecommendedTextColor,
+  contrastRatio,
+  extractSolidHex,
+  mixColorsAlpha,
+} from "../../lib/color-utils";
 
 function ColorControl({
   value,
@@ -127,7 +133,7 @@ export function DesignSection({ profile, onChange, userId }: DesignSectionProps)
     fixProp = "button_text_color";
   } else if (buttonStyle === "soft") {
     effectiveFg = rawBtn;
-    effectiveBg = mixColorsAlpha(rawBtn, bgHex, 0.08); 
+    effectiveBg = mixColorsAlpha(rawBtn, bgHex, 0.08);
     fixProp = "button_color";
   } else if (buttonStyle === "card") {
     effectiveFg = rawBtn;
@@ -203,8 +209,6 @@ export function DesignSection({ profile, onChange, userId }: DesignSectionProps)
 
   // Mantenemos compatibilidad por si la base de datos trae un botón NEON
   const pureBtnColor = rawBtn.replace("_NEON", "");
-
-
 
   const handleSolidChange = (val: string) => {
     onChange({ background_color: val });
@@ -575,11 +579,24 @@ export function DesignSection({ profile, onChange, userId }: DesignSectionProps)
 
         {/* CONTRAST WARNING */}
         {contrastState !== "PASS" && (
-          <Alert variant="default" className={`mt-4 border ${contrastState === "POOR" ? "bg-red-50 text-red-900 border-red-200" : "bg-amber-50 text-amber-900 border-amber-200"}`}>
-            <AlertTriangle className={`w-4 h-4 ${contrastState === "POOR" ? "text-red-600" : "text-amber-600"}`} />
+          <Alert
+            variant="default"
+            className={`mt-4 border ${contrastState === "POOR" ? "bg-red-50 text-red-900 border-red-200" : "bg-amber-50 text-amber-900 border-amber-200"}`}
+          >
+            <AlertTriangle
+              className={`w-4 h-4 ${contrastState === "POOR" ? "text-red-600" : "text-amber-600"}`}
+            />
             <AlertDescription className="flex flex-col sm:flex-row sm:items-center justify-between text-[11px] ml-1 gap-2">
-              <span>Contraste {contrastState === "POOR" ? "muy bajo" : "bajo"}. El texto puede ser difícil de leer.</span>
-              <Button variant="outline" size="sm" onClick={handleFixContrast} className="h-6 text-[10px] px-2 shrink-0 bg-white hover:bg-muted">
+              <span>
+                Contraste {contrastState === "POOR" ? "muy bajo" : "bajo"}. El texto puede ser
+                difícil de leer.
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleFixContrast}
+                className="h-6 text-[10px] px-2 shrink-0 bg-white hover:bg-muted"
+              >
                 <Wand2 className="w-3 h-3 mr-1" /> Usar color recomendado
               </Button>
             </AlertDescription>
@@ -671,7 +688,7 @@ export function DesignSection({ profile, onChange, userId }: DesignSectionProps)
                   key={style.id}
                   type="button"
                   aria-pressed={isActive}
-                  onClick={() => onChange({ button_style: style.id as any })}
+                  onClick={() => onChange({ button_style: style.id as "solid" | "line" | "minimal" | "pill" | "card" })}
                   className={`flex flex-col gap-2 p-2 rounded-xl border transition-all ${isActive ? "bg-primary/5 border-primary ring-1 ring-primary" : "bg-card hover:bg-accent border-border"}`}
                 >
                   <div className="w-full bg-muted/30 rounded-lg p-2 flex items-center justify-center">
@@ -695,8 +712,6 @@ export function DesignSection({ profile, onChange, userId }: DesignSectionProps)
             })}
           </div>
         </div>
-
-
       </div>
     </div>
   );
