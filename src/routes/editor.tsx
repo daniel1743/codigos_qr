@@ -15,6 +15,7 @@ import { PublicProfileView } from "../components/profile/PublicProfileView";
 import { toast } from "sonner";
 import { generatePublicId, getInternalSlugFromPublicId } from "../lib/publicId";
 import { isValidUrl, normalizeUrl } from "../lib/validation";
+import { isUserAdmin, isAdminEmail } from "../lib/admin-check";
 import {
   UserCircle,
   UserRound,
@@ -28,6 +29,7 @@ import {
   CheckCircle2,
   ZoomIn,
   ZoomOut,
+  Shield,
   Maximize,
 } from "lucide-react";
 import { Button } from "../components/ui/button";
@@ -60,7 +62,8 @@ function EditorPage() {
   const [activeTab, setActiveTab] = useState<TabId>("profile");
   const [panelOpen, setPanelOpen] = useState<boolean>(true);
   const [zoomLevel, setZoomLevel] = useState<number>(1);
-  const [isDesktop, setIsDesktop] = useState(true); // Default true para evitar parpadeos en SSR si asumimos desktop
+  const [isDesktop, setIsDesktop] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const supabase = getBrowserSupabaseClient();
   const loadedUserId = useRef<string | null>(null);
@@ -181,6 +184,13 @@ function EditorPage() {
           font_family: "Inter",
         });
       }
+
+      // Verificar si es admin
+      const adminStatus = await isUserAdmin(supabase, userId);
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setIsAdmin(adminStatus || isAdminEmail(user?.email || ""));
     } catch (e) {
       console.error(e);
     } finally {
@@ -315,7 +325,7 @@ function EditorPage() {
   if (!session) return <Auth />;
 
   const TABS = [
-    { id: "profile", label: "Perfil", icon: UserCircle },
+    { id: "profile", label: "Datos", icon: UserCircle },
     { id: "links", label: "Enlaces", icon: LinkIcon },
     { id: "design", label: "Diseño", icon: Palette },
     { id: "text", label: "Texto", icon: Type },
@@ -396,11 +406,20 @@ function EditorPage() {
     <div className="relative flex h-[100dvh] w-full flex-col overflow-hidden overscroll-none bg-background font-sans md:flex-row">
       {/* SIDEBAR DESKTOP */}
       <nav className="hidden md:flex flex-col items-center w-[88px] border-r bg-card py-6 z-20 shrink-0">
-        <div className="w-10 h-10 bg-primary text-primary-foreground rounded-xl flex items-center justify-center font-bold mb-8 shadow-sm">
+        <div className="w-10 h-10 bg-primary text-primary-foreground rounded-xl flex items-center justify-center font-bold mb-8 shadow-sm shrink-0">
           QR
         </div>
 
-        <div className="flex flex-col gap-4 w-full px-3">
+        <div className="flex flex-col gap-4 w-full px-3 flex-1 overflow-y-auto pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <Link
+            to="/profile"
+            title="Mi perfil principal"
+            className="flex flex-col items-center justify-center p-3 w-full shrink-0 rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200"
+          >
+            <UserRound className="w-5 h-5 mb-1" />
+            <span className="text-center text-[10px] font-medium leading-tight">Mi perfil principal</span>
+          </Link>
+
           {TABS.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id && panelOpen;
@@ -408,7 +427,8 @@ function EditorPage() {
               <button
                 key={tab.id}
                 onClick={() => handleTabClick(tab.id as TabId)}
-                className={`flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-200 group ${
+                title={tab.label}
+                className={`flex flex-col items-center justify-center p-3 rounded-xl shrink-0 transition-all duration-200 group ${
                   isActive
                     ? "bg-primary/10 text-primary"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -426,13 +446,17 @@ function EditorPage() {
         </div>
 
         <div className="mt-auto px-3 w-full space-y-2">
-          <Link
-            to="/profile"
-            className="flex flex-col items-center justify-center p-3 w-full rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200"
-          >
-            <UserRound className="w-5 h-5 mb-1" />
-            <span className="text-[10px] font-medium">Mi Perfil</span>
-          </Link>
+          {/* Botón Panel Admin - solo visible para admins */}
+          {isAdmin && (
+            <Link
+              to="/admin"
+              className="flex flex-col items-center justify-center p-3 w-full rounded-xl bg-gradient-to-br from-amber-500/10 to-yellow-500/10 text-amber-600 hover:from-amber-500/20 hover:to-yellow-500/20 transition-all duration-200 border border-amber-200/50"
+            >
+              <Shield className="w-5 h-5 mb-1" />
+              <span className="text-[10px] font-medium">Panel Admin</span>
+            </Link>
+          )}
+
           <button
             onClick={() => supabase.auth.signOut()}
             className="flex flex-col items-center justify-center p-3 w-full rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200"
@@ -563,6 +587,15 @@ function EditorPage() {
 
       {/* MOBILE BOTTOM NAVIGATION */}
       <nav className="z-30 flex shrink-0 items-center gap-1 overflow-x-auto border-t bg-card px-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] pt-2 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] md:hidden">
+        <Link
+          to="/profile"
+          title="Mi perfil principal"
+          className="flex min-h-14 min-w-[52px] flex-1 flex-col items-center justify-center rounded-lg px-1.5 py-2 transition-colors text-muted-foreground hover:text-primary"
+        >
+          <UserRound className="w-5 h-5 mb-1" />
+          <span className="max-w-full truncate text-[10px] font-medium">Mi perfil</span>
+        </Link>
+
         {TABS.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id && panelOpen;
@@ -579,13 +612,6 @@ function EditorPage() {
             </button>
           );
         })}
-        <Link
-          to="/profile"
-          className="flex min-h-14 min-w-[52px] flex-1 flex-col items-center justify-center rounded-lg px-1.5 py-2 transition-colors text-muted-foreground hover:text-primary"
-        >
-          <UserRound className="w-5 h-5 mb-1" />
-          <span className="max-w-full truncate text-[10px] font-medium">Perfil</span>
-        </Link>
       </nav>
 
       {/* MOBILE BOTTOM SHEET (Panel Overlay) */}

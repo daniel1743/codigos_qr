@@ -214,6 +214,7 @@ export function QRTemplateGallery({
                 ))}
               </div>
             </div>
+            )}
           </DialogHeader>
 
           {/* Gallery Grid */}

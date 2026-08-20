@@ -123,8 +123,8 @@ export function createAdvancedOptionsFromSimple(
     ...(logoEnabled && logoUrl ? {
       imageOptions: {
         hideBackgroundDots: true,
-        imageSize: 0.18, // 18% del área
-        margin: 8,
+        imageSize: 0.28,
+        margin: 4,
         crossOrigin: "anonymous",
       }
     } : {}),

@@ -7,12 +7,15 @@ import {
   BarChart3,
   QrCode,
   Shield,
-  Upload,
   Camera,
   Mail,
   Calendar,
   Award,
-  Sparkles
+  Sparkles,
+  Menu,
+  X,
+  LogOut,
+  ArrowLeft,
 } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -20,10 +23,13 @@ import { Label } from "../ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Badge } from "../ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { Tabs, TabsContent } from "../ui/tabs";
 import { Separator } from "../ui/separator";
 import { toast } from "sonner";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
+import { isAdminEmail } from "../../lib/admin-check";
+import { hasPremiumAccessByEmail } from "../../lib/entitlements";
+import { Link, useNavigate } from "@tanstack/react-router";
 
 interface UserProfile {
   id: string;
@@ -55,8 +61,11 @@ export function MyProfilePage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [activeTab, setActiveTab] = useState("overview");
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const supabase = getBrowserSupabaseClient();
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadUserData();
@@ -81,21 +90,28 @@ export function MyProfilePage() {
         created_at: authUser.created_at,
       };
       setProfile(userProfile);
+      const hasPremiumOverride = hasPremiumAccessByEmail(authUser.email || "");
 
       // Check premium status
       const { data: premiumData } = await supabase
         .from("premium_users")
         .select("*")
         .eq("user_id", authUser.id)
-        .single();
+        .maybeSingle();
 
       if (premiumData) {
         const isActive = !premiumData.expires_at || new Date(premiumData.expires_at) > new Date();
         setPremiumStatus({
-          isPremium: isActive,
+          isPremium: isActive || hasPremiumOverride,
           tier: premiumData.tier,
           source: premiumData.source,
           expires_at: premiumData.expires_at,
+        });
+      } else if (hasPremiumOverride) {
+        setPremiumStatus({
+          isPremium: true,
+          tier: "premium_pro",
+          source: "admin_test_override",
         });
       }
 
@@ -104,9 +120,9 @@ export function MyProfilePage() {
         .from("admin_users")
         .select("role")
         .eq("user_id", authUser.id)
-        .single();
+        .maybeSingle();
 
-      setIsAdmin(!!adminData);
+      setIsAdmin(!!adminData || isAdminEmail(authUser.email || ""));
 
       // Get user stats
       const { data: profilesData } = await supabase
@@ -115,11 +131,12 @@ export function MyProfilePage() {
         .eq("user_id", authUser.id);
 
       const totalProfiles = profilesData?.length || 0;
-      const totalScans = profilesData?.reduce((sum, p) => sum + p.scan_count, 0) || 0;
+      const totalScans =
+        profilesData?.reduce((sum: number, p: { scan_count?: number | null }) => sum + (p.scan_count || 0), 0) || 0;
 
       // Get total links
       if (profilesData && profilesData.length > 0) {
-        const profileIds = profilesData.map(p => p.id);
+        const profileIds = profilesData.map((p: { id: string }) => p.id);
         const { count } = await supabase
           .from("profile_links")
           .select("*", { count: "exact", head: true })
@@ -145,8 +162,9 @@ export function MyProfilePage() {
     if (!event.target.files || event.target.files.length === 0 || !user) return;
 
     const file = event.target.files[0];
+    if (!file) return;
     const fileExt = file.name.split(".").pop();
-    const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+    const fileName = `${user.id}/profile/avatar-${Date.now()}.${fileExt}`;
 
     setUploading(true);
     try {
@@ -175,6 +193,11 @@ export function MyProfilePage() {
     } finally {
       setUploading(false);
     }
+  };
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate({ to: "/" });
   };
 
   const handleUpdateProfile = async (updates: Partial<UserProfile>) => {
@@ -214,9 +237,113 @@ export function MyProfilePage() {
   const accountAge = Math.floor(
     (new Date().getTime() - new Date(profile.created_at).getTime()) / (1000 * 60 * 60 * 24)
   );
+  const navItems = [
+    { value: "overview", label: "Datos", icon: User },
+    { value: "premium", label: "Premium", icon: Crown },
+    { value: "stats", label: "Estadísticas", icon: BarChart3 },
+    ...(isAdmin ? [{ value: "admin", label: "Admin", icon: Shield }] : []),
+  ];
+
+  const ProfileNav = ({ mobile = false }: { mobile?: boolean }) => (
+    <div className="flex h-full flex-col">
+      <div className="mb-5 flex items-center justify-between gap-3">
+        <div>
+          <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+            Cuenta
+          </p>
+          <h2 className="text-lg font-semibold tracking-tight">Mi perfil principal</h2>
+        </div>
+        {mobile && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="h-9 w-9 rounded-full"
+            onClick={() => setMenuOpen(false)}
+            aria-label="Cerrar menú"
+          >
+            <X className="h-5 w-5" />
+          </Button>
+        )}
+      </div>
+
+      <div className="space-y-1.5">
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = activeTab === item.value;
+          return (
+            <button
+              key={item.value}
+              type="button"
+              onClick={() => {
+                setActiveTab(item.value);
+                setMenuOpen(false);
+              }}
+              className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-colors ${
+                isActive
+                  ? "bg-slate-950 text-white shadow-sm"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              }`}
+            >
+              <Icon className="h-4 w-4" strokeWidth={1.8} />
+              <span>{item.label}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="mt-auto space-y-2 pt-6">
+        <Link
+          to="/editor"
+          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+        >
+          <ArrowLeft className="h-4 w-4" strokeWidth={1.8} />
+          Volver al editor
+        </Link>
+        <button
+          type="button"
+          onClick={handleSignOut}
+          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
+        >
+          <LogOut className="h-4 w-4" strokeWidth={1.8} />
+          Cerrar sesión
+        </button>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="container mx-auto max-w-6xl p-4 py-8">
+    <div className="min-h-screen bg-muted/30">
+      <Button
+        type="button"
+        size="icon"
+        className="fixed left-4 top-4 z-40 h-11 w-11 rounded-full shadow-lg md:hidden"
+        onClick={() => setMenuOpen(true)}
+        aria-label="Abrir menú"
+      >
+        <Menu className="h-5 w-5" />
+      </Button>
+
+      {menuOpen && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/35 backdrop-blur-[2px]"
+            onClick={() => setMenuOpen(false)}
+            aria-label="Cerrar menú"
+          />
+          <aside className="absolute left-0 top-0 h-full w-[82vw] max-w-[320px] bg-background p-5 shadow-2xl">
+            <ProfileNav mobile />
+          </aside>
+        </div>
+      )}
+
+      <div className="mx-auto flex max-w-7xl gap-6 p-4 py-8 md:p-8">
+        <aside className="sticky top-8 hidden h-[calc(100vh-4rem)] w-64 shrink-0 rounded-2xl border bg-background p-5 shadow-lg md:block">
+          <ProfileNav />
+        </aside>
+
+        <main className="min-w-0 flex-1">
       {/* Header Section */}
       <div className="mb-8">
         <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary/10 via-primary/5 to-background p-8">
@@ -306,27 +433,7 @@ export function MyProfilePage() {
       </div>
 
       {/* Tabs Section */}
-      <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2 md:w-auto md:grid-cols-4">
-          <TabsTrigger value="overview" className="gap-2">
-            <User className="h-4 w-4" />
-            <span className="hidden sm:inline">General</span>
-          </TabsTrigger>
-          <TabsTrigger value="premium" className="gap-2">
-            <Crown className="h-4 w-4" />
-            <span className="hidden sm:inline">Premium</span>
-          </TabsTrigger>
-          <TabsTrigger value="stats" className="gap-2">
-            <BarChart3 className="h-4 w-4" />
-            <span className="hidden sm:inline">Estadísticas</span>
-          </TabsTrigger>
-          {isAdmin && (
-            <TabsTrigger value="admin" className="gap-2">
-              <Shield className="h-4 w-4" />
-              <span className="hidden sm:inline">Admin</span>
-            </TabsTrigger>
-          )}
-        </TabsList>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
 
         {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-6">
@@ -528,7 +635,9 @@ export function MyProfilePage() {
             </Card>
           </TabsContent>
         )}
-      </Tabs>
+          </Tabs>
+        </main>
+      </div>
     </div>
   );
 }

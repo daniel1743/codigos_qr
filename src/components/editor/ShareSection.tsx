@@ -34,7 +34,7 @@ import { Switch } from "../ui/switch";
 import { Alert, AlertDescription } from "../ui/alert";
 import { getBrowserSupabaseClient } from "../../lib/supabase/client";
 import { QRTemplateGallery } from "./QRTemplateGallery";
-import { canUsePremiumTemplates } from "../../lib/entitlements";
+import { hasPremiumAccessByEmail } from "../../lib/entitlements";
 import imageCompression from "browser-image-compression";
 
 interface ShareSectionProps {
@@ -70,7 +70,7 @@ export function ShareSection({
 
   // Gallery state
   const [galleryOpen, setGalleryOpen] = useState(false);
-  const isPremiumUser = canUsePremiumTemplates(profile.user_id);
+  const [isPremiumUser, setIsPremiumUser] = useState(false);
 
   const fgColor = profile.qr_foreground_color || "#000000";
   const bgColor = profile.qr_background_color || "#FFFFFF";
@@ -93,6 +93,47 @@ export function ShareSection({
     rebuildPublicUrl();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [publicId]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const checkPremiumAccess = async () => {
+      try {
+        const supabase = getBrowserSupabaseClient();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        if (!user) {
+          if (!cancelled) setIsPremiumUser(false);
+          return;
+        }
+
+        if (hasPremiumAccessByEmail(user.email || "")) {
+          if (!cancelled) setIsPremiumUser(true);
+          return;
+        }
+
+        const { data } = await supabase
+          .from("premium_users")
+          .select("expires_at")
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        const active = !!data && (!data.expires_at || new Date(data.expires_at) > new Date());
+        if (!cancelled) setIsPremiumUser(active);
+      } catch (error) {
+        console.error("Error checking premium access:", error);
+        if (!cancelled) setIsPremiumUser(false);
+      }
+    };
+
+    checkPremiumAccess();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [profile.user_id]);
 
   useEffect(() => {
     if (profile?.id) {
@@ -137,8 +178,9 @@ export function ShareSection({
         toast.info("Optimizando imagen...");
 
         const options = {
-          maxSizeMB: 0.5, // Max 500KB
-          maxWidthOrHeight: 800, // Max 800px (ideal para QR logo)
+          maxSizeMB: 1.5,
+          maxWidthOrHeight: 1600,
+          initialQuality: 0.95,
           useWebWorker: true,
           fileType: file.type,
         };
@@ -229,8 +271,8 @@ export function ShareSection({
         ...(logoEnabled && logoUrl ? {
           imageOptions: {
             hideBackgroundDots: true,
-            imageSize: 0.18,
-            margin: 8,
+            imageSize: 0.28,
+            margin: 4,
             crossOrigin: "anonymous"
           }
         } : {}),
@@ -378,8 +420,8 @@ export function ShareSection({
                       ...(logoEnabled && logoUrl ? {
                         imageOptions: {
                           hideBackgroundDots: true,
-                          imageSize: 0.18,
-                          margin: 8,
+                          imageSize: 0.28,
+                          margin: 4,
                           crossOrigin: "anonymous"
                         }
                       } : {}),

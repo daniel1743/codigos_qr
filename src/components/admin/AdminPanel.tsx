@@ -24,6 +24,7 @@ import { PremiumPanel } from "./PremiumPanel";
 import { InvitationCodesPanel } from "./InvitationCodesPanel";
 import { LogosPanel } from "./LogosPanel";
 import { AnalyticsGlobalPanel } from "./AnalyticsGlobalPanel";
+import { isAdminEmail } from "../../lib/admin-check";
 
 interface GlobalStats {
   totalUsers: number;
@@ -68,9 +69,9 @@ export function AdminPanel() {
         .from("admin_users")
         .select("role")
         .eq("user_id", user.id)
-        .single();
+        .maybeSingle();
 
-      if (!adminData) {
+      if (!adminData && !isAdminEmail(user.email || "")) {
         navigate({ to: "/" });
         return;
       }
@@ -102,7 +103,8 @@ export function AdminPanel() {
         .from("profiles")
         .select("scan_count");
 
-      const totalScans = profilesData?.reduce((sum, p) => sum + (p.scan_count || 0), 0) || 0;
+      const totalScans =
+        profilesData?.reduce((sum: number, p: { scan_count?: number | null }) => sum + (p.scan_count || 0), 0) || 0;
 
       // Active invitation codes
       const { count: codesCount } = await supabase

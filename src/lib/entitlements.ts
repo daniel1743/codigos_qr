@@ -88,8 +88,7 @@ export function canApplyPremiumTemplate(userId?: string): boolean {
  * Es solo para testing durante desarrollo.
  */
 const PREMIUM_DEV_EMAILS: string[] = [
-  // Agregar emails de testing aquí si es necesario
-  // "test@example.com"
+  "falcondaniel37@gmail.com",
 ];
 
 /**
@@ -99,4 +98,15 @@ const PREMIUM_DEV_EMAILS: string[] = [
  */
 export function hasPremiumAccessByEmail(email: string): boolean {
   return PREMIUM_DEV_EMAILS.includes(email.toLowerCase());
+}
+
+export function getPremiumOverrideByEmail(email?: string | null): UserEntitlements | null {
+  if (!email || !hasPremiumAccessByEmail(email)) return null;
+
+  return {
+    plan: "premium",
+    canUsePremiumTemplates: true,
+    canExportHighRes: true,
+    canUseAdvancedAnalytics: true,
+  };
 }

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import QRCodeStyling from "qr-code-styling";
-import type { Options } from "qr-code-styling";
-import type { QRAdvancedOptions } from "../../types/qr-advanced";
+import type { DotType, Options } from "qr-code-styling";
+import type { QRAdvancedOptions, DotsType } from "../../types/qr-advanced";
 import { PREMIUM_EFFECTS, PREMIUM_KEYFRAMES } from "../../lib/premium-qr-presets";
 
 interface QRCodeAdvancedProps {
@@ -10,8 +10,10 @@ interface QRCodeAdvancedProps {
   onRender?: (canvas: HTMLCanvasElement) => void;
 }
 
-const DEFAULT_LOGO_SIZE = 0.185;
-const DEFAULT_LOGO_MARGIN = 6;
+const DEFAULT_LOGO_SIZE = 0.28;
+const MAX_LOGO_SIZE = 0.32;
+const DEFAULT_LOGO_MARGIN = 4;
+const MIN_PROCESSED_LOGO_SIZE = 512;
 const WHITE_THRESHOLD = 246;
 
 async function removeWhiteBackground(src: string): Promise<string> {
@@ -25,8 +27,11 @@ async function removeWhiteBackground(src: string): Promise<string> {
 
     image.onload = () => {
       const canvas = document.createElement("canvas");
-      const width = image.naturalWidth || image.width;
-      const height = image.naturalHeight || image.height;
+      const sourceWidth = image.naturalWidth || image.width;
+      const sourceHeight = image.naturalHeight || image.height;
+      const scale = Math.max(1, MIN_PROCESSED_LOGO_SIZE / Math.max(sourceWidth, sourceHeight));
+      const width = Math.round(sourceWidth * scale);
+      const height = Math.round(sourceHeight * scale);
       canvas.width = width;
       canvas.height = height;
 
@@ -36,6 +41,8 @@ async function removeWhiteBackground(src: string): Promise<string> {
         return;
       }
 
+      context.imageSmoothingEnabled = true;
+      context.imageSmoothingQuality = "high";
       context.drawImage(image, 0, 0, width, height);
 
       try {
@@ -68,7 +75,88 @@ async function removeWhiteBackground(src: string): Promise<string> {
 
 function getImageSize(options: QRAdvancedOptions) {
   const requestedSize = options.imageOptions?.imageSize ?? DEFAULT_LOGO_SIZE;
-  return Math.min(requestedSize * 1.03, 0.22);
+  return Math.min(requestedSize, MAX_LOGO_SIZE);
+}
+
+function normalizeDotsType(type?: DotsType): DotType {
+  if (type === "diamond" || type === "star") return "classy-rounded";
+  return type ?? "square";
+}
+
+function buildStylingOptions(options: QRAdvancedOptions, image?: string): Options {
+  const stylingOptions: Options = {
+    width: options.width,
+    height: options.height,
+    data: options.data,
+    margin: options.margin ?? 4,
+    qrOptions: {
+      errorCorrectionLevel: options.qrOptions?.errorCorrectionLevel ?? "H",
+    },
+    imageOptions: {
+      saveAsBlob: true,
+      hideBackgroundDots: options.imageOptions?.hideBackgroundDots ?? true,
+      imageSize: image ? getImageSize(options) : DEFAULT_LOGO_SIZE,
+      margin: image ? (options.imageOptions?.margin ?? DEFAULT_LOGO_MARGIN) : 0,
+      crossOrigin: options.imageOptions?.crossOrigin ?? "anonymous",
+    },
+    dotsOptions: {
+      type: normalizeDotsType(options.dotsType),
+      color: "#000000",
+      roundSize: true,
+    },
+    backgroundOptions: {
+      color: options.backgroundColor ?? "#ffffff",
+    },
+    cornersSquareOptions: {
+      type: options.cornersSquareType ?? "extra-rounded",
+    },
+    cornersDotOptions: {
+      type: options.cornersDotType ?? "dot",
+    },
+  };
+
+  if (image) {
+    stylingOptions.image = image;
+  }
+
+  if (typeof options.dotsColor === "string") {
+    stylingOptions.dotsOptions = {
+      ...stylingOptions.dotsOptions,
+      color: options.dotsColor,
+    };
+    stylingOptions.cornersSquareOptions = {
+      ...stylingOptions.cornersSquareOptions,
+      color: options.dotsColor,
+    };
+    stylingOptions.cornersDotOptions = {
+      ...stylingOptions.cornersDotOptions,
+      color: options.dotsColor,
+    };
+  } else if (options.dotsColor && typeof options.dotsColor === "object") {
+    const gradient = {
+      type: options.dotsColor.type,
+      rotation: options.dotsColor.rotation ?? 0,
+      colorStops: options.dotsColor.colorStops.map((stop) => ({
+        offset: stop.offset,
+        color: stop.color,
+      })),
+    };
+
+    stylingOptions.dotsOptions = {
+      ...stylingOptions.dotsOptions,
+      gradient,
+    };
+    stylingOptions.cornersSquareOptions = {
+      ...stylingOptions.cornersSquareOptions,
+      gradient,
+    };
+    stylingOptions.cornersDotOptions = {
+      ...stylingOptions.cornersDotOptions,
+      gradient,
+    };
+  }
+
+  return stylingOptions;
 }
 
 /**
@@ -87,78 +175,7 @@ export function QRCodeAdvanced({ options, className, onRender }: QRCodeAdvancedP
       const image = options.image ? await removeWhiteBackground(options.image) : undefined;
       if (cancelled || !ref.current) return;
 
-      // Convertir nuestras opciones al formato de qr-code-styling
-      const stylingOptions: Options = {
-        width: options.width,
-        height: options.height,
-        data: options.data,
-        margin: options.margin ?? 4,
-        qrOptions: {
-          errorCorrectionLevel: options.qrOptions?.errorCorrectionLevel ?? "H",
-        },
-        imageOptions: image
-          ? {
-              hideBackgroundDots: options.imageOptions?.hideBackgroundDots ?? true,
-              imageSize: getImageSize(options),
-              margin: options.imageOptions?.margin ?? DEFAULT_LOGO_MARGIN,
-              crossOrigin: options.imageOptions?.crossOrigin ?? "anonymous",
-            }
-          : undefined,
-        dotsOptions: {
-          type: options.dotsType ?? "square",
-        },
-        backgroundOptions: {
-          color: options.backgroundColor ?? "#ffffff",
-        },
-        cornersSquareOptions: options.cornersSquareType
-          ? {
-              type: options.cornersSquareType,
-            }
-          : undefined,
-        cornersDotOptions: options.cornersDotType
-          ? {
-              type: options.cornersDotType,
-            }
-          : undefined,
-      };
-
-      // Manejar color de dots (sólido o gradiente)
-      if (typeof options.dotsColor === "string") {
-        // Color sólido
-        stylingOptions.dotsOptions.color = options.dotsColor;
-
-        // Aplicar mismo color a corners si no están especificados
-        if (stylingOptions.cornersSquareOptions) {
-          stylingOptions.cornersSquareOptions.color = options.dotsColor;
-        }
-        if (stylingOptions.cornersDotOptions) {
-          stylingOptions.cornersDotOptions.color = options.dotsColor;
-        }
-      } else if (options.dotsColor && typeof options.dotsColor === "object") {
-        // Gradiente
-        const gradient = options.dotsColor;
-        stylingOptions.dotsOptions.gradient = {
-          type: gradient.type,
-          rotation: gradient.rotation ?? 0,
-          colorStops: gradient.colorStops.map((stop) => ({
-            offset: stop.offset,
-            color: stop.color,
-          })),
-        };
-
-        // Aplicar gradiente también a corners
-        if (stylingOptions.cornersSquareOptions) {
-          stylingOptions.cornersSquareOptions.gradient = stylingOptions.dotsOptions.gradient;
-        }
-        if (stylingOptions.cornersDotOptions) {
-          stylingOptions.cornersDotOptions.gradient = stylingOptions.dotsOptions.gradient;
-        }
-      }
-
-      // Agregar logo si existe
-      if (image) {
-        stylingOptions.image = image;
-      }
+      const stylingOptions = buildStylingOptions(options, image);
 
       // Crear o actualizar QR
       if (!qrCode.current) {
@@ -177,11 +194,11 @@ export function QRCodeAdvanced({ options, className, onRender }: QRCodeAdvancedP
         if (effectStyle) {
           canvas.style.filter = effectStyle.filter;
 
-          if (effectStyle.animation) {
+          if ("animation" in effectStyle && effectStyle.animation) {
             canvas.style.animation = effectStyle.animation;
           }
 
-          if (effectStyle.backdropFilter) {
+          if ("backdropFilter" in effectStyle && effectStyle.backdropFilter) {
             canvas.style.backdropFilter = effectStyle.backdropFilter;
           }
 
@@ -227,70 +244,8 @@ export function useQRAdvancedDownload() {
     filename: string,
     format: "png" | "svg" = "png",
   ) => {
-    // Convertir opciones igual que en el componente
-    const stylingOptions: Options = {
-      width: options.width,
-      height: options.height,
-      data: options.data,
-      margin: options.margin ?? 4,
-      qrOptions: {
-        errorCorrectionLevel: options.qrOptions?.errorCorrectionLevel ?? "H",
-      },
-      imageOptions: options.image
-        ? {
-            hideBackgroundDots: options.imageOptions?.hideBackgroundDots ?? true,
-            imageSize: getImageSize(options),
-            margin: options.imageOptions?.margin ?? DEFAULT_LOGO_MARGIN,
-          }
-        : undefined,
-      dotsOptions: {
-        type: options.dotsType ?? "square",
-      },
-      backgroundOptions: {
-        color: options.backgroundColor ?? "#ffffff",
-      },
-      cornersSquareOptions: options.cornersSquareType
-        ? {
-            type: options.cornersSquareType,
-          }
-        : undefined,
-      cornersDotOptions: options.cornersDotType
-        ? {
-            type: options.cornersDotType,
-          }
-        : undefined,
-    };
-
-    // Color/gradiente
-    if (typeof options.dotsColor === "string") {
-      stylingOptions.dotsOptions.color = options.dotsColor;
-      if (stylingOptions.cornersSquareOptions) {
-        stylingOptions.cornersSquareOptions.color = options.dotsColor;
-      }
-      if (stylingOptions.cornersDotOptions) {
-        stylingOptions.cornersDotOptions.color = options.dotsColor;
-      }
-    } else if (options.dotsColor && typeof options.dotsColor === "object") {
-      const gradient = options.dotsColor;
-      stylingOptions.dotsOptions.gradient = {
-        type: gradient.type,
-        rotation: gradient.rotation ?? 0,
-        colorStops: gradient.colorStops.map((stop) => ({
-          offset: stop.offset,
-          color: stop.color,
-        })),
-      };
-      if (stylingOptions.cornersSquareOptions) {
-        stylingOptions.cornersSquareOptions.gradient = stylingOptions.dotsOptions.gradient;
-      }
-      if (stylingOptions.cornersDotOptions) {
-        stylingOptions.cornersDotOptions.gradient = stylingOptions.dotsOptions.gradient;
-      }
-    }
-
-    if (options.image) {
-      stylingOptions.image = await removeWhiteBackground(options.image);
-    }
+    const image = options.image ? await removeWhiteBackground(options.image) : undefined;
+    const stylingOptions = buildStylingOptions(options, image);
 
     const qr = new QRCodeStyling(stylingOptions);
 

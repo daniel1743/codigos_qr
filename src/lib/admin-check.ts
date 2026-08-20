@@ -12,7 +12,7 @@ export async function isUserAdmin(
       .from("admin_users")
       .select("user_id")
       .eq("user_id", userId)
-      .single();
+      .maybeSingle();
 
     if (error) {
       console.error("Error checking admin status:", error);
@@ -29,7 +29,7 @@ export async function isUserAdmin(
 /**
  * Lista de emails admin hardcoded como fallback
  */
-const ADMIN_EMAILS = [
+export const ADMIN_EMAILS = [
   "falcondaniel37@gmail.com",
   "admin@example.com"
 ];
