@@ -1,4 +1,7 @@
-import type { Profile } from "../../types/database";
+const fs = require('fs');
+const file = 'src/lib/design/template-presets.ts';
+
+const content = `import type { Profile } from "../../types/database";
 
 export interface TemplateStyle {
   font_family: string;
@@ -1004,3 +1007,7 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
     }
   }
 ];
+`;
+
+fs.writeFileSync(file, content);
+console.log("Replaced template-presets.ts");

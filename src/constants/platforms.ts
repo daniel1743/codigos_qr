@@ -5,7 +5,6 @@ import {
   SiTiktok,
   SiYoutube,
   SiX,
-  
   SiTelegram,
   SiDiscord,
   SiReddit,
@@ -25,7 +24,6 @@ import {
   SiTwitch,
   SiPinterest,
   SiEtsy,
-  
   SiGooglemaps,
   SiVimeo,
   SiTumblr,
@@ -33,18 +31,26 @@ import {
   SiVk,
   SiLine,
   SiWechat,
-  SiSignal
+  SiSignal,
 } from "@icons-pack/react-simple-icons";
-import { Globe, Mail, Phone, Link as LinkIcon, LucideIcon, Linkedin, ShoppingCart } from "lucide-react";
+import {
+  Globe,
+  Mail,
+  Phone,
+  Link as LinkIcon,
+  LucideIcon,
+  Linkedin,
+  ShoppingCart,
+} from "lucide-react";
 import React from "react";
 
-export type PlatformCategory = 
-  | "populares" 
-  | "mensajeria_comunidades" 
-  | "profesional_creadores" 
-  | "musica_streaming" 
-  | "descubrimiento_comercio" 
-  | "contacto" 
+export type PlatformCategory =
+  | "populares"
+  | "mensajeria_comunidades"
+  | "profesional_creadores"
+  | "musica_streaming"
+  | "descubrimiento_comercio"
+  | "contacto"
   | "otros";
 
 export interface PlatformDef {
@@ -63,7 +69,7 @@ export const PLATFORMS_CATALOG: PlatformDef[] = [
   { id: "facebook", label: "Facebook", category: "populares", icon: SiFacebook },
   { id: "twitter", label: "X / Twitter", category: "populares", icon: SiX },
   { id: "linkedin", label: "LinkedIn", category: "populares", icon: Linkedin },
-  
+
   // mensajeria_comunidades
   { id: "telegram", label: "Telegram", category: "mensajeria_comunidades", icon: SiTelegram },
   { id: "discord", label: "Discord", category: "mensajeria_comunidades", icon: SiDiscord },
@@ -95,7 +101,12 @@ export const PLATFORMS_CATALOG: PlatformDef[] = [
   { id: "pinterest", label: "Pinterest", category: "descubrimiento_comercio", icon: SiPinterest },
   { id: "etsy", label: "Etsy", category: "descubrimiento_comercio", icon: SiEtsy },
   { id: "amazon", label: "Amazon", category: "descubrimiento_comercio", icon: ShoppingCart },
-  { id: "googlemaps", label: "Google Maps", category: "descubrimiento_comercio", icon: SiGooglemaps },
+  {
+    id: "googlemaps",
+    label: "Google Maps",
+    category: "descubrimiento_comercio",
+    icon: SiGooglemaps,
+  },
   { id: "tumblr", label: "Tumblr", category: "descubrimiento_comercio", icon: SiTumblr },
   { id: "flickr", label: "Flickr", category: "descubrimiento_comercio", icon: SiFlickr },
   { id: "vk", label: "VK", category: "descubrimiento_comercio", icon: SiVk },
@@ -121,5 +132,8 @@ export const CATEGORY_LABELS: Record<PlatformCategory, string> = {
 
 export const getPlatformDef = (id: string): PlatformDef => {
   if (id === "x") id = "twitter"; // backward compatibility
-  return PLATFORMS_CATALOG.find((p) => p.id === id) || PLATFORMS_CATALOG[PLATFORMS_CATALOG.length - 1] as PlatformDef; // defaults to "other"
+  return (
+    PLATFORMS_CATALOG.find((p) => p.id === id) ||
+    (PLATFORMS_CATALOG[PLATFORMS_CATALOG.length - 1] as PlatformDef)
+  ); // defaults to "other"
 };

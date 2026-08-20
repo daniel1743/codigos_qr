@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 import {
   ArrowRight,
   BadgeCheck,
@@ -19,6 +20,7 @@ import {
   Store,
   UserRound,
   Wand2,
+  X,
 } from "lucide-react";
 import { SiInstagram, SiTiktok, SiWhatsapp, SiYoutube } from "@icons-pack/react-simple-icons";
 
@@ -95,6 +97,8 @@ const useCases = [
 ];
 
 function Index() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
     <main className="min-h-screen bg-white text-[#0f172a]">
       <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-white/90 backdrop-blur-xl">
@@ -138,13 +142,66 @@ function Index() {
               Crear mi QR
             </Link>
             <button
-              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 text-slate-700 md:hidden"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 text-slate-700 transition hover:bg-slate-50 md:hidden"
               aria-label="Menú"
+              aria-expanded={mobileMenuOpen}
             >
-              <Menu className="h-5 w-5" />
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
           </div>
         </nav>
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="border-t border-slate-200/70 bg-white md:hidden">
+            <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6">
+              <div className="flex flex-col space-y-3">
+                <a
+                  href="#producto"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center justify-between rounded-xl px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                >
+                  Producto
+                  <ChevronRight className="h-4 w-4 text-slate-400" />
+                </a>
+                <a
+                  href="#como-funciona"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center justify-between rounded-xl px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                >
+                  Cómo funciona
+                  <ChevronRight className="h-4 w-4 text-slate-400" />
+                </a>
+                <a
+                  href="#plantillas"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center justify-between rounded-xl px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                >
+                  Plantillas
+                  <ChevronRight className="h-4 w-4 text-slate-400" />
+                </a>
+                <a
+                  href="#faq"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center justify-between rounded-xl px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                >
+                  FAQ
+                  <ChevronRight className="h-4 w-4 text-slate-400" />
+                </a>
+                <div className="border-t border-slate-200 pt-3">
+                  <Link
+                    to="/editor"
+                    className="flex items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                  >
+                    Iniciar sesión
+                    <ArrowRight className="h-4 w-4 text-slate-400" />
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </header>
 
       <section className="overflow-hidden border-b border-slate-100 bg-[linear-gradient(180deg,#ffffff_0%,#f5f7fa_100%)]">

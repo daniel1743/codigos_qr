@@ -1,18 +1,9 @@
 import React from "react";
 import type { Profile, ProfileLink } from "../../types/database";
-import {
-  SiInstagram,
-  SiWhatsapp,
-  SiFacebook,
-  SiTiktok,
-  SiYoutube,
-  SiX,
-  SiTelegram,
-  SiGithub,
-} from "@icons-pack/react-simple-icons";
-import { Globe, Link as LinkIcon, Mail, ChevronRight, Linkedin } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 
 import { ContextualToolbar } from "./ContextualToolbar";
+import { getPlatformDef } from "../../constants/platforms";
 
 interface PublicProfileViewProps {
   profile: Partial<Profile>;
@@ -23,36 +14,79 @@ interface PublicProfileViewProps {
   onOpenSidebar?: (tabId: string) => void;
 }
 
-const getPlatformIcon = (platform: string, className: string) => {
-  switch (platform.toLowerCase()) {
-    case "instagram":
-      return <SiInstagram className={className} aria-hidden="true" />;
-    case "whatsapp":
-      return <SiWhatsapp className={className} aria-hidden="true" />;
-    case "facebook":
-      return <SiFacebook className={className} aria-hidden="true" />;
-    case "tiktok":
-      return <SiTiktok className={className} aria-hidden="true" />;
-    case "youtube":
-      return <SiYoutube className={className} aria-hidden="true" />;
-    case "twitter":
-    case "x":
-      return <SiX className={className} aria-hidden="true" />;
-    case "linkedin":
-      return <Linkedin className={className} aria-hidden="true" />;
-    case "telegram":
-      return <SiTelegram className={className} aria-hidden="true" />;
-    case "github":
-      return <SiGithub className={className} aria-hidden="true" />;
-    case "website":
-      return <Globe className={className} aria-hidden="true" />;
-    case "email":
-      return <Mail className={className} aria-hidden="true" />;
-    case "other":
-    default:
-      return <LinkIcon className={className} aria-hidden="true" />;
+function DecorativeLayer({
+  profile,
+  accentColor,
+}: {
+  profile: Partial<Profile>;
+  accentColor: string;
+}) {
+  const shape = profile.decor_shape || "none";
+  const particles = profile.decor_particles || "none";
+  const smoke = profile.decor_smoke || "none";
+  const shadow = profile.decor_shadow || "none";
+  const intensity = profile.decor_intensity || "subtle";
+  const opacityClass =
+    intensity === "strong" ? "opacity-80" : intensity === "medium" ? "opacity-55" : "opacity-35";
+
+  if (shape === "none" && particles === "none" && smoke === "none" && shadow === "none") {
+    return null;
   }
-};
+
+  const accentStyle = { borderColor: accentColor, color: accentColor };
+  const fillStyle = { backgroundColor: accentColor };
+
+  return (
+    <div className={`pointer-events-none absolute inset-0 z-0 overflow-hidden ${opacityClass}`} aria-hidden="true">
+      {(shape === "circles" || shape === "mixed") && (
+        <>
+          <span className="absolute -right-10 top-20 h-32 w-32 rounded-full border" style={accentStyle} />
+          <span className="absolute left-7 top-[42%] h-16 w-16 rounded-full border" style={accentStyle} />
+          <span className="absolute bottom-20 right-12 h-8 w-8 rounded-full" style={fillStyle} />
+        </>
+      )}
+
+      {(shape === "squares" || shape === "mixed") && (
+        <>
+          <span className="absolute -left-8 top-28 h-24 w-24 rotate-12 rounded-2xl border" style={accentStyle} />
+          <span className="absolute bottom-36 right-4 h-14 w-14 -rotate-12 rounded-xl border" style={accentStyle} />
+        </>
+      )}
+
+      {(shape === "lines" || shape === "mixed") && (
+        <>
+          <span className="absolute left-8 top-24 h-px w-28 rotate-[-18deg]" style={fillStyle} />
+          <span className="absolute right-8 top-[48%] h-px w-36 rotate-12" style={fillStyle} />
+          <span className="absolute bottom-32 left-10 h-px w-24 rotate-6" style={fillStyle} />
+        </>
+      )}
+
+      {particles === "dots" && (
+        <>
+          {[
+            "left-[18%] top-[18%]",
+            "right-[22%] top-[24%]",
+            "left-[12%] top-[58%]",
+            "right-[14%] top-[62%]",
+            "left-[28%] bottom-[16%]",
+            "right-[30%] bottom-[20%]",
+          ].map((position) => (
+            <span key={position} className={`absolute h-1.5 w-1.5 rounded-full ${position}`} style={fillStyle} />
+          ))}
+        </>
+      )}
+
+      {smoke === "soft" && (
+        <>
+          <span className="absolute -left-10 top-20 h-40 w-56 rounded-[45%] blur-3xl" style={fillStyle} />
+          <span className="absolute -right-16 bottom-24 h-44 w-64 rounded-[45%] blur-3xl" style={fillStyle} />
+        </>
+      )}
+
+      {shadow === "soft" && <span className="absolute inset-x-10 bottom-3 h-24 rounded-full bg-black/30 blur-3xl" />}
+    </div>
+  );
+}
 
 export function PublicProfileView({
   profile,
@@ -62,21 +96,27 @@ export function PublicProfileView({
   onLinkChange,
   onOpenSidebar,
 }: PublicProfileViewProps) {
+  const renderPlatformIcon = (platform: string, className: string) => {
+    const Icon = getPlatformDef(platform).icon;
+    return <Icon className={className} aria-hidden="true" />;
+  };
   const ContextWrapper = ({
     type,
     linkId,
     children,
   }: {
-    type: any;
+    type: "title" | "bio" | "avatar" | "cover" | "background" | "link";
     linkId?: string | undefined;
     children: React.ReactNode;
   }) => {
     if (!isPreview) return <>{children}</>;
+    const currentLink = linkId ? links.find((l) => l.id === linkId) : undefined;
     const toolbarProps = {
       ...(linkId ? { linkId } : {}),
       ...(onProfileChange ? { onProfileChange } : {}),
       ...(onLinkChange ? { onLinkChange } : {}),
       ...(onOpenSidebar ? { onOpenSidebar } : {}),
+      ...(currentLink ? { currentLink } : {}),
     };
 
     return (
@@ -235,6 +275,23 @@ export function PublicProfileView({
         : "font-semibold";
   const btnContentAlign = profile.button_content_align || "left";
   const btnIconPos = profile.button_icon_position || "left";
+  const linkSpacingClass =
+    profile.theme_spacing === "compact"
+      ? "gap-1.5"
+      : profile.theme_spacing === "generous"
+        ? "gap-4"
+        : "gap-2.5";
+  const hasSurface = !!profile.theme_surface && profile.theme_surface !== "transparent";
+  const surfaceIsDark = profile.theme_surface === "#111827";
+  const surfaceStyle: React.CSSProperties | undefined = hasSurface
+    ? {
+        backgroundColor: profile.theme_surface,
+        color: surfaceIsDark ? "#ffffff" : undefined,
+      }
+    : undefined;
+  const surfaceClass = hasSurface
+    ? "rounded-[2rem] border border-white/30 py-8 shadow-xl backdrop-blur-sm"
+    : "";
 
   return (
     <ContextWrapper type="background">
@@ -245,6 +302,7 @@ export function PublicProfileView({
           fontFamily: fontFamily,
         }}
       >
+        <DecorativeLayer profile={profile} accentColor={buttonColor} />
         <div className="relative z-10 flex w-full max-w-[520px] flex-1 flex-col items-center pb-12 pt-0 sm:pb-16">
           {/* Portada Section */}
           {profile.banner_url ? (
@@ -263,7 +321,10 @@ export function PublicProfileView({
             </ContextWrapper>
           )}
 
-          <div className="w-full flex flex-col items-center px-4 sm:px-6">
+          <div
+            className={`w-full flex flex-col items-center px-4 sm:px-6 ${surfaceClass}`}
+            style={surfaceStyle}
+          >
             {/* Avatar Section */}
             {profile.avatar_shape !== "none" && (
               <ContextWrapper type="avatar">
@@ -330,7 +391,9 @@ export function PublicProfileView({
             </div>
 
             {/* Lista de Enlaces */}
-            <div className="w-full px-4 sm:px-6 space-y-3.5 flex-1 flex flex-col items-center">
+            <div
+              className={`w-full px-4 sm:px-6 ${linkSpacingClass} flex-1 flex flex-col items-center`}
+            >
               {links
                 .filter((l) => l.enabled)
                 .map((link, i) => {
@@ -392,10 +455,10 @@ export function PublicProfileView({
                             >
                               {buttonStyle === "card" ? (
                                 <div className="w-10 h-10 shrink-0 rounded-full flex items-center justify-center bg-black/5 shadow-inner">
-                                  {getPlatformIcon(link.platform || "other", "w-5 h-5")}
+                                  {renderPlatformIcon(link.platform || "other", "w-5 h-5")}
                                 </div>
                               ) : (
-                                getPlatformIcon(link.platform || "other", "w-5 h-5 shrink-0")
+                                renderPlatformIcon(link.platform || "other", "w-5 h-5 shrink-0")
                               )}
                             </div>
                           )}
@@ -413,10 +476,10 @@ export function PublicProfileView({
                             >
                               {buttonStyle === "card" ? (
                                 <div className="w-10 h-10 shrink-0 rounded-full flex items-center justify-center bg-black/5 shadow-inner">
-                                  {getPlatformIcon(link.platform || "other", "w-5 h-5")}
+                                  {renderPlatformIcon(link.platform || "other", "w-5 h-5")}
                                 </div>
                               ) : (
-                                getPlatformIcon(link.platform || "other", "w-5 h-5 shrink-0")
+                                renderPlatformIcon(link.platform || "other", "w-5 h-5 shrink-0")
                               )}
                             </div>
                           )}
@@ -434,6 +497,15 @@ export function PublicProfileView({
                   );
                 })}
             </div>
+
+            {profile.footer_enabled && (
+              <div
+                className="mt-8 max-w-[320px] px-4 text-center text-xs font-medium opacity-70"
+                style={{ color: surfaceIsDark ? "#ffffff" : textColor }}
+              >
+                {profile.footer_text || "Gracias por visitar mi página"}
+              </div>
+            )}
           </div>
         </div>
       </div>

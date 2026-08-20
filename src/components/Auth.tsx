@@ -9,15 +9,21 @@ import {
   ArrowRight,
   BadgeCheck,
   Eye,
+  EyeOff,
   LockKeyhole,
   Mail,
   QrCode,
   Sparkles,
+  User,
 } from "lucide-react";
+import { Checkbox } from "./ui/checkbox";
 
 export function Auth() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<"login" | "signup">("login");
@@ -33,9 +39,20 @@ export function Auth() {
 
     try {
       if (mode === "signup") {
+        if (!termsAccepted) {
+          throw new Error("Debes aceptar los términos y condiciones para continuar.");
+        }
+        if (!name.trim()) {
+          throw new Error("Por favor, ingresa tu nombre.");
+        }
         const { error } = await supabase.auth.signUp({
           email,
           password,
+          options: {
+            data: {
+              full_name: name,
+            },
+          },
         });
         if (error) throw error;
         setSuccessMessage(
@@ -164,6 +181,29 @@ export function Auth() {
                   </Alert>
                 )}
 
+                {!isLogin && (
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="name"
+                      className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500"
+                    >
+                      Nombre completo
+                    </Label>
+                    <div className="relative">
+                      <User className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                      <Input
+                        id="name"
+                        type="text"
+                        placeholder="Tu nombre"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        required={!isLogin}
+                        className="h-12 rounded-2xl border-slate-200 bg-slate-50 pl-11 text-slate-950 shadow-inner shadow-slate-900/[0.02] focus-visible:ring-blue-500"
+                      />
+                    </div>
+                  </div>
+                )}
+
                 <div className="space-y-2">
                   <Label
                     htmlFor="email"
@@ -196,16 +236,39 @@ export function Auth() {
                     <LockKeyhole className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                     <Input
                       id="password"
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
                       minLength={6}
                       className="h-12 rounded-2xl border-slate-200 bg-slate-50 pl-11 pr-11 text-slate-950 shadow-inner shadow-slate-900/[0.02] focus-visible:ring-blue-500"
                     />
-                    <Eye className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-300" />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-300 hover:text-slate-500 focus:outline-none"
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
                   </div>
                 </div>
+
+                {!isLogin && (
+                  <div className="flex items-center space-x-2 pt-2">
+                    <Checkbox
+                      id="terms"
+                      checked={termsAccepted}
+                      onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
+                      className="border-slate-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <label
+                      htmlFor="terms"
+                      className="text-sm font-medium leading-none text-slate-600 peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      Acepto los términos y condiciones
+                    </label>
+                  </div>
+                )}
               </div>
 
               <div className="mt-7 space-y-3">

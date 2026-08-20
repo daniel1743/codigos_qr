@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useRef } from "react";
 import { getBrowserSupabaseClient } from "../lib/supabase/client";
 import { profileService } from "../services/profile.service";
@@ -17,6 +17,7 @@ import { generatePublicId, getInternalSlugFromPublicId } from "../lib/publicId";
 import { isValidUrl, normalizeUrl } from "../lib/validation";
 import {
   UserCircle,
+  UserRound,
   Link as LinkIcon,
   Palette,
   Type,
@@ -341,7 +342,12 @@ function EditorPage() {
           <TextSection profile={profile} onChange={(u) => setProfile((p) => ({ ...p, ...u }))} />
         );
       case "elements":
-        return <ElementsSection />;
+        return (
+          <ElementsSection
+            profile={profile}
+            onChange={(u) => setProfile((p) => ({ ...p, ...u }))}
+          />
+        );
       case "qr":
         return (
           <ShareSection
@@ -413,7 +419,14 @@ function EditorPage() {
           })}
         </div>
 
-        <div className="mt-auto px-3 w-full">
+        <div className="mt-auto px-3 w-full space-y-2">
+          <Link
+            to="/profile"
+            className="flex flex-col items-center justify-center p-3 w-full rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200"
+          >
+            <UserRound className="w-5 h-5 mb-1" />
+            <span className="text-[10px] font-medium">Mi Perfil</span>
+          </Link>
           <button
             onClick={() => supabase.auth.signOut()}
             className="flex flex-col items-center justify-center p-3 w-full rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200"

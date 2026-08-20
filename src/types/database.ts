@@ -38,10 +38,28 @@ export interface Profile {
   qr_background_color?: string | null;
   qr_logo_url?: string | null;
   qr_logo_enabled?: boolean;
+  qr_gradient?: {
+    type: "linear" | "radial";
+    colorStops: Array<{ offset: number; color: string }>;
+    rotation?: number;
+  } | null;
+  qr_dots_type?: string | null;
+  qr_corners_square_type?: string | null;
+  qr_corners_dot_type?: string | null;
+  qr_effect?: string | null;
+  qr_demo_logo_id?: string | null;
   footer_enabled?: boolean;
   footer_text?: string | null;
   scan_count: number;
   published: boolean;
+  theme_layout?: string;
+  theme_surface?: string;
+  theme_spacing?: string;
+  decor_shape?: string | null;
+  decor_particles?: string | null;
+  decor_smoke?: string | null;
+  decor_shadow?: string | null;
+  decor_intensity?: string | null;
   created_at: string;
   updated_at: string;
 }

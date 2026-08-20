@@ -15,13 +15,7 @@ import {
   AlertDialogTrigger,
 } from "../ui/alert-dialog";
 import type { ProfileLink } from "../../types/database";
-import {
-  ArrowUp,
-  ArrowDown,
-  Trash2,
-  Plus,
-  GripVertical, Link as LinkIcon,
-} from "lucide-react";
+import { ArrowUp, ArrowDown, Trash2, Plus, GripVertical, Link as LinkIcon } from "lucide-react";
 
 import { PlatformPicker } from "../profile/PlatformPicker";
 import { getPlatformDef } from "../../constants/platforms";
@@ -93,7 +87,7 @@ export function LinksSection({ links, onChange }: LinksSectionProps) {
 
       <Accordion type="single" collapsible className="w-full space-y-3">
         {links.map((link, index) => {
-          const platformInfo = getPlatformDef(link.platform as string || "website");
+          const platformInfo = getPlatformDef((link.platform as string) || "website");
           const IconComponent = platformInfo.icon;
 
           return (
@@ -108,9 +102,7 @@ export function LinksSection({ links, onChange }: LinksSectionProps) {
                 </div>
                 <AccordionTrigger className="flex-1 py-4 hover:no-underline">
                   <div className="flex min-w-0 items-center gap-3 w-full">
-                    <div
-                      className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 bg-primary/10 text-primary"
-                    >
+                    <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 bg-primary/10 text-primary">
                       <IconComponent size={20} />
                     </div>
                     <div className="flex min-w-0 flex-1 flex-col items-start text-left">
@@ -199,11 +191,12 @@ export function LinksSection({ links, onChange }: LinksSectionProps) {
                         onChange={(val) => {
                           const newDef = getPlatformDef(val);
                           const currentLabel = link.label?.trim() || "";
-                          const isAutoLabel = currentLabel === "" || 
-                            currentLabel === "Mi Enlace" || 
-                            currentLabel === "Otro" || 
-                            currentLabel === "Sitio Web" || 
-                            currentLabel === "X (Twitter)" || 
+                          const isAutoLabel =
+                            currentLabel === "" ||
+                            currentLabel === "Mi Enlace" ||
+                            currentLabel === "Otro" ||
+                            currentLabel === "Sitio Web" ||
+                            currentLabel === "X (Twitter)" ||
                             getPlatformDef(link.platform as string)?.label === currentLabel;
 
                           if (isAutoLabel) {

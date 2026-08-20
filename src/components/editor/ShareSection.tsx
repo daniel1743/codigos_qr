@@ -1,5 +1,7 @@
 import { Button } from "../ui/button";
 import { QRCodeCanvas, QRCodeSVG } from "qrcode.react";
+import { QRCodeAdvanced, useQRAdvancedDownload } from "../qr/QRCodeAdvanced";
+import { requiresAdvancedRenderer } from "../../lib/qr-advanced-utils";
 import { downloadQR, downloadSVG } from "../../lib/downloadQR";
 import { getPublicProfileUrl, getAliasProfileUrl } from "../../lib/url";
 import {
@@ -15,6 +17,8 @@ import {
   Clock,
   Eye,
   Layers,
+  Sparkles,
+  Crown,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -31,6 +35,7 @@ import { Alert, AlertDescription } from "../ui/alert";
 import { getBrowserSupabaseClient } from "../../lib/supabase/client";
 import { QRTemplateGallery } from "./QRTemplateGallery";
 import { canUsePremiumTemplates } from "../../lib/entitlements";
+import imageCompression from "browser-image-compression";
 
 interface ShareSectionProps {
   publicId: string;
@@ -58,6 +63,7 @@ export function ShareSection({
   const [exportSize, setExportSize] = useState<number>(1024);
   const [exportFormat, setExportFormat] = useState<"png" | "svg">("png");
   const [isPreparingDownload, setIsPreparingDownload] = useState(false);
+  const { download: downloadAdvancedQR } = useQRAdvancedDownload();
 
   // Logo state
   const [uploadingLogo, setUploadingLogo] = useState(false);
@@ -115,11 +121,6 @@ export function ShareSection({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error("El archivo es muy grande", { description: "Máximo 2MB" });
-      return;
-    }
-
     const allowed = ["image/jpeg", "image/png", "image/webp", "image/svg+xml"];
     if (!allowed.includes(file.type)) {
       toast.error("Formato no válido", { description: "Usa PNG, JPG, WEBP o SVG" });
@@ -129,13 +130,42 @@ export function ShareSection({
     setUploadingLogo(true);
     try {
       const supabase = getBrowserSupabaseClient();
+      let fileToUpload = file;
+
+      // Comprimir imagen automáticamente (excepto SVG)
+      if (file.type !== "image/svg+xml") {
+        toast.info("Optimizando imagen...");
+
+        const options = {
+          maxSizeMB: 0.5, // Max 500KB
+          maxWidthOrHeight: 800, // Max 800px (ideal para QR logo)
+          useWebWorker: true,
+          fileType: file.type,
+        };
+
+        try {
+          const compressedFile = await imageCompression(file, options);
+          fileToUpload = compressedFile;
+
+          const savedKB = ((file.size - compressedFile.size) / 1024).toFixed(0);
+          toast.success(`Imagen optimizada (${savedKB}KB reducidos)`);
+        } catch (compressionError) {
+          console.warn("Compression failed, using original:", compressionError);
+          // Si falla la compresión, usar original
+          if (file.size > 2 * 1024 * 1024) {
+            toast.error("El archivo es muy grande", { description: "Máximo 2MB" });
+            return;
+          }
+        }
+      }
+
       const fileExt = file.name.split(".").pop();
       const fileName = `qr-logo-${Date.now()}.${fileExt}`;
       const filePath = `${profile.user_id}/logos/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from("avatars")
-        .upload(filePath, file, { upsert: true });
+        .upload(filePath, fileToUpload, { upsert: true });
 
       if (uploadError) throw uploadError;
 
@@ -176,6 +206,39 @@ export function ShareSection({
           console.error("Error saving QR version:", e);
         }
       }
+    }
+
+        const isAdvanced = requiresAdvancedRenderer(
+      profile.qr_gradient || fgColor,
+      profile.qr_dots_type || "square",
+      profile.qr_effect || "none"
+    );
+
+    if (isAdvanced) {
+      setIsPreparingDownload(true);
+      const advOptions = {
+        data: publicUrl,
+        width: exportSize,
+        height: exportSize,
+        margin: 4,
+        dotsColor: profile.qr_gradient || fgColor,
+        backgroundColor: bgColor,
+        dotsType: (profile.qr_dots_type as any) || "square",
+        effect: (profile.qr_effect as any) || "none",
+        ...(logoEnabled && logoUrl ? { image: logoUrl } : {}),
+        ...(logoEnabled && logoUrl ? {
+          imageOptions: {
+            hideBackgroundDots: true,
+            imageSize: 0.18,
+            margin: 8,
+            crossOrigin: "anonymous"
+          }
+        } : {}),
+        qrOptions: { errorCorrectionLevel: "H" as const }
+      };
+      await downloadAdvancedQR(advOptions, `qr-${publicId}-${exportSize}px.${exportFormat}`, exportFormat);
+      setIsPreparingDownload(false);
+      return;
     }
 
     if (exportFormat === "svg") {
@@ -294,8 +357,37 @@ export function ShareSection({
                 diseño.
               </p>
 
-              <div className="flex aspect-square w-full max-w-[240px] items-center justify-center rounded-2xl border bg-white p-4 shadow-sm">
-                {exportFormat === "svg" ? (
+              <div className="flex aspect-square w-full max-w-[240px] items-center justify-center rounded-2xl border bg-white p-4 shadow-sm overflow-hidden relative">
+                {requiresAdvancedRenderer(
+                  profile.qr_gradient || fgColor,
+                  profile.qr_dots_type || "square",
+                  profile.qr_effect || "none"
+                ) ? (
+                  <QRCodeAdvanced
+                    key={`adv-${publicUrl}-${qrVersion}-${JSON.stringify(profile.qr_gradient)}-${fgColor}-${bgColor}-${logoEnabled}-${profile.qr_effect}`}
+                    options={{
+                      data: publicUrl,
+                      width: 240,
+                      height: 240,
+                      margin: 4,
+                      dotsColor: profile.qr_gradient || fgColor,
+                      backgroundColor: bgColor,
+                      dotsType: (profile.qr_dots_type as any) || "square",
+                      effect: (profile.qr_effect as any) || "none",
+                      ...(logoEnabled && logoUrl ? { image: logoUrl } : {}),
+                      ...(logoEnabled && logoUrl ? {
+                        imageOptions: {
+                          hideBackgroundDots: true,
+                          imageSize: 0.18,
+                          margin: 8,
+                          crossOrigin: "anonymous"
+                        }
+                      } : {}),
+                      qrOptions: { errorCorrectionLevel: "H" }
+                    }}
+                    className="w-full h-full flex items-center justify-center"
+                  />
+                ) : exportFormat === "svg" ? (
                   <QRCodeSVG
                     key={`svg-${publicUrl}-${qrVersion}-${fgColor}-${bgColor}-${logoEnabled}`}
                     id="qr-preview-svg"
@@ -369,7 +461,7 @@ export function ShareSection({
                     <ColorControl
                       compact
                       value={fgColor}
-                      onChange={(val) => onChange({ qr_foreground_color: val })}
+                      onChange={(val) => onChange({ qr_foreground_color: val, qr_gradient: null })}
                     />
                   </div>
                   <div className="space-y-2">
@@ -400,6 +492,124 @@ export function ShareSection({
                     </AlertDescription>
                   </Alert>
                 )}
+              </div>
+
+              {/* EFECTOS AVANZADOS PREMIUM */}
+              <div className="space-y-4 rounded-2xl border bg-gradient-to-br from-amber-500/10 to-yellow-500/5 p-4 shadow-sm border-amber-200/50">
+                <h4 className="font-semibold flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-amber-500" />
+                  Efectos Premium
+                  <Crown className="w-3 h-3 text-amber-500 fill-amber-500" />
+                </h4>
+                <p className="text-xs text-muted-foreground">
+                  Selecciona degradados dinámicos o efecto neón.
+                </p>
+                
+                <div className="grid grid-cols-2 min-[400px]:grid-cols-3 gap-2">
+                  <Button
+                    variant="outline"
+                    className={`h-16 flex flex-col gap-1 rounded-xl border-2 ${!profile.qr_gradient && !profile.qr_effect ? 'border-amber-400 bg-amber-50' : 'border-transparent'}`}
+                    onClick={() => onChange({ qr_gradient: null, qr_effect: null })}
+                  >
+                    <div className="w-5 h-5 rounded-full bg-black"></div>
+                    <span className="text-[10px]">Clásico</span>
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    className={`h-16 flex flex-col gap-1 rounded-xl border-2 ${profile.qr_effect === 'neon' && profile.qr_foreground_color === '#ec4899' ? 'border-amber-400 bg-amber-50' : 'border-transparent'}`}
+                    onClick={() => onChange({ 
+                      qr_gradient: null, 
+                      qr_effect: 'neon', 
+                      qr_foreground_color: '#ec4899', 
+                      qr_background_color: '#000000',
+                      qr_dots_type: 'classy'
+                    })}
+                  >
+                    <div className="w-5 h-5 rounded-full shadow-[0_0_8px_#ec4899] bg-[#ec4899]"></div>
+                    <span className="text-[10px]">Neón Pink</span>
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    className={`h-16 flex flex-col gap-1 rounded-xl border-2 ${profile.qr_effect === 'neon' && profile.qr_foreground_color === '#06b6d4' ? 'border-amber-400 bg-amber-50' : 'border-transparent'}`}
+                    onClick={() => onChange({ 
+                      qr_gradient: null, 
+                      qr_effect: 'neon', 
+                      qr_foreground_color: '#06b6d4', 
+                      qr_background_color: '#000000',
+                      qr_dots_type: 'classy'
+                    })}
+                  >
+                    <div className="w-5 h-5 rounded-full shadow-[0_0_8px_#06b6d4] bg-[#06b6d4]"></div>
+                    <span className="text-[10px]">Neón Cyan</span>
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    className={`h-16 flex flex-col gap-1 rounded-xl border-2 ${profile.qr_gradient?.colorStops?.[0]?.color === '#f59e0b' ? 'border-amber-400 bg-amber-50' : 'border-transparent'}`}
+                    onClick={() => onChange({ 
+                      qr_effect: null,
+                      qr_foreground_color: '#f59e0b',
+                      qr_background_color: '#ffffff',
+                      qr_dots_type: 'rounded',
+                      qr_gradient: {
+                        type: 'linear',
+                        rotation: 45,
+                        colorStops: [
+                          { offset: 0, color: '#f59e0b' },
+                          { offset: 1, color: '#ef4444' }
+                        ]
+                      }
+                    })}
+                  >
+                    <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-amber-500 to-red-500"></div>
+                    <span className="text-[10px]">Sunset</span>
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    className={`h-16 flex flex-col gap-1 rounded-xl border-2 ${profile.qr_gradient?.colorStops?.[0]?.color === '#8b5cf6' ? 'border-amber-400 bg-amber-50' : 'border-transparent'}`}
+                    onClick={() => onChange({ 
+                      qr_effect: null,
+                      qr_foreground_color: '#8b5cf6',
+                      qr_background_color: '#ffffff',
+                      qr_dots_type: 'rounded',
+                      qr_gradient: {
+                        type: 'linear',
+                        rotation: 135,
+                        colorStops: [
+                          { offset: 0, color: '#8b5cf6' },
+                          { offset: 1, color: '#3b82f6' }
+                        ]
+                      }
+                    })}
+                  >
+                    <div className="w-5 h-5 rounded-full bg-gradient-to-br from-violet-500 to-blue-500"></div>
+                    <span className="text-[10px]">Galaxy</span>
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    className={`h-16 flex flex-col gap-1 rounded-xl border-2 ${profile.qr_gradient?.type === 'radial' ? 'border-amber-400 bg-amber-50' : 'border-transparent'}`}
+                    onClick={() => onChange({ 
+                      qr_effect: null,
+                      qr_foreground_color: '#10b981',
+                      qr_background_color: '#ffffff',
+                      qr_dots_type: 'dots',
+                      qr_gradient: {
+                        type: 'radial',
+                        colorStops: [
+                          { offset: 0, color: '#10b981' },
+                          { offset: 1, color: '#047857' }
+                        ]
+                      }
+                    })}
+                  >
+                    <div className="w-5 h-5 rounded-full bg-[radial-gradient(circle_at_center,_#10b981_0%,_#047857_100%)]"></div>
+                    <span className="text-[10px]">Emerald</span>
+                  </Button>
+                </div>
               </div>
 
               {/* LOGO */}

@@ -564,6 +564,39 @@ export function DesignSection({ profile, onChange, userId }: DesignSectionProps)
         </div>
 
         <div className="space-y-3 pt-4 mt-4 border-t border-border/40">
+          <Label className="text-xs text-muted-foreground">Separación entre botones</Label>
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              { id: "compact", label: "Juntos", preview: "gap-0.5" },
+              { id: "standard", label: "Normal", preview: "gap-1.5" },
+              { id: "generous", label: "Separados", preview: "gap-3" },
+            ].map((option) => {
+              const isActive = (profile.theme_spacing || "standard") === option.id;
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  aria-pressed={isActive}
+                  onClick={() => onChange({ theme_spacing: option.id })}
+                  className={`flex min-h-[76px] flex-col items-center justify-center rounded-xl border p-2 text-xs font-medium transition-all ${
+                    isActive
+                      ? "border-primary bg-primary/5 text-primary ring-1 ring-primary"
+                      : "border-border bg-card text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                  }`}
+                >
+                  <div className={`mb-2 flex w-full max-w-[64px] flex-col ${option.preview}`}>
+                    <span className="h-2 rounded-full bg-current opacity-80" />
+                    <span className="h-2 rounded-full bg-current opacity-55" />
+                    <span className="h-2 rounded-full bg-current opacity-35" />
+                  </div>
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="space-y-3 pt-4 mt-4 border-t border-border/40">
           <Label className="text-xs text-muted-foreground">Estilo de enlaces</Label>
           <div className="grid grid-cols-2 gap-3 min-[430px]:grid-cols-3">
             {[

@@ -17,11 +17,14 @@ import {
   Image as ImageIcon2,
   CircleDashed,
 } from "lucide-react";
+import { PlatformPicker } from "./PlatformPicker";
+import { getPlatformDef } from "../../constants/platforms";
 
 interface ContextualToolbarProps {
   type: "title" | "bio" | "avatar" | "cover" | "background" | "link";
   linkId?: string | undefined;
   profile: Profile;
+  currentLink?: Partial<ProfileLink>;
   onProfileChange?: (updates: Partial<Profile>) => void;
   onLinkChange?: (linkId: string, updates: Partial<ProfileLink>) => void;
   onOpenSidebar?: (tabId: string) => void;
@@ -32,6 +35,7 @@ export function ContextualToolbar({
   type,
   linkId,
   profile,
+  currentLink,
   onProfileChange,
   onLinkChange,
   onOpenSidebar,
@@ -245,6 +249,35 @@ export function ContextualToolbar({
 
   const renderLinkToolbar = () => (
     <>
+      {currentLink && (
+        <>
+          <div className="w-[180px] pr-1">
+            <PlatformPicker
+              value={currentLink.platform as string}
+              className="h-8 shadow-none"
+              onChange={(val) => {
+                if (!linkId || !onLinkChange) return;
+                const newDef = getPlatformDef(val);
+                const currentLabel = currentLink.label?.trim() || "";
+                const isAutoLabel =
+                  currentLabel === "" ||
+                  currentLabel === "Mi Enlace" ||
+                  currentLabel === "Otro" ||
+                  currentLabel === "Sitio Web" ||
+                  currentLabel === "X (Twitter)" ||
+                  getPlatformDef(currentLink.platform as string)?.label === currentLabel;
+
+                if (isAutoLabel) {
+                  onLinkChange(linkId, { platform: val, label: newDef.label });
+                } else {
+                  onLinkChange(linkId, { platform: val });
+                }
+              }}
+            />
+          </div>
+          <div className="w-px h-5 bg-border mx-1" />
+        </>
+      )}
       <ColorPicker
         value={profile.button_color || "#000000"}
         onChange={(v) => onProfileChange?.({ button_color: v })}
@@ -301,19 +334,13 @@ export function ContextualToolbar({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <div
-          className={`relative group cursor-pointer transition-all outline-none ${type === "background" ? "w-full h-full min-h-[100dvh]" : "rounded-lg inline-block w-full"}`}
+          className={`group contents cursor-pointer outline-none ${type === "background" ? "block h-full min-h-[100dvh] w-full" : ""}`}
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
             setOpen(true);
           }}
         >
-          {/* Subtle outline on hover to show it's editable */}
-          {type !== "background" && (
-            <div
-              className={`absolute inset-0 -m-1 rounded-xl ring-2 ring-primary/0 group-hover:ring-primary/20 transition-all pointer-events-none z-10 ${open ? "ring-primary/40" : ""}`}
-            />
-          )}
           {children}
         </div>
       </PopoverTrigger>

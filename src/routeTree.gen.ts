@@ -11,7 +11,9 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AliasRouteImport } from './routes/$alias'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as EditorRouteImport } from './routes/editor'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PPublicIdRouteImport } from './routes/p.$publicId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -24,9 +26,19 @@ const AliasRoute = AliasRouteImport.update({
   path: '/$alias',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EditorRoute = EditorRouteImport.update({
   id: '/editor',
   path: '/editor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PPublicIdRoute = PPublicIdRouteImport.update({
@@ -38,34 +50,50 @@ const PPublicIdRoute = PPublicIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$alias': typeof AliasRoute
+  '/admin': typeof AdminRoute
   '/editor': typeof EditorRoute
+  '/profile': typeof ProfileRoute
   '/p/$publicId': typeof PPublicIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$alias': typeof AliasRoute
+  '/admin': typeof AdminRoute
   '/editor': typeof EditorRoute
+  '/profile': typeof ProfileRoute
   '/p/$publicId': typeof PPublicIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$alias': typeof AliasRoute
+  '/admin': typeof AdminRoute
   '/editor': typeof EditorRoute
+  '/profile': typeof ProfileRoute
   '/p/$publicId': typeof PPublicIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/$alias' | '/editor' | '/p/$publicId'
+  fullPaths:
+    '/' | '/$alias' | '/admin' | '/editor' | '/profile' | '/p/$publicId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/$alias' | '/editor' | '/p/$publicId'
-  id: '__root__' | '/' | '/$alias' | '/editor' | '/p/$publicId'
+  to: '/' | '/$alias' | '/admin' | '/editor' | '/profile' | '/p/$publicId'
+  id:
+    | '__root__'
+    | '/'
+    | '/$alias'
+    | '/admin'
+    | '/editor'
+    | '/profile'
+    | '/p/$publicId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AliasRoute: typeof AliasRoute
+  AdminRoute: typeof AdminRoute
   EditorRoute: typeof EditorRoute
+  ProfileRoute: typeof ProfileRoute
   PPublicIdRoute: typeof PPublicIdRoute
 }
 
@@ -85,11 +113,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AliasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/editor': {
       id: '/editor'
       path: '/editor'
       fullPath: '/editor'
       preLoaderRoute: typeof EditorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/p/$publicId': {
@@ -105,7 +147,9 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AliasRoute: AliasRoute,
+  AdminRoute: AdminRoute,
   EditorRoute: EditorRoute,
+  ProfileRoute: ProfileRoute,
   PPublicIdRoute: PPublicIdRoute,
 }
 export const routeTree = rootRouteImport
