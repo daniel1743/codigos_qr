@@ -49,9 +49,7 @@ export function AdvancedEffectsSelector({
   onChange,
 }: AdvancedEffectsSelectorProps) {
   const [selectedEffect, setSelectedEffect] = useState(profile.qr_effect || "none");
-  const [selectedDotsStyle, setSelectedDotsStyle] = useState(
-    profile.qr_dots_type || "square"
-  );
+  const [selectedDotsStyle, setSelectedDotsStyle] = useState(profile.qr_dots_type || "square");
 
   const handleApplyEffects = () => {
     onChange({

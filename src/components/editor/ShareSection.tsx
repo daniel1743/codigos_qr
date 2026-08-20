@@ -19,10 +19,17 @@ import {
   Layers,
   Sparkles,
   Crown,
+  Stamp,
+  Smartphone,
+  Tag,
+  Wine,
+  Square,
+  Circle,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Profile, QRVisualVersion } from "../../types/database";
+import { CornerDotType, CornerSquareType, DotsType, QREffectType } from "../../types/qr-advanced";
 import { profileService } from "../../services/profile.service";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
@@ -36,6 +43,52 @@ import { getBrowserSupabaseClient } from "../../lib/supabase/client";
 import { QRTemplateGallery } from "./QRTemplateGallery";
 import { hasPremiumAccessByEmail } from "../../lib/entitlements";
 import imageCompression from "browser-image-compression";
+import { loadImageDeterministic } from "../../lib/qr-export/loadImage";
+
+const QR_FRAME_OPTIONS = [
+  { id: "plain", label: "Simple", icon: Square, className: "rounded-2xl border bg-white p-4" },
+  {
+    id: "stamp",
+    label: "Sello",
+    icon: Stamp,
+    className: "rounded-full border-[6px] border-double bg-white p-5 shadow-sm",
+  },
+  {
+    id: "badge",
+    label: "Etiqueta",
+    icon: Tag,
+    className: "rounded-[1.25rem] border-4 border-b-[26px] bg-white p-4 shadow-sm",
+  },
+  {
+    id: "phone",
+    label: "Celular",
+    icon: Smartphone,
+    className: "rounded-[2rem] border-[10px] border-slate-900 bg-white p-4 shadow-md",
+  },
+  {
+    id: "bottle",
+    label: "Bebida",
+    icon: Wine,
+    className: "rounded-t-[4rem] rounded-b-2xl border bg-white p-5 shadow-sm",
+  },
+] as const;
+
+const DOT_STYLE_OPTIONS = [
+  { value: "square", label: "Clásico" },
+  { value: "rounded", label: "Suave" },
+  { value: "dots", label: "Puntos" },
+  { value: "classy-rounded", label: "Sello" },
+] as const;
+
+const CORNER_STYLE_OPTIONS = [
+  { value: "square", label: "Cuadrada" },
+  { value: "extra-rounded", label: "Redonda" },
+  { value: "dot", label: "Circular" },
+] as const;
+
+function getQrColorStatus(color: string, background: string) {
+  return analyzeQrContrast(color, background);
+}
 
 interface ShareSectionProps {
   publicId: string;
@@ -74,6 +127,16 @@ export function ShareSection({
 
   const fgColor = profile.qr_foreground_color || "#000000";
   const bgColor = profile.qr_background_color || "#FFFFFF";
+  const cornerTopLeftColor =
+    profile.qr_corner_top_left_color || profile.qr_corners_square_color || fgColor;
+  const cornerTopRightColor =
+    profile.qr_corner_top_right_color || profile.qr_corners_square_color || fgColor;
+  const cornerBottomLeftColor =
+    profile.qr_corner_bottom_left_color || profile.qr_corners_square_color || fgColor;
+  const cornerDotColor = profile.qr_corners_dot_color || fgColor;
+  const qrFrameStyle = profile.qr_frame_style || "plain";
+  const selectedFrame =
+    QR_FRAME_OPTIONS.find((option) => option.id === qrFrameStyle) || QR_FRAME_OPTIONS[0];
   const logoUrl = profile.qr_logo_url;
   const logoEnabled = profile.qr_logo_enabled ?? false;
 
@@ -81,6 +144,29 @@ export function ShareSection({
   const [loadingHistory, setLoadingHistory] = useState(false);
 
   const { contrast, isInverted, status: contrastStatus } = analyzeQrContrast(fgColor, bgColor);
+  const cornerContrastChecks = [
+    getQrColorStatus(cornerTopLeftColor, bgColor),
+    getQrColorStatus(cornerTopRightColor, bgColor),
+    getQrColorStatus(cornerBottomLeftColor, bgColor),
+    getQrColorStatus(cornerDotColor, bgColor),
+  ];
+  const hasCornerContrastIssue = cornerContrastChecks.some(
+    (check) => check.status !== "good" || check.isInverted,
+  );
+
+  const usesAdvancedQR =
+    requiresAdvancedRenderer(
+      profile.qr_gradient || fgColor,
+      profile.qr_dots_type || "square",
+      profile.qr_effect || "none",
+    ) ||
+    !!profile.qr_corners_square_type ||
+    !!profile.qr_corners_dot_type ||
+    !!profile.qr_corners_square_color ||
+    !!profile.qr_corners_dot_color ||
+    !!profile.qr_corner_top_left_color ||
+    !!profile.qr_corner_top_right_color ||
+    !!profile.qr_corner_bottom_left_color;
 
   const rebuildPublicUrl = () => {
     setPublicUrl(publicId ? getPublicProfileUrl(publicId) : "");
@@ -155,7 +241,16 @@ export function ShareSection({
   };
 
   const handleFixContrast = () => {
-    onChange({ qr_foreground_color: "#000000", qr_background_color: "#FFFFFF" });
+    onChange({
+      qr_gradient: null,
+      qr_foreground_color: "#000000",
+      qr_background_color: "#FFFFFF",
+      qr_corners_square_color: "#000000",
+      qr_corners_dot_color: "#000000",
+      qr_corner_top_left_color: "#000000",
+      qr_corner_top_right_color: "#000000",
+      qr_corner_bottom_left_color: "#000000",
+    });
   };
 
   const handleUploadLogo = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -250,62 +345,101 @@ export function ShareSection({
       }
     }
 
-    const isAdvanced = requiresAdvancedRenderer(
-      profile.qr_gradient || fgColor,
-      profile.qr_dots_type || "square",
-      profile.qr_effect || "none"
-    );
+    const isAdvanced = usesAdvancedQR;
 
     if (isAdvanced) {
-      setIsPreparingDownload(true);
-      const advOptions = {
-        data: publicUrl,
-        width: exportSize,
-        height: exportSize,
-        margin: 4,
-        dotsColor: profile.qr_gradient || fgColor,
-        backgroundColor: bgColor,
-        dotsType: (profile.qr_dots_type as any) || "square",
-        effect: (profile.qr_effect as any) || "none",
-        ...(logoEnabled && logoUrl ? { image: logoUrl } : {}),
-        ...(logoEnabled && logoUrl ? {
-          imageOptions: {
-            hideBackgroundDots: true,
-            imageSize: 0.28,
-            margin: 4,
-            crossOrigin: "anonymous"
-          }
-        } : {}),
-        qrOptions: { errorCorrectionLevel: "H" as const }
-      };
-      await downloadAdvancedQR(advOptions, `qr-${publicId}-${exportSize}px.${exportFormat}`, exportFormat);
-      setIsPreparingDownload(false);
+      try {
+        setIsPreparingDownload(true);
+        const advOptions = {
+          data: publicUrl,
+          width: exportSize,
+          height: exportSize,
+          margin: 4,
+          dotsColor: profile.qr_gradient || fgColor,
+          backgroundColor: bgColor,
+          dotsType: (profile.qr_dots_type || "square") as DotsType,
+          cornersSquareType: (profile.qr_corners_square_type ||
+            "extra-rounded") as CornerSquareType,
+          cornersDotType: (profile.qr_corners_dot_type || "dot") as CornerDotType,
+          cornersSquareColor: cornerTopLeftColor,
+          cornersDotColor: cornerDotColor,
+          cornerSquareColors: {
+            topLeft: cornerTopLeftColor,
+            topRight: cornerTopRightColor,
+            bottomLeft: cornerBottomLeftColor,
+          },
+          effect: (profile.qr_effect || "none") as QREffectType,
+          ...(logoEnabled && logoUrl ? { image: logoUrl } : {}),
+          ...(logoEnabled && logoUrl
+            ? {
+                imageOptions: {
+                  hideBackgroundDots: true,
+                  imageSize: 0.18, // 18% safe limit
+                  margin: 4,
+                  crossOrigin: "anonymous",
+                },
+              }
+            : {}),
+          qrOptions: { errorCorrectionLevel: "H" as const },
+        };
+        await downloadAdvancedQR(
+          advOptions,
+          `qr-${publicId}-${exportSize}px.${exportFormat}`,
+          exportFormat,
+        );
+        toast.success("QR avanzado descargado correctamente");
+      } catch (error) {
+        console.error("Advanced QR export failed:", error);
+        toast.error("Error al exportar QR avanzado", {
+          description: error instanceof Error ? error.message : "Error desconocido",
+        });
+      } finally {
+        setIsPreparingDownload(false);
+      }
       return;
     }
 
     if (exportFormat === "svg") {
-      await downloadSVG(publicId, "qr-preview-svg", `qr-${publicId}.svg`);
-    } else {
-      if (logoEnabled && logoUrl) {
-        const img = new Image();
-        img.crossOrigin = "anonymous";
-        img.onload = () => {
-          setIsPreparingDownload(true);
-          setTimeout(() => {
-            downloadQR(publicId, "qr-export-canvas", `qr-${publicId}-${exportSize}px.png`);
-            setIsPreparingDownload(false);
-          }, 100);
-        };
-        img.onerror = () => {
-          toast.error("Error al cargar el logo para la exportación. Intenta sin logo.");
-        };
-        img.src = logoUrl;
-      } else {
+      try {
         setIsPreparingDownload(true);
-        setTimeout(() => {
-          downloadQR(publicId, "qr-export-canvas", `qr-${publicId}-${exportSize}px.png`);
-          setIsPreparingDownload(false);
-        }, 100);
+        await downloadSVG(publicId, "qr-preview-svg", `qr-${publicId}.svg`);
+        toast.success("SVG descargado correctamente");
+      } catch (error) {
+        console.error("SVG export failed:", error);
+        toast.error("Error al exportar SVG", {
+          description: error instanceof Error ? error.message : "Error desconocido",
+        });
+      } finally {
+        setIsPreparingDownload(false);
+      }
+    } else {
+      // PNG export with deterministic image loading
+      try {
+        setIsPreparingDownload(true);
+
+        // Load logo if enabled
+        if (logoEnabled && logoUrl) {
+          try {
+            await loadImageDeterministic(logoUrl, { crossOrigin: "anonymous", timeout: 10000 });
+          } catch (logoError) {
+            console.error("Logo load failed:", logoError);
+            toast.error("Error al cargar el logo para la exportación", {
+              description: "Intenta sin logo o sube una imagen diferente.",
+            });
+            return;
+          }
+        }
+
+        // Download QR (canvas should be ready now)
+        downloadQR(publicId, "qr-export-canvas", `qr-${publicId}-${exportSize}px.png`);
+        toast.success("QR descargado correctamente");
+      } catch (error) {
+        console.error("Export failed:", error);
+        toast.error("Error al exportar el QR", {
+          description: error instanceof Error ? error.message : "Error desconocido",
+        });
+      } finally {
+        setIsPreparingDownload(false);
       }
     }
   };
@@ -314,8 +448,8 @@ export function ShareSection({
     logoEnabled && logoUrl
       ? {
           src: logoUrl,
-          height: 43,
-          width: 43,
+          height: exportSize * 0.18, // 18% of QR size for consistency with advanced renderer
+          width: exportSize * 0.18,
           excavate: true,
         }
       : undefined;
@@ -360,7 +494,11 @@ export function ShareSection({
           {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
           Guardar borrador
         </Button>
-        <Button className="h-11 w-full rounded-xl" disabled={saving || !isValid} onClick={() => onSave(true)}>
+        <Button
+          className="h-11 w-full rounded-xl"
+          disabled={saving || !isValid}
+          onClick={() => onSave(true)}
+        >
           {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
           {published ? "Actualizar y Publicar" : "Publicar ahora"}
         </Button>
@@ -399,12 +537,10 @@ export function ShareSection({
                 diseño.
               </p>
 
-              <div className="flex aspect-square w-full max-w-[240px] items-center justify-center rounded-2xl border bg-white p-4 shadow-sm overflow-hidden relative">
-                {requiresAdvancedRenderer(
-                  profile.qr_gradient || fgColor,
-                  profile.qr_dots_type || "square",
-                  profile.qr_effect || "none"
-                ) ? (
+              <div
+                className={`flex aspect-square w-full max-w-[260px] items-center justify-center overflow-hidden relative ${selectedFrame.className}`}
+              >
+                {usesAdvancedQR ? (
                   <QRCodeAdvanced
                     key={`adv-${publicUrl}-${qrVersion}-${JSON.stringify(profile.qr_gradient)}-${fgColor}-${bgColor}-${logoEnabled}-${profile.qr_effect}`}
                     options={{
@@ -414,18 +550,30 @@ export function ShareSection({
                       margin: 4,
                       dotsColor: profile.qr_gradient || fgColor,
                       backgroundColor: bgColor,
-                      dotsType: (profile.qr_dots_type as any) || "square",
-                      effect: (profile.qr_effect as any) || "none",
+                      dotsType: (profile.qr_dots_type || "square") as DotsType,
+                      cornersSquareType: (profile.qr_corners_square_type ||
+                        "extra-rounded") as CornerSquareType,
+                      cornersDotType: (profile.qr_corners_dot_type || "dot") as CornerDotType,
+                      cornersSquareColor: cornerTopLeftColor,
+                      cornersDotColor: cornerDotColor,
+                      cornerSquareColors: {
+                        topLeft: cornerTopLeftColor,
+                        topRight: cornerTopRightColor,
+                        bottomLeft: cornerBottomLeftColor,
+                      },
+                      effect: (profile.qr_effect || "none") as QREffectType,
                       ...(logoEnabled && logoUrl ? { image: logoUrl } : {}),
-                      ...(logoEnabled && logoUrl ? {
-                        imageOptions: {
-                          hideBackgroundDots: true,
-                          imageSize: 0.28,
-                          margin: 4,
-                          crossOrigin: "anonymous"
-                        }
-                      } : {}),
-                      qrOptions: { errorCorrectionLevel: "H" }
+                      ...(logoEnabled && logoUrl
+                        ? {
+                            imageOptions: {
+                              hideBackgroundDots: true,
+                              imageSize: 0.28,
+                              margin: 4,
+                              crossOrigin: "anonymous",
+                            },
+                          }
+                        : {}),
+                      qrOptions: { errorCorrectionLevel: "H" },
                     }}
                     className="w-full h-full flex items-center justify-center"
                   />
@@ -459,10 +607,18 @@ export function ShareSection({
               </div>
 
               <div className="grid w-full gap-2">
-                <Button onClick={rebuildPublicUrl} variant="outline" className="h-11 w-full rounded-xl justify-start">
+                <Button
+                  onClick={rebuildPublicUrl}
+                  variant="outline"
+                  className="h-11 w-full rounded-xl justify-start"
+                >
                   <RefreshCw className="w-4 h-4 mr-2" /> Regenerar patrón
                 </Button>
-                <Button onClick={handleCopy} variant="outline" className="h-11 w-full rounded-xl justify-start">
+                <Button
+                  onClick={handleCopy}
+                  variant="outline"
+                  className="h-11 w-full rounded-xl justify-start"
+                >
                   <Copy className="w-4 h-4 mr-2" /> Copiar Enlace
                 </Button>
                 <Button variant="outline" className="h-11 w-full rounded-xl justify-start" asChild>
@@ -495,19 +651,31 @@ export function ShareSection({
 
               {/* COLORS */}
               <div className="space-y-4 rounded-2xl border bg-card p-4 shadow-sm">
-                <h4 className="font-semibold flex items-center gap-2">Colores</h4>
+                <div className="space-y-1">
+                  <h4 className="font-semibold flex items-center gap-2">Personalizar QR</h4>
+                  <p className="text-xs text-muted-foreground">
+                    Usa colores oscuros sobre fondo claro para mantener buen escaneo.
+                  </p>
+                </div>
 
                 <div className="grid grid-cols-1 gap-4 min-[360px]:grid-cols-2">
                   <div className="space-y-2">
-                    <Label className="text-xs text-muted-foreground">Color del QR</Label>
+                    <Label className="text-xs text-muted-foreground">Patrón principal</Label>
                     <ColorControl
                       compact
                       value={fgColor}
-                      onChange={(val) => onChange({ qr_foreground_color: val, qr_gradient: null })}
+                      onChange={(val) =>
+                        onChange({
+                          qr_foreground_color: val,
+                          qr_gradient: null,
+                          qr_corners_square_color: val,
+                          qr_corners_dot_color: val,
+                        })
+                      }
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-xs text-muted-foreground">Fondo</Label>
+                    <Label className="text-xs text-muted-foreground">Fondo seguro</Label>
                     <ColorControl
                       compact
                       value={bgColor}
@@ -516,13 +684,58 @@ export function ShareSection({
                   </div>
                 </div>
 
-                {(contrastStatus !== "good" || isInverted) && (
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    variant="outline"
+                    className="h-11 rounded-xl justify-start"
+                    onClick={() =>
+                      onChange({
+                        qr_gradient: null,
+                        qr_foreground_color: "#0f172a",
+                        qr_background_color: "#ffffff",
+                        qr_corners_square_color: "#0f172a",
+                        qr_corners_dot_color: "#0f172a",
+                        qr_corner_top_left_color: "#0f172a",
+                        qr_corner_top_right_color: "#0f172a",
+                        qr_corner_bottom_left_color: "#0f172a",
+                      })
+                    }
+                  >
+                    <span className="mr-2 h-4 w-4 rounded-full bg-slate-900" />
+                    Seguro
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="h-11 rounded-xl justify-start"
+                    onClick={() =>
+                      onChange({
+                        qr_gradient: null,
+                        qr_foreground_color: "#0b5cad",
+                        qr_background_color: "#ffffff",
+                        qr_corners_square_color: "#0b5cad",
+                        qr_corners_dot_color: "#111827",
+                        qr_corner_top_left_color: "#0b5cad",
+                        qr_corner_top_right_color: "#111827",
+                        qr_corner_bottom_left_color: "#b91c1c",
+                      })
+                    }
+                  >
+                    <span className="mr-2 flex -space-x-1">
+                      <span className="h-4 w-4 rounded-full bg-blue-700" />
+                      <span className="h-4 w-4 rounded-full bg-slate-900" />
+                      <span className="h-4 w-4 rounded-full bg-red-700" />
+                    </span>
+                    3 esquinas
+                  </Button>
+                </div>
+
+                {(contrastStatus !== "good" || isInverted || hasCornerContrastIssue) && (
                   <Alert variant="destructive" className="py-2 px-3">
                     <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
                     <AlertDescription className="text-xs flex flex-col gap-2 ml-2">
                       <span>
-                        {isInverted || contrastStatus === "poor"
-                          ? "Contraste insuficiente. Usa un patrón más oscuro o un fondo más claro."
+                        {isInverted || contrastStatus === "poor" || hasCornerContrastIssue
+                          ? "Hay colores con poco contraste. Usa patrón y esquinas oscuras sobre fondo claro."
                           : "Esta combinación puede reducir la fiabilidad de escaneo."}
                       </span>
                       <button
@@ -536,6 +749,112 @@ export function ShareSection({
                 )}
               </div>
 
+              <div className="space-y-4 rounded-2xl border bg-card p-4 shadow-sm">
+                <h4 className="font-semibold">Forma del QR</h4>
+                <div className="grid grid-cols-2 gap-2">
+                  {DOT_STYLE_OPTIONS.map((option) => (
+                    <Button
+                      key={option.value}
+                      variant="outline"
+                      className={`h-12 rounded-xl justify-start ${profile.qr_dots_type === option.value ? "border-primary bg-primary/5" : ""}`}
+                      onClick={() =>
+                        onChange({
+                          qr_dots_type: option.value,
+                          qr_gradient: null,
+                        })
+                      }
+                    >
+                      <Circle className="mr-2 h-4 w-4" />
+                      {option.label}
+                    </Button>
+                  ))}
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Forma de los 3 cuadros</Label>
+                  <Select
+                    value={profile.qr_corners_square_type || "extra-rounded"}
+                    onValueChange={(value) => onChange({ qr_corners_square_type: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CORNER_STYLE_OPTIONS.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-4 rounded-2xl border bg-card p-4 shadow-sm">
+                <div className="space-y-1">
+                  <h4 className="font-semibold">Colores de esquinas</h4>
+                  <p className="text-xs text-muted-foreground">
+                    Puedes dejar un solo color o diferenciar las tres esquinas principales.
+                  </p>
+                </div>
+                <div className="grid grid-cols-1 gap-4 min-[360px]:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Arriba izquierda</Label>
+                    <ColorControl
+                      compact
+                      value={cornerTopLeftColor}
+                      onChange={(val) =>
+                        onChange({ qr_corner_top_left_color: val, qr_corners_square_color: val })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Arriba derecha</Label>
+                    <ColorControl
+                      compact
+                      value={cornerTopRightColor}
+                      onChange={(val) => onChange({ qr_corner_top_right_color: val })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Abajo izquierda</Label>
+                    <ColorControl
+                      compact
+                      value={cornerBottomLeftColor}
+                      onChange={(val) => onChange({ qr_corner_bottom_left_color: val })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Centro de cuadros</Label>
+                    <ColorControl
+                      compact
+                      value={cornerDotColor}
+                      onChange={(val) => onChange({ qr_corners_dot_color: val })}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4 rounded-2xl border bg-card p-4 shadow-sm">
+                <h4 className="font-semibold">Marco visual</h4>
+                <div className="grid grid-cols-2 gap-2 min-[420px]:grid-cols-3">
+                  {QR_FRAME_OPTIONS.map((option) => {
+                    const Icon = option.icon;
+                    return (
+                      <Button
+                        key={option.id}
+                        variant="outline"
+                        className={`h-16 flex-col rounded-xl gap-1 ${qrFrameStyle === option.id ? "border-primary bg-primary/5" : ""}`}
+                        onClick={() => onChange({ qr_frame_style: option.id })}
+                      >
+                        <Icon className="h-5 w-5" />
+                        <span className="text-[10px]">{option.label}</span>
+                      </Button>
+                    );
+                  })}
+                </div>
+              </div>
+
               {/* EFECTOS AVANZADOS PREMIUM */}
               <div className="space-y-4 rounded-2xl border bg-gradient-to-br from-amber-500/10 to-yellow-500/5 p-4 shadow-sm border-amber-200/50">
                 <h4 className="font-semibold flex items-center gap-2">
@@ -546,27 +865,29 @@ export function ShareSection({
                 <p className="text-xs text-muted-foreground">
                   Selecciona degradados dinámicos o efecto neón.
                 </p>
-                
+
                 <div className="grid grid-cols-2 min-[400px]:grid-cols-3 gap-2">
                   <Button
                     variant="outline"
-                    className={`h-16 flex flex-col gap-1 rounded-xl border-2 ${!profile.qr_gradient && !profile.qr_effect ? 'border-amber-400 bg-amber-50' : 'border-transparent'}`}
+                    className={`h-16 flex flex-col gap-1 rounded-xl border-2 ${!profile.qr_gradient && !profile.qr_effect ? "border-amber-400 bg-amber-50" : "border-transparent"}`}
                     onClick={() => onChange({ qr_gradient: null, qr_effect: null })}
                   >
                     <div className="w-5 h-5 rounded-full bg-black"></div>
                     <span className="text-[10px]">Clásico</span>
                   </Button>
-                  
+
                   <Button
                     variant="outline"
-                    className={`h-16 flex flex-col gap-1 rounded-xl border-2 ${profile.qr_effect === 'neon' && profile.qr_foreground_color === '#ec4899' ? 'border-amber-400 bg-amber-50' : 'border-transparent'}`}
-                    onClick={() => onChange({ 
-                      qr_gradient: null, 
-                      qr_effect: 'neon', 
-                      qr_foreground_color: '#ec4899', 
-                      qr_background_color: '#000000',
-                      qr_dots_type: 'classy'
-                    })}
+                    className={`h-16 flex flex-col gap-1 rounded-xl border-2 ${profile.qr_effect === "neon" && profile.qr_foreground_color === "#ec4899" ? "border-amber-400 bg-amber-50" : "border-transparent"}`}
+                    onClick={() =>
+                      onChange({
+                        qr_gradient: null,
+                        qr_effect: "neon",
+                        qr_foreground_color: "#ec4899",
+                        qr_background_color: "#000000",
+                        qr_dots_type: "classy",
+                      })
+                    }
                   >
                     <div className="w-5 h-5 rounded-full shadow-[0_0_8px_#ec4899] bg-[#ec4899]"></div>
                     <span className="text-[10px]">Neón Pink</span>
@@ -574,36 +895,40 @@ export function ShareSection({
 
                   <Button
                     variant="outline"
-                    className={`h-16 flex flex-col gap-1 rounded-xl border-2 ${profile.qr_effect === 'neon' && profile.qr_foreground_color === '#06b6d4' ? 'border-amber-400 bg-amber-50' : 'border-transparent'}`}
-                    onClick={() => onChange({ 
-                      qr_gradient: null, 
-                      qr_effect: 'neon', 
-                      qr_foreground_color: '#06b6d4', 
-                      qr_background_color: '#000000',
-                      qr_dots_type: 'classy'
-                    })}
+                    className={`h-16 flex flex-col gap-1 rounded-xl border-2 ${profile.qr_effect === "neon" && profile.qr_foreground_color === "#06b6d4" ? "border-amber-400 bg-amber-50" : "border-transparent"}`}
+                    onClick={() =>
+                      onChange({
+                        qr_gradient: null,
+                        qr_effect: "neon",
+                        qr_foreground_color: "#06b6d4",
+                        qr_background_color: "#000000",
+                        qr_dots_type: "classy",
+                      })
+                    }
                   >
                     <div className="w-5 h-5 rounded-full shadow-[0_0_8px_#06b6d4] bg-[#06b6d4]"></div>
                     <span className="text-[10px]">Neón Cyan</span>
                   </Button>
-                  
+
                   <Button
                     variant="outline"
-                    className={`h-16 flex flex-col gap-1 rounded-xl border-2 ${profile.qr_gradient?.colorStops?.[0]?.color === '#f59e0b' ? 'border-amber-400 bg-amber-50' : 'border-transparent'}`}
-                    onClick={() => onChange({ 
-                      qr_effect: null,
-                      qr_foreground_color: '#f59e0b',
-                      qr_background_color: '#ffffff',
-                      qr_dots_type: 'rounded',
-                      qr_gradient: {
-                        type: 'linear',
-                        rotation: 45,
-                        colorStops: [
-                          { offset: 0, color: '#f59e0b' },
-                          { offset: 1, color: '#ef4444' }
-                        ]
-                      }
-                    })}
+                    className={`h-16 flex flex-col gap-1 rounded-xl border-2 ${profile.qr_gradient?.colorStops?.[0]?.color === "#f59e0b" ? "border-amber-400 bg-amber-50" : "border-transparent"}`}
+                    onClick={() =>
+                      onChange({
+                        qr_effect: null,
+                        qr_foreground_color: "#f59e0b",
+                        qr_background_color: "#ffffff",
+                        qr_dots_type: "rounded",
+                        qr_gradient: {
+                          type: "linear",
+                          rotation: 45,
+                          colorStops: [
+                            { offset: 0, color: "#f59e0b" },
+                            { offset: 1, color: "#ef4444" },
+                          ],
+                        },
+                      })
+                    }
                   >
                     <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-amber-500 to-red-500"></div>
                     <span className="text-[10px]">Sunset</span>
@@ -611,42 +936,46 @@ export function ShareSection({
 
                   <Button
                     variant="outline"
-                    className={`h-16 flex flex-col gap-1 rounded-xl border-2 ${profile.qr_gradient?.colorStops?.[0]?.color === '#8b5cf6' ? 'border-amber-400 bg-amber-50' : 'border-transparent'}`}
-                    onClick={() => onChange({ 
-                      qr_effect: null,
-                      qr_foreground_color: '#8b5cf6',
-                      qr_background_color: '#ffffff',
-                      qr_dots_type: 'rounded',
-                      qr_gradient: {
-                        type: 'linear',
-                        rotation: 135,
-                        colorStops: [
-                          { offset: 0, color: '#8b5cf6' },
-                          { offset: 1, color: '#3b82f6' }
-                        ]
-                      }
-                    })}
+                    className={`h-16 flex flex-col gap-1 rounded-xl border-2 ${profile.qr_gradient?.colorStops?.[0]?.color === "#8b5cf6" ? "border-amber-400 bg-amber-50" : "border-transparent"}`}
+                    onClick={() =>
+                      onChange({
+                        qr_effect: null,
+                        qr_foreground_color: "#8b5cf6",
+                        qr_background_color: "#ffffff",
+                        qr_dots_type: "rounded",
+                        qr_gradient: {
+                          type: "linear",
+                          rotation: 135,
+                          colorStops: [
+                            { offset: 0, color: "#8b5cf6" },
+                            { offset: 1, color: "#3b82f6" },
+                          ],
+                        },
+                      })
+                    }
                   >
                     <div className="w-5 h-5 rounded-full bg-gradient-to-br from-violet-500 to-blue-500"></div>
                     <span className="text-[10px]">Galaxy</span>
                   </Button>
-                  
+
                   <Button
                     variant="outline"
-                    className={`h-16 flex flex-col gap-1 rounded-xl border-2 ${profile.qr_gradient?.type === 'radial' ? 'border-amber-400 bg-amber-50' : 'border-transparent'}`}
-                    onClick={() => onChange({ 
-                      qr_effect: null,
-                      qr_foreground_color: '#10b981',
-                      qr_background_color: '#ffffff',
-                      qr_dots_type: 'dots',
-                      qr_gradient: {
-                        type: 'radial',
-                        colorStops: [
-                          { offset: 0, color: '#10b981' },
-                          { offset: 1, color: '#047857' }
-                        ]
-                      }
-                    })}
+                    className={`h-16 flex flex-col gap-1 rounded-xl border-2 ${profile.qr_gradient?.type === "radial" ? "border-amber-400 bg-amber-50" : "border-transparent"}`}
+                    onClick={() =>
+                      onChange({
+                        qr_effect: null,
+                        qr_foreground_color: "#10b981",
+                        qr_background_color: "#ffffff",
+                        qr_dots_type: "dots",
+                        qr_gradient: {
+                          type: "radial",
+                          colorStops: [
+                            { offset: 0, color: "#10b981" },
+                            { offset: 1, color: "#047857" },
+                          ],
+                        },
+                      })
+                    }
                   >
                     <div className="w-5 h-5 rounded-full bg-[radial-gradient(circle_at_center,_#10b981_0%,_#047857_100%)]"></div>
                     <span className="text-[10px]">Emerald</span>
@@ -759,6 +1088,16 @@ export function ShareSection({
                     onChange({
                       qr_foreground_color: "#000000",
                       qr_background_color: "#FFFFFF",
+                      qr_gradient: null,
+                      qr_dots_type: "square",
+                      qr_corners_square_type: "square",
+                      qr_corners_dot_type: "square",
+                      qr_corners_square_color: "#000000",
+                      qr_corners_dot_color: "#000000",
+                      qr_corner_top_left_color: "#000000",
+                      qr_corner_top_right_color: "#000000",
+                      qr_corner_bottom_left_color: "#000000",
+                      qr_frame_style: "plain",
                       qr_logo_enabled: false,
                     });
                     setExportSize(1024);

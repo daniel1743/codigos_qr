@@ -1,33 +1,13 @@
 import { useState, useEffect } from "react";
 import { getBrowserSupabaseClient } from "../../lib/supabase/client";
-import {
-  Crown,
-  Plus,
-  Trash2,
-  Calendar,
-  Clock,
-  AlertCircle,
-  CheckCircle,
-} from "lucide-react";
+import { Crown, Plus, Trash2, Calendar, Clock, AlertCircle, CheckCircle } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "../ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
@@ -114,7 +94,9 @@ export function PremiumPanel() {
       }
 
       // Get current admin
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      const {
+        data: { user: currentUser },
+      } = await supabase.auth.getUser();
 
       // Insert premium user
       const { error } = await supabase.from("premium_users").insert({
@@ -145,10 +127,7 @@ export function PremiumPanel() {
     if (!confirm(`¿Revocar Premium de ${email}?`)) return;
 
     try {
-      const { error } = await supabase
-        .from("premium_users")
-        .delete()
-        .eq("user_id", userId);
+      const { error } = await supabase.from("premium_users").delete().eq("user_id", userId);
 
       if (error) throw error;
 
@@ -258,8 +237,8 @@ export function PremiumPanel() {
                           {user.source === "admin_grant"
                             ? "Admin"
                             : user.source === "invitation"
-                            ? "Invitación"
-                            : "Compra"}
+                              ? "Invitación"
+                              : "Compra"}
                         </Badge>
                       </div>
 

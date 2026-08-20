@@ -237,10 +237,7 @@ const PREMIUM_TEMPLATES: QRTemplate[] = [
 /**
  * Catálogo completo de plantillas
  */
-export const QR_TEMPLATES: QRTemplate[] = [
-  ...FREE_TEMPLATES,
-  ...PREMIUM_TEMPLATES,
-];
+export const QR_TEMPLATES: QRTemplate[] = [...FREE_TEMPLATES, ...PREMIUM_TEMPLATES];
 
 /**
  * Utilidades para filtrado

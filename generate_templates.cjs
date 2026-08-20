@@ -1,5 +1,5 @@
-const fs = require('fs');
-const file = 'src/lib/design/template-presets.ts';
+const fs = require("fs");
+const file = "src/lib/design/template-presets.ts";
 
 const content = `import type { Profile } from "../../types/database";
 

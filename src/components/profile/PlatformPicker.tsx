@@ -18,9 +18,10 @@ export interface PlatformPickerProps {
   value: string;
   onChange: (value: string) => void;
   className?: string;
+  asIcon?: boolean;
 }
 
-export function PlatformPicker({ value, onChange, className }: PlatformPickerProps) {
+export function PlatformPicker({ value, onChange, className, asIcon }: PlatformPickerProps) {
   const [open, setOpen] = React.useState(false);
 
   const currentPlatform =
@@ -41,20 +42,35 @@ export function PlatformPicker({ value, onChange, className }: PlatformPickerPro
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className={cn("w-full justify-between h-10 px-3 py-2", className)}
-        >
-          <div className="flex items-center gap-2 truncate">
-            {CurrentIcon && <CurrentIcon className="w-4 h-4 shrink-0 opacity-70" />}
-            <span className="truncate">
-              {currentPlatform?.label || "Seleccionar plataforma..."}
-            </span>
-          </div>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
+        {asIcon ? (
+          <button
+            type="button"
+            className={cn(
+              "min-h-[44px] min-w-[44px] px-3 py-2 rounded-md transition-colors flex flex-col items-center justify-center gap-1 shrink-0 hover:bg-muted text-foreground",
+              className,
+            )}
+            title="Cambiar red"
+            aria-label="Cambiar red"
+          >
+            {CurrentIcon && <CurrentIcon className="w-4 h-4" />}
+            <span className="text-[10px] font-medium leading-none">Red</span>
+          </button>
+        ) : (
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            className={cn("w-full justify-between h-10 px-3 py-2", className)}
+          >
+            <div className="flex items-center gap-2 truncate">
+              {CurrentIcon && <CurrentIcon className="w-4 h-4 shrink-0 opacity-70" />}
+              <span className="truncate">
+                {currentPlatform?.label || "Seleccionar plataforma..."}
+              </span>
+            </div>
+            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          </Button>
+        )}
       </PopoverTrigger>
       <PopoverContent className="w-full p-0 sm:w-[350px] max-w-[90vw]" align="start">
         <Command

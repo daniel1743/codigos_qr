@@ -57,7 +57,9 @@ export function AdminPanel() {
   const checkAdminAccess = async () => {
     setLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       if (!user) {
         navigate({ to: "/" });
@@ -99,12 +101,13 @@ export function AdminPanel() {
         .select("*", { count: "exact", head: true });
 
       // Total scans
-      const { data: profilesData } = await supabase
-        .from("profiles")
-        .select("scan_count");
+      const { data: profilesData } = await supabase.from("profiles").select("scan_count");
 
       const totalScans =
-        profilesData?.reduce((sum: number, p: { scan_count?: number | null }) => sum + (p.scan_count || 0), 0) || 0;
+        profilesData?.reduce(
+          (sum: number, p: { scan_count?: number | null }) => sum + (p.scan_count || 0),
+          0,
+        ) || 0;
 
       // Active invitation codes
       const { count: codesCount } = await supabase
@@ -157,9 +160,7 @@ export function AdminPanel() {
               </div>
               <div>
                 <h1 className="text-3xl font-bold tracking-tight">Panel de Administración</h1>
-                <p className="text-sm text-muted-foreground">
-                  Gestión del sistema QR Generator
-                </p>
+                <p className="text-sm text-muted-foreground">Gestión del sistema QR Generator</p>
               </div>
             </div>
           </div>

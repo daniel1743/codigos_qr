@@ -173,7 +173,8 @@ export const PREMIUM_GRADIENTS = {
 
 export const PREMIUM_EFFECTS = {
   holographic: {
-    filter: "drop-shadow(0 0 12px rgba(139, 92, 246, 0.6)) drop-shadow(0 0 24px rgba(236, 72, 153, 0.4)) brightness(1.2)",
+    filter:
+      "drop-shadow(0 0 12px rgba(139, 92, 246, 0.6)) drop-shadow(0 0 24px rgba(236, 72, 153, 0.4)) brightness(1.2)",
     animation: "holographic-shimmer 3s ease-in-out infinite",
   },
   metallicGold: {
@@ -191,7 +192,8 @@ export const PREMIUM_EFFECTS = {
     animation: "rainbow-rotate 4s linear infinite",
   },
   aurora: {
-    filter: "drop-shadow(0 0 20px rgba(0, 255, 163, 0.6)) drop-shadow(0 0 40px rgba(3, 225, 255, 0.4)) brightness(1.25)",
+    filter:
+      "drop-shadow(0 0 20px rgba(0, 255, 163, 0.6)) drop-shadow(0 0 40px rgba(3, 225, 255, 0.4)) brightness(1.25)",
     animation: "aurora-pulse 3s ease-in-out infinite",
   },
   neon: {

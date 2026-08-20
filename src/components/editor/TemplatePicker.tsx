@@ -99,7 +99,6 @@ function TemplateThumbnail({ style, name }: { style: TemplateStyle; name: string
   );
 }
 
-
 export function TemplatePicker({ profile, onChange }: TemplatePickerProps) {
   const [activeFamily, setActiveFamily] = React.useState("Todas");
   const [tierFilter, setTierFilter] = React.useState("all");
@@ -109,7 +108,7 @@ export function TemplatePicker({ profile, onChange }: TemplatePickerProps) {
       t.style.font_family === profile.font_family &&
       t.style.background_color === profile.background_color &&
       t.style.button_color === profile.button_color &&
-      t.style.button_style === profile.button_style
+      t.style.button_style === profile.button_style,
   );
 
   let visibleTemplates = TEMPLATE_PRESETS;
@@ -138,7 +137,7 @@ export function TemplatePicker({ profile, onChange }: TemplatePickerProps) {
             </span>
           )}
         </div>
-        
+
         {/* Tier Filters */}
         <div className="flex gap-2">
           <button
@@ -164,7 +163,10 @@ export function TemplatePicker({ profile, onChange }: TemplatePickerProps) {
 
       <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 scrollbar-thin">
         {["Todas", ...TEMPLATE_FAMILY_OPTIONS.map((family) => family.id)].map((familyId) => {
-          const familyName = familyId === "Todas" ? "Todas" : TEMPLATE_FAMILY_OPTIONS.find(f => f.id === familyId)?.name || familyId;
+          const familyName =
+            familyId === "Todas"
+              ? "Todas"
+              : TEMPLATE_FAMILY_OPTIONS.find((f) => f.id === familyId)?.name || familyId;
           return (
             <button
               key={familyId}
@@ -197,7 +199,7 @@ export function TemplatePicker({ profile, onChange }: TemplatePickerProps) {
               <div
                 className={`relative w-full rounded-[1.25rem] p-1 transition-all duration-200 ${isActive ? "bg-primary/5 border-2 border-primary" : "border-2 border-transparent hover:bg-muted"}`}
               >
-                {template.tier === 'premium' && (
+                {template.tier === "premium" && (
                   <div className="absolute top-2 right-2 z-10 bg-gradient-to-r from-amber-500 to-yellow-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-sm">
                     PRO
                   </div>
@@ -205,7 +207,9 @@ export function TemplatePicker({ profile, onChange }: TemplatePickerProps) {
                 <TemplateThumbnail style={template.style} name={template.name} />
               </div>
               <div className="px-1.5 space-y-1">
-                <div className={`text-sm font-semibold leading-tight flex items-center gap-1 ${isActive ? "text-primary" : ""}`}>
+                <div
+                  className={`text-sm font-semibold leading-tight flex items-center gap-1 ${isActive ? "text-primary" : ""}`}
+                >
                   {template.name}
                 </div>
                 <div className="text-[11px] text-muted-foreground leading-snug">

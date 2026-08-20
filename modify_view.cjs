@@ -1,6 +1,6 @@
-const fs = require('fs');
-const file = 'src/components/profile/PublicProfileView.tsx';
-let code = fs.readFileSync(file, 'utf8');
+const fs = require("fs");
+const file = "src/components/profile/PublicProfileView.tsx";
+let code = fs.readFileSync(file, "utf8");
 
 const replacement = `
   const layout = profile.theme_layout || "classic_center";
@@ -222,7 +222,7 @@ const replacement = `
 `;
 
 const startIndex = code.indexOf('<ContextWrapper type="background">');
-const endIndex = code.lastIndexOf('</ContextWrapper>') + '</ContextWrapper>'.length;
+const endIndex = code.lastIndexOf("</ContextWrapper>") + "</ContextWrapper>".length;
 if (startIndex !== -1 && endIndex !== -1) {
   code = code.substring(0, startIndex) + replacement + code.substring(endIndex);
   fs.writeFileSync(file, code);

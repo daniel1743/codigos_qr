@@ -50,7 +50,10 @@ async function hashIP(ip: string): Promise<string> {
   const data = encoder.encode(ip);
   const hashBuffer = await crypto.subtle.digest("SHA-256", data);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("").substring(0, 16);
+  return hashArray
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("")
+    .substring(0, 16);
 }
 
 /**
@@ -61,7 +64,11 @@ function detectDeviceType(userAgent: string): DeviceType {
   if (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(ua)) {
     return "tablet";
   }
-  if (/Mobile|Android|iP(hone|od)|IEMobile|BlackBerry|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/.test(ua)) {
+  if (
+    /Mobile|Android|iP(hone|od)|IEMobile|BlackBerry|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/.test(
+      ua,
+    )
+  ) {
     return "mobile";
   }
   return "desktop";
@@ -124,7 +131,7 @@ export const analyticsService = {
   async trackPageView(
     supabase: SupabaseClient,
     profileId: string,
-    context: AnalyticsContext = {}
+    context: AnalyticsContext = {},
   ): Promise<string | null> {
     try {
       const userAgent = context.userAgent || navigator.userAgent;
@@ -165,7 +172,7 @@ export const analyticsService = {
     supabase: SupabaseClient,
     profileId: string,
     linkId: string,
-    context: AnalyticsContext = {}
+    context: AnalyticsContext = {},
   ): Promise<string | null> {
     try {
       const userAgent = context.userAgent || navigator.userAgent;
@@ -203,7 +210,7 @@ export const analyticsService = {
   async getProfileAnalytics(
     supabase: SupabaseClient,
     profileId: string,
-    filters: AnalyticsFilters = {}
+    filters: AnalyticsFilters = {},
   ): Promise<QRAnalyticsEvent[]> {
     let query = supabase
       .from("qr_analytics")
@@ -239,7 +246,7 @@ export const analyticsService = {
   async getAggregatedAnalytics(
     supabase: SupabaseClient,
     profileId: string,
-    days: number = 30
+    days: number = 30,
   ): Promise<AggregatedAnalytics> {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);

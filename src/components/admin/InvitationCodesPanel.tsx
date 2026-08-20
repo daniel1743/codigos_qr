@@ -1,34 +1,13 @@
 import { useState, useEffect } from "react";
 import { getBrowserSupabaseClient } from "../../lib/supabase/client";
-import {
-  Ticket,
-  Plus,
-  Copy,
-  CheckCircle,
-  XCircle,
-  Calendar,
-  Users,
-  Sparkles,
-} from "lucide-react";
+import { Ticket, Plus, Copy, CheckCircle, XCircle, Calendar, Users, Sparkles } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "../ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Switch } from "../ui/switch";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
@@ -91,12 +70,12 @@ export function InvitationCodesPanel() {
 
     setCreating(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       // Generate code
-      const { data: codeData, error: codeError } = await supabase.rpc(
-        "generate_invitation_code"
-      );
+      const { data: codeData, error: codeError } = await supabase.rpc("generate_invitation_code");
 
       if (codeError) throw codeError;
 
@@ -290,9 +269,7 @@ export function InvitationCodesPanel() {
                             })}
                           </span>
                         )}
-                        {exhausted && (
-                          <span className="text-red-600 font-medium">Agotado</span>
-                        )}
+                        {exhausted && <span className="text-red-600 font-medium">Agotado</span>}
                       </div>
                     </div>
 
@@ -319,9 +296,7 @@ export function InvitationCodesPanel() {
               <Ticket className="h-5 w-5 text-blue-500" />
               Crear Código de Invitación
             </DialogTitle>
-            <DialogDescription>
-              Configura el código para otorgar acceso Premium
-            </DialogDescription>
+            <DialogDescription>Configura el código para otorgar acceso Premium</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">

@@ -43,18 +43,45 @@ export async function downloadSVG(publicId: string, elementId = "qr-code-svg", f
       if (href && href.startsWith("http")) {
         try {
           const response = await fetch(href);
+
+          // Validate response before processing
+          if (!response.ok) {
+            throw new Error(`Failed to fetch image: ${response.status} ${response.statusText}`);
+          }
+
           const blob = await response.blob();
-          const base64 = await new Promise<string>((resolve) => {
+          const base64 = await new Promise<string>((resolve, reject) => {
             const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result as string);
+            reader.onloadend = () => {
+              const result = reader.result;
+              if (typeof result === "string") {
+                resolve(result);
+              } else {
+                reject(new Error("FileReader result is not a string"));
+              }
+            };
+            reader.onerror = () => reject(new Error("FileReader failed"));
             reader.readAsDataURL(blob);
           });
+
           // Reemplaza la URL en el string SVG original
           svgString = svgString.replace(href, base64);
         } catch (e) {
-          console.warn("No se pudo convertir la imagen externa a base64 para el SVG", e);
+          console.error("Failed to embed external image in SVG", e);
+          throw new Error(
+            `No se pudo incrustar el logo en el SVG: ${e instanceof Error ? e.message : "Error desconocido"}`,
+          );
         }
       }
+    }
+
+    // Modified by Claude Code — QR-STUDIO-CLOSE-10B
+    // Verify no external image URLs remain in critical attributes
+    const externalUrlPattern = /(?:href|xlink:href)=["']https?:\/\/[^"']+["']/i;
+    if (externalUrlPattern.test(svgString)) {
+      throw new Error(
+        "El SVG contiene referencias externas que no pudieron incrustarse. Descarga sin logo o intenta con otra imagen.",
+      );
     }
 
     const blob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });

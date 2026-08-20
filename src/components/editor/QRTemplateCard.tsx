@@ -72,16 +72,11 @@ export function QRTemplateCard({
       <div className="flex flex-col gap-1.5 px-1">
         <div className="flex items-start justify-between gap-2">
           <h3 className="text-sm font-semibold leading-tight">{template.name}</h3>
-          <Badge
-            variant="outline"
-            className="shrink-0 text-[9px] font-medium capitalize"
-          >
+          <Badge variant="outline" className="shrink-0 text-[9px] font-medium capitalize">
             {template.category}
           </Badge>
         </div>
-        <p className="text-xs leading-snug text-muted-foreground">
-          {template.description}
-        </p>
+        <p className="text-xs leading-snug text-muted-foreground">{template.description}</p>
       </div>
 
       {/* Actions */}
@@ -107,7 +102,7 @@ export function QRTemplateCard({
               onClick={() => {
                 // TODO: Navegar a página de Premium cuando exista
                 alert(
-                  "Este diseño forma parte de Premium.\n\nPróximamente podrás desbloquear plantillas Premium."
+                  "Este diseño forma parte de Premium.\n\nPróximamente podrás desbloquear plantillas Premium.",
                 );
               }}
               className="h-9 gap-1.5 bg-gradient-to-r from-amber-500 to-yellow-500 px-3 text-xs font-bold text-white hover:from-amber-600 hover:to-yellow-600"

@@ -87,9 +87,7 @@ export function canApplyPremiumTemplate(userId?: string): boolean {
  * NOTA: Este array debe eliminarse cuando exista sistema de suscripciones real.
  * Es solo para testing durante desarrollo.
  */
-const PREMIUM_DEV_EMAILS: string[] = [
-  "falcondaniel37@gmail.com",
-];
+const PREMIUM_DEV_EMAILS: string[] = ["falcondaniel37@gmail.com"];
 
 /**
  * Verificación temporal por email (solo desarrollo)

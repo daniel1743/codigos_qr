@@ -201,7 +201,7 @@ export function ProfileSection({ profile, onChange, userId }: ProfileSectionProp
             aria-label="Activar Pie de página"
           />
         </div>
-        
+
         {profile.footer_enabled && (
           <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
             <Label htmlFor="footer_text">Mensaje del Pie de página</Label>
@@ -216,7 +216,6 @@ export function ProfileSection({ profile, onChange, userId }: ProfileSectionProp
           </div>
         )}
       </div>
-
     </div>
   );
 }

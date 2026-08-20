@@ -55,9 +55,8 @@ export function UsersPanel() {
       setFilteredUsers(
         users.filter(
           (u) =>
-            u.email.toLowerCase().includes(query) ||
-            u.full_name?.toLowerCase().includes(query)
-        )
+            u.email.toLowerCase().includes(query) || u.full_name?.toLowerCase().includes(query),
+        ),
       );
     }
   }, [searchQuery, users]);
@@ -136,11 +135,13 @@ export function UsersPanel() {
 
   const handleMakeAdmin = async (userId: string) => {
     try {
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      const {
+        data: { user: currentUser },
+      } = await supabase.auth.getUser();
 
       const { error } = await supabase.from("admin_users").insert({
         user_id: userId,
-        email: users.find(u => u.id === userId)?.email || "",
+        email: users.find((u) => u.id === userId)?.email || "",
         role: "admin",
         created_by: currentUser?.id,
       });
@@ -249,9 +250,7 @@ export function UsersPanel() {
                   <div className="flex items-center gap-4">
                     <div className="hidden text-right text-sm sm:block">
                       <div className="font-medium">{user.profileCount} QR</div>
-                      <div className="text-xs text-muted-foreground">
-                        {user.totalScans} scans
-                      </div>
+                      <div className="text-xs text-muted-foreground">{user.totalScans} scans</div>
                     </div>
 
                     <DropdownMenu>

@@ -50,7 +50,7 @@ export const TEMPLATE_FAMILIES = [
   { id: "tech", name: "Tech" },
   { id: "fashion", name: "Fashion" },
   { id: "music", name: "Music" },
-  { id: "events", name: "Eventos" }
+  { id: "events", name: "Eventos" },
 ];
 
 export const TEMPLATE_FAMILY_OPTIONS = TEMPLATE_FAMILIES;
@@ -73,7 +73,7 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       button_radius: "rounded",
       button_style: "solid",
       avatar_shape: "circle",
-    }
+    },
   },
   {
     id: "free-minimal-dark",
@@ -93,7 +93,7 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       avatar_shape: "circle",
       title_color: "#FFFFFF",
       bio_color: "#A1A1AA",
-    }
+    },
   },
   {
     id: "free-business-basic",
@@ -111,7 +111,7 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       button_radius: "rounded",
       button_style: "card",
       avatar_shape: "rounded",
-    }
+    },
   },
   {
     id: "free-creator-clean",
@@ -129,7 +129,7 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       button_radius: "full",
       button_style: "solid",
       avatar_shape: "circle",
-    }
+    },
   },
   {
     id: "free-warm",
@@ -147,7 +147,7 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       button_radius: "full",
       button_style: "soft",
       avatar_shape: "circle",
-    }
+    },
   },
   {
     id: "free-ocean",
@@ -165,7 +165,7 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       button_radius: "rounded",
       button_style: "solid",
       avatar_shape: "circle",
-    }
+    },
   },
   {
     id: "free-editorial-basic",
@@ -183,7 +183,7 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       button_radius: "none",
       button_style: "outline",
       avatar_shape: "square",
-    }
+    },
   },
   {
     id: "free-modern",
@@ -201,7 +201,7 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       button_radius: "none",
       button_style: "line",
       avatar_shape: "circle",
-    }
+    },
   },
 
   // --- PREMIUM TIER ---
@@ -231,8 +231,8 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       title_weight: "normal",
       bio_color: "#D5C5A1",
       bio_weight: "light",
-      button_content_align: "center"
-    }
+      button_content_align: "center",
+    },
   },
   {
     id: "prem-lux-maison",
@@ -254,8 +254,8 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       title_size: "xl",
       bio_color: "#555555",
       button_content_align: "left",
-      button_text_weight: "normal"
-    }
+      button_text_weight: "normal",
+    },
   },
   {
     id: "prem-lux-monaco",
@@ -274,8 +274,8 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       button_style: "solid",
       avatar_shape: "circle",
       title_color: "#F7F8FA",
-      bio_color: "#91A7C5"
-    }
+      bio_color: "#91A7C5",
+    },
   },
   {
     id: "prem-lux-atelier",
@@ -294,8 +294,8 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       button_style: "line",
       avatar_shape: "circle",
       title_color: "#F8F0E8",
-      bio_color: "#D9B9A7"
-    }
+      bio_color: "#D9B9A7",
+    },
   },
   {
     id: "prem-lux-vellum",
@@ -313,8 +313,8 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       button_text_color: "#FFFFFF",
       button_radius: "none",
       button_style: "solid",
-      avatar_shape: "square"
-    }
+      avatar_shape: "square",
+    },
   },
 
   // BEAUTY (5 templates)
@@ -336,8 +336,8 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       avatar_shape: "circle",
       title_color: "#442F31",
       bio_color: "#6D5154",
-      button_content_align: "center"
-    }
+      button_content_align: "center",
+    },
   },
   {
     id: "prem-beauty-aura",
@@ -356,8 +356,8 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       button_style: "solid",
       avatar_shape: "circle",
       title_color: "#4A3F35",
-      title_weight: "light"
-    }
+      title_weight: "light",
+    },
   },
   {
     id: "prem-beauty-serene",
@@ -375,8 +375,8 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       button_radius: "full",
       button_style: "outline",
       avatar_shape: "rounded",
-      title_color: "#2C3D2C"
-    }
+      title_color: "#2C3D2C",
+    },
   },
   {
     id: "prem-beauty-rose",
@@ -394,8 +394,8 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       button_text_color: "#FFFFFF",
       button_radius: "rounded",
       button_style: "solid",
-      avatar_shape: "circle"
-    }
+      avatar_shape: "circle",
+    },
   },
   {
     id: "prem-beauty-glow",
@@ -412,8 +412,8 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       button_text_color: "#C68E65",
       button_radius: "full",
       button_style: "soft",
-      avatar_shape: "circle"
-    }
+      avatar_shape: "circle",
+    },
   },
 
   // FOOD (5 templates)
@@ -434,8 +434,8 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       button_style: "solid",
       avatar_shape: "circle",
       title_color: "#2C351B",
-      bio_color: "#4D5B32"
-    }
+      bio_color: "#4D5B32",
+    },
   },
   {
     id: "prem-food-bistro",
@@ -454,8 +454,8 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       button_style: "solid",
       avatar_shape: "square",
       title_color: "#F6F0DF",
-      bio_color: "#C7B47A"
-    }
+      bio_color: "#C7B47A",
+    },
   },
   {
     id: "prem-food-terra",
@@ -474,8 +474,8 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       button_radius: "rounded",
       button_style: "solid",
       avatar_shape: "rounded",
-      title_color: "#44291C"
-    }
+      title_color: "#44291C",
+    },
   },
   {
     id: "prem-food-cafe",
@@ -493,8 +493,8 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       button_radius: "none",
       button_style: "outline",
       avatar_shape: "circle",
-      title_color: "#362217"
-    }
+      title_color: "#362217",
+    },
   },
   {
     id: "prem-food-savor",
@@ -511,8 +511,8 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       button_text_color: "#FFFFFF",
       button_radius: "full",
       button_style: "solid",
-      avatar_shape: "circle"
-    }
+      avatar_shape: "circle",
+    },
   },
 
   // BUSINESS (5 templates)
@@ -533,8 +533,8 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       button_style: "card",
       avatar_shape: "rounded",
       title_color: "#F7F8FA",
-      bio_color: "#91A7C5"
-    }
+      bio_color: "#91A7C5",
+    },
   },
   {
     id: "prem-biz-boardroom",
@@ -552,8 +552,8 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       button_text_color: "#FFFFFF",
       button_radius: "rounded",
       button_style: "solid",
-      avatar_shape: "circle"
-    }
+      avatar_shape: "circle",
+    },
   },
   {
     id: "prem-biz-signature",
@@ -570,8 +570,8 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       button_text_color: "#0F172A",
       button_radius: "none",
       button_style: "line",
-      avatar_shape: "square"
-    }
+      avatar_shape: "square",
+    },
   },
   {
     id: "prem-biz-corporate",
@@ -588,8 +588,8 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       button_text_color: "#FFFFFF",
       button_radius: "rounded",
       button_style: "solid",
-      avatar_shape: "circle"
-    }
+      avatar_shape: "circle",
+    },
   },
   {
     id: "prem-biz-agency",
@@ -607,8 +607,8 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       button_radius: "rounded",
       button_style: "solid",
       avatar_shape: "circle",
-      title_color: "#FFFFFF"
-    }
+      title_color: "#FFFFFF",
+    },
   },
 
   // CREATOR (4 templates)
@@ -629,8 +629,8 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       button_style: "solid",
       avatar_shape: "circle",
       title_color: "#FFFFFF",
-      button_content_align: "center"
-    }
+      button_content_align: "center",
+    },
   },
   {
     id: "prem-creator-spotlight",
@@ -649,8 +649,8 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       button_style: "solid",
       avatar_shape: "square",
       title_color: "#FFFFFF",
-      bio_color: "#FFE0B2"
-    }
+      bio_color: "#FFE0B2",
+    },
   },
   {
     id: "prem-creator-vibe",
@@ -668,8 +668,8 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       button_radius: "full",
       button_style: "solid",
       avatar_shape: "circle",
-      title_color: "#FFFFFF"
-    }
+      title_color: "#FFFFFF",
+    },
   },
   {
     id: "prem-creator-stream",
@@ -688,8 +688,8 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       button_style: "solid",
       avatar_shape: "circle",
       title_color: "#FFFFFF",
-      bio_color: "#A1A1AA"
-    }
+      bio_color: "#A1A1AA",
+    },
   },
 
   // WELLNESS (4 templates)
@@ -709,8 +709,8 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       button_radius: "full",
       button_style: "soft",
       avatar_shape: "circle",
-      title_color: "#27352C"
-    }
+      title_color: "#27352C",
+    },
   },
   {
     id: "prem-well-flow",
@@ -728,8 +728,8 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       button_radius: "full",
       button_style: "solid",
       avatar_shape: "circle",
-      title_color: "#3E3326"
-    }
+      title_color: "#3E3326",
+    },
   },
   {
     id: "prem-well-breathe",
@@ -746,8 +746,8 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       button_text_color: "#FFFFFF",
       button_radius: "rounded",
       button_style: "solid",
-      avatar_shape: "rounded"
-    }
+      avatar_shape: "rounded",
+    },
   },
   {
     id: "prem-well-balance",
@@ -765,8 +765,8 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       button_text_color: "#FFFFFF",
       button_radius: "full",
       button_style: "solid",
-      avatar_shape: "circle"
-    }
+      avatar_shape: "circle",
+    },
   },
 
   // FASHION (3 templates)
@@ -786,8 +786,8 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       button_radius: "none",
       button_style: "solid",
       avatar_shape: "square",
-      title_size: "xl"
-    }
+      title_size: "xl",
+    },
   },
   {
     id: "prem-fash-runway",
@@ -805,8 +805,8 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       button_radius: "none",
       button_style: "solid",
       avatar_shape: "circle",
-      title_color: "#FFFFFF"
-    }
+      title_color: "#FFFFFF",
+    },
   },
   {
     id: "prem-fash-chic",
@@ -823,8 +823,8 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       button_text_color: "#4A4A4A",
       button_radius: "none",
       button_style: "line",
-      avatar_shape: "circle"
-    }
+      avatar_shape: "circle",
+    },
   },
 
   // MUSIC (3 templates)
@@ -845,8 +845,8 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       button_style: "solid",
       avatar_shape: "circle",
       title_color: "#FFFFFF",
-      title_size: "xl"
-    }
+      title_size: "xl",
+    },
   },
   {
     id: "prem-music-neon",
@@ -864,8 +864,8 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       button_radius: "rounded",
       button_style: "solid",
       avatar_shape: "circle",
-      title_color: "#FFFFFF"
-    }
+      title_color: "#FFFFFF",
+    },
   },
   {
     id: "prem-music-stage",
@@ -883,8 +883,8 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       button_radius: "full",
       button_style: "solid",
       avatar_shape: "circle",
-      title_color: "#FFFFFF"
-    }
+      title_color: "#FFFFFF",
+    },
   },
 
   // TECH (3 templates)
@@ -904,8 +904,8 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       button_radius: "rounded",
       button_style: "solid",
       avatar_shape: "square",
-      title_color: "#FFFFFF"
-    }
+      title_color: "#FFFFFF",
+    },
   },
   {
     id: "prem-tech-saas",
@@ -923,8 +923,8 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       button_text_color: "#FFFFFF",
       button_radius: "rounded",
       button_style: "solid",
-      avatar_shape: "rounded"
-    }
+      avatar_shape: "rounded",
+    },
   },
   {
     id: "prem-tech-minimal",
@@ -941,8 +941,8 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       button_text_color: "#FFFFFF",
       button_radius: "none",
       button_style: "solid",
-      avatar_shape: "circle"
-    }
+      avatar_shape: "circle",
+    },
   },
 
   // EVENTS (3 templates)
@@ -962,8 +962,8 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       button_radius: "rounded",
       button_style: "solid",
       avatar_shape: "circle",
-      title_color: "#111111"
-    }
+      title_color: "#111111",
+    },
   },
   {
     id: "prem-event-party",
@@ -981,8 +981,8 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       button_radius: "full",
       button_style: "solid",
       avatar_shape: "circle",
-      title_color: "#FFFFFF"
-    }
+      title_color: "#FFFFFF",
+    },
   },
   {
     id: "prem-event-invite",
@@ -1000,7 +1000,7 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       button_text_color: "#FFFFFF",
       button_radius: "rounded",
       button_style: "solid",
-      avatar_shape: "square"
-    }
-  }
+      avatar_shape: "square",
+    },
+  },
 ];

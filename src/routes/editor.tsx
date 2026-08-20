@@ -242,7 +242,20 @@ function EditorPage() {
 
         // Validar alias (slug) reservado al guardar
         if (editableProfile.slug) {
-          const reservedRoutes = ["editor", "login", "auth", "api", "qr", "account", "settings", "p", "terms", "privacy", "help", "support"];
+          const reservedRoutes = [
+            "editor",
+            "login",
+            "auth",
+            "api",
+            "qr",
+            "account",
+            "settings",
+            "p",
+            "terms",
+            "privacy",
+            "help",
+            "support",
+          ];
           if (reservedRoutes.includes(editableProfile.slug)) {
             toast.error("Nombre reservado", { description: "Este enlace no está disponible." });
             setSaving(false);
@@ -303,8 +316,12 @@ function EditorPage() {
       }
     } catch (e: unknown) {
       console.error("Error completo al guardar:", e);
-      const isUniqueViolation = typeof e === "object" && e !== null && "code" in e && (e as { code?: string }).code === "23505";
-      
+      const isUniqueViolation =
+        typeof e === "object" &&
+        e !== null &&
+        "code" in e &&
+        (e as { code?: string }).code === "23505";
+
       if (isUniqueViolation) {
         toast.error("Enlace no disponible", {
           description: "Ese nombre ya está en uso por otra persona.",
@@ -351,6 +368,7 @@ function EditorPage() {
             profile={profile}
             onChange={(u) => setProfile((p) => ({ ...p, ...u }))}
             userId={session.user.id}
+            links={links}
           />
         );
       case "text":
@@ -417,7 +435,9 @@ function EditorPage() {
             className="flex flex-col items-center justify-center p-3 w-full shrink-0 rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200"
           >
             <UserRound className="w-5 h-5 mb-1" />
-            <span className="text-center text-[10px] font-medium leading-tight">Mi perfil principal</span>
+            <span className="text-center text-[10px] font-medium leading-tight">
+              Mi perfil principal
+            </span>
           </Link>
 
           {TABS.map((tab) => {

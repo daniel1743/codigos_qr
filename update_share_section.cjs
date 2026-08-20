@@ -1,25 +1,26 @@
-const fs = require('fs');
-const file = 'src/components/editor/ShareSection.tsx';
-let code = fs.readFileSync(file, 'utf8');
+const fs = require("fs");
+const file = "src/components/editor/ShareSection.tsx";
+let code = fs.readFileSync(file, "utf8");
 
 // 1. We need to import QRCodeAdvanced and useQRAdvancedDownload
-if (!code.includes('QRCodeAdvanced')) {
+if (!code.includes("QRCodeAdvanced")) {
   code = code.replace(
     'import { QRCodeCanvas, QRCodeSVG } from "qrcode.react";',
-    'import { QRCodeCanvas, QRCodeSVG } from "qrcode.react";\nimport { QRCodeAdvanced, useQRAdvancedDownload } from "../qr/QRCodeAdvanced";\nimport { requiresAdvancedRenderer } from "../../lib/qr-advanced-utils";'
+    'import { QRCodeCanvas, QRCodeSVG } from "qrcode.react";\nimport { QRCodeAdvanced, useQRAdvancedDownload } from "../qr/QRCodeAdvanced";\nimport { requiresAdvancedRenderer } from "../../lib/qr-advanced-utils";',
   );
 }
 
 // 2. We need to use useQRAdvancedDownload inside ShareSection
-if (!code.includes('downloadAdvancedQR')) {
+if (!code.includes("downloadAdvancedQR")) {
   code = code.replace(
-    'const [isPreparingDownload, setIsPreparingDownload] = useState(false);',
-    'const [isPreparingDownload, setIsPreparingDownload] = useState(false);\n  const { download: downloadAdvancedQR } = useQRAdvancedDownload();'
+    "const [isPreparingDownload, setIsPreparingDownload] = useState(false);",
+    "const [isPreparingDownload, setIsPreparingDownload] = useState(false);\n  const { download: downloadAdvancedQR } = useQRAdvancedDownload();",
   );
 }
 
 // 3. We need to update handleDownload to use advanced download if required
-const handleDownloadRegex = /if \(exportFormat === "svg"\) \{\s*await downloadSVG\(publicId, "qr-preview-svg", `qr-\$\{publicId\}\.svg`\);\s*\} else \{\s*if \(logoEnabled && logoUrl\) \{\s*const img = new Image\(\);\s*img\.crossOrigin = "anonymous";\s*img\.onload = \(\) => \{\s*setIsPreparingDownload\(true\);\s*setTimeout\(\(\) => \{\s*downloadQR\(publicId, "qr-export-canvas", `qr-\$\{publicId\}-\$\{exportSize\}px\.png`\);\s*setIsPreparingDownload\(false\);\s*\}, 100\);\s*\};\s*img\.onerror = \(\) => \{\s*toast\.error\("Error al cargar el logo para la exportación\. Intenta sin logo\."\);\s*\};\s*img\.src = logoUrl;\s*\} else \{\s*setIsPreparingDownload\(true\);\s*setTimeout\(\(\) => \{\s*downloadQR\(publicId, "qr-export-canvas", `qr-\$\{publicId\}-\$\{exportSize\}px\.png`\);\s*setIsPreparingDownload\(false\);\s*\}, 100\);\s*\}\s*\}/;
+const handleDownloadRegex =
+  /if \(exportFormat === "svg"\) \{\s*await downloadSVG\(publicId, "qr-preview-svg", `qr-\$\{publicId\}\.svg`\);\s*\} else \{\s*if \(logoEnabled && logoUrl\) \{\s*const img = new Image\(\);\s*img\.crossOrigin = "anonymous";\s*img\.onload = \(\) => \{\s*setIsPreparingDownload\(true\);\s*setTimeout\(\(\) => \{\s*downloadQR\(publicId, "qr-export-canvas", `qr-\$\{publicId\}-\$\{exportSize\}px\.png`\);\s*setIsPreparingDownload\(false\);\s*\}, 100\);\s*\};\s*img\.onerror = \(\) => \{\s*toast\.error\("Error al cargar el logo para la exportación\. Intenta sin logo\."\);\s*\};\s*img\.src = logoUrl;\s*\} else \{\s*setIsPreparingDownload\(true\);\s*setTimeout\(\(\) => \{\s*downloadQR\(publicId, "qr-export-canvas", `qr-\$\{publicId\}-\$\{exportSize\}px\.png`\);\s*setIsPreparingDownload\(false\);\s*\}, 100\);\s*\}\s*\}/;
 
 const advancedDownloadBlock = `    const isAdvanced = requiresAdvancedRenderer(
       profile.qr_gradient || fgColor,

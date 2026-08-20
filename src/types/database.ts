@@ -46,6 +46,12 @@ export interface Profile {
   qr_dots_type?: string | null;
   qr_corners_square_type?: string | null;
   qr_corners_dot_type?: string | null;
+  qr_corners_square_color?: string | null;
+  qr_corners_dot_color?: string | null;
+  qr_corner_top_left_color?: string | null;
+  qr_corner_top_right_color?: string | null;
+  qr_corner_bottom_left_color?: string | null;
+  qr_frame_style?: string | null;
   qr_effect?: string | null;
   qr_demo_logo_id?: string | null;
   footer_enabled?: boolean;
@@ -60,6 +66,8 @@ export interface Profile {
   decor_smoke?: string | null;
   decor_shadow?: string | null;
   decor_intensity?: string | null;
+  social_covers_enabled?: boolean;
+  hero_link_id?: string | null;
   created_at: string;
   updated_at: string;
 }

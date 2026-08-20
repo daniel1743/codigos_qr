@@ -21,7 +21,7 @@ export const demoLogoService = {
    */
   async getLogosByCategory(
     supabase: SupabaseClient,
-    category: DemoLogoCategory
+    category: DemoLogoCategory,
   ): Promise<DemoLogo[]> {
     const { data, error } = await supabase
       .from("demo_logos")
@@ -37,11 +37,7 @@ export const demoLogoService = {
    * Obtener logo por ID
    */
   async getLogoById(supabase: SupabaseClient, id: string): Promise<DemoLogo | null> {
-    const { data, error } = await supabase
-      .from("demo_logos")
-      .select("*")
-      .eq("id", id)
-      .single();
+    const { data, error } = await supabase.from("demo_logos").select("*").eq("id", id).single();
 
     if (error) return null;
     return data;
@@ -52,13 +48,9 @@ export const demoLogoService = {
    */
   async createLogo(
     supabase: SupabaseClient,
-    logo: Omit<DemoLogo, "id" | "created_at" | "updated_at">
+    logo: Omit<DemoLogo, "id" | "created_at" | "updated_at">,
   ): Promise<DemoLogo> {
-    const { data, error } = await supabase
-      .from("demo_logos")
-      .insert(logo)
-      .select()
-      .single();
+    const { data, error } = await supabase.from("demo_logos").insert(logo).select().single();
 
     if (error) throw error;
     return data;
@@ -70,7 +62,7 @@ export const demoLogoService = {
   async updateLogo(
     supabase: SupabaseClient,
     id: string,
-    updates: Partial<Omit<DemoLogo, "id" | "created_at" | "updated_at">>
+    updates: Partial<Omit<DemoLogo, "id" | "created_at" | "updated_at">>,
   ): Promise<DemoLogo> {
     const { data, error } = await supabase
       .from("demo_logos")
@@ -95,11 +87,7 @@ export const demoLogoService = {
   /**
    * Upload logo file to Supabase Storage
    */
-  async uploadLogoFile(
-    supabase: SupabaseClient,
-    file: File,
-    category: string
-  ): Promise<string> {
+  async uploadLogoFile(supabase: SupabaseClient, file: File, category: string): Promise<string> {
     const fileExt = file.name.split(".").pop();
     const fileName = `${category}-${Date.now()}.${fileExt}`;
     const filePath = `${category}/${fileName}`;

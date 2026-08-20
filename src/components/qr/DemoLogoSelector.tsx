@@ -135,7 +135,10 @@ export function DemoLogoSelector({
                       {/* Info */}
                       <div className="flex flex-col gap-1.5 px-1">
                         <h3 className="text-sm font-semibold leading-tight">{logo.name}</h3>
-                        <Badge variant="outline" className="w-fit text-[9px] font-medium capitalize">
+                        <Badge
+                          variant="outline"
+                          className="w-fit text-[9px] font-medium capitalize"
+                        >
                           {logo.category}
                         </Badge>
                       </div>

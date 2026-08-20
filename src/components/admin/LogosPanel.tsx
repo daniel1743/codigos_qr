@@ -1,32 +1,13 @@
 import { useState, useEffect } from "react";
 import { getBrowserSupabaseClient } from "../../lib/supabase/client";
-import {
-  ImageIcon,
-  Plus,
-  Trash2,
-  Upload,
-  Edit,
-  Eye,
-} from "lucide-react";
+import { ImageIcon, Plus, Trash2, Upload, Edit, Eye } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "../ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { toast } from "sonner";
 import { demoLogoService } from "../../services/demoLogoService";
 import type { DemoLogo, DemoLogoCategory } from "../../types/demo-logo";
@@ -186,13 +167,16 @@ export function LogosPanel() {
     );
   }
 
-  const logosByCategory = logos.reduce((acc, logo) => {
-    if (!acc[logo.category]) {
-      acc[logo.category] = [];
-    }
-    acc[logo.category].push(logo);
-    return acc;
-  }, {} as Record<string, DemoLogo[]>);
+  const logosByCategory = logos.reduce(
+    (acc, logo) => {
+      if (!acc[logo.category]) {
+        acc[logo.category] = [];
+      }
+      acc[logo.category].push(logo);
+      return acc;
+    },
+    {} as Record<string, DemoLogo[]>,
+  );
 
   return (
     <div className="space-y-4">
@@ -303,9 +287,7 @@ export function LogosPanel() {
               <Upload className="h-5 w-5 text-purple-500" />
               Subir Nuevo Logo
             </DialogTitle>
-            <DialogDescription>
-              Agrega un nuevo logo a la biblioteca Premium
-            </DialogDescription>
+            <DialogDescription>Agrega un nuevo logo a la biblioteca Premium</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
@@ -364,9 +346,7 @@ export function LogosPanel() {
             {file && (
               <div className="rounded-lg border p-3 text-sm">
                 <p className="font-medium">{file.name}</p>
-                <p className="text-xs text-muted-foreground">
-                  {(file.size / 1024).toFixed(2)} KB
-                </p>
+                <p className="text-xs text-muted-foreground">{(file.size / 1024).toFixed(2)} KB</p>
               </div>
             )}
 
@@ -401,19 +381,13 @@ export function LogosPanel() {
               <Edit className="h-5 w-5 text-purple-500" />
               Editar Logo
             </DialogTitle>
-            <DialogDescription>
-              Actualiza la información del logo
-            </DialogDescription>
+            <DialogDescription>Actualiza la información del logo</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="edit_name">Nombre del Logo</Label>
-              <Input
-                id="edit_name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
+              <Input id="edit_name" value={name} onChange={(e) => setName(e.target.value)} />
             </div>
 
             <div className="space-y-2">

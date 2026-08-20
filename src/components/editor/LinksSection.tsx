@@ -97,7 +97,10 @@ export function LinksSection({ links, onChange }: LinksSectionProps) {
               className="overflow-hidden rounded-xl border bg-card px-1 shadow-sm ring-border/50 data-[state=open]:ring-2"
             >
               <div className="flex items-center gap-1 pr-2 min-[380px]:gap-2 min-[380px]:pr-4">
-                <div className="hidden cursor-grab p-3 text-muted-foreground hover:text-foreground min-[380px]:block">
+                <div
+                  className="hidden p-3 text-muted-foreground min-[380px]:block"
+                  title={`Posición ${index + 1}`}
+                >
                   <GripVertical className="w-4 h-4" />
                 </div>
                 <AccordionTrigger className="flex-1 py-4 hover:no-underline">
@@ -115,7 +118,37 @@ export function LinksSection({ links, onChange }: LinksSectionProps) {
                     </div>
                   </div>
                 </AccordionTrigger>
-                <div className="flex items-center gap-3 pl-2">
+                <div className="flex items-center gap-1 pl-1 min-[380px]:gap-2 min-[380px]:pl-2">
+                  <div
+                    className="flex items-center gap-0.5"
+                    onClick={(e) => e.stopPropagation()}
+                    aria-label="Ordenar enlace"
+                  >
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      disabled={index === 0}
+                      onClick={() => moveLink(index, "up")}
+                      className="h-8 w-8 rounded-full"
+                      aria-label={`Mover ${link.label || platformInfo.label} hacia arriba`}
+                      title="Mover arriba"
+                    >
+                      <ArrowUp className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      disabled={index === links.length - 1}
+                      onClick={() => moveLink(index, "down")}
+                      className="h-8 w-8 rounded-full"
+                      aria-label={`Mover ${link.label || platformInfo.label} hacia abajo`}
+                      title="Mover abajo"
+                    >
+                      <ArrowDown className="w-4 h-4" />
+                    </Button>
+                  </div>
                   <div
                     className="flex flex-col items-center gap-1"
                     onClick={(e) => e.stopPropagation()}

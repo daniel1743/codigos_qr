@@ -42,9 +42,7 @@ export function validateAdvancedQR(options: QRAdvancedOptions): QRValidationResu
     }
 
     // Verificar que todos los colores del gradiente sean suficientemente oscuros
-    const hasLightColor = gradient.colorStops.some(
-      (stop) => getLuminance(stop.color) > 0.5
-    );
+    const hasLightColor = gradient.colorStops.some((stop) => getLuminance(stop.color) > 0.5);
 
     if (hasLightColor) {
       warnings.push("El gradiente contiene colores claros que pueden dificultar el escaneo.");
@@ -69,7 +67,7 @@ export function validateAdvancedQR(options: QRAdvancedOptions): QRValidationResu
     (options.dotsType === "dots" || options.dotsType === "classy")
   ) {
     warnings.push(
-      "Dots type 'dots' o 'classy' con gradiente puede reducir la confiabilidad del escaneo."
+      "Dots type 'dots' o 'classy' con gradiente puede reducir la confiabilidad del escaneo.",
     );
   }
 
@@ -109,7 +107,7 @@ export function createAdvancedOptionsFromSimple(
   backgroundColor: string,
   size: number,
   logoUrl?: string,
-  logoEnabled?: boolean
+  logoEnabled?: boolean,
 ): QRAdvancedOptions {
   return {
     data,
@@ -120,14 +118,16 @@ export function createAdvancedOptionsFromSimple(
     backgroundColor,
     dotsType: "square",
     ...(logoEnabled && logoUrl ? { image: logoUrl } : {}),
-    ...(logoEnabled && logoUrl ? {
-      imageOptions: {
-        hideBackgroundDots: true,
-        imageSize: 0.28,
-        margin: 4,
-        crossOrigin: "anonymous",
-      }
-    } : {}),
+    ...(logoEnabled && logoUrl
+      ? {
+          imageOptions: {
+            hideBackgroundDots: true,
+            imageSize: 0.18, // 18% safe limit for error correction level H
+            margin: 4,
+            crossOrigin: "anonymous",
+          },
+        }
+      : {}),
     qrOptions: {
       errorCorrectionLevel: "H",
     },
@@ -140,7 +140,7 @@ export function createAdvancedOptionsFromSimple(
 export function requiresAdvancedRenderer(
   foregroundColor: string | GradientOptions,
   dotsType?: string,
-  effect?: string
+  effect?: string,
 ): boolean {
   // Si es gradiente, necesita renderer avanzado
   if (typeof foregroundColor === "object") {

@@ -1,6 +1,6 @@
-const fs = require('fs');
-const file = 'src/components/editor/TemplatePicker.tsx';
-let code = fs.readFileSync(file, 'utf8');
+const fs = require("fs");
+const file = "src/components/editor/TemplatePicker.tsx";
+let code = fs.readFileSync(file, "utf8");
 
 const replacement = `
 export function TemplatePicker({ profile, onChange }: TemplatePickerProps) {
@@ -129,7 +129,7 @@ export function TemplatePicker({ profile, onChange }: TemplatePickerProps) {
 }
 `;
 
-const searchString = 'export function TemplatePicker({ profile, onChange }: TemplatePickerProps) {';
+const searchString = "export function TemplatePicker({ profile, onChange }: TemplatePickerProps) {";
 const startIndex = code.indexOf(searchString);
 if (startIndex !== -1) {
   code = code.substring(0, startIndex) + replacement;

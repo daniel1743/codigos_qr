@@ -6,15 +6,18 @@ import { AlertTriangle, PaintBucket, Palette, ChevronDown, Wand2 } from "lucide-
 import { useState, useMemo, useEffect } from "react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../ui/collapsible";
 import { TemplatePicker } from "./TemplatePicker";
-import type { Profile, AvatarShape } from "../../types/database";
+import type { Profile, AvatarShape, ProfileLink } from "../../types/database";
 import { getBrowserSupabaseClient } from "../../lib/supabase/client";
 import { toast } from "sonner";
-import { Loader2, Image as ImageIcon, CircleUserRound } from "lucide-react";
+import { Loader2, Image as ImageIcon, CircleUserRound, Star, Sparkles } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { Switch } from "../ui/switch";
 
 interface DesignSectionProps {
   profile: Partial<Profile>;
   onChange: (updates: Partial<Profile>) => void;
   userId: string;
+  links?: Partial<ProfileLink>[];
 }
 
 const GRADIENT_PRESETS = [
@@ -49,7 +52,7 @@ import {
 
 import { ColorControl } from "./ColorControl";
 
-export function DesignSection({ profile, onChange, userId }: DesignSectionProps) {
+export function DesignSection({ profile, onChange, userId, links = [] }: DesignSectionProps) {
   const rawBg = profile.background_color || "#ffffff";
   const rawBtn = profile.button_color || "#111111";
   const rawBtnText = profile.button_text_color || "#ffffff";
@@ -168,6 +171,62 @@ export function DesignSection({ profile, onChange, userId }: DesignSectionProps)
       </div>
 
       <TemplatePicker profile={profile} onChange={onChange} />
+
+      {/* SOCIAL COVERS & HERO SOCIAL */}
+      <div className="space-y-4 rounded-xl border bg-card p-3 shadow-sm sm:p-4">
+        <Label className="flex items-center gap-2">
+          <Sparkles className="w-4 h-4" /> Apariencia Social (Premium)
+        </Label>
+
+        <div className="space-y-4 pt-2">
+          {/* Social Covers Toggle */}
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label className="text-sm">Activar Social Covers</Label>
+              <p className="text-xs text-muted-foreground">Transforma redes en tarjetas visuales</p>
+            </div>
+            <Switch
+              checked={profile.social_covers_enabled || false}
+              onCheckedChange={(checked) => onChange({ social_covers_enabled: checked })}
+            />
+          </div>
+
+          <div className="w-full h-px bg-border/50" />
+
+          {/* Hero Social Selector */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label className="text-sm">Hero Social</Label>
+                <p className="text-xs text-muted-foreground">
+                  Destaca un enlace como portada superior
+                </p>
+              </div>
+            </div>
+
+            <Select
+              value={profile.hero_link_id || "off"}
+              onValueChange={(val) => onChange({ hero_link_id: val === "off" ? null : val })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Seleccionar enlace principal" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="off">
+                  <span className="text-muted-foreground">Desactivado (OFF)</span>
+                </SelectItem>
+                {links
+                  ?.filter((l) => l.id && l.enabled)
+                  .map((link) => (
+                    <SelectItem key={link.id} value={link.id as string}>
+                      {link.label || link.platform}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
 
       {/* PORTADA Y AVATAR */}
       <div className="space-y-4 rounded-xl border bg-card p-3 shadow-sm sm:p-4">

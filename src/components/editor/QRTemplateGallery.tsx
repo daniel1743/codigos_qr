@@ -44,7 +44,7 @@ export function QRTemplateGallery({
       (t) =>
         t.qr_foreground_color === profile.qr_foreground_color &&
         t.qr_background_color === profile.qr_background_color &&
-        t.qr_logo_enabled === profile.qr_logo_enabled
+        t.qr_logo_enabled === profile.qr_logo_enabled,
     );
   }, [profile.qr_foreground_color, profile.qr_background_color, profile.qr_logo_enabled]);
 
@@ -171,49 +171,49 @@ export function QRTemplateGallery({
             {/* Filters - solo mostrar en tab templates */}
             {activeTab === "templates" && (
               <div className="space-y-3">
-              {/* Tier Filter */}
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  variant={tierFilter === "all" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setTierFilter("all")}
-                  className="h-8 text-xs"
-                >
-                  Todos
-                </Button>
-                <Button
-                  variant={tierFilter === "free" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setTierFilter("free")}
-                  className="h-8 text-xs"
-                >
-                  Gratis
-                </Button>
-                <Button
-                  variant={tierFilter === "premium" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setTierFilter("premium")}
-                  className="h-8 text-xs"
-                >
-                  Premium
-                </Button>
-              </div>
-
-              {/* Category Filter */}
-              <div className="flex flex-wrap gap-2">
-                {QR_CATEGORIES.map((cat) => (
+                {/* Tier Filter */}
+                <div className="flex flex-wrap gap-2">
                   <Button
-                    key={cat.id}
-                    variant={categoryFilter === cat.id ? "default" : "outline"}
+                    variant={tierFilter === "all" ? "default" : "outline"}
                     size="sm"
-                    onClick={() => setCategoryFilter(cat.id as QRTemplateCategory | "all")}
-                    className="h-7 text-xs"
+                    onClick={() => setTierFilter("all")}
+                    className="h-8 text-xs"
                   >
-                    {cat.label}
+                    Todos
                   </Button>
-                ))}
+                  <Button
+                    variant={tierFilter === "free" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setTierFilter("free")}
+                    className="h-8 text-xs"
+                  >
+                    Gratis
+                  </Button>
+                  <Button
+                    variant={tierFilter === "premium" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setTierFilter("premium")}
+                    className="h-8 text-xs"
+                  >
+                    Premium
+                  </Button>
+                </div>
+
+                {/* Category Filter */}
+                <div className="flex flex-wrap gap-2">
+                  {QR_CATEGORIES.map((cat) => (
+                    <Button
+                      key={cat.id}
+                      variant={categoryFilter === cat.id ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setCategoryFilter(cat.id as QRTemplateCategory | "all")}
+                      className="h-7 text-xs"
+                    >
+                      {cat.label}
+                    </Button>
+                  ))}
+                </div>
               </div>
-            </div>
             )}
           </DialogHeader>
 
@@ -258,27 +258,100 @@ export function QRTemplateGallery({
 
                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
                   {Object.entries({
-                    holographicPurple: { name: "Holográfico Púrpura", effect: "holographic", dotsType: "rounded", preview: "linear-gradient(45deg, #8B5CF6, #EC4899, #3B82F6, #10B981, #F59E0B)" },
-                    holographicBlue: { name: "Holográfico Azul", effect: "holographic", dotsType: "classy", preview: "linear-gradient(135deg, #06B6D4, #3B82F6, #8B5CF6, #EC4899)" },
-                    metallicGold: { name: "Oro Metálico", effect: "metallic-gold", dotsType: "rounded", preview: "linear-gradient(90deg, #FFD700, #FFA500, #FFED4E, #D4AF37)" },
-                    metallicSilver: { name: "Plata Metálica", effect: "metallic-silver", dotsType: "rounded", preview: "linear-gradient(90deg, #E8E8E8, #FFFFFF, #C0C0C0, #F0F0F0)" },
-                    metallicRoseGold: { name: "Oro Rosa", effect: "metallic-gold", dotsType: "classy", preview: "linear-gradient(45deg, #F4C2C2, #E0A899, #FFD4B8)" },
-                    aurora: { name: "Aurora Boreal", effect: "aurora", dotsType: "extra-rounded", preview: "linear-gradient(180deg, #00FFA3, #03E1FF, #DC1FFF)" },
-                    rainbowPremium: { name: "Rainbow Premium", effect: "rainbow", dotsType: "classy-rounded", preview: "linear-gradient(45deg, #FF0080, #FF00FF, #8000FF, #0080FF, #00FFFF)" },
-                    crystal: { name: "Cristal", effect: "crystal", dotsType: "rounded", preview: "radial-gradient(circle, #FFFFFF, #E0F2FE, #BAE6FD, #0EA5E9)" },
-                    sunsetPremium: { name: "Sunset Premium", effect: "glow", dotsType: "classy", preview: "linear-gradient(135deg, #FF6B6B, #FFD93D, #FF8E53)" },
-                    oceanPremium: { name: "Ocean Premium", effect: "glow", dotsType: "rounded", preview: "linear-gradient(180deg, #667EEA, #764BA2, #F093FB)" },
-                    neonCyberpunk: { name: "Neón Cyberpunk", effect: "neon", dotsType: "square", preview: "linear-gradient(90deg, #FF00FF, #00FFFF, #FF00FF)" },
-                    emeraldLuxury: { name: "Esmeralda Luxury", effect: "glow", dotsType: "classy-rounded", preview: "radial-gradient(circle, #10B981, #059669, #047857)" },
-                    rubyLuxury: { name: "Rubí Luxury", effect: "glow", dotsType: "classy-rounded", preview: "radial-gradient(circle, #DC2626, #EF4444, #B91C1C)" },
-                    sapphireLuxury: { name: "Zafiro Luxury", effect: "glow", dotsType: "classy-rounded", preview: "radial-gradient(circle, #3B82F6, #2563EB, #1D4ED8)" },
+                    holographicPurple: {
+                      name: "Holográfico Púrpura",
+                      effect: "holographic",
+                      dotsType: "rounded",
+                      preview:
+                        "linear-gradient(45deg, #8B5CF6, #EC4899, #3B82F6, #10B981, #F59E0B)",
+                    },
+                    holographicBlue: {
+                      name: "Holográfico Azul",
+                      effect: "holographic",
+                      dotsType: "classy",
+                      preview: "linear-gradient(135deg, #06B6D4, #3B82F6, #8B5CF6, #EC4899)",
+                    },
+                    metallicGold: {
+                      name: "Oro Metálico",
+                      effect: "metallic-gold",
+                      dotsType: "rounded",
+                      preview: "linear-gradient(90deg, #FFD700, #FFA500, #FFED4E, #D4AF37)",
+                    },
+                    metallicSilver: {
+                      name: "Plata Metálica",
+                      effect: "metallic-silver",
+                      dotsType: "rounded",
+                      preview: "linear-gradient(90deg, #E8E8E8, #FFFFFF, #C0C0C0, #F0F0F0)",
+                    },
+                    metallicRoseGold: {
+                      name: "Oro Rosa",
+                      effect: "metallic-gold",
+                      dotsType: "classy",
+                      preview: "linear-gradient(45deg, #F4C2C2, #E0A899, #FFD4B8)",
+                    },
+                    aurora: {
+                      name: "Aurora Boreal",
+                      effect: "aurora",
+                      dotsType: "extra-rounded",
+                      preview: "linear-gradient(180deg, #00FFA3, #03E1FF, #DC1FFF)",
+                    },
+                    rainbowPremium: {
+                      name: "Rainbow Premium",
+                      effect: "rainbow",
+                      dotsType: "classy-rounded",
+                      preview:
+                        "linear-gradient(45deg, #FF0080, #FF00FF, #8000FF, #0080FF, #00FFFF)",
+                    },
+                    crystal: {
+                      name: "Cristal",
+                      effect: "crystal",
+                      dotsType: "rounded",
+                      preview: "radial-gradient(circle, #FFFFFF, #E0F2FE, #BAE6FD, #0EA5E9)",
+                    },
+                    sunsetPremium: {
+                      name: "Sunset Premium",
+                      effect: "glow",
+                      dotsType: "classy",
+                      preview: "linear-gradient(135deg, #FF6B6B, #FFD93D, #FF8E53)",
+                    },
+                    oceanPremium: {
+                      name: "Ocean Premium",
+                      effect: "glow",
+                      dotsType: "rounded",
+                      preview: "linear-gradient(180deg, #667EEA, #764BA2, #F093FB)",
+                    },
+                    neonCyberpunk: {
+                      name: "Neón Cyberpunk",
+                      effect: "neon",
+                      dotsType: "square",
+                      preview: "linear-gradient(90deg, #FF00FF, #00FFFF, #FF00FF)",
+                    },
+                    emeraldLuxury: {
+                      name: "Esmeralda Luxury",
+                      effect: "glow",
+                      dotsType: "classy-rounded",
+                      preview: "radial-gradient(circle, #10B981, #059669, #047857)",
+                    },
+                    rubyLuxury: {
+                      name: "Rubí Luxury",
+                      effect: "glow",
+                      dotsType: "classy-rounded",
+                      preview: "radial-gradient(circle, #DC2626, #EF4444, #B91C1C)",
+                    },
+                    sapphireLuxury: {
+                      name: "Zafiro Luxury",
+                      effect: "glow",
+                      dotsType: "classy-rounded",
+                      preview: "radial-gradient(circle, #3B82F6, #2563EB, #1D4ED8)",
+                    },
                   }).map(([key, data]) => (
                     <button
                       key={key}
                       onClick={() => {
                         if (!isPremiumUser) {
                           toast.error("Acceso Premium requerido", {
-                            description: "Los efectos opulentos están disponibles solo para usuarios Premium"
+                            description:
+                              "Los efectos opulentos están disponibles solo para usuarios Premium",
                           });
                           return;
                         }
@@ -288,7 +361,9 @@ export function QRTemplateGallery({
                           qr_dots_type: data.dotsType,
                           qr_foreground_color: null,
                         });
-                        toast.success("Efecto aplicado", { description: `${data.name} aplicado a tu QR` });
+                        toast.success("Efecto aplicado", {
+                          description: `${data.name} aplicado a tu QR`,
+                        });
                         onClose();
                       }}
                       disabled={!isPremiumUser}
@@ -344,9 +419,7 @@ export function QRTemplateGallery({
                     </Badge>
                   )}
                 </DialogTitle>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {previewTemplate?.description}
-                </p>
+                <p className="mt-1 text-sm text-muted-foreground">{previewTemplate?.description}</p>
               </div>
             </div>
           </DialogHeader>
@@ -381,11 +454,7 @@ export function QRTemplateGallery({
 
             {/* Actions */}
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                className="flex-1"
-                onClick={() => setPreviewTemplate(null)}
-              >
+              <Button variant="outline" className="flex-1" onClick={() => setPreviewTemplate(null)}>
                 Volver
               </Button>
               {previewTemplate?.tier === "premium" && !isPremiumUser ? (

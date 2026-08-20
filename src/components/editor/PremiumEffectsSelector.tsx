@@ -1,11 +1,5 @@
 import { Button } from "../ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "../ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../ui/dialog";
 import { Badge } from "../ui/badge";
 import { Crown, Sparkles, Zap } from "lucide-react";
 import { PREMIUM_GRADIENTS } from "../../lib/premium-qr-presets";
@@ -13,11 +7,7 @@ import { PREMIUM_GRADIENTS } from "../../lib/premium-qr-presets";
 interface PremiumEffectsSelectorProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSelectEffect: (effect: {
-    gradient: any;
-    effect: string;
-    dotsType: string;
-  }) => void;
+  onSelectEffect: (effect: { gradient: any; effect: string; dotsType: string }) => void;
   isPremium: boolean;
 }
 
@@ -83,7 +73,8 @@ const PREMIUM_PRESETS = [
     effect: "rainbow",
     dotsType: "classy-rounded",
     tier: "premium",
-    preview: "linear-gradient(45deg, #FF0080, #FF00FF, #8000FF, #0080FF, #00FFFF, #00FF80, #80FF00)",
+    preview:
+      "linear-gradient(45deg, #FF0080, #FF00FF, #8000FF, #0080FF, #00FFFF, #00FF80, #80FF00)",
   },
   {
     id: "crystal",

@@ -158,10 +158,8 @@ export function AnalyticsGlobalPanel() {
           <CardContent>
             <div className="text-2xl font-bold">{analytics.totalViews.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">
-              {totalEvents > 0
-                ? ((analytics.totalViews / totalEvents) * 100).toFixed(1)
-                : 0}
-              % del total
+              {totalEvents > 0 ? ((analytics.totalViews / totalEvents) * 100).toFixed(1) : 0}% del
+              total
             </p>
           </CardContent>
         </Card>
@@ -174,10 +172,8 @@ export function AnalyticsGlobalPanel() {
           <CardContent>
             <div className="text-2xl font-bold">{analytics.totalClicks.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">
-              {totalEvents > 0
-                ? ((analytics.totalClicks / totalEvents) * 100).toFixed(1)
-                : 0}
-              % del total
+              {totalEvents > 0 ? ((analytics.totalClicks / totalEvents) * 100).toFixed(1) : 0}% del
+              total
             </p>
           </CardContent>
         </Card>
@@ -188,9 +184,7 @@ export function AnalyticsGlobalPanel() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {analytics.uniqueVisitors.toLocaleString()}
-            </div>
+            <div className="text-2xl font-bold">{analytics.uniqueVisitors.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">IPs únicas</p>
           </CardContent>
         </Card>
@@ -309,10 +303,7 @@ export function AnalyticsGlobalPanel() {
                 <p className="text-sm text-muted-foreground">No hay datos de ubicación</p>
               ) : (
                 analytics.topCountries.map((country, index) => (
-                  <div
-                    key={country.country}
-                    className="flex items-center justify-between text-sm"
-                  >
+                  <div key={country.country} className="flex items-center justify-between text-sm">
                     <div className="flex items-center gap-2">
                       <Badge variant="outline" className="w-6 justify-center">
                         {index + 1}

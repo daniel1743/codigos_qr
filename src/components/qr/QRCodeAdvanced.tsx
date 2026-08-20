@@ -16,6 +16,92 @@ const DEFAULT_LOGO_MARGIN = 4;
 const MIN_PROCESSED_LOGO_SIZE = 512;
 const WHITE_THRESHOLD = 246;
 
+function hexToRgb(hex?: string) {
+  if (!hex || !/^#[0-9A-Fa-f]{6}$/.test(hex)) return null;
+  return {
+    red: parseInt(hex.slice(1, 3), 16),
+    green: parseInt(hex.slice(3, 5), 16),
+    blue: parseInt(hex.slice(5, 7), 16),
+  };
+}
+
+function recolorCanvasRegion(
+  canvas: HTMLCanvasElement,
+  region: { x: number; y: number; width: number; height: number },
+  color?: string,
+  backgroundColor?: string,
+) {
+  const target = hexToRgb(color);
+  if (!target) return;
+
+  const background = hexToRgb(backgroundColor || "#ffffff") || {
+    red: 255,
+    green: 255,
+    blue: 255,
+  };
+  const context = canvas.getContext("2d", { willReadFrequently: true });
+  if (!context) return;
+
+  const x = Math.max(0, Math.round(region.x));
+  const y = Math.max(0, Math.round(region.y));
+  const width = Math.min(canvas.width - x, Math.round(region.width));
+  const height = Math.min(canvas.height - y, Math.round(region.height));
+  if (width <= 0 || height <= 0) return;
+
+  try {
+    const imageData = context.getImageData(x, y, width, height);
+    const { data } = imageData;
+
+    for (let i = 0; i < data.length; i += 4) {
+      const red = data[i] ?? 0;
+      const green = data[i + 1] ?? 0;
+      const blue = data[i + 2] ?? 0;
+      const alpha = data[i + 3] ?? 255;
+      const bgDistance =
+        Math.abs(red - background.red) +
+        Math.abs(green - background.green) +
+        Math.abs(blue - background.blue);
+
+      if (alpha > 0 && bgDistance > 60) {
+        data[i] = target.red;
+        data[i + 1] = target.green;
+        data[i + 2] = target.blue;
+      }
+    }
+
+    context.putImageData(imageData, x, y);
+  } catch {
+    // Canvas may be tainted by a remote logo; leave QR untouched in that case.
+  }
+}
+
+function applyCornerSquareColors(canvas: HTMLCanvasElement, options: QRAdvancedOptions) {
+  const colors = options.cornerSquareColors;
+  if (!colors) return;
+
+  const size = Math.min(canvas.width, canvas.height);
+  const finderSize = size * 0.26;
+
+  recolorCanvasRegion(
+    canvas,
+    { x: 0, y: 0, width: finderSize, height: finderSize },
+    colors.topLeft,
+    options.backgroundColor,
+  );
+  recolorCanvasRegion(
+    canvas,
+    { x: size - finderSize, y: 0, width: finderSize, height: finderSize },
+    colors.topRight,
+    options.backgroundColor,
+  );
+  recolorCanvasRegion(
+    canvas,
+    { x: 0, y: size - finderSize, width: finderSize, height: finderSize },
+    colors.bottomLeft,
+    options.backgroundColor,
+  );
+}
+
 async function removeWhiteBackground(src: string): Promise<string> {
   if (src.startsWith("data:image/svg+xml") || src.endsWith(".svg")) {
     return src;
@@ -109,9 +195,11 @@ function buildStylingOptions(options: QRAdvancedOptions, image?: string): Option
     },
     cornersSquareOptions: {
       type: options.cornersSquareType ?? "extra-rounded",
+      color: options.cornersSquareColor,
     },
     cornersDotOptions: {
       type: options.cornersDotType ?? "dot",
+      color: options.cornersDotColor,
     },
   };
 
@@ -126,11 +214,11 @@ function buildStylingOptions(options: QRAdvancedOptions, image?: string): Option
     };
     stylingOptions.cornersSquareOptions = {
       ...stylingOptions.cornersSquareOptions,
-      color: options.dotsColor,
+      color: options.cornersSquareColor ?? options.dotsColor,
     };
     stylingOptions.cornersDotOptions = {
       ...stylingOptions.cornersDotOptions,
-      color: options.dotsColor,
+      color: options.cornersDotColor ?? options.dotsColor,
     };
   } else if (options.dotsColor && typeof options.dotsColor === "object") {
     const gradient = {
@@ -149,10 +237,12 @@ function buildStylingOptions(options: QRAdvancedOptions, image?: string): Option
     stylingOptions.cornersSquareOptions = {
       ...stylingOptions.cornersSquareOptions,
       gradient,
+      ...(options.cornersSquareColor ? { color: options.cornersSquareColor } : {}),
     };
     stylingOptions.cornersDotOptions = {
       ...stylingOptions.cornersDotOptions,
       gradient,
+      ...(options.cornersDotColor ? { color: options.cornersDotColor } : {}),
     };
   }
 
@@ -186,6 +276,9 @@ export function QRCodeAdvanced({ options, className, onRender }: QRCodeAdvancedP
       }
 
       const canvas = ref.current.querySelector("canvas");
+      if (canvas) {
+        applyCornerSquareColors(canvas, options);
+      }
 
       // Aplicar efectos Premium
       if (canvas && options.effect && options.effect !== "none") {
@@ -203,7 +296,10 @@ export function QRCodeAdvanced({ options, className, onRender }: QRCodeAdvancedP
           }
 
           // Para efectos básicos que necesitan color
-          if ((options.effect === "neon" || options.effect === "glow") && typeof options.dotsColor === "string") {
+          if (
+            (options.effect === "neon" || options.effect === "glow") &&
+            typeof options.dotsColor === "string"
+          ) {
             canvas.style.color = options.dotsColor;
           }
         }
@@ -244,14 +340,65 @@ export function useQRAdvancedDownload() {
     filename: string,
     format: "png" | "svg" = "png",
   ) => {
-    const image = options.image ? await removeWhiteBackground(options.image) : undefined;
-    const stylingOptions = buildStylingOptions(options, image);
+    try {
+      const image = options.image ? await removeWhiteBackground(options.image) : undefined;
+      const stylingOptions = buildStylingOptions(options, image);
 
-    const qr = new QRCodeStyling(stylingOptions);
+      const qr = new QRCodeStyling(stylingOptions);
 
-    if (format === "png") {
-      const blob = await qr.getRawData("png");
-      if (blob) {
+      if (format === "png") {
+        const blob = await qr.getRawData("png");
+        if (!blob) {
+          throw new Error("Failed to generate PNG: getRawData returned null");
+        }
+        let outputBlob = blob as Blob;
+        if (options.cornerSquareColors) {
+          outputBlob = await new Promise<Blob>((resolve) => {
+            const image = new Image();
+            image.onload = () => {
+              const canvas = document.createElement("canvas");
+              canvas.width = options.width;
+              canvas.height = options.height;
+              const context = canvas.getContext("2d");
+              if (!context) {
+                resolve(blob as Blob);
+                return;
+              }
+              context.drawImage(image, 0, 0, options.width, options.height);
+              applyCornerSquareColors(canvas, options);
+              canvas.toBlob(
+                (processedBlob) => resolve(processedBlob || (blob as Blob)),
+                "image/png",
+              );
+              URL.revokeObjectURL(image.src);
+            };
+            image.onerror = () => resolve(blob as Blob);
+            image.src = URL.createObjectURL(blob as Blob);
+          });
+        }
+
+        const url = URL.createObjectURL(outputBlob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+      } else {
+        // Modified by Claude Code — QR-STUDIO-CLOSE-10B
+        const blob = await qr.getRawData("svg");
+        if (!blob) {
+          throw new Error("Failed to generate SVG: getRawData returned null");
+        }
+
+        // Verify SVG is self-contained (no external image URLs)
+        const svgText = await blob.text();
+        const externalUrlPattern = /(?:href|xlink:href)=["']https?:\/\/[^"']+["']/i;
+        if (externalUrlPattern.test(svgText)) {
+          throw new Error(
+            "SVG avanzado contiene referencias externas. La librería no pudo incrustar el logo.",
+          );
+        }
+
         const url = URL.createObjectURL(blob as Blob);
         const a = document.createElement("a");
         a.href = url;
@@ -259,16 +406,9 @@ export function useQRAdvancedDownload() {
         a.click();
         URL.revokeObjectURL(url);
       }
-    } else {
-      const blob = await qr.getRawData("svg");
-      if (blob) {
-        const url = URL.createObjectURL(blob as Blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = filename;
-        a.click();
-        URL.revokeObjectURL(url);
-      }
+    } catch (error) {
+      console.error("Advanced QR download failed:", error);
+      throw error; // Re-throw to let caller handle it
     }
   };
 

@@ -1,7 +1,7 @@
 import React from "react";
 import type { Profile, ProfileLink } from "../../types/database";
 import { ChevronRight } from "lucide-react";
-
+import { SocialCover } from "./SocialCover";
 import { ContextualToolbar } from "./ContextualToolbar";
 import { getPlatformDef } from "../../constants/platforms";
 
@@ -304,6 +304,22 @@ export function PublicProfileView({
       >
         <DecorativeLayer profile={profile} accentColor={buttonColor} />
         <div className="relative z-10 flex w-full max-w-[520px] flex-1 flex-col items-center pb-12 pt-0 sm:pb-16">
+          
+          {/* Hero Social Section */}
+          {profile.hero_link_id && links.find(l => l.id === profile.hero_link_id && l.enabled) && (
+            <ContextWrapper type="link" linkId={profile.hero_link_id}>
+              <div className="w-full shrink-0 relative">
+                <SocialCover 
+                  link={links.find(l => l.id === profile.hero_link_id)! as ProfileLink} 
+                  variant="hero" 
+                  onClick={(e) => {
+                    if (isPreview) e.preventDefault();
+                  }}
+                />
+              </div>
+            </ContextWrapper>
+          )}
+
           {/* Portada Section */}
           {profile.banner_url ? (
             <ContextWrapper type="cover">
@@ -395,7 +411,7 @@ export function PublicProfileView({
               className={`w-full px-4 sm:px-6 ${linkSpacingClass} flex-1 flex flex-col items-center`}
             >
               {links
-                .filter((l) => l.enabled)
+                .filter((l) => l.enabled && l.id !== profile.hero_link_id)
                 .map((link, i) => {
                   let btnClassName = `group relative flex w-full items-center justify-between p-4 px-5 text-left shadow-sm transition-all duration-200 hover:-translate-y-[1px] active:scale-[0.985] motion-reduce:transition-none motion-reduce:transform-none h-[56px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${radiusClass}`;
                   let btnStyle: React.CSSProperties = {};
@@ -430,69 +446,80 @@ export function PublicProfileView({
                       {...(link.id ? { linkId: link.id } : {})}
                       key={link.id || i}
                     >
-                      <a
-                        href={isPreview ? undefined : link.url}
-                        target={isPreview ? undefined : "_blank"}
-                        rel={isPreview ? undefined : "noopener noreferrer"}
-                        onClick={(e) => {
-                          if (isPreview) e.preventDefault();
-                        }}
-                        className={btnClassName}
-                        style={btnStyle}
-                      >
-                        {buttonStyle === "solid" || buttonStyle === "pill" ? (
-                          <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[inherit]">
-                            <div className="absolute inset-y-0 w-1/4 h-full bg-white/20 -skew-x-12 opacity-0 group-hover:opacity-100 -translate-x-full group-hover:animate-[shine_1.5s_ease-out] motion-reduce:hidden"></div>
-                          </div>
-                        ) : null}
-
-                        <div
-                          className={`relative z-10 flex items-center w-full ${btnContentAlign === "center" ? "justify-center px-10" : btnContentAlign === "right" ? "justify-end" : "justify-start"} gap-3`}
+                      {profile.social_covers_enabled ? (
+                        <SocialCover
+                          link={link as ProfileLink}
+                          variant="cover"
+                          className="w-full mb-3 last:mb-0"
+                          onClick={(e) => {
+                            if (isPreview) e.preventDefault();
+                          }}
+                        />
+                      ) : (
+                        <a
+                          href={isPreview ? undefined : link.url}
+                          target={isPreview ? undefined : "_blank"}
+                          rel={isPreview ? undefined : "noopener noreferrer"}
+                          onClick={(e) => {
+                            if (isPreview) e.preventDefault();
+                          }}
+                          className={btnClassName}
+                          style={btnStyle}
                         >
-                          {btnIconPos === "left" && (
-                            <div
-                              className={`shrink-0 ${btnContentAlign === "center" ? "absolute left-0 w-10 flex items-center justify-start" : ""}`}
-                            >
-                              {buttonStyle === "card" ? (
-                                <div className="w-10 h-10 shrink-0 rounded-full flex items-center justify-center bg-black/5 shadow-inner">
-                                  {renderPlatformIcon(link.platform || "other", "w-5 h-5")}
-                                </div>
-                              ) : (
-                                renderPlatformIcon(link.platform || "other", "w-5 h-5 shrink-0")
-                              )}
+                          {buttonStyle === "solid" || buttonStyle === "pill" ? (
+                            <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[inherit]">
+                              <div className="absolute inset-y-0 w-1/4 h-full bg-white/20 -skew-x-12 opacity-0 group-hover:opacity-100 -translate-x-full group-hover:animate-[shine_1.5s_ease-out] motion-reduce:hidden"></div>
                             </div>
-                          )}
+                          ) : null}
 
-                          <span
-                            title={link.label || "Enlace"}
-                            className={`min-w-0 truncate leading-snug ${btnTextSize} ${btnTextWeight} ${buttonStyle === "minimal" || buttonStyle === "line" ? "tracking-tight" : ""} ${btnContentAlign === "center" ? "text-center" : btnContentAlign === "right" ? "text-right" : "text-left"} ${btnContentAlign === "center" ? "w-full" : "flex-1"}`}
+                          <div
+                            className={`relative z-10 flex items-center w-full ${btnContentAlign === "center" ? "justify-center px-10" : btnContentAlign === "right" ? "justify-end" : "justify-start"} gap-3`}
                           >
-                            {link.label || "Enlace"}
-                          </span>
+                            {btnIconPos === "left" && (
+                              <div
+                                className={`shrink-0 ${btnContentAlign === "center" ? "absolute left-0 w-10 flex items-center justify-start" : ""}`}
+                              >
+                                {buttonStyle === "card" ? (
+                                  <div className="w-10 h-10 shrink-0 rounded-full flex items-center justify-center bg-black/5 shadow-inner">
+                                    {renderPlatformIcon(link.platform || "other", "w-5 h-5")}
+                                  </div>
+                                ) : (
+                                  renderPlatformIcon(link.platform || "other", "w-5 h-5 shrink-0")
+                                )}
+                              </div>
+                            )}
 
-                          {btnIconPos === "right" && (
-                            <div
-                              className={`shrink-0 ${btnContentAlign === "center" ? "absolute right-0 w-10 flex items-center justify-end" : ""}`}
+                            <span
+                              title={link.label || "Enlace"}
+                              className={`min-w-0 truncate leading-snug ${btnTextSize} ${btnTextWeight} ${buttonStyle === "minimal" || buttonStyle === "line" ? "tracking-tight" : ""} ${btnContentAlign === "center" ? "text-center" : btnContentAlign === "right" ? "text-right" : "text-left"} ${btnContentAlign === "center" ? "w-full" : "flex-1"}`}
                             >
-                              {buttonStyle === "card" ? (
-                                <div className="w-10 h-10 shrink-0 rounded-full flex items-center justify-center bg-black/5 shadow-inner">
-                                  {renderPlatformIcon(link.platform || "other", "w-5 h-5")}
-                                </div>
-                              ) : (
-                                renderPlatformIcon(link.platform || "other", "w-5 h-5 shrink-0")
-                              )}
-                            </div>
-                          )}
+                              {link.label || "Enlace"}
+                            </span>
 
-                          {btnIconPos !== "right" && (
-                            <div
-                              className={`shrink-0 opacity-50 group-hover:opacity-100 transition-opacity ${btnContentAlign === "center" ? "absolute right-0 w-10 flex items-center justify-end" : ""}`}
-                            >
-                              <ChevronRight className="w-5 h-5" aria-hidden="true" />
-                            </div>
-                          )}
-                        </div>
-                      </a>
+                            {btnIconPos === "right" && (
+                              <div
+                                className={`shrink-0 ${btnContentAlign === "center" ? "absolute right-0 w-10 flex items-center justify-end" : ""}`}
+                              >
+                                {buttonStyle === "card" ? (
+                                  <div className="w-10 h-10 shrink-0 rounded-full flex items-center justify-center bg-black/5 shadow-inner">
+                                    {renderPlatformIcon(link.platform || "other", "w-5 h-5")}
+                                  </div>
+                                ) : (
+                                  renderPlatformIcon(link.platform || "other", "w-5 h-5 shrink-0")
+                                )}
+                              </div>
+                            )}
+
+                            {btnIconPos !== "right" && (
+                              <div
+                                className={`shrink-0 opacity-50 group-hover:opacity-100 transition-opacity ${btnContentAlign === "center" ? "absolute right-0 w-10 flex items-center justify-end" : ""}`}
+                              >
+                                <ChevronRight className="w-5 h-5" aria-hidden="true" />
+                              </div>
+                            )}
+                          </div>
+                        </a>
+                      )}
                     </ContextWrapper>
                   );
                 })}

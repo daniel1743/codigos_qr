@@ -132,14 +132,20 @@ function OptionCard({
         <Icon className="h-5 w-5" />
       </div>
       <span className="block text-sm font-semibold leading-tight">{option.title}</span>
-      <span className={`mt-1 block text-xs leading-snug ${active ? "text-white/70" : "text-muted-foreground"}`}>
+      <span
+        className={`mt-1 block text-xs leading-snug ${active ? "text-white/70" : "text-muted-foreground"}`}
+      >
         {option.description}
       </span>
     </button>
   );
 }
 
-function OptionRow({ options, profile, onChange }: {
+function OptionRow({
+  options,
+  profile,
+  onChange,
+}: {
   options: DecorativeOption[];
   profile: Partial<Profile>;
   onChange: (updates: Partial<Profile>) => void;
@@ -151,7 +157,11 @@ function OptionRow({ options, profile, onChange }: {
           key={option.id}
           option={option}
           active={option.active(profile)}
-          onApply={() => onChange(typeof option.updates === "function" ? option.updates(profile) : option.updates)}
+          onApply={() =>
+            onChange(
+              typeof option.updates === "function" ? option.updates(profile) : option.updates,
+            )
+          }
         />
       ))}
     </div>

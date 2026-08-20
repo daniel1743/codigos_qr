@@ -3,10 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 /**
  * Verificar si un usuario es administrador
  */
-export async function isUserAdmin(
-  supabase: SupabaseClient,
-  userId: string
-): Promise<boolean> {
+export async function isUserAdmin(supabase: SupabaseClient, userId: string): Promise<boolean> {
   try {
     const { data, error } = await supabase
       .from("admin_users")
@@ -29,10 +26,7 @@ export async function isUserAdmin(
 /**
  * Lista de emails admin hardcoded como fallback
  */
-export const ADMIN_EMAILS = [
-  "falcondaniel37@gmail.com",
-  "admin@example.com"
-];
+export const ADMIN_EMAILS = ["falcondaniel37@gmail.com", "admin@example.com"];
 
 /**
  * Verificar si un email es admin (fallback)
