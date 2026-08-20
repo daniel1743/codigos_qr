@@ -130,10 +130,10 @@ function Index() {
 
           <div className="flex items-center gap-2">
             <Link
-              to="/editor"
+              to="/profile"
               className="hidden text-sm font-semibold text-slate-700 hover:text-slate-950 sm:inline-flex"
             >
-              Iniciar sesión
+              Panel / Perfil
             </Link>
             <Link
               to="/editor"
@@ -191,10 +191,10 @@ function Index() {
                 </a>
                 <div className="border-t border-slate-200 pt-3">
                   <Link
-                    to="/editor"
+                    to="/profile"
                     className="flex items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
                   >
-                    Iniciar sesión
+                    Panel / Perfil
                     <ArrowRight className="h-4 w-4 text-slate-400" />
                   </Link>
                 </div>

@@ -208,7 +208,7 @@ export function ShareSection({
       }
     }
 
-        const isAdvanced = requiresAdvancedRenderer(
+    const isAdvanced = requiresAdvancedRenderer(
       profile.qr_gradient || fgColor,
       profile.qr_dots_type || "square",
       profile.qr_effect || "none"

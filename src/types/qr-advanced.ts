@@ -2,11 +2,11 @@
  * Tipos para QR Code Styling avanzado
  */
 
-export type DotsType = "rounded" | "dots" | "classy" | "classy-rounded" | "square" | "extra-rounded";
+export type DotsType = "rounded" | "dots" | "classy" | "classy-rounded" | "square" | "extra-rounded" | "diamond" | "star";
 export type CornerSquareType = "dot" | "square" | "extra-rounded";
 export type CornerDotType = "dot" | "square";
 export type GradientType = "linear" | "radial";
-export type QREffectType = "none" | "neon" | "glow";
+export type QREffectType = "none" | "neon" | "glow" | "holographic" | "metallic-gold" | "metallic-silver" | "crystal" | "rainbow" | "aurora";
 
 export interface GradientOptions {
   type: GradientType;

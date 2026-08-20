@@ -201,11 +201,14 @@ function EditorPage() {
     setSaving(true);
     try {
       let currentProfileId = profile.id;
+
+      // CRÍTICO: Proteger publicId - nunca cambiar si ya existe
       const publicId = profile.public_id || generatePublicId();
       const internalSlug = profile.slug || getInternalSlugFromPublicId(publicId);
 
       let finalProfile;
       if (!currentProfileId) {
+        // Primera vez: crear con publicId
         finalProfile = await profileService.createProfile(supabase, {
           ...profile,
           user_id: session.user.id,
@@ -216,7 +219,10 @@ function EditorPage() {
         });
         currentProfileId = finalProfile.id;
       } else {
+        // Ya existe: NUNCA tocar public_id
         const { public_id: _publicId, ...editableProfile } = profile;
+
+        // Solo agregar publicId si NO existe (migración legacy)
         const identityBackfill = profile.public_id
           ? {}
           : {
@@ -573,6 +579,13 @@ function EditorPage() {
             </button>
           );
         })}
+        <Link
+          to="/profile"
+          className="flex min-h-14 min-w-[52px] flex-1 flex-col items-center justify-center rounded-lg px-1.5 py-2 transition-colors text-muted-foreground hover:text-primary"
+        >
+          <UserRound className="w-5 h-5 mb-1" />
+          <span className="max-w-full truncate text-[10px] font-medium">Perfil</span>
+        </Link>
       </nav>
 
       {/* MOBILE BOTTOM SHEET (Panel Overlay) */}
