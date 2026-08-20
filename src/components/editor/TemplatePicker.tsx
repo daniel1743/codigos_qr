@@ -1,7 +1,11 @@
 import React from "react";
 import { Label } from "../ui/label";
 import { LayoutTemplate } from "lucide-react";
-import { TEMPLATE_PRESETS, TemplateStyle } from "../../lib/design/template-presets";
+import {
+  TEMPLATE_FAMILY_OPTIONS,
+  TEMPLATE_PRESETS,
+  TemplateStyle,
+} from "../../lib/design/template-presets";
 import type { Profile } from "../../types/database";
 
 interface TemplatePickerProps {
@@ -31,7 +35,7 @@ function TemplateThumbnail({ style, name }: { style: TemplateStyle; name: string
 
   return (
     <div
-      className="w-full aspect-[3/4] rounded-xl overflow-hidden border shadow-sm flex flex-col items-center p-3 gap-2"
+      className="w-full aspect-[4/5] rounded-2xl overflow-hidden border shadow-sm flex flex-col items-center p-3 gap-2"
       style={bg}
     >
       {/* Avatar mock */}
@@ -41,7 +45,9 @@ function TemplateThumbnail({ style, name }: { style: TemplateStyle; name: string
       />
       {/* Name / Font mock (skeleton) */}
       <div className="flex flex-col items-center gap-1 w-full shrink-0 mt-0.5">
-        <div className="w-14 h-2 rounded-sm" style={{ backgroundColor: textColor, opacity: 0.7 }} />
+        <div className="max-w-full truncate px-1 text-[9px] font-bold" style={{ color: textColor }}>
+          {name}
+        </div>
         <div
           className="w-20 h-1.5 rounded-sm"
           style={{ backgroundColor: textColor, opacity: 0.4 }}
@@ -51,20 +57,20 @@ function TemplateThumbnail({ style, name }: { style: TemplateStyle; name: string
       <div className="w-full flex-1 flex flex-col justify-end gap-1.5 mt-1 pb-1">
         {[1, 2].map((i) => {
           let btnStyle: React.CSSProperties = { backgroundColor: style.button_color };
-          let btnClass = `w-full h-[18px] border border-black/5 shadow-sm ${radiusClass}`;
+          let btnClass = `w-full h-5 border border-black/5 shadow-sm ${radiusClass}`;
 
           if (style.button_style === "line") {
             btnStyle = {
               borderBottom: `2px solid ${style.button_color}`,
               backgroundColor: "transparent",
             };
-            btnClass = `w-full h-[18px] rounded-none`;
+            btnClass = `w-full h-5 rounded-none`;
           } else if (style.button_style === "minimal") {
             btnStyle = { backgroundColor: "transparent" };
-            btnClass = `w-full h-[18px] flex items-center justify-center`;
+            btnClass = `w-full h-5 flex items-center justify-center`;
           } else if (style.button_style === "soft") {
             btnStyle = { backgroundColor: style.button_color, opacity: 0.4 };
-            btnClass = `w-full h-[18px] ${radiusClass}`;
+            btnClass = `w-full h-5 ${radiusClass}`;
           } else if (style.button_style === "card") {
             btnStyle = {
               backgroundColor: "rgba(255,255,255,0.9)",
@@ -94,6 +100,7 @@ function TemplateThumbnail({ style, name }: { style: TemplateStyle; name: string
 }
 
 export function TemplatePicker({ profile, onChange }: TemplatePickerProps) {
+  const [activeFamily, setActiveFamily] = React.useState("Todas");
   // Detectar si la configuración actual coincide exactamente con una plantilla
   const activeTemplate = TEMPLATE_PRESETS.find(
     (t) =>
@@ -103,9 +110,13 @@ export function TemplatePicker({ profile, onChange }: TemplatePickerProps) {
       t.style.button_text_color === profile.button_text_color &&
       t.style.button_radius === profile.button_radius,
   );
+  const visibleTemplates =
+    activeFamily === "Todas"
+      ? TEMPLATE_PRESETS
+      : TEMPLATE_PRESETS.filter((template) => template.family === activeFamily);
 
   return (
-    <div className="space-y-4 rounded-xl border bg-card p-3 shadow-sm sm:p-4">
+    <div className="space-y-4 rounded-2xl border bg-card p-4 shadow-sm">
       <div className="flex items-center justify-between">
         <Label className="flex items-center gap-2 text-base">
           <LayoutTemplate className="w-4 h-4 text-primary" />
@@ -122,8 +133,25 @@ export function TemplatePicker({ profile, onChange }: TemplatePickerProps) {
         )}
       </div>
 
-      <div className="grid grid-cols-2 min-[420px]:grid-cols-3 sm:grid-cols-4 gap-x-3 gap-y-4 max-h-[420px] overflow-y-auto pr-1 pb-1 scrollbar-thin">
-        {TEMPLATE_PRESETS.map((template) => {
+      <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 scrollbar-thin">
+        {["Todas", ...TEMPLATE_FAMILY_OPTIONS.map((family) => family.name)].map((family) => (
+          <button
+            key={family}
+            type="button"
+            onClick={() => setActiveFamily(family)}
+            className={`shrink-0 rounded-full px-3 py-1.5 text-[11px] font-semibold transition-colors ${
+              activeFamily === family
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
+            }`}
+          >
+            {family}
+          </button>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 max-h-[520px] overflow-y-auto pr-1 pb-1 scrollbar-thin">
+        {visibleTemplates.map((template) => {
           const isActive = activeTemplate?.id === template.id;
           return (
             <button
@@ -132,18 +160,18 @@ export function TemplatePicker({ profile, onChange }: TemplatePickerProps) {
               aria-label={`Aplicar plantilla ${template.name}`}
               aria-pressed={isActive}
               onClick={() => onChange(template.style)}
-              className="flex flex-col gap-2 group text-left transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-xl"
+              className="flex flex-col gap-2 group text-left transition-transform duration-200 hover:scale-[1.01] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-2xl"
             >
               <div
-                className={`relative w-full rounded-2xl p-1 transition-all duration-200 ${isActive ? "bg-primary/5 border-2 border-primary" : "border-2 border-transparent hover:bg-muted"}`}
+                className={`relative w-full rounded-[1.25rem] p-1 transition-all duration-200 ${isActive ? "bg-primary/5 border-2 border-primary" : "border-2 border-transparent hover:bg-muted"}`}
               >
                 <TemplateThumbnail style={template.style} name={template.name} />
               </div>
-              <div className="px-1.5 space-y-0.5">
-                <div className={`text-xs font-semibold truncate ${isActive ? "text-primary" : ""}`}>
+              <div className="px-1.5 space-y-1">
+                <div className={`text-sm font-semibold leading-tight ${isActive ? "text-primary" : ""}`}>
                   {template.name}
                 </div>
-                <div className="text-[10px] text-muted-foreground leading-[1.1] line-clamp-2">
+                <div className="text-[11px] text-muted-foreground leading-snug">
                   {template.description}
                 </div>
               </div>

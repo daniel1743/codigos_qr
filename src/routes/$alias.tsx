@@ -6,33 +6,50 @@ import { getBrowserSupabaseClient } from "../lib/supabase/client";
 import { PublicProfileView } from "../components/profile/PublicProfileView";
 import { useEffect, useRef } from "react";
 
-export const Route = createFileRoute("/p/$publicId")({
+export const Route = createFileRoute("/$alias")({
   loader: async ({ params }) => {
+    // Rutas reservadas
+    const reservedRoutes = [
+      "editor",
+      "login",
+      "auth",
+      "api",
+      "qr",
+      "account",
+      "settings",
+      "p",
+      "terms",
+      "privacy",
+      "help",
+      "support",
+    ];
+    const aliasLower = params.alias.toLowerCase();
+
+    if (reservedRoutes.includes(aliasLower)) {
+      throw notFound();
+    }
+
     const supabase = getServerSupabaseClient();
-    const profile = await profileService.getPublicProfileByPublicId(supabase, params.publicId);
+    const profile = await profileService.getPublicProfileBySlug(supabase, aliasLower);
 
     if (!profile) {
       throw notFound();
     }
 
-    // Obtener los links para este perfil
     const links = await linkService.getProfileLinks(supabase, profile.id);
 
     return { profile, links: links.filter((l) => l.enabled) };
   },
-  component: PublicProfilePage,
+  component: PublicProfilePageByAlias,
 });
 
-function PublicProfilePage() {
+function PublicProfilePageByAlias() {
   const { profile, links } = Route.useLoaderData();
   const hasIncremented = useRef(false);
 
   useEffect(() => {
-    // Evitar contar bots sin JS o incrementar múltiple veces por hydration/StrictMode
-    // usando useRef para la vida de este componente. Un refresh cuenta como nueva apertura.
     if (!hasIncremented.current) {
       hasIncremented.current = true;
-      // Hacer el llamado asíncrono para incrementar (fuego y olvido)
       const supabase = getBrowserSupabaseClient();
       profileService.incrementScanCount(supabase, profile.id).catch(console.error);
     }

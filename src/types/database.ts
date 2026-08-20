@@ -34,9 +34,26 @@ export interface Profile {
   button_text_weight?: string;
   button_content_align?: string;
   button_icon_position?: string;
+  qr_foreground_color?: string | null;
+  qr_background_color?: string | null;
+  qr_logo_url?: string | null;
+  qr_logo_enabled?: boolean;
+  footer_enabled?: boolean;
+  footer_text?: string | null;
+  scan_count: number;
   published: boolean;
   created_at: string;
   updated_at: string;
+}
+
+export interface QRVisualVersion {
+  id: string; // UUID
+  profile_id: string; // UUID
+  foreground_color: string;
+  background_color: string;
+  logo_url: string | null;
+  logo_enabled: boolean;
+  created_at: string;
 }
 
 export type PlatformType =

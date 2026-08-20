@@ -215,20 +215,33 @@ function EditorPage() {
         });
         currentProfileId = finalProfile.id;
       } else {
-        const { public_id: _publicId, slug: _slug, ...editableProfile } = profile;
+        const { public_id: _publicId, ...editableProfile } = profile;
         const identityBackfill = profile.public_id
           ? {}
           : {
               public_id: publicId,
               slug: internalSlug,
             };
+
+        // Validar alias (slug) reservado al guardar
+        if (editableProfile.slug) {
+          const reservedRoutes = ["editor", "login", "auth", "api", "qr", "account", "settings", "p", "terms", "privacy", "help", "support"];
+          if (reservedRoutes.includes(editableProfile.slug)) {
+            toast.error("Nombre reservado", { description: "Este enlace no está disponible." });
+            setSaving(false);
+            return;
+          }
+        }
+
         finalProfile = await profileService.updateProfile(supabase, currentProfileId, {
           ...editableProfile,
           ...identityBackfill,
           published: publish,
         });
       }
-      setProfile(finalProfile);
+
+      setProfile((prev) => ({ ...prev, ...finalProfile }));
+      toast.success(publish ? "Página publicada correctamente" : "Cambios guardados en borrador");
 
       if (publish) {
         setSavedPublicId(finalProfile.public_id);
@@ -271,9 +284,15 @@ function EditorPage() {
       } else {
         toast.success("Borrador guardado");
       }
-    } catch (e) {
+    } catch (e: unknown) {
       console.error("Error completo al guardar:", e);
-      if (e instanceof Error) {
+      const isUniqueViolation = typeof e === "object" && e !== null && "code" in e && (e as { code?: string }).code === "23505";
+      
+      if (isUniqueViolation) {
+        toast.error("Enlace no disponible", {
+          description: "Ese nombre ya está en uso por otra persona.",
+        });
+      } else if (e instanceof Error) {
         toast.error("Error al guardar", { description: e.message });
       } else {
         toast.error("Error al guardar", {
@@ -294,7 +313,7 @@ function EditorPage() {
     { id: "design", label: "Diseño", icon: Palette },
     { id: "text", label: "Texto", icon: Type },
     { id: "elements", label: "Elementos", icon: Shapes },
-    { id: "qr", label: "Publicar", icon: QrCode },
+    { id: "qr", label: "QR", icon: QrCode },
   ] as const;
 
   const renderActiveSection = () => {
@@ -331,6 +350,8 @@ function EditorPage() {
             saving={saving}
             onSave={handleSave}
             isValid={validate()}
+            profile={profile}
+            onChange={(u) => setProfile((p) => ({ ...p, ...u }))}
           />
         );
       default:
@@ -340,6 +361,22 @@ function EditorPage() {
 
   const handleTabClick = (id: TabId) => {
     setActiveTab(id);
+    setPanelOpen(true);
+  };
+
+  const handleProfilePreviewChange = (updates: Partial<Profile>) => {
+    setProfile((current) => ({ ...current, ...updates }));
+  };
+
+  const handleLinkPreviewChange = (linkId: string, updates: Partial<ProfileLink>) => {
+    setLinks((current) =>
+      current.map((link) => (link.id === linkId ? { ...link, ...updates } : link)),
+    );
+  };
+
+  const handleOpenPreviewSidebar = (tabId: string) => {
+    const nextTab = TABS.some((tab) => tab.id === tabId) ? (tabId as TabId) : "profile";
+    setActiveTab(nextTab);
     setPanelOpen(true);
   };
 
@@ -493,7 +530,14 @@ function EditorPage() {
               transformOrigin: "center center",
             }}
           >
-            <PublicProfileView profile={profile} links={links} isPreview={true} />
+            <PublicProfileView
+              profile={profile}
+              links={links}
+              isPreview={true}
+              onProfileChange={handleProfilePreviewChange}
+              onLinkChange={handleLinkPreviewChange}
+              onOpenSidebar={handleOpenPreviewSidebar}
+            />
           </div>
         </div>
       </main>

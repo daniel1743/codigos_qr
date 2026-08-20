@@ -2,7 +2,6 @@ import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Switch } from "../ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
 import {
   AlertDialog,
@@ -15,45 +14,22 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "../ui/alert-dialog";
-import type { ProfileLink, PlatformType } from "../../types/database";
+import type { ProfileLink } from "../../types/database";
 import {
   ArrowUp,
   ArrowDown,
   Trash2,
   Plus,
-  Globe,
-  Link as LinkIcon,
-  GripVertical,
-  Linkedin,
+  GripVertical, Link as LinkIcon,
 } from "lucide-react";
 
-import {
-  SiInstagram,
-  SiWhatsapp,
-  SiX,
-  SiFacebook,
-  SiTiktok,
-  SiYoutube,
-  SiTelegram,
-} from "@icons-pack/react-simple-icons";
+import { PlatformPicker } from "../profile/PlatformPicker";
+import { getPlatformDef } from "../../constants/platforms";
 
 interface LinksSectionProps {
   links: Partial<ProfileLink>[];
   onChange: (links: Partial<ProfileLink>[]) => void;
 }
-
-const PLATFORMS = [
-  { value: "instagram", label: "Instagram", icon: SiInstagram, color: "#E4405F" },
-  { value: "whatsapp", label: "WhatsApp", icon: SiWhatsapp, color: "#25D366" },
-  { value: "twitter", label: "X (Twitter)", icon: SiX, color: "#000000" },
-  { value: "facebook", label: "Facebook", icon: SiFacebook, color: "#1877F2" },
-  { value: "tiktok", label: "TikTok", icon: SiTiktok, color: "#000000" },
-  { value: "youtube", label: "YouTube", icon: SiYoutube, color: "#FF0000" },
-  { value: "linkedin", label: "LinkedIn", icon: Linkedin, color: "#0A66C2" },
-  { value: "telegram", label: "Telegram", icon: SiTelegram, color: "#26A5E4" },
-  { value: "website", label: "Sitio Web", icon: Globe, color: "#666666" },
-  { value: "other", label: "Otro", icon: LinkIcon, color: "#666666" },
-] as const;
 
 export function LinksSection({ links, onChange }: LinksSectionProps) {
   const handleAddLink = () => {
@@ -97,10 +73,6 @@ export function LinksSection({ links, onChange }: LinksSectionProps) {
     onChange(newLinks.map((link, i) => ({ ...link, sort_order: i })));
   };
 
-  const getPlatformInfo = (platformValue: string | undefined) => {
-    return PLATFORMS.find((p) => p.value === platformValue) || PLATFORMS[8]; // Default to website
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-3 min-[380px]:flex-row min-[380px]:items-center min-[380px]:justify-between">
@@ -121,7 +93,7 @@ export function LinksSection({ links, onChange }: LinksSectionProps) {
 
       <Accordion type="single" collapsible className="w-full space-y-3">
         {links.map((link, index) => {
-          const platformInfo = getPlatformInfo(link.platform);
+          const platformInfo = getPlatformDef(link.platform as string || "website");
           const IconComponent = platformInfo.icon;
 
           return (
@@ -137,11 +109,7 @@ export function LinksSection({ links, onChange }: LinksSectionProps) {
                 <AccordionTrigger className="flex-1 py-4 hover:no-underline">
                   <div className="flex min-w-0 items-center gap-3 w-full">
                     <div
-                      className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
-                      style={{
-                        backgroundColor: `${platformInfo.color}15`,
-                        color: platformInfo.color,
-                      }}
+                      className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 bg-primary/10 text-primary"
                     >
                       <IconComponent size={20} />
                     </div>
@@ -223,67 +191,28 @@ export function LinksSection({ links, onChange }: LinksSectionProps) {
                       </AlertDialog>
                     </div>
                   </div>
-
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div className="space-y-2">
                       <Label>Plataforma</Label>
-                      <Select
+                      <PlatformPicker
                         value={link.platform as string}
-                        onValueChange={(val) => {
-                          const platformMapping: Record<string, string> = {
-                            instagram: "Instagram",
-                            twitter: "X",
-                            facebook: "Facebook",
-                            linkedin: "LinkedIn",
-                            tiktok: "TikTok",
-                            youtube: "YouTube",
-                            github: "GitHub",
-                            website: "Sitio web",
-                            whatsapp: "WhatsApp",
-                            email: "Email",
-                            telegram: "Telegram",
-                            other: "Mi enlace",
-                          };
-
-                          const newPlatformLabel = platformMapping[val] || "Mi enlace";
+                        onChange={(val) => {
+                          const newDef = getPlatformDef(val);
                           const currentLabel = link.label?.trim() || "";
-
-                          // Consider it auto-generated if it's empty, or matches one of our known auto labels
-                          const knownAutoLabels = Object.values(platformMapping).concat([
-                            "X (Twitter)",
-                            "Sitio Web",
-                            "Otro",
-                          ]);
-                          const isAutoLabel =
-                            currentLabel === "" || knownAutoLabels.includes(currentLabel);
+                          const isAutoLabel = currentLabel === "" || 
+                            currentLabel === "Mi Enlace" || 
+                            currentLabel === "Otro" || 
+                            currentLabel === "Sitio Web" || 
+                            currentLabel === "X (Twitter)" || 
+                            getPlatformDef(link.platform as string)?.label === currentLabel;
 
                           if (isAutoLabel) {
-                            updateLink(index, {
-                              platform: val as PlatformType,
-                              label: newPlatformLabel,
-                            });
+                            updateLink(index, { platform: val, label: newDef.label });
                           } else {
-                            updateLink(index, { platform: val as PlatformType });
+                            updateLink(index, { platform: val });
                           }
                         }}
-                      >
-                        <SelectTrigger className="h-11">
-                          <SelectValue placeholder="Selecciona una red" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {PLATFORMS.map((p) => {
-                            const PIcon = p.icon;
-                            return (
-                              <SelectItem key={p.value} value={p.value}>
-                                <div className="flex items-center gap-2">
-                                  <PIcon size={14} />
-                                  <span>{p.label}</span>
-                                </div>
-                              </SelectItem>
-                            );
-                          })}
-                        </SelectContent>
-                      </Select>
+                      />
                     </div>
                     <div className="space-y-2">
                       <Label>Texto del botón</Label>

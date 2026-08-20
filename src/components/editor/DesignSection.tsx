@@ -47,74 +47,7 @@ import {
   mixColorsAlpha,
 } from "../../lib/color-utils";
 
-function ColorControl({
-  value,
-  onChange,
-  compact = false,
-}: {
-  value: string;
-  onChange: (validHex: string) => void;
-  compact?: boolean;
-}) {
-  const [localVal, setLocalVal] = useState(value);
-  const [error, setError] = useState(false);
-
-  useEffect(() => {
-    setLocalVal(value);
-    setError(false);
-  }, [value]);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newVal = e.target.value;
-    setLocalVal(newVal);
-    if (/^#[0-9A-Fa-f]{6}$/i.test(newVal)) {
-      setError(false);
-      onChange(newVal);
-    } else {
-      setError(true);
-    }
-  };
-
-  const handleBlur = () => {
-    if (!/^#[0-9A-Fa-f]{6}$/i.test(localVal)) {
-      setLocalVal(value);
-      setError(false);
-    }
-  };
-
-  const validColorForPicker = /^#[0-9A-Fa-f]{6}$/i.test(localVal) ? localVal : value;
-
-  const heightClass = compact ? "h-10" : "h-11";
-
-  return (
-    <div className={`flex ${compact ? "gap-2" : "gap-3"} mb-1`}>
-      <Input
-        type="color"
-        value={validColorForPicker}
-        onChange={(e) => {
-          setLocalVal(e.target.value);
-          onChange(e.target.value);
-        }}
-        className={`${heightClass} ${compact ? "w-10" : "w-11"} cursor-pointer rounded-lg p-1 shrink-0`}
-      />
-      <div className="flex-1 relative">
-        <Input
-          type="text"
-          value={localVal}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          className={`${heightClass} min-w-0 w-full font-mono text-sm uppercase ${error ? "border-destructive/60 focus-visible:ring-destructive/60" : ""}`}
-          maxLength={7}
-        />
-        {error && (
-          <span className="absolute -bottom-4 left-1 text-[10px] text-destructive">
-            Formato: #RRGGBB
-          </span>
-        )}
-      </div>
-    </div>
-  );
-}
+import { ColorControl } from "./ColorControl";
 
 export function DesignSection({ profile, onChange, userId }: DesignSectionProps) {
   const rawBg = profile.background_color || "#ffffff";
@@ -688,7 +621,11 @@ export function DesignSection({ profile, onChange, userId }: DesignSectionProps)
                   key={style.id}
                   type="button"
                   aria-pressed={isActive}
-                  onClick={() => onChange({ button_style: style.id as "solid" | "line" | "minimal" | "pill" | "card" })}
+                  onClick={() =>
+                    onChange({
+                      button_style: style.id as "solid" | "line" | "minimal" | "pill" | "card",
+                    })
+                  }
                   className={`flex flex-col gap-2 p-2 rounded-xl border transition-all ${isActive ? "bg-primary/5 border-primary ring-1 ring-primary" : "bg-card hover:bg-accent border-border"}`}
                 >
                   <div className="w-full bg-muted/30 rounded-lg p-2 flex items-center justify-center">

@@ -10,12 +10,18 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AliasRouteImport } from './routes/$alias'
 import { Route as EditorRouteImport } from './routes/editor'
 import { Route as PPublicIdRouteImport } from './routes/p.$publicId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AliasRoute = AliasRouteImport.update({
+  id: '/$alias',
+  path: '/$alias',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EditorRoute = EditorRouteImport.update({
@@ -31,30 +37,34 @@ const PPublicIdRoute = PPublicIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/$alias': typeof AliasRoute
   '/editor': typeof EditorRoute
   '/p/$publicId': typeof PPublicIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/$alias': typeof AliasRoute
   '/editor': typeof EditorRoute
   '/p/$publicId': typeof PPublicIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/$alias': typeof AliasRoute
   '/editor': typeof EditorRoute
   '/p/$publicId': typeof PPublicIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/editor' | '/p/$publicId'
+  fullPaths: '/' | '/$alias' | '/editor' | '/p/$publicId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/editor' | '/p/$publicId'
-  id: '__root__' | '/' | '/editor' | '/p/$publicId'
+  to: '/' | '/$alias' | '/editor' | '/p/$publicId'
+  id: '__root__' | '/' | '/$alias' | '/editor' | '/p/$publicId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AliasRoute: typeof AliasRoute
   EditorRoute: typeof EditorRoute
   PPublicIdRoute: typeof PPublicIdRoute
 }
@@ -66,6 +76,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$alias': {
+      id: '/$alias'
+      path: '/$alias'
+      fullPath: '/$alias'
+      preLoaderRoute: typeof AliasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/editor': {
@@ -87,6 +104,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AliasRoute: AliasRoute,
   EditorRoute: EditorRoute,
   PPublicIdRoute: PPublicIdRoute,
 }

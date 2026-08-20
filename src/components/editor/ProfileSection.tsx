@@ -1,11 +1,13 @@
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
+import { Button } from "../ui/button";
+import { Switch } from "../ui/switch";
 import { toast } from "sonner";
 import type { Profile } from "../../types/database";
 import { getBrowserSupabaseClient } from "../../lib/supabase/client";
 import { useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, Bold } from "lucide-react";
 
 interface ProfileSectionProps {
   profile: Partial<Profile>;
@@ -95,17 +97,126 @@ export function ProfileSection({ profile, onChange, userId }: ProfileSectionProp
         />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="bio">Descripción / Biografía</Label>
-        <Textarea
-          id="bio"
-          value={profile.bio || ""}
-          onChange={(e) => onChange({ bio: e.target.value })}
-          placeholder="Un par de líneas sobre ti o tu negocio"
-          maxLength={180}
-          className="min-h-28 resize-none"
-        />
+      <div className="space-y-2 mt-8 pt-6 border-t border-border/50">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="bio">Descripción / Biografía</Label>
+        </div>
+        <div className="border rounded-md focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 overflow-hidden bg-background">
+          <div className="flex items-center border-b px-2 py-1 bg-muted/50">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 px-2 text-muted-foreground hover:text-foreground"
+              aria-label="Negrita"
+              title="Negrita"
+              onClick={() => {
+                const textarea = document.getElementById("bio") as HTMLTextAreaElement;
+                if (!textarea) return;
+
+                const start = textarea.selectionStart;
+                const end = textarea.selectionEnd;
+                const text = profile.bio || "";
+
+                let newText = "";
+                if (start === end) {
+                  newText = text.substring(0, start) + "**texto**" + text.substring(end);
+                  onChange({ bio: newText });
+                  setTimeout(() => {
+                    textarea.focus();
+                    textarea.setSelectionRange(start + 2, start + 7);
+                  }, 0);
+                } else {
+                  newText =
+                    text.substring(0, start) +
+                    "**" +
+                    text.substring(start, end) +
+                    "**" +
+                    text.substring(end);
+                  onChange({ bio: newText });
+                  setTimeout(() => {
+                    textarea.focus();
+                    textarea.setSelectionRange(start, end + 4);
+                  }, 0);
+                }
+              }}
+            >
+              <Bold className="w-4 h-4 mr-1" />
+              <span className="text-xs">Negrita</span>
+            </Button>
+            <span className="text-xs text-muted-foreground ml-auto pr-2">
+              Selecciona texto y pulsa Negrita
+            </span>
+          </div>
+          <Textarea
+            id="bio"
+            value={profile.bio || ""}
+            onChange={(e) => onChange({ bio: e.target.value })}
+            placeholder="Un par de líneas sobre ti o tu negocio"
+            maxLength={180}
+            className="min-h-28 resize-none border-0 focus-visible:ring-0 rounded-none shadow-none"
+          />
+        </div>
       </div>
+
+      <div className="space-y-2 mt-8 pt-6 border-t border-border/50">
+        <h3 className="font-semibold flex items-center gap-2">Enlace personalizado</h3>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          Usa un nombre corto y fácil de recordar para compartirlo en Instagram, TikTok o tarjetas.
+        </p>
+        <div className="flex rounded-md shadow-sm mt-3">
+          <span className="inline-flex items-center rounded-l-md border border-r-0 border-input bg-muted px-3 text-sm text-muted-foreground whitespace-nowrap">
+            tudominio.com/
+          </span>
+          <Input
+            id="public_alias"
+            value={profile.slug || ""}
+            onChange={(e) => {
+              const val = e.target.value
+                .toLowerCase()
+                .replace(/[^a-z0-9-]/g, "")
+                .slice(0, 40);
+              onChange({ slug: val });
+            }}
+            placeholder="fusion"
+            className="rounded-l-none h-11"
+            aria-label="Enlace personalizado"
+          />
+        </div>
+        <p className="text-[11px] text-muted-foreground mt-2">
+          Si cambias tu enlace personalizado, el enlace anterior dejará de funcionar. Tu QR físico
+          seguirá funcionando siempre porque usa su identificador estable.
+        </p>
+      </div>
+      <div className="space-y-4 mt-8 pt-6 border-t border-border/50">
+        <div className="flex flex-row items-center justify-between rounded-lg border p-3 bg-muted/20">
+          <div className="space-y-0.5">
+            <Label className="text-base font-semibold">Pie de página</Label>
+            <p className="text-[13px] text-muted-foreground">
+              Muestra un mensaje pequeño al final de tu perfil (ej: "Creado por Juan").
+            </p>
+          </div>
+          <Switch
+            checked={profile.footer_enabled || false}
+            onCheckedChange={(checked) => onChange({ footer_enabled: checked })}
+            aria-label="Activar Pie de página"
+          />
+        </div>
+        
+        {profile.footer_enabled && (
+          <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
+            <Label htmlFor="footer_text">Mensaje del Pie de página</Label>
+            <Input
+              id="footer_text"
+              value={profile.footer_text || ""}
+              onChange={(e) => onChange({ footer_text: e.target.value })}
+              placeholder="Ej: Creado con amor por Fusion QR"
+              maxLength={80}
+              className="h-11"
+            />
+          </div>
+        )}
+      </div>
+
     </div>
   );
 }

@@ -17,3 +17,13 @@ export function getPublicProfileUrl(publicId: string): string {
 
   return `${baseUrl}/p/${cleanPublicId}`;
 }
+
+export function getAliasProfileUrl(slug: string): string {
+  let appUrl = env.appUrl;
+  if (typeof window !== "undefined") {
+    appUrl = window.location.origin;
+  }
+  const baseUrl = appUrl.replace(/\/$/, "");
+  const cleanSlug = slug.replace(/^\//, "");
+  return `${baseUrl}/${cleanSlug}`;
+}

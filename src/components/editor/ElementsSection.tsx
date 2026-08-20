@@ -24,9 +24,11 @@ export function ElementsSection() {
           </svg>
         </div>
         <div className="space-y-1">
-          <p className="text-sm font-medium text-foreground">Próximamente</p>
+          <p className="text-sm font-medium text-foreground">
+            Elementos decorativos &mdash; Próximamente
+          </p>
           <p className="text-xs text-muted-foreground">
-            Los elementos decorativos estarán disponibles en futuras actualizaciones.
+            Líneas, círculos, formas y ondulaciones para personalizar aún más tu página.
           </p>
         </div>
       </div>
