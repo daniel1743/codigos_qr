@@ -15,6 +15,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as EditorRouteImport } from './routes/editor'
 import { Route as EncryptedDocumentsRouteImport } from './routes/encrypted-documents'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as DShortUrlRouteImport } from './routes/d.$shortUrl'
 import { Route as PPublicIdRouteImport } from './routes/p.$publicId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -47,6 +48,11 @@ const ProfileRoute = ProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DShortUrlRoute = DShortUrlRouteImport.update({
+  id: '/d/$shortUrl',
+  path: '/d/$shortUrl',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PPublicIdRoute = PPublicIdRouteImport.update({
   id: '/p/$publicId',
   path: '/p/$publicId',
@@ -60,6 +66,7 @@ export interface FileRoutesByFullPath {
   '/editor': typeof EditorRoute
   '/encrypted-documents': typeof EncryptedDocumentsRoute
   '/profile': typeof ProfileRoute
+  '/d/$shortUrl': typeof DShortUrlRoute
   '/p/$publicId': typeof PPublicIdRoute
 }
 export interface FileRoutesByTo {
@@ -69,6 +76,7 @@ export interface FileRoutesByTo {
   '/editor': typeof EditorRoute
   '/encrypted-documents': typeof EncryptedDocumentsRoute
   '/profile': typeof ProfileRoute
+  '/d/$shortUrl': typeof DShortUrlRoute
   '/p/$publicId': typeof PPublicIdRoute
 }
 export interface FileRoutesById {
@@ -79,6 +87,7 @@ export interface FileRoutesById {
   '/editor': typeof EditorRoute
   '/encrypted-documents': typeof EncryptedDocumentsRoute
   '/profile': typeof ProfileRoute
+  '/d/$shortUrl': typeof DShortUrlRoute
   '/p/$publicId': typeof PPublicIdRoute
 }
 export interface FileRouteTypes {
@@ -90,6 +99,7 @@ export interface FileRouteTypes {
     | '/editor'
     | '/encrypted-documents'
     | '/profile'
+    | '/d/$shortUrl'
     | '/p/$publicId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -99,6 +109,7 @@ export interface FileRouteTypes {
     | '/editor'
     | '/encrypted-documents'
     | '/profile'
+    | '/d/$shortUrl'
     | '/p/$publicId'
   id:
     | '__root__'
@@ -108,6 +119,7 @@ export interface FileRouteTypes {
     | '/editor'
     | '/encrypted-documents'
     | '/profile'
+    | '/d/$shortUrl'
     | '/p/$publicId'
   fileRoutesById: FileRoutesById
 }
@@ -118,6 +130,7 @@ export interface RootRouteChildren {
   EditorRoute: typeof EditorRoute
   EncryptedDocumentsRoute: typeof EncryptedDocumentsRoute
   ProfileRoute: typeof ProfileRoute
+  DShortUrlRoute: typeof DShortUrlRoute
   PPublicIdRoute: typeof PPublicIdRoute
 }
 
@@ -165,6 +178,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/d/$shortUrl': {
+      id: '/d/$shortUrl'
+      path: '/d/$shortUrl'
+      fullPath: '/d/$shortUrl'
+      preLoaderRoute: typeof DShortUrlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/p/$publicId': {
       id: '/p/$publicId'
       path: '/p/$publicId'
@@ -182,6 +202,7 @@ const rootRouteChildren: RootRouteChildren = {
   EditorRoute: EditorRoute,
   EncryptedDocumentsRoute: EncryptedDocumentsRoute,
   ProfileRoute: ProfileRoute,
+  DShortUrlRoute: DShortUrlRoute,
   PPublicIdRoute: PPublicIdRoute,
 }
 export const routeTree = rootRouteImport

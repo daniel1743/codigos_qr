@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Auth } from "../components/Auth";
 import { getBrowserSupabaseClient } from "../lib/supabase/client";
 import { Button } from "../components/ui/button";
@@ -26,11 +26,13 @@ import {
   CheckCircle2,
   ShieldCheck,
   Key,
-  Fingerprint,
+  Calendar,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { EncryptionService } from "../lib/encryption";
 import type { EncryptionLevel, CreateEncryptedDocumentRequest } from "../types/encrypted-documents";
+import { QRCodeSVG } from "qrcode.react";
 
 export const Route = createFileRoute("/encrypted-documents")({
   component: EncryptedDocumentsPage,
@@ -42,20 +44,20 @@ function EncryptedDocumentsPage() {
   const [loading, setLoading] = useState(true);
 
   // Check session
-  useState(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }: any) => {
       setSession(session);
       setLoading(false);
     });
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
       setSession(session);
     });
 
     return () => subscription.unsubscribe();
-  });
+  }, []);
 
   if (loading) {
     return (
@@ -90,8 +92,31 @@ function EncryptedDocumentsPage() {
   return <EncryptedDocumentsApp userId={session.user.id} />;
 }
 
+function getFileIconHelper(fileType: string) {
+  switch (fileType) {
+    case "excel":
+      return <FileText className="w-8 h-8 text-green-600" />;
+    case "pdf":
+      return <FileText className="w-8 h-8 text-red-600" />;
+    case "image":
+      return <ImageIcon className="w-8 h-8 text-blue-600" />;
+    case "word":
+      return <FileText className="w-8 h-8 text-blue-700" />;
+    case "zip":
+      return <Archive className="w-8 h-8 text-orange-600" />;
+    default:
+      return <File className="w-8 h-8 text-gray-600" />;
+  }
+}
+
 function EncryptedDocumentsApp({ userId }: { userId: string }) {
   const [view, setView] = useState<"list" | "create">("list");
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  const handleDocumentCreated = () => {
+    setView("list");
+    setRefreshTrigger((prev) => prev + 1);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50">
@@ -100,8 +125,8 @@ function EncryptedDocumentsApp({ userId }: { userId: string }) {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                ← Volver al inicio
+              <Link to="/editor" className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+                ← Volver al editor
               </Link>
               <div className="h-6 w-px bg-border" />
               <div className="flex items-center gap-2">
@@ -139,13 +164,115 @@ function EncryptedDocumentsApp({ userId }: { userId: string }) {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
-        {view === "list" ? <DocumentsList userId={userId} /> : <CreateDocument userId={userId} />}
+        {view === "list" ? (
+          <DocumentsList userId={userId} refreshTrigger={refreshTrigger} onUploadClick={() => setView("create")} />
+        ) : (
+          <CreateDocument userId={userId} onSuccess={handleDocumentCreated} />
+        )}
       </main>
     </div>
   );
 }
 
-function DocumentsList({ userId }: { userId: string }) {
+interface DocumentsListProps {
+  userId: string;
+  refreshTrigger: number;
+  onUploadClick: () => void;
+}
+
+function DocumentsList({ userId, refreshTrigger, onUploadClick }: DocumentsListProps) {
+  const [documents, setDocuments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedQrDoc, setSelectedQrDoc] = useState<any | null>(null);
+  const [failedCount, setFailedCount] = useState(0);
+  const supabase = getBrowserSupabaseClient();
+
+  useEffect(() => {
+    fetchDocumentsAndStats();
+  }, [userId, refreshTrigger]);
+
+  const fetchDocumentsAndStats = async () => {
+    setLoading(true);
+    try {
+      // 1. Fetch documents
+      const { data, error } = await supabase
+        .from("encrypted_documents")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setDocuments(data || []);
+
+      // 2. Fetch failed access logs count
+      const docIds = data?.map((d: any) => d.id) || [];
+      if (docIds.length > 0) {
+        const { count, error: logError } = await supabase
+          .from("document_access_logs")
+          .select("*", { count: "exact", head: true })
+          .in("document_id", docIds)
+          .eq("success", false);
+
+        if (!logError && count !== null) {
+          setFailedCount(count);
+        }
+      }
+    } catch (e) {
+      console.error(e);
+      toast.error("Error al cargar la lista de documentos");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id: string, filePath: string) => {
+    if (!confirm("¿Estás seguro de que deseas eliminar este documento de forma permanente? Esta acción no se puede deshacer.")) {
+      return;
+    }
+
+    try {
+      // Delete from storage
+      const { error: storageError } = await supabase.storage
+        .from("encrypted-documents")
+        .remove([filePath]);
+
+      if (storageError) {
+        console.warn("Storage delete warning:", storageError.message);
+      }
+
+      // Delete from DB (cascade deletes access logs)
+      const { error: dbError } = await supabase
+        .from("encrypted_documents")
+        .delete()
+        .eq("id", id);
+
+      if (dbError) throw dbError;
+
+      toast.success("Documento eliminado correctamente");
+      setDocuments((prev) => prev.filter((doc) => doc.id !== id));
+    } catch (e) {
+      console.error(e);
+      toast.error("Error al eliminar el documento");
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center p-12">
+        <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent" />
+      </div>
+    );
+  }
+
+  // Calculate statistics
+  const activeDocs = documents.filter((doc) => {
+    const isExpired = doc.expire_at && new Date(doc.expire_at) < new Date();
+    const isLimitReached = doc.max_downloads && doc.current_downloads >= doc.max_downloads;
+    return !isExpired && !isLimitReached;
+  }).length;
+
+  const totalDownloads = documents.reduce((sum, doc) => sum + (doc.current_downloads || 0), 0);
+
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
@@ -156,7 +283,7 @@ function DocumentsList({ userId }: { userId: string }) {
               <FileText className="w-6 h-6 text-blue-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold">0</p>
+              <p className="text-2xl font-bold">{activeDocs}</p>
               <p className="text-xs text-muted-foreground">Documentos Activos</p>
             </div>
           </div>
@@ -168,7 +295,7 @@ function DocumentsList({ userId }: { userId: string }) {
               <Download className="w-6 h-6 text-green-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold">0</p>
+              <p className="text-2xl font-bold">{totalDownloads}</p>
               <p className="text-xs text-muted-foreground">Descargas Totales</p>
             </div>
           </div>
@@ -180,7 +307,7 @@ function DocumentsList({ userId }: { userId: string }) {
               <ShieldCheck className="w-6 h-6 text-purple-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold">0</p>
+              <p className="text-2xl font-bold">{documents.length}</p>
               <p className="text-xs text-muted-foreground">Accesos Seguros</p>
             </div>
           </div>
@@ -192,32 +319,224 @@ function DocumentsList({ userId }: { userId: string }) {
               <AlertTriangle className="w-6 h-6 text-red-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold">0</p>
+              <p className="text-2xl font-bold">{failedCount}</p>
               <p className="text-xs text-muted-foreground">Intentos Bloqueados</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Empty State */}
-      <div className="rounded-xl border bg-white p-12 text-center shadow-sm">
-        <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-blue-100 to-cyan-100 mb-6">
-          <Shield className="w-10 h-10 text-blue-600" />
+      {documents.length === 0 ? (
+        /* Empty State */
+        <div className="rounded-xl border bg-white p-12 text-center shadow-sm">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-blue-100 to-cyan-100 mb-6">
+            <Shield className="w-10 h-10 text-blue-600" />
+          </div>
+          <h2 className="text-2xl font-bold mb-2">No tienes documentos encriptados</h2>
+          <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+            Sube tu primer documento confidencial y genera un QR code seguro para compartirlo.
+          </p>
+          <Button size="lg" className="gap-2" onClick={onUploadClick}>
+            <Upload className="w-5 h-5" />
+            Subir Primer Documento
+          </Button>
         </div>
-        <h2 className="text-2xl font-bold mb-2">No tienes documentos encriptados</h2>
-        <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-          Sube tu primer documento confidencial y genera un QR code seguro para compartirlo.
-        </p>
-        <Button size="lg" className="gap-2">
-          <Upload className="w-5 h-5" />
-          Subir Primer Documento
-        </Button>
-      </div>
+      ) : (
+        /* Documents Grid / Table */
+        <div className="rounded-xl border bg-white overflow-hidden shadow-sm">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50 border-b text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <th className="p-4">Documento</th>
+                  <th className="p-4">Seguridad</th>
+                  <th className="p-4">Expiración</th>
+                  <th className="p-4">Descargas</th>
+                  <th className="p-4 text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y text-sm">
+                {documents.map((doc) => {
+                  const isExpired = doc.expire_at && new Date(doc.expire_at) < new Date();
+                  const isLimitReached = doc.max_downloads && doc.current_downloads >= doc.max_downloads;
+                  const isLinkActive = !isExpired && !isLimitReached;
+                  
+                  return (
+                    <tr key={doc.id} className="hover:bg-slate-50/50">
+                      <td className="p-4 flex items-center gap-3">
+                        <div className="shrink-0 p-2 border rounded-lg bg-slate-50">
+                          {getFileIconHelper(doc.file_type)}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-semibold text-foreground truncate max-w-[240px]">{doc.name}</p>
+                          <p className="text-xs text-muted-foreground truncate max-w-[240px]">
+                            {doc.original_filename} • {EncryptionService.formatFileSize(doc.file_size_bytes)}
+                          </p>
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        <div className="flex flex-col gap-1">
+                          <span className={`inline-flex items-center gap-1 text-xs font-medium ${
+                            doc.encryption_level === "maximum" ? "text-red-600" : doc.encryption_level === "high" ? "text-purple-600" : "text-blue-600"
+                          }`}>
+                            <Lock className="w-3.5 h-3.5" />
+                            {doc.encryption_level === "maximum" ? "Máximo (2FA)" : doc.encryption_level === "high" ? "Alto" : "Estándar"}
+                          </span>
+                          {doc.password_required && (
+                            <span className="text-[10px] text-amber-600 font-semibold">🔒 Con Contraseña</span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        {doc.expire_at ? (
+                          <div className="flex flex-col">
+                            <span className={`text-xs ${isExpired ? "text-red-500 font-medium" : "text-foreground"}`}>
+                              {new Date(doc.expire_at).toLocaleDateString()}
+                            </span>
+                            <span className="text-[10px] text-muted-foreground">
+                              {isExpired ? "Expirado" : new Date(doc.expire_at).toLocaleTimeString()}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">Nunca expira</span>
+                        )}
+                      </td>
+                      <td className="p-4">
+                        <div className="flex flex-col">
+                          <span className={`text-xs font-medium ${isLimitReached ? "text-red-500" : "text-foreground"}`}>
+                            {doc.current_downloads} / {doc.max_downloads || "∞"}
+                          </span>
+                          {doc.one_time_download && (
+                            <span className="text-[10px] text-orange-600 font-semibold">Un solo uso</span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="p-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={!isLinkActive}
+                            onClick={() => {
+                              const url = `${window.location.origin}/d/${doc.short_url}`;
+                              navigator.clipboard.writeText(url);
+                              toast.success("Enlace copiado al portapapeles");
+                            }}
+                            title="Copiar Enlace"
+                          >
+                            <Copy className="w-3.5 h-3.5" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={!isLinkActive}
+                            onClick={() => setSelectedQrDoc(doc)}
+                            title="Ver Código QR"
+                          >
+                            <QrCodeIcon className="w-3.5 h-3.5" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            onClick={() => handleDelete(doc.id, doc.encrypted_file_path)}
+                            title="Eliminar"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* QR Modal Overlay */}
+      {selectedQrDoc && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-6 text-center space-y-6 shadow-2xl relative border">
+            <button
+              onClick={() => setSelectedQrDoc(null)}
+              className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-slate-100 text-muted-foreground transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div className="space-y-1">
+              <h3 className="font-bold text-lg text-foreground">{selectedQrDoc.name}</h3>
+              <p className="text-xs text-muted-foreground">Comparte este QR seguro de descarga</p>
+            </div>
+
+            <div className="bg-slate-50 p-6 rounded-xl border inline-block">
+              <QRCodeSVG
+                id={`qr-modal-${selectedQrDoc.id}`}
+                value={`${window.location.origin}/d/${selectedQrDoc.short_url}`}
+                size={180}
+                level="H"
+                includeMargin={true}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Input
+                readOnly
+                value={`${window.location.origin}/d/${selectedQrDoc.short_url}`}
+                className="bg-slate-50 font-mono text-[10px] select-all text-center h-10"
+              />
+            </div>
+
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                className="flex-1 text-xs"
+                onClick={() => {
+                  const svg = document.getElementById(`qr-modal-${selectedQrDoc.id}`);
+                  if (svg) {
+                    const svgString = new XMLSerializer().serializeToString(svg);
+                    const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+                    const svgUrl = URL.createObjectURL(svgBlob);
+                    const trigger = document.createElement("a");
+                    trigger.href = svgUrl;
+                    trigger.download = `QR_${selectedQrDoc.name}.svg`;
+                    trigger.click();
+                    URL.revokeObjectURL(svgUrl);
+                    toast.success("Código QR descargado");
+                  }
+                }}
+              >
+                <Download className="w-3.5 h-3.5 mr-1" />
+                Descargar QR
+              </Button>
+              <Button
+                className="flex-1 text-xs"
+                onClick={() => {
+                  const url = `${window.location.origin}/d/${selectedQrDoc.short_url}`;
+                  navigator.clipboard.writeText(url);
+                  toast.success("Enlace copiado");
+                  setSelectedQrDoc(null);
+                }}
+              >
+                <Copy className="w-3.5 h-3.5 mr-1" />
+                Copiar Enlace
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-function CreateDocument({ userId }: { userId: string }) {
+interface CreateDocumentProps {
+  userId: string;
+  onSuccess: () => void;
+}
+
+function CreateDocument({ userId, onSuccess }: CreateDocumentProps) {
   const [file, setFile] = useState<File | null>(null);
   const [formData, setFormData] = useState<Partial<CreateEncryptedDocumentRequest>>({
     name: "",
@@ -226,10 +545,11 @@ function CreateDocument({ userId }: { userId: string }) {
     password: "",
     two_factor_enabled: false,
     one_time_download: false,
-    expire_hours: undefined,
-    max_downloads: undefined,
   });
   const [uploading, setUploading] = useState(false);
+  const [createdDoc, setCreatedDoc] = useState<any | null>(null);
+  
+  const supabase = getBrowserSupabaseClient();
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -241,6 +561,15 @@ function CreateDocument({ userId }: { userId: string }) {
     }
   };
 
+  function generateShortUrl() {
+    const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let result = "";
+    for (let i = 0; i < 8; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) {
@@ -250,17 +579,73 @@ function CreateDocument({ userId }: { userId: string }) {
 
     setUploading(true);
     try {
-      // Encrypt file
+      // 1. Client-Side Encryption
       const encrypted = await EncryptionService.encryptFile(file, formData.password);
 
-      // TODO: Upload to Supabase Storage
-      // TODO: Create database record
-      // TODO: Generate QR code
+      // 2. Wrap encrypted ArrayBuffer in a Blob using original file type
+      // (Bypasses bucket MIME restrictions that block raw application/octet-stream)
+      const encryptedBlob = new Blob([encrypted.encryptedData], { type: file.type || "application/octet-stream" });
 
-      toast.success("Documento encriptado exitosamente");
-    } catch (error) {
+      // 3. Upload encrypted binary to Storage
+      const filePath = `${userId}/${Date.now()}_${file.name}.bin`;
+      const { error: uploadError } = await supabase.storage
+        .from("encrypted-documents")
+        .upload(filePath, encryptedBlob, {
+          contentType: file.type || "application/octet-stream",
+          upsert: false
+        });
+
+      if (uploadError) throw uploadError;
+
+      // 4. Calculate password hash if provided
+      let passwordHash = null;
+      if (formData.password) {
+        passwordHash = await EncryptionService.hashPassword(formData.password);
+      }
+
+      // 5. Calculate expiration date
+      let expireAt = null;
+      if (formData.expire_hours) {
+        const d = new Date();
+        d.setHours(d.getHours() + formData.expire_hours);
+        expireAt = d.toISOString();
+      }
+
+      // 6. Generate Short URL key
+      const shortUrl = generateShortUrl();
+
+      // 7. Write metadata record in Supabase DB
+      const { data: dbData, error: dbError } = await supabase
+        .from("encrypted_documents")
+        .insert({
+          user_id: userId,
+          name: formData.name || file.name,
+          description: formData.description || null,
+          original_filename: file.name,
+          file_type: EncryptionService.getDocumentType(file.type),
+          file_size_bytes: file.size,
+          mime_type: file.type,
+          encrypted_file_path: filePath,
+          iv: encrypted.iv,
+          salt: encrypted.salt || null,
+          encryption_level: formData.encryption_level,
+          password_required: !!formData.password,
+          password_hash: passwordHash,
+          expire_at: expireAt,
+          max_downloads: formData.max_downloads || null,
+          one_time_download: formData.one_time_download || false,
+          short_url: shortUrl,
+        })
+        .select()
+        .single();
+
+      if (dbError) throw dbError;
+
+      toast.success("Documento encriptado y subido con éxito");
+      setCreatedDoc(dbData);
+    } catch (error: any) {
       console.error(error);
-      toast.error("Error al encriptar el documento");
+      toast.error("Error al guardar y encriptar: " + (error.message || "Error desconocido"));
     } finally {
       setUploading(false);
     }
@@ -284,6 +669,85 @@ function CreateDocument({ userId }: { userId: string }) {
         return <File className="w-8 h-8 text-gray-600" />;
     }
   };
+
+  if (createdDoc) {
+    const downloadUrl = `${window.location.origin}/d/${createdDoc.short_url}`;
+    
+    return (
+      <div className="max-w-xl mx-auto rounded-xl border bg-white p-8 shadow-md text-center space-y-6 animate-fade-in">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-2">
+          <CheckCircle2 className="w-8 h-8 text-green-600" />
+        </div>
+        <h2 className="text-2xl font-bold">¡Documento Encriptado con Éxito!</h2>
+        <p className="text-muted-foreground text-sm max-w-sm mx-auto">
+          Tu archivo ha sido cifrado en el navegador y subido de forma segura. Comparte el código QR o el enlace corto.
+        </p>
+
+        {/* QR Code Card */}
+        <div className="bg-slate-50 p-6 rounded-xl border border-slate-100 inline-block shadow-sm">
+          <QRCodeSVG
+            id="qr-success-display"
+            value={downloadUrl}
+            size={200}
+            level="H"
+            includeMargin={true}
+          />
+        </div>
+
+        {/* Short URL copy widget */}
+        <div className="space-y-2">
+          <Label className="text-xs text-muted-foreground">Enlace Seguro de Descarga</Label>
+          <div className="flex items-center gap-2 max-w-md mx-auto">
+            <Input readOnly value={downloadUrl} className="bg-slate-50 font-mono text-xs select-all text-center h-11" />
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              className="h-11 w-11 shrink-0"
+              onClick={() => {
+                navigator.clipboard.writeText(downloadUrl);
+                toast.success("Enlace copiado al portapapeles");
+              }}
+            >
+              <Copy className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
+          <Button
+            type="button"
+            variant="outline"
+            className="flex-1 gap-2"
+            onClick={() => {
+              const svg = document.getElementById("qr-success-display");
+              if (svg) {
+                const svgString = new XMLSerializer().serializeToString(svg);
+                const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+                const svgUrl = URL.createObjectURL(svgBlob);
+                const trigger = document.createElement("a");
+                trigger.href = svgUrl;
+                trigger.download = `QR_${createdDoc.name}.svg`;
+                trigger.click();
+                URL.revokeObjectURL(svgUrl);
+                toast.success("Código QR descargado");
+              }
+            }}
+          >
+            <Download className="w-4 h-4" />
+            Descargar QR
+          </Button>
+          <Button
+            type="button"
+            className="flex-1"
+            onClick={onSuccess}
+          >
+            Ver Mis Documentos
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -470,7 +934,7 @@ function CreateDocument({ userId }: { userId: string }) {
                   </p>
                 </div>
                 <Switch
-                  checked={formData.one_time_download}
+                  checked={formData.one_time_download || false}
                   onCheckedChange={(checked) =>
                     setFormData({ ...formData, one_time_download: checked })
                   }
@@ -484,7 +948,7 @@ function CreateDocument({ userId }: { userId: string }) {
                   onValueChange={(value) =>
                     setFormData({
                       ...formData,
-                      expire_hours: value === "never" ? undefined : parseInt(value),
+                      expire_hours: (value === "never" ? undefined : parseInt(value)) as any,
                     })
                   }
                 >
@@ -508,7 +972,7 @@ function CreateDocument({ userId }: { userId: string }) {
                   onValueChange={(value) =>
                     setFormData({
                       ...formData,
-                      max_downloads: value === "unlimited" ? undefined : parseInt(value),
+                      max_downloads: (value === "unlimited" ? undefined : parseInt(value)) as any,
                     })
                   }
                 >

@@ -59,7 +59,7 @@ export class EncryptionService {
     return await crypto.subtle.deriveKey(
       {
         name: "PBKDF2",
-        salt: salt,
+        salt: salt as any,
         iterations: 100000,
         hash: "SHA-256",
       },
@@ -93,7 +93,7 @@ export class EncryptionService {
       // Use password-based encryption
       salt = crypto.getRandomValues(new Uint8Array(16));
       key = await this.deriveKeyFromPassword(password, salt);
-      saltString = this.arrayBufferToBase64(salt);
+      saltString = this.arrayBufferToBase64(salt.buffer as ArrayBuffer);
     } else {
       // Use random key
       key = await this.generateKey();
@@ -111,12 +111,15 @@ export class EncryptionService {
 
     const keyString = await this.exportKey(key);
 
-    return {
+    const result: any = {
       encryptedData,
       key: keyString,
-      iv: this.arrayBufferToBase64(iv),
-      salt: saltString,
+      iv: this.arrayBufferToBase64(iv.buffer as ArrayBuffer),
     };
+    if (saltString) {
+      result.salt = saltString;
+    }
+    return result;
   }
 
   /**
@@ -200,7 +203,7 @@ export class EncryptionService {
     const bytes = new Uint8Array(buffer);
     let binary = "";
     for (let i = 0; i < bytes.byteLength; i++) {
-      binary += String.fromCharCode(bytes[i]);
+      binary += String.fromCharCode(bytes[i]!);
     }
     return btoa(binary);
   }
