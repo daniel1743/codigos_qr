@@ -31,7 +31,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { EncryptionService } from "../lib/encryption";
-import type { EncryptionLevel, CreateEncryptedDocumentRequest } from "../types/encrypted-documents";
+import type { CreateEncryptedDocumentRequest } from "../types/encrypted-documents";
 import { QRCodeSVG } from "qrcode.react";
 
 export const Route = createFileRoute("/encrypted-documents")({
@@ -80,7 +80,7 @@ function EncryptedDocumentsPage() {
             </div>
             <h1 className="text-3xl font-bold tracking-tight">Documentos Encriptados</h1>
             <p className="text-muted-foreground">
-              Comparte archivos confidenciales con encriptación de nivel militar
+              Comparte archivos confidenciales con cifrado local AES-256-GCM
             </p>
           </div>
           <Auth />
@@ -548,12 +548,19 @@ function CreateDocument({ userId, onSuccess }: CreateDocumentProps) {
   });
   const [uploading, setUploading] = useState(false);
   const [createdDoc, setCreatedDoc] = useState<any | null>(null);
+  const maxFileSizeBytes = 50 * 1024 * 1024;
   
   const supabase = getBrowserSupabaseClient();
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
+      // Modified by ChatGPT Work — ENC-DOC-SECURE-DELIVERY-02
+      if (selectedFile.size > maxFileSizeBytes) {
+        toast.error("El archivo supera el límite de 50 MB.");
+        e.target.value = "";
+        return;
+      }
       setFile(selectedFile);
       if (!formData.name) {
         setFormData((prev) => ({ ...prev, name: selectedFile.name }));
@@ -561,13 +568,17 @@ function CreateDocument({ userId, onSuccess }: CreateDocumentProps) {
     }
   };
 
+  // Modified by ChatGPT Work — ENC-DOC-SECURE-DELIVERY-02
   function generateShortUrl() {
-    const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    let result = "";
-    for (let i = 0; i < 8; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return result;
+    const bytes = crypto.getRandomValues(new Uint8Array(18));
+    return btoa(String.fromCharCode(...bytes))
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=+$/g, "");
+  }
+
+  function keyToUrlSafe(key: string) {
+    return key.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -578,74 +589,72 @@ function CreateDocument({ userId, onSuccess }: CreateDocumentProps) {
     }
 
     setUploading(true);
+    let uploadedPath: string | null = null;
     try {
-      // 1. Client-Side Encryption
+      // Modified by ChatGPT Work — ENC-DOC-SECURE-DELIVERY-02
       const encrypted = await EncryptionService.encryptFile(file, formData.password);
+      const encryptedBlob = new Blob(
+        [encrypted.encryptedData],
+        { type: "application/octet-stream" },
+      );
 
-      // 2. Wrap encrypted ArrayBuffer in a Blob using original file type
-      // (Bypasses bucket MIME restrictions that block raw application/octet-stream)
-      const encryptedBlob = new Blob([encrypted.encryptedData], { type: file.type || "application/octet-stream" });
-
-      // 3. Upload encrypted binary to Storage
       const filePath = `${userId}/${Date.now()}_${file.name}.bin`;
       const { error: uploadError } = await supabase.storage
         .from("encrypted-documents")
         .upload(filePath, encryptedBlob, {
-          contentType: file.type || "application/octet-stream",
-          upsert: false
+          contentType: "application/octet-stream",
+          upsert: false,
         });
 
       if (uploadError) throw uploadError;
+      uploadedPath = filePath;
 
-      // 4. Calculate password hash if provided
-      let passwordHash = null;
-      if (formData.password) {
-        passwordHash = await EncryptionService.hashPassword(formData.password);
-      }
-
-      // 5. Calculate expiration date
-      let expireAt = null;
+      let expireAt: string | null = null;
       if (formData.expire_hours) {
-        const d = new Date();
-        d.setHours(d.getHours() + formData.expire_hours);
-        expireAt = d.toISOString();
+        const expiration = new Date();
+        expiration.setHours(expiration.getHours() + formData.expire_hours);
+        expireAt = expiration.toISOString();
       }
 
-      // 6. Generate Short URL key
       const shortUrl = generateShortUrl();
-
-      // 7. Write metadata record in Supabase DB
-      const { data: dbData, error: dbError } = await supabase
-        .from("encrypted_documents")
-        .insert({
-          user_id: userId,
-          name: formData.name || file.name,
-          description: formData.description || null,
-          original_filename: file.name,
-          file_type: EncryptionService.getDocumentType(file.type),
-          file_size_bytes: file.size,
-          mime_type: file.type,
-          encrypted_file_path: filePath,
-          iv: encrypted.iv,
-          salt: encrypted.salt || null,
-          encryption_level: formData.encryption_level,
-          password_required: !!formData.password,
-          password_hash: passwordHash,
-          expire_at: expireAt,
-          max_downloads: formData.max_downloads || null,
-          one_time_download: formData.one_time_download || false,
-          short_url: shortUrl,
-        })
-        .select()
-        .single();
+      const { data: dbData, error: dbError } = await supabase.rpc(
+        "create_encrypted_document",
+        {
+          p_name: formData.name || file.name,
+          p_description: formData.description || null,
+          p_original_filename: file.name,
+          p_file_type: EncryptionService.getDocumentType(file.type),
+          p_file_size_bytes: file.size,
+          p_mime_type: file.type || "application/octet-stream",
+          p_encrypted_file_path: filePath,
+          p_iv: encrypted.iv,
+          p_salt: encrypted.salt || null,
+          p_password: formData.password || null,
+          p_expire_at: expireAt,
+          p_max_downloads: formData.max_downloads || null,
+          p_one_time_download: formData.one_time_download || false,
+          p_short_url: shortUrl,
+        },
+      );
 
       if (dbError) throw dbError;
 
-      toast.success("Documento encriptado y subido con éxito");
-      setCreatedDoc(dbData);
+      const documentRecord = Array.isArray(dbData) ? dbData[0] : dbData;
+      toast.success("Documento cifrado y subido con éxito");
+      setCreatedDoc({
+        ...documentRecord,
+        short_url: documentRecord?.short_url ?? shortUrl,
+        decryption_key: formData.password ? null : keyToUrlSafe(encrypted.key),
+      });
     } catch (error: any) {
+      if (uploadedPath) {
+        const { error: cleanupError } = await supabase.storage
+          .from("encrypted-documents")
+          .remove([uploadedPath]);
+        if (cleanupError) console.error("Encrypted upload cleanup failed", cleanupError);
+      }
       console.error(error);
-      toast.error("Error al guardar y encriptar: " + (error.message || "Error desconocido"));
+      toast.error("Error al guardar y cifrar: " + (error.message || "Error desconocido"));
     } finally {
       setUploading(false);
     }
@@ -671,7 +680,7 @@ function CreateDocument({ userId, onSuccess }: CreateDocumentProps) {
   };
 
   if (createdDoc) {
-    const downloadUrl = `${window.location.origin}/d/${createdDoc.short_url}`;
+    const downloadUrl = `${window.location.origin}/d/${createdDoc.short_url}${createdDoc.decryption_key ? `#key=${createdDoc.decryption_key}` : ""}`;
     
     return (
       <div className="max-w-xl mx-auto rounded-xl border bg-white p-8 shadow-md text-center space-y-6 animate-fade-in">
@@ -769,7 +778,7 @@ function CreateDocument({ userId, onSuccess }: CreateDocumentProps) {
                     Click para subir o arrastra el archivo aquí
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Excel, PDF, Word, Imágenes, ZIP (Max 100MB)
+                    Excel, PDF, Word, Imágenes, ZIP (máx. 50 MB)
                   </p>
                 </div>
                 <input
@@ -835,65 +844,15 @@ function CreateDocument({ userId, onSuccess }: CreateDocumentProps) {
 
         {/* Right Column - Security Settings */}
         <div className="space-y-6">
-          {/* Encryption Level */}
-          <div className="rounded-xl border bg-white p-6 shadow-sm space-y-4">
-            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          {/* Modified by ChatGPT Work — ENC-DOC-SECURE-DELIVERY-02 */}
+          <div className="rounded-xl border bg-white p-6 shadow-sm space-y-2">
+            <h3 className="text-lg font-semibold flex items-center gap-2">
               <ShieldCheck className="w-5 h-5 text-blue-600" />
-              Nivel de Seguridad
+              Cifrado disponible
             </h3>
-
-            <div className="space-y-3">
-              {[
-                {
-                  value: "standard",
-                  icon: Shield,
-                  label: "Estándar",
-                  description: "AES-256",
-                  color: "text-blue-600",
-                },
-                {
-                  value: "high",
-                  icon: Lock,
-                  label: "Alto",
-                  description: "RSA + AES-256",
-                  color: "text-purple-600",
-                },
-                {
-                  value: "maximum",
-                  icon: Key,
-                  label: "Máximo",
-                  description: "RSA + AES + 2FA",
-                  color: "text-red-600",
-                },
-              ].map((level) => {
-                const Icon = level.icon;
-                const isActive = formData.encryption_level === level.value;
-                return (
-                  <button
-                    key={level.value}
-                    type="button"
-                    onClick={() =>
-                      setFormData({
-                        ...formData,
-                        encryption_level: level.value as EncryptionLevel,
-                      })
-                    }
-                    className={`w-full flex items-center gap-3 p-3 rounded-lg border-2 transition-all ${
-                      isActive
-                        ? "border-primary bg-primary/5 shadow-sm"
-                        : "border-border hover:border-primary/50"
-                    }`}
-                  >
-                    <Icon className={`w-5 h-5 ${level.color}`} />
-                    <div className="flex-1 text-left">
-                      <p className="font-semibold text-sm">{level.label}</p>
-                      <p className="text-xs text-muted-foreground">{level.description}</p>
-                    </div>
-                    {isActive && <CheckCircle2 className="w-5 h-5 text-primary" />}
-                  </button>
-                );
-              })}
-            </div>
+            <p className="text-sm text-muted-foreground">
+              AES-256-GCM con descifrado local. RSA y 2FA aún no están disponibles.
+            </p>
           </div>
 
           {/* Password Protection */}
@@ -930,7 +889,7 @@ function CreateDocument({ userId, onSuccess }: CreateDocumentProps) {
                 <div className="space-y-0.5">
                   <Label>Descarga única</Label>
                   <p className="text-xs text-muted-foreground">
-                    Auto-destruir después de 1 descarga
+                    Invalidar el enlace después de una autorización
                   </p>
                 </div>
                 <Switch
