@@ -416,22 +416,22 @@ function DocumentsList({ userId, refreshTrigger, onUploadClick }: DocumentsListP
                           <Button
                             variant="outline"
                             size="sm"
-                            disabled={!isLinkActive}
+                            disabled={!isLinkActive || !doc.password_required}
                             onClick={() => {
                               const url = `${window.location.origin}/d/${doc.short_url}`;
                               navigator.clipboard.writeText(url);
                               toast.success("Enlace copiado al portapapeles");
                             }}
-                            title="Copiar Enlace"
+                            title={doc.password_required ? "Copiar enlace" : "La clave solo se muestra al crear el documento"}
                           >
                             <Copy className="w-3.5 h-3.5" />
                           </Button>
                           <Button
                             variant="outline"
                             size="sm"
-                            disabled={!isLinkActive}
+                            disabled={!isLinkActive || !doc.password_required}
                             onClick={() => setSelectedQrDoc(doc)}
-                            title="Ver Código QR"
+                            title={doc.password_required ? "Ver código QR" : "La clave solo se muestra al crear el documento"}
                           >
                             <QrCodeIcon className="w-3.5 h-3.5" />
                           </Button>
