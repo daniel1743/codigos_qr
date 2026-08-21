@@ -16,6 +16,7 @@ import {
   QrCode,
   RefreshCw,
   Scissors,
+  Shield,
   Sparkles,
   Store,
   UserRound,
@@ -182,6 +183,13 @@ function Index() {
             <a href="#plantillas" className="hover:text-slate-950">
               Plantillas
             </a>
+            <Link
+              to="/encrypted-documents"
+              className="flex items-center gap-1.5 hover:text-slate-950 text-blue-600 font-semibold"
+            >
+              <Shield className="w-4 h-4" />
+              Documentos Seguros
+            </Link>
             <a href="#faq" className="hover:text-slate-950">
               FAQ
             </a>

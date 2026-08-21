@@ -1,10 +1,11 @@
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../ui/collapsible";
-import { ChevronDown, Wand2, PaintBucket, Palette, Type, Sparkles, ImageIcon } from "lucide-react";
+import { ChevronDown, Wand2, PaintBucket, Palette, Type, Sparkles, ImageIcon, Crown } from "lucide-react";
 import { useState } from "react";
 import type { Profile, ProfileLink } from "../../types/database";
 import { TemplatePicker } from "./TemplatePicker";
+import { PremiumMaxProPicker } from "./PremiumMaxProPicker";
 
 // Importamos las subsecciones que crearemos
 import { FondoSection } from "./appearance/FondoSection";
@@ -42,6 +43,27 @@ export function AppearanceSection({
 
       {/* 1. PLANTILLAS PRIMERO */}
       <TemplatePicker profile={profile} onChange={onChange} />
+
+      {/* 1.5 PREMIUM MAX PRO TEMPLATES (Collapsible) */}
+      <Collapsible defaultOpen={false}>
+        <CollapsibleTrigger className="flex w-full items-center justify-between rounded-xl border-2 border-amber-500/30 bg-gradient-to-r from-amber-500/10 to-amber-600/10 p-4 hover:from-amber-500/20 hover:to-amber-600/20 transition-all shadow-sm hover:shadow-md">
+          <div className="flex items-center gap-2">
+            <Crown className="w-5 h-5 text-amber-600" />
+            <span className="font-bold text-sm bg-gradient-to-r from-amber-600 to-amber-700 bg-clip-text text-transparent">
+              Premium Max Pro Templates
+            </span>
+            <span className="text-[10px] bg-amber-500 text-white px-2 py-0.5 rounded-full font-bold">
+              ELITE
+            </span>
+          </div>
+          <ChevronDown
+            className={`w-4 h-4 text-amber-600 transition-transform data-[state=open]:rotate-180`}
+          />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="pt-4">
+          <PremiumMaxProPicker profile={profile} onChange={onChange} />
+        </CollapsibleContent>
+      </Collapsible>
 
       {/* 2. PERSONALIZACIÓN MANUAL (Collapsible) */}
       <Collapsible open={manualCustomizationOpen} onOpenChange={setManualCustomizationOpen}>

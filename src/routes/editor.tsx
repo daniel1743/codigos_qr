@@ -6,11 +6,9 @@ import { linkService } from "../services/link.service";
 import type { Profile, ProfileLink } from "../types/database";
 import { Auth } from "../components/Auth";
 import { ProfileSection } from "../components/editor/ProfileSection";
-import { DesignSection } from "../components/editor/DesignSection";
+import { AppearanceSection } from "../components/editor/AppearanceSection";
 import { LinksSection } from "../components/editor/LinksSection";
 import { ShareSection } from "../components/editor/ShareSection";
-import { TextSection } from "../components/editor/TextSection";
-import { ElementsSection } from "../components/editor/ElementsSection";
 import { PublicProfileView } from "../components/profile/PublicProfileView";
 import { QRCodeAdvanced } from "../components/qr/QRCodeAdvanced";
 import { QRFrameShell } from "../components/qr/QRFrameShell";
@@ -24,8 +22,6 @@ import {
   UserRound,
   Link as LinkIcon,
   Palette,
-  Type,
-  Shapes,
   QrCode,
   X,
   ChevronDown,
@@ -34,6 +30,7 @@ import {
   ZoomOut,
   Shield,
   Maximize,
+  Lock,
 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import type { CornerDotType, CornerSquareType, DotsType, QREffectType } from "../types/qr-advanced";
@@ -44,7 +41,7 @@ export const Route = createFileRoute("/editor")({
   component: EditorPage,
 });
 
-type TabId = "profile" | "links" | "design" | "text" | "elements" | "qr" | "preview";
+type TabId = "profile" | "links" | "appearance" | "qr";
 
 const ZOOM_STEPS = [0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.25];
 
@@ -427,11 +424,9 @@ function EditorPage() {
   if (!session) return <Auth />;
 
   const TABS = [
-    { id: "profile", label: "Datos", icon: UserCircle },
+    { id: "profile", label: "Perfil", icon: UserCircle },
     { id: "links", label: "Enlaces", icon: LinkIcon },
-    { id: "design", label: "Diseño", icon: Palette },
-    { id: "text", label: "Texto", icon: Type },
-    { id: "elements", label: "Elementos", icon: Shapes },
+    { id: "appearance", label: "Apariencia", icon: Palette },
     { id: "qr", label: "QR", icon: QrCode },
   ] as const;
 
@@ -447,9 +442,9 @@ function EditorPage() {
         );
       case "links":
         return <LinksSection links={links} onChange={setLinks} userId={session.user.id} />;
-      case "design":
+      case "appearance":
         return (
-          <DesignSection
+          <AppearanceSection
             profile={profile}
             onChange={(u) => setProfile((p) => ({ ...p, ...u }))}
             userId={session.user.id}
@@ -458,17 +453,6 @@ function EditorPage() {
               setActiveTab("links");
               setPanelOpen(true);
             }}
-          />
-        );
-      case "text":
-        return (
-          <TextSection profile={profile} onChange={(u) => setProfile((p) => ({ ...p, ...u }))} />
-        );
-      case "elements":
-        return (
-          <ElementsSection
-            profile={profile}
-            onChange={(u) => setProfile((p) => ({ ...p, ...u }))}
           />
         );
       case "qr":
@@ -528,6 +512,17 @@ function EditorPage() {
             <UserRound className="w-5 h-5 mb-1" />
             <span className="text-center text-[10px] font-medium leading-tight">
               Mi perfil principal
+            </span>
+          </Link>
+
+          <Link
+            to="/encrypted-documents"
+            title="Documentos Seguros"
+            className="flex flex-col items-center justify-center p-3 w-full shrink-0 rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200"
+          >
+            <Lock className="w-5 h-5 mb-1" />
+            <span className="text-center text-[10px] font-medium leading-tight font-semibold text-blue-600">
+              Docs Seguros
             </span>
           </Link>
 
@@ -713,6 +708,15 @@ function EditorPage() {
         >
           <UserRound className="w-5 h-5 mb-1" />
           <span className="max-w-full truncate text-[10px] font-medium">Mi perfil</span>
+        </Link>
+
+        <Link
+          to="/encrypted-documents"
+          title="Documentos Seguros"
+          className="flex min-h-14 min-w-[52px] flex-1 flex-col items-center justify-center rounded-lg px-1.5 py-2 transition-colors text-muted-foreground hover:text-primary"
+        >
+          <Lock className="w-5 h-5 mb-1 text-blue-500" />
+          <span className="max-w-full truncate text-[10px] font-medium text-blue-500 font-semibold">Docs Seguros</span>
         </Link>
 
         {TABS.map((tab) => {

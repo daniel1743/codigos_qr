@@ -405,6 +405,8 @@ export function PublicProfileView({
                         <PremiumMediaLinkCard
                           link={link as ProfileLink}
                           layout={premiumMediaLayout}
+                          coverHeight={profile.social_cover_height}
+                          coverWidth={profile.social_cover_width}
                           mainAvatarUrl={profile.avatar_url ?? null}
                           isPreview={isPreview}
                         />

@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AliasRouteImport } from './routes/$alias'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as EditorRouteImport } from './routes/editor'
+import { Route as EncryptedDocumentsRouteImport } from './routes/encrypted-documents'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PPublicIdRouteImport } from './routes/p.$publicId'
 
@@ -36,6 +37,11 @@ const EditorRoute = EditorRouteImport.update({
   path: '/editor',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EncryptedDocumentsRoute = EncryptedDocumentsRouteImport.update({
+  id: '/encrypted-documents',
+  path: '/encrypted-documents',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -52,6 +58,7 @@ export interface FileRoutesByFullPath {
   '/$alias': typeof AliasRoute
   '/admin': typeof AdminRoute
   '/editor': typeof EditorRoute
+  '/encrypted-documents': typeof EncryptedDocumentsRoute
   '/profile': typeof ProfileRoute
   '/p/$publicId': typeof PPublicIdRoute
 }
@@ -60,6 +67,7 @@ export interface FileRoutesByTo {
   '/$alias': typeof AliasRoute
   '/admin': typeof AdminRoute
   '/editor': typeof EditorRoute
+  '/encrypted-documents': typeof EncryptedDocumentsRoute
   '/profile': typeof ProfileRoute
   '/p/$publicId': typeof PPublicIdRoute
 }
@@ -69,21 +77,36 @@ export interface FileRoutesById {
   '/$alias': typeof AliasRoute
   '/admin': typeof AdminRoute
   '/editor': typeof EditorRoute
+  '/encrypted-documents': typeof EncryptedDocumentsRoute
   '/profile': typeof ProfileRoute
   '/p/$publicId': typeof PPublicIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/$alias' | '/admin' | '/editor' | '/profile' | '/p/$publicId'
+    | '/'
+    | '/$alias'
+    | '/admin'
+    | '/editor'
+    | '/encrypted-documents'
+    | '/profile'
+    | '/p/$publicId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/$alias' | '/admin' | '/editor' | '/profile' | '/p/$publicId'
+  to:
+    | '/'
+    | '/$alias'
+    | '/admin'
+    | '/editor'
+    | '/encrypted-documents'
+    | '/profile'
+    | '/p/$publicId'
   id:
     | '__root__'
     | '/'
     | '/$alias'
     | '/admin'
     | '/editor'
+    | '/encrypted-documents'
     | '/profile'
     | '/p/$publicId'
   fileRoutesById: FileRoutesById
@@ -93,6 +116,7 @@ export interface RootRouteChildren {
   AliasRoute: typeof AliasRoute
   AdminRoute: typeof AdminRoute
   EditorRoute: typeof EditorRoute
+  EncryptedDocumentsRoute: typeof EncryptedDocumentsRoute
   ProfileRoute: typeof ProfileRoute
   PPublicIdRoute: typeof PPublicIdRoute
 }
@@ -127,6 +151,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EditorRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/encrypted-documents': {
+      id: '/encrypted-documents'
+      path: '/encrypted-documents'
+      fullPath: '/encrypted-documents'
+      preLoaderRoute: typeof EncryptedDocumentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profile': {
       id: '/profile'
       path: '/profile'
@@ -149,6 +180,7 @@ const rootRouteChildren: RootRouteChildren = {
   AliasRoute: AliasRoute,
   AdminRoute: AdminRoute,
   EditorRoute: EditorRoute,
+  EncryptedDocumentsRoute: EncryptedDocumentsRoute,
   ProfileRoute: ProfileRoute,
   PPublicIdRoute: PPublicIdRoute,
 }

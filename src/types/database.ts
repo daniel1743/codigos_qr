@@ -70,6 +70,7 @@ export interface Profile {
   social_cover_style?: string | null;
   social_cover_avatar_enabled?: boolean;
   social_cover_height?: number | null;
+  social_cover_width?: number | null;
   hero_link_id?: string | null;
   created_at: string;
   updated_at: string;

@@ -1,0 +1,396 @@
+import type { Profile } from "../../types/database";
+
+/**
+ * PREMIUM MAX PRO TEMPLATES
+ * Inspirados en diseños de Envato Elements, Dribbble Premium
+ * Nivel profesional con elegancia, sofisticación y detalles premium
+ */
+
+export interface PremiumTemplate {
+  id: string;
+  name: string;
+  category: "luxury" | "minimal" | "artistic" | "modern" | "elegant";
+  thumbnail?: string;
+  description: string;
+  config: Partial<Profile>;
+}
+
+export const PREMIUM_MAX_PRO_TEMPLATES: PremiumTemplate[] = [
+  // 1. BLACK OBSIDIAN - Elegancia oscura absoluta
+  {
+    id: "black_obsidian",
+    name: "Black Obsidian",
+    category: "luxury",
+    description: "Elegancia oscura con detalles dorados y tipografía serif premium",
+    config: {
+      background_color: "linear-gradient(135deg, #0A0A0A, #1A1A1A)",
+      button_color: "#000000",
+      button_text_color: "#D4AF37", // Dorado
+      button_style: "premium_classic_card",
+      button_radius: "rounded",
+      button_content_align: "left",
+      theme_spacing: "generous",
+      font_family: "Playfair Display",
+      title_color: "#FFFFFF",
+      title_size: "xl",
+      title_weight: "bold",
+      title_align: "center",
+      bio_color: "#C0C0C0", // Plata
+      bio_size: "md",
+      bio_weight: "light",
+      bio_align: "center",
+      avatar_shape: "circle",
+      ring_enabled: true,
+      ring_color: "#D4AF37",
+      ring_thickness: "medium",
+      social_covers_enabled: true,
+      social_cover_style: "glass_orbit",
+      social_cover_height: 72,
+      decor_shadow: "soft",
+      decor_intensity: "strong",
+    },
+  },
+
+  // 2. IVORY PALACE - Minimalismo de lujo claro
+  {
+    id: "ivory_palace",
+    name: "Ivory Palace",
+    category: "luxury",
+    description: "Minimalismo de lujo con tonos crema, dorados sutiles y espaciado generoso",
+    config: {
+      background_color: "#F8F6F3",
+      button_color: "#2C2416",
+      button_text_color: "#F8F6F3",
+      button_style: "premium_minimal_badge",
+      button_radius: "full",
+      button_content_align: "center",
+      theme_spacing: "generous",
+      font_family: "Cormorant Garamond",
+      title_color: "#2C2416",
+      title_size: "xl",
+      title_weight: "semibold",
+      title_align: "center",
+      bio_color: "#5C5446",
+      bio_size: "lg",
+      bio_weight: "light",
+      bio_align: "center",
+      avatar_shape: "rounded",
+      ring_enabled: true,
+      ring_color: "#D4AF37",
+      ring_thickness: "thin",
+      social_covers_enabled: true,
+      social_cover_style: "raised_gloss",
+      social_cover_height: 68,
+      decor_shape: "none",
+      decor_intensity: "subtle",
+    },
+  },
+
+  // 3. NEON TOKYO - Cyberpunk premium
+  {
+    id: "neon_tokyo",
+    name: "Neon Tokyo",
+    category: "modern",
+    description: "Estética cyberpunk con neones vibrantes y efectos de luz premium",
+    config: {
+      background_color: "linear-gradient(135deg, #0F0326, #1A0B3D)",
+      button_color: "#FF006E_NEON",
+      button_text_color: "#FFFFFF",
+      button_style: "premium_image_right",
+      button_radius: "rounded",
+      button_content_align: "left",
+      theme_spacing: "standard",
+      font_family: "Space Grotesk",
+      title_color: "#00F5FF",
+      title_size: "xl",
+      title_weight: "bold",
+      title_align: "center",
+      bio_color: "#B794F6",
+      bio_size: "md",
+      bio_weight: "normal",
+      bio_align: "center",
+      avatar_shape: "circle",
+      ring_enabled: true,
+      ring_color: "#00F5FF",
+      ring_thickness: "medium",
+      social_covers_enabled: true,
+      social_cover_style: "neon_lumen",
+      social_cover_height: 76,
+      decor_particles: "dots",
+      decor_smoke: "soft",
+      decor_intensity: "strong",
+    },
+  },
+
+  // 4. ROSE GARDEN - Elegancia romántica moderna
+  {
+    id: "rose_garden",
+    name: "Rose Garden",
+    category: "elegant",
+    description: "Elegancia romántica con gradientes sutiles rosa-durazno y serif delicado",
+    config: {
+      background_color: "linear-gradient(135deg, #FFF5F7, #FFE5EC)",
+      button_color: "#C9184A",
+      button_text_color: "#FFFFFF",
+      button_style: "premium_classic_card",
+      button_radius: "rounded",
+      button_content_align: "left",
+      theme_spacing: "generous",
+      font_family: "Lora",
+      title_color: "#800F2F",
+      title_size: "xl",
+      title_weight: "bold",
+      title_align: "center",
+      bio_color: "#A4133C",
+      bio_size: "md",
+      bio_weight: "normal",
+      bio_align: "center",
+      avatar_shape: "circle",
+      ring_enabled: true,
+      ring_color: "#FF758F",
+      ring_thickness: "thin",
+      social_covers_enabled: true,
+      social_cover_style: "heart_badge",
+      social_cover_height: 70,
+      decor_shape: "circles",
+      decor_intensity: "subtle",
+    },
+  },
+
+  // 5. EMERALD FOREST - Natural premium oscuro
+  {
+    id: "emerald_forest",
+    name: "Emerald Forest",
+    category: "elegant",
+    description: "Naturaleza premium con verdes profundos y dorados orgánicos",
+    config: {
+      background_color: "linear-gradient(135deg, #0B3D2E, #1A5C47)",
+      button_color: "#FFFFFF",
+      button_text_color: "#0B3D2E",
+      button_style: "premium_detail_arrow",
+      button_radius: "rounded",
+      button_content_align: "left",
+      theme_spacing: "standard",
+      font_family: "Libre Baskerville",
+      title_color: "#F0EAD2",
+      title_size: "xl",
+      title_weight: "bold",
+      title_align: "center",
+      bio_color: "#DDA15E",
+      bio_size: "md",
+      bio_weight: "light",
+      bio_align: "center",
+      avatar_shape: "circle",
+      ring_enabled: true,
+      ring_color: "#BC6C25",
+      ring_thickness: "medium",
+      social_covers_enabled: true,
+      social_cover_style: "leaf_outline",
+      social_cover_height: 72,
+      decor_shadow: "soft",
+      decor_intensity: "medium",
+    },
+  },
+
+  // 6. ICE CRYSTAL - Glassmorphism premium
+  {
+    id: "ice_crystal",
+    name: "Ice Crystal",
+    category: "modern",
+    description: "Glassmorphism de lujo con efectos de escarcha y transparencias",
+    config: {
+      background_color: "linear-gradient(135deg, #E0F4FF, #B8E1FF)",
+      button_color: "#FFFFFF",
+      button_text_color: "#0353A4",
+      button_style: "card",
+      button_radius: "rounded",
+      button_content_align: "center",
+      theme_spacing: "generous",
+      font_family: "Inter",
+      title_color: "#023E7D",
+      title_size: "xl",
+      title_weight: "bold",
+      title_align: "center",
+      bio_color: "#0353A4",
+      bio_size: "md",
+      bio_weight: "normal",
+      bio_align: "center",
+      avatar_shape: "circle",
+      ring_enabled: true,
+      ring_color: "#48CAE4",
+      ring_thickness: "thin",
+      social_covers_enabled: true,
+      social_cover_style: "glass_orbit",
+      social_cover_height: 70,
+      decor_smoke: "soft",
+      decor_particles: "dots",
+      decor_intensity: "medium",
+    },
+  },
+
+  // 7. MIDNIGHT VELVET - Ultra oscuro con púrpura
+  {
+    id: "midnight_velvet",
+    name: "Midnight Velvet",
+    category: "luxury",
+    description: "Ultra oscuro con acentos púrpura royal y detalles plateados",
+    config: {
+      background_color: "linear-gradient(135deg, #10002B, #240046)",
+      button_color: "#7209B7",
+      button_text_color: "#FFFFFF",
+      button_style: "premium_image_left",
+      button_radius: "rounded",
+      button_content_align: "left",
+      theme_spacing: "standard",
+      font_family: "Playfair Display",
+      title_color: "#E0AAFF",
+      title_size: "xl",
+      title_weight: "bold",
+      title_align: "center",
+      bio_color: "#C77DFF",
+      bio_size: "md",
+      bio_weight: "light",
+      bio_align: "center",
+      avatar_shape: "circle",
+      ring_enabled: true,
+      ring_color: "#9D4EDD",
+      ring_thickness: "medium",
+      social_covers_enabled: true,
+      social_cover_style: "metal_coin",
+      social_cover_height: 74,
+      decor_shadow: "soft",
+      decor_particles: "dots",
+      decor_intensity: "strong",
+    },
+  },
+
+  // 8. GOLDEN SAND - Cálido terroso premium
+  {
+    id: "golden_sand",
+    name: "Golden Sand",
+    category: "elegant",
+    description: "Tonos arena y dorados cálidos con tipografía elegante y espaciado fluido",
+    config: {
+      background_color: "linear-gradient(135deg, #FFF8E7, #FFE6BC)",
+      button_color: "#8B6914",
+      button_text_color: "#FFFFFF",
+      button_style: "premium_classic_card",
+      button_radius: "rounded",
+      button_content_align: "left",
+      theme_spacing: "generous",
+      font_family: "Fraunces",
+      title_color: "#654321",
+      title_size: "xl",
+      title_weight: "bold",
+      title_align: "center",
+      bio_color: "#8B6914",
+      bio_size: "lg",
+      bio_weight: "light",
+      bio_align: "center",
+      avatar_shape: "circle",
+      ring_enabled: true,
+      ring_color: "#D4AF37",
+      ring_thickness: "thin",
+      social_covers_enabled: true,
+      social_cover_style: "ribbon_label",
+      social_cover_height: 68,
+      decor_shape: "lines",
+      decor_intensity: "subtle",
+    },
+  },
+
+  // 9. ARCTIC MONO - Monocromático premium
+  {
+    id: "arctic_mono",
+    name: "Arctic Mono",
+    category: "minimal",
+    description: "Monocromático ultra minimalista con jerarquía tipográfica perfecta",
+    config: {
+      background_color: "#FAFAFA",
+      button_color: "#111111",
+      button_text_color: "#FFFFFF",
+      button_style: "solid",
+      button_radius: "none",
+      button_content_align: "center",
+      theme_spacing: "generous",
+      font_family: "Inter",
+      title_color: "#000000",
+      title_size: "xl",
+      title_weight: "bold",
+      title_align: "left",
+      bio_color: "#666666",
+      bio_size: "md",
+      bio_weight: "light",
+      bio_align: "left",
+      avatar_shape: "rounded",
+      ring_enabled: false,
+      social_covers_enabled: true,
+      social_cover_style: "split_capsule",
+      social_cover_height: 64,
+      decor_shape: "none",
+      decor_intensity: "subtle",
+    },
+  },
+
+  // 10. SUNSET BLAZE - Gradiente ardiente premium
+  {
+    id: "sunset_blaze",
+    name: "Sunset Blaze",
+    category: "artistic",
+    description: "Gradientes ardientes con tipografía bold y efectos dramáticos",
+    config: {
+      background_color: "linear-gradient(135deg, #FF006E, #FB5607, #FFBE0B)",
+      button_color: "#FFFFFF",
+      button_text_color: "#370617",
+      button_style: "premium_minimal_badge",
+      button_radius: "full",
+      button_content_align: "center",
+      theme_spacing: "standard",
+      font_family: "Bebas Neue",
+      title_color: "#FFFFFF",
+      title_size: "xl",
+      title_weight: "bold",
+      title_align: "center",
+      bio_color: "#FFFFFF",
+      bio_size: "md",
+      bio_weight: "normal",
+      bio_align: "center",
+      avatar_shape: "circle",
+      ring_enabled: true,
+      ring_color: "#FFFFFF",
+      ring_thickness: "medium",
+      social_covers_enabled: true,
+      social_cover_style: "solid_subscribe",
+      social_cover_height: 76,
+      decor_particles: "dots",
+      decor_smoke: "soft",
+      decor_intensity: "strong",
+    },
+  },
+];
+
+/**
+ * Aplica un template Premium Max Pro al perfil
+ */
+export function applyPremiumMaxProTemplate(
+  templateId: string,
+  currentProfile: Partial<Profile>,
+): Partial<Profile> {
+  const template = PREMIUM_MAX_PRO_TEMPLATES.find((t) => t.id === templateId);
+  if (!template) {
+    console.warn(`Premium template ${templateId} not found`);
+    return currentProfile;
+  }
+
+  return {
+    ...currentProfile,
+    ...template.config,
+  };
+}
+
+/**
+ * Obtiene templates por categoría
+ */
+export function getPremiumTemplatesByCategory(category: PremiumTemplate["category"]) {
+  return PREMIUM_MAX_PRO_TEMPLATES.filter((t) => t.category === category);
+}

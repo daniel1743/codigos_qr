@@ -12,6 +12,8 @@ interface PremiumMediaLinkCardProps {
   layout: PremiumMediaLayoutId;
   mainAvatarUrl?: string | null;
   isPreview?: boolean;
+  coverHeight?: number | null;
+  coverWidth?: number | null;
 }
 
 function getLinkVisual(link: ProfileLink, mainAvatarUrl?: string | null) {
@@ -41,6 +43,8 @@ export function PremiumMediaLinkCard({
   layout,
   mainAvatarUrl,
   isPreview = false,
+  coverHeight,
+  coverWidth,
 }: PremiumMediaLinkCardProps) {
   const design = getPremiumMediaLayout(layout);
   const platform = getPlatformDef(link.platform || "other");
@@ -62,6 +66,11 @@ export function PremiumMediaLinkCard({
   const mediaBorder = visualIsImage
     ? "1px solid rgba(255, 255, 255, 0.72)"
     : design.mediaBorder;
+  const normalizedHeight = Math.min(88, Math.max(48, Number(coverHeight || 64)));
+  const normalizedWidth = Math.min(116, Math.max(88, Number(coverWidth || 100)));
+  const cardMinHeight = Math.max(132, Math.round(normalizedHeight * 2.3));
+  const mediaMinHeight = Math.max(112, cardMinHeight - 12);
+  const mediaInnerMinHeight = Math.max(104, mediaMinHeight - 10);
 
   return (
     <a
@@ -71,13 +80,16 @@ export function PremiumMediaLinkCard({
       onClick={(event) => {
         if (isPreview) event.preventDefault();
       }}
-      className="group grid min-h-[148px] w-full grid-cols-[minmax(0,1fr)_minmax(112px,38%)] items-stretch gap-1 overflow-visible p-1.5 text-left transition duration-200 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+      className="group mx-auto grid grid-cols-[minmax(0,1fr)_minmax(112px,38%)] items-stretch gap-1 overflow-visible p-1.5 text-left transition duration-200 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
       style={{
         background: design.cardBackground,
         border: design.cardBorder,
         borderRadius: "22px",
         boxShadow: design.cardShadow,
         color: design.contentColor,
+        width: `${normalizedWidth}%`,
+        maxWidth: "calc(100% + 36px)",
+        minHeight: `${cardMinHeight}px`,
       }}
     >
       <div className="relative z-10 flex min-w-0 flex-col justify-between py-3 pl-4 pr-2">
@@ -116,14 +128,18 @@ export function PremiumMediaLinkCard({
           </span>
         </div>
       </div>
-      <div className="relative flex min-h-[136px] items-stretch overflow-visible py-1.5 pr-1.5">
+      <div
+        className="relative flex items-stretch overflow-visible py-1.5 pr-1.5"
+        style={{ minHeight: `${mediaMinHeight}px` }}
+      >
         <div
-          className="relative h-full min-h-[124px] w-full overflow-hidden transition-transform duration-300 group-hover:scale-[1.015]"
+          className="relative h-full w-full overflow-hidden transition-transform duration-300 group-hover:scale-[1.015]"
           style={{
             borderRadius: imageRadius,
             background: mediaBackground,
             border: mediaBorder,
             boxShadow: visualIsImage ? "inset 0 0 0 1px rgba(15, 23, 42, 0.06)" : undefined,
+            minHeight: `${mediaInnerMinHeight}px`,
           }}
         >
           {visualIsImage && visual.url ? (

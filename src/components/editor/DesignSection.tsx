@@ -379,6 +379,76 @@ export function DesignSection({
                 />
               </div>
 
+              <div className="space-y-2 rounded-md border bg-background p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="space-y-0.5">
+                    <Label className="text-sm">Ancho premium</Label>
+                    <p className="text-xs text-muted-foreground">
+                      Haz las tarjetas mas compactas o mas anchas
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      className="h-9 w-9 rounded-full"
+                      onClick={() =>
+                        onChange({
+                          social_cover_width: Math.max(
+                            88,
+                            Number(profile.social_cover_width || 100) - 4,
+                          ),
+                        })
+                      }
+                    >
+                      -
+                    </Button>
+                    <Input
+                      type="number"
+                      min={88}
+                      max={116}
+                      step={2}
+                      value={profile.social_cover_width || 100}
+                      onChange={(e) =>
+                        onChange({
+                          social_cover_width: Math.min(
+                            116,
+                            Math.max(88, Number(e.target.value) || 100),
+                          ),
+                        })
+                      }
+                      className="h-9 w-16 text-center"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      className="h-9 w-9 rounded-full"
+                      onClick={() =>
+                        onChange({
+                          social_cover_width: Math.min(
+                            116,
+                            Number(profile.social_cover_width || 100) + 4,
+                          ),
+                        })
+                      }
+                    >
+                      +
+                    </Button>
+                  </div>
+                </div>
+                <input
+                  type="range"
+                  min={88}
+                  max={116}
+                  step={2}
+                  value={profile.social_cover_width || 100}
+                  onChange={(e) => onChange({ social_cover_width: Number(e.target.value) || 100 })}
+                  className="w-full accent-primary"
+                />
+              </div>
+
               <div className="space-y-0.5">
                 <Label className="text-sm">Modelos premium</Label>
                 <p className="text-xs text-muted-foreground">

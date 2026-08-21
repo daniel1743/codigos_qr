@@ -16,6 +16,7 @@ import {
   X,
   LogOut,
   ArrowLeft,
+  Lock,
 } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -298,6 +299,13 @@ export function MyProfilePage() {
       </div>
 
       <div className="mt-auto space-y-2 pt-6">
+        <Link
+          to="/encrypted-documents"
+          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-50 font-semibold"
+        >
+          <Lock className="h-4 w-4 text-blue-500" strokeWidth={1.8} />
+          Documentos Seguros
+        </Link>
         <Link
           to="/editor"
           className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
