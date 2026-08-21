@@ -1,6 +1,7 @@
 -- Modified by ChatGPT Work — ENC-DOC-SECURE-DELIVERY-02
 -- Secure, private delivery for encrypted documents.
 
+CREATE SCHEMA IF NOT EXISTS extensions;
 CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA extensions;
 
 ALTER TABLE public.encrypted_documents
@@ -66,9 +67,9 @@ BEGIN
     RETURN;
   END IF;
 
-  SELECT * INTO v_document
-  FROM public.encrypted_documents
-  WHERE short_url = p_short_url;
+  SELECT d.* INTO v_document
+  FROM public.encrypted_documents AS d
+  WHERE d.short_url = p_short_url;
 
   IF NOT FOUND THEN
     RETURN QUERY SELECT 'not_found'::TEXT, NULL::TEXT, NULL::TEXT, NULL::TEXT, NULL::BIGINT, NULL::BOOLEAN;
@@ -106,7 +107,12 @@ CREATE OR REPLACE FUNCTION public.create_encrypted_document(
   p_one_time_download BOOLEAN,
   p_short_url TEXT
 )
-RETURNS public.encrypted_documents
+RETURNS TABLE (
+  id UUID,
+  name TEXT,
+  short_url TEXT,
+  password_required BOOLEAN
+)
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = pg_catalog, public, extensions
@@ -149,9 +155,13 @@ BEGIN
   )
   RETURNING * INTO v_document;
 
-  RETURN v_document;
+  RETURN QUERY SELECT
+    v_document.id,
+    v_document.name,
+    v_document.short_url,
+    v_document.password_required;
 END;
-$$;
+$;
 
 REVOKE ALL ON FUNCTION public.create_encrypted_document(TEXT,TEXT,TEXT,TEXT,BIGINT,TEXT,TEXT,TEXT,TEXT,TEXT,TIMESTAMPTZ,INTEGER,BOOLEAN,TEXT) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.create_encrypted_document(TEXT,TEXT,TEXT,TEXT,BIGINT,TEXT,TEXT,TEXT,TEXT,TEXT,TIMESTAMPTZ,INTEGER,BOOLEAN,TEXT) TO authenticated;
@@ -184,9 +194,9 @@ BEGIN
     RETURN;
   END IF;
 
-  SELECT * INTO v_document
-  FROM public.encrypted_documents
-  WHERE short_url = p_short_url
+  SELECT d.* INTO v_document
+  FROM public.encrypted_documents AS d
+  WHERE d.short_url = p_short_url
   FOR UPDATE;
 
   IF NOT FOUND THEN
