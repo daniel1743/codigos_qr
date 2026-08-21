@@ -16,6 +16,7 @@ interface PublicProfileViewProps {
   onOpenSidebar?: (tabId: string) => void;
 }
 
+import { PremiumCustomLinkCard } from "./PremiumCustomLinkCard";
 import { PremiumDecorativeLayer } from "./PremiumDecorativeLayer";
 import { loadGoogleFont } from "../../lib/fonts";
 
@@ -393,7 +394,14 @@ export function PublicProfileView({
                       {...(link.id ? { linkId: link.id } : {})}
                       key={link.id || i}
                     >
-                      {premiumMediaLayout ? (
+                      {buttonStyle.startsWith("premium_") ? (
+                        <PremiumCustomLinkCard
+                          link={link as ProfileLink}
+                          buttonStyle={buttonStyle}
+                          profile={profile}
+                          isPreview={isPreview}
+                        />
+                      ) : premiumMediaLayout ? (
                         <PremiumMediaLinkCard
                           link={link as ProfileLink}
                           layout={premiumMediaLayout}

@@ -289,7 +289,7 @@ export function LinksSection({ links, onChange, userId }: LinksSectionProps) {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Texto del botón</Label>
+                      <Label>Título / Etiqueta</Label>
                       <Input
                         value={link.label || ""}
                         onChange={(e) => updateLink(index, { label: e.target.value })}
@@ -300,12 +300,23 @@ export function LinksSection({ links, onChange, userId }: LinksSectionProps) {
                   </div>
 
                   <div className="space-y-2">
+                    <Label>Descripción (Para Tarjetas Premium)</Label>
+                    <Input
+                      value={link.subtitle || ""}
+                      onChange={(e) => updateLink(index, { subtitle: e.target.value })}
+                      placeholder="Ej: Conoce mis servicios y reserva una cita..."
+                      className="h-11"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
                     <Label>URL de destino</Label>
                     <Input
                       value={link.url || ""}
                       onChange={(e) => updateLink(index, { url: e.target.value })}
                       placeholder="https://..."
                       className="h-11"
+                      dir="ltr"
                     />
                   </div>
 

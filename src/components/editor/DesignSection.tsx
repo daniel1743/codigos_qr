@@ -906,15 +906,20 @@ export function DesignSection({
         <div className="space-y-3 pt-4 mt-4 border-t border-border/40">
           <Label className="text-xs text-muted-foreground">Estilo de enlaces</Label>
           <div className="grid grid-cols-2 gap-3 min-[430px]:grid-cols-3">
-            {[
-              { id: "solid", label: "Sólido" },
-              { id: "outline", label: "Outline" },
-              { id: "soft", label: "Soft" },
-              { id: "pill", label: "Pill" },
-              { id: "minimal", label: "Minimal" },
-              { id: "line", label: "Line" },
-              { id: "card", label: "Card" },
-            ].map((style) => {
+                          {[
+                { id: "solid", label: "Sólido" },
+                { id: "outline", label: "Outline" },
+                { id: "soft", label: "Soft" },
+                { id: "pill", label: "Pill" },
+                { id: "minimal", label: "Minimal" },
+                { id: "line", label: "Line" },
+                { id: "card", label: "Card" },
+                { id: "premium_image_right", label: "Pro Max: Derecha" },
+                { id: "premium_image_left", label: "Pro Max: Izquierda" },
+                { id: "premium_detail_arrow", label: "Pro Max: Detalle" },
+                { id: "premium_classic_card", label: "Pro Max: Tarjeta" },
+                { id: "premium_minimal_badge", label: "Pro Max: Badge" },
+              ].map((style) => {
               const isActive = (profile.button_style || "solid") === style.id;
 
               // Paleta neutral para demos (nunca falla el contraste visual)
@@ -963,7 +968,7 @@ export function DesignSection({
                   aria-pressed={isActive}
                   onClick={() =>
                     onChange({
-                      button_style: style.id as "solid" | "line" | "minimal" | "pill" | "card",
+                      button_style: style.id as any,
                     })
                   }
                   className={`flex flex-col gap-2 p-2 rounded-xl border transition-all ${isActive ? "bg-primary/5 border-primary ring-1 ring-primary" : "bg-card hover:bg-accent border-border"}`}
