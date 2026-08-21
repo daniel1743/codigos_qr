@@ -15,17 +15,37 @@ import {
   AlertDialogTrigger,
 } from "../ui/alert-dialog";
 import type { ProfileLink } from "../../types/database";
-import { ArrowUp, ArrowDown, Trash2, Plus, GripVertical, Link as LinkIcon } from "lucide-react";
+import type { LinkImageMode } from "../../types/database";
+import {
+  ArrowUp,
+  ArrowDown,
+  Trash2,
+  Plus,
+  GripVertical,
+  Link as LinkIcon,
+  Image as ImageIcon,
+  Loader2,
+  X,
+  UserCircle,
+} from "lucide-react";
 
 import { PlatformPicker } from "../profile/PlatformPicker";
 import { getPlatformDef } from "../../constants/platforms";
+import { getBrowserSupabaseClient } from "../../lib/supabase/client";
+import { toast } from "sonner";
+import { useState } from "react";
+import type { ChangeEvent, ComponentType } from "react";
 
 interface LinksSectionProps {
   links: Partial<ProfileLink>[];
   onChange: (links: Partial<ProfileLink>[]) => void;
+  userId: string;
 }
 
-export function LinksSection({ links, onChange }: LinksSectionProps) {
+export function LinksSection({ links, onChange, userId }: LinksSectionProps) {
+  const supabase = getBrowserSupabaseClient();
+  const [uploadingCoverIndex, setUploadingCoverIndex] = useState<number | null>(null);
+
   const handleAddLink = () => {
     if (links.length >= 8) return;
 
@@ -65,6 +85,34 @@ export function LinksSection({ links, onChange }: LinksSectionProps) {
     newLinks[targetIndex] = temp;
 
     onChange(newLinks.map((link, i) => ({ ...link, sort_order: i })));
+  };
+
+  const handleSocialCoverImageUpload = async (index: number, e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingCoverIndex(index);
+    try {
+      const fileExt = file.name.split(".").pop();
+      const platform = links[index]?.platform || "link";
+      const fileName = `social-cover-${platform}-${Date.now()}.${fileExt}`;
+      const filePath = `${userId}/social-covers/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage.from("avatars").upload(filePath, file);
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
+      updateLink(index, {
+        social_cover_image_mode: "custom_image",
+        social_cover_image_url: data.publicUrl,
+      });
+    } catch (error) {
+      console.error(error);
+      toast.error("No se pudo subir la foto de esta red.");
+    } finally {
+      setUploadingCoverIndex(null);
+      e.target.value = "";
+    }
   };
 
   return (
@@ -259,6 +307,118 @@ export function LinksSection({ links, onChange }: LinksSectionProps) {
                       placeholder="https://..."
                       className="h-11"
                     />
+                  </div>
+
+                  <div className="space-y-2 rounded-lg border bg-muted/20 p-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="space-y-0.5">
+                        <Label className="flex items-center gap-2 text-sm">
+                          <ImageIcon className="h-4 w-4" />
+                          Imagen premium de esta red
+                        </Label>
+                        <p className="text-xs text-muted-foreground">
+                          Elige si usa logo, avatar principal o una foto propia
+                        </p>
+                      </div>
+                      {link.social_cover_image_url && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 rounded-full"
+                          onClick={() =>
+                            updateLink(index, {
+                              social_cover_image_mode: "platform_icon",
+                              social_cover_image_url: null,
+                            })
+                          }
+                          aria-label="Quitar foto premium"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-2 min-[420px]:grid-cols-3">
+                      {(
+                        [
+                          {
+                            mode: "platform_icon" as const,
+                            label: "Logo de la red",
+                            icon: IconComponent,
+                          },
+                          {
+                            mode: "main_avatar" as const,
+                            label: "Usar mi avatar",
+                            icon: UserCircle,
+                          },
+                          {
+                            mode: "custom_image" as const,
+                            label: "Subir foto",
+                            icon: ImageIcon,
+                          },
+                        ] satisfies Array<{
+                          mode: LinkImageMode;
+                          label: string;
+                          icon: ComponentType<{ className?: string }>;
+                        }>
+                      ).map((option) => {
+                        const OptionIcon = option.icon;
+                        const active =
+                          (link.social_cover_image_mode || "platform_icon") === option.mode;
+                        return (
+                          <Button
+                            key={option.mode}
+                            type="button"
+                            variant="outline"
+                            className={`h-12 justify-start gap-2 rounded-lg px-3 text-xs ${
+                              active ? "border-primary bg-primary/5 text-primary" : ""
+                            }`}
+                            onClick={() =>
+                              updateLink(index, {
+                                social_cover_image_mode: option.mode as LinkImageMode,
+                              })
+                            }
+                            aria-pressed={active}
+                          >
+                            <OptionIcon className="h-4 w-4 shrink-0" />
+                            <span className="truncate">{option.label}</span>
+                          </Button>
+                        );
+                      })}
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <div className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-full border bg-background">
+                        {(link.social_cover_image_mode || "platform_icon") === "custom_image" &&
+                        link.social_cover_image_url ? (
+                          <img
+                            src={link.social_cover_image_url}
+                            alt=""
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (link.social_cover_image_mode || "platform_icon") === "main_avatar" ? (
+                          <UserCircle className="h-7 w-7 text-muted-foreground" />
+                        ) : (
+                          <IconComponent className="h-6 w-6 text-muted-foreground" />
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <Input
+                          type="file"
+                          accept="image/png, image/jpeg, image/webp"
+                          onChange={(e) => handleSocialCoverImageUpload(index, e)}
+                          disabled={uploadingCoverIndex === index}
+                          className="h-10 text-xs"
+                        />
+                        {uploadingCoverIndex === index && (
+                          <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            Subiendo...
+                          </p>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </AccordionContent>

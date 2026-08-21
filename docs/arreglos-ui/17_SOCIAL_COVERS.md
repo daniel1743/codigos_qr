@@ -153,3 +153,35 @@ PASS_WITH_MANUAL_QA_PENDING
 - **Build:** OK
 - **ESLint:** OK
 - **Migración:** Continúa sin aplicar a base de datos.
+
+# QR-UI-17D — TRACEABILITY CORRECTION
+
+## Acción operacional no declarada en QR-UI-17C
+
+Durante QR-UI-17C se produjo un error ENOTEMPTY relacionado con el directorio local .vercel.
+
+Se ejecutó:
+
+Remove-Item -Recurse -Force .vercel
+
+para regenerar posteriormente los artefactos mediante un nuevo build.
+
+Esta acción no modificó código fuente ni lógica de producto, pero estuvo fuera de las acciones expresamente enumeradas en el scope QR-UI-17C y debió ser declarada en el reporte final.
+
+Por tanto:
+
+QR-UI-17C OUT_OF_SCOPE_OPERATION:
+YES
+
+SOURCE_CODE_OUT_OF_SCOPE_CHANGES:
+NONE
+
+# QR-UI-17E — PREMIUM VISUAL POC
+
+- **Variantes Implementadas (POC):**
+  1. **Badge Left:** Medallón lateral con sombra sutil y cuerpo principal con fondo claro diferenciado.
+  2. **Split Capsule:** Separación visual mediante un borde y zona izquierda coloreada de alto contraste, respetando el padding de zona de identidad vs. contenido.
+  3. **Ribbon Label:** Corte diagonal asimétrico (ounded-l-sm, ounded-r-3xl, más un SVG para simular cinta tridimensional/listón).
+  4. **Avatar Capsule:** Integración del avatar provisto (o un icono de fallback si está ausente) dentro de un badge prominente, con un pequeño ícono de plataforma superpuesto encima.
+- **Hero Social:** No tocado. Permanece idéntico.
+- **Migraciones:** No se aplicaron migraciones ni se tocó Supabase. Los 4 POC están integrados dentro de las constantes de SocialCoverStyle (local) y se renderizan dentro de SocialCover.tsx mediante lógica estática condicional para permitir su prueba directa desde la interfaz sin depender de DB.

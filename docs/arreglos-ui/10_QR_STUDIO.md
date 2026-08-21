@@ -109,3 +109,35 @@ Al ser un agente en un entorno virtual, no puedo apuntar una cámara física a l
   px tsc --noEmit\: Exit Code 0
 
 **VEREDICTO FINAL QR-UI-10:** Fase de QR Studio arquitectónicamente estable y lista para Merge/Despliegue tras revisión de tests de escaneo manuales.
+
+## 7. QR-STUDIO-11C — Finder Colors, Marcos Reales y Preview de Edición
+
+### 7.1 Finder Colors Independientes
+
+- Se separó el control **Arriba izquierda** del color global `qr_corners_square_color`.
+- Cada finder externo usa su valor propio:
+  - `qr_corner_top_left_color`
+  - `qr_corner_top_right_color`
+  - `qr_corner_bottom_left_color`
+- Fallback aplicado: valor individual -> `qr_corners_square_color` -> foreground.
+- El centro de los tres finders usa `qr_corners_dot_color`.
+
+### 7.2 Marcos Reales
+
+Los estilos `plain`, `stamp`, `badge`, `phone` y `bottle` ahora se renderizan como decoración real alrededor del QR, no solo como padding genérico. El QR se mantiene dentro de una zona blanca para preservar contraste y quiet zone.
+
+### 7.3 Exportación
+
+- PNG avanzado: compone colores individuales y marco en canvas.
+- SVG avanzado con colores individuales o marco: exporta un SVG autocontenido con una imagen PNG embebida para mantener paridad visual con la vista previa.
+- No se agregó migración SQL en esta fase; se reutilizaron campos existentes.
+
+### 7.4 Preview de Edición
+
+Cuando el usuario abre el tab **QR**, el centro del editor cambia del miniweb a una vista grande del QR en vivo. Al presionar **Listo**, cerrar el panel o cambiar de sección, vuelve el miniweb.
+
+### 7.5 Scan QA
+
+**Estado:** `MANUAL_SCAN_QA_PENDING`
+
+Queda pendiente validar con cámara física los marcos `stamp`, `badge`, `phone` y `bottle` en combinaciones de colores reales del usuario.

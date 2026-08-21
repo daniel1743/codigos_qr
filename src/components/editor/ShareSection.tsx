@@ -1,6 +1,7 @@
 import { Button } from "../ui/button";
 import { QRCodeCanvas, QRCodeSVG } from "qrcode.react";
 import { QRCodeAdvanced, useQRAdvancedDownload } from "../qr/QRCodeAdvanced";
+import { QRFrameShell } from "../qr/QRFrameShell";
 import { requiresAdvancedRenderer } from "../../lib/qr-advanced-utils";
 import { downloadQR, downloadSVG } from "../../lib/downloadQR";
 import { getPublicProfileUrl, getAliasProfileUrl } from "../../lib/url";
@@ -46,31 +47,11 @@ import imageCompression from "browser-image-compression";
 import { loadImageDeterministic } from "../../lib/qr-export/loadImage";
 
 const QR_FRAME_OPTIONS = [
-  { id: "plain", label: "Simple", icon: Square, className: "rounded-2xl border bg-white p-4" },
-  {
-    id: "stamp",
-    label: "Sello",
-    icon: Stamp,
-    className: "rounded-full border-[6px] border-double bg-white p-5 shadow-sm",
-  },
-  {
-    id: "badge",
-    label: "Etiqueta",
-    icon: Tag,
-    className: "rounded-[1.25rem] border-4 border-b-[26px] bg-white p-4 shadow-sm",
-  },
-  {
-    id: "phone",
-    label: "Celular",
-    icon: Smartphone,
-    className: "rounded-[2rem] border-[10px] border-slate-900 bg-white p-4 shadow-md",
-  },
-  {
-    id: "bottle",
-    label: "Bebida",
-    icon: Wine,
-    className: "rounded-t-[4rem] rounded-b-2xl border bg-white p-5 shadow-sm",
-  },
+  { id: "plain", label: "Simple", icon: Square },
+  { id: "stamp", label: "Sello", icon: Stamp },
+  { id: "badge", label: "Etiqueta", icon: Tag },
+  { id: "phone", label: "Celular", icon: Smartphone },
+  { id: "bottle", label: "Bebida", icon: Wine },
 ] as const;
 
 const DOT_STYLE_OPTIONS = [
@@ -166,7 +147,8 @@ export function ShareSection({
     !!profile.qr_corners_dot_color ||
     !!profile.qr_corner_top_left_color ||
     !!profile.qr_corner_top_right_color ||
-    !!profile.qr_corner_bottom_left_color;
+    !!profile.qr_corner_bottom_left_color ||
+    qrFrameStyle !== "plain";
 
   const rebuildPublicUrl = () => {
     setPublicUrl(publicId ? getPublicProfileUrl(publicId) : "");
@@ -361,13 +343,14 @@ export function ShareSection({
           cornersSquareType: (profile.qr_corners_square_type ||
             "extra-rounded") as CornerSquareType,
           cornersDotType: (profile.qr_corners_dot_type || "dot") as CornerDotType,
-          cornersSquareColor: cornerTopLeftColor,
+          cornersSquareColor: profile.qr_corners_square_color || fgColor,
           cornersDotColor: cornerDotColor,
           cornerSquareColors: {
             topLeft: cornerTopLeftColor,
             topRight: cornerTopRightColor,
             bottomLeft: cornerBottomLeftColor,
           },
+          frameStyle: qrFrameStyle,
           effect: (profile.qr_effect || "none") as QREffectType,
           ...(logoEnabled && logoUrl ? { image: logoUrl } : {}),
           ...(logoEnabled && logoUrl
@@ -537,9 +520,7 @@ export function ShareSection({
                 diseño.
               </p>
 
-              <div
-                className={`flex aspect-square w-full max-w-[260px] items-center justify-center overflow-hidden relative ${selectedFrame.className}`}
-              >
+              <QRFrameShell frameStyle={selectedFrame.id} className="w-full max-w-[260px]">
                 {usesAdvancedQR ? (
                   <QRCodeAdvanced
                     key={`adv-${publicUrl}-${qrVersion}-${JSON.stringify(profile.qr_gradient)}-${fgColor}-${bgColor}-${logoEnabled}-${profile.qr_effect}`}
@@ -554,13 +535,14 @@ export function ShareSection({
                       cornersSquareType: (profile.qr_corners_square_type ||
                         "extra-rounded") as CornerSquareType,
                       cornersDotType: (profile.qr_corners_dot_type || "dot") as CornerDotType,
-                      cornersSquareColor: cornerTopLeftColor,
+                      cornersSquareColor: profile.qr_corners_square_color || fgColor,
                       cornersDotColor: cornerDotColor,
                       cornerSquareColors: {
                         topLeft: cornerTopLeftColor,
                         topRight: cornerTopRightColor,
                         bottomLeft: cornerBottomLeftColor,
                       },
+                      frameStyle: qrFrameStyle,
                       effect: (profile.qr_effect || "none") as QREffectType,
                       ...(logoEnabled && logoUrl ? { image: logoUrl } : {}),
                       ...(logoEnabled && logoUrl
@@ -575,7 +557,7 @@ export function ShareSection({
                         : {}),
                       qrOptions: { errorCorrectionLevel: "H" },
                     }}
-                    className="w-full h-full flex items-center justify-center"
+                    className="flex h-full w-full items-center justify-center [&_canvas]:h-full [&_canvas]:w-full"
                   />
                 ) : exportFormat === "svg" ? (
                   <QRCodeSVG
@@ -604,7 +586,7 @@ export function ShareSection({
                     style={{ width: "100%", height: "100%" }}
                   />
                 )}
-              </div>
+              </QRFrameShell>
 
               <div className="grid w-full gap-2">
                 <Button
@@ -803,9 +785,8 @@ export function ShareSection({
                     <ColorControl
                       compact
                       value={cornerTopLeftColor}
-                      onChange={(val) =>
-                        onChange({ qr_corner_top_left_color: val, qr_corners_square_color: val })
-                      }
+                      // Modified by Codex — QR-STUDIO-11C
+                      onChange={(val) => onChange({ qr_corner_top_left_color: val })}
                     />
                   </div>
                   <div className="space-y-2">

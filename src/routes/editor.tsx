@@ -12,8 +12,11 @@ import { ShareSection } from "../components/editor/ShareSection";
 import { TextSection } from "../components/editor/TextSection";
 import { ElementsSection } from "../components/editor/ElementsSection";
 import { PublicProfileView } from "../components/profile/PublicProfileView";
+import { QRCodeAdvanced } from "../components/qr/QRCodeAdvanced";
+import { QRFrameShell } from "../components/qr/QRFrameShell";
 import { toast } from "sonner";
 import { generatePublicId, getInternalSlugFromPublicId } from "../lib/publicId";
+import { getPublicProfileUrl } from "../lib/url";
 import { isValidUrl, normalizeUrl } from "../lib/validation";
 import { isUserAdmin, isAdminEmail } from "../lib/admin-check";
 import {
@@ -33,6 +36,7 @@ import {
   Maximize,
 } from "lucide-react";
 import { Button } from "../components/ui/button";
+import type { CornerDotType, CornerSquareType, DotsType, QREffectType } from "../types/qr-advanced";
 
 import type { Session } from "@supabase/supabase-js";
 
@@ -43,6 +47,87 @@ export const Route = createFileRoute("/editor")({
 type TabId = "profile" | "links" | "design" | "text" | "elements" | "qr" | "preview";
 
 const ZOOM_STEPS = [0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.25];
+
+// Modified by Codex — QR-STUDIO-11C
+function EditorQRPreview({
+  profile,
+  publicId,
+  onDone,
+}: {
+  profile: Partial<Profile>;
+  publicId: string;
+  onDone: () => void;
+}) {
+  const fgColor = profile.qr_foreground_color || "#000000";
+  const bgColor = profile.qr_background_color || "#FFFFFF";
+  const cornerTopLeftColor =
+    profile.qr_corner_top_left_color || profile.qr_corners_square_color || fgColor;
+  const cornerTopRightColor =
+    profile.qr_corner_top_right_color || profile.qr_corners_square_color || fgColor;
+  const cornerBottomLeftColor =
+    profile.qr_corner_bottom_left_color || profile.qr_corners_square_color || fgColor;
+  const qrUrl = publicId ? getPublicProfileUrl(publicId) : "https://preview.local/qr";
+  const logoEnabled = profile.qr_logo_enabled ?? false;
+
+  return (
+    <div className="flex h-full w-full items-center justify-center px-6">
+      <div className="flex w-full max-w-[540px] flex-col items-center gap-5 rounded-3xl border bg-background/95 p-6 shadow-2xl">
+        <div className="flex w-full items-center justify-between gap-4">
+          <div>
+            <h2 className="text-lg font-semibold tracking-tight">Vista QR</h2>
+            <p className="text-sm text-muted-foreground">Cambios visuales en vivo</p>
+          </div>
+          <Button className="rounded-full px-5" onClick={onDone}>
+            Listo
+          </Button>
+        </div>
+
+        <QRFrameShell
+          frameStyle={profile.qr_frame_style || "plain"}
+          className="w-full max-w-[420px]"
+        >
+          <QRCodeAdvanced
+            key={`editor-qr-${qrUrl}-${JSON.stringify(profile.qr_gradient)}-${fgColor}-${bgColor}-${profile.qr_frame_style}-${logoEnabled}-${profile.qr_effect}`}
+            options={{
+              data: qrUrl,
+              width: 360,
+              height: 360,
+              margin: 4,
+              dotsColor: profile.qr_gradient || fgColor,
+              backgroundColor: bgColor,
+              dotsType: (profile.qr_dots_type || "square") as DotsType,
+              cornersSquareType: (profile.qr_corners_square_type ||
+                "extra-rounded") as CornerSquareType,
+              cornersDotType: (profile.qr_corners_dot_type || "dot") as CornerDotType,
+              cornersSquareColor: profile.qr_corners_square_color || fgColor,
+              cornersDotColor: profile.qr_corners_dot_color || fgColor,
+              cornerSquareColors: {
+                topLeft: cornerTopLeftColor,
+                topRight: cornerTopRightColor,
+                bottomLeft: cornerBottomLeftColor,
+              },
+              frameStyle: profile.qr_frame_style || "plain",
+              effect: (profile.qr_effect || "none") as QREffectType,
+              ...(logoEnabled && profile.qr_logo_url ? { image: profile.qr_logo_url } : {}),
+              ...(logoEnabled && profile.qr_logo_url
+                ? {
+                    imageOptions: {
+                      hideBackgroundDots: true,
+                      imageSize: 0.28,
+                      margin: 4,
+                      crossOrigin: "anonymous",
+                    },
+                  }
+                : {}),
+              qrOptions: { errorCorrectionLevel: "H" },
+            }}
+            className="flex h-full w-full items-center justify-center [&_canvas]:h-full [&_canvas]:w-full"
+          />
+        </QRFrameShell>
+      </div>
+    </div>
+  );
+}
 
 function EditorPage() {
   const [session, setSession] = useState<Session | null>(null);
@@ -361,7 +446,7 @@ function EditorPage() {
           />
         );
       case "links":
-        return <LinksSection links={links} onChange={setLinks} />;
+        return <LinksSection links={links} onChange={setLinks} userId={session.user.id} />;
       case "design":
         return (
           <DesignSection
@@ -419,6 +504,8 @@ function EditorPage() {
     setActiveTab(nextTab);
     setPanelOpen(true);
   };
+
+  const showQrEditingPreview = activeTab === "qr" && panelOpen;
 
   return (
     <div className="relative flex h-[100dvh] w-full flex-col overflow-hidden overscroll-none bg-background font-sans md:flex-row">
@@ -585,23 +672,31 @@ function EditorPage() {
 
         {/* Scalable Container */}
         <div className="relative flex items-center justify-center w-full h-full">
-          {/* Phone Frame */}
-          <div
-            className="relative h-[750px] w-[375px] shrink-0 transform-gpu overflow-hidden rounded-[3rem] border-[8px] border-black/10 bg-background shadow-2xl transition-transform duration-300"
-            style={{
-              transform: `scale(${zoomLevel})`,
-              transformOrigin: "center center",
-            }}
-          >
-            <PublicProfileView
+          {showQrEditingPreview ? (
+            <EditorQRPreview
               profile={profile}
-              links={links}
-              isPreview={true}
-              onProfileChange={handleProfilePreviewChange}
-              onLinkChange={handleLinkPreviewChange}
-              onOpenSidebar={handleOpenPreviewSidebar}
+              publicId={savedPublicId || profile.public_id || ""}
+              onDone={() => setPanelOpen(false)}
             />
-          </div>
+          ) : (
+            // Modified by Codex — QR-STUDIO-11C
+            <div
+              className="relative h-[750px] w-[375px] shrink-0 transform-gpu overflow-hidden rounded-[3rem] border-[8px] border-black/10 bg-background shadow-2xl transition-transform duration-300"
+              style={{
+                transform: `scale(${zoomLevel})`,
+                transformOrigin: "center center",
+              }}
+            >
+              <PublicProfileView
+                profile={profile}
+                links={links}
+                isPreview={true}
+                onProfileChange={handleProfilePreviewChange}
+                onLinkChange={handleLinkPreviewChange}
+                onOpenSidebar={handleOpenPreviewSidebar}
+              />
+            </div>
+          )}
         </div>
       </main>
 

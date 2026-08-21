@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { Loader2, Image as ImageIcon, CircleUserRound, Star, Sparkles } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Switch } from "../ui/switch";
+import { SOCIAL_COVER_STYLE_OPTIONS } from "../../constants/social-cover-styles";
 
 interface DesignSectionProps {
   profile: Partial<Profile>;
@@ -190,6 +191,142 @@ export function DesignSection({ profile, onChange, userId, links = [] }: DesignS
               onCheckedChange={(checked) => onChange({ social_covers_enabled: checked })}
             />
           </div>
+
+          {profile.social_covers_enabled && (
+            <div className="space-y-3 rounded-lg border bg-muted/20 p-3">
+              <div className="space-y-2 rounded-md border bg-background p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="space-y-0.5">
+                    <Label className="text-sm">Alto premium</Label>
+                    <p className="text-xs text-muted-foreground">
+                      Ajusta el grosor sin cambiar el largo
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      className="h-9 w-9 rounded-full"
+                      onClick={() =>
+                        onChange({
+                          social_cover_height: Math.max(
+                            48,
+                            Number(profile.social_cover_height || 64) - 4,
+                          ),
+                        })
+                      }
+                    >
+                      -
+                    </Button>
+                    <Input
+                      type="number"
+                      min={48}
+                      max={88}
+                      step={2}
+                      value={profile.social_cover_height || 64}
+                      onChange={(e) =>
+                        onChange({
+                          social_cover_height: Math.min(
+                            88,
+                            Math.max(48, Number(e.target.value) || 64),
+                          ),
+                        })
+                      }
+                      className="h-9 w-16 text-center"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      className="h-9 w-9 rounded-full"
+                      onClick={() =>
+                        onChange({
+                          social_cover_height: Math.min(
+                            88,
+                            Number(profile.social_cover_height || 64) + 4,
+                          ),
+                        })
+                      }
+                    >
+                      +
+                    </Button>
+                  </div>
+                </div>
+                <input
+                  type="range"
+                  min={48}
+                  max={88}
+                  step={2}
+                  value={profile.social_cover_height || 64}
+                  onChange={(e) => onChange({ social_cover_height: Number(e.target.value) || 64 })}
+                  className="w-full accent-primary"
+                />
+              </div>
+
+              <div className="space-y-0.5">
+                <Label className="text-sm">Modelos premium</Label>
+                <p className="text-xs text-muted-foreground">
+                  Elige la forma visual de tus botones sociales
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                {SOCIAL_COVER_STYLE_OPTIONS.map((option) => {
+                  const active = (profile.social_cover_style || "badge_left") === option.id;
+                  return (
+                    <button
+                      key={option.id}
+                      type="button"
+                      aria-pressed={active}
+                      onClick={() => onChange({ social_cover_style: option.id })}
+                      className={`flex min-h-[88px] flex-col rounded-lg border p-2 text-left transition-all ${
+                        active
+                          ? "border-primary bg-primary/5 ring-1 ring-primary"
+                          : "border-border bg-background hover:bg-accent"
+                      }`}
+                    >
+                      <span className="relative mb-2 block h-8 w-full overflow-hidden rounded-full bg-gradient-to-r from-blue-600 via-cyan-500 to-emerald-500 shadow-sm">
+                        {option.id === "badge_left" && (
+                          <span className="absolute -left-1 top-1/2 h-9 w-9 -translate-y-1/2 rounded-full border-4 border-white bg-blue-600" />
+                        )}
+                        {option.id === "split_capsule" && (
+                          <>
+                            <span className="absolute inset-0 bg-white" />
+                            <span className="absolute left-0 top-0 h-full w-12 bg-blue-600" />
+                          </>
+                        )}
+                        {option.id === "ribbon_label" && (
+                          <span className="absolute left-0 top-0 h-full w-12 bg-pink-600 [clip-path:polygon(0_0,80%_0,100%_100%,0_100%)]" />
+                        )}
+                        {option.id === "avatar_capsule" && (
+                          <span className="absolute -left-1 top-1/2 h-9 w-9 -translate-y-1/2 rounded-full bg-slate-200 border-2 border-white" />
+                        )}
+                      </span>
+                      <span
+                        className={`text-xs font-semibold ${active ? "text-primary" : "text-foreground"}`}
+                      >
+                        {option.label}
+                      </span>
+                      <span className="mt-0.5 text-[10px] leading-tight text-muted-foreground">
+                        {option.hint}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="rounded-md border bg-background px-3 py-2">
+                <div className="space-y-0.5">
+                  <Label className="text-xs">Imagen por enlace</Label>
+                  <p className="text-[10px] text-muted-foreground">
+                    {/* Modified by Codex — SOCIAL-BADGES-IMAGE-MODE */}
+                    El logo, avatar o foto propia se configura desde cada enlace.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="w-full h-px bg-border/50" />
 

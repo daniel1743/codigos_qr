@@ -34,7 +34,7 @@ import {
   SiSignal,
 } from "@icons-pack/react-simple-icons";
 import {
-  Globe,
+  AppWindow,
   Mail,
   Phone,
   Link as LinkIcon,
@@ -112,7 +112,8 @@ export const PLATFORMS_CATALOG: PlatformDef[] = [
   { id: "vk", label: "VK", category: "descubrimiento_comercio", icon: SiVk },
 
   // contacto
-  { id: "website", label: "Sitio web", category: "contacto", icon: Globe },
+  // Modified by Codex — SOCIAL-BADGES-IMAGE-MODE
+  { id: "website", label: "Sitio web", category: "contacto", icon: AppWindow },
   { id: "email", label: "Email", category: "contacto", icon: Mail },
   { id: "phone", label: "Teléfono", category: "contacto", icon: Phone },
 

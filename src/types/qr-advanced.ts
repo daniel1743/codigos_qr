@@ -24,6 +24,7 @@ export type QREffectType =
   | "crystal"
   | "rainbow"
   | "aurora";
+export type QRFrameStyle = "plain" | "stamp" | "badge" | "phone" | "bottle";
 
 export interface GradientOptions {
   type: GradientType;
@@ -56,6 +57,8 @@ export interface QRAdvancedOptions {
     topRight?: string;
     bottomLeft?: string;
   };
+  // Modified by Codex — QR-STUDIO-11C
+  frameStyle?: QRFrameStyle | string | null;
 
   // Effect
   effect?: QREffectType;

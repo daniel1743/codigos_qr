@@ -37,19 +37,34 @@ function DecorativeLayer({
   const fillStyle = { backgroundColor: accentColor };
 
   return (
-    <div className={`pointer-events-none absolute inset-0 z-0 overflow-hidden ${opacityClass}`} aria-hidden="true">
+    <div
+      className={`pointer-events-none absolute inset-0 z-0 overflow-hidden ${opacityClass}`}
+      aria-hidden="true"
+    >
       {(shape === "circles" || shape === "mixed") && (
         <>
-          <span className="absolute -right-10 top-20 h-32 w-32 rounded-full border" style={accentStyle} />
-          <span className="absolute left-7 top-[42%] h-16 w-16 rounded-full border" style={accentStyle} />
+          <span
+            className="absolute -right-10 top-20 h-32 w-32 rounded-full border"
+            style={accentStyle}
+          />
+          <span
+            className="absolute left-7 top-[42%] h-16 w-16 rounded-full border"
+            style={accentStyle}
+          />
           <span className="absolute bottom-20 right-12 h-8 w-8 rounded-full" style={fillStyle} />
         </>
       )}
 
       {(shape === "squares" || shape === "mixed") && (
         <>
-          <span className="absolute -left-8 top-28 h-24 w-24 rotate-12 rounded-2xl border" style={accentStyle} />
-          <span className="absolute bottom-36 right-4 h-14 w-14 -rotate-12 rounded-xl border" style={accentStyle} />
+          <span
+            className="absolute -left-8 top-28 h-24 w-24 rotate-12 rounded-2xl border"
+            style={accentStyle}
+          />
+          <span
+            className="absolute bottom-36 right-4 h-14 w-14 -rotate-12 rounded-xl border"
+            style={accentStyle}
+          />
         </>
       )}
 
@@ -71,19 +86,31 @@ function DecorativeLayer({
             "left-[28%] bottom-[16%]",
             "right-[30%] bottom-[20%]",
           ].map((position) => (
-            <span key={position} className={`absolute h-1.5 w-1.5 rounded-full ${position}`} style={fillStyle} />
+            <span
+              key={position}
+              className={`absolute h-1.5 w-1.5 rounded-full ${position}`}
+              style={fillStyle}
+            />
           ))}
         </>
       )}
 
       {smoke === "soft" && (
         <>
-          <span className="absolute -left-10 top-20 h-40 w-56 rounded-[45%] blur-3xl" style={fillStyle} />
-          <span className="absolute -right-16 bottom-24 h-44 w-64 rounded-[45%] blur-3xl" style={fillStyle} />
+          <span
+            className="absolute -left-10 top-20 h-40 w-56 rounded-[45%] blur-3xl"
+            style={fillStyle}
+          />
+          <span
+            className="absolute -right-16 bottom-24 h-44 w-64 rounded-[45%] blur-3xl"
+            style={fillStyle}
+          />
         </>
       )}
 
-      {shadow === "soft" && <span className="absolute inset-x-10 bottom-3 h-24 rounded-full bg-black/30 blur-3xl" />}
+      {shadow === "soft" && (
+        <span className="absolute inset-x-10 bottom-3 h-24 rounded-full bg-black/30 blur-3xl" />
+      )}
     </div>
   );
 }
@@ -304,21 +331,21 @@ export function PublicProfileView({
       >
         <DecorativeLayer profile={profile} accentColor={buttonColor} />
         <div className="relative z-10 flex w-full max-w-[520px] flex-1 flex-col items-center pb-12 pt-0 sm:pb-16">
-          
           {/* Hero Social Section */}
-          {profile.hero_link_id && links.find(l => l.id === profile.hero_link_id && l.enabled) && (
-            <ContextWrapper type="link" linkId={profile.hero_link_id}>
-              <div className="w-full shrink-0 relative">
-                <SocialCover 
-                  link={links.find(l => l.id === profile.hero_link_id)! as ProfileLink} 
-                  variant="hero" 
-                  onClick={(e) => {
-                    if (isPreview) e.preventDefault();
-                  }}
-                />
-              </div>
-            </ContextWrapper>
-          )}
+          {profile.hero_link_id &&
+            links.find((l) => l.id === profile.hero_link_id && l.enabled) && (
+              <ContextWrapper type="link" linkId={profile.hero_link_id}>
+                <div className="w-full shrink-0 relative">
+                  <SocialCover
+                    link={links.find((l) => l.id === profile.hero_link_id)! as ProfileLink}
+                    variant="hero"
+                    onClick={(e) => {
+                      if (isPreview) e.preventDefault();
+                    }}
+                  />
+                </div>
+              </ContextWrapper>
+            )}
 
           {/* Portada Section */}
           {profile.banner_url ? (
@@ -450,6 +477,10 @@ export function PublicProfileView({
                         <SocialCover
                           link={link as ProfileLink}
                           variant="cover"
+                          coverStyle={profile.social_cover_style}
+                          coverHeight={profile.social_cover_height}
+                          // Modified by Codex — SOCIAL-BADGES-IMAGE-MODE
+                          avatarUrl={profile.avatar_url}
                           className="w-full mb-3 last:mb-0"
                           onClick={(e) => {
                             if (isPreview) e.preventDefault();

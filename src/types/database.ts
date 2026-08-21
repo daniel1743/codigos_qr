@@ -67,6 +67,9 @@ export interface Profile {
   decor_shadow?: string | null;
   decor_intensity?: string | null;
   social_covers_enabled?: boolean;
+  social_cover_style?: string | null;
+  social_cover_avatar_enabled?: boolean;
+  social_cover_height?: number | null;
   hero_link_id?: string | null;
   created_at: string;
   updated_at: string;
@@ -94,6 +97,7 @@ export type PlatformType =
   | "whatsapp"
   | "email"
   | "other";
+export type LinkImageMode = "platform_icon" | "main_avatar" | "custom_image";
 
 export interface ProfileLink {
   id: string; // UUID
@@ -102,6 +106,8 @@ export interface ProfileLink {
   label: string;
   url: string;
   icon_key: string | null;
+  social_cover_image_mode?: LinkImageMode | null;
+  social_cover_image_url?: string | null;
   sort_order: number;
   enabled: boolean;
   created_at: string;
