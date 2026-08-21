@@ -76,57 +76,107 @@ function recolorCanvasRegion(
   }
 }
 
-function applyCornerSquareColors(canvas: HTMLCanvasElement, options: QRAdvancedOptions) {
+function applyCornerSquareColors(
+  canvas: HTMLCanvasElement,
+  options: QRAdvancedOptions,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  qrCodeInstance?: any,
+) {
   const colors = options.cornerSquareColors;
   if (!colors) return;
 
   const size = Math.min(canvas.width, canvas.height);
-  const finderSize = size * 0.245;
-  const innerSize = finderSize * 0.38;
-  const innerOffset = finderSize * 0.31;
+  const margin = options.margin ?? 4;
+
+  // Si tenemos la instancia de qr-code-styling, podemos saber el número exacto de módulos.
+  // Por defecto, si falla, asumimos la versión 3 que tiene 29 módulos.
+  const qr = qrCodeInstance?._qr;
+  const count = qr ? qr.getModuleCount() : 29;
+  const moduleSize = (size - 2 * margin) / count;
+
+  // Un patrón finder ("ojo") siempre mide exactamente 7 módulos de ancho y alto.
+  const exactFinderSize = 7 * moduleSize;
+
+  const tlX = margin;
+  const tlY = margin;
+  const trX = size - margin - exactFinderSize;
+  const trY = margin;
+  const blX = margin;
+  const blY = size - margin - exactFinderSize;
+
   const squareFallback =
     options.cornersSquareColor ||
     (typeof options.dotsColor === "string" ? options.dotsColor : "#000000");
 
-  // Modified by Codex — QR-STUDIO-11C
+  // Sumamos un pequeño margen de 0.5px para evitar bordes suavizados (anti-aliasing) fuera de la región
+  const boxW = exactFinderSize + 1;
+  const boxH = exactFinderSize + 1;
+
   recolorCanvasRegion(
     canvas,
-    { x: 0, y: 0, width: finderSize, height: finderSize },
+    { x: tlX - 0.5, y: tlY - 0.5, width: boxW, height: boxH },
     colors.topLeft || squareFallback,
     options.backgroundColor,
   );
   recolorCanvasRegion(
     canvas,
-    { x: size - finderSize, y: 0, width: finderSize, height: finderSize },
+    { x: trX - 0.5, y: trY - 0.5, width: boxW, height: boxH },
     colors.topRight || squareFallback,
     options.backgroundColor,
   );
   recolorCanvasRegion(
     canvas,
-    { x: 0, y: size - finderSize, width: finderSize, height: finderSize },
+    { x: blX - 0.5, y: blY - 0.5, width: boxW, height: boxH },
     colors.bottomLeft || squareFallback,
     options.backgroundColor,
   );
 
   if (options.cornersDotColor) {
+    // COMENTADO TEMPORALMENTE A PETICIÓN DEL USUARIO PARA PRUEBAS
+    /*
+    // La zona interior (dot) ocupa 3x3 módulos empezando desde un offset de 2 módulos.
+    const innerOffset = 2 * moduleSize;
+    const innerSize = 3 * moduleSize;
+
+    // Expandimos la caja interior un poco para atrapar bordes, aprovechando el espacio blanco de 1 módulo que lo rodea
+    const expand = 0.5 * moduleSize;
+    const safeInnerOffset = innerOffset - expand;
+    const safeInnerSize = innerSize + 2 * expand;
+
     recolorCanvasRegion(
       canvas,
-      { x: innerOffset, y: innerOffset, width: innerSize, height: innerSize },
+      {
+        x: tlX + safeInnerOffset,
+        y: tlY + safeInnerOffset,
+        width: safeInnerSize,
+        height: safeInnerSize,
+      },
       options.cornersDotColor,
       options.backgroundColor,
     );
     recolorCanvasRegion(
       canvas,
-      { x: size - finderSize + innerOffset, y: innerOffset, width: innerSize, height: innerSize },
+      {
+        x: trX + safeInnerOffset,
+        y: trY + safeInnerOffset,
+        width: safeInnerSize,
+        height: safeInnerSize,
+      },
       options.cornersDotColor,
       options.backgroundColor,
     );
     recolorCanvasRegion(
       canvas,
-      { x: innerOffset, y: size - finderSize + innerOffset, width: innerSize, height: innerSize },
+      {
+        x: blX + safeInnerOffset,
+        y: blY + safeInnerOffset,
+        width: safeInnerSize,
+        height: safeInnerSize,
+      },
       options.cornersDotColor,
       options.backgroundColor,
     );
+    */
   }
 }
 
@@ -443,7 +493,7 @@ export function QRCodeAdvanced({ options, className, onRender }: QRCodeAdvancedP
 
       const canvas = ref.current.querySelector("canvas");
       if (canvas) {
-        applyCornerSquareColors(canvas, options);
+        applyCornerSquareColors(canvas, options, qrCode.current);
       }
 
       // Aplicar efectos Premium
@@ -531,7 +581,7 @@ export function useQRAdvancedDownload() {
                 return;
               }
               context.drawImage(image, 0, 0, options.width, options.height);
-              applyCornerSquareColors(canvas, options);
+              applyCornerSquareColors(canvas, options, qr);
               canvas.toBlob(
                 (processedBlob) => resolve(processedBlob || (blob as Blob)),
                 "image/png",
@@ -574,7 +624,7 @@ export function useQRAdvancedDownload() {
                   return;
                 }
                 context.drawImage(image, 0, 0, options.width, options.height);
-                applyCornerSquareColors(canvas, options);
+                applyCornerSquareColors(canvas, options, qr);
                 canvas.toBlob(
                   (processedBlob) => resolve(processedBlob || (blob as Blob)),
                   "image/png",

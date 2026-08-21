@@ -454,6 +454,10 @@ function EditorPage() {
             onChange={(u) => setProfile((p) => ({ ...p, ...u }))}
             userId={session.user.id}
             links={links}
+            onManageLinkImages={() => {
+              setActiveTab("links");
+              setPanelOpen(true);
+            }}
           />
         );
       case "text":

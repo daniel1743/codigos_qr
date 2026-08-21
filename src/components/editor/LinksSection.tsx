@@ -404,13 +404,28 @@ export function LinksSection({ links, onChange, userId }: LinksSectionProps) {
                         )}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <Input
+                        <input
+                          id={`social-cover-image-${link.id || index}`}
                           type="file"
                           accept="image/png, image/jpeg, image/webp"
                           onChange={(e) => handleSocialCoverImageUpload(index, e)}
                           disabled={uploadingCoverIndex === index}
-                          className="h-10 text-xs"
+                          className="sr-only"
                         />
+                        <Label
+                          htmlFor={`social-cover-image-${link.id || index}`}
+                          className={`flex h-10 cursor-pointer items-center justify-center rounded-md border border-input bg-background px-3 text-xs font-medium transition-colors hover:bg-accent ${
+                            uploadingCoverIndex === index ? "pointer-events-none opacity-60" : ""
+                          }`}
+                        >
+                          <ImageIcon className="mr-2 h-4 w-4" />
+                          {link.social_cover_image_url
+                            ? "Cambiar imagen"
+                            : "Subir imagen personalizada"}
+                        </Label>
+                        <p className="mt-1 text-[10px] text-muted-foreground">
+                          PNG, JPG o WEBP. Se ajusta solo dentro del logo.
+                        </p>
                         {uploadingCoverIndex === index && (
                           <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
                             <Loader2 className="h-3.5 w-3.5 animate-spin" />

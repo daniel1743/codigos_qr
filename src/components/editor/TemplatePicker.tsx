@@ -13,6 +13,31 @@ interface TemplatePickerProps {
   onChange: (updates: Partial<Profile>) => void;
 }
 
+// Applying a preset must also clear optional values from the previous one.
+// Without this baseline, a light `theme_surface` from one template can remain
+// active after selecting a dark template, leaving an unintended card and bars.
+const TEMPLATE_STYLE_BASELINE: Partial<Profile> = {
+  theme_layout: "classic_center",
+  theme_surface: "transparent",
+  theme_spacing: "standard",
+  avatar_shape: "circle",
+  ring_enabled: false,
+  ring_color: "#000000",
+  ring_thickness: "thin",
+  title_color: null,
+  title_size: "lg",
+  title_weight: "bold",
+  title_align: "center",
+  bio_color: null,
+  bio_size: "md",
+  bio_weight: "normal",
+  bio_align: "center",
+  button_text_size: "md",
+  button_text_weight: "semibold",
+  button_content_align: "left",
+  button_icon_position: "left",
+};
+
 function TemplateThumbnail({ style, name }: { style: TemplateStyle; name: string }) {
   const bg = style.background_color.includes("gradient")
     ? { background: style.background_color }
@@ -32,6 +57,81 @@ function TemplateThumbnail({ style, name }: { style: TemplateStyle; name: string
     style.background_color.includes("#FB7185");
   const textColor = isDarkBg ? "rgba(255,255,255,0.85)" : "rgba(0,0,0,0.85)";
   const avatarColor = isDarkBg ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.1)";
+
+  if (style.theme_layout?.startsWith("media_")) {
+    const mediaOnRight = [
+      "media_cobalt_editorial",
+      "media_aqua_glass",
+      "media_sage_maison",
+      "media_scarlet_journal",
+      "media_ocean_grid",
+    ].includes(style.theme_layout);
+    const cardColor = isDarkBg ? "rgba(255,255,255,0.09)" : "rgba(255,255,255,0.82)";
+    const cardBorder = isDarkBg ? "rgba(255,255,255,0.16)" : "rgba(15,23,42,0.08)";
+    const skeletonColor = isDarkBg ? "rgba(255,255,255,0.64)" : "rgba(15,23,42,0.58)";
+
+    return (
+      <div
+        className="relative flex aspect-[4/5] w-full flex-col justify-end gap-1.5 overflow-hidden rounded-2xl border p-2.5 shadow-sm"
+        style={bg}
+      >
+        <div
+          className="absolute inset-0 opacity-25"
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(255,255,255,0.32) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.32) 1px, transparent 1px)",
+            backgroundSize: "14px 14px",
+          }}
+        />
+        <div className="relative mb-auto flex items-center justify-between">
+          <span
+            className="rounded-full px-1.5 py-0.5 text-[7px] font-bold"
+            style={{
+              backgroundColor: style.button_color,
+              color: style.button_text_color,
+            }}
+          >
+            PRO
+          </span>
+          <span
+            className="h-1.5 w-8 rounded-full"
+            style={{ backgroundColor: skeletonColor, opacity: 0.7 }}
+          />
+        </div>
+        <div className="relative flex flex-col gap-1.5">
+          {[0, 1, 2].map((item) => (
+            <div
+              key={item}
+              className={`flex h-10 items-center gap-1.5 overflow-hidden border p-1 ${mediaOnRight ? "flex-row-reverse" : ""}`}
+              style={{
+                background: cardColor,
+                borderColor: cardBorder,
+                borderRadius: "8px",
+              }}
+            >
+              <div
+                className="h-full w-8 shrink-0 rounded-md"
+                style={{ background: style.button_color }}
+              />
+              <div className="flex min-w-0 flex-1 flex-col gap-1">
+                <span
+                  className="h-1.5 w-12 rounded-full"
+                  style={{ backgroundColor: skeletonColor }}
+                />
+                <span
+                  className="h-1 w-8 rounded-full opacity-50"
+                  style={{ backgroundColor: skeletonColor }}
+                />
+              </div>
+              <span className="text-[10px] font-bold" style={{ color: style.button_color }}>
+                &gt;
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -108,7 +208,8 @@ export function TemplatePicker({ profile, onChange }: TemplatePickerProps) {
       t.style.font_family === profile.font_family &&
       t.style.background_color === profile.background_color &&
       t.style.button_color === profile.button_color &&
-      t.style.button_style === profile.button_style,
+      t.style.button_style === profile.button_style &&
+      t.style.theme_layout === profile.theme_layout,
   );
 
   let visibleTemplates = TEMPLATE_PRESETS;
@@ -118,6 +219,13 @@ export function TemplatePicker({ profile, onChange }: TemplatePickerProps) {
   if (tierFilter !== "all") {
     visibleTemplates = visibleTemplates.filter((t) => t.tier === tierFilter);
   }
+
+  const applyTemplate = (style: TemplateStyle) => {
+    onChange({
+      ...TEMPLATE_STYLE_BASELINE,
+      ...style,
+    });
+  };
 
   return (
     <div className="space-y-4 rounded-2xl border bg-card p-4 shadow-sm">
@@ -193,7 +301,7 @@ export function TemplatePicker({ profile, onChange }: TemplatePickerProps) {
               type="button"
               aria-label={`Aplicar plantilla ${template.name}`}
               aria-pressed={isActive}
-              onClick={() => onChange(template.style)}
+              onClick={() => applyTemplate(template.style)}
               className="flex flex-col gap-2 group text-left transition-transform duration-200 hover:scale-[1.01] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-2xl relative"
             >
               <div

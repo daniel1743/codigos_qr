@@ -101,6 +101,65 @@ function Index() {
 
   return (
     <main className="min-h-screen bg-white text-[#0f172a]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([
+            {
+              "@context": "https://schema.org",
+              "@type": "WebApplication",
+              "name": "QR Links",
+              "url": "https://codigos-qr.vercel.app/",
+              "applicationCategory": "UtilityApplication",
+              "operatingSystem": "All",
+              "description": "Generador de códigos QR con página web personalizable para enlaces, WhatsApp y redes sociales.",
+              "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "USD"
+              }
+            },
+            {
+              "@context": "https://schema.org",
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "¿Puedo cambiar mis enlaces después de imprimir el QR?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Sí. El contenido de tu página puede actualizarse sin cambiar el QR, mientras mantengas el mismo identificador público."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "¿Puedo usar varias redes en una sola página?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Sí. Puedes reunir diferentes enlaces y plataformas en un solo destino."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "¿Puedo personalizar el diseño?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Sí. Puedes ajustar fuentes, colores, plantillas, portada y estilos visuales según la versión disponible."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "¿Puedo descargar el QR?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Sí. La creación te lleva al editor para publicar y descargar tu código QR."
+                  }
+                }
+              ]
+            }
+          ])
+        }}
+      />
       <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-white/90 backdrop-blur-xl">
         <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <Link to="/" className="flex items-center gap-2 font-semibold tracking-tight">
@@ -214,6 +273,9 @@ function Index() {
             <h1 className="max-w-4xl text-5xl font-extrabold leading-[0.95] tracking-tight text-slate-950 sm:text-6xl lg:text-7xl">
               Tu QR. Tu página. Tu marca.
             </h1>
+            <h2 className="mt-4 text-xl font-medium text-slate-700">
+              Generador de Código QR con Página Personalizada
+            </h2>
             <p className="mt-6 max-w-xl text-lg leading-8 text-slate-600">
               Reúne tus redes, WhatsApp, web y contenido en una página profesional. Actualízala
               cuando quieras sin volver a imprimir tu QR.

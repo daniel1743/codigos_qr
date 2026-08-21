@@ -2,7 +2,7 @@ import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Alert, AlertDescription } from "../ui/alert";
-import { AlertTriangle, PaintBucket, Palette, ChevronDown, Wand2 } from "lucide-react";
+import { AlertTriangle, PaintBucket, Palette, ChevronDown, Wand2, ArrowRight } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../ui/collapsible";
 import { TemplatePicker } from "./TemplatePicker";
@@ -19,6 +19,7 @@ interface DesignSectionProps {
   onChange: (updates: Partial<Profile>) => void;
   userId: string;
   links?: Partial<ProfileLink>[];
+  onManageLinkImages?: () => void;
 }
 
 const GRADIENT_PRESETS = [
@@ -53,7 +54,121 @@ import {
 
 import { ColorControl } from "./ColorControl";
 
-export function DesignSection({ profile, onChange, userId, links = [] }: DesignSectionProps) {
+function SocialCoverStylePreview({ id }: { id: string }) {
+  const base =
+    "relative mb-2 block h-8 w-full overflow-hidden rounded-full bg-gradient-to-r from-blue-600 via-cyan-500 to-emerald-500 shadow-sm";
+
+  if (id === "split_capsule") {
+    return (
+      <span className={base}>
+        <span className="absolute inset-0 bg-white" />
+        <span className="absolute left-0 top-0 h-full w-12 bg-blue-600" />
+      </span>
+    );
+  }
+
+  if (id === "ribbon_label") {
+    return (
+      <span className={base}>
+        <span className="absolute left-0 top-0 h-full w-12 bg-pink-600 [clip-path:polygon(0_0,80%_0,100%_100%,0_100%)]" />
+      </span>
+    );
+  }
+
+  if (id === "avatar_capsule") {
+    return (
+      <span className={base}>
+        <span className="absolute -left-1 top-1/2 h-9 w-9 -translate-y-1/2 rounded-full border-2 border-white bg-slate-200" />
+      </span>
+    );
+  }
+
+  if (id === "solid_subscribe") {
+    return (
+      <span className={`${base} bg-gradient-to-r from-pink-600 to-rose-500`}>
+        <span className="absolute bottom-1 left-4 right-4 h-2 rounded-full bg-white/15" />
+        <span className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 rounded-md bg-white/90" />
+      </span>
+    );
+  }
+
+  if (id === "raised_gloss") {
+    return (
+      <span
+        className={`${base} border-2 border-white bg-gradient-to-r from-blue-700 to-cyan-500 shadow-[0_3px_0_rgba(148,163,184,0.8)]`}
+      >
+        <span className="absolute left-2 top-1/2 h-5 w-5 -translate-y-1/2 rounded-full bg-white" />
+        <span className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.28),transparent_45%)]" />
+      </span>
+    );
+  }
+
+  if (id === "heart_badge") {
+    return (
+      <span className={`${base} overflow-visible bg-gradient-to-r from-blue-700 to-pink-500`}>
+        <span className="absolute -left-1 top-1/2 h-8 w-8 -translate-y-1/2 rounded-2xl bg-blue-600 shadow-sm" />
+        <span className="absolute -left-0.5 top-0 h-4 w-4 rounded-full bg-blue-600" />
+        <span className="absolute left-3 top-0 h-4 w-4 rounded-full bg-blue-600" />
+      </span>
+    );
+  }
+
+  if (id === "angled_tab") {
+    return (
+      <span className="relative mb-2 block h-8 w-full overflow-hidden rounded-r-full border-2 border-blue-600 bg-white shadow-sm">
+        <span className="absolute left-0 top-0 h-full w-12 bg-blue-600 [clip-path:polygon(0_0,80%_0,100%_100%,0_100%)]" />
+      </span>
+    );
+  }
+
+  if (id === "leaf_outline") {
+    return (
+      <span className="relative mb-2 block h-8 w-full overflow-hidden rounded-[999px_14px_999px_999px] border-2 border-cyan-500 bg-white shadow-sm">
+        <span className="absolute left-0 top-0 h-full w-12 rounded-l-full bg-gradient-to-r from-pink-500 to-yellow-400 [clip-path:polygon(0_0,82%_0,100%_50%,82%_100%,0_100%)]" />
+      </span>
+    );
+  }
+
+  if (id === "metal_coin") {
+    return (
+      <span className={`${base} overflow-visible bg-gradient-to-r from-blue-700 to-blue-500`}>
+        <span className="absolute -left-1 top-1/2 h-9 w-9 -translate-y-1/2 rounded-full bg-[conic-gradient(from_25deg,#f8fafc,#94a3b8,#fff,#64748b,#f8fafc)] shadow-sm" />
+      </span>
+    );
+  }
+
+  if (id === "neon_lumen") {
+    return (
+      <span className="relative mb-2 block h-8 w-full overflow-hidden rounded-full bg-gradient-to-r from-slate-950 via-blue-600 to-cyan-400 shadow-sm">
+        <span className="absolute -inset-y-6 left-8 w-14 rotate-12 bg-white/30 blur-lg" />
+        <span className="absolute left-2 top-1/2 h-5 w-5 -translate-y-1/2 rounded-full bg-white" />
+      </span>
+    );
+  }
+
+  if (id === "glass_orbit") {
+    return (
+      <span className="relative mb-2 block h-8 w-full overflow-hidden rounded-[18px] border border-white bg-white shadow-sm">
+        <span className="absolute inset-0 bg-gradient-to-r from-blue-500 via-cyan-400 to-emerald-400 opacity-30" />
+        <span className="absolute -left-1 top-1/2 h-9 w-9 -translate-y-1/2 rounded-full border-4 border-white bg-blue-600" />
+      </span>
+    );
+  }
+
+  return (
+    <span className={base}>
+      <span className="absolute -left-1 top-1/2 h-9 w-9 -translate-y-1/2 rounded-full border-4 border-white bg-blue-600" />
+    </span>
+  );
+}
+
+export function DesignSection({
+  profile,
+  onChange,
+  userId,
+  links = [],
+  onManageLinkImages,
+}: DesignSectionProps) {
   const rawBg = profile.background_color || "#ffffff";
   const rawBtn = profile.button_color || "#111111";
   const rawBtnText = profile.button_text_color || "#ffffff";
@@ -286,23 +401,7 @@ export function DesignSection({ profile, onChange, userId, links = [] }: DesignS
                           : "border-border bg-background hover:bg-accent"
                       }`}
                     >
-                      <span className="relative mb-2 block h-8 w-full overflow-hidden rounded-full bg-gradient-to-r from-blue-600 via-cyan-500 to-emerald-500 shadow-sm">
-                        {option.id === "badge_left" && (
-                          <span className="absolute -left-1 top-1/2 h-9 w-9 -translate-y-1/2 rounded-full border-4 border-white bg-blue-600" />
-                        )}
-                        {option.id === "split_capsule" && (
-                          <>
-                            <span className="absolute inset-0 bg-white" />
-                            <span className="absolute left-0 top-0 h-full w-12 bg-blue-600" />
-                          </>
-                        )}
-                        {option.id === "ribbon_label" && (
-                          <span className="absolute left-0 top-0 h-full w-12 bg-pink-600 [clip-path:polygon(0_0,80%_0,100%_100%,0_100%)]" />
-                        )}
-                        {option.id === "avatar_capsule" && (
-                          <span className="absolute -left-1 top-1/2 h-9 w-9 -translate-y-1/2 rounded-full bg-slate-200 border-2 border-white" />
-                        )}
-                      </span>
+                      <SocialCoverStylePreview id={option.id} />
                       <span
                         className={`text-xs font-semibold ${active ? "text-primary" : "text-foreground"}`}
                       >
@@ -316,15 +415,27 @@ export function DesignSection({ profile, onChange, userId, links = [] }: DesignS
                 })}
               </div>
 
-              <div className="rounded-md border bg-background px-3 py-2">
-                <div className="space-y-0.5">
-                  <Label className="text-xs">Imagen por enlace</Label>
-                  <p className="text-[10px] text-muted-foreground">
-                    {/* Modified by Codex — SOCIAL-BADGES-IMAGE-MODE */}
-                    El logo, avatar o foto propia se configura desde cada enlace.
-                  </p>
-                </div>
-              </div>
+              <button
+                type="button"
+                onClick={onManageLinkImages}
+                className="flex w-full items-center gap-3 rounded-md border bg-background px-3 py-3 text-left transition-colors hover:bg-accent disabled:cursor-default disabled:hover:bg-background"
+                disabled={!onManageLinkImages}
+              >
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
+                  <ImageIcon className="h-4 w-4" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-xs font-semibold text-foreground">
+                    Imagen por enlace
+                  </span>
+                  <span className="mt-0.5 block text-[10px] leading-snug text-muted-foreground">
+                    Sube una foto propia para el logo de cada botón.
+                  </span>
+                </span>
+                {onManageLinkImages && (
+                  <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+                )}
+              </button>
             </div>
           )}
 

@@ -185,3 +185,11 @@ NONE
   4. **Avatar Capsule:** Integración del avatar provisto (o un icono de fallback si está ausente) dentro de un badge prominente, con un pequeño ícono de plataforma superpuesto encima.
 - **Hero Social:** No tocado. Permanece idéntico.
 - **Migraciones:** No se aplicaron migraciones ni se tocó Supabase. Los 4 POC están integrados dentro de las constantes de SocialCoverStyle (local) y se renderizan dentro de SocialCover.tsx mediante lógica estática condicional para permitir su prueba directa desde la interfaz sin depender de DB.
+
+
+### 17F — Corrección Ajuste de Imagen Personalizada (Logo)
+- **Archivo Modificado:** `src/components/profile/SocialCover.tsx` (componente `PlatformMark`)
+- **Propiedad / Componente Corregido:** Se eliminó el redimensionado condicional (`h-[80%] w-[80%] self-start justify-self-start`) del contenedor de la imagen que empujaba la imagen hacia la esquina superior izquierda. Además, se añadió `scale-[0.85]` y una transición suave al tag `img` cuando `imageFit === "contain" (logos personalizados).
+- **Comportamiento Anterior:** Al subir un logo, la imagen se encogía al 80% y se anclaba arriba a la izquierda del círculo. Adicionalmente, el objeto contenido (contain) perdía las esquinas al tocar el límite del border-radius.
+- **Comportamiento Nuevo:** La imagen (ya sea fotografía en cover o logo en contain) ocupa el 100% de su contenedor de forma centrada. Los logos y fotos cuadradas que se configuren con contain ahora se escalan sutilmente (85%) para encajar dentro de la curvatura del círculo sin recortes destructivos, usando el fondo natural transparente u opaco que ya existía como apoyo.
+- **Pruebas Realizadas:** Se visualizó la integridad de la clase CSS, se protegió la dimensión del Badge original (que al estar anclado absoluto a su root layer nunca cambia de tamaño/lugar) y se ejecutó ESLint y TSC exitosamente.

@@ -1,16 +1,7 @@
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
-
 User-agent: *
 Allow: /
+Disallow: /editor
+Disallow: /profile
+Disallow: /admin
 
-Sitemap: https://tu-dominio-vercel.com/sitemap.xml
+Sitemap: https://codigos-qr.vercel.app/sitemap.xml

@@ -4,6 +4,8 @@ import { ChevronRight } from "lucide-react";
 import { SocialCover } from "./SocialCover";
 import { ContextualToolbar } from "./ContextualToolbar";
 import { getPlatformDef } from "../../constants/platforms";
+import { PremiumMediaLinkCard } from "./PremiumMediaLinkCard";
+import { isPremiumMediaLayout } from "../../lib/design/premium-media-layouts";
 
 interface PublicProfileViewProps {
   profile: Partial<Profile>;
@@ -14,106 +16,8 @@ interface PublicProfileViewProps {
   onOpenSidebar?: (tabId: string) => void;
 }
 
-function DecorativeLayer({
-  profile,
-  accentColor,
-}: {
-  profile: Partial<Profile>;
-  accentColor: string;
-}) {
-  const shape = profile.decor_shape || "none";
-  const particles = profile.decor_particles || "none";
-  const smoke = profile.decor_smoke || "none";
-  const shadow = profile.decor_shadow || "none";
-  const intensity = profile.decor_intensity || "subtle";
-  const opacityClass =
-    intensity === "strong" ? "opacity-80" : intensity === "medium" ? "opacity-55" : "opacity-35";
-
-  if (shape === "none" && particles === "none" && smoke === "none" && shadow === "none") {
-    return null;
-  }
-
-  const accentStyle = { borderColor: accentColor, color: accentColor };
-  const fillStyle = { backgroundColor: accentColor };
-
-  return (
-    <div
-      className={`pointer-events-none absolute inset-0 z-0 overflow-hidden ${opacityClass}`}
-      aria-hidden="true"
-    >
-      {(shape === "circles" || shape === "mixed") && (
-        <>
-          <span
-            className="absolute -right-10 top-20 h-32 w-32 rounded-full border"
-            style={accentStyle}
-          />
-          <span
-            className="absolute left-7 top-[42%] h-16 w-16 rounded-full border"
-            style={accentStyle}
-          />
-          <span className="absolute bottom-20 right-12 h-8 w-8 rounded-full" style={fillStyle} />
-        </>
-      )}
-
-      {(shape === "squares" || shape === "mixed") && (
-        <>
-          <span
-            className="absolute -left-8 top-28 h-24 w-24 rotate-12 rounded-2xl border"
-            style={accentStyle}
-          />
-          <span
-            className="absolute bottom-36 right-4 h-14 w-14 -rotate-12 rounded-xl border"
-            style={accentStyle}
-          />
-        </>
-      )}
-
-      {(shape === "lines" || shape === "mixed") && (
-        <>
-          <span className="absolute left-8 top-24 h-px w-28 rotate-[-18deg]" style={fillStyle} />
-          <span className="absolute right-8 top-[48%] h-px w-36 rotate-12" style={fillStyle} />
-          <span className="absolute bottom-32 left-10 h-px w-24 rotate-6" style={fillStyle} />
-        </>
-      )}
-
-      {particles === "dots" && (
-        <>
-          {[
-            "left-[18%] top-[18%]",
-            "right-[22%] top-[24%]",
-            "left-[12%] top-[58%]",
-            "right-[14%] top-[62%]",
-            "left-[28%] bottom-[16%]",
-            "right-[30%] bottom-[20%]",
-          ].map((position) => (
-            <span
-              key={position}
-              className={`absolute h-1.5 w-1.5 rounded-full ${position}`}
-              style={fillStyle}
-            />
-          ))}
-        </>
-      )}
-
-      {smoke === "soft" && (
-        <>
-          <span
-            className="absolute -left-10 top-20 h-40 w-56 rounded-[45%] blur-3xl"
-            style={fillStyle}
-          />
-          <span
-            className="absolute -right-16 bottom-24 h-44 w-64 rounded-[45%] blur-3xl"
-            style={fillStyle}
-          />
-        </>
-      )}
-
-      {shadow === "soft" && (
-        <span className="absolute inset-x-10 bottom-3 h-24 rounded-full bg-black/30 blur-3xl" />
-      )}
-    </div>
-  );
-}
+import { PremiumDecorativeLayer } from "./PremiumDecorativeLayer";
+import { loadGoogleFont } from "../../lib/fonts";
 
 export function PublicProfileView({
   profile,
@@ -185,6 +89,13 @@ export function PublicProfileView({
     return `"${font}", sans-serif`;
   };
   const fontFamily = getFontFamily(profile.font_family);
+
+  // Load the font dynamically
+  React.useEffect(() => {
+    if (profile.font_family) {
+      loadGoogleFont(profile.font_family);
+    }
+  }, [profile.font_family]);
 
   const rawButtonColor = profile.button_color || "#111111";
   const buttonTextColor = profile.button_text_color || "#ffffff";
@@ -308,7 +219,16 @@ export function PublicProfileView({
       : profile.theme_spacing === "generous"
         ? "gap-4"
         : "gap-2.5";
-  const hasSurface = !!profile.theme_surface && profile.theme_surface !== "transparent";
+  const premiumMediaLayout = isPremiumMediaLayout(profile.theme_layout)
+    ? profile.theme_layout
+    : null;
+  // A surface belongs exclusively to the professional-card composition. Older
+  // profiles can retain a surface after switching templates, so do not let it
+  // create a floating panel in layouts that are meant to fill the screen.
+  const hasSurface =
+    profile.theme_layout === "professional_card" &&
+    !!profile.theme_surface &&
+    profile.theme_surface !== "transparent";
   const surfaceIsDark = profile.theme_surface === "#111827";
   const surfaceStyle: React.CSSProperties | undefined = hasSurface
     ? {
@@ -329,7 +249,7 @@ export function PublicProfileView({
           fontFamily: fontFamily,
         }}
       >
-        <DecorativeLayer profile={profile} accentColor={buttonColor} />
+        <PremiumDecorativeLayer profile={profile} accentColor={buttonColor} />
         <div className="relative z-10 flex w-full max-w-[520px] flex-1 flex-col items-center pb-12 pt-0 sm:pb-16">
           {/* Hero Social Section */}
           {profile.hero_link_id &&
@@ -473,7 +393,14 @@ export function PublicProfileView({
                       {...(link.id ? { linkId: link.id } : {})}
                       key={link.id || i}
                     >
-                      {profile.social_covers_enabled ? (
+                      {premiumMediaLayout ? (
+                        <PremiumMediaLinkCard
+                          link={link as ProfileLink}
+                          layout={premiumMediaLayout}
+                          mainAvatarUrl={profile.avatar_url ?? null}
+                          isPreview={isPreview}
+                        />
+                      ) : profile.social_covers_enabled ? (
                         <SocialCover
                           link={link as ProfileLink}
                           variant="cover"

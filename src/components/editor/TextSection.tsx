@@ -13,7 +13,7 @@ import {
   ChevronDown,
   ChevronRight,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ScrollArea } from "../ui/scroll-area";
 import type { Profile } from "../../types/database";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../ui/collapsible";
@@ -155,6 +155,8 @@ function SectionGroup({
   );
 }
 
+import { loadPreviewFont } from "../../lib/fonts";
+
 export function TextSection({ profile, onChange }: TextSectionProps) {
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<string>("Todas");
@@ -166,6 +168,11 @@ export function TextSection({ profile, onChange }: TextSectionProps) {
     const matchesCategory = activeCategory === "Todas" || f.category === activeCategory;
     return matchesSearch && matchesCategory;
   });
+
+  // Load preview fonts lazily for the filtered list
+  useEffect(() => {
+    filteredFonts.forEach((font) => loadPreviewFont(font.name));
+  }, [filteredFonts]);
 
   const checkContrast = (color: string | undefined | null) => {
     if (!color) return null;
