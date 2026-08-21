@@ -77,9 +77,9 @@ BEGIN
     RETURN QUERY SELECT 'revoked'::TEXT, v_document.name, v_document.original_filename, v_document.file_type, v_document.file_size_bytes, v_document.password_required;
   ELSIF v_document.expire_at IS NOT NULL AND v_document.expire_at <= now() THEN
     RETURN QUERY SELECT 'expired'::TEXT, v_document.name, v_document.original_filename, v_document.file_type, v_document.file_size_bytes, v_document.password_required;
-  ELSIF v_document.one_time_download AND v_document.current_downloads >= 1 THEN
+  ELSIF v_document.one_time_download AND COALESCE(v_document.current_downloads, 0) >= 1 THEN
     RETURN QUERY SELECT 'limit_reached'::TEXT, v_document.name, v_document.original_filename, v_document.file_type, v_document.file_size_bytes, v_document.password_required;
-  ELSIF v_document.max_downloads IS NOT NULL AND v_document.current_downloads >= v_document.max_downloads THEN
+  ELSIF v_document.max_downloads IS NOT NULL AND COALESCE(v_document.current_downloads, 0) >= v_document.max_downloads THEN
     RETURN QUERY SELECT 'limit_reached'::TEXT, v_document.name, v_document.original_filename, v_document.file_type, v_document.file_size_bytes, v_document.password_required;
   ELSE
     RETURN QUERY SELECT 'available'::TEXT, v_document.name, v_document.original_filename, v_document.file_type, v_document.file_size_bytes, v_document.password_required;
@@ -239,7 +239,7 @@ BEGIN
   END IF;
 
   UPDATE public.encrypted_documents
-  SET current_downloads = current_downloads + 1,
+  SET current_downloads = COALESCE(current_downloads, 0) + 1,
       last_accessed_at = now()
   WHERE id = v_document.id;
 
@@ -264,7 +264,7 @@ SET search_path = pg_catalog, public
 AS $$
 BEGIN
   UPDATE public.encrypted_documents
-  SET current_downloads = GREATEST(current_downloads - 1, 0)
+  SET current_downloads = GREATEST(COALESCE(current_downloads, 0) - 1, 0)
   WHERE id = p_document_id;
 END;
 $$;
