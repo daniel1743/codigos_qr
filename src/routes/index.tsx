@@ -10,15 +10,21 @@ import {
   ChevronRight,
   Download,
   ExternalLink,
+  FileArchive,
+  FileSpreadsheet,
+  FileText,
+  Image as ImageIcon,
   Link as LinkIcon,
   Menu,
   Palette,
+  Presentation,
   QrCode,
   RefreshCw,
   Scissors,
   Shield,
   Sparkles,
   Store,
+  Upload,
   UserRound,
   Wand2,
   X,
@@ -350,6 +356,84 @@ function Index() {
             <QrTile />
             <MiniPageCard title="Página A" accent="#2563eb" bg="bg-white" />
             <MiniPageCard title="Página B" accent="#0f766e" bg="bg-[#effaf7]" />
+          </div>
+        </div>
+      </section>
+
+      {/* Modified by ChatGPT Work — ENC-DOC-UX-FILE-TYPES-04 */}
+      <section className="border-y border-slate-100 bg-white px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
+        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+          <div>
+            <p className="text-sm font-bold uppercase tracking-[0.2em] text-blue-600">
+              Documentos seguros
+            </p>
+            <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-5xl">
+              Comparte archivos de forma segura con un QR
+            </h2>
+            <p className="mt-5 text-lg leading-8 text-slate-600">
+              Sube tu documento, protégelo y comparte únicamente el QR o enlace de acceso. El
+              archivo no viaja dentro del QR.
+            </p>
+            <div className="mt-7 flex flex-wrap gap-2">
+              {[
+                "Hasta 50 MB por archivo",
+                "Contraseña opcional",
+                "Expiración",
+                "Límite de descargas",
+                "Acceso mediante QR o enlace",
+              ].map((item) => (
+                <span
+                  key={item}
+                  className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700"
+                >
+                  <Check className="h-4 w-4 text-blue-600" />
+                  {item}
+                </span>
+              ))}
+            </div>
+            <Link
+              to="/encrypted-documents"
+              className="mt-8 inline-flex h-12 items-center justify-center rounded-full bg-[#0f172a] px-6 text-sm font-bold text-white transition hover:bg-slate-800"
+            >
+              Proteger un archivo
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+          </div>
+
+          <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5 shadow-sm">
+            <div className="grid gap-3 sm:grid-cols-2">
+              {[
+                { icon: Upload, label: "Sube" },
+                { icon: Shield, label: "Cifra" },
+                { icon: QrCode, label: "Genera QR" },
+                { icon: LinkIcon, label: "Comparte enlace" },
+              ].map((step) => (
+                <div key={step.label} className="rounded-xl border border-slate-200 bg-white p-4">
+                  <step.icon className="h-5 w-5 text-blue-600" />
+                  <p className="mt-3 text-sm font-bold">{step.label}</p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
+              {[
+                { icon: FileSpreadsheet, label: "Excel", color: "text-green-700" },
+                { icon: FileText, label: "PDF", color: "text-red-700" },
+                { icon: FileText, label: "Word", color: "text-blue-700" },
+                { icon: Presentation, label: "PowerPoint", color: "text-orange-700" },
+                { icon: ImageIcon, label: "Images", color: "text-cyan-700" },
+                { icon: FileArchive, label: "ZIP", color: "text-amber-800" },
+                { icon: FileText, label: "Text", color: "text-slate-700" },
+                { icon: FileText, label: "+ More", color: "text-slate-700" },
+              ].map((format) => (
+                <div
+                  key={format.label}
+                  className="flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-slate-700 ring-1 ring-slate-200"
+                >
+                  <format.icon className={`h-4 w-4 ${format.color}`} />
+                  <span className="truncate">{format.label}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>

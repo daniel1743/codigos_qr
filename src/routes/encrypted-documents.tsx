@@ -13,11 +13,14 @@ import {
   Lock,
   Upload,
   FileText,
+  FileSpreadsheet,
+  FileArchive,
   Image as ImageIcon,
   File,
-  Archive,
+  Presentation,
   Download,
   Eye,
+  EyeOff,
   Trash2,
   Copy,
   QrCode as QrCodeIcon,
@@ -26,11 +29,18 @@ import {
   CheckCircle2,
   ShieldCheck,
   Key,
-  Calendar,
   X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { EncryptionService } from "../lib/encryption";
+import {
+  MAX_ENCRYPTED_DOCUMENT_SIZE_LABEL,
+  generateSecureDocumentPassword,
+  getDocumentFileType,
+  getFileTypeQrTheme,
+  isEncryptedDocumentSizeAllowed,
+  type DocumentFileCategory,
+} from "../lib/document-file-types";
 import type { EncryptionLevel, CreateEncryptedDocumentRequest } from "../types/encrypted-documents";
 import { QRCodeSVG } from "qrcode.react";
 
@@ -80,7 +90,7 @@ function EncryptedDocumentsPage() {
             </div>
             <h1 className="text-3xl font-bold tracking-tight">Documentos Encriptados</h1>
             <p className="text-muted-foreground">
-              Comparte archivos confidenciales con encriptación de nivel militar
+              Comparte archivos de forma segura con un QR
             </p>
           </div>
           <Auth />
@@ -92,21 +102,134 @@ function EncryptedDocumentsPage() {
   return <EncryptedDocumentsApp userId={session.user.id} />;
 }
 
-function getFileIconHelper(fileType: string) {
-  switch (fileType) {
-    case "excel":
-      return <FileText className="w-8 h-8 text-green-600" />;
-    case "pdf":
-      return <FileText className="w-8 h-8 text-red-600" />;
-    case "image":
-      return <ImageIcon className="w-8 h-8 text-blue-600" />;
-    case "word":
-      return <FileText className="w-8 h-8 text-blue-700" />;
-    case "zip":
-      return <Archive className="w-8 h-8 text-orange-600" />;
-    default:
-      return <File className="w-8 h-8 text-gray-600" />;
+// Modified by ChatGPT Work — ENC-DOC-UX-FILE-TYPES-04
+const documentIconMap = {
+  excel: FileSpreadsheet,
+  pdf: FileText,
+  word: FileText,
+  powerpoint: Presentation,
+  image: ImageIcon,
+  archive: FileArchive,
+  text: FileText,
+  generic: File,
+} satisfies Record<DocumentFileCategory, typeof File>;
+
+function normalizeDocumentCategory(fileType?: string): DocumentFileCategory {
+  if (fileType === "zip") return "archive";
+  if (
+    fileType === "excel" ||
+    fileType === "pdf" ||
+    fileType === "word" ||
+    fileType === "powerpoint" ||
+    fileType === "image" ||
+    fileType === "archive" ||
+    fileType === "text" ||
+    fileType === "generic"
+  ) {
+    return fileType;
   }
+  return "generic";
+}
+
+function FileTypeIcon({
+  fileType,
+  className = "w-8 h-8",
+}: {
+  fileType?: string;
+  className?: string;
+}) {
+  const category = normalizeDocumentCategory(fileType);
+  const theme = getFileTypeQrTheme(category);
+  const Icon = documentIconMap[category];
+  return <Icon className={className} style={{ color: theme.iconColor }} aria-hidden="true" />;
+}
+
+function getQrIconDataUri(fileType?: string) {
+  const category = normalizeDocumentCategory(fileType);
+  const theme = getFileTypeQrTheme(category);
+  const iconColor = encodeURIComponent(theme.iconColor);
+  const stroke = `stroke="${iconColor}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"`;
+  const shapes: Record<DocumentFileCategory, string> = {
+    excel: `<path ${stroke} d="M5 3h10l4 4v14H5z"/><path ${stroke} d="M15 3v5h5"/><path ${stroke} d="M8 12h8M8 16h8M12 10v8"/>`,
+    pdf: `<path ${stroke} d="M6 3h9l3 3v15H6z"/><path ${stroke} d="M15 3v4h4"/><path ${stroke} d="M8 16c2-4 3-7 3-7s1 4 5 6c0 0-4-1-8 1z"/>`,
+    word: `<path ${stroke} d="M6 3h9l3 3v15H6z"/><path ${stroke} d="M15 3v4h4"/><path ${stroke} d="M8 11l1.5 6 2-5 2 5 1.5-6"/>`,
+    powerpoint: `<path ${stroke} d="M4 5h16v11H4z"/><path ${stroke} d="M8 21h8M12 16v5"/><path ${stroke} d="M9 13V8h4a2 2 0 0 1 0 4H9"/>`,
+    image: `<path ${stroke} d="M5 5h14v14H5z"/><circle ${stroke} cx="9" cy="9" r="1.4"/><path ${stroke} d="M6 17l4-4 3 3 2-2 3 3"/>`,
+    archive: `<path ${stroke} d="M6 3h12v18H6z"/><path ${stroke} d="M10 3v18M10 7h4M10 11h4M10 15h4"/>`,
+    text: `<path ${stroke} d="M6 3h9l3 3v15H6z"/><path ${stroke} d="M15 3v4h4"/><path ${stroke} d="M8 12h8M8 16h6"/>`,
+    generic: `<path ${stroke} d="M6 3h9l3 3v15H6z"/><path ${stroke} d="M15 3v4h4"/><path ${stroke} d="M9 13h6"/>`,
+  };
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24">${shapes[category]}</svg>`;
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+}
+
+function ThemedDocumentQr({
+  id,
+  value,
+  fileType,
+  size,
+}: {
+  id: string;
+  value: string;
+  fileType?: string;
+  size: number;
+}) {
+  const category = normalizeDocumentCategory(fileType);
+  const theme = getFileTypeQrTheme(category);
+  return (
+    <QRCodeSVG
+      id={id}
+      value={value}
+      size={size}
+      level="H"
+      includeMargin={true}
+      bgColor={theme.background}
+      fgColor={theme.foreground}
+      imageSettings={{
+        src: getQrIconDataUri(category),
+        height: Math.round(size * 0.14),
+        width: Math.round(size * 0.14),
+        excavate: true,
+      }}
+    />
+  );
+}
+
+function downloadSvgElement(elementId: string, filename: string) {
+  const svg = document.getElementById(elementId);
+  if (!svg) return;
+  const svgString = new XMLSerializer().serializeToString(svg);
+  const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+  const svgUrl = URL.createObjectURL(svgBlob);
+  const trigger = document.createElement("a");
+  trigger.href = svgUrl;
+  trigger.download = filename;
+  trigger.click();
+  URL.revokeObjectURL(svgUrl);
+}
+
+function downloadPngFromSvgElement(elementId: string, filename: string) {
+  const svg = document.getElementById(elementId);
+  if (!svg) return;
+  const svgString = new XMLSerializer().serializeToString(svg);
+  const image = new window.Image();
+  const svgUrl = URL.createObjectURL(new Blob([svgString], { type: "image/svg+xml;charset=utf-8" }));
+  image.onload = () => {
+    const canvas = document.createElement("canvas");
+    canvas.width = image.width;
+    canvas.height = image.height;
+    const context = canvas.getContext("2d");
+    if (!context) return;
+    context.fillStyle = "#FFFFFF";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.drawImage(image, 0, 0);
+    const trigger = document.createElement("a");
+    trigger.href = canvas.toDataURL("image/png");
+    trigger.download = filename;
+    trigger.click();
+    URL.revokeObjectURL(svgUrl);
+  };
+  image.src = svgUrl;
 }
 
 function EncryptedDocumentsApp({ userId }: { userId: string }) {
@@ -364,8 +487,11 @@ function DocumentsList({ userId, refreshTrigger, onUploadClick }: DocumentsListP
                   return (
                     <tr key={doc.id} className="hover:bg-slate-50/50">
                       <td className="p-4 flex items-center gap-3">
-                        <div className="shrink-0 p-2 border rounded-lg bg-slate-50">
-                          {getFileIconHelper(doc.file_type)}
+                        <div
+                          className="shrink-0 p-2 border rounded-lg"
+                          style={{ backgroundColor: getFileTypeQrTheme(normalizeDocumentCategory(doc.file_type)).accentBackground }}
+                        >
+                          <FileTypeIcon fileType={doc.file_type} />
                         </div>
                         <div className="min-w-0">
                           <p className="font-semibold text-foreground truncate max-w-[240px]">{doc.name}</p>
@@ -472,12 +598,11 @@ function DocumentsList({ userId, refreshTrigger, onUploadClick }: DocumentsListP
             </div>
 
             <div className="bg-slate-50 p-6 rounded-xl border inline-block">
-              <QRCodeSVG
+              <ThemedDocumentQr
                 id={`qr-modal-${selectedQrDoc.id}`}
                 value={`${window.location.origin}/d/${selectedQrDoc.short_url}`}
                 size={180}
-                level="H"
-                includeMargin={true}
+                fileType={selectedQrDoc.file_type}
               />
             </div>
 
@@ -500,22 +625,23 @@ function DocumentsList({ userId, refreshTrigger, onUploadClick }: DocumentsListP
                 variant="outline"
                 className="flex-1 text-xs"
                 onClick={() => {
-                  const svg = document.getElementById(`qr-modal-${selectedQrDoc.id}`);
-                  if (svg) {
-                    const svgString = new XMLSerializer().serializeToString(svg);
-                    const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
-                    const svgUrl = URL.createObjectURL(svgBlob);
-                    const trigger = document.createElement("a");
-                    trigger.href = svgUrl;
-                    trigger.download = `QR_${selectedQrDoc.name}.svg`;
-                    trigger.click();
-                    URL.revokeObjectURL(svgUrl);
-                    toast.success("Código QR descargado");
-                  }
+                  downloadSvgElement(`qr-modal-${selectedQrDoc.id}`, `QR_${selectedQrDoc.name}.svg`);
+                  toast.success("Código QR SVG descargado");
                 }}
               >
                 <Download className="w-3.5 h-3.5 mr-1" />
-                Descargar QR
+                SVG
+              </Button>
+              <Button
+                variant="outline"
+                className="flex-1 text-xs"
+                onClick={() => {
+                  downloadPngFromSvgElement(`qr-modal-${selectedQrDoc.id}`, `QR_${selectedQrDoc.name}.png`);
+                  toast.success("Código QR PNG descargado");
+                }}
+              >
+                <Download className="w-3.5 h-3.5 mr-1" />
+                PNG
               </Button>
               <Button
                 className="flex-1 text-xs"
@@ -556,18 +682,46 @@ function CreateDocument({ userId, onSuccess }: CreateDocumentProps) {
   const [createdDoc, setCreatedDoc] = useState<any | null>(null);
   // Modified by ChatGPT Work — ENC-DOC-SECURE-DELIVERY-02
   const [generatedKey, setGeneratedKey] = useState<string | null>(null);
+  // Modified by ChatGPT Work — ENC-DOC-UX-FILE-TYPES-04
+  const [plainPasswordForSession, setPlainPasswordForSession] = useState("");
+  const [passwordWasGenerated, setPasswordWasGenerated] = useState(false);
+  const [passwordCopied, setPasswordCopied] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   
   const supabase = getBrowserSupabaseClient();
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
+      if (!isEncryptedDocumentSizeAllowed(selectedFile.size)) {
+        toast.error(`Este archivo supera el límite de ${MAX_ENCRYPTED_DOCUMENT_SIZE_LABEL}. Selecciona un archivo más pequeño.`);
+        e.target.value = "";
+        return;
+      }
       setFile(selectedFile);
       if (!formData.name) {
         setFormData((prev) => ({ ...prev, name: selectedFile.name }));
       }
     }
   };
+
+  // Modified by ChatGPT Work — ENC-DOC-UX-FILE-TYPES-04
+  const fileTypeInfo = file ? getDocumentFileType(file) : null;
+  const fileTheme = getFileTypeQrTheme(fileTypeInfo?.category || "generic");
+
+  function updatePassword(password: string, generated = false) {
+    setFormData((prev) => ({ ...prev, password }));
+    setPlainPasswordForSession(password);
+    setPasswordWasGenerated(generated);
+    setPasswordCopied(false);
+  }
+
+  function copyPassword() {
+    if (!formData.password) return;
+    navigator.clipboard.writeText(formData.password);
+    setPasswordCopied(true);
+    toast.success("Contraseña copiada");
+  }
 
   // Modified by ChatGPT Work — ENC-DOC-SECURE-DELIVERY-02
   function generateShortUrl() {
@@ -585,6 +739,10 @@ function CreateDocument({ userId, onSuccess }: CreateDocumentProps) {
     e.preventDefault();
     if (!file) {
       toast.error("Por favor selecciona un archivo");
+      return;
+    }
+    if (!isEncryptedDocumentSizeAllowed(file.size)) {
+      toast.error(`Este archivo supera el límite de ${MAX_ENCRYPTED_DOCUMENT_SIZE_LABEL}. Selecciona un archivo más pequeño.`);
       return;
     }
 
@@ -634,7 +792,7 @@ function CreateDocument({ userId, onSuccess }: CreateDocumentProps) {
           name: formData.name || file.name,
           description: formData.description || null,
           original_filename: file.name,
-          file_type: EncryptionService.getDocumentType(file.type),
+          file_type: EncryptionService.getDocumentType(file.type, file.name),
           file_size_bytes: file.size,
           mime_type: file.type,
           encrypted_file_path: filePath,
@@ -670,47 +828,38 @@ function CreateDocument({ userId, onSuccess }: CreateDocumentProps) {
     }
   };
 
-  const getFileIcon = () => {
-    if (!file) return <FileText className="w-8 h-8" />;
-    const type = EncryptionService.getDocumentType(file.type);
-    switch (type) {
-      case "excel":
-        return <FileText className="w-8 h-8 text-green-600" />;
-      case "pdf":
-        return <FileText className="w-8 h-8 text-red-600" />;
-      case "image":
-        return <ImageIcon className="w-8 h-8 text-blue-600" />;
-      case "word":
-        return <FileText className="w-8 h-8 text-blue-700" />;
-      case "zip":
-        return <Archive className="w-8 h-8 text-orange-600" />;
-      default:
-        return <File className="w-8 h-8 text-gray-600" />;
-    }
-  };
-
   if (createdDoc) {
     // Modified by ChatGPT Work — ENC-DOC-SECURE-DELIVERY-02
     const downloadUrl = `${window.location.origin}/d/${createdDoc.short_url}${generatedKey ? `#key=${generatedKey}` : ""}`;
+    // Modified by ChatGPT Work — ENC-DOC-UX-FILE-TYPES-04
+    const createdTheme = getFileTypeQrTheme(normalizeDocumentCategory(createdDoc.file_type));
     
     return (
       <div className="max-w-xl mx-auto rounded-xl border bg-white p-8 shadow-md text-center space-y-6 animate-fade-in">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-2">
-          <CheckCircle2 className="w-8 h-8 text-green-600" />
+        <div
+          className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-2"
+          style={{ backgroundColor: createdTheme.accentBackground }}
+        >
+          <FileTypeIcon fileType={createdDoc.file_type} className="w-8 h-8" />
         </div>
-        <h2 className="text-2xl font-bold">¡Documento Encriptado con Éxito!</h2>
+        <h2 className="text-2xl font-bold">Documento protegido</h2>
         <p className="text-muted-foreground text-sm max-w-sm mx-auto">
           Tu archivo ha sido cifrado en el navegador y subido de forma segura. Comparte el código QR o el enlace corto.
         </p>
+        <div className="mx-auto max-w-md rounded-lg border bg-slate-50 p-3 text-left">
+          <p className="truncate text-sm font-semibold">{createdDoc.original_filename}</p>
+          <p className="text-xs text-muted-foreground">
+            {createdTheme.label} • {EncryptionService.formatFileSize(createdDoc.file_size_bytes)}
+          </p>
+        </div>
 
         {/* QR Code Card */}
-        <div className="bg-slate-50 p-6 rounded-xl border border-slate-100 inline-block shadow-sm">
-          <QRCodeSVG
+        <div className="p-6 rounded-xl border inline-block shadow-sm" style={{ backgroundColor: createdTheme.accentBackground }}>
+          <ThemedDocumentQr
             id="qr-success-display"
             value={downloadUrl}
             size={200}
-            level="H"
-            includeMargin={true}
+            fileType={createdDoc.file_type}
           />
         </div>
 
@@ -724,6 +873,7 @@ function CreateDocument({ userId, onSuccess }: CreateDocumentProps) {
               variant="outline"
               size="icon"
               className="h-11 w-11 shrink-0"
+              aria-label="Copiar enlace seguro"
               onClick={() => {
                 navigator.clipboard.writeText(downloadUrl);
                 toast.success("Enlace copiado al portapapeles");
@@ -733,6 +883,44 @@ function CreateDocument({ userId, onSuccess }: CreateDocumentProps) {
             </Button>
           </div>
         </div>
+
+        {createdDoc.password_required && plainPasswordForSession && (
+          <div className="space-y-2">
+            <Label className="text-xs text-muted-foreground">Contraseña</Label>
+            <div className="flex items-center gap-2 max-w-md mx-auto">
+              <Input
+                readOnly
+                type={showPassword ? "text" : "password"}
+                value={plainPasswordForSession}
+                className="bg-slate-50 font-mono text-xs select-all text-center h-11"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="h-11 w-11 shrink-0"
+                aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                onClick={() => setShowPassword((current) => !current)}
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="h-11 w-11 shrink-0"
+                aria-label="Copiar contraseña"
+                onClick={copyPassword}
+              >
+                <Copy className="w-4 h-4" />
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {passwordWasGenerated && !passwordCopied ? "Guarda esta contraseña ahora. " : ""}
+              Envíala por un canal separado del QR.
+            </p>
+          </div>
+        )}
 
         {/* Zero-Knowledge warning for no-password files */}
         {/* Modified by ChatGPT Work — ENC-DOC-SECURE-DELIVERY-02 */}
@@ -754,22 +942,24 @@ function CreateDocument({ userId, onSuccess }: CreateDocumentProps) {
             variant="outline"
             className="flex-1 gap-2"
             onClick={() => {
-              const svg = document.getElementById("qr-success-display");
-              if (svg) {
-                const svgString = new XMLSerializer().serializeToString(svg);
-                const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
-                const svgUrl = URL.createObjectURL(svgBlob);
-                const trigger = document.createElement("a");
-                trigger.href = svgUrl;
-                trigger.download = `QR_${createdDoc.name}.svg`;
-                trigger.click();
-                URL.revokeObjectURL(svgUrl);
-                toast.success("Código QR descargado");
-              }
+              downloadSvgElement("qr-success-display", `QR_${createdDoc.name}.svg`);
+              toast.success("Código QR SVG descargado");
             }}
           >
             <Download className="w-4 h-4" />
-            Descargar QR
+            Descargar SVG
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            className="flex-1 gap-2"
+            onClick={() => {
+              downloadPngFromSvgElement("qr-success-display", `QR_${createdDoc.name}.png`);
+              toast.success("Código QR PNG descargado");
+            }}
+          >
+            <Download className="w-4 h-4" />
+            Descargar PNG
           </Button>
           <Button
             type="button"
@@ -803,25 +993,25 @@ function CreateDocument({ userId, onSuccess }: CreateDocumentProps) {
                     Click para subir o arrastra el archivo aquí
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Excel, PDF, Word, Imágenes, ZIP (Max 100MB)
+                    Excel, PDF, Word, PowerPoint, imágenes y ZIP. Hasta {MAX_ENCRYPTED_DOCUMENT_SIZE_LABEL} por archivo.
                   </p>
                 </div>
                 <input
                   type="file"
                   className="hidden"
                   onChange={handleFileSelect}
-                  accept=".xlsx,.xls,.pdf,.doc,.docx,.png,.jpg,.jpeg,.zip"
+                  accept=".xlsx,.xls,.csv,.pdf,.doc,.docx,.ppt,.pptx,.png,.jpg,.jpeg,.webp,.zip,.txt"
                 />
               </label>
             ) : (
-              <div className="flex items-center gap-4 p-4 border rounded-xl bg-gradient-to-br from-blue-50 to-cyan-50">
+              <div className="flex items-center gap-4 p-4 border rounded-xl" style={{ backgroundColor: fileTheme.accentBackground }}>
                 <div className="flex items-center justify-center w-16 h-16 rounded-lg bg-white shadow-sm">
-                  {getFileIcon()}
+                  <FileTypeIcon fileType={fileTypeInfo?.category || "other"} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold truncate">{file.name}</p>
                   <p className="text-sm text-muted-foreground">
-                    {EncryptionService.formatFileSize(file.size)}
+                    {fileTypeInfo?.label} • {EncryptionService.formatFileSize(file.size)}
                   </p>
                 </div>
                 <Button
@@ -939,15 +1129,51 @@ function CreateDocument({ userId, onSuccess }: CreateDocumentProps) {
 
             <div className="space-y-2">
               <Label htmlFor="password">Contraseña (opcional pero recomendado)</Label>
-              <Input
-                id="password"
-                type="password"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                placeholder="Ingresa una contraseña segura"
-              />
+              <div className="flex items-center gap-2">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  value={formData.password}
+                  onChange={(e) => updatePassword(e.target.value, false)}
+                  placeholder="Ingresa una contraseña segura"
+                  autoComplete="new-password"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className="h-10 w-10 shrink-0"
+                  aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                  title={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                  onClick={() => setShowPassword((current) => !current)}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </Button>
+                {formData.password && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="h-10 w-10 shrink-0"
+                    aria-label="Copiar contraseña"
+                    title="Copiar contraseña"
+                    onClick={copyPassword}
+                  >
+                    <Copy className="w-4 h-4" />
+                  </Button>
+                )}
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full gap-2"
+                onClick={() => updatePassword(generateSecureDocumentPassword(), true)}
+              >
+                <Key className="w-4 h-4" />
+                Generar contraseña segura — recomendado
+              </Button>
               <p className="text-xs text-muted-foreground">
-                La contraseña será requerida para descargar el documento
+                La contraseña será requerida para descargar el documento. Compártela por separado con el destinatario.
               </p>
             </div>
           </div>

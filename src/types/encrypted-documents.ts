@@ -1,5 +1,6 @@
 // Types for Encrypted Documents
-export type DocumentType = 'excel' | 'pdf' | 'image' | 'word' | 'zip';
+// Modified by ChatGPT Work — ENC-DOC-UX-FILE-TYPES-04
+export type DocumentType = 'excel' | 'pdf' | 'image' | 'word' | 'powerpoint' | 'archive' | 'text' | 'generic';
 export type EncryptionLevel = 'standard' | 'high' | 'maximum';
 
 export interface EncryptedDocument {

@@ -1,3 +1,5 @@
+import { getDocumentFileType } from "./document-file-types";
+
 /**
  * Encryption Service for Encrypted Documents
  * Implements AES-256-GCM encryption with multiple security levels
@@ -235,35 +237,12 @@ export class EncryptionService {
     return bytes.buffer;
   }
 
+  // Modified by ChatGPT Work — ENC-DOC-UX-FILE-TYPES-04
   /**
    * Get file type from MIME type
    */
-  static getDocumentType(mimeType: string): "excel" | "pdf" | "image" | "word" | "zip" | "other" {
-    if (
-      mimeType.includes("excel") ||
-      mimeType.includes("spreadsheet") ||
-      mimeType === "application/vnd.ms-excel" ||
-      mimeType === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    ) {
-      return "excel";
-    }
-    if (mimeType === "application/pdf") {
-      return "pdf";
-    }
-    if (mimeType.startsWith("image/")) {
-      return "image";
-    }
-    if (
-      mimeType.includes("word") ||
-      mimeType === "application/msword" ||
-      mimeType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-    ) {
-      return "word";
-    }
-    if (mimeType.includes("zip") || mimeType.includes("compressed")) {
-      return "zip";
-    }
-    return "other";
+  static getDocumentType(mimeType: string, fileName = "") {
+    return getDocumentFileType(mimeType, fileName).category;
   }
 
   /**
