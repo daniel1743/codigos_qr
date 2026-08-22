@@ -1,4 +1,4 @@
-// Modified by ChatGPT Work — ENC-DOC-SECURE-DELIVERY-02
+// Modified by ChatGPT Work — ENC-DOC-SECURE-DELIVERY-02B
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { getBrowserSupabaseClient } from "../lib/supabase/client";
@@ -20,11 +20,15 @@ import { createServerFn } from "@tanstack/react-start";
 import { getPrivilegedSupabaseClient } from "../lib/supabase/server-privileged";
 import { getRequestHeader } from "@tanstack/react-start/server";
 
-// Modified by ChatGPT Work — ENC-DOC-SECURE-DELIVERY-02
+// Modified by ChatGPT Work — ENC-DOC-SECURE-DELIVERY-02B
 /**
  * Server function to securely authorize a document download.
- * Validates expiration, revocation, limits, and password server-side,
- * then generates a short-lived signed URL for the client.
+ * Under ENC-DOC-SECURE-DELIVERY-02B, the order of operations is:
+ * 1. Retrieve secrets using internal RPC 'get_encrypted_document_delivery_secret' (service_role only).
+ * 2. Validate password SERVER-SIDE. If incorrect: STOP, log failed access, do not claim/consume download.
+ * 3. Atomically check limits and increment downloads via 'claim_encrypted_document_download'.
+ * 4. Generate short-lived signed URL for storage object.
+ * 5. Log success and return decryption parameters to browser.
  */
 export const authorizeDownloadFn = createServerFn()
   .validator((d: { shortUrl: string; password?: string }) => d)
@@ -32,7 +36,7 @@ export const authorizeDownloadFn = createServerFn()
     const { shortUrl, password } = data;
     const supabase = getPrivilegedSupabaseClient();
     
-    // Retrieve user-agent header securely on the server
+    // Retrieve user-agent header securely on the server for access logs
     let userAgent = "";
     try {
       userAgent = getRequestHeader("user-agent") || "";
@@ -40,12 +44,46 @@ export const authorizeDownloadFn = createServerFn()
       console.warn("Could not retrieve user-agent header:", e);
     }
 
-    // 1. Execute atomic check-and-increment RPC on DB
-    const { data: claimRows, error: rpcError } = await supabase
-      .rpc("authorize_and_claim_download", { p_short_url: shortUrl });
+    // 1. Retrieve delivery secret (internal RPC)
+    const { data: secretRows, error: secretError } = await supabase
+      .rpc("get_encrypted_document_delivery_secret", { p_short_url: shortUrl });
 
-    if (rpcError) {
-      console.error("Database authorization RPC error:", rpcError);
+    if (secretError) {
+      console.error("Database secret retrieval RPC error:", secretError);
+      return { success: false, error: "SERVER_ERROR" };
+    }
+
+    const secret = Array.isArray(secretRows) ? secretRows[0] : secretRows;
+
+    if (!secret || !secret.id) {
+      return { success: false, error: "DOCUMENT_NOT_FOUND" };
+    }
+
+    // 2. Validate password server-side (before claiming/consuming the download)
+    if (secret.password_hash) {
+      if (!password) {
+        return { success: false, error: "PASSWORD_REQUIRED" };
+      }
+
+      const isValid = await EncryptionService.verifyPassword(password, secret.password_hash, secret.salt);
+      if (!isValid) {
+        // Log failed attempt without incrementing downloads
+        await supabase.rpc("log_document_access", {
+          p_document_id: secret.id,
+          p_success: false,
+          p_user_agent: userAgent
+        });
+
+        return { success: false, error: "INVALID_PASSWORD" };
+      }
+    }
+
+    // 3. Atomically check restrictions and claim download
+    const { data: claimRows, error: claimError } = await supabase
+      .rpc("claim_encrypted_document_download", { p_short_url: shortUrl });
+
+    if (claimError) {
+      console.error("Database download claim RPC error:", claimError);
       return { success: false, error: "SERVER_ERROR" };
     }
 
@@ -55,57 +93,33 @@ export const authorizeDownloadFn = createServerFn()
       return { success: false, error: claim?.error_message || "DOCUMENT_NOT_AVAILABLE" };
     }
 
-    // 2. Password validation server-side (if password is required)
-    if (claim.password_hash) {
-      if (!password) {
-        // Compensate by decrementing download count
-        await supabase.rpc("decrement_document_downloads", { p_document_id: claim.id });
-        return { success: false, error: "PASSWORD_REQUIRED" };
-      }
-
-      const isValid = await EncryptionService.verifyPassword(password, claim.password_hash, claim.salt);
-      if (!isValid) {
-        // Compensate count
-        await supabase.rpc("decrement_document_downloads", { p_document_id: claim.id });
-        
-        // Log failed attempt
-        await supabase.rpc("log_document_access", {
-          p_document_id: claim.id,
-          p_success: false,
-          p_user_agent: userAgent
-        });
-
-        return { success: false, error: "INVALID_PASSWORD" };
-      }
-    }
-
-    // 3. Generate signed URL for private bucket (60 seconds TTL)
+    // 4. Generate signed URL for private bucket (60 seconds TTL)
     const { data: signedUrlData, error: signedUrlError } = await supabase.storage
       .from("encrypted-documents")
-      .createSignedUrl(claim.encrypted_file_path, 60);
+      .createSignedUrl(secret.encrypted_file_path, 60);
 
     if (signedUrlError || !signedUrlData) {
       console.error("Storage signed URL generation error:", signedUrlError);
-      // Compensate count
-      await supabase.rpc("decrement_document_downloads", { p_document_id: claim.id });
+      // Compensate: Decrement the download count since the file URL generation failed
+      await supabase.rpc("decrement_document_downloads", { p_document_id: secret.id });
       return { success: false, error: "SIGNED_URL_FAILED" };
     }
 
-    // 4. Log successful access
+    // 5. Log successful access
     await supabase.rpc("log_document_access", {
-      p_document_id: claim.id,
+      p_document_id: secret.id,
       p_success: true,
       p_user_agent: userAgent
     });
 
-    // 5. Return payload for client-side decryption (excluding password_hash)
+    // 6. Return payload for client-side decryption (excluding password_hash)
     return {
       success: true,
       signedUrl: signedUrlData.signedUrl,
-      iv: claim.iv,
-      salt: claim.salt,
-      originalFilename: claim.original_filename,
-      mimeType: claim.mime_type
+      iv: secret.iv,
+      salt: secret.salt,
+      originalFilename: secret.original_filename,
+      mimeType: secret.mime_type
     };
   });
 
@@ -113,7 +127,7 @@ export const Route = createFileRoute("/d/$shortUrl")({
   component: PublicDownloadPage,
 });
 
-// Modified by ChatGPT Work — ENC-DOC-SECURE-DELIVERY-02
+// Modified by ChatGPT Work — ENC-DOC-SECURE-DELIVERY-02B
 function PublicDownloadPage() {
   const { shortUrl } = Route.useParams();
   const [loading, setLoading] = useState(true);
@@ -151,6 +165,11 @@ function PublicDownloadPage() {
 
       if (docData.expire_at && new Date(docData.expire_at) < new Date()) {
         setError("Este documento seguro ha expirado y ya no está disponible.");
+        return;
+      }
+
+      if (docData.one_time_download && docData.current_downloads >= 1) {
+        setError("Este documento ya ha sido descargado y no está disponible para segundas descargas.");
         return;
       }
 

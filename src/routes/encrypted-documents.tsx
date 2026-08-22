@@ -147,7 +147,7 @@ function FileTypeIcon({
 function getQrIconDataUri(fileType?: string) {
   const category = normalizeDocumentCategory(fileType);
   const theme = getFileTypeQrTheme(category);
-  const iconColor = encodeURIComponent(theme.iconColor);
+  const iconColor = theme.iconColor;
   const stroke = `stroke="${iconColor}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"`;
   const shapes: Record<DocumentFileCategory, string> = {
     excel: `<path ${stroke} d="M5 3h10l4 4v14H5z"/><path ${stroke} d="M15 3v5h5"/><path ${stroke} d="M8 12h8M8 16h8M12 10v8"/>`,
@@ -235,10 +235,23 @@ function downloadPngFromSvgElement(elementId: string, filename: string) {
 function EncryptedDocumentsApp({ userId }: { userId: string }) {
   const [view, setView] = useState<"list" | "create">("list");
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [documentPasswords, setDocumentPasswords] = useState<Record<string, string>>({});
 
   const handleDocumentCreated = () => {
     setView("list");
     setRefreshTrigger((prev) => prev + 1);
+  };
+
+  const handlePasswordCaptured = (documentId: string, password: string) => {
+    setDocumentPasswords((prev) => ({ ...prev, [documentId]: password }));
+  };
+
+  const handleDocumentDeleted = (documentId: string) => {
+    setDocumentPasswords((prev) => {
+      const next = { ...prev };
+      delete next[documentId];
+      return next;
+    });
   };
 
   return (
@@ -288,9 +301,19 @@ function EncryptedDocumentsApp({ userId }: { userId: string }) {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         {view === "list" ? (
-          <DocumentsList userId={userId} refreshTrigger={refreshTrigger} onUploadClick={() => setView("create")} />
+          <DocumentsList
+            userId={userId}
+            refreshTrigger={refreshTrigger}
+            onUploadClick={() => setView("create")}
+            documentPasswords={documentPasswords}
+            onDocumentDeleted={handleDocumentDeleted}
+          />
         ) : (
-          <CreateDocument userId={userId} onSuccess={handleDocumentCreated} />
+          <CreateDocument
+            userId={userId}
+            onSuccess={handleDocumentCreated}
+            onPasswordCaptured={handlePasswordCaptured}
+          />
         )}
       </main>
     </div>
@@ -301,9 +324,17 @@ interface DocumentsListProps {
   userId: string;
   refreshTrigger: number;
   onUploadClick: () => void;
+  documentPasswords: Record<string, string>;
+  onDocumentDeleted: (documentId: string) => void;
 }
 
-function DocumentsList({ userId, refreshTrigger, onUploadClick }: DocumentsListProps) {
+function DocumentsList({
+  userId,
+  refreshTrigger,
+  onUploadClick,
+  documentPasswords,
+  onDocumentDeleted,
+}: DocumentsListProps) {
   const [documents, setDocuments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedQrDoc, setSelectedQrDoc] = useState<any | null>(null);
@@ -373,6 +404,7 @@ function DocumentsList({ userId, refreshTrigger, onUploadClick }: DocumentsListP
 
       toast.success("Documento eliminado correctamente");
       setDocuments((prev) => prev.filter((doc) => doc.id !== id));
+      onDocumentDeleted(id);
     } catch (e) {
       console.error(e);
       toast.error("Error al eliminar el documento");
@@ -483,6 +515,7 @@ function DocumentsList({ userId, refreshTrigger, onUploadClick }: DocumentsListP
                   const isExpired = doc.expire_at && new Date(doc.expire_at) < new Date();
                   const isLimitReached = doc.max_downloads && doc.current_downloads >= doc.max_downloads;
                   const isLinkActive = !isExpired && !isLimitReached;
+                  const sessionPassword = documentPasswords[doc.id];
                   
                   return (
                     <tr key={doc.id} className="hover:bg-slate-50/50">
@@ -552,6 +585,21 @@ function DocumentsList({ userId, refreshTrigger, onUploadClick }: DocumentsListP
                           >
                             <Copy className="w-3.5 h-3.5" />
                           </Button>
+                          {doc.password_required && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              disabled={!sessionPassword}
+                              onClick={() => {
+                                if (!sessionPassword) return;
+                                navigator.clipboard.writeText(sessionPassword);
+                                toast.success("Contraseña copiada al portapapeles");
+                              }}
+                              title={sessionPassword ? "Copiar Contraseña" : "Contraseña no disponible en esta sesión"}
+                            >
+                              <Key className="w-3.5 h-3.5" />
+                            </Button>
+                          )}
                           <Button
                             variant="outline"
                             size="sm"
@@ -666,9 +714,10 @@ function DocumentsList({ userId, refreshTrigger, onUploadClick }: DocumentsListP
 interface CreateDocumentProps {
   userId: string;
   onSuccess: () => void;
+  onPasswordCaptured: (documentId: string, password: string) => void;
 }
 
-function CreateDocument({ userId, onSuccess }: CreateDocumentProps) {
+function CreateDocument({ userId, onSuccess, onPasswordCaptured }: CreateDocumentProps) {
   const [file, setFile] = useState<File | null>(null);
   const [formData, setFormData] = useState<Partial<CreateEncryptedDocumentRequest>>({
     name: "",
@@ -816,6 +865,7 @@ function CreateDocument({ userId, onSuccess }: CreateDocumentProps) {
         setGeneratedKey(encrypted.key);
       } else {
         setGeneratedKey(null);
+        onPasswordCaptured(dbData.id, formData.password);
       }
 
       toast.success("Documento encriptado y subido con éxito");

@@ -248,7 +248,16 @@ function EditorPage() {
 
     setLoading(true);
     try {
-      const p = await profileService.getProfileByUserId(supabase, userId);
+      // Parallelize queries to Supabase to prevent network waterfalls
+      const [p, adminStatus, authUserResult] = await Promise.all([
+        profileService.getProfileByUserId(supabase, userId),
+        isUserAdmin(supabase, userId),
+        supabase.auth.getUser()
+      ]);
+
+      const userEmail = authUserResult.data.user?.email || "";
+      setIsAdmin(adminStatus || isAdminEmail(userEmail));
+
       if (p) {
         setProfile(p);
         if (p.published && p.public_id) {
@@ -266,13 +275,6 @@ function EditorPage() {
           font_family: "Inter",
         });
       }
-
-      // Verificar si es admin
-      const adminStatus = await isUserAdmin(supabase, userId);
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      setIsAdmin(adminStatus || isAdminEmail(user?.email || ""));
     } catch (e) {
       console.error(e);
     } finally {

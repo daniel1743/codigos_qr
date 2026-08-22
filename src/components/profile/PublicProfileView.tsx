@@ -241,6 +241,315 @@ export function PublicProfileView({
     ? "rounded-[2rem] border border-white/30 py-8 shadow-xl backdrop-blur-sm"
     : "";
 
+  if (profile.theme_layout === "media_larissa_luxury") {
+    /* Modified by ChatGPT Work — ENC-DOC-SECURE-DELIVERY-02B */
+    // Monogram letters
+    const displayName = profile.display_name || "Larissa Almeida";
+    const monogramLetters = displayName.split(" ").map(part => part.charAt(0).toUpperCase()).slice(0, 2);
+    if (monogramLetters.length < 1) monogramLetters.push("L");
+    if (monogramLetters.length < 2) monogramLetters.push("A");
+
+    // Background images
+    const topImage = profile.banner_url || "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=800&auto=format&fit=crop";
+    const bottomImage = profile.avatar_url || "https://images.unsplash.com/photo-1604654894610-df63bc536371?q=80&w=800&auto=format&fit=crop";
+
+    // Social links
+    const socialLinks = links.filter((l) => {
+      const p = (l.platform || "").toLowerCase();
+      return ["instagram", "whatsapp", "facebook", "twitter", "tiktok", "youtube", "linkedin", "telegram"].includes(p);
+    });
+
+    // Bio catchphrase divided
+    const bioText = profile.bio || "Sua melhor versão, até nas unhas.";
+    const bioParts = bioText.split(",");
+
+    return (
+      <ContextWrapper type="background">
+        <style dangerouslySetInnerHTML={{__html: `
+          @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&display=swap');
+          .font-serif { font-family: 'Playfair Display', serif; }
+          .font-sans { font-family: 'Montserrat', sans-serif; }
+          .font-script { font-family: 'Great Vibes', cursive; }
+        `}} />
+
+        <div
+          className="relative w-full max-w-[480px] bg-[#0A0A0A] flex flex-col shadow-2xl mx-auto overflow-x-hidden min-h-screen text-white select-none selection:bg-[#D9BBA0] selection:text-black font-sans shrink-0 rounded-[3rem]"
+        >
+          {/* Top Background Image (Professional) */}
+          <div className="absolute top-0 left-0 w-full h-[600px] z-0 opacity-80 pointer-events-none">
+            <ContextWrapper type="cover">
+              <div 
+                className="absolute inset-0 bg-cover bg-left-top"
+                style={{ backgroundImage: `url(${topImage})` }}
+              />
+            </ContextWrapper>
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#0A0A0A]/50 to-[#0A0A0A] w-[120%] -left-[10%]"></div>
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0A0A0A]/80 to-[#0A0A0A]"></div>
+            <div className="absolute inset-0 bg-black/30"></div>
+          </div>
+
+          {/* Bottom Background Image (Manicure) */}
+          <div className="absolute bottom-0 left-0 w-full h-[500px] z-0 opacity-50 pointer-events-none">
+            <ContextWrapper type="avatar">
+              <div 
+                className="absolute inset-0 bg-cover bg-center"
+                style={{ backgroundImage: `url(${bottomImage})` }}
+              />
+            </ContextWrapper>
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A]/40 via-[#0A0A0A] to-[#0A0A0A]"></div>
+          </div>
+
+          {/* Main Content Wrapper */}
+          <div className="relative z-10 flex-grow flex flex-col w-full px-4 sm:px-6">
+            
+            {/* Top Section */}
+            <header className="pt-16 pb-10 px-6 flex flex-col items-end text-right w-full">
+              {/* Monogram / Logo Area */}
+              <div className="flex flex-col items-end mb-8">
+                {/* Monogram Circle */}
+                <div className="w-16 h-16 rounded-full border-[0.5px] border-[#D9BBA0]/60 flex items-center justify-center relative mb-4">
+                  <div className="absolute inset-0 border border-[#D9BBA0]/20 rounded-full m-1 pointer-events-none"></div>
+                  <span className="font-script text-3xl text-[#D9BBA0] -ml-2">{monogramLetters[0]}</span>
+                  <span className="font-script text-3xl text-[#D9BBA0] opacity-80 absolute top-1/2 left-1/2 transform -translate-x-[40%] -translate-y-[40%]">{monogramLetters[1]}</span>
+                </div>
+                
+                <ContextWrapper type="title">
+                  <h1 className="font-serif text-[#F2E8E0] text-[1.35rem] tracking-[0.15em] leading-none mb-2 font-normal uppercase">
+                    {displayName}
+                  </h1>
+                </ContextWrapper>
+                <h2 className="font-sans text-[#A68A72] text-[0.55rem] uppercase tracking-[0.3em]">
+                  Beauty Designer
+                </h2>
+              </div>
+
+              {/* Tagline */}
+              <div className="mt-4 max-w-[250px]">
+                <p className="font-sans text-[#EAE1D9] text-sm font-light leading-relaxed tracking-wide">
+                  Conecte-se comigo e
+                </p>
+                <p className="font-sans text-[#EAE1D9] text-sm font-light leading-relaxed tracking-wide">
+                  descubra o poder da sua
+                </p>
+                <p className="font-script text-[#D9BBA0] text-[2.2rem] leading-none mt-1 transform -rotate-2">
+                  autoestima.
+                </p>
+              </div>
+            </header>
+
+            {/* Social Icons Divider Section */}
+            <div className="w-full flex items-center justify-center px-4 my-6">
+              <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent to-[#D9BBA0]/50 relative">
+                 <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rotate-45 bg-[#D9BBA0]/60"></div>
+              </div>
+              
+              <div className="flex gap-4 px-6 relative z-20">
+                {socialLinks.slice(0, 3).map((link, idx) => {
+                  const platformDef = getPlatformDef(link.platform || "other");
+                  const Icon = platformDef.icon;
+                  return (
+                    <a 
+                      key={link.id || idx}
+                      href={isPreview ? "#" : link.url}
+                      target={isPreview ? undefined : "_blank"}
+                      rel={isPreview ? undefined : "noopener noreferrer"}
+                      className="w-[2.75rem] h-[2.75rem] rounded-[0.8rem] border-[0.5px] border-[#D9BBA0]/40 flex items-center justify-center text-[#EAE1D9] bg-black/40 backdrop-blur-md hover:bg-[#D9BBA0]/20 hover:border-[#D9BBA0] transition-all duration-300 shadow-sm"
+                    >
+                      <Icon size={20} strokeWidth={1.5} />
+                    </a>
+                  );
+                })}
+              </div>
+
+              <div className="flex-1 h-[1px] bg-gradient-to-l from-transparent to-[#D9BBA0]/50 relative">
+                 <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rotate-45 bg-[#D9BBA0]/60"></div>
+              </div>
+            </div>
+
+            {/* Central Script Divider Text */}
+            <div className="text-center px-6 my-10 relative z-20">
+              <ContextWrapper type="bio">
+                <h2 className="font-script text-[#D9BBA0] text-3xl md:text-4xl leading-tight">
+                  {bioParts.map((part, i) => (
+                    <React.Fragment key={i}>
+                      {part}{i < bioParts.length - 1 ? ',' : ''}<br/>
+                    </React.Fragment>
+                  ))}
+                </h2>
+              </ContextWrapper>
+            </div>
+
+            {/* Link Cards Section */}
+            <div className="pb-12 w-full max-w-[400px] mx-auto flex flex-col gap-1 z-20 relative">
+              {links
+                .filter((l) => l.enabled && l.id !== profile.hero_link_id)
+                .map((link, i) => (
+                  <ContextWrapper
+                    type="link"
+                    {...(link.id ? { linkId: link.id } : {})}
+                    key={link.id || i}
+                  >
+                    <PremiumMediaLinkCard
+                      link={link as ProfileLink}
+                      layout="media_larissa_luxury"
+                      coverHeight={profile.social_cover_height ?? null}
+                      coverWidth={profile.social_cover_width ?? null}
+                      mainAvatarUrl={profile.avatar_url ?? null}
+                      isPreview={isPreview}
+                      userId={profile.user_id ?? null}
+                      onLinkChange={onLinkChange}
+                    />
+                  </ContextWrapper>
+                ))}
+            </div>
+
+            {/* Footer */}
+            {profile.footer_enabled && (
+              <footer className="w-full text-center py-8 px-6 relative z-20 mt-auto">
+                <p className="font-sans text-[#EAE1D9]/50 text-[0.6rem] tracking-wider uppercase">
+                  {profile.footer_text || `2026 ${displayName}, Beauty designer. Todos os direitos reservados.`}
+                </p>
+              </footer>
+            )}
+          </div>
+        </div>
+      </ContextWrapper>
+    );
+  }
+
+  if (profile.theme_layout === "media_barbara_elite") {
+    /* Modified by ChatGPT Work — ENC-DOC-SECURE-DELIVERY-02B */
+    return (
+      <ContextWrapper type="background">
+        <div
+          className={containerClasses}
+          style={{
+            ...backgroundStyle,
+            fontFamily: fontFamily,
+          }}
+        >
+          <div className="relative z-10 flex w-full max-w-[520px] flex-1 flex-col items-center pb-12 pt-0 sm:pb-16 px-4 sm:px-0">
+            {/* Header Section */}
+            <div className="w-full relative bg-[#2D5A60] pt-12 pb-8 px-6 overflow-hidden rounded-[2.5rem] text-center mb-8 border border-white/10 shadow-lg shrink-0">
+              {/* Decorative Background Letter */}
+              <div className="absolute top-0 left-[-20%] text-[20rem] font-serif text-[#ffffff0b] leading-none select-none pointer-events-none">
+                {profile.display_name ? profile.display_name.charAt(0).toUpperCase() : 'B'}
+              </div>
+              {/* Decorative Lines */}
+              <svg className="absolute top-0 left-0 w-full h-full opacity-20 pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <path d="M0,50 Q25,25 50,50 T100,50" fill="none" stroke="#D4C4A8" strokeWidth="0.5" />
+                <path d="M0,80 Q50,60 100,80" fill="none" stroke="#D4C4A8" strokeWidth="0.2" />
+              </svg>
+
+              <div className="flex justify-between items-start relative z-10 text-left">
+                {/* Profile Image Area */}
+                <div className="w-1/2 relative">
+                  <ContextWrapper type="avatar">
+                    {profile.avatar_url ? (
+                      <img
+                        src={profile.avatar_url}
+                        alt={profile.display_name || "Avatar"}
+                        className="w-full aspect-[3/4] object-cover rounded-t-[4rem] rounded-bl-3xl shadow-lg border-b-4 border-[#D4C4A8] bg-white/10"
+                      />
+                    ) : (
+                      <div className="w-full aspect-[3/4] bg-white/10 rounded-t-[4rem] rounded-bl-3xl shadow-lg border-b-4 border-[#D4C4A8] flex items-center justify-center text-white/50 text-[10px]">
+                        [Foto de Perfil]
+                      </div>
+                    )}
+                  </ContextWrapper>
+                </div>
+
+                {/* Logo and Info */}
+                <div className="w-1/2 flex flex-col items-center pl-4 mt-2 text-center">
+                  {/* Logo Circle */}
+                  <div className="w-14 h-14 rounded-full border-2 border-[#D4C4A8] flex items-center justify-center mb-2">
+                    <span className="text-[#D4C4A8] font-serif text-2xl font-light">
+                      {profile.display_name ? profile.display_name.charAt(0).toUpperCase() : 'B'}
+                    </span>
+                  </div>
+                  
+                  <h2 className="text-[#D4C4A8] text-[0.6rem] uppercase tracking-[0.2em] mb-1">
+                    {profile.display_name ? 'Studio' : ''}
+                  </h2>
+                  <ContextWrapper type="title">
+                    <h1 className="text-[#F4EBE4] font-serif text-lg mb-1 tracking-widest break-words max-w-full font-light uppercase">
+                      {profile.display_name || "BARBARA"}
+                    </h1>
+                  </ContextWrapper>
+                  <p className="text-[#D4C4A8] text-[0.6rem] uppercase tracking-[0.1em] mb-4">
+                    Estética Avançada
+                  </p>
+
+                  {/* Social Icons */}
+                  <div className="flex gap-2">
+                    {links
+                      .filter((l) => l.enabled && ["instagram", "whatsapp", "facebook", "twitter", "tiktok", "youtube", "linkedin", "telegram"].includes((l.platform || "").toLowerCase()))
+                      .slice(0, 3)
+                      .map((link, idx) => {
+                        const platformDef = getPlatformDef(link.platform || "other");
+                        const Icon = platformDef.icon;
+                        return (
+                          <a
+                            key={link.id || idx}
+                            href={isPreview ? "#" : link.url}
+                            target={isPreview ? undefined : "_blank"}
+                            rel={isPreview ? undefined : "noopener noreferrer"}
+                            className="w-7 h-7 bg-white rounded-md flex items-center justify-center text-[#2D5A60] hover:bg-[#D4C4A8] hover:text-white transition-colors shadow-sm"
+                          >
+                            <Icon size={14} strokeWidth={2} />
+                          </a>
+                        );
+                      })}
+                  </div>
+                </div>
+              </div>
+              
+              {/* Bio Text */}
+              <div className="mt-6 text-center px-4 relative z-10">
+                <ContextWrapper type="bio">
+                  <p className="text-[#F4EBE4] text-xs leading-relaxed font-light tracking-wide max-w-xs mx-auto">
+                    {profile.bio || "Realçando sua beleza com cuidado, delicadeza e procedimentos pensados para elevar sua autoestima."}
+                  </p>
+                </ContextWrapper>
+              </div>
+            </div>
+
+            {/* Links List */}
+            <div className={`w-full px-4 sm:px-6 ${linkSpacingClass} flex-1 flex flex-col items-center`}>
+              {links
+                .filter((l) => l.enabled && l.id !== profile.hero_link_id)
+                .map((link, i) => (
+                  <ContextWrapper
+                    type="link"
+                    {...(link.id ? { linkId: link.id } : {})}
+                    key={link.id || i}
+                  >
+                    <PremiumMediaLinkCard
+                      link={link as ProfileLink}
+                      layout="media_barbara_elite"
+                      coverHeight={profile.social_cover_height ?? null}
+                      coverWidth={profile.social_cover_width ?? null}
+                      mainAvatarUrl={profile.avatar_url ?? null}
+                      isPreview={isPreview}
+                      userId={profile.user_id ?? null}
+                      onLinkChange={onLinkChange}
+                    />
+                  </ContextWrapper>
+                ))}
+            </div>
+
+            {/* Footer */}
+            {profile.footer_enabled && (
+              <div className="mt-8 max-w-[320px] px-4 text-center text-xs font-medium opacity-70" style={{ color: "#2D5A60" }}>
+                {profile.footer_text || "2026 Studio Barbara Estética Avançada. Todos os direitos reservados."}
+              </div>
+            )}
+          </div>
+        </div>
+      </ContextWrapper>
+    );
+  }
+
   return (
     <ContextWrapper type="background">
       <div
@@ -405,10 +714,12 @@ export function PublicProfileView({
                         <PremiumMediaLinkCard
                           link={link as ProfileLink}
                           layout={premiumMediaLayout}
-                          coverHeight={profile.social_cover_height}
-                          coverWidth={profile.social_cover_width}
+                          coverHeight={profile.social_cover_height ?? null}
+                          coverWidth={profile.social_cover_width ?? null}
                           mainAvatarUrl={profile.avatar_url ?? null}
                           isPreview={isPreview}
+                          userId={profile.user_id ?? null}
+                          onLinkChange={onLinkChange}
                         />
                       ) : profile.social_covers_enabled ? (
                         <SocialCover

@@ -10,7 +10,9 @@ export type PremiumMediaLayoutId =
   | "media_midnight_neon"
   | "media_scarlet_journal"
   | "media_sandstone_luxe"
-  | "media_ocean_grid";
+  | "media_ocean_grid"
+  | "media_barbara_elite"
+  | "media_larissa_luxury";
 
 export interface PremiumMediaLayout {
   id: PremiumMediaLayoutId;
@@ -183,6 +185,32 @@ export const PREMIUM_MEDIA_LAYOUTS: Record<PremiumMediaLayoutId, PremiumMediaLay
     contentColor: "#07364d",
     mutedColor: "#4c788d",
     accentColor: "#0878ad",
+  },
+  media_barbara_elite: {
+    id: "media_barbara_elite",
+    mediaPosition: "right",
+    mediaShape: "soft",
+    cardBackground: "#2D5A60",
+    cardBorder: "none",
+    cardShadow: "0 10px 25px rgba(45, 90, 96, 0.15)",
+    mediaBackground: "#dcc39e",
+    mediaBorder: "none",
+    contentColor: "#ffffff",
+    mutedColor: "#F4EBE4",
+    accentColor: "#dcc39e",
+  },
+  media_larissa_luxury: {
+    id: "media_larissa_luxury",
+    mediaPosition: "left",
+    mediaShape: "round",
+    cardBackground: "linear-gradient(to right, #F9EFEB, #EAE1D9, #D5C2B2)",
+    cardBorder: "1px solid rgba(255, 255, 255, 0.20)",
+    cardShadow: "0 10px 30px rgba(0,0,0,0.3)",
+    mediaBackground: "linear-gradient(to bottom right, #FDFCFB, #F2E8E0)",
+    mediaBorder: "1px solid rgba(217, 187, 160, 0.40)",
+    contentColor: "#30261E",
+    mutedColor: "#5A4E44",
+    accentColor: "#D9BBA0",
   },
 };
 
