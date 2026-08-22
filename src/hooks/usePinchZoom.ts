@@ -1,17 +1,18 @@
-import { useRef, useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef, useState } from "react";
 
 /**
  * Pinch Zoom Hook - Premium Mobile UX
  *
- * Native-feeling pinch zoom for canvas viewport
- * Like Canva/PicsArt mobile experience
- *
- * Rules:
- * - User manipulates VIEWPORT, not template geometry
- * - Focal point preserved under fingers
- * - Smooth interpolation (60fps)
- * - Bounds checking
+ * Direct manipulation rules:
+ * - scale = actualScaleAtGestureStart * currentDistance / initialDistance
+ * - native browser pinch is disabled on the target to avoid pointercancel races
+ * - programmatic zoom changes are synchronized into the gesture base
  */
+
+interface FocalPoint {
+  x: number;
+  y: number;
+}
 
 interface UsePinchZoomOptions {
   minScale?: number;
@@ -19,7 +20,7 @@ interface UsePinchZoomOptions {
   initialScale?: number;
   onZoomStart?: () => void;
   onZoomEnd?: () => void;
-  onZoomChange?: (scale: number) => void;
+  onZoomChange?: (scale: number, focalPoint: FocalPoint) => void;
 }
 
 interface PinchState {
@@ -27,8 +28,10 @@ interface PinchState {
   initialDistance: number;
   initialScale: number;
   currentScale: number;
-  focalPoint: { x: number; y: number };
+  focalPoint: FocalPoint;
 }
+
+const DEFAULT_FOCAL_POINT: FocalPoint = { x: 0, y: 0 };
 
 export function usePinchZoom({
   minScale = 0.45,
@@ -38,143 +41,174 @@ export function usePinchZoom({
   onZoomEnd,
   onZoomChange,
 }: UsePinchZoomOptions = {}) {
+  const clampScale = useCallback(
+    (scale: number): number => Math.max(minScale, Math.min(maxScale, scale)),
+    [maxScale, minScale],
+  );
+
   const pinchState = useRef<PinchState>({
     isPinching: false,
     initialDistance: 0,
-    initialScale: initialScale,
-    currentScale: initialScale,
-    focalPoint: { x: 0, y: 0 },
+    initialScale: clampScale(initialScale),
+    currentScale: clampScale(initialScale),
+    focalPoint: DEFAULT_FOCAL_POINT,
   });
-
   const activePointers = useRef<Map<number, PointerEvent>>(new Map());
+  const targetElement = useRef<HTMLElement | null>(null);
+  const [isPinching, setIsPinching] = useState(false);
 
-  /**
-   * Calculate distance between two pointers
-   */
   const getDistance = (p1: PointerEvent, p2: PointerEvent): number => {
     const dx = p2.clientX - p1.clientX;
     const dy = p2.clientY - p1.clientY;
-    return Math.sqrt(dx * dx + dy * dy);
+    return Math.hypot(dx, dy);
   };
 
-  /**
-   * Calculate focal point (center between two fingers)
-   */
-  const getFocalPoint = (p1: PointerEvent, p2: PointerEvent): { x: number; y: number } => {
-    return {
-      x: (p1.clientX + p2.clientX) / 2,
-      y: (p1.clientY + p2.clientY) / 2,
-    };
+  const getFocalPoint = (p1: PointerEvent, p2: PointerEvent): FocalPoint => ({
+    x: (p1.clientX + p2.clientX) / 2,
+    y: (p1.clientY + p2.clientY) / 2,
+  });
+
+  const getTwoPointers = (): [PointerEvent, PointerEvent] | null => {
+    const pointers = Array.from(activePointers.current.values());
+    const first = pointers[0];
+    const second = pointers[1];
+    if (!first || !second) return null;
+    return [first, second];
   };
 
-  /**
-   * Clamp scale to min/max bounds
-   */
-  const clampScale = (scale: number): number => {
-    return Math.max(minScale, Math.min(maxScale, scale));
-  };
+  const syncScale = useCallback(
+    (scale: number) => {
+      const clampedScale = clampScale(scale);
+      pinchState.current.currentScale = clampedScale;
+      if (!pinchState.current.isPinching) {
+        pinchState.current.initialScale = clampedScale;
+      }
+      return clampedScale;
+    },
+    [clampScale],
+  );
 
-  const handlePointerDown = useCallback((e: PointerEvent) => {
-    activePointers.current.set(e.pointerId, e);
+  useEffect(() => {
+    syncScale(initialScale);
+  }, [initialScale, syncScale]);
 
-    // Start pinch when 2 fingers detected
-    if (activePointers.current.size === 2) {
-      const pointers = Array.from(activePointers.current.values());
+  const endPinch = useCallback(() => {
+    if (!pinchState.current.isPinching) return;
+    pinchState.current.isPinching = false;
+    pinchState.current.initialScale = pinchState.current.currentScale;
+    setIsPinching(false);
+    onZoomEnd?.();
+  }, [onZoomEnd]);
+
+  const handlePointerDown = useCallback(
+    (event: PointerEvent) => {
+      if (event.pointerType === "mouse") return;
+      activePointers.current.set(event.pointerId, event);
+      targetElement.current?.setPointerCapture?.(event.pointerId);
+
+      const pointers = getTwoPointers();
+      if (!pointers) return;
+
+      event.preventDefault();
       const [p1, p2] = pointers;
-
       pinchState.current = {
         isPinching: true,
-        initialDistance: getDistance(p1, p2),
+        initialDistance: Math.max(1, getDistance(p1, p2)),
         initialScale: pinchState.current.currentScale,
         currentScale: pinchState.current.currentScale,
         focalPoint: getFocalPoint(p1, p2),
       };
-
+      setIsPinching(true);
       onZoomStart?.();
-    }
-  }, [onZoomStart]);
+    },
+    [onZoomStart],
+  );
 
-  const handlePointerMove = useCallback((e: PointerEvent) => {
-    // Update pointer position
-    if (activePointers.current.has(e.pointerId)) {
-      activePointers.current.set(e.pointerId, e);
-    }
+  const handlePointerMove = useCallback(
+    (event: PointerEvent) => {
+      if (!activePointers.current.has(event.pointerId)) return;
+      activePointers.current.set(event.pointerId, event);
 
-    // Process pinch if 2 fingers active
-    if (activePointers.current.size === 2 && pinchState.current.isPinching) {
-      const pointers = Array.from(activePointers.current.values());
+      if (activePointers.current.size !== 2 || !pinchState.current.isPinching) return;
+      const pointers = getTwoPointers();
+      if (!pointers) return;
+
+      event.preventDefault();
       const [p1, p2] = pointers;
+      const currentDistance = Math.max(1, getDistance(p1, p2));
+      const nextScale = clampScale(
+        pinchState.current.initialScale *
+          (currentDistance / Math.max(1, pinchState.current.initialDistance)),
+      );
+      const focalPoint = getFocalPoint(p1, p2);
 
-      const currentDistance = getDistance(p1, p2);
-      const distanceRatio = currentDistance / pinchState.current.initialDistance;
+      pinchState.current.currentScale = nextScale;
+      pinchState.current.focalPoint = focalPoint;
+      onZoomChange?.(nextScale, focalPoint);
+    },
+    [clampScale, onZoomChange],
+  );
 
-      // Calculate new scale
-      const newScale = clampScale(pinchState.current.initialScale * distanceRatio);
+  const handlePointerUp = useCallback(
+    (event: PointerEvent) => {
+      activePointers.current.delete(event.pointerId);
+      targetElement.current?.releasePointerCapture?.(event.pointerId);
+      if (activePointers.current.size < 2) endPinch();
+    },
+    [endPinch],
+  );
 
-      // Update state
-      pinchState.current.currentScale = newScale;
-      pinchState.current.focalPoint = getFocalPoint(p1, p2);
+  const handlePointerCancel = useCallback(
+    (event: PointerEvent) => {
+      activePointers.current.delete(event.pointerId);
+      if (activePointers.current.size < 2) endPinch();
+    },
+    [endPinch],
+  );
 
-      // Notify change
-      onZoomChange?.(newScale);
-    }
-  }, [onZoomChange]);
+  const attachToElement = useCallback(
+    (element: HTMLElement | null) => {
+      if (!element) return () => {};
 
-  const handlePointerUp = useCallback((e: PointerEvent) => {
-    activePointers.current.delete(e.pointerId);
+      targetElement.current = element;
+      const previousTouchAction = element.style.touchAction;
+      element.style.touchAction = "pan-y";
 
-    // End pinch when less than 2 fingers
-    if (activePointers.current.size < 2 && pinchState.current.isPinching) {
-      pinchState.current.isPinching = false;
-      onZoomEnd?.();
-    }
-  }, [onZoomEnd]);
+      element.addEventListener("pointerdown", handlePointerDown, { passive: false });
+      element.addEventListener("pointermove", handlePointerMove, { passive: false });
+      element.addEventListener("pointerup", handlePointerUp);
+      element.addEventListener("pointercancel", handlePointerCancel);
 
-  const handlePointerCancel = useCallback((e: PointerEvent) => {
-    activePointers.current.delete(e.pointerId);
+      return () => {
+        element.style.touchAction = previousTouchAction;
+        element.removeEventListener("pointerdown", handlePointerDown);
+        element.removeEventListener("pointermove", handlePointerMove);
+        element.removeEventListener("pointerup", handlePointerUp);
+        element.removeEventListener("pointercancel", handlePointerCancel);
+        activePointers.current.clear();
+        targetElement.current = null;
+        endPinch();
+      };
+    },
+    [endPinch, handlePointerCancel, handlePointerDown, handlePointerMove, handlePointerUp],
+  );
 
-    if (activePointers.current.size < 2 && pinchState.current.isPinching) {
-      pinchState.current.isPinching = false;
-      onZoomEnd?.();
-    }
-  }, [onZoomEnd]);
-
-  // Attach listeners to target element
-  const attachToElement = useCallback((element: HTMLElement | null) => {
-    if (!element) return () => {};
-
-    // Set touch-action CSS for proper pinch support
-    element.style.touchAction = 'pan-y pinch-zoom';
-
-    element.addEventListener('pointerdown', handlePointerDown as any);
-    element.addEventListener('pointermove', handlePointerMove as any);
-    element.addEventListener('pointerup', handlePointerUp as any);
-    element.addEventListener('pointercancel', handlePointerCancel as any);
-
-    return () => {
-      element.removeEventListener('pointerdown', handlePointerDown as any);
-      element.removeEventListener('pointermove', handlePointerMove as any);
-      element.removeEventListener('pointerup', handlePointerUp as any);
-      element.removeEventListener('pointercancel', handlePointerCancel as any);
-    };
-  }, [handlePointerDown, handlePointerMove, handlePointerUp, handlePointerCancel]);
-
-  // Reset zoom to initial scale
   const resetZoom = useCallback(() => {
-    pinchState.current.currentScale = initialScale;
-    onZoomChange?.(initialScale);
-  }, [initialScale, onZoomChange]);
+    const clampedScale = syncScale(initialScale);
+    onZoomChange?.(clampedScale, pinchState.current.focalPoint);
+  }, [initialScale, onZoomChange, syncScale]);
 
-  // Programmatically set zoom
-  const setZoom = useCallback((scale: number) => {
-    const clampedScale = clampScale(scale);
-    pinchState.current.currentScale = clampedScale;
-    onZoomChange?.(clampedScale);
-  }, [onZoomChange]);
+  const setZoom = useCallback(
+    (scale: number) => {
+      const clampedScale = syncScale(scale);
+      onZoomChange?.(clampedScale, pinchState.current.focalPoint);
+    },
+    [onZoomChange, syncScale],
+  );
 
   return {
     attachToElement,
-    isPinching: pinchState.current.isPinching,
+    isPinching,
     currentScale: pinchState.current.currentScale,
     focalPoint: pinchState.current.focalPoint,
     resetZoom,

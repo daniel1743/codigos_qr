@@ -7,6 +7,7 @@ import type { Profile, ProfileLink } from "../types/database";
 import { Auth } from "../components/Auth";
 import { ContextualPropertiesPanel } from "../components/editor/ContextualPropertiesPanel";
 import { FloatingContextToolbar } from "../components/editor/FloatingContextToolbar";
+import { DirectBottomSheet } from "../components/editor/DirectBottomSheet";
 import { DraggableBottomSheet } from "../components/editor/DraggableBottomSheet";
 import { UndoRedoFAB, useHistory } from "../components/editor/UndoRedoFAB";
 import { PublicProfileView } from "../components/profile/PublicProfileView";
@@ -18,7 +19,7 @@ import { getPublicProfileUrl } from "../lib/url";
 import { isValidUrl, normalizeUrl } from "../lib/validation";
 import { isUserAdmin, isAdminEmail } from "../lib/admin-check";
 import { useTouchGesture, parseEditorTarget } from "../hooks/useTouchGesture";
-import { usePinchZoom } from "../hooks/usePinchZoom";
+import { usePinchZoomDirect } from "../hooks/usePinchZoomDirect";
 import {
   UserCircle,
   UserRound,
@@ -182,6 +183,7 @@ function EditorPage() {
     type: "profile.photo",
   });
   const [zoomLevel, setZoomLevel] = useState<number>(1);
+  const [pinchTransformOrigin, setPinchTransformOrigin] = useState("center center");
   const [isDesktop, setIsDesktop] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
@@ -203,7 +205,7 @@ function EditorPage() {
     canRedo,
   } = useHistory<EditorState>(
     { profile, links },
-    50 // Max 50 history states
+    50, // Max 50 history states
   );
 
   const handleUndo = () => {
@@ -241,8 +243,25 @@ function EditorPage() {
     const { type, id } = parseEditorTarget(target);
     if (type && type.startsWith("link") && id) {
       setSelectedEditorTarget({ type: "link", linkId: id });
-    } else if (type) {
-      setSelectedEditorTarget({ type: type as any });
+    } else if (
+      type === "profile.photo" ||
+      type === "profile.name" ||
+      type === "profile.bio" ||
+      type === "profile.alias" ||
+      type === "profile.cover" ||
+      type === "profile.footer" ||
+      type === "links.manage" ||
+      type === "appearance.templates" ||
+      type === "appearance.typography" ||
+      type === "appearance.colors" ||
+      type === "appearance.buttons" ||
+      type === "appearance.spacing" ||
+      type === "appearance.decoration" ||
+      type === "social_cover" ||
+      type === "hero_social" ||
+      type === "qr"
+    ) {
+      setSelectedEditorTarget({ type });
     }
   };
 
@@ -279,47 +298,45 @@ function EditorPage() {
   };
 
   // Touch gesture hook (only on mobile)
-  useTouchGesture({
-    onTap: !isDesktop ? handleTapOnElement : undefined,
-    onTapOutside: !isDesktop ? handleTapOutside : undefined,
-  });
+  useTouchGesture(
+    !isDesktop
+      ? {
+          onTap: handleTapOnElement,
+          onTapOutside: handleTapOutside,
+        }
+      : {},
+  );
 
   // Modified by Codex — MOBILE-PINCH-ZOOM-CANVAS-13
-  // Pinch zoom for mobile canvas viewport
-  const canvasRef = useRef<HTMLDivElement>(null);
+  // Modified by Codex — DIRECT-MANIPULATION-PINCH-ZOOM
+  // Pinch zoom with direct finger control (no React re-renders during gesture)
+  const canvasContainerRef = useRef<HTMLDivElement>(null);
 
-  const {
-    attachToElement,
-    isPinching,
-    currentScale,
-    resetZoom,
-  } = usePinchZoom({
-    minScale: 0.45,
+  const { attachTo: attachPinchZoom, setScale: setPinchScale } = usePinchZoomDirect({
+    minScale: 0.4,
     maxScale: 3.0,
     initialScale: zoomLevel,
-    onZoomStart: () => {
-      // Hide toolbar during pinch for cleaner UX
-      if (!isDesktop) {
-        setShowFloatingToolbar(false);
-      }
-    },
-    onZoomEnd: () => {
-      // Restore toolbar if element still selected
-      if (!isDesktop && selectedMobileTarget) {
-        setShowFloatingToolbar(true);
-      }
-    },
-    onZoomChange: (scale) => {
+    onScaleChange: (scale) => {
+      // Only update React state AFTER gesture ends
       setZoomLevel(scale);
     },
   });
 
-  // Attach pinch zoom to canvas on mobile
+  const setZoom = (scale: number) => {
+    setZoomLevel(scale);
+    setPinchScale(scale);
+  };
+
+  // Attach pinch zoom to canvas container on mobile
   useEffect(() => {
-    if (!isDesktop && canvasRef.current) {
-      return attachToElement(canvasRef.current);
+    if (!isDesktop && canvasContainerRef.current) {
+      // Find the actual canvas element (the scaled div)
+      const canvas = canvasContainerRef.current.querySelector('.phone-canvas') as HTMLElement;
+      if (canvas) {
+        attachPinchZoom(canvas);
+      }
     }
-  }, [isDesktop, attachToElement]);
+  }, [isDesktop, attachPinchZoom]);
 
   useEffect(() => {
     setIsDesktop(window.innerWidth >= 768);
@@ -331,14 +348,16 @@ function EditorPage() {
   const handleZoomIn = () => {
     const nextStep = ZOOM_STEPS.find((step) => step > zoomLevel + 0.01);
     if (nextStep !== undefined) {
-      setZoomLevel(nextStep);
+      setPinchTransformOrigin("center center");
+      setZoom(nextStep);
     }
   };
 
   const handleZoomOut = () => {
     const prevStep = [...ZOOM_STEPS].reverse().find((step) => step < zoomLevel - 0.01);
     if (prevStep !== undefined) {
-      setZoomLevel(prevStep);
+      setPinchTransformOrigin("center center");
+      setZoom(prevStep);
     }
   };
 
@@ -358,7 +377,8 @@ function EditorPage() {
     if (bestScale > 1.0) bestScale = 1.0;
     if (bestScale < 0.3) bestScale = 0.3; // Allow smaller fit on very small screens
 
-    setZoomLevel(bestScale);
+    setPinchTransformOrigin("center center");
+    setZoom(bestScale);
   };
 
   useEffect(() => {
@@ -640,7 +660,8 @@ function EditorPage() {
   const handleTabClick = (id: TabId) => {
     setActiveTab(id);
     setPanelOpen(true);
-    setMobilePropertiesOpen(true);
+    // Modified by Codex — MOBILE-FORENSIC-FIX: Connect to correct state
+    setBottomSheetOpen(true); // ✅ Opens DraggableBottomSheet
     // Modified by Codex — EDITOR-THREE-PANEL-RESTRUCTURE-09
     setSelectedEditorTarget(
       id === "profile"
@@ -998,9 +1019,9 @@ function EditorPage() {
             </Button>
           </div>
 
-          {/* Scalable Container - Pinch zoom enabled on mobile */}
+          {/* Scalable Container - Direct manipulation pinch zoom */}
           <div
-            ref={canvasRef}
+            ref={canvasContainerRef}
             className="relative flex items-center justify-center w-full h-full"
           >
             {showQrEditingPreview ? (
@@ -1010,11 +1031,10 @@ function EditorPage() {
                 onDone={() => setPanelOpen(false)}
               />
             ) : (
-              // Modified by Codex — QR-STUDIO-11C
+              // Modified by Codex — DIRECT-MANIPULATION: Transform applied via direct DOM
               <div
-                className="relative h-[750px] w-[375px] shrink-0 transform-gpu overflow-hidden rounded-[3rem] border-[8px] border-black/10 bg-background shadow-2xl transition-transform duration-300"
+                className="phone-canvas relative h-[750px] w-[375px] shrink-0 transform-gpu overflow-hidden rounded-[3rem] border-[8px] border-black/10 bg-background shadow-2xl"
                 style={{
-                  transform: `scale(${zoomLevel})`,
                   transformOrigin: "center center",
                 }}
               >
@@ -1074,12 +1094,7 @@ function EditorPage() {
 
       {/* Modified by Codex — PREMIUM-MOBILE-UX-ZERO-FRICTION-2026 */}
       {/* Undo/Redo FAB - Always accessible (like PicsArt) */}
-      <UndoRedoFAB
-        onUndo={handleUndo}
-        onRedo={handleRedo}
-        canUndo={canUndo}
-        canRedo={canRedo}
-      />
+      <UndoRedoFAB onUndo={handleUndo} onRedo={handleRedo} canUndo={canUndo} canRedo={canRedo} />
 
       {/* MOBILE BOTTOM NAVIGATION */}
       <nav className="z-30 flex shrink-0 items-center gap-1 border-t bg-card px-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] pt-2 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] md:hidden">
@@ -1121,9 +1136,9 @@ function EditorPage() {
         })}
       </nav>
 
-      {/* Modified by Codex — MOBILE-TOUCH-SELECTION-SHEET-12 */}
-      {/* Draggable Bottom Sheet - Replaces old fixed drawer */}
-      <DraggableBottomSheet
+      {/* Modified by Codex — DIRECT-MANIPULATION-BOTTOM-SHEET */}
+      {/* Direct Bottom Sheet - Follows finger exactly during drag */}
+      <DirectBottomSheet
         open={bottomSheetOpen}
         onOpenChange={setBottomSheetOpen}
         title={
@@ -1139,10 +1154,9 @@ function EditorPage() {
                     : "Propiedades"
             : "Propiedades"
         }
-        initialSnap="half"
       >
         {renderContextualProperties()}
-      </DraggableBottomSheet>
+      </DirectBottomSheet>
     </div>
   );
 }

@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 import { Toaster } from "../components/ui/sonner";
+import { PremiumMobileNavDrawer } from "../components/navigation/PremiumMobileNavDrawer";
 
 import appCss from "../styles.css?url";
 
@@ -82,15 +83,33 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
       { title: "Generador de Código QR con Página Personalizada | QR Links" },
-      { name: "description", content: "Crea tu código QR gratis. Reúne tus redes sociales, WhatsApp, enlaces y web en una página profesional personalizable. Tu QR, tu página, tu marca." },
-      { property: "og:title", content: "Generador de Código QR con Página Personalizada | QR Links" },
-      { property: "og:description", content: "Crea tu código QR gratis. Reúne tus redes sociales, WhatsApp, enlaces y web en una página profesional personalizable." },
+      {
+        name: "description",
+        content:
+          "Crea tu código QR gratis. Reúne tus redes sociales, WhatsApp, enlaces y web en una página profesional personalizable. Tu QR, tu página, tu marca.",
+      },
+      {
+        property: "og:title",
+        content: "Generador de Código QR con Página Personalizada | QR Links",
+      },
+      {
+        property: "og:description",
+        content:
+          "Crea tu código QR gratis. Reúne tus redes sociales, WhatsApp, enlaces y web en una página profesional personalizable.",
+      },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://codigos-qr.vercel.app/" },
       { property: "og:image", content: "https://codigos-qr.vercel.app/icon-512.png" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Generador de Código QR con Página Personalizada | QR Links" },
-      { name: "twitter:description", content: "Crea tu código QR gratis. Reúne tus redes, WhatsApp y enlaces en una página personalizable." },
+      {
+        name: "twitter:title",
+        content: "Generador de Código QR con Página Personalizada | QR Links",
+      },
+      {
+        name: "twitter:description",
+        content:
+          "Crea tu código QR gratis. Reúne tus redes, WhatsApp y enlaces en una página personalizable.",
+      },
       { name: "twitter:image", content: "https://codigos-qr.vercel.app/icon-512.png" },
     ],
     links: [
@@ -148,7 +167,9 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <PremiumMobileNavDrawer>
+        <Outlet />
+      </PremiumMobileNavDrawer>
       <Toaster position="bottom-right" />
     </QueryClientProvider>
   );

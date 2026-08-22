@@ -441,6 +441,11 @@ function DocumentsList({
 
   const [mutatingDocId, setMutatingDocId] = useState<string | null>(null);
 
+  // Password modal state (replaces window.prompt)
+  const [selectedPasswordDoc, setSelectedPasswordDoc] = useState<any | null>(null);
+  const [passwordInput, setPasswordInput] = useState("");
+  const [showPasswordInput, setShowPasswordInput] = useState(false);
+
   useEffect(() => {
     fetchDocumentsAndStats();
   }, [userId, refreshTrigger]);
@@ -739,7 +744,7 @@ function DocumentsList({
     }
   };
 
-  // Modified by Codex — ENC-DOC-COPY-PASSWORD-HOTFIX
+  // Modified by Antigravity — Replace window.prompt with modern Dialog
   const handleCopyPasswordAction = (doc: any, currentPassword?: string) => {
     if (!doc.password_required) {
       toast.info("Este documento no usa contraseña");
@@ -748,18 +753,27 @@ function DocumentsList({
 
     if (currentPassword) {
       navigator.clipboard.writeText(currentPassword);
-      toast.success("Contraseña copiada");
+      toast.success("Contraseña copiada al portapapeles");
       return;
     }
 
-    const password = window.prompt(
-      "Esta contraseña no está guardada en este navegador. Pégala una vez para guardarla localmente y copiarla.",
-    );
-    if (!password) return;
+    // No password in session/localStorage — open the recovery modal
+    setSelectedPasswordDoc(doc);
+    setPasswordInput("");
+    setShowPasswordInput(false);
+  };
 
-    onPasswordCaptured(doc.id, password);
-    navigator.clipboard.writeText(password);
-    toast.success("Contraseña guardada localmente y copiada");
+  const handlePasswordModalSave = () => {
+    if (!selectedPasswordDoc || !passwordInput.trim()) {
+      toast.error("Por favor ingresa la contraseña");
+      return;
+    }
+    onPasswordCaptured(selectedPasswordDoc.id, passwordInput.trim());
+    navigator.clipboard.writeText(passwordInput.trim());
+    toast.success("Contraseña guardada localmente y copiada al portapapeles");
+    setSelectedPasswordDoc(null);
+    setPasswordInput("");
+    setShowPasswordInput(false);
   };
 
   // Calculate statistics
@@ -1178,7 +1192,7 @@ function DocumentsList({
                                 {sessionPassword
                                   ? "Copiar Contraseña"
                                   : doc.password_required
-                                    ? "Guardar/Copiar Contraseña"
+                                    ? "Ver Contraseña"
                                     : "Sin contraseña"}
                               </DropdownMenuItem>
 
@@ -1310,7 +1324,7 @@ function DocumentsList({
                           {sessionPassword
                             ? "Copiar Contraseña"
                             : doc.password_required
-                              ? "Guardar/Copiar Contraseña"
+                              ? "Ver Contraseña"
                               : "Sin contraseña"}
                         </DropdownMenuItem>
 
@@ -1638,6 +1652,141 @@ function DocumentsList({
           )}
         </SheetContent>
       </Sheet>
+
+      {/* Password Recovery Modal — replaces window.prompt */}
+      <Dialog
+        open={!!selectedPasswordDoc}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelectedPasswordDoc(null);
+            setPasswordInput("");
+            setShowPasswordInput(false);
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-amber-100 shrink-0">
+                <Key className="w-5 h-5 text-amber-600" />
+              </div>
+              Contraseña No Disponible
+            </DialogTitle>
+            <DialogDescription asChild>
+              <div className="text-sm text-muted-foreground text-left space-y-3 pt-2">
+                <div className="rounded-lg bg-amber-50 border border-amber-200 p-3 text-amber-900 text-xs space-y-2">
+                  <p className="font-semibold flex items-center gap-1.5">
+                    <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                    ¿Por qué no está disponible?
+                  </p>
+                  <p className="leading-relaxed">
+                    La contraseña de este documento no se encuentra guardada en este navegador. 
+                    Esto ocurre cuando el documento fue creado en <strong>otro navegador</strong>, <strong>otro dispositivo</strong>, 
+                    o en un <strong>entorno diferente</strong> (por ejemplo, se creó en producción y estás accediendo desde localhost).
+                  </p>
+                  <p className="leading-relaxed">
+                    Por seguridad, las contraseñas solo se almacenan localmente en el navegador donde fueron creadas y nunca se guardan en el servidor.
+                  </p>
+                </div>
+
+                <div className="rounded-lg bg-blue-50 border border-blue-200 p-3 text-blue-900 text-xs space-y-1.5">
+                  <p className="font-semibold flex items-center gap-1.5">
+                    <Info className="w-4 h-4 text-blue-600 shrink-0" />
+                    ¿Qué puedes hacer?
+                  </p>
+                  <ul className="list-disc list-inside space-y-1 pl-1">
+                    <li>Abre el documento desde el navegador donde lo creaste</li>
+                    <li>Revisa si la guardaste en un gestor de contraseñas</li>
+                    <li>Si la tienes copiada, pégala abajo para guardarla en este navegador</li>
+                  </ul>
+                </div>
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedPasswordDoc && (
+            <div className="space-y-4 pt-2">
+              <div className="flex items-center gap-3 p-3 rounded-lg border bg-muted/30">
+                <FileTypeIcon fileType={selectedPasswordDoc.file_type} className="w-6 h-6 shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold truncate">{selectedPasswordDoc.name}</p>
+                  <p className="text-[10px] text-muted-foreground truncate">{selectedPasswordDoc.original_filename}</p>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs font-medium">Si ya tienes la contraseña, ingrésala aquí (o genera una nueva):</Label>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 min-w-0">
+                    <Input
+                      type={showPasswordInput ? "text" : "password"}
+                      placeholder="Pega, escribe o genera la contraseña..."
+                      value={passwordInput}
+                      onChange={(e) => setPasswordInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && passwordInput.trim()) {
+                          handlePasswordModalSave();
+                        }
+                      }}
+                      className="h-10 w-full font-mono text-xs"
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="h-10 w-10 shrink-0 text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+                    title="Generar contraseña"
+                    onClick={() => {
+                      const newPass = generateSecureDocumentPassword();
+                      setPasswordInput(newPass);
+                      setShowPasswordInput(true);
+                      toast.info("Nueva contraseña generada");
+                    }}
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="h-10 w-10 shrink-0"
+                    onClick={() => setShowPasswordInput((prev) => !prev)}
+                    title={showPasswordInput ? "Ocultar" : "Mostrar"}
+                  >
+                    {showPasswordInput ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </Button>
+                </div>
+                <p className="text-[10px] text-muted-foreground leading-normal">
+                  Nota: Generar una nueva contraseña aquí guardará esta clave localmente en tu navegador.
+                </p>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="flex-col sm:flex-row gap-2 pt-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setSelectedPasswordDoc(null);
+                setPasswordInput("");
+                setShowPasswordInput(false);
+              }}
+              className="flex-1"
+            >
+              Cancelar
+            </Button>
+            <Button
+              disabled={!passwordInput.trim()}
+              onClick={handlePasswordModalSave}
+              className="flex-1 gap-2"
+            >
+              <Copy className="w-4 h-4" />
+              Guardar y Copiar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -2139,10 +2288,20 @@ function CreateDocument({ userId, onSuccess, onPasswordCaptured }: CreateDocumen
                   type={showPassword ? "text" : "password"}
                   value={formData.password}
                   onChange={(e) => updatePassword(e.target.value, false)}
-                  placeholder="Ingresa una contraseña segura"
+                  placeholder="Ingresa una contraseña o genérala"
                   autoComplete="new-password"
                   className="min-w-0 flex-1"
                 />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className="h-10 w-10 shrink-0 text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+                  title="Generar contraseña"
+                  onClick={() => updatePassword(generateSecureDocumentPassword(), true)}
+                >
+                  <RefreshCw className="w-4 h-4" />
+                </Button>
                 <Button
                   type="button"
                   variant="outline"
@@ -2168,18 +2327,8 @@ function CreateDocument({ userId, onSuccess, onPasswordCaptured }: CreateDocumen
                   </Button>
                 )}
               </div>
-              <Button
-                type="button"
-                variant="outline"
-                className="min-h-11 w-full whitespace-normal break-words px-3 text-center leading-tight"
-                onClick={() => updatePassword(generateSecureDocumentPassword(), true)}
-              >
-                <Key className="w-4 h-4" />
-                Generar contraseña segura
-              </Button>
-              <p className="text-xs text-muted-foreground">
-                La contraseña será requerida para descargar el documento. Compártela por separado
-                con el destinatario.
+              <p className="text-xs text-muted-foreground leading-normal">
+                La contraseña es opcional. Si la usas, será requerida para descargar el documento. Compártela con el destinatario.
               </p>
             </div>
           </div>

@@ -10,22 +10,21 @@ interface DraggableBottomSheetProps {
   initialSnap?: "compact" | "half" | "expanded";
 }
 
-type SnapPoint = "closed" | "compact" | "half" | "expanded";
-
-const SNAP_HEIGHTS: Record<SnapPoint, string> = {
-  closed: "0vh",
-  compact: "30vh",
-  half: "50vh",
-  expanded: "85vh",
-};
+const MIN_HEIGHT_RATIO = 0.22;
+const MAX_HEIGHT_RATIO = 0.88;
+const INITIAL_HEIGHTS = {
+  compact: 0.3,
+  half: 0.5,
+  expanded: 0.85,
+} as const;
+const CLOSE_DRAG_THRESHOLD = 120;
 
 /**
  * Draggable Bottom Sheet
  *
  * Features:
- * - Snap points: compact, half, expanded
- * - Drag by handle to resize
- * - Smooth transitions
+ * - Free-position height controlled directly by the handle
+ * - Release keeps the exact allowed height where the finger stopped
  * - Preserves scroll inside content
  * - Does not interfere with canvas gestures
  */
@@ -36,96 +35,113 @@ export function DraggableBottomSheet({
   children,
   initialSnap = "half",
 }: DraggableBottomSheetProps) {
-  const [snapPoint, setSnapPoint] = useState<SnapPoint>(open ? initialSnap : "closed");
+  const getViewportHeight = useCallback(() => {
+    if (typeof window === "undefined") return 800;
+    return window.visualViewport?.height ?? window.innerHeight;
+  }, []);
+
+  const getInitialHeight = useCallback(() => {
+    return Math.round(getViewportHeight() * INITIAL_HEIGHTS[initialSnap]);
+  }, [getViewportHeight, initialSnap]);
+
+  const getMinHeight = useCallback(() => {
+    return Math.round(getViewportHeight() * MIN_HEIGHT_RATIO);
+  }, [getViewportHeight]);
+
+  const getMaxHeight = useCallback(() => {
+    return Math.round(getViewportHeight() * MAX_HEIGHT_RATIO);
+  }, [getViewportHeight]);
+
+  const clampHeight = useCallback(
+    (height: number) => Math.max(getMinHeight(), Math.min(getMaxHeight(), height)),
+    [getMaxHeight, getMinHeight],
+  );
+
+  const [heightPx, setHeightPx] = useState(() => (open ? getInitialHeight() : 0));
   const [isDragging, setIsDragging] = useState(false);
   const [startY, setStartY] = useState(0);
-  const [currentY, setCurrentY] = useState(0);
+  const [startHeightPx, setStartHeightPx] = useState(0);
+  const [lastDragDeltaY, setLastDragDeltaY] = useState(0);
   const sheetRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  // Sync open state with snap point
+  // Sync open state with free height.
   useEffect(() => {
-    if (open && snapPoint === "closed") {
-      setSnapPoint(initialSnap);
-    } else if (!open && snapPoint !== "closed") {
-      setSnapPoint("closed");
+    if (open && heightPx <= 0) {
+      setHeightPx(clampHeight(getInitialHeight()));
+    } else if (!open && heightPx !== 0) {
+      setHeightPx(0);
     }
-  }, [open, snapPoint, initialSnap]);
+  }, [clampHeight, getInitialHeight, heightPx, open]);
 
-  const handlePointerDown = useCallback((e: React.PointerEvent) => {
-    // Only drag from handle, not from content
-    const target = e.target as HTMLElement;
-    if (!target.closest("[data-sheet-handle]")) return;
+  useEffect(() => {
+    if (!open) return;
+    const handleResize = () => {
+      setHeightPx((currentHeight) => clampHeight(currentHeight));
+    };
+    window.addEventListener("resize", handleResize);
+    window.visualViewport?.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      window.visualViewport?.removeEventListener("resize", handleResize);
+    };
+  }, [clampHeight, open]);
 
-    setIsDragging(true);
-    setStartY(e.clientY);
-    setCurrentY(e.clientY);
-    e.currentTarget.setPointerCapture(e.pointerId);
-  }, []);
+  const handlePointerDown = useCallback(
+    (e: React.PointerEvent) => {
+      // Only drag from handle, not from content
+      const target = e.target as HTMLElement;
+      if (!target.closest("[data-sheet-handle]")) return;
+
+      setIsDragging(true);
+      setStartY(e.clientY);
+      setStartHeightPx(heightPx);
+      setLastDragDeltaY(0);
+      e.currentTarget.setPointerCapture(e.pointerId);
+    },
+    [heightPx],
+  );
 
   const handlePointerMove = useCallback(
     (e: React.PointerEvent) => {
       if (!isDragging) return;
-      setCurrentY(e.clientY);
+      const deltaY = e.clientY - startY;
+      setLastDragDeltaY(deltaY);
+      setHeightPx(clampHeight(startHeightPx - deltaY));
     },
-    [isDragging]
+    [clampHeight, isDragging, startHeightPx, startY],
   );
 
   const handlePointerUp = useCallback(
     (e: React.PointerEvent) => {
       if (!isDragging) return;
 
-      const deltaY = currentY - startY;
-      const threshold = 50; // px
+      const shouldClose = lastDragDeltaY > CLOSE_DRAG_THRESHOLD && heightPx <= getMinHeight() + 12;
 
-      // Determine new snap point based on drag direction
-      if (deltaY > threshold) {
-        // Dragged down
-        if (snapPoint === "expanded") {
-          setSnapPoint("half");
-        } else if (snapPoint === "half") {
-          setSnapPoint("compact");
-        } else if (snapPoint === "compact") {
-          setSnapPoint("closed");
-          onOpenChange(false);
-        }
-      } else if (deltaY < -threshold) {
-        // Dragged up
-        if (snapPoint === "compact") {
-          setSnapPoint("half");
-        } else if (snapPoint === "half") {
-          setSnapPoint("expanded");
-        }
+      if (shouldClose) {
+        setHeightPx(0);
+        onOpenChange(false);
+      } else {
+        setHeightPx((currentHeight) => clampHeight(currentHeight));
       }
 
       setIsDragging(false);
       e.currentTarget.releasePointerCapture(e.pointerId);
     },
-    [isDragging, currentY, startY, snapPoint, onOpenChange]
+    [clampHeight, getMinHeight, heightPx, isDragging, lastDragDeltaY, onOpenChange],
   );
 
   const handleClose = () => {
-    setSnapPoint("closed");
+    setHeightPx(0);
     onOpenChange(false);
   };
-
-  // Calculate transform during drag
-  const getDragTransform = () => {
-    if (!isDragging) return 0;
-    const delta = currentY - startY;
-    // Clamp to prevent dragging too far
-    return Math.max(-100, Math.min(200, delta));
-  };
-
-  const height = SNAP_HEIGHTS[snapPoint];
-  const transform = isDragging ? getDragTransform() : 0;
 
   return (
     <>
       {/* Backdrop */}
       <div
         className={`fixed inset-0 z-40 bg-black/20 backdrop-blur-[1px] transition-opacity duration-300 md:hidden ${
-          snapPoint !== "closed" ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
+          open && heightPx > 0 ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
         }`}
         onClick={handleClose}
       />
@@ -134,11 +150,10 @@ export function DraggableBottomSheet({
       <div
         ref={sheetRef}
         className={`fixed inset-x-0 bottom-0 z-50 flex flex-col rounded-t-3xl border-t bg-background shadow-2xl md:hidden ${
-          isDragging ? "" : "transition-all duration-300 ease-out"
+          isDragging ? "" : "transition-[height] duration-150 ease-out"
         }`}
         style={{
-          height: snapPoint === "closed" ? "0vh" : height,
-          transform: `translateY(${transform}px)`,
+          height: heightPx,
           touchAction: "none",
         }}
         onPointerDown={handlePointerDown}
