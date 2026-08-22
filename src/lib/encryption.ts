@@ -161,21 +161,39 @@ export class EncryptionService {
     }
   }
 
+  // Modified by ChatGPT Work — ENC-DOC-SECURE-DELIVERY-02
   /**
-   * Hash password for storage (SHA-256)
+   * Hash password for storage using PBKDF2 and a unique salt
    */
-  static async hashPassword(password: string): Promise<string> {
+  static async hashPassword(password: string, salt: string): Promise<string> {
     const encoder = new TextEncoder();
-    const data = encoder.encode(password);
-    const hash = await crypto.subtle.digest("SHA-256", data);
-    return this.arrayBufferToBase64(hash);
+    const saltBuffer = this.base64ToArrayBuffer(salt);
+    const passwordKey = await crypto.subtle.importKey(
+      "raw",
+      encoder.encode(password),
+      { name: "PBKDF2" },
+      false,
+      ["deriveBits"]
+    );
+    const derivedBits = await crypto.subtle.deriveBits(
+      {
+        name: "PBKDF2",
+        salt: new Uint8Array(saltBuffer) as any,
+        iterations: 10000,
+        hash: "SHA-256",
+      },
+      passwordKey,
+      256
+    );
+    return this.arrayBufferToBase64(derivedBits);
   }
 
+  // Modified by ChatGPT Work — ENC-DOC-SECURE-DELIVERY-02
   /**
-   * Verify password against hash
+   * Verify password against hash using the unique salt
    */
-  static async verifyPassword(password: string, hash: string): Promise<boolean> {
-    const computedHash = await this.hashPassword(password);
+  static async verifyPassword(password: string, hash: string, salt: string): Promise<boolean> {
+    const computedHash = await this.hashPassword(password, salt);
     return computedHash === hash;
   }
 

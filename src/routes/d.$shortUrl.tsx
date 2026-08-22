@@ -1,3 +1,4 @@
+// Modified by ChatGPT Work — ENC-DOC-SECURE-DELIVERY-02
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { getBrowserSupabaseClient } from "../lib/supabase/client";
@@ -10,17 +11,109 @@ import {
   Download,
   AlertTriangle,
   FileText,
-  Key,
   ShieldCheck,
   CheckCircle2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { EncryptionService } from "../lib/encryption";
+import { createServerFn } from "@tanstack/react-start";
+import { getPrivilegedSupabaseClient } from "../lib/supabase/server-privileged";
+import { getRequestHeader } from "@tanstack/react-start/server";
+
+// Modified by ChatGPT Work — ENC-DOC-SECURE-DELIVERY-02
+/**
+ * Server function to securely authorize a document download.
+ * Validates expiration, revocation, limits, and password server-side,
+ * then generates a short-lived signed URL for the client.
+ */
+export const authorizeDownloadFn = createServerFn()
+  .validator((d: { shortUrl: string; password?: string }) => d)
+  .handler(async ({ data }) => {
+    const { shortUrl, password } = data;
+    const supabase = getPrivilegedSupabaseClient();
+    
+    // Retrieve user-agent header securely on the server
+    let userAgent = "";
+    try {
+      userAgent = getRequestHeader("user-agent") || "";
+    } catch (e) {
+      console.warn("Could not retrieve user-agent header:", e);
+    }
+
+    // 1. Execute atomic check-and-increment RPC on DB
+    const { data: claimRows, error: rpcError } = await supabase
+      .rpc("authorize_and_claim_download", { p_short_url: shortUrl });
+
+    if (rpcError) {
+      console.error("Database authorization RPC error:", rpcError);
+      return { success: false, error: "SERVER_ERROR" };
+    }
+
+    const claim = Array.isArray(claimRows) ? claimRows[0] : claimRows;
+
+    if (!claim || !claim.success) {
+      return { success: false, error: claim?.error_message || "DOCUMENT_NOT_AVAILABLE" };
+    }
+
+    // 2. Password validation server-side (if password is required)
+    if (claim.password_hash) {
+      if (!password) {
+        // Compensate by decrementing download count
+        await supabase.rpc("decrement_document_downloads", { p_document_id: claim.id });
+        return { success: false, error: "PASSWORD_REQUIRED" };
+      }
+
+      const isValid = await EncryptionService.verifyPassword(password, claim.password_hash, claim.salt);
+      if (!isValid) {
+        // Compensate count
+        await supabase.rpc("decrement_document_downloads", { p_document_id: claim.id });
+        
+        // Log failed attempt
+        await supabase.rpc("log_document_access", {
+          p_document_id: claim.id,
+          p_success: false,
+          p_user_agent: userAgent
+        });
+
+        return { success: false, error: "INVALID_PASSWORD" };
+      }
+    }
+
+    // 3. Generate signed URL for private bucket (60 seconds TTL)
+    const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+      .from("encrypted-documents")
+      .createSignedUrl(claim.encrypted_file_path, 60);
+
+    if (signedUrlError || !signedUrlData) {
+      console.error("Storage signed URL generation error:", signedUrlError);
+      // Compensate count
+      await supabase.rpc("decrement_document_downloads", { p_document_id: claim.id });
+      return { success: false, error: "SIGNED_URL_FAILED" };
+    }
+
+    // 4. Log successful access
+    await supabase.rpc("log_document_access", {
+      p_document_id: claim.id,
+      p_success: true,
+      p_user_agent: userAgent
+    });
+
+    // 5. Return payload for client-side decryption (excluding password_hash)
+    return {
+      success: true,
+      signedUrl: signedUrlData.signedUrl,
+      iv: claim.iv,
+      salt: claim.salt,
+      originalFilename: claim.original_filename,
+      mimeType: claim.mime_type
+    };
+  });
 
 export const Route = createFileRoute("/d/$shortUrl")({
   component: PublicDownloadPage,
 });
 
+// Modified by ChatGPT Work — ENC-DOC-SECURE-DELIVERY-02
 function PublicDownloadPage() {
   const { shortUrl } = Route.useParams();
   const [loading, setLoading] = useState(true);
@@ -51,13 +144,16 @@ function PublicDownloadPage() {
         return;
       }
 
-      // Check expiration
+      if (docData.revoked) {
+        setError("Este documento seguro ha sido revocado y ya no está disponible.");
+        return;
+      }
+
       if (docData.expire_at && new Date(docData.expire_at) < new Date()) {
         setError("Este documento seguro ha expirado y ya no está disponible.");
         return;
       }
 
-      // Check download limit
       if (docData.max_downloads && docData.current_downloads >= docData.max_downloads) {
         setError("Este documento ha alcanzado el límite máximo de descargas permitido.");
         return;
@@ -76,97 +172,96 @@ function PublicDownloadPage() {
     e.preventDefault();
     if (!doc) return;
 
-    // Check password if required
-    if (doc.password_required) {
-      if (!password) {
-        toast.error("Por favor ingresa la contraseña");
-        return;
-      }
-
-      // Verify password hash
-      setDecrypting(true);
-      try {
-        const isValid = await EncryptionService.verifyPassword(password, doc.password_hash);
-        if (!isValid) {
-          toast.error("Contraseña incorrecta");
-          
-          // Log failed attempt via secure RPC
-          await supabase.rpc("log_document_access", {
-            p_document_id: doc.id,
-            p_success: false,
-            p_user_agent: navigator.userAgent
-          });
-
-          setDecrypting(false);
-          return;
-        }
-      } catch (err) {
-        console.error(err);
-        toast.error("Error al validar la contraseña");
-        setDecrypting(false);
-        return;
-      }
-    } else {
-      // If no password is required, the key must be in the URL hash
-      const keyFromHash = window.location.hash.substring(1);
-      if (!keyFromHash) {
-        toast.error("Enlace incompleto: Falta la clave de desencriptación en la URL.");
-        return;
-      }
+    if (doc.password_required && !password) {
+      toast.error("Por favor ingresa la contraseña");
+      return;
     }
 
     setDecrypting(true);
     try {
-      // 1. Download encrypted file from storage
-      const { data: fileBlob, error: downloadError } = await supabase.storage
-        .from("encrypted-documents")
-        .download(doc.encrypted_file_path);
+      // 1. Call server function to authorize and get signed URL
+      const payload: any = { shortUrl };
+      if (doc.password_required) {
+        payload.password = password;
+      }
+      const res = await authorizeDownloadFn({ data: payload });
 
-      if (downloadError) throw downloadError;
+      if (!res.success) {
+        if (res.error === "PASSWORD_REQUIRED") {
+          toast.error("Por favor ingresa la contraseña");
+        } else if (res.error === "INVALID_PASSWORD") {
+          toast.error("Contraseña incorrecta");
+        } else if (res.error === "DOCUMENT_REVOKED") {
+          setError("Este documento seguro ha sido revocado y ya no está disponible.");
+        } else if (res.error === "DOCUMENT_EXPIRED") {
+          setError("Este documento seguro ha expirado y ya no está disponible.");
+        } else if (res.error === "DOWNLOAD_LIMIT_REACHED") {
+          setError("Este documento ha alcanzado el límite máximo de descargas permitido.");
+        } else {
+          toast.error("Error al autorizar la descarga.");
+        }
+        setDecrypting(false);
+        return;
+      }
 
-      // 2. Convert Blob to ArrayBuffer
-      const encryptedBuffer = await fileBlob.arrayBuffer();
+      // 2. Fetch encrypted ciphertext binary using the signed URL
+      const fetchRes = await fetch(res.signedUrl);
+      if (!fetchRes.ok) {
+        throw new Error("Fallo al obtener el archivo del almacenamiento.");
+      }
+      const encryptedBuffer = await fetchRes.arrayBuffer();
 
-      // 3. Decrypt file client-side
-      const keyOrPassword = doc.password_required ? password : window.location.hash.substring(1);
+      // 3. Extract decryption key
+      let keyOrPassword = "";
+      if (doc.password_required) {
+        keyOrPassword = password;
+      } else {
+        // Read key from hash fragment (#key=...)
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        keyOrPassword = hashParams.get("key") || "";
+        if (!keyOrPassword) {
+          toast.error("Clave de descifrado no encontrada en el enlace.");
+          setDecrypting(false);
+          return;
+        }
+      }
+
+      // 4. Decrypt file client-side
       const decryptedBuffer = await EncryptionService.decryptFile(
         encryptedBuffer,
         keyOrPassword,
-        doc.iv,
-        doc.salt || undefined
+        res.iv,
+        res.salt || undefined
       );
 
-      // 4. Create decrypted file blob
-      const decryptedBlob = new Blob([decryptedBuffer], { type: doc.mime_type });
+      // 5. Create decrypted blob and trigger download
+      const decryptedBlob = new Blob([decryptedBuffer], { type: res.mimeType });
       const decryptedUrl = URL.createObjectURL(decryptedBlob);
 
-      // 5. Trigger download in browser
       const trigger = document.createElement("a");
       trigger.href = decryptedUrl;
-      trigger.download = doc.original_filename;
+      trigger.download = res.originalFilename;
       trigger.click();
       URL.revokeObjectURL(decryptedUrl);
 
-      // 6. Update download count in database securely via RPC
-      const newDownloads = (doc.current_downloads || 0) + 1;
-      await supabase.rpc("increment_document_downloads", { p_document_id: doc.id });
-
-      // 7. Log success access via secure RPC
-      await supabase.rpc("log_document_access", {
-        p_document_id: doc.id,
-        p_success: true,
-        p_user_agent: navigator.userAgent
-      });
-
       toast.success("Documento descargado y descifrado con éxito");
-      
-      // Update local state if one-time download or limit reached
-      if (doc.one_time_download || (doc.max_downloads && newDownloads >= doc.max_downloads)) {
-        setError("Este documento ha sido descargado y ya no está disponible.");
-      } else {
-        setDoc((prev: any) => ({ ...prev, current_downloads: newDownloads }));
+
+      // Optional hash cleanup for no-password files to clean browser URL address bar
+      if (!doc.password_required) {
+        try {
+          history.replaceState(null, "", window.location.pathname + window.location.search);
+        } catch (he) {
+          console.warn("Could not clean hash:", he);
+        }
       }
 
+      // Update local state if it's a one-time download or limit reached
+      const nextDownloads = (doc.current_downloads || 0) + 1;
+      if (doc.one_time_download || (doc.max_downloads && nextDownloads >= doc.max_downloads)) {
+        setError("Este documento ha sido descargado y ya no está disponible.");
+      } else {
+        setDoc((prev: any) => ({ ...prev, current_downloads: nextDownloads }));
+      }
     } catch (err: any) {
       console.error(err);
       toast.error("Error al descargar o descifrar el archivo: " + (err.message || "Error desconocido"));

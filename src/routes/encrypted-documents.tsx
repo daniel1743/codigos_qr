@@ -487,6 +487,12 @@ function DocumentsList({ userId, refreshTrigger, onUploadClick }: DocumentsListP
                 value={`${window.location.origin}/d/${selectedQrDoc.short_url}`}
                 className="bg-slate-50 font-mono text-[10px] select-all text-center h-10"
               />
+              {/* Modified by ChatGPT Work — ENC-DOC-SECURE-DELIVERY-02 */}
+              {!selectedQrDoc.password_required && (
+                <p className="text-[10px] text-amber-700 bg-amber-50/50 p-2 rounded-lg border border-amber-200/50 leading-relaxed text-left">
+                  ⚠️ **Atención:** Como este documento no tiene contraseña, quien reciba el QR necesitará el enlace original con el fragmento `#key=...` para descifrarlo.
+                </p>
+              )}
             </div>
 
             <div className="flex gap-2">
@@ -548,6 +554,8 @@ function CreateDocument({ userId, onSuccess }: CreateDocumentProps) {
   });
   const [uploading, setUploading] = useState(false);
   const [createdDoc, setCreatedDoc] = useState<any | null>(null);
+  // Modified by ChatGPT Work — ENC-DOC-SECURE-DELIVERY-02
+  const [generatedKey, setGeneratedKey] = useState<string | null>(null);
   
   const supabase = getBrowserSupabaseClient();
 
@@ -561,11 +569,14 @@ function CreateDocument({ userId, onSuccess }: CreateDocumentProps) {
     }
   };
 
+  // Modified by ChatGPT Work — ENC-DOC-SECURE-DELIVERY-02
   function generateShortUrl() {
     const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    const array = new Uint8Array(12);
+    crypto.getRandomValues(array);
     let result = "";
-    for (let i = 0; i < 8; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    for (let i = 0; i < array.length; i++) {
+      result += chars.charAt(array[i]! % chars.length);
     }
     return result;
   }
@@ -597,10 +608,11 @@ function CreateDocument({ userId, onSuccess }: CreateDocumentProps) {
 
       if (uploadError) throw uploadError;
 
-      // 4. Calculate password hash if provided
+      // 4. Calculate password hash if provided using unique salt (harden verify)
+      // Modified by ChatGPT Work — ENC-DOC-SECURE-DELIVERY-02
       let passwordHash = null;
-      if (formData.password) {
-        passwordHash = await EncryptionService.hashPassword(formData.password);
+      if (formData.password && encrypted.salt) {
+        passwordHash = await EncryptionService.hashPassword(formData.password, encrypted.salt);
       }
 
       // 5. Calculate expiration date
@@ -641,6 +653,13 @@ function CreateDocument({ userId, onSuccess }: CreateDocumentProps) {
 
       if (dbError) throw dbError;
 
+      // Modified by ChatGPT Work — ENC-DOC-SECURE-DELIVERY-02
+      if (!formData.password) {
+        setGeneratedKey(encrypted.key);
+      } else {
+        setGeneratedKey(null);
+      }
+
       toast.success("Documento encriptado y subido con éxito");
       setCreatedDoc(dbData);
     } catch (error: any) {
@@ -671,7 +690,8 @@ function CreateDocument({ userId, onSuccess }: CreateDocumentProps) {
   };
 
   if (createdDoc) {
-    const downloadUrl = `${window.location.origin}/d/${createdDoc.short_url}`;
+    // Modified by ChatGPT Work — ENC-DOC-SECURE-DELIVERY-02
+    const downloadUrl = `${window.location.origin}/d/${createdDoc.short_url}${generatedKey ? `#key=${generatedKey}` : ""}`;
     
     return (
       <div className="max-w-xl mx-auto rounded-xl border bg-white p-8 shadow-md text-center space-y-6 animate-fade-in">
@@ -713,6 +733,20 @@ function CreateDocument({ userId, onSuccess }: CreateDocumentProps) {
             </Button>
           </div>
         </div>
+
+        {/* Zero-Knowledge warning for no-password files */}
+        {/* Modified by ChatGPT Work — ENC-DOC-SECURE-DELIVERY-02 */}
+        {!createdDoc.password_required && (
+          <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs text-left max-w-md mx-auto space-y-1.5 shadow-sm">
+            <p className="font-bold flex items-center gap-1.5 text-amber-950">
+              <AlertTriangle className="w-4 h-4 text-amber-600" />
+              Guarda este enlace ahora
+            </p>
+            <p className="leading-relaxed text-amber-800">
+              Por seguridad (Zero-Knowledge), la clave de descifrado está integrada en el fragmento de la URL (`#key=...`) y no se guarda en nuestros servidores. Si cierras esta pantalla, no podrás recuperar el acceso al archivo.
+            </p>
+          </div>
+        )}
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
           <Button
