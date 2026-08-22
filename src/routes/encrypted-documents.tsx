@@ -7,7 +7,13 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Textarea } from "../components/ui/textarea";
 import { Switch } from "../components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select";
 import {
   Shield,
   Lock,
@@ -30,7 +36,40 @@ import {
   ShieldCheck,
   Key,
   X,
+  MoreVertical,
+  Ban,
+  RefreshCw,
+  Calendar as CalendarIcon,
+  Info,
+  Check,
+  Search,
+  ChevronDown,
 } from "lucide-react";
+import { Badge } from "../components/ui/badge";
+import { Progress } from "../components/ui/progress";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "../components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+} from "../components/ui/dropdown-menu";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "../components/ui/sheet";
 import { toast } from "sonner";
 import { EncryptionService } from "../lib/encryption";
 import {
@@ -89,9 +128,7 @@ function EncryptedDocumentsPage() {
               <Shield className="w-8 h-8 text-white" />
             </div>
             <h1 className="text-3xl font-bold tracking-tight">Documentos Encriptados</h1>
-            <p className="text-muted-foreground">
-              Comparte archivos de forma segura con un QR
-            </p>
+            <p className="text-muted-foreground">Comparte archivos de forma segura con un QR</p>
           </div>
           <Auth />
         </div>
@@ -213,7 +250,9 @@ function downloadPngFromSvgElement(elementId: string, filename: string) {
   if (!svg) return;
   const svgString = new XMLSerializer().serializeToString(svg);
   const image = new window.Image();
-  const svgUrl = URL.createObjectURL(new Blob([svgString], { type: "image/svg+xml;charset=utf-8" }));
+  const svgUrl = URL.createObjectURL(
+    new Blob([svgString], { type: "image/svg+xml;charset=utf-8" }),
+  );
   image.onload = () => {
     const canvas = document.createElement("canvas");
     canvas.width = image.width;
@@ -235,7 +274,27 @@ function downloadPngFromSvgElement(elementId: string, filename: string) {
 function EncryptedDocumentsApp({ userId }: { userId: string }) {
   const [view, setView] = useState<"list" | "create">("list");
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const [documentPasswords, setDocumentPasswords] = useState<Record<string, string>>({});
+  // Modified by Codex — ENC-DOC-COPY-PASSWORD-HOTFIX
+  const passwordStorageKey = `encrypted-document-passwords:${userId}`;
+  const [documentPasswords, setDocumentPasswords] = useState<Record<string, string>>(() => {
+    if (typeof window === "undefined") return {};
+    try {
+      const stored = window.localStorage.getItem(passwordStorageKey);
+      return stored ? JSON.parse(stored) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  // Modified by Codex — ENC-DOC-COPY-PASSWORD-HOTFIX
+  const persistDocumentPasswords = (nextPasswords: Record<string, string>) => {
+    if (typeof window === "undefined") return;
+    try {
+      window.localStorage.setItem(passwordStorageKey, JSON.stringify(nextPasswords));
+    } catch (error) {
+      console.warn("No se pudieron guardar localmente las contraseñas de documentos", error);
+    }
+  };
 
   const handleDocumentCreated = () => {
     setView("list");
@@ -243,55 +302,70 @@ function EncryptedDocumentsApp({ userId }: { userId: string }) {
   };
 
   const handlePasswordCaptured = (documentId: string, password: string) => {
-    setDocumentPasswords((prev) => ({ ...prev, [documentId]: password }));
+    setDocumentPasswords((prev) => {
+      const next = { ...prev, [documentId]: password };
+      persistDocumentPasswords(next);
+      return next;
+    });
   };
 
   const handleDocumentDeleted = (documentId: string) => {
     setDocumentPasswords((prev) => {
       const next = { ...prev };
       delete next[documentId];
+      persistDocumentPasswords(next);
       return next;
     });
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50">
+    <div className="min-h-screen max-w-[100vw] overflow-x-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50">
       {/* Header */}
       <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link to="/editor" className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
-                ← Volver al editor
+        <div className="mx-auto w-full max-w-7xl px-3 py-3 sm:px-4 sm:py-4">
+          <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 items-center gap-2 sm:gap-4">
+              <Link
+                to="/editor"
+                className="flex min-h-11 shrink-0 items-center gap-1 rounded-lg px-1 text-xs text-muted-foreground transition-colors hover:text-foreground sm:text-sm"
+              >
+                ← <span className="hidden sm:inline">Volver al editor</span>
+                <span className="sm:hidden">Volver</span>
               </Link>
-              <div className="h-6 w-px bg-border" />
-              <div className="flex items-center gap-2">
-                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-600 shadow-md">
-                  <Shield className="w-5 h-5 text-white" />
+              <div className="h-6 w-px bg-border hidden sm:block" />
+              <div className="flex min-w-0 items-center gap-2">
+                <div className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-600 shadow-md shrink-0">
+                  <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </div>
-                <div>
-                  <h1 className="text-lg font-bold tracking-tight">Documentos Encriptados</h1>
-                  <p className="text-xs text-muted-foreground">Máxima seguridad</p>
+                <div className="min-w-0">
+                  <h1 className="truncate text-sm font-bold tracking-tight sm:text-lg">
+                    Documentos Encriptados
+                  </h1>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground hidden sm:block">
+                    Máxima seguridad
+                  </p>
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:shrink-0 sm:items-center">
               <Button
                 variant={view === "list" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setView("list")}
+                className="min-h-11 px-2 text-xs sm:h-9 sm:min-h-0 sm:px-3 sm:text-sm"
               >
-                <FileText className="w-4 h-4 mr-2" />
-                Mis Documentos
+                <FileText className="w-4 h-4 sm:mr-2" />
+                <span className="ml-1 sm:ml-0">Mis Documentos</span>
               </Button>
               <Button
                 variant={view === "create" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setView("create")}
+                className="min-h-11 px-2 text-xs sm:h-9 sm:min-h-0 sm:px-3 sm:text-sm"
               >
-                <Upload className="w-4 h-4 mr-2" />
-                Crear Nuevo
+                <Upload className="w-4 h-4 sm:mr-2" />
+                <span className="ml-1 sm:ml-0">Crear Nuevo</span>
               </Button>
             </div>
           </div>
@@ -299,13 +373,14 @@ function EncryptedDocumentsApp({ userId }: { userId: string }) {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="mx-auto w-full max-w-7xl overflow-x-hidden px-3 py-4 sm:px-4 sm:py-8">
         {view === "list" ? (
           <DocumentsList
             userId={userId}
             refreshTrigger={refreshTrigger}
             onUploadClick={() => setView("create")}
             documentPasswords={documentPasswords}
+            onPasswordCaptured={handlePasswordCaptured}
             onDocumentDeleted={handleDocumentDeleted}
           />
         ) : (
@@ -325,6 +400,7 @@ interface DocumentsListProps {
   refreshTrigger: number;
   onUploadClick: () => void;
   documentPasswords: Record<string, string>;
+  onPasswordCaptured: (documentId: string, password: string) => void;
   onDocumentDeleted: (documentId: string) => void;
 }
 
@@ -333,6 +409,7 @@ function DocumentsList({
   refreshTrigger,
   onUploadClick,
   documentPasswords,
+  onPasswordCaptured,
   onDocumentDeleted,
 }: DocumentsListProps) {
   const [documents, setDocuments] = useState<any[]>([]);
@@ -341,9 +418,40 @@ function DocumentsList({
   const [failedCount, setFailedCount] = useState(0);
   const supabase = getBrowserSupabaseClient();
 
+  // Search, filter, and sorting states
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | "active" | "revoked" | "expired" | "limit_reached"
+  >("all");
+  const [securityFilter, setSecurityFilter] = useState<"all" | "password" | "no_password">("all");
+  const [sortBy, setSortBy] = useState<"recent" | "oldest" | "access" | "expiration">("recent");
+
+  // Control modals states
+  const [selectedLimitDoc, setSelectedLimitDoc] = useState<any | null>(null);
+  const [limitMaxDownloads, setLimitMaxDownloads] = useState<string>("");
+  const [limitOneTime, setLimitOneTime] = useState<boolean>(false);
+
+  const [selectedExpirationDoc, setSelectedExpirationDoc] = useState<any | null>(null);
+  const [expirationOption, setExpirationOption] = useState<string>("never");
+  const [expirationCustomDate, setExpirationCustomDate] = useState<string>("");
+
+  const [selectedActivityDoc, setSelectedActivityDoc] = useState<any | null>(null);
+  const [activityLogs, setActivityLogs] = useState<any[]>([]);
+  const [loadingActivity, setLoadingActivity] = useState(false);
+
+  const [mutatingDocId, setMutatingDocId] = useState<string | null>(null);
+
   useEffect(() => {
     fetchDocumentsAndStats();
   }, [userId, refreshTrigger]);
+
+  useEffect(() => {
+    if (selectedActivityDoc) {
+      fetchActivityLogs(selectedActivityDoc.id);
+    } else {
+      setActivityLogs([]);
+    }
+  }, [selectedActivityDoc]);
 
   const fetchDocumentsAndStats = async () => {
     setLoading(true);
@@ -379,11 +487,232 @@ function DocumentsList({
     }
   };
 
-  const handleDelete = async (id: string, filePath: string) => {
-    if (!confirm("¿Estás seguro de que deseas eliminar este documento de forma permanente? Esta acción no se puede deshacer.")) {
+  const fetchActivityLogs = async (docId: string) => {
+    setLoadingActivity(true);
+    try {
+      const { data, error } = await supabase
+        .from("document_access_logs")
+        .select("*")
+        .eq("document_id", docId)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setActivityLogs(data || []);
+    } catch (err) {
+      console.error(err);
+      toast.error("Error al cargar el historial de actividad");
+    } finally {
+      setLoadingActivity(false);
+    }
+  };
+
+  const handleToggleRevoked = async (doc: any) => {
+    setMutatingDocId(doc.id);
+    const newRevoked = !doc.revoked;
+    try {
+      if (newRevoked) {
+        const ok = window.confirm(
+          "¿Estás seguro de que deseas revocar el acceso a este documento? Ningún destinatario podrá descargarlo a partir de ahora.",
+        );
+        if (!ok) {
+          setMutatingDocId(null);
+          return;
+        }
+      }
+      const { error } = await supabase
+        .from("encrypted_documents")
+        .update({
+          revoked: newRevoked,
+          revoked_at: newRevoked ? new Date().toISOString() : null,
+        })
+        .eq("id", doc.id);
+
+      if (error) throw error;
+
+      setDocuments((prev) =>
+        prev.map((d) =>
+          d.id === doc.id
+            ? {
+                ...d,
+                revoked: newRevoked,
+                revoked_at: newRevoked ? new Date().toISOString() : null,
+              }
+            : d,
+        ),
+      );
+      toast.success(
+        newRevoked ? "Acceso revocado correctamente" : "Acceso reactivado correctamente",
+      );
+    } catch (err) {
+      console.error(err);
+      toast.error("Error al actualizar el estado de revocación");
+    } finally {
+      setMutatingDocId(null);
+    }
+  };
+
+  const handleToggleOneTime = async (doc: any) => {
+    setMutatingDocId(doc.id);
+    const newValue = !doc.one_time_download;
+
+    if (newValue && doc.current_downloads >= 1) {
+      const ok = window.confirm(
+        `Este documento ya tiene ${doc.current_downloads} accesos autorizados. Si activas la descarga única, quedará bloqueado de inmediato para futuros accesos. ¿Deseas continuar?`,
+      );
+      if (!ok) {
+        setMutatingDocId(null);
+        return;
+      }
+    }
+
+    try {
+      const { error } = await supabase
+        .from("encrypted_documents")
+        .update({ one_time_download: newValue })
+        .eq("id", doc.id);
+
+      if (error) throw error;
+
+      setDocuments((prev) =>
+        prev.map((d) => (d.id === doc.id ? { ...d, one_time_download: newValue } : d)),
+      );
+      toast.success(newValue ? "Descarga única activada" : "Descarga única desactivada");
+    } catch (err) {
+      console.error(err);
+      toast.error("Error al actualizar configuración de descarga única");
+    } finally {
+      setMutatingDocId(null);
+    }
+  };
+
+  const openLimitModal = (doc: any) => {
+    setSelectedLimitDoc(doc);
+    setLimitMaxDownloads(doc.max_downloads ? doc.max_downloads.toString() : "");
+    setLimitOneTime(doc.one_time_download || false);
+  };
+
+  const handleSaveLimits = async () => {
+    if (!selectedLimitDoc) return;
+    const newMaxDownloads = limitMaxDownloads.trim() === "" ? null : parseInt(limitMaxDownloads);
+
+    if (newMaxDownloads !== null && isNaN(newMaxDownloads)) {
+      toast.error("Por favor ingresa un número válido");
       return;
     }
 
+    if (newMaxDownloads !== null && newMaxDownloads < selectedLimitDoc.current_downloads) {
+      const ok = window.confirm(
+        `Este documento ya tiene ${selectedLimitDoc.current_downloads} accesos autorizados. Si reduces el límite a ${newMaxDownloads}, quedará bloqueado inmediatamente para nuevos accesos. ¿Deseas continuar?`,
+      );
+      if (!ok) return;
+    }
+
+    setMutatingDocId(selectedLimitDoc.id);
+    try {
+      const { error } = await supabase
+        .from("encrypted_documents")
+        .update({
+          max_downloads: newMaxDownloads,
+          one_time_download: limitOneTime,
+        })
+        .eq("id", selectedLimitDoc.id);
+
+      if (error) throw error;
+
+      setDocuments((prev) =>
+        prev.map((d) =>
+          d.id === selectedLimitDoc.id
+            ? { ...d, max_downloads: newMaxDownloads, one_time_download: limitOneTime }
+            : d,
+        ),
+      );
+      toast.success("Límites de descarga actualizados");
+      setSelectedLimitDoc(null);
+    } catch (err) {
+      console.error(err);
+      toast.error("Error al actualizar límites");
+    } finally {
+      setMutatingDocId(null);
+    }
+  };
+
+  const openExpirationModal = (doc: any) => {
+    setSelectedExpirationDoc(doc);
+    if (!doc.expire_at) {
+      setExpirationOption("never");
+      setExpirationCustomDate("");
+    } else {
+      setExpirationOption("custom");
+      // Format to datetime-local input format (YYYY-MM-DDThh:mm)
+      const date = new Date(doc.expire_at);
+      const tzOffset = date.getTimezoneOffset() * 60000;
+      const localISOTime = new Date(date.getTime() - tzOffset).toISOString().slice(0, 16);
+      setExpirationCustomDate(localISOTime);
+    }
+  };
+
+  const handleSaveExpiration = async () => {
+    if (!selectedExpirationDoc) return;
+    let newExpireAt: string | null = null;
+
+    if (expirationOption !== "never") {
+      const now = new Date();
+      if (expirationOption === "1h") {
+        now.setHours(now.getHours() + 1);
+        newExpireAt = now.toISOString();
+      } else if (expirationOption === "6h") {
+        now.setHours(now.getHours() + 6);
+        newExpireAt = now.toISOString();
+      } else if (expirationOption === "24h") {
+        now.setHours(now.getHours() + 24);
+        newExpireAt = now.toISOString();
+      } else if (expirationOption === "3d") {
+        now.setDate(now.getDate() + 3);
+        newExpireAt = now.toISOString();
+      } else if (expirationOption === "7d") {
+        now.setDate(now.getDate() + 7);
+        newExpireAt = now.toISOString();
+      } else if (expirationOption === "custom") {
+        if (!expirationCustomDate) {
+          toast.error("Por favor selecciona una fecha personalizada");
+          return;
+        }
+        newExpireAt = new Date(expirationCustomDate).toISOString();
+      }
+    }
+
+    setMutatingDocId(selectedExpirationDoc.id);
+    try {
+      const { error } = await supabase
+        .from("encrypted_documents")
+        .update({ expire_at: newExpireAt })
+        .eq("id", selectedExpirationDoc.id);
+
+      if (error) throw error;
+
+      setDocuments((prev) =>
+        prev.map((d) => (d.id === selectedExpirationDoc.id ? { ...d, expire_at: newExpireAt } : d)),
+      );
+      toast.success("Fecha de expiración actualizada");
+      setSelectedExpirationDoc(null);
+    } catch (err) {
+      console.error(err);
+      toast.error("Error al actualizar la expiración");
+    } finally {
+      setMutatingDocId(null);
+    }
+  };
+
+  const handleDelete = async (id: string, filePath: string) => {
+    if (
+      !confirm(
+        "¿Estás seguro de que deseas eliminar este documento de forma permanente? Se borrarán de forma definitiva el archivo cifrado y todos sus logs de acceso. Esta acción no se puede deshacer.",
+      )
+    ) {
+      return;
+    }
+
+    setMutatingDocId(id);
     try {
       // Delete from storage
       const { error: storageError } = await supabase.storage
@@ -395,10 +724,7 @@ function DocumentsList({
       }
 
       // Delete from DB (cascade deletes access logs)
-      const { error: dbError } = await supabase
-        .from("encrypted_documents")
-        .delete()
-        .eq("id", id);
+      const { error: dbError } = await supabase.from("encrypted_documents").delete().eq("id", id);
 
       if (dbError) throw dbError;
 
@@ -408,76 +734,203 @@ function DocumentsList({
     } catch (e) {
       console.error(e);
       toast.error("Error al eliminar el documento");
+    } finally {
+      setMutatingDocId(null);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center p-12">
-        <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent" />
-      </div>
+  // Modified by Codex — ENC-DOC-COPY-PASSWORD-HOTFIX
+  const handleCopyPasswordAction = (doc: any, currentPassword?: string) => {
+    if (!doc.password_required) {
+      toast.info("Este documento no usa contraseña");
+      return;
+    }
+
+    if (currentPassword) {
+      navigator.clipboard.writeText(currentPassword);
+      toast.success("Contraseña copiada");
+      return;
+    }
+
+    const password = window.prompt(
+      "Esta contraseña no está guardada en este navegador. Pégala una vez para guardarla localmente y copiarla.",
     );
-  }
+    if (!password) return;
+
+    onPasswordCaptured(doc.id, password);
+    navigator.clipboard.writeText(password);
+    toast.success("Contraseña guardada localmente y copiada");
+  };
 
   // Calculate statistics
   const activeDocs = documents.filter((doc) => {
     const isExpired = doc.expire_at && new Date(doc.expire_at) < new Date();
     const isLimitReached = doc.max_downloads && doc.current_downloads >= doc.max_downloads;
-    return !isExpired && !isLimitReached;
+    return !doc.revoked && !isExpired && !isLimitReached;
   }).length;
 
   const totalDownloads = documents.reduce((sum, doc) => sum + (doc.current_downloads || 0), 0);
 
+  // Client-side filtering and sorting
+  const filteredDocuments = documents
+    .filter((doc) => {
+      // 1. Search term
+      const search = searchTerm.toLowerCase().trim();
+      if (search) {
+        const matchesName = (doc.name || "").toLowerCase().includes(search);
+        const matchesFilename = (doc.original_filename || "").toLowerCase().includes(search);
+        const matchesType = (doc.file_type || "").toLowerCase().includes(search);
+        if (!matchesName && !matchesFilename && !matchesType) return false;
+      }
+
+      // 2. Status filter
+      const isExpired = doc.expire_at && new Date(doc.expire_at) < new Date();
+      const isLimitReached = doc.max_downloads && doc.current_downloads >= doc.max_downloads;
+
+      let status: "active" | "revoked" | "expired" | "limit_reached" = "active";
+      if (doc.revoked) status = "revoked";
+      else if (isExpired) status = "expired";
+      else if (isLimitReached) status = "limit_reached";
+
+      if (statusFilter !== "all" && statusFilter !== status) return false;
+
+      // 3. Security filter
+      if (securityFilter === "password" && !doc.password_required) return false;
+      if (securityFilter === "no_password" && doc.password_required) return false;
+
+      return true;
+    })
+    .sort((a, b) => {
+      if (sortBy === "recent") {
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      }
+      if (sortBy === "oldest") {
+        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+      }
+      if (sortBy === "access") {
+        return (b.current_downloads || 0) - (a.current_downloads || 0);
+      }
+      if (sortBy === "expiration") {
+        if (!a.expire_at) return 1;
+        if (!b.expire_at) return -1;
+        return new Date(a.expire_at).getTime() - new Date(b.expire_at).getTime();
+      }
+      return 0;
+    });
+
   return (
-    <div className="space-y-6">
+    <div className="w-full max-w-full space-y-6 overflow-x-hidden">
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="rounded-xl border bg-white p-6 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-blue-100">
-              <FileText className="w-6 h-6 text-blue-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold">{activeDocs}</p>
-              <p className="text-xs text-muted-foreground">Documentos Activos</p>
-            </div>
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+        <div className="flex min-w-0 items-center gap-2 rounded-xl border bg-card p-3 shadow-sm sm:gap-4 sm:p-5">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 sm:h-12 sm:w-12">
+            <FileText className="h-5 w-5 sm:h-6 sm:w-6" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-xl font-bold tracking-tight sm:text-2xl">{activeDocs}</p>
+            <p className="break-words text-[11px] font-medium leading-tight text-muted-foreground sm:text-xs">
+              Documentos Activos
+            </p>
           </div>
         </div>
 
-        <div className="rounded-xl border bg-white p-6 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-green-100">
-              <Download className="w-6 h-6 text-green-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold">{totalDownloads}</p>
-              <p className="text-xs text-muted-foreground">Descargas Totales</p>
-            </div>
+        <div className="flex min-w-0 items-center gap-2 rounded-xl border bg-card p-3 shadow-sm sm:gap-4 sm:p-5">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-50 text-green-600 dark:bg-green-950/30 dark:text-green-400 sm:h-12 sm:w-12">
+            <Download className="h-5 w-5 sm:h-6 sm:w-6" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-xl font-bold tracking-tight sm:text-2xl">{totalDownloads}</p>
+            <p
+              className="break-words text-[11px] font-medium leading-tight text-muted-foreground sm:text-xs"
+              title="Suma de current_downloads (Accesos autorizados por el servidor)"
+            >
+              Accesos Autorizados
+            </p>
           </div>
         </div>
 
-        <div className="rounded-xl border bg-white p-6 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-purple-100">
-              <ShieldCheck className="w-6 h-6 text-purple-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold">{documents.length}</p>
-              <p className="text-xs text-muted-foreground">Accesos Seguros</p>
-            </div>
+        <div className="flex min-w-0 items-center gap-2 rounded-xl border bg-card p-3 shadow-sm sm:gap-4 sm:p-5">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-950/30 dark:text-purple-400 sm:h-12 sm:w-12">
+            <ShieldCheck className="h-5 w-5 sm:h-6 sm:w-6" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-xl font-bold tracking-tight sm:text-2xl">{documents.length}</p>
+            <p className="break-words text-[11px] font-medium leading-tight text-muted-foreground sm:text-xs">
+              Documentos Protegidos
+            </p>
           </div>
         </div>
 
-        <div className="rounded-xl border bg-white p-6 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-red-100">
-              <AlertTriangle className="w-6 h-6 text-red-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold">{failedCount}</p>
-              <p className="text-xs text-muted-foreground">Intentos Bloqueados</p>
-            </div>
+        <div className="flex min-w-0 items-center gap-2 rounded-xl border bg-card p-3 shadow-sm sm:gap-4 sm:p-5">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400 sm:h-12 sm:w-12">
+            <AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6" />
           </div>
+          <div className="min-w-0">
+            <p className="text-xl font-bold tracking-tight sm:text-2xl">{failedCount}</p>
+            <p
+              className="break-words text-[11px] font-medium leading-tight text-muted-foreground sm:text-xs"
+              title="Suma de logs fallidos (Intentos con contraseña incorrecta o bloqueos)"
+            >
+              Intentos Bloqueados
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Control panel and filters */}
+      <div className="flex flex-col gap-3 bg-card p-3 sm:p-4 rounded-xl border shadow-sm">
+        <div className="flex flex-col sm:flex-row gap-2">
+          <div className="relative flex-1 min-w-0">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Buscar por nombre o archivo..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-9 h-10 w-full"
+            />
+          </div>
+          <div className="grid grid-cols-2 sm:flex gap-2">
+            <Select value={statusFilter} onValueChange={(v: any) => setStatusFilter(v)}>
+              <SelectTrigger className="w-full sm:w-[160px] h-10">
+                <SelectValue placeholder="Estado" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos los estados</SelectItem>
+                <SelectItem value="active">Activos</SelectItem>
+                <SelectItem value="revoked">Revocados</SelectItem>
+                <SelectItem value="expired">Expirados</SelectItem>
+                <SelectItem value="limit_reached">Límite alcanzado</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={securityFilter} onValueChange={(v: any) => setSecurityFilter(v)}>
+              <SelectTrigger className="w-full sm:w-[160px] h-10">
+                <SelectValue placeholder="Seguridad" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Cualquier seguridad</SelectItem>
+                <SelectItem value="password">Con contraseña</SelectItem>
+                <SelectItem value="no_password">Sin contraseña</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <div className="flex min-w-0 gap-2">
+          <Select value={sortBy} onValueChange={(v: any) => setSortBy(v)}>
+            <SelectTrigger className="flex-1 sm:flex-none sm:w-[150px] h-10">
+              <SelectValue placeholder="Ordenar por" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="recent">Más recientes</SelectItem>
+              <SelectItem value="oldest">Más antiguos</SelectItem>
+              <SelectItem value="access">Más accesos</SelectItem>
+              <SelectItem value="expiration">Expiración</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button size="sm" onClick={onUploadClick} className="h-10 shrink-0 px-3 sm:px-4">
+            <Upload className="w-4 h-4 sm:mr-2" />
+            <span className="hidden sm:inline">Subir Nuevo</span>
+          </Button>
         </div>
       </div>
 
@@ -496,156 +949,459 @@ function DocumentsList({
             Subir Primer Documento
           </Button>
         </div>
+      ) : filteredDocuments.length === 0 ? (
+        /* No results empty state */
+        <div className="rounded-xl border bg-card p-12 text-center shadow-sm">
+          <p className="text-muted-foreground">
+            No se encontraron documentos con los filtros seleccionados.
+          </p>
+        </div>
       ) : (
-        /* Documents Grid / Table */
-        <div className="rounded-xl border bg-white overflow-hidden shadow-sm">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-50 border-b text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  <th className="p-4">Documento</th>
-                  <th className="p-4">Seguridad</th>
-                  <th className="p-4">Expiración</th>
-                  <th className="p-4">Descargas</th>
-                  <th className="p-4 text-right">Acciones</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y text-sm">
-                {documents.map((doc) => {
-                  const isExpired = doc.expire_at && new Date(doc.expire_at) < new Date();
-                  const isLimitReached = doc.max_downloads && doc.current_downloads >= doc.max_downloads;
-                  const isLinkActive = !isExpired && !isLimitReached;
-                  const sessionPassword = documentPasswords[doc.id];
-                  
-                  return (
-                    <tr key={doc.id} className="hover:bg-slate-50/50">
-                      <td className="p-4 flex items-center gap-3">
-                        <div
-                          className="shrink-0 p-2 border rounded-lg"
-                          style={{ backgroundColor: getFileTypeQrTheme(normalizeDocumentCategory(doc.file_type)).accentBackground }}
-                        >
-                          <FileTypeIcon fileType={doc.file_type} />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="font-semibold text-foreground truncate max-w-[240px]">{doc.name}</p>
-                          <p className="text-xs text-muted-foreground truncate max-w-[240px]">
-                            {doc.original_filename} • {EncryptionService.formatFileSize(doc.file_size_bytes)}
-                          </p>
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <div className="flex flex-col gap-1">
-                          <span className={`inline-flex items-center gap-1 text-xs font-medium ${
-                            doc.encryption_level === "maximum" ? "text-red-600" : doc.encryption_level === "high" ? "text-purple-600" : "text-blue-600"
-                          }`}>
-                            <Lock className="w-3.5 h-3.5" />
-                            {doc.encryption_level === "maximum" ? "Máximo (2FA)" : doc.encryption_level === "high" ? "Alto" : "Estándar"}
-                          </span>
-                          {doc.password_required && (
-                            <span className="text-[10px] text-amber-600 font-semibold">🔒 Con Contraseña</span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        {doc.expire_at ? (
+        <>
+          {/* Desktop Table View */}
+          <div className="hidden md:block rounded-xl border bg-card overflow-hidden shadow-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-muted/40 border-b text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    <th className="p-4">Documento</th>
+                    <th className="p-4">Estado</th>
+                    <th className="p-4">Seguridad</th>
+                    <th className="p-4">Actividad</th>
+                    <th className="p-4">Límite</th>
+                    <th className="p-4">Expiración</th>
+                    <th className="p-4">Último Acceso</th>
+                    <th className="p-4 text-right">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y text-sm">
+                  {filteredDocuments.map((doc) => {
+                    const isExpired = doc.expire_at && new Date(doc.expire_at) < new Date();
+                    const isLimitReached =
+                      doc.max_downloads && doc.current_downloads >= doc.max_downloads;
+                    const sessionPassword = documentPasswords[doc.id];
+                    const isMutating = mutatingDocId === doc.id;
+
+                    let statusLabel = "Activo";
+                    const statusVariant: "default" | "secondary" | "destructive" | "outline" =
+                      "default";
+                    let statusClass =
+                      "bg-green-50 text-green-700 border-green-200 dark:bg-green-950/20 dark:text-green-400 dark:border-green-900/30";
+
+                    if (doc.revoked) {
+                      statusLabel = "Revocado";
+                      statusClass =
+                        "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/20 dark:text-red-400 dark:border-red-900/30";
+                    } else if (isExpired) {
+                      statusLabel = "Expirado";
+                      statusClass =
+                        "bg-slate-100 text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700";
+                    } else if (isLimitReached) {
+                      statusLabel = "Límite Alcanzado";
+                      statusClass =
+                        "bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-950/20 dark:text-orange-400 dark:border-orange-900/30";
+                    }
+
+                    // Progress bar values
+                    const limitVal = doc.max_downloads || 0;
+                    const progressVal =
+                      limitVal > 0
+                        ? Math.min(100, Math.round((doc.current_downloads / limitVal) * 100))
+                        : 0;
+
+                    return (
+                      <tr
+                        key={doc.id}
+                        className={`hover:bg-muted/30 transition-colors ${isMutating ? "opacity-50 pointer-events-none" : ""}`}
+                      >
+                        <td className="p-4 flex items-center gap-3">
+                          <div
+                            className="shrink-0 p-2 border rounded-lg"
+                            style={{
+                              backgroundColor: getFileTypeQrTheme(
+                                normalizeDocumentCategory(doc.file_type),
+                              ).accentBackground,
+                            }}
+                          >
+                            <FileTypeIcon fileType={doc.file_type} />
+                          </div>
+                          <div className="min-w-0">
+                            <p
+                              className="font-semibold text-foreground truncate max-w-[200px]"
+                              title={doc.name}
+                            >
+                              {doc.name}
+                            </p>
+                            <p
+                              className="text-[11px] text-muted-foreground truncate max-w-[200px]"
+                              title={doc.original_filename}
+                            >
+                              {doc.original_filename} •{" "}
+                              {EncryptionService.formatFileSize(doc.file_size_bytes)}
+                            </p>
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <Badge
+                            variant="outline"
+                            className={`font-semibold text-xs border uppercase tracking-wider rounded-full px-2.5 py-0.5 ${statusClass}`}
+                          >
+                            {statusLabel}
+                          </Badge>
+                        </td>
+                        <td className="p-4">
+                          <div className="flex flex-col gap-0.5">
+                            <span
+                              className={`inline-flex items-center gap-1 text-[11px] font-medium ${
+                                doc.encryption_level === "maximum"
+                                  ? "text-red-600 dark:text-red-400"
+                                  : doc.encryption_level === "high"
+                                    ? "text-purple-600 dark:text-purple-400"
+                                    : "text-blue-600 dark:text-blue-400"
+                              }`}
+                            >
+                              <Lock className="w-3 h-3" />
+                              {doc.encryption_level === "maximum"
+                                ? "Máximo (2FA)"
+                                : doc.encryption_level === "high"
+                                  ? "Alto"
+                                  : "Estándar"}
+                            </span>
+                            {doc.password_required ? (
+                              <span className="text-[9px] text-amber-600 dark:text-amber-400 font-bold uppercase tracking-wider">
+                                🔒 Con Contraseña
+                              </span>
+                            ) : (
+                              <span className="text-[9px] text-muted-foreground font-medium uppercase tracking-wider">
+                                🔓 Sin Contraseña
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="p-4">
                           <div className="flex flex-col">
-                            <span className={`text-xs ${isExpired ? "text-red-500 font-medium" : "text-foreground"}`}>
-                              {new Date(doc.expire_at).toLocaleDateString()}
+                            <span className="text-xs font-semibold text-foreground">
+                              {doc.current_downloads} accesos
                             </span>
                             <span className="text-[10px] text-muted-foreground">
-                              {isExpired ? "Expirado" : new Date(doc.expire_at).toLocaleTimeString()}
+                              0 intentos bloqueados
                             </span>
                           </div>
-                        ) : (
-                          <span className="text-xs text-muted-foreground">Nunca expira</span>
-                        )}
-                      </td>
-                      <td className="p-4">
-                        <div className="flex flex-col">
-                          <span className={`text-xs font-medium ${isLimitReached ? "text-red-500" : "text-foreground"}`}>
-                            {doc.current_downloads} / {doc.max_downloads || "∞"}
-                          </span>
-                          {doc.one_time_download && (
-                            <span className="text-[10px] text-orange-600 font-semibold">Un solo uso</span>
+                        </td>
+                        <td className="p-4">
+                          <div className="flex flex-col gap-1 w-24">
+                            <span className="text-[11px] font-medium text-foreground">
+                              {doc.current_downloads} / {limitVal || "∞"}
+                            </span>
+                            {limitVal > 0 ? (
+                              <Progress
+                                value={progressVal}
+                                className={`h-1.5 ${isLimitReached ? "[&>div]:bg-red-500" : ""}`}
+                              />
+                            ) : (
+                              <div className="h-1.5 w-full bg-slate-100 rounded-full dark:bg-slate-800" />
+                            )}
+                            {doc.one_time_download && (
+                              <span className="text-[9px] text-orange-600 dark:text-orange-400 font-bold uppercase tracking-wider">
+                                Un solo uso
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          {doc.expire_at ? (
+                            <div className="flex flex-col">
+                              <span
+                                className={`text-xs ${isExpired ? "text-red-500 font-medium" : "text-foreground"}`}
+                              >
+                                {new Date(doc.expire_at).toLocaleDateString()}
+                              </span>
+                              <span className="text-[10px] text-muted-foreground">
+                                {isExpired
+                                  ? "Expiró"
+                                  : new Date(doc.expire_at).toLocaleTimeString([], {
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                    })}
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">Nunca expira</span>
                           )}
-                        </div>
-                      </td>
-                      <td className="p-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            disabled={!isLinkActive}
-                            onClick={() => {
-                              const url = `${window.location.origin}/d/${doc.short_url}`;
-                              navigator.clipboard.writeText(url);
-                              toast.success("Enlace copiado al portapapeles");
-                            }}
-                            title="Copiar Enlace"
-                          >
-                            <Copy className="w-3.5 h-3.5" />
-                          </Button>
-                          {doc.password_required && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              disabled={!sessionPassword}
-                              onClick={() => {
-                                if (!sessionPassword) return;
-                                navigator.clipboard.writeText(sessionPassword);
-                                toast.success("Contraseña copiada al portapapeles");
-                              }}
-                              title={sessionPassword ? "Copiar Contraseña" : "Contraseña no disponible en esta sesión"}
+                        </td>
+                        <td className="p-4">
+                          {doc.last_accessed_at ? (
+                            <div className="flex flex-col">
+                              <span className="text-xs text-foreground">
+                                {new Date(doc.last_accessed_at).toLocaleDateString()}
+                              </span>
+                              <span className="text-[10px] text-muted-foreground">
+                                {new Date(doc.last_accessed_at).toLocaleTimeString([], {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">Nunca accedido</span>
+                          )}
+                        </td>
+                        <td className="p-4 text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                              align="end"
+                              className="w-[calc(100vw-24px)] max-w-72 md:w-56"
                             >
-                              <Key className="w-3.5 h-3.5" />
-                            </Button>
-                          )}
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            disabled={!isLinkActive}
-                            onClick={() => setSelectedQrDoc(doc)}
-                            title="Ver Código QR"
-                          >
-                            <QrCodeIcon className="w-3.5 h-3.5" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                            onClick={() => handleDelete(doc.id, doc.encrypted_file_path)}
-                            title="Eliminar"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                              <DropdownMenuLabel>Compartir</DropdownMenuLabel>
+                              <DropdownMenuItem onClick={() => setSelectedQrDoc(doc)}>
+                                <QrCodeIcon className="w-4 h-4 mr-2" /> Ver Código QR
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  const url = `${window.location.origin}/d/${doc.short_url}`;
+                                  navigator.clipboard.writeText(url);
+                                  toast.success("Enlace copiado al portapapeles");
+                                }}
+                              >
+                                <Copy className="w-4 h-4 mr-2" /> Copiar Enlace
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                disabled={!doc.password_required}
+                                onClick={() => handleCopyPasswordAction(doc, sessionPassword)}
+                              >
+                                <Key className="w-4 h-4 mr-2" />
+                                {sessionPassword
+                                  ? "Copiar Contraseña"
+                                  : doc.password_required
+                                    ? "Guardar/Copiar Contraseña"
+                                    : "Sin contraseña"}
+                              </DropdownMenuItem>
+
+                              <DropdownMenuSeparator />
+                              <DropdownMenuLabel>Control</DropdownMenuLabel>
+                              <DropdownMenuItem onClick={() => openLimitModal(doc)}>
+                                <Shield className="w-4 h-4 mr-2" /> Cambiar Límite
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => openExpirationModal(doc)}>
+                                <Clock className="w-4 h-4 mr-2" /> Cambiar Expiración
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleToggleOneTime(doc)}>
+                                <RefreshCw className="w-4 h-4 mr-2" />
+                                {doc.one_time_download
+                                  ? "Desactivar un solo uso"
+                                  : "Activar un solo uso"}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem disabled className="opacity-50 cursor-not-allowed">
+                                <Ban className="w-4 h-4 mr-2" /> Pausar Acceso (MIGRATION REQ)
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleToggleRevoked(doc)}>
+                                <AlertTriangle className="w-4 h-4 mr-2" />
+                                {doc.revoked ? "Reactivar Acceso" : "Revocar Acceso"}
+                              </DropdownMenuItem>
+
+                              <DropdownMenuSeparator />
+                              <DropdownMenuLabel>Actividad</DropdownMenuLabel>
+                              <DropdownMenuItem onClick={() => setSelectedActivityDoc(doc)}>
+                                <FileText className="w-4 h-4 mr-2" /> Ver Actividad
+                              </DropdownMenuItem>
+
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                className="text-red-600 hover:text-red-700 focus:text-red-700 focus:bg-red-50 dark:focus:bg-red-950/20"
+                                onClick={() => handleDelete(doc.id, doc.encrypted_file_path)}
+                              >
+                                <Trash2 className="w-4 h-4 mr-2" /> Eliminar
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+
+          {/* Mobile Cards View */}
+          <div className="md:hidden space-y-4">
+            {filteredDocuments.map((doc) => {
+              const isExpired = doc.expire_at && new Date(doc.expire_at) < new Date();
+              const isLimitReached =
+                doc.max_downloads && doc.current_downloads >= doc.max_downloads;
+              const sessionPassword = documentPasswords[doc.id];
+              const isMutating = mutatingDocId === doc.id;
+
+              let statusLabel = "Activo";
+              let statusClass =
+                "bg-green-50 text-green-700 border-green-200 dark:bg-green-950/20 dark:text-green-400 dark:border-green-900/30";
+
+              if (doc.revoked) {
+                statusLabel = "Revocado";
+                statusClass =
+                  "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/20 dark:text-red-400 dark:border-red-900/30";
+              } else if (isExpired) {
+                statusLabel = "Expirado";
+                statusClass =
+                  "bg-slate-100 text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700";
+              } else if (isLimitReached) {
+                statusLabel = "Límite Alcanzado";
+                statusClass =
+                  "bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-950/20 dark:text-orange-400 dark:border-orange-900/30";
+              }
+
+              return (
+                <div
+                  key={doc.id}
+                  className={`relative max-w-full space-y-4 overflow-hidden rounded-xl border bg-card p-4 shadow-sm ${isMutating ? "opacity-50 pointer-events-none" : ""}`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <div
+                        className="p-2 border rounded-lg shrink-0"
+                        style={{
+                          backgroundColor: getFileTypeQrTheme(
+                            normalizeDocumentCategory(doc.file_type),
+                          ).accentBackground,
+                        }}
+                      >
+                        <FileTypeIcon fileType={doc.file_type} />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="max-w-full truncate font-semibold text-foreground">
+                          {doc.name}
+                        </p>
+                        <p className="max-w-full truncate text-xs text-muted-foreground">
+                          {doc.original_filename} •{" "}
+                          {EncryptionService.formatFileSize(doc.file_size_bytes)}
+                        </p>
+                      </div>
+                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full -mt-1">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-[calc(100vw-24px)] max-w-72">
+                        <DropdownMenuLabel>Compartir</DropdownMenuLabel>
+                        <DropdownMenuItem onClick={() => setSelectedQrDoc(doc)}>
+                          <QrCodeIcon className="w-4 h-4 mr-2" /> Ver Código QR
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            const url = `${window.location.origin}/d/${doc.short_url}`;
+                            navigator.clipboard.writeText(url);
+                            toast.success("Enlace copiado al portapapeles");
+                          }}
+                        >
+                          <Copy className="w-4 h-4 mr-2" /> Copiar Enlace
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          disabled={!doc.password_required}
+                          onClick={() => handleCopyPasswordAction(doc, sessionPassword)}
+                        >
+                          <Key className="w-4 h-4 mr-2" />
+                          {sessionPassword
+                            ? "Copiar Contraseña"
+                            : doc.password_required
+                              ? "Guardar/Copiar Contraseña"
+                              : "Sin contraseña"}
+                        </DropdownMenuItem>
+
+                        <DropdownMenuSeparator />
+                        <DropdownMenuLabel>Control</DropdownMenuLabel>
+                        <DropdownMenuItem onClick={() => openLimitModal(doc)}>
+                          <Shield className="w-4 h-4 mr-2" /> Cambiar Límite
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => openExpirationModal(doc)}>
+                          <Clock className="w-4 h-4 mr-2" /> Cambiar Expiración
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleToggleOneTime(doc)}>
+                          <RefreshCw className="w-4 h-4 mr-2" />
+                          {doc.one_time_download ? "Desactivar un solo uso" : "Activar un solo uso"}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem disabled className="opacity-50 cursor-not-allowed">
+                          <Ban className="w-4 h-4 mr-2" /> Pausar Acceso (MIGRATION REQ)
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleToggleRevoked(doc)}>
+                          <AlertTriangle className="w-4 h-4 mr-2" />
+                          {doc.revoked ? "Reactivar Acceso" : "Revocar Acceso"}
+                        </DropdownMenuItem>
+
+                        <DropdownMenuSeparator />
+                        <DropdownMenuLabel>Actividad</DropdownMenuLabel>
+                        <DropdownMenuItem onClick={() => setSelectedActivityDoc(doc)}>
+                          <FileText className="w-4 h-4 mr-2" /> Ver Actividad
+                        </DropdownMenuItem>
+
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          className="text-red-600 hover:text-red-700 focus:text-red-700 focus:bg-red-50 dark:focus:bg-red-950/20"
+                          onClick={() => handleDelete(doc.id, doc.encrypted_file_path)}
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" /> Eliminar
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-x-3 gap-y-3 border-t pt-2 text-xs">
+                    <div>
+                      <p className="text-muted-foreground">Estado</p>
+                      <Badge
+                        variant="outline"
+                        className={`mt-1 font-semibold text-[10px] border uppercase tracking-wider rounded-full px-2 py-0.5 ${statusClass}`}
+                      >
+                        {statusLabel}
+                      </Badge>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Límite descargas</p>
+                      <p className="font-semibold text-foreground mt-1">
+                        {doc.current_downloads} / {doc.max_downloads || "∞"}{" "}
+                        {doc.one_time_download && "• 1 uso"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Expiración</p>
+                      <p className="font-semibold text-foreground mt-1">
+                        {doc.expire_at ? new Date(doc.expire_at).toLocaleDateString() : "Nunca"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Último acceso autorizado</p>
+                      <p className="font-semibold text-foreground mt-1">
+                        {doc.last_accessed_at
+                          ? new Date(doc.last_accessed_at).toLocaleDateString()
+                          : "Nunca"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </>
       )}
 
-      {/* QR Modal Overlay */}
+      {/* QR VIEW MODAL */}
       {selectedQrDoc && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
-          <div className="bg-white rounded-2xl max-w-sm w-full p-6 text-center space-y-6 shadow-2xl relative border">
-            <button
-              onClick={() => setSelectedQrDoc(null)}
-              className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-slate-100 text-muted-foreground transition-colors"
-            >
-              <X className="w-4 h-4" />
-            </button>
+        <Dialog open={!!selectedQrDoc} onOpenChange={() => setSelectedQrDoc(null)}>
+          <DialogContent className="max-w-sm w-full p-6 text-center space-y-6">
+            <DialogHeader>
+              <DialogTitle className="text-lg font-bold">{selectedQrDoc.name}</DialogTitle>
+              <DialogDescription className="text-xs">
+                Comparte este QR seguro de descarga
+              </DialogDescription>
+            </DialogHeader>
 
-            <div className="space-y-1">
-              <h3 className="font-bold text-lg text-foreground">{selectedQrDoc.name}</h3>
-              <p className="text-xs text-muted-foreground">Comparte este QR seguro de descarga</p>
-            </div>
-
-            <div className="bg-slate-50 p-6 rounded-xl border inline-block">
+            <div className="bg-slate-50 p-6 rounded-xl border inline-block mx-auto dark:bg-slate-900/50">
               <ThemedDocumentQr
                 id={`qr-modal-${selectedQrDoc.id}`}
                 value={`${window.location.origin}/d/${selectedQrDoc.short_url}`}
@@ -658,22 +1414,26 @@ function DocumentsList({
               <Input
                 readOnly
                 value={`${window.location.origin}/d/${selectedQrDoc.short_url}`}
-                className="bg-slate-50 font-mono text-[10px] select-all text-center h-10"
+                className="bg-slate-50 font-mono text-[10px] select-all text-center h-10 dark:bg-slate-900/50"
               />
-              {/* Modified by ChatGPT Work — ENC-DOC-SECURE-DELIVERY-02 */}
               {!selectedQrDoc.password_required && (
-                <p className="text-[10px] text-amber-700 bg-amber-50/50 p-2 rounded-lg border border-amber-200/50 leading-relaxed text-left">
-                  ⚠️ **Atención:** Como este documento no tiene contraseña, quien reciba el QR necesitará el enlace original con el fragmento `#key=...` para descifrarlo.
-                </p>
+                <div className="text-[10px] text-amber-700 bg-amber-50/50 p-2.5 rounded-lg border border-amber-200/50 leading-relaxed text-left dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/30">
+                  <span className="font-semibold">⚠️ Atención:</span> Como este documento no tiene
+                  contraseña, quien reciba el QR necesitará el enlace original con la llave de
+                  fragmento (`#key=...`) para descifrarlo en su navegador.
+                </div>
               )}
             </div>
 
-            <div className="flex gap-2">
+            <DialogFooter className="flex flex-row gap-2 sm:justify-center">
               <Button
                 variant="outline"
                 className="flex-1 text-xs"
                 onClick={() => {
-                  downloadSvgElement(`qr-modal-${selectedQrDoc.id}`, `QR_${selectedQrDoc.name}.svg`);
+                  downloadSvgElement(
+                    `qr-modal-${selectedQrDoc.id}`,
+                    `QR_${selectedQrDoc.name}.svg`,
+                  );
                   toast.success("Código QR SVG descargado");
                 }}
               >
@@ -684,7 +1444,10 @@ function DocumentsList({
                 variant="outline"
                 className="flex-1 text-xs"
                 onClick={() => {
-                  downloadPngFromSvgElement(`qr-modal-${selectedQrDoc.id}`, `QR_${selectedQrDoc.name}.png`);
+                  downloadPngFromSvgElement(
+                    `qr-modal-${selectedQrDoc.id}`,
+                    `QR_${selectedQrDoc.name}.png`,
+                  );
                   toast.success("Código QR PNG descargado");
                 }}
               >
@@ -701,12 +1464,180 @@ function DocumentsList({
                 }}
               >
                 <Copy className="w-3.5 h-3.5 mr-1" />
-                Copiar Enlace
+                Copiar
               </Button>
-            </div>
-          </div>
-        </div>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       )}
+
+      {/* CHANGE DOWNLOAD LIMITS MODAL */}
+      {selectedLimitDoc && (
+        <Dialog open={!!selectedLimitDoc} onOpenChange={() => setSelectedLimitDoc(null)}>
+          <DialogContent className="max-w-md w-full p-6 space-y-4">
+            <DialogHeader>
+              <DialogTitle className="text-lg font-bold">Cambiar límites de descargas</DialogTitle>
+              <DialogDescription className="text-xs">
+                Configura cuántas veces puede autorizarse la descarga de este archivo.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 py-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="maxDownloadsInput">Máximo de descargas permitidas</Label>
+                <Input
+                  id="maxDownloadsInput"
+                  type="number"
+                  placeholder="Sin límite (deja vacío)"
+                  value={limitMaxDownloads}
+                  onChange={(e) => setLimitMaxDownloads(e.target.value)}
+                  className="w-full"
+                />
+                <p className="text-[10px] text-muted-foreground">
+                  Consumo actual: **{selectedLimitDoc.current_downloads} descargas**.
+                </p>
+              </div>
+
+              <div className="flex items-center justify-between border p-3 rounded-lg bg-muted/20">
+                <div className="space-y-0.5">
+                  <Label className="text-sm font-semibold">Descarga única</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Bloquea el enlace automáticamente tras el primer acceso.
+                  </p>
+                </div>
+                <Switch checked={limitOneTime} onCheckedChange={setLimitOneTime} />
+              </div>
+            </div>
+
+            <DialogFooter className="flex gap-2 justify-end pt-2">
+              <Button variant="outline" onClick={() => setSelectedLimitDoc(null)}>
+                Cancelar
+              </Button>
+              <Button onClick={handleSaveLimits}>Guardar Cambios</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* CHANGE EXPIRATION MODAL */}
+      {selectedExpirationDoc && (
+        <Dialog open={!!selectedExpirationDoc} onOpenChange={() => setSelectedExpirationDoc(null)}>
+          <DialogContent className="max-w-md w-full p-6 space-y-4">
+            <DialogHeader>
+              <DialogTitle className="text-lg font-bold">Cambiar expiración de acceso</DialogTitle>
+              <DialogDescription className="text-xs">
+                Modifica el límite de tiempo a partir del cual el documento dejará de estar
+                disponible.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 py-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="expirationOption">Plazo de expiración</Label>
+                <Select value={expirationOption} onValueChange={setExpirationOption}>
+                  <SelectTrigger id="expirationOption" className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="never">Nunca expira</SelectItem>
+                    <SelectItem value="1h">1 hora</SelectItem>
+                    <SelectItem value="6h">6 horas</SelectItem>
+                    <SelectItem value="24h">24 horas</SelectItem>
+                    <SelectItem value="3d">3 días</SelectItem>
+                    <SelectItem value="7d">7 días</SelectItem>
+                    <SelectItem value="custom">Fecha personalizada</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {expirationOption === "custom" && (
+                <div className="space-y-1.5">
+                  <Label htmlFor="customDateInput">Selecciona fecha y hora</Label>
+                  <Input
+                    id="customDateInput"
+                    type="datetime-local"
+                    value={expirationCustomDate}
+                    onChange={(e) => setExpirationCustomDate(e.target.value)}
+                    className="w-full"
+                  />
+                </div>
+              )}
+            </div>
+
+            <DialogFooter className="flex gap-2 justify-end pt-2">
+              <Button variant="outline" onClick={() => setSelectedExpirationDoc(null)}>
+                Cancelar
+              </Button>
+              <Button onClick={handleSaveExpiration}>Guardar Cambios</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* ACTIVITY TIMELINE DRAWER */}
+      <Sheet open={!!selectedActivityDoc} onOpenChange={() => setSelectedActivityDoc(null)}>
+        <SheetContent className="w-full sm:max-w-md overflow-y-auto">
+          <SheetHeader className="pb-4 border-b">
+            <SheetTitle className="text-lg font-bold">Actividad de acceso</SheetTitle>
+            <SheetDescription className="text-xs">
+              Historial y auditoría de accesos autorizados y bloqueados de tu documento.
+            </SheetDescription>
+          </SheetHeader>
+
+          {selectedActivityDoc && (
+            <div className="space-y-6 pt-6">
+              <div className="border p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/50 space-y-1.5">
+                <p className="font-semibold text-sm truncate">{selectedActivityDoc.name}</p>
+                <p className="text-xs text-muted-foreground">
+                  Consumo: **{selectedActivityDoc.current_downloads}** accesos autorizados.
+                </p>
+              </div>
+
+              {loadingActivity ? (
+                <div className="flex justify-center py-12">
+                  <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-solid border-primary border-r-transparent" />
+                </div>
+              ) : activityLogs.length === 0 ? (
+                <div className="text-center py-12 text-muted-foreground text-sm border-2 border-dashed rounded-xl p-4">
+                  No se registran accesos ni intentos para este documento todavía.
+                </div>
+              ) : (
+                <div className="relative border-l border-muted pl-6 ml-3 space-y-6">
+                  {activityLogs.map((log) => (
+                    <div key={log.id} className="relative">
+                      {/* Timeline dot */}
+                      <div
+                        className={`absolute -left-[32px] top-1 w-4 h-4 rounded-full border bg-card flex items-center justify-center ${
+                          log.success
+                            ? "border-green-500 text-green-500"
+                            : "border-red-500 text-red-500"
+                        }`}
+                      >
+                        <div
+                          className={`w-1.5 h-1.5 rounded-full ${log.success ? "bg-green-500" : "bg-red-500"}`}
+                        />
+                      </div>
+
+                      {/* Log Details */}
+                      <div className="text-[10px] text-muted-foreground font-medium">
+                        {new Date(log.created_at).toLocaleString()}
+                      </div>
+                      <div className="text-xs font-bold mt-0.5 text-foreground">
+                        {log.success ? "Acceso Autorizado" : "Intento Bloqueado"}
+                      </div>
+                      {log.user_agent && (
+                        <div className="text-[10px] text-muted-foreground mt-1 border bg-muted/20 p-2 rounded-lg break-words max-w-[280px]">
+                          <span className="font-semibold">Dispositivo:</span> {log.user_agent}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
@@ -736,14 +1667,16 @@ function CreateDocument({ userId, onSuccess, onPasswordCaptured }: CreateDocumen
   const [passwordWasGenerated, setPasswordWasGenerated] = useState(false);
   const [passwordCopied, setPasswordCopied] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  
+
   const supabase = getBrowserSupabaseClient();
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
       if (!isEncryptedDocumentSizeAllowed(selectedFile.size)) {
-        toast.error(`Este archivo supera el límite de ${MAX_ENCRYPTED_DOCUMENT_SIZE_LABEL}. Selecciona un archivo más pequeño.`);
+        toast.error(
+          `Este archivo supera el límite de ${MAX_ENCRYPTED_DOCUMENT_SIZE_LABEL}. Selecciona un archivo más pequeño.`,
+        );
         e.target.value = "";
         return;
       }
@@ -791,7 +1724,9 @@ function CreateDocument({ userId, onSuccess, onPasswordCaptured }: CreateDocumen
       return;
     }
     if (!isEncryptedDocumentSizeAllowed(file.size)) {
-      toast.error(`Este archivo supera el límite de ${MAX_ENCRYPTED_DOCUMENT_SIZE_LABEL}. Selecciona un archivo más pequeño.`);
+      toast.error(
+        `Este archivo supera el límite de ${MAX_ENCRYPTED_DOCUMENT_SIZE_LABEL}. Selecciona un archivo más pequeño.`,
+      );
       return;
     }
 
@@ -802,7 +1737,9 @@ function CreateDocument({ userId, onSuccess, onPasswordCaptured }: CreateDocumen
 
       // 2. Wrap encrypted ArrayBuffer in a Blob using original file type
       // (Bypasses bucket MIME restrictions that block raw application/octet-stream)
-      const encryptedBlob = new Blob([encrypted.encryptedData], { type: file.type || "application/octet-stream" });
+      const encryptedBlob = new Blob([encrypted.encryptedData], {
+        type: file.type || "application/octet-stream",
+      });
 
       // 3. Upload encrypted binary to Storage
       const filePath = `${userId}/${Date.now()}_${file.name}.bin`;
@@ -810,7 +1747,7 @@ function CreateDocument({ userId, onSuccess, onPasswordCaptured }: CreateDocumen
         .from("encrypted-documents")
         .upload(filePath, encryptedBlob, {
           contentType: file.type || "application/octet-stream",
-          upsert: false
+          upsert: false,
         });
 
       if (uploadError) throw uploadError;
@@ -883,18 +1820,19 @@ function CreateDocument({ userId, onSuccess, onPasswordCaptured }: CreateDocumen
     const downloadUrl = `${window.location.origin}/d/${createdDoc.short_url}${generatedKey ? `#key=${generatedKey}` : ""}`;
     // Modified by ChatGPT Work — ENC-DOC-UX-FILE-TYPES-04
     const createdTheme = getFileTypeQrTheme(normalizeDocumentCategory(createdDoc.file_type));
-    
+
     return (
-      <div className="max-w-xl mx-auto rounded-xl border bg-white p-8 shadow-md text-center space-y-6 animate-fade-in">
+      <div className="max-w-xl mx-auto rounded-xl border bg-white p-4 sm:p-8 shadow-md text-center space-y-5 sm:space-y-6 animate-fade-in overflow-hidden">
         <div
-          className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-2"
+          className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full mb-1 sm:mb-2"
           style={{ backgroundColor: createdTheme.accentBackground }}
         >
-          <FileTypeIcon fileType={createdDoc.file_type} className="w-8 h-8" />
+          <FileTypeIcon fileType={createdDoc.file_type} className="w-7 h-7 sm:w-8 sm:h-8" />
         </div>
-        <h2 className="text-2xl font-bold">Documento protegido</h2>
-        <p className="text-muted-foreground text-sm max-w-sm mx-auto">
-          Tu archivo ha sido cifrado en el navegador y subido de forma segura. Comparte el código QR o el enlace corto.
+        <h2 className="text-xl sm:text-2xl font-bold">Documento protegido</h2>
+        <p className="text-muted-foreground text-xs sm:text-sm max-w-sm mx-auto">
+          Tu archivo ha sido cifrado en el navegador y subido de forma segura. Comparte el código QR
+          o el enlace corto.
         </p>
         <div className="mx-auto max-w-md rounded-lg border bg-slate-50 p-3 text-left">
           <p className="truncate text-sm font-semibold">{createdDoc.original_filename}</p>
@@ -904,11 +1842,14 @@ function CreateDocument({ userId, onSuccess, onPasswordCaptured }: CreateDocumen
         </div>
 
         {/* QR Code Card */}
-        <div className="p-6 rounded-xl border inline-block shadow-sm" style={{ backgroundColor: createdTheme.accentBackground }}>
+        <div
+          className="p-4 sm:p-6 rounded-xl border inline-block shadow-sm"
+          style={{ backgroundColor: createdTheme.accentBackground }}
+        >
           <ThemedDocumentQr
             id="qr-success-display"
             value={downloadUrl}
-            size={200}
+            size={180}
             fileType={createdDoc.file_type}
           />
         </div>
@@ -917,7 +1858,13 @@ function CreateDocument({ userId, onSuccess, onPasswordCaptured }: CreateDocumen
         <div className="space-y-2">
           <Label className="text-xs text-muted-foreground">Enlace Seguro de Descarga</Label>
           <div className="flex items-center gap-2 max-w-md mx-auto">
-            <Input readOnly value={downloadUrl} className="bg-slate-50 font-mono text-xs select-all text-center h-11" />
+            <div className="flex-1 min-w-0">
+              <Input
+                readOnly
+                value={downloadUrl}
+                className="bg-slate-50 font-mono text-[10px] sm:text-xs select-all text-center h-11 w-full"
+              />
+            </div>
             <Button
               type="button"
               variant="outline"
@@ -938,12 +1885,14 @@ function CreateDocument({ userId, onSuccess, onPasswordCaptured }: CreateDocumen
           <div className="space-y-2">
             <Label className="text-xs text-muted-foreground">Contraseña</Label>
             <div className="flex items-center gap-2 max-w-md mx-auto">
-              <Input
-                readOnly
-                type={showPassword ? "text" : "password"}
-                value={plainPasswordForSession}
-                className="bg-slate-50 font-mono text-xs select-all text-center h-11"
-              />
+              <div className="flex-1 min-w-0">
+                <Input
+                  readOnly
+                  type={showPassword ? "text" : "password"}
+                  value={plainPasswordForSession}
+                  className="bg-slate-50 font-mono text-[10px] sm:text-xs select-all text-center h-11 w-full"
+                />
+              </div>
               <Button
                 type="button"
                 variant="outline"
@@ -960,7 +1909,13 @@ function CreateDocument({ userId, onSuccess, onPasswordCaptured }: CreateDocumen
                 size="icon"
                 className="h-11 w-11 shrink-0"
                 aria-label="Copiar contraseña"
-                onClick={copyPassword}
+                onClick={() => {
+                  if (plainPasswordForSession) {
+                    navigator.clipboard.writeText(plainPasswordForSession);
+                    setPasswordCopied(true);
+                    toast.success("Contraseña copiada al portapapeles");
+                  }
+                }}
               >
                 <Copy className="w-4 h-4" />
               </Button>
@@ -975,22 +1930,24 @@ function CreateDocument({ userId, onSuccess, onPasswordCaptured }: CreateDocumen
         {/* Zero-Knowledge warning for no-password files */}
         {/* Modified by ChatGPT Work — ENC-DOC-SECURE-DELIVERY-02 */}
         {!createdDoc.password_required && (
-          <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs text-left max-w-md mx-auto space-y-1.5 shadow-sm">
+          <div className="p-3 sm:p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs text-left max-w-md mx-auto space-y-1.5 shadow-sm">
             <p className="font-bold flex items-center gap-1.5 text-amber-950">
-              <AlertTriangle className="w-4 h-4 text-amber-600" />
+              <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
               Guarda este enlace ahora
             </p>
             <p className="leading-relaxed text-amber-800">
-              Por seguridad (Zero-Knowledge), la clave de descifrado está integrada en el fragmento de la URL (`#key=...`) y no se guarda en nuestros servidores. Si cierras esta pantalla, no podrás recuperar el acceso al archivo.
+              Por seguridad (Zero-Knowledge), la clave de descifrado está integrada en el fragmento
+              de la URL (`#key=...`) y no se guarda en nuestros servidores. Si cierras esta
+              pantalla, no podrás recuperar el acceso al archivo.
             </p>
           </div>
         )}
 
-        <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 justify-center pt-3 sm:pt-4">
           <Button
             type="button"
             variant="outline"
-            className="flex-1 gap-2"
+            className="flex-1 gap-2 text-xs sm:text-sm"
             onClick={() => {
               downloadSvgElement("qr-success-display", `QR_${createdDoc.name}.svg`);
               toast.success("Código QR SVG descargado");
@@ -1002,7 +1959,7 @@ function CreateDocument({ userId, onSuccess, onPasswordCaptured }: CreateDocumen
           <Button
             type="button"
             variant="outline"
-            className="flex-1 gap-2"
+            className="flex-1 gap-2 text-xs sm:text-sm"
             onClick={() => {
               downloadPngFromSvgElement("qr-success-display", `QR_${createdDoc.name}.png`);
               toast.success("Código QR PNG descargado");
@@ -1011,11 +1968,7 @@ function CreateDocument({ userId, onSuccess, onPasswordCaptured }: CreateDocumen
             <Download className="w-4 h-4" />
             Descargar PNG
           </Button>
-          <Button
-            type="button"
-            className="flex-1"
-            onClick={onSuccess}
-          >
+          <Button type="button" className="flex-1 text-xs sm:text-sm" onClick={onSuccess}>
             Ver Mis Documentos
           </Button>
         </div>
@@ -1024,26 +1977,27 @@ function CreateDocument({ userId, onSuccess, onPasswordCaptured }: CreateDocumen
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <form onSubmit={handleSubmit} className="w-full max-w-full space-y-6 overflow-x-hidden">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-6">
         {/* Left Column - Upload & Basic Info */}
         <div className="lg:col-span-2 space-y-6">
           {/* Upload Area */}
-          <div className="rounded-xl border bg-white p-6 shadow-sm">
-            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <div className="rounded-xl border bg-white p-4 shadow-sm sm:p-6">
+            <h3 className="mb-4 flex items-center gap-2 text-base font-semibold sm:text-lg">
               <Upload className="w-5 h-5" />
               Subir Archivo
             </h3>
 
             {!file ? (
-              <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-border rounded-xl cursor-pointer bg-gradient-to-br from-slate-50 to-blue-50 hover:from-blue-50 hover:to-cyan-50 transition-all">
-                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                  <Upload className="w-12 h-12 text-muted-foreground mb-4" />
-                  <p className="mb-2 text-sm font-semibold">
+              <label className="flex min-h-52 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-border bg-gradient-to-br from-slate-50 to-blue-50 p-4 text-center transition-all hover:from-blue-50 hover:to-cyan-50 sm:h-64">
+                <div className="flex min-w-0 flex-col items-center justify-center">
+                  <Upload className="mb-4 h-10 w-10 text-muted-foreground sm:h-12 sm:w-12" />
+                  <p className="mb-2 text-sm font-semibold leading-tight">
                     Click para subir o arrastra el archivo aquí
                   </p>
-                  <p className="text-xs text-muted-foreground">
-                    Excel, PDF, Word, PowerPoint, imágenes y ZIP. Hasta {MAX_ENCRYPTED_DOCUMENT_SIZE_LABEL} por archivo.
+                  <p className="max-w-full break-words text-xs text-muted-foreground">
+                    Excel, PDF, Word, PowerPoint, imágenes y ZIP. Hasta{" "}
+                    {MAX_ENCRYPTED_DOCUMENT_SIZE_LABEL} por archivo.
                   </p>
                 </div>
                 <input
@@ -1054,22 +2008,20 @@ function CreateDocument({ userId, onSuccess, onPasswordCaptured }: CreateDocumen
                 />
               </label>
             ) : (
-              <div className="flex items-center gap-4 p-4 border rounded-xl" style={{ backgroundColor: fileTheme.accentBackground }}>
-                <div className="flex items-center justify-center w-16 h-16 rounded-lg bg-white shadow-sm">
+              <div
+                className="flex min-w-0 items-center gap-3 rounded-xl border p-3 sm:gap-4 sm:p-4"
+                style={{ backgroundColor: fileTheme.accentBackground }}
+              >
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-white shadow-sm sm:h-16 sm:w-16">
                   <FileTypeIcon fileType={fileTypeInfo?.category || "other"} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold truncate">{file.name}</p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="truncate text-sm text-muted-foreground">
                     {fileTypeInfo?.label} • {EncryptionService.formatFileSize(file.size)}
                   </p>
                 </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setFile(null)}
-                >
+                <Button type="button" variant="ghost" size="icon" onClick={() => setFile(null)}>
                   <Trash2 className="w-4 h-4" />
                 </Button>
               </div>
@@ -1077,8 +2029,8 @@ function CreateDocument({ userId, onSuccess, onPasswordCaptured }: CreateDocumen
           </div>
 
           {/* Basic Info */}
-          <div className="rounded-xl border bg-white p-6 shadow-sm space-y-4">
-            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <div className="space-y-4 rounded-xl border bg-white p-4 shadow-sm sm:p-6">
+            <h3 className="mb-4 flex items-center gap-2 text-base font-semibold sm:text-lg">
               <FileText className="w-5 h-5" />
               Información del Documento
             </h3>
@@ -1110,8 +2062,8 @@ function CreateDocument({ userId, onSuccess, onPasswordCaptured }: CreateDocumen
         {/* Right Column - Security Settings */}
         <div className="space-y-6">
           {/* Encryption Level */}
-          <div className="rounded-xl border bg-white p-6 shadow-sm space-y-4">
-            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <div className="space-y-4 rounded-xl border bg-white p-4 shadow-sm sm:p-6">
+            <h3 className="mb-4 flex items-center gap-2 text-base font-semibold sm:text-lg">
               <ShieldCheck className="w-5 h-5 text-blue-600" />
               Nivel de Seguridad
             </h3>
@@ -1129,14 +2081,14 @@ function CreateDocument({ userId, onSuccess, onPasswordCaptured }: CreateDocumen
                   value: "high",
                   icon: Lock,
                   label: "Alto",
-                  description: "RSA + AES-256",
+                  description: "Contraseña + controles",
                   color: "text-purple-600",
                 },
                 {
                   value: "maximum",
                   icon: Key,
                   label: "Máximo",
-                  description: "RSA + AES + 2FA",
+                  description: "Contraseña + límites",
                   color: "text-red-600",
                 },
               ].map((level) => {
@@ -1152,16 +2104,18 @@ function CreateDocument({ userId, onSuccess, onPasswordCaptured }: CreateDocumen
                         encryption_level: level.value as EncryptionLevel,
                       })
                     }
-                    className={`w-full flex items-center gap-3 p-3 rounded-lg border-2 transition-all ${
+                    className={`flex w-full min-w-0 items-center gap-3 rounded-lg border-2 p-3 transition-all ${
                       isActive
                         ? "border-primary bg-primary/5 shadow-sm"
                         : "border-border hover:border-primary/50"
                     }`}
                   >
                     <Icon className={`w-5 h-5 ${level.color}`} />
-                    <div className="flex-1 text-left">
+                    <div className="min-w-0 flex-1 text-left">
                       <p className="font-semibold text-sm">{level.label}</p>
-                      <p className="text-xs text-muted-foreground">{level.description}</p>
+                      <p className="break-words text-xs text-muted-foreground">
+                        {level.description}
+                      </p>
                     </div>
                     {isActive && <CheckCircle2 className="w-5 h-5 text-primary" />}
                   </button>
@@ -1171,15 +2125,15 @@ function CreateDocument({ userId, onSuccess, onPasswordCaptured }: CreateDocumen
           </div>
 
           {/* Password Protection */}
-          <div className="rounded-xl border bg-white p-6 shadow-sm space-y-4">
-            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <div className="space-y-4 rounded-xl border bg-white p-4 shadow-sm sm:p-6">
+            <h3 className="mb-4 flex items-center gap-2 text-base font-semibold sm:text-lg">
               <Key className="w-5 h-5 text-amber-600" />
               Protección con Contraseña
             </h3>
 
             <div className="space-y-2">
               <Label htmlFor="password">Contraseña (opcional pero recomendado)</Label>
-              <div className="flex items-center gap-2">
+              <div className="flex min-w-0 items-center gap-2">
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
@@ -1187,6 +2141,7 @@ function CreateDocument({ userId, onSuccess, onPasswordCaptured }: CreateDocumen
                   onChange={(e) => updatePassword(e.target.value, false)}
                   placeholder="Ingresa una contraseña segura"
                   autoComplete="new-password"
+                  className="min-w-0 flex-1"
                 />
                 <Button
                   type="button"
@@ -1216,28 +2171,29 @@ function CreateDocument({ userId, onSuccess, onPasswordCaptured }: CreateDocumen
               <Button
                 type="button"
                 variant="outline"
-                className="w-full gap-2"
+                className="min-h-11 w-full whitespace-normal break-words px-3 text-center leading-tight"
                 onClick={() => updatePassword(generateSecureDocumentPassword(), true)}
               >
                 <Key className="w-4 h-4" />
-                Generar contraseña segura — recomendado
+                Generar contraseña segura
               </Button>
               <p className="text-xs text-muted-foreground">
-                La contraseña será requerida para descargar el documento. Compártela por separado con el destinatario.
+                La contraseña será requerida para descargar el documento. Compártela por separado
+                con el destinatario.
               </p>
             </div>
           </div>
 
           {/* Access Control */}
-          <div className="rounded-xl border bg-white p-6 shadow-sm space-y-4">
-            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <div className="space-y-4 rounded-xl border bg-white p-4 shadow-sm sm:p-6">
+            <h3 className="mb-4 flex items-center gap-2 text-base font-semibold sm:text-lg">
               <Clock className="w-5 h-5 text-green-600" />
               Control de Acceso
             </h3>
 
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
+              <div className="flex min-w-0 items-center justify-between gap-3">
+                <div className="min-w-0 space-y-0.5">
                   <Label>Descarga única</Label>
                   <p className="text-xs text-muted-foreground">
                     Auto-destruir después de 1 descarga
@@ -1262,7 +2218,7 @@ function CreateDocument({ userId, onSuccess, onPasswordCaptured }: CreateDocumen
                     })
                   }
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="w-full">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -1286,7 +2242,7 @@ function CreateDocument({ userId, onSuccess, onPasswordCaptured }: CreateDocumen
                     })
                   }
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="w-full">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>

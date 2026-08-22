@@ -14,6 +14,11 @@ interface PublicProfileViewProps {
   onProfileChange?: (updates: Partial<Profile>) => void;
   onLinkChange?: (linkId: string, updates: Partial<ProfileLink>) => void;
   onOpenSidebar?: (tabId: string) => void;
+  // Modified by Codex — EDITOR-THREE-PANEL-RESTRUCTURE-09
+  onSelectTarget?: (target: {
+    type: "title" | "bio" | "avatar" | "cover" | "background" | "link";
+    linkId?: string;
+  }) => void;
 }
 
 import { PremiumCustomLinkCard } from "./PremiumCustomLinkCard";
@@ -27,6 +32,7 @@ export function PublicProfileView({
   onProfileChange,
   onLinkChange,
   onOpenSidebar,
+  onSelectTarget,
 }: PublicProfileViewProps) {
   const renderPlatformIcon = (platform: string, className: string) => {
     const Icon = getPlatformDef(platform).icon;
@@ -48,6 +54,7 @@ export function PublicProfileView({
       ...(onProfileChange ? { onProfileChange } : {}),
       ...(onLinkChange ? { onLinkChange } : {}),
       ...(onOpenSidebar ? { onOpenSidebar } : {}),
+      ...(onSelectTarget ? { onSelectTarget } : {}),
       ...(currentLink ? { currentLink } : {}),
     };
 
@@ -245,18 +252,34 @@ export function PublicProfileView({
     /* Modified by ChatGPT Work — ENC-DOC-SECURE-DELIVERY-02B */
     // Monogram letters
     const displayName = profile.display_name || "Larissa Almeida";
-    const monogramLetters = displayName.split(" ").map(part => part.charAt(0).toUpperCase()).slice(0, 2);
+    const monogramLetters = displayName
+      .split(" ")
+      .map((part) => part.charAt(0).toUpperCase())
+      .slice(0, 2);
     if (monogramLetters.length < 1) monogramLetters.push("L");
     if (monogramLetters.length < 2) monogramLetters.push("A");
 
     // Background images
-    const topImage = profile.banner_url || "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=800&auto=format&fit=crop";
-    const bottomImage = profile.avatar_url || "https://images.unsplash.com/photo-1604654894610-df63bc536371?q=80&w=800&auto=format&fit=crop";
+    const topImage =
+      profile.banner_url ||
+      "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=800&auto=format&fit=crop";
+    const bottomImage =
+      profile.avatar_url ||
+      "https://images.unsplash.com/photo-1604654894610-df63bc536371?q=80&w=800&auto=format&fit=crop";
 
     // Social links
     const socialLinks = links.filter((l) => {
       const p = (l.platform || "").toLowerCase();
-      return ["instagram", "whatsapp", "facebook", "twitter", "tiktok", "youtube", "linkedin", "telegram"].includes(p);
+      return [
+        "instagram",
+        "whatsapp",
+        "facebook",
+        "twitter",
+        "tiktok",
+        "youtube",
+        "linkedin",
+        "telegram",
+      ].includes(p);
     });
 
     // Bio catchphrase divided
@@ -265,20 +288,22 @@ export function PublicProfileView({
 
     return (
       <ContextWrapper type="background">
-        <style dangerouslySetInnerHTML={{__html: `
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `
           @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&display=swap');
           .font-serif { font-family: 'Playfair Display', serif; }
           .font-sans { font-family: 'Montserrat', sans-serif; }
           .font-script { font-family: 'Great Vibes', cursive; }
-        `}} />
+        `,
+          }}
+        />
 
-        <div
-          className="relative w-full max-w-[480px] bg-[#0A0A0A] flex flex-col shadow-2xl mx-auto overflow-x-hidden min-h-screen text-white select-none selection:bg-[#D9BBA0] selection:text-black font-sans shrink-0 rounded-[3rem]"
-        >
+        <div className="relative w-full max-w-[480px] bg-[#0A0A0A] flex flex-col shadow-2xl mx-auto overflow-x-hidden min-h-screen text-white select-none selection:bg-[#D9BBA0] selection:text-black font-sans shrink-0 rounded-[3rem]">
           {/* Top Background Image (Professional) */}
           <div className="absolute top-0 left-0 w-full h-[600px] z-0 opacity-80 pointer-events-none">
             <ContextWrapper type="cover">
-              <div 
+              <div
                 className="absolute inset-0 bg-cover bg-left-top"
                 style={{ backgroundImage: `url(${topImage})` }}
               />
@@ -291,7 +316,7 @@ export function PublicProfileView({
           {/* Bottom Background Image (Manicure) */}
           <div className="absolute bottom-0 left-0 w-full h-[500px] z-0 opacity-50 pointer-events-none">
             <ContextWrapper type="avatar">
-              <div 
+              <div
                 className="absolute inset-0 bg-cover bg-center"
                 style={{ backgroundImage: `url(${bottomImage})` }}
               />
@@ -301,7 +326,6 @@ export function PublicProfileView({
 
           {/* Main Content Wrapper */}
           <div className="relative z-10 flex-grow flex flex-col w-full px-4 sm:px-6">
-            
             {/* Top Section */}
             <header className="pt-16 pb-10 px-6 flex flex-col items-end text-right w-full">
               {/* Monogram / Logo Area */}
@@ -309,10 +333,14 @@ export function PublicProfileView({
                 {/* Monogram Circle */}
                 <div className="w-16 h-16 rounded-full border-[0.5px] border-[#D9BBA0]/60 flex items-center justify-center relative mb-4">
                   <div className="absolute inset-0 border border-[#D9BBA0]/20 rounded-full m-1 pointer-events-none"></div>
-                  <span className="font-script text-3xl text-[#D9BBA0] -ml-2">{monogramLetters[0]}</span>
-                  <span className="font-script text-3xl text-[#D9BBA0] opacity-80 absolute top-1/2 left-1/2 transform -translate-x-[40%] -translate-y-[40%]">{monogramLetters[1]}</span>
+                  <span className="font-script text-3xl text-[#D9BBA0] -ml-2">
+                    {monogramLetters[0]}
+                  </span>
+                  <span className="font-script text-3xl text-[#D9BBA0] opacity-80 absolute top-1/2 left-1/2 transform -translate-x-[40%] -translate-y-[40%]">
+                    {monogramLetters[1]}
+                  </span>
                 </div>
-                
+
                 <ContextWrapper type="title">
                   <h1 className="font-serif text-[#F2E8E0] text-[1.35rem] tracking-[0.15em] leading-none mb-2 font-normal uppercase">
                     {displayName}
@@ -340,15 +368,15 @@ export function PublicProfileView({
             {/* Social Icons Divider Section */}
             <div className="w-full flex items-center justify-center px-4 my-6">
               <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent to-[#D9BBA0]/50 relative">
-                 <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rotate-45 bg-[#D9BBA0]/60"></div>
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rotate-45 bg-[#D9BBA0]/60"></div>
               </div>
-              
+
               <div className="flex gap-4 px-6 relative z-20">
                 {socialLinks.slice(0, 3).map((link, idx) => {
                   const platformDef = getPlatformDef(link.platform || "other");
                   const Icon = platformDef.icon;
                   return (
-                    <a 
+                    <a
                       key={link.id || idx}
                       href={isPreview ? "#" : link.url}
                       target={isPreview ? undefined : "_blank"}
@@ -362,7 +390,7 @@ export function PublicProfileView({
               </div>
 
               <div className="flex-1 h-[1px] bg-gradient-to-l from-transparent to-[#D9BBA0]/50 relative">
-                 <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rotate-45 bg-[#D9BBA0]/60"></div>
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rotate-45 bg-[#D9BBA0]/60"></div>
               </div>
             </div>
 
@@ -372,7 +400,9 @@ export function PublicProfileView({
                 <h2 className="font-script text-[#D9BBA0] text-3xl md:text-4xl leading-tight">
                   {bioParts.map((part, i) => (
                     <React.Fragment key={i}>
-                      {part}{i < bioParts.length - 1 ? ',' : ''}<br/>
+                      {part}
+                      {i < bioParts.length - 1 ? "," : ""}
+                      <br />
                     </React.Fragment>
                   ))}
                 </h2>
@@ -407,7 +437,8 @@ export function PublicProfileView({
             {profile.footer_enabled && (
               <footer className="w-full text-center py-8 px-6 relative z-20 mt-auto">
                 <p className="font-sans text-[#EAE1D9]/50 text-[0.6rem] tracking-wider uppercase">
-                  {profile.footer_text || `2026 ${displayName}, Beauty designer. Todos os direitos reservados.`}
+                  {profile.footer_text ||
+                    `2026 ${displayName}, Beauty designer. Todos os direitos reservados.`}
                 </p>
               </footer>
             )}
@@ -433,11 +464,20 @@ export function PublicProfileView({
             <div className="w-full relative bg-[#2D5A60] pt-12 pb-8 px-6 overflow-hidden rounded-[2.5rem] text-center mb-8 border border-white/10 shadow-lg shrink-0">
               {/* Decorative Background Letter */}
               <div className="absolute top-0 left-[-20%] text-[20rem] font-serif text-[#ffffff0b] leading-none select-none pointer-events-none">
-                {profile.display_name ? profile.display_name.charAt(0).toUpperCase() : 'B'}
+                {profile.display_name ? profile.display_name.charAt(0).toUpperCase() : "B"}
               </div>
               {/* Decorative Lines */}
-              <svg className="absolute top-0 left-0 w-full h-full opacity-20 pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
-                <path d="M0,50 Q25,25 50,50 T100,50" fill="none" stroke="#D4C4A8" strokeWidth="0.5" />
+              <svg
+                className="absolute top-0 left-0 w-full h-full opacity-20 pointer-events-none"
+                viewBox="0 0 100 100"
+                preserveAspectRatio="none"
+              >
+                <path
+                  d="M0,50 Q25,25 50,50 T100,50"
+                  fill="none"
+                  stroke="#D4C4A8"
+                  strokeWidth="0.5"
+                />
                 <path d="M0,80 Q50,60 100,80" fill="none" stroke="#D4C4A8" strokeWidth="0.2" />
               </svg>
 
@@ -464,12 +504,12 @@ export function PublicProfileView({
                   {/* Logo Circle */}
                   <div className="w-14 h-14 rounded-full border-2 border-[#D4C4A8] flex items-center justify-center mb-2">
                     <span className="text-[#D4C4A8] font-serif text-2xl font-light">
-                      {profile.display_name ? profile.display_name.charAt(0).toUpperCase() : 'B'}
+                      {profile.display_name ? profile.display_name.charAt(0).toUpperCase() : "B"}
                     </span>
                   </div>
-                  
+
                   <h2 className="text-[#D4C4A8] text-[0.6rem] uppercase tracking-[0.2em] mb-1">
-                    {profile.display_name ? 'Studio' : ''}
+                    {profile.display_name ? "Studio" : ""}
                   </h2>
                   <ContextWrapper type="title">
                     <h1 className="text-[#F4EBE4] font-serif text-lg mb-1 tracking-widest break-words max-w-full font-light uppercase">
@@ -483,7 +523,20 @@ export function PublicProfileView({
                   {/* Social Icons */}
                   <div className="flex gap-2">
                     {links
-                      .filter((l) => l.enabled && ["instagram", "whatsapp", "facebook", "twitter", "tiktok", "youtube", "linkedin", "telegram"].includes((l.platform || "").toLowerCase()))
+                      .filter(
+                        (l) =>
+                          l.enabled &&
+                          [
+                            "instagram",
+                            "whatsapp",
+                            "facebook",
+                            "twitter",
+                            "tiktok",
+                            "youtube",
+                            "linkedin",
+                            "telegram",
+                          ].includes((l.platform || "").toLowerCase()),
+                      )
                       .slice(0, 3)
                       .map((link, idx) => {
                         const platformDef = getPlatformDef(link.platform || "other");
@@ -503,19 +556,22 @@ export function PublicProfileView({
                   </div>
                 </div>
               </div>
-              
+
               {/* Bio Text */}
               <div className="mt-6 text-center px-4 relative z-10">
                 <ContextWrapper type="bio">
                   <p className="text-[#F4EBE4] text-xs leading-relaxed font-light tracking-wide max-w-xs mx-auto">
-                    {profile.bio || "Realçando sua beleza com cuidado, delicadeza e procedimentos pensados para elevar sua autoestima."}
+                    {profile.bio ||
+                      "Realçando sua beleza com cuidado, delicadeza e procedimentos pensados para elevar sua autoestima."}
                   </p>
                 </ContextWrapper>
               </div>
             </div>
 
             {/* Links List */}
-            <div className={`w-full px-4 sm:px-6 ${linkSpacingClass} flex-1 flex flex-col items-center`}>
+            <div
+              className={`w-full px-4 sm:px-6 ${linkSpacingClass} flex-1 flex flex-col items-center`}
+            >
               {links
                 .filter((l) => l.enabled && l.id !== profile.hero_link_id)
                 .map((link, i) => (
@@ -540,8 +596,12 @@ export function PublicProfileView({
 
             {/* Footer */}
             {profile.footer_enabled && (
-              <div className="mt-8 max-w-[320px] px-4 text-center text-xs font-medium opacity-70" style={{ color: "#2D5A60" }}>
-                {profile.footer_text || "2026 Studio Barbara Estética Avançada. Todos os direitos reservados."}
+              <div
+                className="mt-8 max-w-[320px] px-4 text-center text-xs font-medium opacity-70"
+                style={{ color: "#2D5A60" }}
+              >
+                {profile.footer_text ||
+                  "2026 Studio Barbara Estética Avançada. Todos os direitos reservados."}
               </div>
             )}
           </div>
@@ -601,7 +661,10 @@ export function PublicProfileView({
             {/* Avatar Section */}
             {profile.avatar_shape !== "none" && (
               <ContextWrapper type="avatar">
-                <div className={`relative group ${profile.banner_url ? "-mt-14 mb-4" : "mb-6"}`}>
+                <div
+                  data-editor-target="profile.photo"
+                  className={`relative group ${profile.banner_url ? "-mt-14 mb-4" : "mb-6"}`}
+                >
                   <div
                     className={`absolute -inset-0.5 bg-gradient-to-r from-black/5 to-black/10 blur opacity-75 ${avatarShapeClass}`}
                   ></div>
@@ -636,6 +699,7 @@ export function PublicProfileView({
             >
               <ContextWrapper type="title">
                 <h1
+                  data-editor-target="profile.name"
                   className={`break-words tracking-tight ${titleSize} ${titleWeight}`}
                   style={{ color: titleColor }}
                 >
@@ -645,6 +709,7 @@ export function PublicProfileView({
               {profile.bio && (
                 <ContextWrapper type="bio">
                   <p
+                    data-editor-target="profile.bio"
                     className={`max-w-[320px] break-words leading-relaxed opacity-80 ${bioSize} ${bioWeight} ${bioAlign}`}
                     style={{ color: bioColor }}
                   >
@@ -736,6 +801,7 @@ export function PublicProfileView({
                         />
                       ) : (
                         <a
+                          data-editor-target={`link:${link.id}`}
                           href={isPreview ? undefined : link.url}
                           target={isPreview ? undefined : "_blank"}
                           rel={isPreview ? undefined : "noopener noreferrer"}

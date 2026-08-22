@@ -17,11 +17,31 @@ export default defineConfig({
         "@supabase/ssr",
         "lucide-react",
         "sonner",
-        "qr-code-styling",
-        "qrcode.react",
-        "zod",
-        "react-hook-form"
-      ]
+      ],
+      exclude: ["tsparticles"]
+    },
+    server: {
+      watch: {
+        ignored: [
+          '**/node_modules/**',
+          '**/.git/**',
+          '**/dist/**',
+          '**/.vercel/**',
+          '**/docs/**',
+          '**/public/ejemplo templates/**',
+          '**/.claude/**'
+        ]
+      },
+      hmr: {
+        overlay: false
+      }
+    },
+    esbuild: {
+      tsconfigRaw: {
+        compilerOptions: {
+          skipLibCheck: true
+        }
+      }
     }
   },
   nitro: {

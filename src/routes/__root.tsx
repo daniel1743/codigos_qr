@@ -130,7 +130,8 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   useEffect(() => {
-    if ("serviceWorker" in navigator) {
+    // Solo registrar service worker en producción
+    if (import.meta.env.PROD && "serviceWorker" in navigator) {
       window.addEventListener("load", () => {
         navigator.serviceWorker
           .register("/sw.js")

@@ -5,10 +5,10 @@ import { profileService } from "../services/profile.service";
 import { linkService } from "../services/link.service";
 import type { Profile, ProfileLink } from "../types/database";
 import { Auth } from "../components/Auth";
-import { ProfileSection } from "../components/editor/ProfileSection";
-import { AppearanceSection } from "../components/editor/AppearanceSection";
-import { LinksSection } from "../components/editor/LinksSection";
-import { ShareSection } from "../components/editor/ShareSection";
+import { ContextualPropertiesPanel } from "../components/editor/ContextualPropertiesPanel";
+import { FloatingContextToolbar } from "../components/editor/FloatingContextToolbar";
+import { DraggableBottomSheet } from "../components/editor/DraggableBottomSheet";
+import { UndoRedoFAB, useHistory } from "../components/editor/UndoRedoFAB";
 import { PublicProfileView } from "../components/profile/PublicProfileView";
 import { QRCodeAdvanced } from "../components/qr/QRCodeAdvanced";
 import { QRFrameShell } from "../components/qr/QRFrameShell";
@@ -17,6 +17,8 @@ import { generatePublicId, getInternalSlugFromPublicId } from "../lib/publicId";
 import { getPublicProfileUrl } from "../lib/url";
 import { isValidUrl, normalizeUrl } from "../lib/validation";
 import { isUserAdmin, isAdminEmail } from "../lib/admin-check";
+import { useTouchGesture, parseEditorTarget } from "../hooks/useTouchGesture";
+import { usePinchZoom } from "../hooks/usePinchZoom";
 import {
   UserCircle,
   UserRound,
@@ -42,6 +44,31 @@ export const Route = createFileRoute("/editor")({
 });
 
 type TabId = "profile" | "links" | "appearance" | "qr";
+
+// Modified by Codex — EDITOR-CONTEXTUAL-RIGHT-PANEL-10
+export type EditorTarget =
+  | {
+      type:
+        | "profile.photo"
+        | "profile.name"
+        | "profile.bio"
+        | "profile.alias"
+        | "profile.cover"
+        | "profile.footer";
+    }
+  | { type: "links.manage" }
+  | { type: "link"; linkId: string }
+  | {
+      type:
+        | "appearance.templates"
+        | "appearance.typography"
+        | "appearance.colors"
+        | "appearance.buttons"
+        | "appearance.spacing"
+        | "appearance.decoration";
+    }
+  | { type: "social_cover" | "hero_social" }
+  | { type: "qr" };
 
 const ZOOM_STEPS = [0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.25];
 
@@ -143,12 +170,156 @@ function EditorPage() {
   const [isPublished, setIsPublished] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<TabId>("profile");
   const [panelOpen, setPanelOpen] = useState<boolean>(true);
+  // Modified by Codex — MOBILE-NATIVE-UX-RESPONSIVE-11
+  const [mobilePropertiesOpen, setMobilePropertiesOpen] = useState<boolean>(false);
+  // Modified by Codex — MOBILE-TOUCH-SELECTION-SHEET-12
+  const [selectedMobileTarget, setSelectedMobileTarget] = useState<string | null>(null);
+  const [showFloatingToolbar, setShowFloatingToolbar] = useState<boolean>(false);
+  const [bottomSheetOpen, setBottomSheetOpen] = useState<boolean>(false);
+  const [bottomSheetContent, setBottomSheetContent] = useState<string>("general");
+  // Modified by Codex — EDITOR-CONTEXTUAL-RIGHT-PANEL-10
+  const [selectedEditorTarget, setSelectedEditorTarget] = useState<EditorTarget>({
+    type: "profile.photo",
+  });
   const [zoomLevel, setZoomLevel] = useState<number>(1);
   const [isDesktop, setIsDesktop] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
   const supabase = getBrowserSupabaseClient();
   const loadedUserId = useRef<string | null>(null);
+
+  // Modified by Codex — PREMIUM-MOBILE-UX-ZERO-FRICTION-2026
+  // Undo/Redo system with history management
+  interface EditorState {
+    profile: Partial<Profile>;
+    links: Partial<ProfileLink>[];
+  }
+
+  const {
+    pushState: pushHistory,
+    undo: undoHistory,
+    redo: redoHistory,
+    canUndo,
+    canRedo,
+  } = useHistory<EditorState>(
+    { profile, links },
+    50 // Max 50 history states
+  );
+
+  const handleUndo = () => {
+    const previousState = undoHistory();
+    if (previousState) {
+      setProfile(previousState.profile);
+      setLinks(previousState.links);
+      toast.success("Deshecho");
+    }
+  };
+
+  const handleRedo = () => {
+    const nextState = redoHistory();
+    if (nextState) {
+      setProfile(nextState.profile);
+      setLinks(nextState.links);
+      toast.success("Rehecho");
+    }
+  };
+
+  // Push to history whenever profile or links change
+  useEffect(() => {
+    if (session && (profile.id || links.length > 0)) {
+      pushHistory({ profile, links });
+    }
+  }, [profile, links, session]);
+
+  // Modified by Codex — MOBILE-TOUCH-SELECTION-SHEET-12
+  // Touch gesture handlers for mobile selection
+  const handleTapOnElement = (target: string) => {
+    setSelectedMobileTarget(target);
+    setShowFloatingToolbar(true);
+
+    // Also update desktop selection state for consistency
+    const { type, id } = parseEditorTarget(target);
+    if (type && type.startsWith("link") && id) {
+      setSelectedEditorTarget({ type: "link", linkId: id });
+    } else if (type) {
+      setSelectedEditorTarget({ type: type as any });
+    }
+  };
+
+  const handleTapOutside = () => {
+    setSelectedMobileTarget(null);
+    setShowFloatingToolbar(false);
+    setBottomSheetOpen(false);
+  };
+
+  const handleFloatingToolbarAction = (action: string) => {
+    if (action === "more") {
+      setBottomSheetOpen(true);
+      setBottomSheetContent("general");
+    } else if (action === "font") {
+      setBottomSheetOpen(true);
+      setBottomSheetContent("font");
+    } else if (action === "color") {
+      setBottomSheetOpen(true);
+      setBottomSheetContent("color");
+    } else if (action === "replace") {
+      // Trigger file upload
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "image/*";
+      input.onchange = (e) => {
+        // Handle file upload
+        console.log("File selected:", (e.target as HTMLInputElement).files?.[0]);
+      };
+      input.click();
+    } else if (action === "edit") {
+      setBottomSheetOpen(true);
+      setBottomSheetContent("edit");
+    }
+  };
+
+  // Touch gesture hook (only on mobile)
+  useTouchGesture({
+    onTap: !isDesktop ? handleTapOnElement : undefined,
+    onTapOutside: !isDesktop ? handleTapOutside : undefined,
+  });
+
+  // Modified by Codex — MOBILE-PINCH-ZOOM-CANVAS-13
+  // Pinch zoom for mobile canvas viewport
+  const canvasRef = useRef<HTMLDivElement>(null);
+
+  const {
+    attachToElement,
+    isPinching,
+    currentScale,
+    resetZoom,
+  } = usePinchZoom({
+    minScale: 0.45,
+    maxScale: 3.0,
+    initialScale: zoomLevel,
+    onZoomStart: () => {
+      // Hide toolbar during pinch for cleaner UX
+      if (!isDesktop) {
+        setShowFloatingToolbar(false);
+      }
+    },
+    onZoomEnd: () => {
+      // Restore toolbar if element still selected
+      if (!isDesktop && selectedMobileTarget) {
+        setShowFloatingToolbar(true);
+      }
+    },
+    onZoomChange: (scale) => {
+      setZoomLevel(scale);
+    },
+  });
+
+  // Attach pinch zoom to canvas on mobile
+  useEffect(() => {
+    if (!isDesktop && canvasRef.current) {
+      return attachToElement(canvasRef.current);
+    }
+  }, [isDesktop, attachToElement]);
 
   useEffect(() => {
     setIsDesktop(window.innerWidth >= 768);
@@ -252,7 +423,7 @@ function EditorPage() {
       const [p, adminStatus, authUserResult] = await Promise.all([
         profileService.getProfileByUserId(supabase, userId),
         isUserAdmin(supabase, userId),
-        supabase.auth.getUser()
+        supabase.auth.getUser(),
       ]);
 
       const userEmail = authUserResult.data.user?.email || "";
@@ -432,51 +603,56 @@ function EditorPage() {
     { id: "qr", label: "QR", icon: QrCode },
   ] as const;
 
-  const renderActiveSection = () => {
-    switch (activeTab) {
-      case "profile":
-        return (
-          <ProfileSection
-            profile={profile}
-            onChange={(u) => setProfile((p) => ({ ...p, ...u }))}
-            userId={session.user.id}
-          />
-        );
-      case "links":
-        return <LinksSection links={links} onChange={setLinks} userId={session.user.id} />;
-      case "appearance":
-        return (
-          <AppearanceSection
-            profile={profile}
-            onChange={(u) => setProfile((p) => ({ ...p, ...u }))}
-            userId={session.user.id}
-            links={links}
-            onManageLinkImages={() => {
-              setActiveTab("links");
-              setPanelOpen(true);
-            }}
-          />
-        );
-      case "qr":
-        return (
-          <ShareSection
-            publicId={savedPublicId || ""}
-            published={isPublished}
-            saving={saving}
-            onSave={handleSave}
-            isValid={validate()}
-            profile={profile}
-            onChange={(u) => setProfile((p) => ({ ...p, ...u }))}
-          />
-        );
-      default:
-        return null;
-    }
-  };
+  // Modified by Codex — EDITOR-CONTEXTUAL-RIGHT-PANEL-10
+  const renderContextualProperties = () => (
+    <ContextualPropertiesPanel
+      selectedTarget={selectedEditorTarget}
+      profile={profile}
+      links={links}
+      userId={session.user.id}
+      publicId={savedPublicId || ""}
+      published={isPublished}
+      saving={saving}
+      onSave={handleSave}
+      isValid={validate()}
+      onProfileChange={(updates) => setProfile((current) => ({ ...current, ...updates }))}
+      onLinksChange={setLinks}
+      onSelectTarget={(target) => {
+        if (target.type === "link" || target.type === "links.manage") {
+          setActiveTab("links");
+        } else if (target.type === "qr") {
+          setActiveTab("qr");
+        } else if (
+          target.type.startsWith("appearance") ||
+          target.type === "social_cover" ||
+          target.type === "hero_social"
+        ) {
+          setActiveTab("appearance");
+        } else {
+          setActiveTab("profile");
+        }
+        setSelectedEditorTarget(target);
+        setPanelOpen(true);
+      }}
+    />
+  );
 
   const handleTabClick = (id: TabId) => {
     setActiveTab(id);
     setPanelOpen(true);
+    setMobilePropertiesOpen(true);
+    // Modified by Codex — EDITOR-THREE-PANEL-RESTRUCTURE-09
+    setSelectedEditorTarget(
+      id === "profile"
+        ? { type: "profile.photo" }
+        : id === "links"
+          ? links[0]?.id
+            ? { type: "link", linkId: links[0].id }
+            : { type: "links.manage" }
+          : id === "appearance"
+            ? { type: "appearance.templates" }
+            : { type: "qr" },
+    );
   };
 
   const handleProfilePreviewChange = (updates: Partial<Profile>) => {
@@ -495,214 +671,418 @@ function EditorPage() {
     setPanelOpen(true);
   };
 
-  const showQrEditingPreview = activeTab === "qr" && panelOpen;
+  // Modified by Codex — EDITOR-THREE-PANEL-RESTRUCTURE-09
+  const handlePreviewTargetSelect = (target: {
+    type: "title" | "bio" | "avatar" | "cover" | "background" | "link";
+    linkId?: string;
+  }) => {
+    if (target.type === "link" && target.linkId) {
+      setActiveTab("links");
+      setSelectedEditorTarget({ type: "link", linkId: target.linkId });
+    } else if (target.type === "title") {
+      setActiveTab("profile");
+      setSelectedEditorTarget({ type: "profile.name" });
+    } else if (target.type === "bio") {
+      setActiveTab("profile");
+      setSelectedEditorTarget({ type: "profile.bio" });
+    } else if (target.type === "avatar") {
+      setActiveTab("profile");
+      setSelectedEditorTarget({ type: "profile.photo" });
+    } else if (target.type === "cover") {
+      setActiveTab("profile");
+      setSelectedEditorTarget({ type: "profile.cover" });
+    } else if (target.type === "background") {
+      setActiveTab("appearance");
+      setSelectedEditorTarget({ type: "appearance.colors" });
+    }
+    setPanelOpen(true);
+    setMobilePropertiesOpen(false);
+  };
+
+  const showQrEditingPreview = activeTab === "qr";
+
+  // Modified by Codex — EDITOR-CONTEXTUAL-RIGHT-PANEL-10
+  const selectTarget = (tab: TabId, target: EditorTarget) => {
+    setActiveTab(tab);
+    setSelectedEditorTarget(target);
+    setPanelOpen(true);
+    setMobilePropertiesOpen(true);
+  };
+
+  // Modified by Codex — EDITOR-CONTEXTUAL-RIGHT-PANEL-10
+  const targetLabel = (() => {
+    if (selectedEditorTarget.type === "profile.photo") return "Foto";
+    if (selectedEditorTarget.type === "profile.name") return "Nombre";
+    if (selectedEditorTarget.type === "profile.bio") return "Bio";
+    if (selectedEditorTarget.type === "profile.alias") return "Alias";
+    if (selectedEditorTarget.type === "profile.cover") return "Portada";
+    if (selectedEditorTarget.type === "profile.footer") return "Pie de página";
+    if (selectedEditorTarget.type === "links.manage") return "Administrar enlaces";
+    if (selectedEditorTarget.type === "link") {
+      return links.find((link) => link.id === selectedEditorTarget.linkId)?.label || "Enlace";
+    }
+    if (selectedEditorTarget.type === "appearance.templates") return "Templates";
+    if (selectedEditorTarget.type === "appearance.typography") return "Tipografía";
+    if (selectedEditorTarget.type === "appearance.colors") return "Colores";
+    if (selectedEditorTarget.type === "appearance.buttons") return "Botones";
+    if (selectedEditorTarget.type === "appearance.spacing") return "Espaciado";
+    if (selectedEditorTarget.type === "appearance.decoration") return "Decoración";
+    if (selectedEditorTarget.type === "social_cover") return "Social covers";
+    if (selectedEditorTarget.type === "hero_social") return "Hero social";
+    return "QR";
+  })();
+
+  // Modified by Codex — EDITOR-CONTEXTUAL-RIGHT-PANEL-10
+  const renderStructurePanel = () => (
+    <div className="flex h-full flex-col gap-5 overflow-y-auto p-4">
+      <div>
+        <p className="mb-2 px-2 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+          Perfil
+        </p>
+        {[
+          ["profile.photo", "Foto"],
+          ["profile.name", "Nombre"],
+          ["profile.bio", "Bio"],
+          ["profile.alias", "Alias"],
+          ["profile.cover", "Portada"],
+          ["profile.footer", "Pie de página"],
+        ].map(([type, label]) => (
+          <button
+            key={type}
+            type="button"
+            className={`mb-1 flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm ${
+              selectedEditorTarget.type === type ? "bg-primary/10 text-primary" : "hover:bg-muted"
+            }`}
+            onClick={() =>
+              selectTarget("profile", { type: type as EditorTarget["type"] } as EditorTarget)
+            }
+          >
+            <span>{label}</span>
+          </button>
+        ))}
+      </div>
+
+      <div>
+        <div className="mb-2 flex items-center justify-between px-2">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+            Enlaces
+          </p>
+          <span className="text-[11px] text-muted-foreground">{links.length}/8</span>
+        </div>
+        <button
+          type="button"
+          className={`mb-2 w-full rounded-lg border border-dashed px-3 py-2 text-left text-sm hover:bg-muted ${
+            selectedEditorTarget.type === "links.manage" ? "bg-primary/10 text-primary" : ""
+          }`}
+          onClick={() => selectTarget("links", { type: "links.manage" })}
+        >
+          Añadir / administrar enlaces
+        </button>
+        {links.map((link) => (
+          <button
+            key={link.id || link.sort_order}
+            type="button"
+            className={`mb-1 flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm ${
+              selectedEditorTarget.type === "link" && selectedEditorTarget.linkId === link.id
+                ? "bg-primary/10 text-primary"
+                : "hover:bg-muted"
+            }`}
+            onClick={() => selectTarget("links", { type: "link", linkId: link.id || "" })}
+          >
+            <span className="min-w-0 truncate">{link.label || link.platform || "Enlace"}</span>
+            <span
+              className={
+                link.enabled ? "text-[10px] text-emerald-600" : "text-[10px] text-muted-foreground"
+              }
+            >
+              {link.enabled ? "ON" : "OFF"}
+            </span>
+          </button>
+        ))}
+      </div>
+
+      <div>
+        <p className="mb-2 px-2 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+          Apariencia
+        </p>
+        {[
+          ["appearance.templates", "Templates"],
+          ["appearance.typography", "Tipografía"],
+          ["appearance.colors", "Colores"],
+          ["appearance.buttons", "Botones"],
+          ["appearance.spacing", "Espaciado"],
+          ["appearance.decoration", "Decoración"],
+          ["social_cover", "Social covers"],
+        ].map(([type, label]) => (
+          <button
+            key={type}
+            type="button"
+            className={`mb-1 w-full rounded-lg px-3 py-2 text-left text-sm ${
+              selectedEditorTarget.type === type ? "bg-primary/10 text-primary" : "hover:bg-muted"
+            }`}
+            onClick={() =>
+              selectTarget("appearance", { type: type as EditorTarget["type"] } as EditorTarget)
+            }
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      <div>
+        <p className="mb-2 px-2 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+          QR
+        </p>
+        <button
+          type="button"
+          className={`w-full rounded-lg px-3 py-2 text-left text-sm ${
+            selectedEditorTarget.type === "qr" ? "bg-primary/10 text-primary" : "hover:bg-muted"
+          }`}
+          onClick={() => selectTarget("qr", { type: "qr" })}
+        >
+          QR Studio
+        </button>
+      </div>
+    </div>
+  );
+
+  // Modified by Codex — MOBILE-TOUCH-SELECTION-SHEET-12 - REMOVED OLD TOOLBAR
+  // Old renderMobileContextToolbar() deleted, replaced with FloatingContextToolbar component
 
   return (
-    <div className="relative flex h-[100dvh] w-full flex-col overflow-hidden overscroll-none bg-background font-sans md:flex-row">
-      {/* SIDEBAR DESKTOP */}
-      <nav className="hidden md:flex flex-col items-center w-[88px] border-r bg-card py-6 z-20 shrink-0">
-        <div className="w-10 h-10 bg-primary text-primary-foreground rounded-xl flex items-center justify-center font-bold mb-8 shadow-sm shrink-0">
-          QR
-        </div>
-
-        <div className="flex flex-col gap-4 w-full px-3 flex-1 overflow-y-auto pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-          <Link
-            to="/profile"
-            title="Mi perfil principal"
-            className="flex flex-col items-center justify-center p-3 w-full shrink-0 rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200"
-          >
-            <UserRound className="w-5 h-5 mb-1" />
-            <span className="text-center text-[10px] font-medium leading-tight">
-              Mi perfil principal
-            </span>
-          </Link>
-
+    <div className="relative flex h-[100dvh] w-full flex-col overflow-hidden overscroll-none bg-background font-sans">
+      {/* Modified by Codex — EDITOR-THREE-PANEL-RESTRUCTURE-09 */}
+      <header className="hidden h-16 shrink-0 items-center justify-between border-b bg-card/95 px-4 shadow-sm backdrop-blur md:flex">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary font-bold text-primary-foreground shadow-sm">
+            QR
+          </div>
+          <div className="flex items-center gap-1">
+            {TABS.map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => handleTabClick(tab.id as TabId)}
+                  className={`flex h-10 items-center gap-2 rounded-lg px-3 text-sm font-medium transition-colors ${
+                    isActive
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  }`}
+                >
+                  <Icon className="h-4 w-4" />
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+          <div className="mx-1 h-6 w-px bg-border" />
           <Link
             to="/encrypted-documents"
-            title="Documentos Seguros"
-            className="flex flex-col items-center justify-center p-3 w-full shrink-0 rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200"
+            className="flex h-10 items-center gap-2 rounded-lg px-3 text-sm font-medium text-blue-600 hover:bg-blue-50"
           >
-            <Lock className="w-5 h-5 mb-1" />
-            <span className="text-center text-[10px] font-medium leading-tight font-semibold text-blue-600">
-              Docs Seguros
-            </span>
+            <Lock className="h-4 w-4" />
+            Docs Seguros
           </Link>
-
-          {TABS.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id && panelOpen;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => handleTabClick(tab.id as TabId)}
-                title={tab.label}
-                className={`flex flex-col items-center justify-center p-3 rounded-xl shrink-0 transition-all duration-200 group ${
-                  isActive
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                }`}
-              >
-                <Icon
-                  className={`w-6 h-6 mb-1.5 transition-transform duration-200 ${
-                    isActive ? "scale-110" : "group-hover:scale-110"
-                  }`}
-                />
-                <span className="text-[10px] font-medium">{tab.label}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="mt-auto px-3 w-full space-y-2">
-          {/* Botón Panel Admin - solo visible para admins */}
+          <Link
+            to="/profile"
+            className="flex h-10 items-center gap-2 rounded-lg px-3 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+          >
+            <UserRound className="h-4 w-4" />
+            Mi perfil
+          </Link>
           {isAdmin && (
             <Link
               to="/admin"
-              className="flex flex-col items-center justify-center p-3 w-full rounded-xl bg-gradient-to-br from-amber-500/10 to-yellow-500/10 text-amber-600 hover:from-amber-500/20 hover:to-yellow-500/20 transition-all duration-200 border border-amber-200/50"
+              className="flex h-10 items-center gap-2 rounded-lg px-3 text-sm font-medium text-amber-600 hover:bg-amber-50"
             >
-              <Shield className="w-5 h-5 mb-1" />
-              <span className="text-[10px] font-medium">Panel Admin</span>
+              <Shield className="h-4 w-4" />
+              Admin
             </Link>
           )}
-
           <button
+            type="button"
             onClick={() => supabase.auth.signOut()}
-            className="flex flex-col items-center justify-center p-3 w-full rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200"
+            className="flex h-10 items-center gap-2 rounded-lg px-3 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
           >
-            <X className="w-5 h-5 mb-1" />
-            <span className="text-[10px] font-medium">Salir</span>
+            <X className="h-4 w-4" />
+            Salir
           </button>
         </div>
-      </nav>
 
-      {/* PANEL CONTEXTUAL DESKTOP */}
-      <div
-        className={`hidden md:flex flex-col border-r bg-background shrink-0 h-full overflow-hidden transition-all duration-300 ease-in-out ${
-          panelOpen ? "w-[360px] opacity-100" : "w-0 opacity-0 border-r-0"
-        }`}
-      >
-        <div className="flex items-center justify-between px-6 py-5 border-b bg-card/50 backdrop-blur-sm shrink-0">
-          <h1 className="font-semibold">{TABS.find((t) => t.id === activeTab)?.label}</h1>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 -mr-2 text-muted-foreground"
-            onClick={() => setPanelOpen(false)}
-          >
-            <X className="w-4 h-4" />
-          </Button>
-        </div>
-        <div className="flex-1 overflow-y-auto p-6 scrollbar-thin">{renderActiveSection()}</div>
-      </div>
-
-      {/* GLOBAL PUBLISH BUTTON DESKTOP (Shortcut) */}
-      <div className="hidden md:flex absolute top-4 right-4 z-30 gap-2">
-        {isPublished && (
-          <div className="flex items-center text-xs font-medium text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200 shadow-sm">
-            <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" /> Publicado
-          </div>
-        )}
-        <Button
-          onClick={() => handleSave(true)}
-          disabled={saving || !validate()}
-          className="shadow-sm rounded-full px-5"
-        >
-          {saving ? "Guardando..." : "Publicar Cambios"}
-        </Button>
-      </div>
-
-      {/* PREVIEW CONTAINER */}
-      <main
-        id="preview-main-container"
-        className="relative flex min-h-0 flex-1 flex-col items-center justify-center overflow-hidden bg-muted/30 p-0 md:h-full md:p-8"
-      >
-        {/* Toggle button to reopen panel if closed */}
-        {!panelOpen && (
-          <Button
-            variant="secondary"
-            size="icon"
-            className="hidden md:flex absolute left-4 top-4 shadow-md rounded-full z-10"
-            onClick={() => setPanelOpen(true)}
-          >
-            <ChevronDown className="w-5 h-5 rotate-90" />
-          </Button>
-        )}
-
-        {/* Zoom Controls */}
-        <div className="absolute right-4 top-4 z-40 flex items-center gap-1 rounded-full border bg-background/95 p-1.5 shadow-sm backdrop-blur-md md:top-1/2 md:-translate-y-1/2 md:flex-col">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleZoomIn}
-            disabled={zoomLevel >= 1.25}
-            className="h-11 w-11 rounded-full md:h-8 md:w-8"
-            aria-label="Acercar"
-            title="Acercar"
-          >
-            <ZoomIn className="w-4 h-4" />
-          </Button>
-          <span
-            className="min-w-10 py-1 text-center text-[10px] font-medium md:w-full"
-            aria-label="Nivel de zoom actual"
-          >
-            {Math.round(zoomLevel * 100)}%
-          </span>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleZoomOut}
-            disabled={zoomLevel <= 0.5}
-            className="h-11 w-11 rounded-full md:h-8 md:w-8"
-            aria-label="Alejar"
-            title="Alejar"
-          >
-            <ZoomOut className="w-4 h-4" />
-          </Button>
-          <div className="h-4 w-[1px] bg-border md:my-1 md:h-[1px] md:w-4" />
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleFit}
-            className="h-11 w-11 rounded-full hover:bg-muted md:h-8 md:w-8"
-            aria-label="Ajustar a pantalla"
-            title="Ajustar"
-          >
-            <Maximize className="w-4 h-4" />
-          </Button>
-        </div>
-
-        {/* Scalable Container */}
-        <div className="relative flex items-center justify-center w-full h-full">
-          {showQrEditingPreview ? (
-            <EditorQRPreview
-              profile={profile}
-              publicId={savedPublicId || profile.public_id || ""}
-              onDone={() => setPanelOpen(false)}
-            />
-          ) : (
-            // Modified by Codex — QR-STUDIO-11C
-            <div
-              className="relative h-[750px] w-[375px] shrink-0 transform-gpu overflow-hidden rounded-[3rem] border-[8px] border-black/10 bg-background shadow-2xl transition-transform duration-300"
-              style={{
-                transform: `scale(${zoomLevel})`,
-                transformOrigin: "center center",
-              }}
-            >
-              <PublicProfileView
-                profile={profile}
-                links={links}
-                isPreview={true}
-                onProfileChange={handleProfilePreviewChange}
-                onLinkChange={handleLinkPreviewChange}
-                onOpenSidebar={handleOpenPreviewSidebar}
-              />
+        <div className="flex items-center gap-2">
+          {isPublished && (
+            <div className="flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-600 shadow-sm">
+              <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" /> Publicado
             </div>
           )}
+          <Button
+            onClick={() => handleSave(true)}
+            disabled={saving || !validate()}
+            className="rounded-full px-5 shadow-sm"
+          >
+            {saving ? "Guardando..." : "Publicar Cambios"}
+          </Button>
         </div>
-      </main>
+      </header>
+
+      <div className="flex min-h-0 flex-1 overflow-hidden">
+        {/* Modified by Codex — EDITOR-THREE-PANEL-RESTRUCTURE-09 */}
+        <div className="hidden h-full w-[292px] shrink-0 flex-col overflow-hidden border-r bg-background md:flex">
+          <div className="shrink-0 border-b bg-card/50 px-4 py-4">
+            <p className="text-sm font-semibold">Estructura</p>
+            <p className="text-xs text-muted-foreground">Selecciona qué quieres editar</p>
+          </div>
+          {renderStructurePanel()}
+        </div>
+
+        {/* PREVIEW CONTAINER */}
+        <main
+          id="preview-main-container"
+          className="relative flex min-h-0 flex-1 flex-col items-center justify-center overflow-hidden bg-muted/30 p-0 pb-24 md:h-full md:p-8"
+        >
+          {/* Toggle button to reopen panel if closed */}
+          {!panelOpen && (
+            <Button
+              variant="secondary"
+              size="icon"
+              className="hidden md:flex absolute left-4 top-4 shadow-md rounded-full z-10"
+              onClick={() => setPanelOpen(true)}
+            >
+              <ChevronDown className="w-5 h-5 rotate-90" />
+            </Button>
+          )}
+
+          {/* Zoom Controls - Hidden on mobile (pinch zoom instead) */}
+          <div className="absolute right-4 top-4 z-40 hidden items-center gap-1 rounded-full border bg-background/95 p-1.5 shadow-sm backdrop-blur-md md:flex md:top-1/2 md:-translate-y-1/2 md:flex-col">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleZoomIn}
+              disabled={zoomLevel >= 1.25}
+              className="h-8 w-8 rounded-full"
+              aria-label="Acercar"
+              title="Acercar"
+            >
+              <ZoomIn className="w-4 h-4" />
+            </Button>
+            <span
+              className="w-full py-1 text-center text-[10px] font-medium"
+              aria-label="Nivel de zoom actual"
+            >
+              {Math.round(zoomLevel * 100)}%
+            </span>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleZoomOut}
+              disabled={zoomLevel <= 0.5}
+              className="h-8 w-8 rounded-full"
+              aria-label="Alejar"
+              title="Alejar"
+            >
+              <ZoomOut className="w-4 h-4" />
+            </Button>
+            <div className="my-1 h-[1px] w-4 bg-border" />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleFit}
+              className="h-8 w-8 rounded-full hover:bg-muted"
+              aria-label="Ajustar a pantalla"
+              title="Ajustar"
+            >
+              <Maximize className="w-4 h-4" />
+            </Button>
+          </div>
+
+          {/* Scalable Container - Pinch zoom enabled on mobile */}
+          <div
+            ref={canvasRef}
+            className="relative flex items-center justify-center w-full h-full"
+          >
+            {showQrEditingPreview ? (
+              <EditorQRPreview
+                profile={profile}
+                publicId={savedPublicId || profile.public_id || ""}
+                onDone={() => setPanelOpen(false)}
+              />
+            ) : (
+              // Modified by Codex — QR-STUDIO-11C
+              <div
+                className="relative h-[750px] w-[375px] shrink-0 transform-gpu overflow-hidden rounded-[3rem] border-[8px] border-black/10 bg-background shadow-2xl transition-transform duration-300"
+                style={{
+                  transform: `scale(${zoomLevel})`,
+                  transformOrigin: "center center",
+                }}
+              >
+                <PublicProfileView
+                  profile={profile}
+                  links={links}
+                  isPreview={true}
+                  onProfileChange={handleProfilePreviewChange}
+                  onLinkChange={handleLinkPreviewChange}
+                  onOpenSidebar={handleOpenPreviewSidebar}
+                  onSelectTarget={handlePreviewTargetSelect}
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Modified by Codex — MOBILE-TOUCH-SELECTION-SHEET-12 */}
+          {/* Floating Context Toolbar - Only visible when element selected on mobile */}
+          <FloatingContextToolbar
+            selectedTarget={selectedMobileTarget}
+            onActionClick={handleFloatingToolbarAction}
+            visible={showFloatingToolbar && !isDesktop}
+          />
+        </main>
+
+        {/* Modified by Codex — EDITOR-THREE-PANEL-RESTRUCTURE-09 */}
+        <aside
+          className={`hidden h-full shrink-0 flex-col overflow-hidden border-l bg-background transition-all duration-200 md:flex ${
+            panelOpen ? "w-[340px]" : "w-0 border-l-0"
+          }`}
+        >
+          <div className="flex shrink-0 items-center justify-between border-b bg-card/50 px-5 py-4">
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold">Propiedades</p>
+              <p className="truncate text-xs text-muted-foreground">{targetLabel}</p>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-muted-foreground"
+              onClick={() => setPanelOpen(false)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+          <div className="flex-1 overflow-y-auto p-5 scrollbar-thin">
+            {panelOpen ? (
+              renderContextualProperties()
+            ) : (
+              <div className="rounded-xl border border-dashed p-4 text-sm text-muted-foreground">
+                Selecciona un elemento para editar sus propiedades.
+              </div>
+            )}
+          </div>
+        </aside>
+      </div>
+
+      {/* Modified by Codex — PREMIUM-MOBILE-UX-ZERO-FRICTION-2026 */}
+      {/* Undo/Redo FAB - Always accessible (like PicsArt) */}
+      <UndoRedoFAB
+        onUndo={handleUndo}
+        onRedo={handleRedo}
+        canUndo={canUndo}
+        canRedo={canRedo}
+      />
 
       {/* MOBILE BOTTOM NAVIGATION */}
-      <nav className="z-30 flex shrink-0 items-center gap-1 overflow-x-auto border-t bg-card px-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] pt-2 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] md:hidden">
+      <nav className="z-30 flex shrink-0 items-center gap-1 border-t bg-card px-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] pt-2 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] md:hidden">
         <Link
           to="/profile"
           title="Mi perfil principal"
@@ -718,7 +1098,9 @@ function EditorPage() {
           className="flex min-h-14 min-w-[52px] flex-1 flex-col items-center justify-center rounded-lg px-1.5 py-2 transition-colors text-muted-foreground hover:text-primary"
         >
           <Lock className="w-5 h-5 mb-1 text-blue-500" />
-          <span className="max-w-full truncate text-[10px] font-medium text-blue-500 font-semibold">Docs Seguros</span>
+          <span className="max-w-full truncate text-[10px] font-medium text-blue-500 font-semibold">
+            Docs Seguros
+          </span>
         </Link>
 
         {TABS.map((tab) => {
@@ -739,47 +1121,28 @@ function EditorPage() {
         })}
       </nav>
 
-      {/* MOBILE BOTTOM SHEET (Panel Overlay) */}
-      <div
-        className={`md:hidden absolute inset-0 z-20 flex flex-col justify-end pointer-events-none transition-opacity duration-300 ${
-          panelOpen ? "opacity-100" : "opacity-0"
-        }`}
+      {/* Modified by Codex — MOBILE-TOUCH-SELECTION-SHEET-12 */}
+      {/* Draggable Bottom Sheet - Replaces old fixed drawer */}
+      <DraggableBottomSheet
+        open={bottomSheetOpen}
+        onOpenChange={setBottomSheetOpen}
+        title={
+          selectedMobileTarget
+            ? parseEditorTarget(selectedMobileTarget).type === "profile.photo"
+              ? "Foto de perfil"
+              : parseEditorTarget(selectedMobileTarget).type === "profile.name"
+                ? "Nombre"
+                : parseEditorTarget(selectedMobileTarget).type === "profile.bio"
+                  ? "Biografía"
+                  : parseEditorTarget(selectedMobileTarget).type === "link"
+                    ? "Enlace"
+                    : "Propiedades"
+            : "Propiedades"
+        }
+        initialSnap="half"
       >
-        {/* Backdrop */}
-        <div
-          className={`absolute inset-0 bg-black/40 backdrop-blur-[2px] transition-opacity duration-300 ${panelOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
-          onClick={() => setPanelOpen(false)}
-        />
-
-        {/* Sheet Content */}
-        <div
-          className={`pointer-events-auto flex h-auto max-h-[88dvh] min-h-[52dvh] w-full flex-col rounded-t-[1.5rem] bg-background shadow-2xl transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
-            panelOpen ? "translate-y-0" : "translate-y-full"
-          }`}
-        >
-          {/* Drag Handle & Header */}
-          <div className="flex shrink-0 flex-col items-center rounded-t-[1.5rem] border-b bg-background pb-3 pt-3">
-            <div className="w-12 h-1.5 bg-muted rounded-full mb-4" />
-            <div className="flex w-full items-center justify-between px-4">
-              <h2 className="text-base font-semibold tracking-tight">
-                {TABS.find((t) => t.id === activeTab)?.label}
-              </h2>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="-mr-2 text-muted-foreground rounded-full"
-                onClick={() => setPanelOpen(false)}
-              >
-                <X className="w-5 h-5" />
-              </Button>
-            </div>
-          </div>
-
-          <div className="mb-16 flex-1 overflow-y-auto p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] scrollbar-thin sm:p-6">
-            {renderActiveSection()}
-          </div>
-        </div>
-      </div>
+        {renderContextualProperties()}
+      </DraggableBottomSheet>
     </div>
   );
 }

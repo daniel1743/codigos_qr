@@ -16,6 +16,7 @@ import {
   Image as ImageIcon2,
   CircleDashed,
   PenSquare,
+  type LucideIcon,
 } from "lucide-react";
 import { PlatformPicker } from "./PlatformPicker";
 
@@ -27,6 +28,8 @@ interface ContextualToolbarProps {
   onProfileChange?: (updates: Partial<Profile>) => void;
   onLinkChange?: (linkId: string, updates: Partial<ProfileLink>) => void;
   onOpenSidebar?: (tabId: string) => void;
+  // Modified by Codex — EDITOR-THREE-PANEL-RESTRUCTURE-09
+  onSelectTarget?: (target: { type: ContextualToolbarProps["type"]; linkId?: string }) => void;
   children: React.ReactNode;
 }
 
@@ -38,6 +41,7 @@ export function ContextualToolbar({
   onProfileChange,
   onLinkChange,
   onOpenSidebar,
+  onSelectTarget,
   children,
 }: ContextualToolbarProps) {
   const [open, setOpen] = React.useState(false);
@@ -75,7 +79,7 @@ export function ContextualToolbar({
     active,
     title,
   }: {
-    icon?: any;
+    icon?: LucideIcon;
     label?: string;
     onClick: () => void;
     active?: boolean;
@@ -112,9 +116,12 @@ export function ContextualToolbar({
       <ActionButton
         label="Tam."
         onClick={() => {
-          const sizes = ["sm", "md", "lg", "xl"];
-          const next = sizes[(sizes.indexOf(profile.title_size || "lg") + 1) % sizes.length];
-          onProfileChange?.({ title_size: next as any });
+          const sizes = ["sm", "md", "lg", "xl"] as const;
+          const currentIndex = sizes.indexOf(
+            (profile.title_size || "lg") as (typeof sizes)[number],
+          );
+          const next = sizes[(currentIndex + 1) % sizes.length] || "lg";
+          onProfileChange?.({ title_size: next });
         }}
         title="Tamaño"
       />
@@ -169,9 +176,10 @@ export function ContextualToolbar({
       <ActionButton
         label="Tam."
         onClick={() => {
-          const sizes = ["sm", "md", "lg"];
-          const next = sizes[(sizes.indexOf(profile.bio_size || "md") + 1) % sizes.length];
-          onProfileChange?.({ bio_size: next as any });
+          const sizes = ["sm", "md", "lg"] as const;
+          const currentIndex = sizes.indexOf((profile.bio_size || "md") as (typeof sizes)[number]);
+          const next = sizes[(currentIndex + 1) % sizes.length] || "md";
+          onProfileChange?.({ bio_size: next });
         }}
         title="Tamaño"
       />
@@ -347,7 +355,7 @@ export function ContextualToolbar({
           onClick={() => {
             const rads = ["none", "md", "full"];
             const next = rads[(rads.indexOf(profile.button_radius || "full") + 1) % rads.length];
-            onProfileChange?.({ button_radius: next as any });
+            onProfileChange?.({ button_radius: next as Profile["button_radius"] });
           }}
           title="Forma"
         />
@@ -358,7 +366,7 @@ export function ContextualToolbar({
             const styles = ["solid", "outline", "ghost", "soft", "glass", "neon", "retro"];
             const next =
               styles[(styles.indexOf(profile.button_style || "solid") + 1) % styles.length];
-            onProfileChange?.({ button_style: next as any });
+            onProfileChange?.({ button_style: next as Profile["button_style"] });
           }}
           title="Estilo"
         />
@@ -407,6 +415,8 @@ export function ContextualToolbar({
             if ((e.target as HTMLElement).closest("a")) {
               e.preventDefault();
             }
+            // Modified by Codex — EDITOR-THREE-PANEL-RESTRUCTURE-09
+            onSelectTarget?.({ type, ...(linkId ? { linkId } : {}) });
             setOpen(true);
           }}
         >
