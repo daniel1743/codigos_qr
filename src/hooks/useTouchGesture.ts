@@ -1,4 +1,4 @@
-import { useRef, useCallback, useEffect } from 'react';
+import { useRef, useCallback, useEffect } from "react";
 
 /**
  * Mobile Touch Gesture Hook
@@ -13,6 +13,7 @@ interface TouchGestureState {
   startTime: number;
   candidateTarget: string | null;
   isScrolling: boolean;
+  ignoredSurface: boolean;
 }
 
 interface UseTouchGestureOptions {
@@ -34,14 +35,20 @@ export function useTouchGesture({
     startTime: 0,
     candidateTarget: null,
     isScrolling: false,
+    ignoredSurface: false,
   });
 
   const handlePointerDown = useCallback((e: PointerEvent) => {
     const target = e.target as HTMLElement;
+    const ignoredSurface = Boolean(
+      target.closest("[data-mobile-bottom-sheet]") ||
+      target.closest("[data-radix-popper-content-wrapper]") ||
+      target.closest('[role="dialog"]'),
+    );
 
     // Find editable target by data attribute
-    const editableElement = target.closest('[data-editor-target]');
-    const candidateTarget = editableElement?.getAttribute('data-editor-target') || null;
+    const editableElement = target.closest("[data-editor-target]");
+    const candidateTarget = editableElement?.getAttribute("data-editor-target") || null;
 
     gestureState.current = {
       startX: e.clientX,
@@ -49,49 +56,69 @@ export function useTouchGesture({
       startTime: Date.now(),
       candidateTarget,
       isScrolling: false,
+      ignoredSurface,
     };
   }, []);
 
-  const handlePointerMove = useCallback((e: PointerEvent) => {
-    const state = gestureState.current;
+  const handlePointerMove = useCallback(
+    (e: PointerEvent) => {
+      const state = gestureState.current;
 
-    // Calculate movement delta
-    const deltaX = Math.abs(e.clientX - state.startX);
-    const deltaY = Math.abs(e.clientY - state.startY);
-    const totalMovement = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+      // Calculate movement delta
+      const deltaX = Math.abs(e.clientX - state.startX);
+      const deltaY = Math.abs(e.clientY - state.startY);
+      const totalMovement = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
-    // If movement exceeds threshold, it's a scroll/drag gesture
-    if (totalMovement > movementThreshold) {
-      state.isScrolling = true;
-    }
-  }, [movementThreshold]);
-
-  const handlePointerUp = useCallback((e: PointerEvent) => {
-    const state = gestureState.current;
-    const duration = Date.now() - state.startTime;
-
-    // Determine if this was a TAP or SCROLL
-    const isTap = !state.isScrolling && duration < tapTimeThreshold;
-
-    if (isTap) {
-      if (state.candidateTarget && onTap) {
-        // Valid tap on editable element
-        onTap(state.candidateTarget);
-      } else if (!state.candidateTarget && onTapOutside) {
-        // Tap outside any editable element
-        onTapOutside();
+      // If movement exceeds threshold, it's a scroll/drag gesture
+      if (totalMovement > movementThreshold) {
+        state.isScrolling = true;
       }
-    }
+    },
+    [movementThreshold],
+  );
 
-    // Reset state
-    gestureState.current = {
-      startX: 0,
-      startY: 0,
-      startTime: 0,
-      candidateTarget: null,
-      isScrolling: false,
-    };
-  }, [tapTimeThreshold, onTap, onTapOutside]);
+  const handlePointerUp = useCallback(
+    (e: PointerEvent) => {
+      const state = gestureState.current;
+      const duration = Date.now() - state.startTime;
+
+      if (state.ignoredSurface) {
+        gestureState.current = {
+          startX: 0,
+          startY: 0,
+          startTime: 0,
+          candidateTarget: null,
+          isScrolling: false,
+          ignoredSurface: false,
+        };
+        return;
+      }
+
+      // Determine if this was a TAP or SCROLL
+      const isTap = !state.isScrolling && duration < tapTimeThreshold;
+
+      if (isTap) {
+        if (state.candidateTarget && onTap) {
+          // Valid tap on editable element
+          onTap(state.candidateTarget);
+        } else if (!state.candidateTarget && onTapOutside) {
+          // Tap outside any editable element
+          onTapOutside();
+        }
+      }
+
+      // Reset state
+      gestureState.current = {
+        startX: 0,
+        startY: 0,
+        startTime: 0,
+        candidateTarget: null,
+        isScrolling: false,
+        ignoredSurface: false,
+      };
+    },
+    [tapTimeThreshold, onTap, onTapOutside],
+  );
 
   const handlePointerCancel = useCallback(() => {
     // Reset on gesture cancel (e.g., pinch zoom started)
@@ -101,6 +128,7 @@ export function useTouchGesture({
       startTime: 0,
       candidateTarget: null,
       isScrolling: false,
+      ignoredSurface: false,
     };
   }, []);
 
@@ -108,16 +136,16 @@ export function useTouchGesture({
   useEffect(() => {
     const element = document.body; // Or specific container
 
-    element.addEventListener('pointerdown', handlePointerDown, { passive: true });
-    element.addEventListener('pointermove', handlePointerMove, { passive: true });
-    element.addEventListener('pointerup', handlePointerUp, { passive: true });
-    element.addEventListener('pointercancel', handlePointerCancel, { passive: true });
+    element.addEventListener("pointerdown", handlePointerDown, { passive: true });
+    element.addEventListener("pointermove", handlePointerMove, { passive: true });
+    element.addEventListener("pointerup", handlePointerUp, { passive: true });
+    element.addEventListener("pointercancel", handlePointerCancel, { passive: true });
 
     return () => {
-      element.removeEventListener('pointerdown', handlePointerDown);
-      element.removeEventListener('pointermove', handlePointerMove);
-      element.removeEventListener('pointerup', handlePointerUp);
-      element.removeEventListener('pointercancel', handlePointerCancel);
+      element.removeEventListener("pointerdown", handlePointerDown);
+      element.removeEventListener("pointermove", handlePointerMove);
+      element.removeEventListener("pointerup", handlePointerUp);
+      element.removeEventListener("pointercancel", handlePointerCancel);
     };
   }, [handlePointerDown, handlePointerMove, handlePointerUp, handlePointerCancel]);
 
@@ -139,7 +167,7 @@ export function parseEditorTarget(target: string | null): {
 } {
   if (!target) return { type: null, id: null };
 
-  const [type, id] = target.split(':');
+  const [type, id] = target.split(":");
   return {
     type: type || null,
     id: id || null,

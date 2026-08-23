@@ -149,6 +149,7 @@ export function DraggableBottomSheet({
       {/* Sheet */}
       <div
         ref={sheetRef}
+        data-mobile-bottom-sheet
         className={`fixed inset-x-0 bottom-0 z-50 flex flex-col rounded-t-3xl border-t bg-background shadow-2xl md:hidden ${
           isDragging ? "" : "transition-[height] duration-150 ease-out"
         }`}

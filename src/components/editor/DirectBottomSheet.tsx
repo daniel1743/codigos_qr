@@ -21,12 +21,7 @@ interface DirectBottomSheetProps {
   children: React.ReactNode;
 }
 
-export function DirectBottomSheet({
-  open,
-  onOpenChange,
-  title,
-  children,
-}: DirectBottomSheetProps) {
+export function DirectBottomSheet({ open, onOpenChange, title, children }: DirectBottomSheetProps) {
   const sheetRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const [isClosing, setIsClosing] = useState(false);
@@ -42,7 +37,7 @@ export function DirectBottomSheet({
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
     // Only drag from handle
     const target = e.target as HTMLElement;
-    if (!target.closest('[data-sheet-handle]')) return;
+    if (!target.closest("[data-sheet-handle]")) return;
 
     const sheet = sheetRef.current;
     if (!sheet) return;
@@ -75,60 +70,63 @@ export function DirectBottomSheet({
 
     // DIRECT DOM MANIPULATION - Sheet follows finger exactly
     sheet.style.height = `${clampedHeight}px`;
-    sheet.style.transition = 'none';  // No transition during drag
+    sheet.style.transition = "none"; // No transition during drag
   }, []);
 
-  const handlePointerUp = useCallback((e: React.PointerEvent) => {
-    if (!dragState.current.isDragging) return;
+  const handlePointerUp = useCallback(
+    (e: React.PointerEvent) => {
+      if (!dragState.current.isDragging) return;
 
-    const sheet = sheetRef.current;
-    if (!sheet) return;
+      const sheet = sheetRef.current;
+      if (!sheet) return;
 
-    dragState.current.isDragging = false;
-    e.currentTarget.releasePointerCapture(e.pointerId);
+      dragState.current.isDragging = false;
+      e.currentTarget.releasePointerCapture(e.pointerId);
 
-    const finalHeight = dragState.current.currentHeight;
-    const viewportHeight = window.innerHeight;
+      const finalHeight = dragState.current.currentHeight;
+      const viewportHeight = window.innerHeight;
 
-    // NOW we can snap (after finger lifts)
-    const snapPoints = [
-      0,                          // closed
-      viewportHeight * 0.3,      // compact
-      viewportHeight * 0.5,      // half
-      viewportHeight * 0.85,     // expanded
-    ];
+      // NOW we can snap (after finger lifts)
+      const snapPoints: [number, number, number, number] = [
+        0, // closed
+        viewportHeight * 0.3, // compact
+        viewportHeight * 0.5, // half
+        viewportHeight * 0.85, // expanded
+      ];
 
-    // Find nearest snap point
-    let nearestSnap = snapPoints[0];
-    let minDistance = Math.abs(finalHeight - snapPoints[0]);
+      // Find nearest snap point
+      let nearestSnap = snapPoints[0];
+      let minDistance = Math.abs(finalHeight - snapPoints[0]);
 
-    for (const snap of snapPoints) {
-      const distance = Math.abs(finalHeight - snap);
-      if (distance < minDistance) {
-        minDistance = distance;
-        nearestSnap = snap;
+      for (const snap of snapPoints) {
+        const distance = Math.abs(finalHeight - snap);
+        if (distance < minDistance) {
+          minDistance = distance;
+          nearestSnap = snap;
+        }
       }
-    }
 
-    // Animate to snap point (only after finger lifts)
-    sheet.style.transition = 'height 200ms ease-out';
-    sheet.style.height = `${nearestSnap}px`;
+      // Animate to snap point (only after finger lifts)
+      sheet.style.transition = "height 200ms ease-out";
+      sheet.style.height = `${nearestSnap}px`;
 
-    // If snapped to closed, trigger close
-    if (nearestSnap === 0) {
-      setIsClosing(true);
-      setTimeout(() => {
-        onOpenChange(false);
-        setIsClosing(false);
-      }, 200);
-    }
-  }, [onOpenChange]);
+      // If snapped to closed, trigger close
+      if (nearestSnap === 0) {
+        setIsClosing(true);
+        setTimeout(() => {
+          onOpenChange(false);
+          setIsClosing(false);
+        }, 200);
+      }
+    },
+    [onOpenChange],
+  );
 
   const handleClose = () => {
     const sheet = sheetRef.current;
     if (sheet) {
-      sheet.style.transition = 'height 200ms ease-out';
-      sheet.style.height = '0px';
+      sheet.style.transition = "height 200ms ease-out";
+      sheet.style.height = "0px";
     }
     setIsClosing(true);
     setTimeout(() => {
@@ -146,7 +144,7 @@ export function DirectBottomSheet({
         className="fixed inset-0 z-40 bg-black/20 backdrop-blur-[1px] transition-opacity md:hidden"
         style={{
           opacity: open ? 1 : 0,
-          pointerEvents: open ? 'auto' : 'none',
+          pointerEvents: open ? "auto" : "none",
         }}
         onClick={handleClose}
       />
@@ -154,10 +152,11 @@ export function DirectBottomSheet({
       {/* Sheet */}
       <div
         ref={sheetRef}
+        data-mobile-bottom-sheet
         className="fixed inset-x-0 bottom-0 z-50 flex flex-col rounded-t-3xl border-t bg-background shadow-2xl md:hidden"
         style={{
-          height: open ? '50vh' : '0',
-          touchAction: 'none',
+          height: open ? "50vh" : "0",
+          touchAction: "none",
         }}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
@@ -191,7 +190,7 @@ export function DirectBottomSheet({
           ref={contentRef}
           className="flex-1 overflow-y-auto overscroll-contain px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] scrollbar-thin"
           style={{
-            touchAction: 'pan-y',
+            touchAction: "pan-y",
           }}
         >
           {children}

@@ -183,7 +183,7 @@ function EditorPage() {
     type: "profile.photo",
   });
   const [zoomLevel, setZoomLevel] = useState<number>(1);
-  const [pinchTransformOrigin, setPinchTransformOrigin] = useState("center center");
+  const [baseZoomScale, setBaseZoomScale] = useState<number>(1);
   const [isDesktop, setIsDesktop] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
@@ -312,10 +312,15 @@ function EditorPage() {
   // Pinch zoom with direct finger control (no React re-renders during gesture)
   const canvasContainerRef = useRef<HTMLDivElement>(null);
 
-  const { attachTo: attachPinchZoom, setScale: setPinchScale } = usePinchZoomDirect({
+  const {
+    attachTo: attachPinchZoom,
+    setScale: setPinchScale,
+    setBaseScale: setPinchBaseScale,
+  } = usePinchZoomDirect({
     minScale: 0.4,
     maxScale: 3.0,
     initialScale: zoomLevel,
+    baseScale: baseZoomScale,
     onScaleChange: (scale) => {
       // Only update React state AFTER gesture ends
       setZoomLevel(scale);
@@ -331,9 +336,9 @@ function EditorPage() {
   useEffect(() => {
     if (!isDesktop && canvasContainerRef.current) {
       // Find the actual canvas element (the scaled div)
-      const canvas = canvasContainerRef.current.querySelector('.phone-canvas') as HTMLElement;
+      const canvas = canvasContainerRef.current.querySelector(".phone-canvas") as HTMLElement;
       if (canvas) {
-        attachPinchZoom(canvas);
+        attachPinchZoom(canvasContainerRef.current, canvas);
       }
     }
   }, [isDesktop, attachPinchZoom]);
@@ -348,7 +353,6 @@ function EditorPage() {
   const handleZoomIn = () => {
     const nextStep = ZOOM_STEPS.find((step) => step > zoomLevel + 0.01);
     if (nextStep !== undefined) {
-      setPinchTransformOrigin("center center");
       setZoom(nextStep);
     }
   };
@@ -356,7 +360,6 @@ function EditorPage() {
   const handleZoomOut = () => {
     const prevStep = [...ZOOM_STEPS].reverse().find((step) => step < zoomLevel - 0.01);
     if (prevStep !== undefined) {
-      setPinchTransformOrigin("center center");
       setZoom(prevStep);
     }
   };
@@ -377,7 +380,8 @@ function EditorPage() {
     if (bestScale > 1.0) bestScale = 1.0;
     if (bestScale < 0.3) bestScale = 0.3; // Allow smaller fit on very small screens
 
-    setPinchTransformOrigin("center center");
+    setBaseZoomScale(bestScale);
+    setPinchBaseScale(bestScale);
     setZoom(bestScale);
   };
 
