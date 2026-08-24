@@ -164,7 +164,7 @@ export const PREMIUM_MAX_PRO_TEMPLATES: PremiumTemplate[] = [
     category: "elegant",
     description: "Naturaleza premium con verdes profundos y dorados orgánicos",
     config: {
-      background_color: "linear-gradient(135deg, #0B3D2E, #1A5C47)",
+      background_color: "#0B3D2E",
       button_color: "#FFFFFF",
       button_text_color: "#0B3D2E",
       button_style: "premium_detail_arrow",
@@ -187,7 +187,7 @@ export const PREMIUM_MAX_PRO_TEMPLATES: PremiumTemplate[] = [
       social_covers_enabled: true,
       social_cover_style: "leaf_outline",
       social_cover_height: 72,
-      decor_shadow: "soft",
+      decor_shadow: "none",
       decor_intensity: "medium",
     },
   },

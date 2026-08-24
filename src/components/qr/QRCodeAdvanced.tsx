@@ -11,8 +11,9 @@ interface QRCodeAdvancedProps {
   onRender?: (canvas: HTMLCanvasElement) => void;
 }
 
-const DEFAULT_LOGO_SIZE = 0.28;
-const MAX_LOGO_SIZE = 0.32;
+const DEFAULT_LOGO_SIZE = 0.22;
+const MIN_LOGO_SIZE = 0.15;
+const MAX_LOGO_SIZE = 0.28;
 const DEFAULT_LOGO_MARGIN = 4;
 const MIN_PROCESSED_LOGO_SIZE = 512;
 const WHITE_THRESHOLD = 246;
@@ -311,9 +312,31 @@ async function composeQRFrameBlob(qrBlob: Blob, options: QRAdvancedOptions) {
   });
 }
 
+async function fetchAsDataUrl(url: string): Promise<string> {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    const blob = await response.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } catch (error) {
+    console.error("Failed to fetch image as data URL:", error);
+    return url;
+  }
+}
+
 async function removeWhiteBackground(src: string): Promise<string> {
-  if (src.startsWith("data:image/svg+xml") || src.endsWith(".svg")) {
+  if (src.startsWith("data:")) {
     return src;
+  }
+
+  // If it's an SVG, fetch it and convert to Base64 to make it self-contained
+  if (src.endsWith(".svg") || src.includes(".svg")) {
+    return fetchAsDataUrl(src);
   }
 
   return new Promise((resolve) => {
@@ -370,7 +393,7 @@ async function removeWhiteBackground(src: string): Promise<string> {
 
 function getImageSize(options: QRAdvancedOptions) {
   const requestedSize = options.imageOptions?.imageSize ?? DEFAULT_LOGO_SIZE;
-  return Math.min(requestedSize, MAX_LOGO_SIZE);
+  return Math.max(MIN_LOGO_SIZE, Math.min(requestedSize, MAX_LOGO_SIZE));
 }
 
 function normalizeDotsType(type?: DotsType): DotType {

@@ -357,7 +357,7 @@ export function ShareSection({
             ? {
                 imageOptions: {
                   hideBackgroundDots: true,
-                  imageSize: 0.18, // 18% safe limit
+                  imageSize: 0.22, // 22% safe limit
                   margin: 4,
                   crossOrigin: "anonymous",
                 },
@@ -427,12 +427,22 @@ export function ShareSection({
     }
   };
 
-  const imageSettings =
+  const previewImageSettings =
     logoEnabled && logoUrl
       ? {
           src: logoUrl,
-          height: exportSize * 0.18, // 18% of QR size for consistency with advanced renderer
-          width: exportSize * 0.18,
+          height: 240 * 0.22, // 22% of preview size (240px)
+          width: 240 * 0.22,
+          excavate: true,
+        }
+      : undefined;
+
+  const exportImageSettings =
+    logoEnabled && logoUrl
+      ? {
+          src: logoUrl,
+          height: exportSize * 0.22, // 22% of export size
+          width: exportSize * 0.22,
           excavate: true,
         }
       : undefined;
@@ -549,7 +559,7 @@ export function ShareSection({
                         ? {
                             imageOptions: {
                               hideBackgroundDots: true,
-                              imageSize: 0.28,
+                              imageSize: 0.22,
                               margin: 4,
                               crossOrigin: "anonymous",
                             },
@@ -569,7 +579,7 @@ export function ShareSection({
                     marginSize={4}
                     bgColor={bgColor}
                     fgColor={fgColor}
-                    {...(imageSettings ? { imageSettings } : {})}
+                    {...(previewImageSettings ? { imageSettings: previewImageSettings } : {})}
                     style={{ width: "100%", height: "100%" }}
                   />
                 ) : (
@@ -582,7 +592,7 @@ export function ShareSection({
                     marginSize={4}
                     bgColor={bgColor}
                     fgColor={fgColor}
-                    {...(imageSettings ? { imageSettings } : {})}
+                    {...(previewImageSettings ? { imageSettings: previewImageSettings } : {})}
                     style={{ width: "100%", height: "100%" }}
                   />
                 )}
@@ -1195,16 +1205,7 @@ export function ShareSection({
             marginSize={4}
             bgColor={bgColor}
             fgColor={fgColor}
-            {...(imageSettings
-              ? {
-                  imageSettings: {
-                    src: imageSettings.src,
-                    excavate: true,
-                    height: exportSize * 0.18,
-                    width: exportSize * 0.18,
-                  },
-                }
-              : {})}
+            {...(exportImageSettings ? { imageSettings: exportImageSettings } : {})}
           />
         </div>
       )}

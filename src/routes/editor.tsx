@@ -34,6 +34,8 @@ import {
   Shield,
   Maximize,
   Lock,
+  Wand2,
+  FolderKanban,
 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import type { CornerDotType, CornerSquareType, DotsType, QREffectType } from "../types/qr-advanced";
@@ -138,7 +140,7 @@ function EditorQRPreview({
                 ? {
                     imageOptions: {
                       hideBackgroundDots: true,
-                      imageSize: 0.28,
+                      imageSize: 0.22,
                       margin: 4,
                       crossOrigin: "anonymous",
                     },
@@ -157,6 +159,11 @@ function EditorQRPreview({
 function EditorPage() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const [profile, setProfile] = useState<Partial<Profile>>({
     background_color: "#ffffff",
@@ -332,16 +339,16 @@ function EditorPage() {
     setPinchScale(scale);
   };
 
-  // Attach pinch zoom to canvas container on mobile
+  // Attach pinch zoom and scale transform to canvas container
   useEffect(() => {
-    if (!isDesktop && canvasContainerRef.current) {
+    if (canvasContainerRef.current) {
       // Find the actual canvas element (the scaled div)
       const canvas = canvasContainerRef.current.querySelector(".phone-canvas") as HTMLElement;
       if (canvas) {
         attachPinchZoom(canvasContainerRef.current, canvas);
       }
     }
-  }, [isDesktop, attachPinchZoom]);
+  }, [attachPinchZoom, activeTab]);
 
   useEffect(() => {
     setIsDesktop(window.innerWidth >= 768);
@@ -617,7 +624,7 @@ function EditorPage() {
     }
   };
 
-  if (loading) return <div className="flex justify-center p-12">Cargando...</div>;
+  if (!isMounted || loading) return <div className="flex justify-center p-12">Cargando...</div>;
   if (!session) return <Auth />;
 
   const TABS = [
@@ -671,9 +678,7 @@ function EditorPage() {
       id === "profile"
         ? { type: "profile.photo" }
         : id === "links"
-          ? links[0]?.id
-            ? { type: "link", linkId: links[0].id }
-            : { type: "links.manage" }
+          ? { type: "links.manage" }
           : id === "appearance"
             ? { type: "appearance.templates" }
             : { type: "qr" },
@@ -910,6 +915,20 @@ function EditorPage() {
           >
             <Lock className="h-4 w-4" />
             Docs Seguros
+          </Link>
+          <Link
+            to="/template-builder"
+            className="flex h-10 items-center gap-2 rounded-lg px-3 text-sm font-medium text-violet-600 hover:bg-violet-50"
+          >
+            <Wand2 className="h-4 w-4" />
+            Editor Básico
+          </Link>
+          <Link
+            to="/template-bank"
+            className="flex h-10 items-center gap-2 rounded-lg px-3 text-sm font-medium text-emerald-700 hover:bg-emerald-50"
+          >
+            <FolderKanban className="h-4 w-4" />
+            Banco de Plantillas
           </Link>
           <Link
             to="/profile"

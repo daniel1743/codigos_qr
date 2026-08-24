@@ -115,10 +115,17 @@ export function usePinchZoomDirect({
   );
 
   const syncTouches = (touches: TouchList) => {
+    const liveTouchIds = new Set<number>();
     for (let index = 0; index < touches.length; index += 1) {
       const touch = touches[index];
-      if (touch && activeTouches.current.has(touch.identifier)) {
+      if (touch) {
+        liveTouchIds.add(touch.identifier);
         activeTouches.current.set(touch.identifier, touch);
+      }
+    }
+    for (const touchId of activeTouches.current.keys()) {
+      if (!liveTouchIds.has(touchId)) {
+        activeTouches.current.delete(touchId);
       }
     }
   };
@@ -158,10 +165,7 @@ export function usePinchZoomDirect({
 
   const handleTouchStart = useCallback(
     (event: TouchEvent) => {
-      for (let index = 0; index < event.changedTouches.length; index += 1) {
-        const touch = event.changedTouches[index];
-        if (touch) activeTouches.current.set(touch.identifier, touch);
-      }
+      syncTouches(event.touches);
 
       const twoTouches = getTwoTouches();
       if (twoTouches) {

@@ -30,6 +30,7 @@ export interface Profile {
   bio_size?: string;
   bio_weight?: string;
   bio_align?: string;
+  bio_bold_weight?: string;
   button_text_size?: string;
   button_text_weight?: string;
   button_content_align?: string;

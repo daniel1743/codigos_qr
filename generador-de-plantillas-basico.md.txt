@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-900">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Motor Editor de Plantillas Premium - Style Canvas</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@400;600;800&family=Oswald:wght@300;400;500;700&family=Playfair+Display:ital,wght@0,600;1,400&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SortableJS para Drag & Drop suave -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+
+    <style>
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(100, 116, 139, 0.5);
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(148, 163, 184, 0.8);
+        }
+
+        /* Phone Canvas Simulated Frames */
+        .phone-frame {
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 0 12px #1e293b, 0 0 0 14px #334155;
+            transition: all 0.3s ease;
+        }
+
+        /* Canvas Live Dynamic Preview Engine CSS Variables */
+        :root {
+            --bg-start: #95547B;
+            --bg-mid: #B46A94;
+            --bg-end: #8C476E;
+            --bg-angle: 180deg;
+
+            --text-primary: #FFFFFF;
+            --text-subtitle: #2C2C2C;
+            --btn-text-color: #FFFFFF;
+
+            --btn-bg-start: rgba(255, 255, 255, 0.1);
+            --btn-bg-end: rgba(255, 255, 255, 0.25);
+            --btn-border-color: rgba(255, 255, 255, 0.7);
+            
+            --accent-bg-start: #f5d1e6;
+            --accent-bg-end: #e0a3c7;
+            --accent-icon-color: #5c2d47;
+
+            --profile-border-color: #5c2d47;
+            --profile-border-width: 4px;
+            --profile-size: 170px;
+            --profile-radius: 50%;
+
+            --font-logo: 'Cinzel', serif;
+            --font-heading: 'Oswald', sans-serif;
+            --font-subtitle: 'Oswald', sans-serif;
+            --font-body: 'Inter', sans-serif;
+
+            --btn-radius: 9999px;
+            --btn-grid-cols: 2;
+            --btn-gap: 1rem;
+
+            --logo-size: 3.2rem;
+            --title-size: 2.2rem;
+            --subtitle-size: 1rem;
+            
+            --bg-image: none;
+            --bg-overlay: 0;
+            --banner-img: none;
+        }
+
+        /* Dynamic Classes for Live Render Container */
+        .render-bg {
+            background-image: var(--bg-image);
+            background-size: cover;
+            background-position: center;
+            background-color: var(--bg-mid); /* Fallback */
+            position: relative;
+        }
+        
+        .render-bg::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(var(--bg-angle), var(--bg-start) 0%, var(--bg-mid) 50%, var(--bg-end) 100%);
+            opacity: calc(1 - var(--bg-overlay));
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .render-banner {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 250px;
+            background-image: var(--banner-img);
+            background-size: cover;
+            background-position: center;
+            -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%);
+            mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%);
+            z-index: 1;
+            opacity: 0.8;
+        }
+
+        .render-content-wrapper {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+        }
+
+        .social-icon-link {
+            transition: all 0.2s ease;
+            color: var(--text-primary);
+            opacity: 0.8;
+        }
+        .social-icon-link:hover {
+            transform: translateY(-2px);
+            opacity: 1;
+        }
+
+        .render-logo {
+            font-family: var(--font-logo);
+            font-size: var(--logo-size);
+            color: var(--text-primary);
+        }
+
+        .render-subtitle {
+            font-family: var(--font-subtitle);
+            color: var(--text-subtitle);
+            font-size: var(--subtitle-size);
+        }
+
+        .render-title {
+            font-family: var(--font-heading);
+            color: var(--text-primary);
+            font-size: var(--title-size);
+        }
+
+        .render-btn {
+            background: linear-gradient(90deg, var(--btn-bg-start) 0%, var(--btn-bg-end) 100%);
+            border: 1px solid var(--btn-border-color);
+            border-radius: var(--btn-radius);
+            color: var(--btn-text-color);
+            font-family: var(--font-body);
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.2);
+        }
+
+        .render-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.3);
+        }
+
+        .render-btn-icon {
+            background: linear-gradient(135deg, var(--accent-bg-start) 0%, var(--accent-bg-end) 100%);
+            color: var(--accent-icon-color);
+            box-shadow: inset 0 2px 4px rgba(255,255,255,0.6), inset 0 -2px 4px rgba(0,0,0,0.15);
+        }
+
+        /* Drag handle highlight */
+        .sortable-ghost {
+            opacity: 0.4;
+            background: rgba(236, 72, 153, 0.2) !important;
+            border: 2px dashed #ec4899 !important;
+        }
+    </style>
+</head>
+<body class="h-full text-slate-100 flex flex-col font-sans overflow-hidden">
+
+    <!-- TOP NAVBAR -->
+    <header class="h-16 bg-slate-950 border-b border-slate-800 px-6 flex items-center justify-between z-30 shrink-0">
+        <div class="flex items-center gap-3">
+            <div class="bg-gradient-to-tr from-pink-500 to-purple-600 p-2 rounded-xl text-white shadow-lg shadow-pink-500/20">
+                <i class="fa-solid fa-wand-magic-sparkles text-xl"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-lg tracking-wide bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">Canvas Engine Studio</h1>
+                <p class="text-xs text-slate-400">Motor de Plantillas Reutilizables & Editables</p>
+            </div>
+        </div>
+
+        <!-- Center Controls: Devices Switch -->
+        <div class="hidden md:flex items-center gap-1 bg-slate-900 border border-slate-800 p-1 rounded-xl">
+            <button id="view-mobile" onclick="setDeviceView('mobile')" class="px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-2 bg-pink-600 text-white shadow transition">
+                <i class="fa-solid fa-mobile-screen-button"></i> Móvil
+            </button>
+
+            <button id="view-desktop" onclick="setDeviceView('desktop')" class="px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-2 text-slate-400 hover:text-white transition">
+                <i class="fa-solid fa-desktop"></i> Desktop
+            </button>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center gap-3">
+            <button onclick="resetTemplate()" class="px-3 py-2 text-xs font-medium text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-xl transition flex items-center gap-2">
+                <i class="fa-solid fa-rotate-left"></i> Restablecer
+            </button>
+            <button onclick="openExportModal()" class="px-4 py-2 text-xs font-bold text-white bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 rounded-xl shadow-lg shadow-pink-500/25 transition flex items-center gap-2">
+                <i class="fa-solid fa-code"></i> Exportar HTML/CSS
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN STUDIO CONTAINER -->
+    <div class="flex-1 flex overflow-hidden">
+
+        <!-- LEFT CONTROL PANEL (CANVA STYLE EDITOR) -->
+        <aside class="w-96 bg-slate-950 border-r border-slate-800 flex flex-col shrink-0 z-20 overflow-hidden">
+            
+            <!-- Editor Tabs Header -->
+            <div class="flex border-b border-slate-800 bg-slate-900/50">
+                <button onclick="switchTab('content')" id="tab-btn-content" class="flex-1 py-3 text-xs font-bold border-b-2 border-pink-500 text-pink-400 flex items-center justify-center gap-2 transition">
+                    <i class="fa-solid fa-pen-to-square"></i> Contenido
+                </button>
+                <button onclick="switchTab('styles')" id="tab-btn-styles" class="flex-1 py-3 text-xs font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center justify-center gap-2 transition">
+                    <i class="fa-solid fa-palette"></i> Estilo & Color
+                </button>
+                <button onclick="switchTab('layout')" id="tab-btn-layout" class="flex-1 py-3 text-xs font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center justify-center gap-2 transition">
+                    <i class="fa-solid fa-layer-group"></i> Disposición
+                </button>
+            </div>
+
+            <!-- Tab Contents Wrapper -->
+            <div class="flex-1 overflow-y-auto p-5 space-y-6">
+
+                <!-- ================= TAB 1: CONTENIDO ================= -->
+                <div id="tab-content" class="space-y-5">
+                    
+                    <!-- Banner Section -->
+                    <div class="bg-slate-900/70 p-4 rounded-2xl border border-slate-800 space-y-3">
+                        <h3 class="text-xs font-bold tracking-wider text-pink-400 uppercase flex items-center gap-2">
+                            <i class="fa-solid fa-panorama"></i> Banner Superior
+                        </h3>
+                        <div>
+                            <label class="text-[11px] text-slate-400 mb-1 block font-medium">URL de Imagen (Fusión con fondo)</label>
+                            <input type="text" id="input-banner-img" value="" placeholder="Dejar en blanco para omitir" oninput="updateContent()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-pink-500 focus:outline-none transition">
+                        </div>
+                    </div>
+
+                    <!-- Branding Header Section -->
+                    <div class="bg-slate-900/70 p-4 rounded-2xl border border-slate-800 space-y-3">
+                        <h3 class="text-xs font-bold tracking-wider text-pink-400 uppercase flex items-center gap-2">
+                            <i class="fa-solid fa-font"></i> Marca & Título
+                        </h3>
+                        <div>
+                            <label class="text-[11px] text-slate-400 mb-1 block font-medium">Texto del Logo / Marca</label>
+                            <input type="text" id="input-logo-text" value="Eudora" oninput="updateContent()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-pink-500 focus:outline-none transition">
+                        </div>
+                        <div>
+                            <label class="text-[11px] text-slate-400 mb-1 block font-medium">Subtítulo (Cargo / Rol)</label>
+                            <input type="text" id="input-subtitle-text" value="CONSULTORA" oninput="updateContent()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-pink-500 focus:outline-none transition">
+                        </div>
+                        <div>
+                            <label class="text-[11px] text-slate-400 mb-1 block font-medium">Nombre Principal</label>
+                            <input type="text" id="input-title-text" value="VANESA ALVES" oninput="updateContent()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-pink-500 focus:outline-none transition">
+                        </div>
+                    </div>
+
+                    <!-- Profile Image Section -->
+                    <div class="bg-slate-900/70 p-4 rounded-2xl border border-slate-800 space-y-3">
+                        <h3 class="text-xs font-bold tracking-wider text-pink-400 uppercase flex items-center gap-2">
+                            <i class="fa-solid fa-image"></i> Imagen de Perfil
+                        </h3>
+                        <div>
+                            <label class="text-[11px] text-slate-400 mb-1 block font-medium">URL de Imagen</label>
+                            <input type="text" id="input-profile-img" value="https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=400&auto=format&fit=crop" oninput="updateContent()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-pink-500 focus:outline-none transition">
+                        </div>
+                    </div>
+
+                    <!-- Redes Sociales Pequeñas Section -->
+                    <div class="bg-slate-900/70 p-4 rounded-2xl border border-slate-800 space-y-3">
+                        <h3 class="text-xs font-bold tracking-wider text-pink-400 uppercase flex items-center gap-2">
+                            <i class="fa-solid fa-hashtag"></i> Fila de Redes Sociales
+                        </h3>
+                        <p class="text-[10px] text-slate-400">Iconos pequeños bajo el título. Deja en blanco los que no uses.</p>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="flex items-center bg-slate-950 border border-slate-800 rounded-lg overflow-hidden">
+                                <span class="pl-2.5 text-slate-500"><i class="fa-brands fa-instagram"></i></span>
+                                <input type="text" id="social-ig" placeholder="URL Instagram" oninput="updateContent()" class="w-full bg-transparent px-2 py-1.5 text-xs text-white focus:outline-none">
+                            </div>
+                            <div class="flex items-center bg-slate-950 border border-slate-800 rounded-lg overflow-hidden">
+                                <span class="pl-2.5 text-slate-500"><i class="fa-brands fa-tiktok"></i></span>
+                                <input type="text" id="social-tk" placeholder="URL TikTok" oninput="updateContent()" class="w-full bg-transparent px-2 py-1.5 text-xs text-white focus:outline-none">
+                            </div>
+                            <div class="flex items-center bg-slate-950 border border-slate-800 rounded-lg overflow-hidden">
+                                <span class="pl-2.5 text-slate-500"><i class="fa-brands fa-youtube"></i></span>
+                                <input type="text" id="social-yt" placeholder="URL YouTube" oninput="updateContent()" class="w-full bg-transparent px-2 py-1.5 text-xs text-white focus:outline-none">
+                            </div>
+                            <div class="flex items-center bg-slate-950 border border-slate-800 rounded-lg overflow-hidden">
+                                <span class="pl-2.5 text-slate-500"><i class="fa-brands fa-linkedin-in"></i></span>
+                                <input type="text" id="social-li" placeholder="URL LinkedIn" oninput="updateContent()" class="w-full bg-transparent px-2 py-1.5 text-xs text-white focus:outline-none">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Buttons Section -->
+                    <div class="bg-slate-900/70 p-4 rounded-2xl border border-slate-800 space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-xs font-bold tracking-wider text-pink-400 uppercase flex items-center gap-2">
+                                <i class="fa-solid fa-link"></i> Enlaces & Botones
+                            </h3>
+                            <button onclick="addButton()" class="text-xs bg-pink-500/20 hover:bg-pink-500/30 text-pink-300 border border-pink-500/40 px-2.5 py-1 rounded-lg transition flex items-center gap-1 font-semibold">
+                                <i class="fa-solid fa-plus text-[10px]"></i> Añadir
+                            </button>
+                        </div>
+                        
+                        <p class="text-[11px] text-slate-400">Arrastra para reordenar los enlaces en el canvas:</p>
+                        
+                        <!-- List of Sortable Draggable Button Controls -->
+                        <div id="buttons-control-list" class="space-y-2.5">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Footer Note Section -->
+                    <div class="bg-slate-900/70 p-4 rounded-2xl border border-slate-800 space-y-3">
+                        <h3 class="text-xs font-bold tracking-wider text-pink-400 uppercase flex items-center gap-2">
+                            <i class="fa-solid fa-hand-pointer"></i> Pie de Página / CTA
+                        </h3>
+                        <div>
+                            <label class="text-[11px] text-slate-400 mb-1 block font-medium">Texto de Interacción</label>
+                            <input type="text" id="input-footer-text" value="Clique para interagir" oninput="updateContent()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-pink-500 focus:outline-none transition">
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- ================= TAB 2: ESTILOS & COLORES ================= -->
+                <div id="tab-styles" class="space-y-5 hidden">
+                    
+                    <!-- Background Config -->
+                    <div class="bg-slate-900/70 p-4 rounded-2xl border border-slate-800 space-y-3">
+                        <h3 class="text-xs font-bold tracking-wider text-pink-400 uppercase flex items-center gap-2">
+                            <i class="fa-solid fa-droplet"></i> Fondo General
+                        </h3>
+                        <div>
+                            <label class="text-[11px] text-slate-400 mb-1 block font-medium">URL de Imagen de Fondo (Opcional)</label>
+                            <input type="text" id="input-bg-image" value="" placeholder="La imagen se verá detrás del degradado" oninput="updateStyles()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-pink-500 focus:outline-none transition mb-2">
+                            
+                            <label class="text-[11px] text-slate-400 mb-1 block font-medium">Fuerza de la Imagen (0% = Solo Degradado): <span id="overlay-val">0</span>%</label>
+                            <input type="range" id="range-bg-overlay" min="0" max="100" value="0" oninput="updateStyles()" class="w-full accent-pink-500">
+                        </div>
+                        <div class="h-px w-full bg-slate-800 my-2"></div>
+                        <label class="text-[11px] text-slate-400 block font-medium">Colores del Degradado (Overlay)</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <div>
+                                <label class="text-[10px] text-slate-400 block mb-1">Color Inicio</label>
+                                <input type="color" id="color-bg-start" value="#95547B" onchange="updateStyles()" class="w-full h-8 bg-slate-950 border border-slate-800 rounded-lg cursor-pointer">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-400 block mb-1">Color Medio</label>
+                                <input type="color" id="color-bg-mid" value="#B46A94" onchange="updateStyles()" class="w-full h-8 bg-slate-950 border border-slate-800 rounded-lg cursor-pointer">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-400 block mb-1">Color Fin</label>
+                                <input type="color" id="color-bg-end" value="#8C476E" onchange="updateStyles()" class="w-full h-8 bg-slate-950 border border-slate-800 rounded-lg cursor-pointer">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-[11px] text-slate-400 mb-1 block font-medium">Ángulo del Gradiente: <span id="angle-val">180</span>°</label>
+                            <input type="range" id="range-bg-angle" min="0" max="360" value="180" oninput="updateStyles()" class="w-full accent-pink-500">
+                        </div>
+                    </div>
+
+                    <!-- Button Aesthetics Config -->
+                    <div class="bg-slate-900/70 p-4 rounded-2xl border border-slate-800 space-y-3">
+                        <h3 class="text-xs font-bold tracking-wider text-pink-400 uppercase flex items-center gap-2">
+                            <i class="fa-solid fa-cubes"></i> Estilo de Botones
+                        </h3>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="text-[10px] text-slate-400 block mb-1">Fondo Botón (Inicio)</label>
+                                <input type="color" id="color-btn-start" value="#ffffff" onchange="updateStyles()" class="w-full h-8 bg-slate-950 border border-slate-800 rounded-lg cursor-pointer">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-400 block mb-1">Fondo Botón (Fin)</label>
+                                <input type="color" id="color-btn-end" value="#ffffff" onchange="updateStyles()" class="w-full h-8 bg-slate-950 border border-slate-800 rounded-lg cursor-pointer">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="text-[10px] text-slate-400 block mb-1">Pill/Icono (Inicio)</label>
+                                <input type="color" id="color-accent-start" value="#f5d1e6" onchange="updateStyles()" class="w-full h-8 bg-slate-950 border border-slate-800 rounded-lg cursor-pointer">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-400 block mb-1">Pill/Icono (Fin)</label>
+                                <input type="color" id="color-accent-end" value="#e0a3c7" onchange="updateStyles()" class="w-full h-8 bg-slate-950 border border-slate-800 rounded-lg cursor-pointer">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="text-[10px] text-slate-400 block mb-1">Color del Icono</label>
+                                <input type="color" id="color-accent-icon" value="#5c2d47" onchange="updateStyles()" class="w-full h-8 bg-slate-950 border border-slate-800 rounded-lg cursor-pointer">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-400 block mb-1">Texto del Botón</label>
+                                <input type="color" id="color-btn-text" value="#ffffff" onchange="updateStyles()" class="w-full h-8 bg-slate-950 border border-slate-800 rounded-lg cursor-pointer">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-[11px] text-slate-400 mb-1 block font-medium">Borde de Botones</label>
+                            <input type="color" id="color-btn-border" value="#ffffff" onchange="updateStyles()" class="w-full h-8 bg-slate-950 border border-slate-800 rounded-lg cursor-pointer">
+                        </div>
+                    </div>
+
+                    <!-- Typography Selector Section -->
+                    <div class="bg-slate-900/70 p-4 rounded-2xl border border-slate-800 space-y-3">
+                        <h3 class="text-xs font-bold tracking-wider text-pink-400 uppercase flex items-center gap-2">
+                            <i class="fa-solid fa-text-height"></i> Tipografía & Fuetes
+                        </h3>
+                        <div>
+                            <label class="text-[11px] text-slate-400 mb-1 block font-medium">Fuente del Logo</label>
+                            <select id="select-font-logo" onchange="updateStyles()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-pink-500 focus:outline-none">
+                                <option value="'Cinzel', serif">Cinzel (Elegante Serifa)</option>
+                                <option value="'Playfair Display', serif">Playfair Display (Clásico Luxury)</option>
+                                <option value="'Montserrat', sans-serif">Montserrat (Moderno Bold)</option>
+                                <option value="'Oswald', sans-serif">Oswald (Condensada)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-[11px] text-slate-400 mb-1 block font-medium">Fuente Títulos / Nombre</label>
+                            <select id="select-font-heading" onchange="updateStyles()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-pink-500 focus:outline-none">
+                                <option value="'Oswald', sans-serif">Oswald (Condensada)</option>
+                                <option value="'Poppins', sans-serif">Poppins (Limpio & Redondo)</option>
+                                <option value="'Montserrat', sans-serif">Montserrat (Moderno)</option>
+                                <option value="'Inter', sans-serif">Inter (Minimalista)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- ================= TAB 3: DISPOSICIÓN & SIZES ================= -->
+                <div id="tab-layout" class="space-y-5 hidden">
+                    
+                    <!-- Avatar Settings -->
+                    <div class="bg-slate-900/70 p-4 rounded-2xl border border-slate-800 space-y-4">
+                        <h3 class="text-xs font-bold tracking-wider text-pink-400 uppercase flex items-center gap-2">
+                            <i class="fa-solid fa-user-circle"></i> Configuración de Avatar
+                        </h3>
+                        
+                        <div>
+                            <label class="text-[11px] text-slate-400 mb-2 block font-medium">Forma del Avatar</label>
+                            <div class="grid grid-cols-3 gap-2">
+                                <button onclick="setAvatarShape('50%')" class="py-1.5 text-[11px] bg-slate-950 border border-slate-800 rounded-full text-slate-300 hover:border-pink-500 transition">Círculo</button>
+                                <button onclick="setAvatarShape('24px')" class="py-1.5 text-[11px] bg-slate-950 border border-slate-800 rounded-2xl text-slate-300 hover:border-pink-500 transition">Cuadrado Red.</button>
+                                <button onclick="setAvatarShape('0px')" class="py-1.5 text-[11px] bg-slate-950 border border-slate-800 rounded text-slate-300 hover:border-pink-500 transition">Cuadrado</button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-[11px] text-slate-400 mb-1">
+                                <span>Grosor del Anillo (Borde)</span>
+                                <span id="val-profile-border">4px</span>
+                            </div>
+                            <input type="range" id="range-profile-border" min="0" max="10" step="1" value="4" oninput="updateLayoutSizes()" class="w-full accent-pink-500">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-[11px] text-slate-400 mb-1">
+                                <span>Tamaño Foto Perfil</span>
+                                <span id="val-profile-size">170px</span>
+                            </div>
+                            <input type="range" id="range-profile-size" min="100" max="260" step="5" value="170" oninput="updateLayoutSizes()" class="w-full accent-pink-500">
+                        </div>
+                    </div>
+
+                    <!-- Element Dimensions -->
+                    <div class="bg-slate-900/70 p-4 rounded-2xl border border-slate-800 space-y-4">
+                        <h3 class="text-xs font-bold tracking-wider text-pink-400 uppercase flex items-center gap-2">
+                            <i class="fa-solid fa-up-right-and-down-left-from-center"></i> Tamaños de Elementos
+                        </h3>
+                        
+                        <div>
+                            <div class="flex justify-between text-[11px] text-slate-400 mb-1">
+                                <span>Tamaño de Logo</span>
+                                <span id="val-logo-size">3.2rem</span>
+                            </div>
+                            <input type="range" id="range-logo-size" min="1.8" max="5.0" step="0.1" value="3.2" oninput="updateLayoutSizes()" class="w-full accent-pink-500">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-[11px] text-slate-400 mb-1">
+                                <span>Tamaño Foto Perfil</span>
+                                <span id="val-profile-size">170px</span>
+                            </div>
+                            <input type="range" id="range-profile-size" min="100" max="260" step="5" value="170" oninput="updateLayoutSizes()" class="w-full accent-pink-500">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-[11px] text-slate-400 mb-1">
+                                <span>Tamaño Nombre Principal</span>
+                                <span id="val-title-size">2.2rem</span>
+                            </div>
+                            <input type="range" id="range-title-size" min="1.5" max="3.8" step="0.1" value="2.2" oninput="updateLayoutSizes()" class="w-full accent-pink-500">
+                        </div>
+                    </div>
+
+                    <!-- Button Grid Layouts -->
+                    <div class="bg-slate-900/70 p-4 rounded-2xl border border-slate-800 space-y-4">
+                        <h3 class="text-xs font-bold tracking-wider text-pink-400 uppercase flex items-center gap-2">
+                            <i class="fa-solid fa-table-cells"></i> Disposición de Botones (Grid)
+                        </h3>
+                        
+                        <div>
+                            <label class="text-[11px] text-slate-400 mb-2 block font-medium">Columnas de Botones</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button onclick="setGridCols(1)" id="btn-col-1" class="py-2 px-3 text-xs border border-slate-700 bg-slate-950 rounded-xl text-slate-300 font-medium hover:border-pink-500 transition">
+                                    <i class="fa-solid fa-bars mb-1 block text-base"></i> 1 Columna (Lista)
+                                </button>
+                                <button onclick="setGridCols(2)" id="btn-col-2" class="py-2 px-3 text-xs border border-pink-500 bg-pink-500/20 rounded-xl text-pink-300 font-medium transition">
+                                    <i class="fa-solid fa-table-columns mb-1 block text-base"></i> 2 Columnas (Grid)
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="text-[11px] text-slate-400 mb-2 block font-medium">Redondeo de Bordes (Border Radius)</label>
+                            <div class="grid grid-cols-3 gap-2">
+                                <button onclick="setBtnRadius('0px')" class="py-1.5 text-[11px] bg-slate-950 border border-slate-800 rounded text-slate-300 hover:border-pink-500">Rectos</button>
+                                <button onclick="setBtnRadius('16px')" class="py-1.5 text-[11px] bg-slate-950 border border-slate-800 rounded-xl text-slate-300 hover:border-pink-500">Suave</button>
+                                <button onclick="setBtnRadius('9999px')" class="py-1.5 text-[11px] bg-slate-950 border border-slate-800 rounded-full text-slate-300 hover:border-pink-500">Pill (Redondo)</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </aside>
+
+        <!-- RIGHT LIVE PREVIEW CANVAS AREA -->
+        <main class="flex-1 bg-slate-900/50 flex flex-col items-center justify-center p-6 relative overflow-y-auto">
+            
+            <!-- Canvas Phone Wrapper -->
+            <div id="phone-container" class="phone-frame w-[390px] h-[780px] bg-slate-950 rounded-[48px] overflow-hidden relative flex flex-col my-auto border-4 border-slate-800">
+                
+                <!-- Phone Top Bar Notch / Speaker -->
+                <div class="absolute top-0 inset-x-0 h-6 bg-slate-950/80 backdrop-blur z-30 flex justify-center items-center">
+                    <div class="w-20 h-3.5 bg-slate-900 rounded-full flex items-center justify-center gap-2 px-2">
+                        <div class="w-2 h-2 rounded-full bg-slate-800"></div>
+                        <div class="w-8 h-1 rounded-full bg-slate-800"></div>
+                    </div>
+                </div>
+
+                <!-- LIVE RENDER ENGINE CANVAS CONTAINER -->
+                <div id="render-canvas" class="render-bg flex-1 flex flex-col relative text-center select-none transition-all overflow-y-auto overflow-x-hidden">
+                    
+                    <!-- BANNER SUPERIOR FUSIONADO -->
+                    <div id="view-banner" class="render-banner"></div>
+
+                    <!-- CONTENIDO -->
+                    <div class="render-content-wrapper px-6 pt-10 pb-8">
+                        
+                        <!-- LOGO -->
+                        <div id="view-logo" class="render-logo z-10 mb-4 tracking-tight leading-none">
+                            Eudora
+                        </div>
+
+                        <!-- PROFILE PICTURE -->
+                        <div id="view-profile-wrapper" class="z-10 mb-4 bg-transparent shadow-2xl transition-all" style="border: var(--profile-border-width) solid var(--profile-border-color); border-radius: var(--profile-radius); width: var(--profile-size); height: var(--profile-size); padding: 4px;">
+                            <img id="view-profile-img" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=400&auto=format&fit=crop" class="w-full h-full object-cover shadow-inner transition-all" style="border-radius: calc(var(--profile-radius) * 0.9);">
+                        </div>
+
+                        <!-- SUBTITLE -->
+                        <h2 id="view-subtitle" class="render-subtitle z-10 uppercase tracking-[0.25em] font-semibold mb-1">
+                            CONSULTORA
+                        </h2>
+
+                        <!-- MAIN TITLE -->
+                        <h1 id="view-title" class="render-title z-10 uppercase font-medium tracking-wide mb-3">
+                            VANESA ALVES
+                        </h1>
+
+                        <!-- SOCIAL MEDIA ICONS ROW -->
+                        <div id="view-social-icons" class="flex items-center justify-center gap-4 mb-6 z-10 text-xl hidden">
+                            <!-- Injected by JS -->
+                        </div>
+
+                        <!-- DYNAMIC BUTTONS GRID -->
+                        <div id="view-buttons-grid" class="w-full z-10 grid grid-cols-2 gap-3 mb-8 transition-all">
+                            <!-- Dynamic rendered buttons here -->
+                        </div>
+
+                        <!-- FOOTER CTA -->
+                        <div class="mt-auto z-10 flex items-center gap-2 text-white/90 text-xs font-medium animate-pulse">
+                            <i class="fa-solid fa-hand-pointer"></i>
+                            <span id="view-footer-text">Clique para interagir</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+    <!-- EXPORT HTML CODE MODAL -->
+    <div id="export-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-6 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-3xl w-full flex flex-col max-h-[85vh] shadow-2xl overflow-hidden">
+            <div class="p-5 border-b border-slate-800 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-code text-pink-500 text-lg"></i>
+                    <h3 class="font-bold text-white text-base">Código HTML Exportable</h3>
+                </div>
+                <button onclick="closeExportModal()" class="text-slate-400 hover:text-white p-2">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <div class="p-5 flex-1 overflow-y-auto bg-slate-950 font-mono text-xs text-pink-300">
+                <pre id="export-code-content" class="whitespace-pre-wrap break-all"></pre>
+            </div>
+            <div class="p-4 border-t border-slate-800 flex justify-end gap-3 bg-slate-900">
+                <button onclick="closeExportModal()" class="px-4 py-2 text-xs font-medium text-slate-400 hover:text-white">Cerrar</button>
+                <button onclick="copyToClipboard()" class="px-5 py-2 text-xs font-bold bg-pink-600 hover:bg-pink-500 text-white rounded-xl shadow-lg transition flex items-center gap-2">
+                    <i class="fa-solid fa-copy"></i> Copiar Código
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT APPLICATION STATE & LOGIC -->
+    <script>
+        // Initial Template State Data
+        let appState = {
+            logoText: 'Eudora',
+            subtitleText: 'CONSULTORA',
+            titleText: 'VANESA ALVES',
+            profileImg: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=400&auto=format&fit=crop',
+            bannerImg: '',
+            socials: { ig: '', tk: '', yt: '', li: '' },
+            footerText: 'Clique para interagir',
+            gridCols: 2,
+            buttons: [
+                { id: 'b1', text: 'Facebook', icon: 'fa-brands fa-facebook-f', url: '#', fullWidth: true },
+                { id: 'b2', text: 'Instagram', icon: 'fa-brands fa-instagram', url: '#', fullWidth: false },
+                { id: 'b3', text: 'E-mail', icon: 'fa-regular fa-envelope', url: 'mailto:ejemplo@correo.com', fullWidth: false },
+                { id: 'b4', text: 'Whatsapp', icon: 'fa-brands fa-whatsapp', url: '#', fullWidth: false },
+                { id: 'b5', text: 'Localização', icon: 'fa-solid fa-location-dot', url: '#', fullWidth: false }
+            ]
+        };
+
+        // Available FontAwesome Icons for dropdown picker
+        const availableIcons = [
+            { name: 'Facebook', class: 'fa-brands fa-facebook-f' },
+            { name: 'Instagram', class: 'fa-brands fa-instagram' },
+            { name: 'Whatsapp', class: 'fa-brands fa-whatsapp' },
+            { name: 'Email', class: 'fa-regular fa-envelope' },
+            { name: 'Ubicación', class: 'fa-solid fa-location-dot' },
+            { name: 'TikTok', class: 'fa-brands fa-tiktok' },
+            { name: 'YouTube', class: 'fa-brands fa-youtube' },
+            { name: 'Twitter/X', class: 'fa-brands fa-x-twitter' },
+            { name: 'Sitio Web', class: 'fa-solid fa-globe' },
+            { name: 'Teléfono', class: 'fa-solid fa-phone' },
+            { name: 'Tienda', class: 'fa-solid fa-bag-shopping' }
+        ];
+
+        // Init on DOM Content Loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            renderControlsList();
+            renderCanvas();
+            setupSortable();
+        });
+
+        // Tab Switching Engine
+        function switchTab(tab) {
+            ['content', 'styles', 'layout'].forEach(t => {
+                document.getElementById(`tab-${t}`).classList.add('hidden');
+                document.getElementById(`tab-btn-${t}`).classList.remove('border-pink-500', 'text-pink-400');
+                document.getElementById(`tab-btn-${t}`).classList.add('border-transparent', 'text-slate-400');
+            });
+
+            document.getElementById(`tab-${tab}`).classList.remove('hidden');
+            document.getElementById(`tab-btn-${tab}`).classList.add('border-pink-500', 'text-pink-400');
+            document.getElementById(`tab-btn-${tab}`).classList.remove('border-transparent', 'text-slate-400');
+        }
+
+        // Device View Switcher
+        function setDeviceView(mode) {
+            const container = document.getElementById('phone-container');
+            const btnMobile = document.getElementById('view-mobile');
+            const btnDesktop = document.getElementById('view-desktop');
+
+            if (mode === 'desktop') {
+                container.classList.remove('w-[390px]', 'h-[780px]', 'rounded-[48px]');
+                container.classList.add('w-[850px]', 'h-[780px]', 'rounded-3xl');
+                btnDesktop.classList.add('bg-pink-600', 'text-white');
+                btnDesktop.classList.remove('text-slate-400');
+                btnMobile.classList.remove('bg-pink-600', 'text-white');
+                btnMobile.classList.add('text-slate-400');
+            } else {
+                container.classList.remove('w-[850px]', 'h-[780px]', 'rounded-3xl');
+                container.classList.add('w-[390px]', 'h-[780px]', 'rounded-[48px]');
+                btnMobile.classList.add('bg-pink-600', 'text-white');
+                btnMobile.classList.remove('text-slate-400');
+                btnDesktop.classList.remove('bg-pink-600', 'text-white');
+                btnDesktop.classList.add('text-slate-400');
+            }
+        }
+
+        // Render Button Controls List in Left Sidebar
+        function renderControlsList() {
+            const container = document.getElementById('buttons-control-list');
+            container.innerHTML = '';
+
+            appState.buttons.forEach((btn, index) => {
+                const card = document.createElement('div');
+                card.className = 'bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2 relative group';
+                card.setAttribute('data-id', btn.id);
+
+                card.innerHTML = `
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2 cursor-grab drag-handle text-slate-500 hover:text-slate-300">
+                            <i class="fa-solid fa-grip-vertical"></i>
+                            <span class="text-xs font-bold text-slate-300">#${index + 1}</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <button onclick="toggleFullWidth('${btn.id}')" title="Alternar Ancho Completo" class="text-[10px] px-2 py-1 rounded ${btn.fullWidth ? 'bg-pink-500/20 text-pink-300 border border-pink-500/30' : 'bg-slate-800 text-slate-400'}">
+                                ${btn.fullWidth ? 'Ancho Completo' : 'Normal'}
+                            </button>
+                            <button onclick="removeButton('${btn.id}')" class="text-slate-500 hover:text-rose-400 p-1">
+                                <i class="fa-solid fa-trash-can text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="text" value="${btn.text}" oninput="updateButtonData('${btn.id}', 'text', this.value)" placeholder="Texto" class="bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none focus:border-pink-500">
+                        <select onchange="updateButtonData('${btn.id}', 'icon', this.value)" class="bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:border-pink-500">
+                            ${availableIcons.map(i => `<option value="${i.class}" ${i.class === btn.icon ? 'selected' : ''}>${i.name}</option>`).join('')}
+                        </select>
+                    </div>
+                    <input type="text" value="${btn.url}" oninput="updateButtonData('${btn.id}', 'url', this.value)" placeholder="URL de Destino / Link" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1 text-xs text-slate-400 focus:outline-none focus:border-pink-500">
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Setup Drag & Drop using SortableJS
+        function setupSortable() {
+            const el = document.getElementById('buttons-control-list');
+            Sortable.create(el, {
+                handle: '.drag-handle',
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                onEnd: function () {
+                    const newOrderIds = Array.from(el.children).map(child => child.getAttribute('data-id'));
+                    appState.buttons.sort((a, b) => newOrderIds.indexOf(a.id) - newOrderIds.indexOf(b.id));
+                    renderCanvas();
+                    renderControlsList();
+                }
+            });
+        }
+
+        // Button Data Manipulations
+        function addButton() {
+            const newId = 'btn_' + Date.now();
+            appState.buttons.push({
+                id: newId,
+                text: 'Nuevo Enlace',
+                icon: 'fa-solid fa-globe',
+                url: '#',
+                fullWidth: false
+            });
+            renderControlsList();
+            renderCanvas();
+        }
+
+        function removeButton(id) {
+            appState.buttons = appState.buttons.filter(b => b.id !== id);
+            renderControlsList();
+            renderCanvas();
+        }
+
+        function toggleFullWidth(id) {
+            const btn = appState.buttons.find(b => b.id === id);
+            if (btn) {
+                btn.fullWidth = !btn.fullWidth;
+                renderControlsList();
+                renderCanvas();
+            }
+        }
+
+        function updateButtonData(id, key, val) {
+            const btn = appState.buttons.find(b => b.id === id);
+            if (btn) {
+                btn[key] = val;
+                renderCanvas();
+            }
+        }
+
+        // Live Text Content Update
+        function updateContent() {
+            appState.logoText = document.getElementById('input-logo-text').value;
+            appState.subtitleText = document.getElementById('input-subtitle-text').value;
+            appState.titleText = document.getElementById('input-title-text').value;
+            appState.profileImg = document.getElementById('input-profile-img').value;
+            appState.bannerImg = document.getElementById('input-banner-img').value;
+            appState.footerText = document.getElementById('input-footer-text').value;
+
+            appState.socials = {
+                ig: document.getElementById('social-ig').value,
+                tk: document.getElementById('social-tk').value,
+                yt: document.getElementById('social-yt').value,
+                li: document.getElementById('social-li').value
+            };
+
+            renderCanvas();
+        }
+
+        // Live Style Custom Properties Update
+        function updateStyles() {
+            const root = document.documentElement;
+
+            // Background Image & Overlay
+            const bgImg = document.getElementById('input-bg-image').value;
+            root.style.setProperty('--bg-image', bgImg ? `url('${bgImg}')` : 'none');
+            
+            const overlayVal = document.getElementById('range-bg-overlay').value;
+            document.getElementById('overlay-val').textContent = overlayVal;
+            root.style.setProperty('--bg-overlay', overlayVal / 100);
+
+            root.style.setProperty('--bg-start', document.getElementById('color-bg-start').value);
+            root.style.setProperty('--bg-mid', document.getElementById('color-bg-mid').value);
+            root.style.setProperty('--bg-end', document.getElementById('color-bg-end').value);
+
+            const angle = document.getElementById('range-bg-angle').value;
+            document.getElementById('angle-val').textContent = angle;
+            root.style.setProperty('--bg-angle', `${angle}deg`);
+
+            root.style.setProperty('--btn-bg-start', hexToRgba(document.getElementById('color-btn-start').value, 0.15));
+            root.style.setProperty('--btn-bg-end', hexToRgba(document.getElementById('color-btn-end').value, 0.35));
+            root.style.setProperty('--btn-border-color', hexToRgba(document.getElementById('color-btn-border').value, 0.7));
+
+            root.style.setProperty('--accent-bg-start', document.getElementById('color-accent-start').value);
+            root.style.setProperty('--accent-bg-end', document.getElementById('color-accent-end').value);
+            root.style.setProperty('--accent-icon-color', document.getElementById('color-accent-icon').value);
+            root.style.setProperty('--btn-text-color', document.getElementById('color-btn-text').value);
+
+            root.style.setProperty('--font-logo', document.getElementById('select-font-logo').value);
+            root.style.setProperty('--font-heading', document.getElementById('select-font-heading').value);
+        }
+
+        function updateLayoutSizes() {
+            const root = document.documentElement;
+
+            const logoSize = document.getElementById('range-logo-size').value;
+            document.getElementById('val-logo-size').textContent = `${logoSize}rem`;
+            root.style.setProperty('--logo-size', `${logoSize}rem`);
+
+            const profileBorder = document.getElementById('range-profile-border').value;
+            document.getElementById('val-profile-border').textContent = `${profileBorder}px`;
+            root.style.setProperty('--profile-border-width', `${profileBorder}px`);
+
+            const profileSize = document.getElementById('range-profile-size').value;
+            document.getElementById('val-profile-size').textContent = `${profileSize}px`;
+            root.style.setProperty('--profile-size', `${profileSize}px`);
+
+            const titleSize = document.getElementById('range-title-size').value;
+            document.getElementById('val-title-size').textContent = `${titleSize}rem`;
+            root.style.setProperty('--title-size', `${titleSize}rem`);
+        }
+
+        function setGridCols(cols) {
+            appState.gridCols = cols;
+            const btn1 = document.getElementById('btn-col-1');
+            const btn2 = document.getElementById('btn-col-2');
+
+            if (cols === 1) {
+                btn1.className = 'py-2 px-3 text-xs border border-pink-500 bg-pink-500/20 rounded-xl text-pink-300 font-medium transition';
+                btn2.className = 'py-2 px-3 text-xs border border-slate-700 bg-slate-950 rounded-xl text-slate-300 font-medium hover:border-pink-500 transition';
+            } else {
+                btn2.className = 'py-2 px-3 text-xs border border-pink-500 bg-pink-500/20 rounded-xl text-pink-300 font-medium transition';
+                btn1.className = 'py-2 px-3 text-xs border border-slate-700 bg-slate-950 rounded-xl text-slate-300 font-medium hover:border-pink-500 transition';
+            }
+            renderCanvas();
+        }
+
+        function setBtnRadius(radius) {
+            document.documentElement.style.setProperty('--btn-radius', radius);
+        }
+
+        function setAvatarShape(radius) {
+            document.documentElement.style.setProperty('--profile-radius', radius);
+        }
+
+        // Helper Hex to RGBA
+        function hexToRgba(hex, alpha) {
+            let c = hex.replace('#', '');
+            if (c.length === 3) c = c.split('').map(x => x + x).join('');
+            const num = parseInt(c, 16);
+            return `rgba(${(num >> 16) & 255}, ${(num >> 8) & 255}, ${num & 255}, ${alpha})`;
+        }
+
+        // Render Live Preview
+        function renderCanvas() {
+            document.documentElement.style.setProperty('--banner-img', appState.bannerImg ? `url('${appState.bannerImg}')` : 'none');
+            
+            document.getElementById('view-logo').textContent = appState.logoText;
+            document.getElementById('view-subtitle').textContent = appState.subtitleText;
+            document.getElementById('view-title').textContent = appState.titleText;
+            document.getElementById('view-profile-img').src = appState.profileImg;
+            document.getElementById('view-footer-text').textContent = appState.footerText;
+
+            // Render Social Icons
+            const socialContainer = document.getElementById('view-social-icons');
+            socialContainer.innerHTML = '';
+            let hasSocials = false;
+            
+            const socialMap = [
+                { id: 'ig', icon: 'fa-brands fa-instagram' },
+                { id: 'tk', icon: 'fa-brands fa-tiktok' },
+                { id: 'yt', icon: 'fa-brands fa-youtube' },
+                { id: 'li', icon: 'fa-brands fa-linkedin-in' }
+            ];
+
+            socialMap.forEach(s => {
+                if(appState.socials[s.id]) {
+                    hasSocials = true;
+                    socialContainer.innerHTML += `<a href="${appState.socials[s.id]}" class="social-icon-link" target="_blank"><i class="${s.icon}"></i></a>`;
+                }
+            });
+
+            if(hasSocials) {
+                socialContainer.classList.remove('hidden');
+            } else {
+                socialContainer.classList.add('hidden');
+            }
+
+            const gridContainer = document.getElementById('view-buttons-grid');
+            gridContainer.className = `w-full z-10 grid gap-3 mb-8 transition-all ${appState.gridCols === 1 ? 'grid-cols-1' : 'grid-cols-2'}`;
+            gridContainer.innerHTML = '';
+
+            appState.buttons.forEach(btn => {
+                const a = document.createElement('a');
+                a.href = btn.url || '#';
+                a.onclick = (e) => e.preventDefault(); // Prevent navigation inside studio
+                a.className = `render-btn flex items-stretch overflow-hidden text-decoration-none ${btn.fullWidth ? 'col-span-full justify-self-center w-[70%]' : 'w-full'}`;
+                
+                a.innerHTML = `
+                    <span class="flex-1 py-2.5 px-3 text-xs font-medium flex items-center justify-center border-r border-white/20 truncate">
+                        ${btn.text}
+                    </span>
+                    <div class="render-btn-icon min-w-[42px] flex items-center justify-center px-2">
+                        <i class="${btn.icon} text-base"></i>
+                    </div>
+                `;
+                gridContainer.appendChild(a);
+            });
+        }
+
+        // EXPORT ENGINE: Build dynamic standalone HTML Code
+        function openExportModal() {
+            const root = getComputedStyle(document.documentElement);
+            
+            const generatedHtml = `<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${appState.titleText} - Perfil Bio Link</title>
+    <script src="https://cdn.tailwindcss.com"><\/script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@400;600;800&family=Oswald:wght@300;400;500;700&family=Playfair+Display:ital,wght@0,600;1,400&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-start: ${root.getPropertyValue('--bg-start')};
+            --bg-mid: ${root.getPropertyValue('--bg-mid')};
+            --bg-end: ${root.getPropertyValue('--bg-end')};
+            --bg-angle: ${root.getPropertyValue('--bg-angle')};
+            --bg-image: ${root.getPropertyValue('--bg-image')};
+            --bg-overlay: ${root.getPropertyValue('--bg-overlay')};
+            --banner-img: ${root.getPropertyValue('--banner-img')};
+
+            --text-primary: ${root.getPropertyValue('--text-primary')};
+            --text-subtitle: ${root.getPropertyValue('--text-subtitle')};
+            --btn-text-color: ${root.getPropertyValue('--btn-text-color')};
+
+            --btn-bg-start: ${root.getPropertyValue('--btn-bg-start')};
+            --btn-bg-end: ${root.getPropertyValue('--btn-bg-end')};
+            --btn-border-color: ${root.getPropertyValue('--btn-border-color')};
+            
+            --accent-bg-start: ${root.getPropertyValue('--accent-bg-start')};
+            --accent-bg-end: ${root.getPropertyValue('--accent-bg-end')};
+            --accent-icon-color: ${root.getPropertyValue('--accent-icon-color')};
+
+            --profile-border-color: ${root.getPropertyValue('--profile-border-color')};
+            --profile-border-width: ${root.getPropertyValue('--profile-border-width')};
+            --profile-size: ${root.getPropertyValue('--profile-size')};
+            --profile-radius: ${root.getPropertyValue('--profile-radius')};
+
+            --font-logo: ${root.getPropertyValue('--font-logo')};
+            --font-heading: ${root.getPropertyValue('--font-heading')};
+            --font-subtitle: ${root.getPropertyValue('--font-subtitle')};
+            --font-body: ${root.getPropertyValue('--font-body')};
+
+            --btn-radius: ${root.getPropertyValue('--btn-radius')};
+
+            --logo-size: ${root.getPropertyValue('--logo-size')};
+            --title-size: ${root.getPropertyValue('--title-size')};
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-image: var(--bg-image);
+            background-size: cover;
+            background-position: center;
+            background-color: var(--bg-mid);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(var(--bg-angle), var(--bg-start) 0%, var(--bg-mid) 50%, var(--bg-end) 100%);
+            opacity: calc(1 - var(--bg-overlay));
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .render-banner {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 250px;
+            background-image: var(--banner-img);
+            background-size: cover;
+            background-position: center;
+            -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%);
+            mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%);
+            z-index: 1;
+            opacity: 0.8;
+        }
+
+        .main-container {
+            width: 100%;
+            max-width: 450px;
+            min-height: 100vh;
+            padding: 2.5rem 1.5rem 3rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .social-icon-link {
+            transition: all 0.2s ease;
+            color: var(--text-primary);
+            opacity: 0.8;
+        }
+        .social-icon-link:hover {
+            transform: translateY(-2px);
+            opacity: 1;
+        }
+
+        .render-logo {
+            font-family: var(--font-logo);
+            font-size: var(--logo-size);
+        }
+
+        .render-subtitle {
+            font-family: var(--font-subtitle);
+            color: var(--text-subtitle);
+        }
+
+        .render-title {
+            font-family: var(--font-heading);
+            font-size: var(--title-size);
+        }
+
+        .render-btn {
+            background: linear-gradient(90deg, var(--btn-bg-start) 0%, var(--btn-bg-end) 100%);
+            border: 1px solid var(--btn-border-color);
+            border-radius: var(--btn-radius);
+            color: var(--btn-text-color);
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.2);
+        }
+
+        .render-btn-icon {
+            background: linear-gradient(135deg, var(--accent-bg-start) 0%, var(--accent-bg-end) 100%);
+            color: var(--accent-icon-color);
+            box-shadow: inset 0 2px 4px rgba(255,255,255,0.6), inset 0 -2px 4px rgba(0,0,0,0.15);
+        }
+    </style>
+</head>
+<body>
+    <div class="render-banner"></div>
+    <main class="main-container text-center flex flex-col items-center">
+        <!-- BRAND LOGO -->
+        <div class="render-logo mb-4 tracking-tight leading-none">${appState.logoText}</div>
+
+        <!-- PROFILE PICTURE -->
+        <div class="mb-4 bg-transparent shadow-2xl" style="border: var(--profile-border-width) solid var(--profile-border-color); border-radius: var(--profile-radius); width: var(--profile-size); height: var(--profile-size); padding: 4px;">
+            <img src="${appState.profileImg}" class="w-full h-full object-cover shadow-inner" style="border-radius: calc(var(--profile-radius) * 0.9);">
+        </div>
+
+        <!-- SUBTITLE -->
+        <h2 class="render-subtitle uppercase tracking-[0.25em] font-semibold mb-1 text-sm">${appState.subtitleText}</h2>
+
+        <!-- MAIN TITLE -->
+        <h1 class="render-title uppercase font-medium tracking-wide mb-3">${appState.titleText}</h1>
+
+        <!-- SOCIAL ICONS -->
+        <div class="flex items-center justify-center gap-4 mb-6 z-10 text-xl">
+            ${document.getElementById('view-social-icons').innerHTML}
+        </div>
+
+        <!-- BUTTONS GRID -->
+        <div class="w-full grid gap-3 mb-8 ${appState.gridCols === 1 ? 'grid-cols-1' : 'grid-cols-2'}">
+            ${appState.buttons.map(btn => `
+            <a href="${btn.url}" class="render-btn flex items-stretch overflow-hidden text-decoration-none ${btn.fullWidth ? 'col-span-full justify-self-center w-[70%]' : 'w-full'}">
+                <span class="flex-1 py-2.5 px-3 text-xs font-medium flex items-center justify-center border-r border-white/20 truncate">
+                    ${btn.text}
+                </span>
+                <div class="render-btn-icon min-w-[42px] flex items-center justify-center px-2">
+                    <i class="${btn.icon} text-base"></i>
+                </div>
+            </a>`).join('')}
+        </div>
+
+        <!-- FOOTER CTA -->
+        <div class="mt-auto flex items-center gap-2 text-white/90 text-xs font-medium animate-pulse">
+            <i class="fa-solid fa-hand-pointer"></i>
+            <span>${appState.footerText}</span>
+        </div>
+    </main>
+</body>
+</html>`;
+
+            document.getElementById('export-code-content').textContent = generatedHtml;
+            document.getElementById('export-modal').classList.remove('hidden');
+        }
+
+        function closeExportModal() {
+            document.getElementById('export-modal').classList.add('hidden');
+        }
+
+        function copyToClipboard() {
+            const code = document.getElementById('export-code-content').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('¡Código HTML copiado al portapapeles!');
+            }).catch(() => {
+                // Fallback for document.execCommand
+                const textarea = document.createElement('textarea');
+                textarea.value = code;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                alert('¡Código HTML copiado al portapapeles!');
+            });
+        }
+
+        function resetTemplate() {
+            if(confirm('¿Deseas restablecer la plantilla a sus valores iniciales?')) {
+                location.reload();
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,5 +1,6 @@
 import { useState, type ChangeEvent } from "react";
-import { Bold, Image as ImageIcon, Loader2, Plus, Trash2 } from "lucide-react";
+import { Bold, Italic, Image as ImageIcon, Loader2, Plus, Trash2 } from "lucide-react";
+import { Slider } from "../ui/slider";
 import { toast } from "sonner";
 import type { LinkImageMode, Profile, ProfileLink } from "../../types/database";
 import type { EditorTarget } from "../../routes/editor";
@@ -240,6 +241,22 @@ export function ContextualPropertiesPanel({
     }, 0);
   };
 
+  const insertItalicBioText = () => {
+    const textarea = document.getElementById("contextual-bio") as HTMLTextAreaElement | null;
+    if (!textarea) return;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = profile.bio || "";
+    const selected = text.substring(start, end);
+    const wrapped = selected ? `*${selected}*` : "*texto*";
+    onProfileChange({ bio: text.substring(0, start) + wrapped + text.substring(end) });
+    setTimeout(() => {
+      textarea.focus();
+      const cursorEnd = selected ? end + 2 : start + 6;
+      textarea.setSelectionRange(start + 1, cursorEnd - 1);
+    }, 0);
+  };
+
   if (!selectedTarget) {
     return (
       <div className="rounded-xl border border-dashed p-4 text-sm text-muted-foreground">
@@ -407,10 +424,28 @@ export function ContextualPropertiesPanel({
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-3">
               <Label htmlFor="contextual-bio">Texto</Label>
-              <Button type="button" variant="ghost" size="sm" onClick={insertBoldBioText}>
-                <Bold className="mr-1 h-4 w-4" />
-                Negrita
-              </Button>
+              <div className="flex items-center gap-1">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-1.5 text-muted-foreground hover:text-foreground"
+                  onClick={insertBoldBioText}
+                >
+                  <Bold className="mr-1 h-3.5 w-3.5" />
+                  Negrita
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-1.5 text-muted-foreground hover:text-foreground"
+                  onClick={insertItalicBioText}
+                >
+                  <Italic className="mr-1 h-3.5 w-3.5" />
+                  Cursiva
+                </Button>
+              </div>
             </div>
             <Textarea
               id="contextual-bio"
@@ -418,6 +453,45 @@ export function ContextualPropertiesPanel({
               onChange={(event) => onProfileChange({ bio: event.target.value })}
               maxLength={180}
               className="min-h-28 resize-none"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs">
+              <Label className="text-xs text-muted-foreground">Grosor de Negrita (Resaltado)</Label>
+              <span className="font-semibold text-primary text-[10px] capitalize">
+                {profile.bio_bold_weight === "medium"
+                  ? "Medio (500)"
+                  : profile.bio_bold_weight === "semibold"
+                    ? "Seminegrita (600)"
+                    : profile.bio_bold_weight === "extrabold"
+                      ? "Extra Negrita (800)"
+                      : profile.bio_bold_weight === "black"
+                        ? "Super Negra (900)"
+                        : "Negrita (700)"}
+              </span>
+            </div>
+            <Slider
+              min={0}
+              max={4}
+              step={1}
+              value={[
+                profile.bio_bold_weight === "medium"
+                  ? 0
+                  : profile.bio_bold_weight === "semibold"
+                    ? 1
+                    : profile.bio_bold_weight === "extrabold"
+                      ? 3
+                      : profile.bio_bold_weight === "black"
+                        ? 4
+                        : 2,
+              ]}
+              onValueChange={(val) => {
+                const weights = ["medium", "semibold", "bold", "extrabold", "black"];
+                const selectedWeight = weights[val[0]] || "bold";
+                onProfileChange({ bio_bold_weight: selectedWeight });
+              }}
+              className="py-1"
             />
           </div>
           <div className="space-y-2">
@@ -688,8 +762,11 @@ export function ContextualPropertiesPanel({
       <FieldGroup title="Añadir / administrar enlaces">
         <Button onClick={addLink} disabled={links.length >= 8} className="w-full">
           <Plus className="mr-2 h-4 w-4" />
-          Agregar enlace
+          Agregar nuevo botón
         </Button>
+        <p className="text-xs text-muted-foreground">
+          Crea un botón nuevo para WhatsApp, web, redes sociales u otro enlace.
+        </p>
         <div className="space-y-2">
           {links.map((link, index) => (
             <button

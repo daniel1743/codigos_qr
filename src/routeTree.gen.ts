@@ -15,6 +15,8 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as EditorRouteImport } from './routes/editor'
 import { Route as EncryptedDocumentsRouteImport } from './routes/encrypted-documents'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as TemplateBankRouteImport } from './routes/template-bank'
+import { Route as TemplateBuilderRouteImport } from './routes/template-builder'
 import { Route as DShortUrlRouteImport } from './routes/d.$shortUrl'
 import { Route as PPublicIdRouteImport } from './routes/p.$publicId'
 
@@ -48,6 +50,16 @@ const ProfileRoute = ProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TemplateBankRoute = TemplateBankRouteImport.update({
+  id: '/template-bank',
+  path: '/template-bank',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TemplateBuilderRoute = TemplateBuilderRouteImport.update({
+  id: '/template-builder',
+  path: '/template-builder',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DShortUrlRoute = DShortUrlRouteImport.update({
   id: '/d/$shortUrl',
   path: '/d/$shortUrl',
@@ -66,6 +78,8 @@ export interface FileRoutesByFullPath {
   '/editor': typeof EditorRoute
   '/encrypted-documents': typeof EncryptedDocumentsRoute
   '/profile': typeof ProfileRoute
+  '/template-bank': typeof TemplateBankRoute
+  '/template-builder': typeof TemplateBuilderRoute
   '/d/$shortUrl': typeof DShortUrlRoute
   '/p/$publicId': typeof PPublicIdRoute
 }
@@ -76,6 +90,8 @@ export interface FileRoutesByTo {
   '/editor': typeof EditorRoute
   '/encrypted-documents': typeof EncryptedDocumentsRoute
   '/profile': typeof ProfileRoute
+  '/template-bank': typeof TemplateBankRoute
+  '/template-builder': typeof TemplateBuilderRoute
   '/d/$shortUrl': typeof DShortUrlRoute
   '/p/$publicId': typeof PPublicIdRoute
 }
@@ -87,6 +103,8 @@ export interface FileRoutesById {
   '/editor': typeof EditorRoute
   '/encrypted-documents': typeof EncryptedDocumentsRoute
   '/profile': typeof ProfileRoute
+  '/template-bank': typeof TemplateBankRoute
+  '/template-builder': typeof TemplateBuilderRoute
   '/d/$shortUrl': typeof DShortUrlRoute
   '/p/$publicId': typeof PPublicIdRoute
 }
@@ -99,6 +117,8 @@ export interface FileRouteTypes {
     | '/editor'
     | '/encrypted-documents'
     | '/profile'
+    | '/template-bank'
+    | '/template-builder'
     | '/d/$shortUrl'
     | '/p/$publicId'
   fileRoutesByTo: FileRoutesByTo
@@ -109,6 +129,8 @@ export interface FileRouteTypes {
     | '/editor'
     | '/encrypted-documents'
     | '/profile'
+    | '/template-bank'
+    | '/template-builder'
     | '/d/$shortUrl'
     | '/p/$publicId'
   id:
@@ -119,6 +141,8 @@ export interface FileRouteTypes {
     | '/editor'
     | '/encrypted-documents'
     | '/profile'
+    | '/template-bank'
+    | '/template-builder'
     | '/d/$shortUrl'
     | '/p/$publicId'
   fileRoutesById: FileRoutesById
@@ -130,6 +154,8 @@ export interface RootRouteChildren {
   EditorRoute: typeof EditorRoute
   EncryptedDocumentsRoute: typeof EncryptedDocumentsRoute
   ProfileRoute: typeof ProfileRoute
+  TemplateBankRoute: typeof TemplateBankRoute
+  TemplateBuilderRoute: typeof TemplateBuilderRoute
   DShortUrlRoute: typeof DShortUrlRoute
   PPublicIdRoute: typeof PPublicIdRoute
 }
@@ -178,6 +204,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/template-bank': {
+      id: '/template-bank'
+      path: '/template-bank'
+      fullPath: '/template-bank'
+      preLoaderRoute: typeof TemplateBankRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/template-builder': {
+      id: '/template-builder'
+      path: '/template-builder'
+      fullPath: '/template-builder'
+      preLoaderRoute: typeof TemplateBuilderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/d/$shortUrl': {
       id: '/d/$shortUrl'
       path: '/d/$shortUrl'
@@ -202,6 +242,8 @@ const rootRouteChildren: RootRouteChildren = {
   EditorRoute: EditorRoute,
   EncryptedDocumentsRoute: EncryptedDocumentsRoute,
   ProfileRoute: ProfileRoute,
+  TemplateBankRoute: TemplateBankRoute,
+  TemplateBuilderRoute: TemplateBuilderRoute,
   DShortUrlRoute: DShortUrlRoute,
   PPublicIdRoute: PPublicIdRoute,
 }

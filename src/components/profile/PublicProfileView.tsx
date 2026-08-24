@@ -207,6 +207,53 @@ export function PublicProfileView({
         ? "text-right"
         : "text-center";
 
+  const renderBioText = (text: string | null | undefined) => {
+    if (!text) return null;
+
+    const boldWeight = profile.bio_bold_weight || "bold";
+    const boldClass =
+      boldWeight === "medium"
+        ? "font-medium"
+        : boldWeight === "semibold"
+          ? "font-semibold"
+          : boldWeight === "extrabold"
+            ? "font-extrabold"
+            : boldWeight === "black"
+              ? "font-black"
+              : "font-bold";
+
+    const parts = text.split(/(\*\*.*?\*\*)/g);
+
+    return parts.map((part, index) => {
+      if (part.startsWith("**") && part.endsWith("**") && part.length >= 4) {
+        const innerText = part.slice(2, -2);
+        return (
+          <strong key={index} className={boldClass}>
+            {renderItalics(innerText)}
+          </strong>
+        );
+      }
+      return <React.Fragment key={index}>{renderItalics(part)}</React.Fragment>;
+    });
+  };
+
+  const renderItalics = (text: string) => {
+    const parts = text.split(/(\*.*?\*|_.*?_)/g);
+    return parts.map((part, index) => {
+      if (
+        (part.startsWith("*") && part.endsWith("*") && part.length >= 2) ||
+        (part.startsWith("_") && part.endsWith("_") && part.length >= 2)
+      ) {
+        return (
+          <em key={index} className="italic not-italic-none">
+            {part.slice(1, -1)}
+          </em>
+        );
+      }
+      return part;
+    });
+  };
+
   const btnTextSize =
     profile.button_text_size === "sm"
       ? "text-sm"
@@ -561,8 +608,10 @@ export function PublicProfileView({
               <div className="mt-6 text-center px-4 relative z-10">
                 <ContextWrapper type="bio">
                   <p className="text-[#F4EBE4] text-xs leading-relaxed font-light tracking-wide max-w-xs mx-auto">
-                    {profile.bio ||
-                      "Realçando sua beleza com cuidado, delicadeza e procedimentos pensados para elevar sua autoestima."}
+                    {renderBioText(
+                      profile.bio ||
+                        "Realçando sua beleza com cuidado, delicadeza e procedimentos pensados para elevar sua autoestima.",
+                    )}
                   </p>
                 </ContextWrapper>
               </div>
@@ -619,8 +668,8 @@ export function PublicProfileView({
           fontFamily: fontFamily,
         }}
       >
-        <PremiumDecorativeLayer profile={profile} accentColor={buttonColor} />
         <div className="relative z-10 flex w-full max-w-[520px] flex-1 flex-col items-center pb-12 pt-0 sm:pb-16">
+          <PremiumDecorativeLayer profile={profile} accentColor={buttonColor} />
           {/* Hero Social Section */}
           {profile.hero_link_id &&
             links.find((l) => l.id === profile.hero_link_id && l.enabled) && (
@@ -713,16 +762,7 @@ export function PublicProfileView({
                     className={`max-w-[320px] break-words leading-relaxed opacity-80 ${bioSize} ${bioWeight} ${bioAlign}`}
                     style={{ color: bioColor }}
                   >
-                    {profile.bio.split(/(\*\*.*?\*\*)/g).map((part, index) => {
-                      if (part.startsWith("**") && part.endsWith("**") && part.length >= 4) {
-                        return (
-                          <strong key={index} className="font-bold">
-                            {part.slice(2, -2)}
-                          </strong>
-                        );
-                      }
-                      return <React.Fragment key={index}>{part}</React.Fragment>;
-                    })}
+                    {renderBioText(profile.bio)}
                   </p>
                 </ContextWrapper>
               )}
@@ -768,7 +808,20 @@ export function PublicProfileView({
                       {...(link.id ? { linkId: link.id } : {})}
                       key={link.id || i}
                     >
-                      {buttonStyle.startsWith("premium_") ? (
+                      {profile.social_covers_enabled ? (
+                        <SocialCover
+                          link={link as ProfileLink}
+                          variant="cover"
+                          coverStyle={profile.social_cover_style}
+                          coverHeight={profile.social_cover_height}
+                          // Modified by Codex — SOCIAL-BADGES-IMAGE-MODE
+                          avatarUrl={profile.avatar_url}
+                          className="w-full mb-3 last:mb-0"
+                          onClick={(e) => {
+                            if (isPreview) e.preventDefault();
+                          }}
+                        />
+                      ) : buttonStyle.startsWith("premium_") ? (
                         <PremiumCustomLinkCard
                           link={link as ProfileLink}
                           buttonStyle={buttonStyle}
@@ -785,19 +838,6 @@ export function PublicProfileView({
                           isPreview={isPreview}
                           userId={profile.user_id ?? null}
                           onLinkChange={onLinkChange}
-                        />
-                      ) : profile.social_covers_enabled ? (
-                        <SocialCover
-                          link={link as ProfileLink}
-                          variant="cover"
-                          coverStyle={profile.social_cover_style}
-                          coverHeight={profile.social_cover_height}
-                          // Modified by Codex — SOCIAL-BADGES-IMAGE-MODE
-                          avatarUrl={profile.avatar_url}
-                          className="w-full mb-3 last:mb-0"
-                          onClick={(e) => {
-                            if (isPreview) e.preventDefault();
-                          }}
                         />
                       ) : (
                         <a

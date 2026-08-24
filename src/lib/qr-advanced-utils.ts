@@ -122,7 +122,7 @@ export function createAdvancedOptionsFromSimple(
       ? {
           imageOptions: {
             hideBackgroundDots: true,
-            imageSize: 0.18, // 18% safe limit for error correction level H
+            imageSize: 0.22, // 22% safe limit for error correction level H
             margin: 4,
             crossOrigin: "anonymous",
           },

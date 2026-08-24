@@ -28,6 +28,7 @@ const PROFILE_WRITABLE_COLUMNS = [
   "bio_size",
   "bio_weight",
   "bio_align",
+  "bio_bold_weight",
   "button_text_size",
   "button_text_weight",
   "button_content_align",

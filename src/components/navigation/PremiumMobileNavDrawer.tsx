@@ -13,6 +13,8 @@ import {
   Sparkles,
   User,
   X,
+  Wand2,
+  FolderKanban,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type PointerEvent, type ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
@@ -95,7 +97,9 @@ export function PremiumMobileNavDrawer({ children }: PremiumMobileNavDrawerProps
       pathname !== "/editor" &&
       pathname !== "/profile" &&
       pathname !== "/encrypted-documents" &&
-      pathname !== "/admin");
+      pathname !== "/admin" &&
+      pathname !== "/template-builder" &&
+      pathname !== "/template-bank");
 
   useEffect(() => {
     const updateDrawerWidth = () => {
@@ -213,6 +217,8 @@ export function PremiumMobileNavDrawer({ children }: PremiumMobileNavDrawerProps
   const toolItems: NavItem[] = [
     { label: "Docs Seguros", to: "/encrypted-documents", icon: Shield },
     { label: "Mis documentos", to: "/encrypted-documents", icon: FileText },
+    { label: "Editor Básico", to: "/template-builder", icon: Wand2 },
+    { label: "Banco de Plantillas", to: "/template-bank", icon: FolderKanban },
     ...(isPremium
       ? [
           {

@@ -3,11 +3,12 @@ import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
 import { Switch } from "../ui/switch";
+import { Slider } from "../ui/slider";
 import { toast } from "sonner";
 import type { Profile } from "../../types/database";
 import { getBrowserSupabaseClient } from "../../lib/supabase/client";
 import { useState } from "react";
-import { Loader2, Bold } from "lucide-react";
+import { Loader2, Bold, Italic } from "lucide-react";
 
 interface ProfileSectionProps {
   profile: Partial<Profile>;
@@ -102,7 +103,7 @@ export function ProfileSection({ profile, onChange, userId }: ProfileSectionProp
           <Label htmlFor="bio">Descripción / Biografía</Label>
         </div>
         <div className="border rounded-md focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 overflow-hidden bg-background">
-          <div className="flex items-center border-b px-2 py-1 bg-muted/50">
+          <div className="flex items-center border-b px-2 py-1 bg-muted/50 gap-1">
             <Button
               variant="ghost"
               size="sm"
@@ -143,8 +144,48 @@ export function ProfileSection({ profile, onChange, userId }: ProfileSectionProp
               <Bold className="w-4 h-4 mr-1" />
               <span className="text-xs">Negrita</span>
             </Button>
-            <span className="text-xs text-muted-foreground ml-auto pr-2">
-              Selecciona texto y pulsa Negrita
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 px-2 text-muted-foreground hover:text-foreground"
+              aria-label="Cursiva"
+              title="Cursiva"
+              onClick={() => {
+                const textarea = document.getElementById("bio") as HTMLTextAreaElement;
+                if (!textarea) return;
+
+                const start = textarea.selectionStart;
+                const end = textarea.selectionEnd;
+                const text = profile.bio || "";
+
+                let newText = "";
+                if (start === end) {
+                  newText = text.substring(0, start) + "*texto*" + text.substring(end);
+                  onChange({ bio: newText });
+                  setTimeout(() => {
+                    textarea.focus();
+                    textarea.setSelectionRange(start + 1, start + 6);
+                  }, 0);
+                } else {
+                  newText =
+                    text.substring(0, start) +
+                    "*" +
+                    text.substring(start, end) +
+                    "*" +
+                    text.substring(end);
+                  onChange({ bio: newText });
+                  setTimeout(() => {
+                    textarea.focus();
+                    textarea.setSelectionRange(start, end + 2);
+                  }, 0);
+                }
+              }}
+            >
+              <Italic className="w-4 h-4 mr-1" />
+              <span className="text-xs">Cursiva</span>
+            </Button>
+            <span className="text-xs text-muted-foreground ml-auto pr-2 hidden sm:inline">
+              Formato Markdown (*cursiva*, **negrita**)
             </span>
           </div>
           <Textarea
@@ -154,6 +195,44 @@ export function ProfileSection({ profile, onChange, userId }: ProfileSectionProp
             placeholder="Un par de líneas sobre ti o tu negocio"
             maxLength={180}
             className="min-h-28 resize-none border-0 focus-visible:ring-0 rounded-none shadow-none"
+          />
+        </div>
+        <div className="space-y-2 pt-3">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-muted-foreground font-medium">Grosor de Negrita (Resaltado)</span>
+            <span className="font-semibold text-primary capitalize">
+              {profile.bio_bold_weight === "medium"
+                ? "Medio (500)"
+                : profile.bio_bold_weight === "semibold"
+                  ? "Seminegrita (600)"
+                  : profile.bio_bold_weight === "extrabold"
+                    ? "Extra Negrita (800)"
+                    : profile.bio_bold_weight === "black"
+                      ? "Super Negra (900)"
+                      : "Negrita (700) (Normal)"}
+            </span>
+          </div>
+          <Slider
+            min={0}
+            max={4}
+            step={1}
+            value={[
+              profile.bio_bold_weight === "medium"
+                ? 0
+                : profile.bio_bold_weight === "semibold"
+                  ? 1
+                  : profile.bio_bold_weight === "extrabold"
+                    ? 3
+                    : profile.bio_bold_weight === "black"
+                      ? 4
+                      : 2,
+            ]}
+            onValueChange={(val) => {
+              const weights = ["medium", "semibold", "bold", "extrabold", "black"];
+              const selectedWeight = weights[val[0]] || "bold";
+              onChange({ bio_bold_weight: selectedWeight });
+            }}
+            className="py-2"
           />
         </div>
       </div>
