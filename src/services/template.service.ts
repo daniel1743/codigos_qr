@@ -22,6 +22,21 @@ export interface TemplateConfig {
   updated_at: string;
 }
 
+export interface PublicTemplateViewModel {
+  id: string;
+  name: string;
+  category: string;
+  previewUrl: string;
+  plan: "free" | "premium";
+  tags: string[];
+  isFeatured: boolean;
+  isNew: boolean;
+  usageCount: number;
+  createdAt: string;
+  status: "PUBLIC";
+  config: any;
+}
+
 export interface CreateTemplateData {
   name: string;
   description?: string;
@@ -55,6 +70,77 @@ export async function getTemplates(
     return data || [];
   } catch (error) {
     console.error("Error fetching templates:", error);
+    throw error;
+  }
+}
+
+function readConfigString(config: any, keys: string[], fallback = ""): string {
+  for (const key of keys) {
+    const value = config?.[key];
+    if (typeof value === "string" && value.trim()) return value.trim();
+  }
+  return fallback;
+}
+
+function readConfigBoolean(config: any, keys: string[], fallback = false): boolean {
+  for (const key of keys) {
+    const value = config?.[key];
+    if (typeof value === "boolean") return value;
+  }
+  return fallback;
+}
+
+function readConfigStringArray(config: any, keys: string[]): string[] {
+  for (const key of keys) {
+    const value = config?.[key];
+    if (Array.isArray(value)) {
+      return value.filter((item): item is string => typeof item === "string" && item.trim() !== "");
+    }
+  }
+  return [];
+}
+
+export function mapTemplateToPublicViewModel(template: TemplateConfig): PublicTemplateViewModel {
+  const config = template.config_json || {};
+  const category = readConfigString(config, ["category", "rubro", "industry"], "General");
+  const tags = readConfigStringArray(config, ["tags", "features", "capabilities"]);
+  const createdAt = template.created_at;
+  const createdDate = new Date(createdAt);
+  const isNew =
+    Number.isFinite(createdDate.getTime()) &&
+    Date.now() - createdDate.getTime() < 1000 * 60 * 60 * 24 * 21;
+
+  return {
+    id: template.id,
+    name: template.name,
+    category,
+    previewUrl: template.preview_image || readConfigString(config, ["previewUrl", "preview_url"]),
+    plan: template.template_type === "premium" ? "premium" : "free",
+    tags,
+    isFeatured: readConfigBoolean(config, ["isFeatured", "featured"], template.usage_count > 25),
+    isNew: readConfigBoolean(config, ["isNew", "new"], isNew),
+    usageCount: template.usage_count || 0,
+    createdAt,
+    status: "PUBLIC",
+    config,
+  };
+}
+
+export async function getPublicTemplates(): Promise<PublicTemplateViewModel[]> {
+  try {
+    const { data, error } = await supabase
+      .from("template_bank")
+      .select("*")
+      .eq("is_public", true)
+      .order("usage_count", { ascending: false });
+
+    if (error) throw error;
+
+    return (data || [])
+      .filter((template) => template.is_public === true)
+      .map((template) => mapTemplateToPublicViewModel(template as TemplateConfig));
+  } catch (error) {
+    console.error("Error fetching public templates:", error);
     throw error;
   }
 }

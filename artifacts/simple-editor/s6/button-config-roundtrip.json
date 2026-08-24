@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "identity": {
+    "logoText": "Eudora",
+    "subtitleText": "CONSULTORA",
+    "titleText": "VANESA ALVES",
+    "profileImg": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=400&auto=format&fit=crop",
+    "bannerImg": ""
+  },
+  "socials": {
+    "ig": "",
+    "tk": "",
+    "yt": "",
+    "li": ""
+  },
+  "content": {
+    "footerText": "Clique para interagir"
+  },
+  "links": [
+    {
+      "id": "b1",
+      "text": "Facebook",
+      "icon": "fa-brands fa-facebook-f",
+      "url": "#",
+      "fullWidth": true
+    },
+    {
+      "id": "b2",
+      "text": "Instagram",
+      "icon": "fa-brands fa-instagram",
+      "url": "#",
+      "fullWidth": false
+    },
+    {
+      "id": "b3",
+      "text": "E-mail",
+      "icon": "fa-regular fa-envelope",
+      "url": "mailto:ejemplo@correo.com",
+      "fullWidth": false
+    },
+    {
+      "id": "b4",
+      "text": "Whatsapp",
+      "icon": "fa-brands fa-whatsapp",
+      "url": "#",
+      "fullWidth": false
+    },
+    {
+      "id": "b5",
+      "text": "Localiza??o",
+      "icon": "fa-solid fa-location-dot",
+      "url": "#",
+      "fullWidth": false
+    }
+  ],
+  "appearance": {
+    "bgImage": "",
+    "bgOverlay": "0",
+    "bgStart": "#faf0e6",
+    "bgMid": "#fdf5e6",
+    "bgEnd": "#f5ebe0",
+    "bgAngle": "180",
+    "btnBgStart": "#ff0000",
+    "btnBgEnd": "#fffbfb",
+    "btnBorderColor": "#b76e79",
+    "accentBgStart": "#c98a93",
+    "accentBgEnd": "#a45763",
+    "accentIconColor": "#ffffff",
+    "btnTextColor": "#4a3b3c",
+    "fontLogo": "",
+    "fontHeading": "",
+    "fontSubtitle": "Oswald",
+    "fontBody": "Oswald",
+    "themeId": "custom",
+    "btnPresetId": "outline",
+    "textPrimary": "#4a3b3c",
+    "textSubtitle": "#b76e79",
+    "profileBorderColor": "#b76e79",
+    "profileRadius": "50%",
+    "btnRadius": "9999px",
+    "banner": {
+      "enabled": true,
+      "heightPreset": "medium",
+      "positionY": 50,
+      "imageOpacity": 100,
+      "fusionPreset": "medium",
+      "fusionStrength": 60
+    }
+  },
+  "layout": {
+    "gridCols": 2,
+    "profileBorder": 4,
+    "profileSize": 170,
+    "logoSize": 3.2,
+    "titleSize": 2.2,
+    "devicePreview": "mobile"
+  }
+}

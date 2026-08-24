@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cripqer Premium Menu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Colors */
+            --bg-body: #020617; 
+            --bg-menu: #F8FAFC;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            --accent: #3B82F6;
+            --accent-hover: #EFF6FF;
+            --danger: #EF4444;
+            
+            /* Responsive Dimensions */
+            --menu-width-raw: min(84vw, 340px); 
+            
+            /* Enhanced Animation Parameters */
+            --premium-timing: cubic-bezier(0.32, 0.72, 0, 1);
+            
+            /* Dynamic State Variables (Mapped 0 to 1 via JS) */
+            --reveal-progress: 0; 
+            --main-translate-x: 0px;
+            
+            /* Tweakable Premium Bounds */
+            --min-scale: 0.965; 
+            --max-radius: 38px; 
+            --max-scrim: 0.20; /* H2.3: Strengthened main-content dimming slightly from 0.12 */
+            --inset-y: 8px; 
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            :root {
+                --min-scale: 1 !important;
+                --inset-y: 0px !important;
+            }
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden; 
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-menu); /* U1: Light underlay base */
+            -webkit-tap-highlight-color: transparent;
+            /* H1.1: Removed global touch-action: none to allow native browser behaviors */
+        }
+
+        #app-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--bg-menu); /* U1: Light underlay */
+            /* H1.1: Restrict horizontal native swipe at container level to prevent history back/forward */
+            touch-action: pan-y; 
+        }
+
+        /* --- LAYER 1: THE MENU (UNDERNEATH) --- */
+        #menu-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            /* F1/F2/F3: Decouple visual overlap (14px) from functional width. Border-box ensures content width stays exactly --menu-width-raw */
+            width: calc(var(--menu-width-raw) + 14px);
+            box-sizing: border-box;
+            height: 100%;
+            background-color: var(--bg-menu);
+            display: flex;
+            flex-direction: column;
+            z-index: 1;
+            
+            transform: scale(calc(0.97 + (var(--reveal-progress) * 0.03)))
+                       translate3d(calc(-16px * (1 - var(--reveal-progress))), 0, 0);
+            opacity: calc(0.6 + (var(--reveal-progress) * 0.4));
+            
+            will-change: transform, opacity;
+            
+            padding-right: 14px;
+        }
+
+        /* --- LAYER 2: MAIN CONTENT (ON TOP) --- */
+        #main-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #FFFFFF;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            
+            transform: translate3d(var(--main-translate-x), calc(var(--reveal-progress) * var(--inset-y)), 0) 
+                       scale(calc(1 - (var(--reveal-progress) * (1 - var(--min-scale)))));
+            
+            border-top-left-radius: calc(var(--reveal-progress) * var(--max-radius));
+            border-bottom-left-radius: calc(var(--reveal-progress) * var(--max-radius));
+            
+            /* H2.2: Removed harsh negative-x shadow that caused vertical seam, softened depth */
+            box-shadow: 
+                calc(-2px * var(--reveal-progress)) 0px calc(8px * var(--reveal-progress)) rgba(15, 23, 42, calc(0.02 * var(--reveal-progress))),
+                calc(-8px * var(--reveal-progress)) 0px calc(30px * var(--reveal-progress)) rgba(15, 23, 42, calc(0.06 * var(--reveal-progress)));
+            
+            transform-origin: center right; 
+            overflow: hidden;
+            will-change: transform, border-radius, box-shadow;
+        }
+
+        #app-container.animating #main-layer,
+        #app-container.animating #menu-layer,
+        #app-container.animating #scrim {
+            transition: transform 0.26s var(--premium-timing), 
+                        border-radius 0.26s var(--premium-timing),
+                        box-shadow 0.26s var(--premium-timing),
+                        opacity 0.26s var(--premium-timing);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            #app-container.animating #main-layer,
+            #app-container.animating #menu-layer,
+            #app-container.animating #scrim {
+                transition-duration: 0.15s;
+            }
+        }
+
+        #scrim {
+            position: absolute;
+            inset: 0;
+            background-color: #0F172A;
+            z-index: 100;
+            opacity: calc(var(--reveal-progress) * var(--max-scrim));
+            pointer-events: none;
+            will-change: opacity;
+        }
+
+        .safe-top {
+            /* H1.4: Moved safe-top inline instead of runtime insertion */
+            padding-top: max(1.5rem, env(safe-area-inset-top));
+        }
+
+        .menu-header-bg {
+            background: linear-gradient(145deg, #020617 0%, #0F172A 100%);
+            padding-top: max(1.5rem, env(safe-area-inset-top));
+        }
+
+        .cta-premium {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(8px);
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 20px;
+            margin: 2px 16px;
+            border-radius: 14px;
+            color: var(--text-main);
+            font-weight: 500;
+            text-decoration: none;
+            transition: background-color 0.15s ease, transform 0.15s ease;
+            cursor: pointer;
+            border: 1px solid transparent; /* Prevents layout jump on active */
+        }
+
+        .nav-item i {
+            font-size: 24px;
+            margin-right: 16px;
+            color: var(--text-muted);
+        }
+
+        .nav-item:active {
+            background-color: #F1F5F9;
+            transform: scale(0.97);
+        }
+
+        .nav-item.active {
+            background-color: var(--accent-hover);
+            color: var(--accent);
+            border-color: rgba(59, 130, 246, 0.1);
+        }
+
+        .nav-item.active i {
+            color: var(--accent);
+        }
+
+        .tools-card {
+            background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+            color: white;
+            border-radius: 18px;
+            padding: 16px;
+            margin: 0 16px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.1);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .footer-area {
+            padding-bottom: max(1rem, env(safe-area-inset-bottom));
+            background-color: var(--bg-menu);
+        }
+
+        .no-select { user-select: none; -webkit-user-select: none; }
+        .menu-scroll::-webkit-scrollbar { display: none; }
+        .menu-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+
+        #main-scroll-view {
+            touch-action: pan-y; 
+        }
+    </style>
+</head>
+<body>
+
+<div id="app-container" data-state="closed">
+    
+    <!-- LAYER 1: The Premium Menu -->
+    <!-- H1.2: Added inert to prevent keyboard access while hidden -->
+    <div id="menu-layer" class="no-select" aria-hidden="true" inert>
+        
+        <!-- Profile Header -->
+        <div class="menu-header-bg px-6 pb-7 relative rounded-br-[36px] shadow-sm">
+            <div class="flex items-center gap-4 mt-2">
+                <!-- Squircle Avatar Refined -->
+                <div class="relative shrink-0">
+                    <img src="https://placehold.co/140x140/1e293b/ffffff?text=DF" alt="Daniel Falcon G. avatar" class="w-14 h-14 object-cover rounded-[18px] border-[1.5px] border-white/15 shadow-md">
+                    <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-400 border-[2.5px] border-[#0F172A] rounded-full"></div>
+                </div>
+                <div class="min-w-0">
+                    <h2 class="text-white font-semibold text-[17px] leading-tight tracking-tight truncate">Daniel Falcon G.</h2>
+                    <p class="text-slate-400 text-[13px] mt-0.5 font-medium truncate">/vida-saludable</p>
+                </div>
+            </div>
+            
+            <button class="cta-premium w-full mt-6 hover:bg-white/10 active:bg-white/15 active:scale-[0.98] text-white/90 font-medium text-sm py-3 px-4 rounded-2xl transition-all duration-200 flex items-center justify-center gap-2">
+                <span>Ver mi perfil público</span>
+                <i class="ph ph-arrow-right text-white/60"></i>
+            </button>
+        </div>
+
+        <!-- Scrollable Navigation -->
+        <div class="flex-1 overflow-y-auto menu-scroll py-6 flex flex-col">
+            
+            <div class="px-6 mb-3 text-[11px] font-bold text-slate-400/80 tracking-widest uppercase">Principal</div>
+            
+            <!-- H1.3: Clean navigation contract with data-nav-id -->
+            <nav aria-label="Navegación principal" class="flex flex-col gap-0.5 mb-8" role="navigation">
+                <a href="/inicio" data-nav-id="home" class="nav-item active" aria-current="page">
+                    <i class="ph-fill ph-house"></i>
+                    Inicio
+                </a>
+                <a href="/perfil" data-nav-id="profile" class="nav-item">
+                    <i class="ph ph-user"></i>
+                    Perfil
+                </a>
+                <a href="/enlaces" data-nav-id="links" class="nav-item">
+                    <i class="ph ph-link-simple"></i>
+                    Enlaces
+                </a>
+                <a href="/apariencia" data-nav-id="appearance" class="nav-item">
+                    <i class="ph ph-palette"></i>
+                    Apariencia
+                </a>
+                <a href="/qr" data-nav-id="qr" class="nav-item">
+                    <i class="ph ph-qr-code"></i>
+                    QR
+                </a>
+            </nav>
+
+            <div class="px-6 mb-3 text-[11px] font-bold text-slate-400/80 tracking-widest uppercase">Seguridad</div>
+            
+            <div class="tools-card active:scale-[0.97] transition-transform duration-200 cursor-pointer" tabindex="0" role="button">
+                <div class="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center mr-4 shrink-0">
+                    <i class="ph-fill ph-shield-check text-blue-400 m-0 text-xl"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h3 class="font-semibold text-sm truncate text-slate-50">Docs Seguros</h3>
+                    <p class="text-slate-400 text-xs mt-0.5 truncate">Almacén protegido</p>
+                </div>
+                <i class="ph ph-caret-right text-slate-500 ml-2 text-lg"></i>
+            </div>
+            
+            <div class="flex-1"></div>
+        </div>
+
+        <!-- Footer fixed -->
+        <div class="footer-area border-t border-slate-200/60 mt-auto pt-2">
+            <button class="flex items-center w-full px-6 py-4 text-rose-500 font-semibold active:bg-rose-50 transition-colors">
+                <i class="ph ph-sign-out text-xl mr-3"></i>
+                Cerrar sesión
+            </button>
+        </div>
+    </div>
+
+    <!-- LAYER 2: Main Application Content -->
+    <div id="main-layer">
+        <div id="scrim"></div>
+
+        <!-- App Header (Mock) -->
+        <header id="main-header" class="h-14 md:h-16 border-b border-slate-100 flex items-center justify-between px-3 bg-white shrink-0 safe-top">
+            <!-- H1.2: Added proper aria-controls and aria-expanded -->
+            <button id="hamburger-btn" aria-controls="menu-layer" aria-expanded="false" aria-label="Abrir menú principal" class="w-11 h-11 flex items-center justify-center rounded-full hover:bg-slate-50 active:bg-slate-100 transition-colors text-slate-700">
+                <i class="ph-bold ph-list text-[22px]"></i>
+            </button>
+            <div class="font-bold text-slate-800 text-[17px] tracking-tight">Cripqer</div>
+            <button aria-label="Notificaciones" class="w-10 h-10 flex items-center justify-center rounded-full text-slate-500">
+                <i class="ph-bold ph-bell text-[20px]"></i>
+            </button>
+        </header>
+
+        <!-- App Scrollable Body -->
+        <main id="main-scroll-view" class="flex-1 overflow-y-auto bg-slate-50 relative">
+            <div class="p-4 max-w-lg mx-auto pb-32">
+                
+                <div class="bg-white p-6 rounded-3xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-slate-100 mb-5">
+                    <h1 class="text-[22px] font-bold text-slate-800 mb-2 tracking-tight">Tus Micro-landings</h1>
+                    <p class="text-slate-500 text-[14px] leading-relaxed mb-5">Desliza desde cualquier parte izquierda de la pantalla para abrir el menú principal fluidamente.</p>
+                    
+                    <button data-drawer-gesture="ignore" class="w-full h-14 bg-blue-50/50 hover:bg-blue-50 rounded-2xl flex items-center justify-center border border-blue-200/60 border-dashed text-blue-600 font-semibold text-[15px] transition-colors active:scale-[0.98]">
+                        + Crear nueva landing
+                    </button>
+                </div>
+
+                <div class="space-y-3">
+                    <!-- Skeleton Cards -->
+                    <div class="p-4 bg-white rounded-3xl shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-slate-100 flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0">
+                            <i class="ph ph-qr-code text-slate-400 text-2xl"></i>
+                        </div>
+                        <div class="flex-1">
+                            <div class="h-4 bg-slate-200 rounded-md w-7/12 mb-2.5"></div>
+                            <div class="h-3 bg-slate-100 rounded-md w-4/12"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Horizontal scroll container to test gesture conflict ignore -->
+                    <div class="py-2 overflow-hidden">
+                        <p class="text-xs font-semibold text-slate-400 mb-3 ml-2">COMPONENTES AISLADOS</p>
+                        <div data-drawer-gesture="ignore" class="flex gap-3 overflow-x-auto pb-4 px-2 snap-x menu-scroll">
+                            <div class="w-40 h-24 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl shrink-0 snap-center shadow-sm"></div>
+                            <div class="w-40 h-24 bg-gradient-to-br from-blue-400 to-cyan-500 rounded-2xl shrink-0 snap-center shadow-sm"></div>
+                            <div class="w-40 h-24 bg-slate-200 rounded-2xl shrink-0 snap-center"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-4 bg-white rounded-3xl shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-slate-100 flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0">
+                            <i class="ph ph-qr-code text-slate-400 text-2xl"></i>
+                        </div>
+                        <div class="flex-1">
+                            <div class="h-4 bg-slate-200 rounded-md w-1/2 mb-2.5"></div>
+                            <div class="h-3 bg-slate-100 rounded-md w-1/3"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-8 text-center text-slate-400 text-xs">
+                    Cripqer v2.0 - Premium Core View
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const root = document.documentElement;
+        const appContainer = document.getElementById('app-container');
+        const mainLayer = document.getElementById('main-layer');
+        const menuLayer = document.getElementById('menu-layer');
+        const hamburgerBtn = document.getElementById('hamburger-btn');
+        
+        // H1.2 Focus Management Elements
+        const mainHeader = document.getElementById('main-header');
+        const mainScrollView = document.getElementById('main-scroll-view');
+        let previousFocus = null;
+
+        // Dynamic dimension checking for responsive limits
+        let MAX_WIDTH = 280; 
+        
+        function updateDimensions() {
+            // F1: Functional width MUST be calculated independently of #menu-layer's visual width to create actual geometric overlap.
+            MAX_WIDTH = Math.min(window.innerWidth * 0.84, 340);
+        }
+        window.addEventListener('resize', updateDimensions);
+        updateDimensions();
+
+        // State & Tracking
+        let isOpen = false;
+        let gestureState = 'IDLE'; // IDLE | MEASURING | DRAGGING
+        let startX = 0, startY = 0;
+        let initialTranslate = 0;
+        let wasDragging = false; 
+        
+        // Velocity Buffer for accurate flicks
+        let historyBuffer = [];
+        let rafId = null;
+
+        function updateUI(progress) {
+            progress = Math.max(0, Math.min(1, progress));
+            const translateX = progress * MAX_WIDTH;
+            
+            root.style.setProperty('--reveal-progress', progress);
+            root.style.setProperty('--main-translate-x', `${translateX}px`);
+        }
+
+        function requestUIUpdate(progress) {
+            if (rafId) cancelAnimationFrame(rafId);
+            rafId = requestAnimationFrame(() => {
+                updateUI(progress);
+                rafId = null;
+            });
+        }
+
+        function setMenuState(open, animate = true) {
+            if (isOpen === open && gestureState === 'IDLE') return; // Prevent redundant state calls
+            isOpen = open;
+            
+            // H1.5: Synchronize ARIA and Semantic states
+            appContainer.setAttribute('data-state', open ? 'open' : 'closed');
+            menuLayer.setAttribute('aria-hidden', !open);
+            hamburgerBtn.setAttribute('aria-expanded', open);
+            
+            if (open) {
+                // H1.2: Focus Management - Enter Menu
+                previousFocus = document.activeElement;
+                menuLayer.removeAttribute('inert');
+                mainHeader.setAttribute('inert', '');
+                mainScrollView.setAttribute('inert', '');
+                
+                // Allow DOM to settle before focusing inner element
+                setTimeout(() => {
+                    const focusable = menuLayer.querySelector('.cta-premium');
+                    if (focusable) focusable.focus();
+                }, 50);
+            } else {
+                // H1.2: Focus Management - Exit Menu
+                menuLayer.setAttribute('inert', '');
+                mainHeader.removeAttribute('inert');
+                mainScrollView.removeAttribute('inert');
+                
+                // Restore focus unless user navigated away via menu click
+                if (previousFocus && !wasDragging) {
+                    previousFocus.focus();
+                }
+            }
+            
+            if (animate) {
+                appContainer.classList.add('animating');
+                requestUIUpdate(open ? 1 : 0);
+                setTimeout(() => {
+                    if (gestureState === 'IDLE') appContainer.classList.remove('animating');
+                }, 300);
+            } else {
+                requestUIUpdate(open ? 1 : 0);
+            }
+        }
+
+        function calculateVelocity() {
+            if (historyBuffer.length < 2) return 0;
+            const now = Date.now();
+            const recent = historyBuffer.filter(h => now - h.time < 120);
+            
+            if (recent.length < 2) {
+                const first = historyBuffer[0];
+                const last = historyBuffer[historyBuffer.length - 1];
+                return (last.x - first.x) / (last.time - first.time);
+            }
+            
+            const first = recent[0];
+            const last = recent[recent.length - 1];
+            return (last.x - first.x) / (last.time - first.time);
+        }
+
+        appContainer.addEventListener('pointerdown', (e) => {
+            if (e.target.closest('[data-drawer-gesture="ignore"]')) return;
+            if (!e.isPrimary) return;
+
+            const isLeftEdge = e.clientX <= window.innerWidth * 0.35;
+            const isOnMainLayer = !!e.target.closest('#main-layer');
+
+            if (!isOpen && !isLeftEdge) return;
+            if (isOpen && !isOnMainLayer) return;
+
+            gestureState = 'MEASURING';
+            startX = e.clientX;
+            startY = e.clientY;
+            initialTranslate = isOpen ? MAX_WIDTH : 0;
+            wasDragging = false;
+            
+            historyBuffer = [{ x: startX, time: Date.now() }];
+        });
+
+        appContainer.addEventListener('pointermove', (e) => {
+            if (gestureState === 'IDLE' || !e.isPrimary) return;
+
+            if (gestureState === 'MEASURING') {
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+                const absDx = Math.abs(dx);
+                const absDy = Math.abs(dy);
+
+                if (absDx > 8 || absDy > 8) {
+                    if (absDx > absDy * 1.2) {
+                        gestureState = 'DRAGGING';
+                        wasDragging = true;
+                        appContainer.classList.remove('animating');
+                        try { appContainer.setPointerCapture(e.pointerId); } catch(err){}
+                    } else {
+                        gestureState = 'IDLE';
+                        return;
+                    }
+                }
+            }
+
+            if (gestureState === 'DRAGGING') {
+                const rawDelta = e.clientX - startX;
+                let newTranslate = initialTranslate + rawDelta;
+                
+                newTranslate = Math.max(0, Math.min(MAX_WIDTH, newTranslate));
+                
+                historyBuffer.push({ x: e.clientX, time: Date.now() });
+                if (historyBuffer.length > 10) historyBuffer.shift();
+                
+                requestUIUpdate(newTranslate / MAX_WIDTH);
+            }
+        });
+
+        function handleDragEnd(e) {
+            if (gestureState !== 'DRAGGING') {
+                gestureState = 'IDLE';
+                return;
+            }
+            
+            gestureState = 'IDLE';
+            try { appContainer.releasePointerCapture(e.pointerId); } catch(err){}
+
+            const currentTranslateStr = root.style.getPropertyValue('--main-translate-x');
+            const currentTranslate = parseFloat(currentTranslateStr) || 0;
+            const progress = currentTranslate / MAX_WIDTH;
+            const velocity = calculateVelocity();
+
+            let shouldOpen = false;
+
+            if (velocity > 0.45) {
+                shouldOpen = true; 
+            } else if (velocity < -0.45) {
+                shouldOpen = false;
+            } else {
+                shouldOpen = progress > 0.40;
+            }
+
+            setMenuState(shouldOpen, true);
+        }
+
+        appContainer.addEventListener('pointerup', handleDragEnd);
+        appContainer.addEventListener('pointercancel', handleDragEnd);
+
+        // Required to halt body scrolling ONLY during horizontal drag on mobile WebKit/Blink
+        appContainer.addEventListener('touchmove', (e) => {
+            if (gestureState === 'DRAGGING') {
+                e.preventDefault(); 
+            }
+        }, { passive: false });
+
+        mainLayer.addEventListener('click', (e) => {
+            if (wasDragging) {
+                e.preventDefault();
+                e.stopPropagation();
+                wasDragging = false;
+            } else if (isOpen) {
+                e.preventDefault();
+                e.stopPropagation();
+                setMenuState(false);
+            }
+        }, true);
+
+        hamburgerBtn.addEventListener('click', () => setMenuState(!isOpen));
+
+        // H1.2: Add Escape key support to close menu
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && isOpen) {
+                setMenuState(false);
+            }
+        });
+
+        // H1.3: Navigation integration contract hook
+        window.onCripqerNavigate = function(routeId) {
+            console.log('[Integration] Navigating to:', routeId);
+            
+            // Sync ARIA and visual active state
+            document.querySelectorAll('.nav-item').forEach(item => {
+                const isActive = item.dataset.navId === routeId;
+                item.classList.toggle('active', isActive);
+                if (isActive) item.setAttribute('aria-current', 'page');
+                else item.removeAttribute('aria-current');
+            });
+            
+            // Close drawer, bypassing normal focus restoration to allow host routing
+            previousFocus = null; 
+            setMenuState(false);
+        };
+
+        // Attach click interceptors to navigation items
+        document.querySelectorAll('.nav-item').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const routeId = e.currentTarget.dataset.navId;
+                if(routeId) window.onCripqerNavigate(routeId);
+            });
+        });
+        
+        // Init logic
+        updateUI(0);
+    });
+</script>
+
+</body>
+</html>

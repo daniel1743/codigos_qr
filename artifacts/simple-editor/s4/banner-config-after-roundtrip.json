@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "identity": {
+    "logoText": "Eudora",
+    "subtitleText": "CONSULTORA",
+    "titleText": "VANESA ALVES",
+    "profileImg": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=400&auto=format&fit=crop",
+    "bannerImg": "blob:http://localhost:8080/f1caddec-0f4a-4868-bf60-36958aa5c3eb"
+  },
+  "socials": {
+    "ig": "",
+    "tk": "",
+    "yt": "",
+    "li": ""
+  },
+  "content": {
+    "footerText": "Clique para interagir"
+  },
+  "links": [
+    {
+      "id": "b1",
+      "text": "Facebook",
+      "icon": "fa-brands fa-facebook-f",
+      "url": "#",
+      "fullWidth": true
+    },
+    {
+      "id": "b2",
+      "text": "Instagram",
+      "icon": "fa-brands fa-instagram",
+      "url": "#",
+      "fullWidth": false
+    },
+    {
+      "id": "b3",
+      "text": "E-mail",
+      "icon": "fa-regular fa-envelope",
+      "url": "mailto:ejemplo@correo.com",
+      "fullWidth": false
+    },
+    {
+      "id": "b4",
+      "text": "Whatsapp",
+      "icon": "fa-brands fa-whatsapp",
+      "url": "#",
+      "fullWidth": false
+    },
+    {
+      "id": "b5",
+      "text": "Localiza??o",
+      "icon": "fa-solid fa-location-dot",
+      "url": "#",
+      "fullWidth": false
+    }
+  ],
+  "appearance": {
+    "bgImage": "",
+    "bgOverlay": 0,
+    "bgStart": "#95547B",
+    "bgMid": "#B46A94",
+    "bgEnd": "#8C476E",
+    "bgAngle": 180,
+    "btnBgStart": "#ffffff",
+    "btnBgEnd": "#ffffff",
+    "btnBorderColor": "#ffffff",
+    "accentBgStart": "#f5d1e6",
+    "accentBgEnd": "#e0a3c7",
+    "accentIconColor": "#5c2d47",
+    "btnTextColor": "#ffffff",
+    "fontLogo": "Cinzel",
+    "fontHeading": "Cinzel",
+    "fontSubtitle": "Oswald",
+    "fontBody": "Oswald",
+    "profileRadius": "50%",
+    "btnRadius": "9999px",
+    "banner": {
+      "enabled": true,
+      "heightPreset": "medium",
+      "positionY": 50,
+      "imageOpacity": 100,
+      "fusionPreset": "deep",
+      "fusionStrength": 60
+    }
+  },
+  "layout": {
+    "gridCols": 2,
+    "profileBorder": 4,
+    "profileSize": 170,
+    "logoSize": 3.2,
+    "titleSize": 2.2,
+    "devicePreview": "desktop"
+  }
+}

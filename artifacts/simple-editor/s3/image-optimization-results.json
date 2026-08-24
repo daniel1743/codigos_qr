@@ -1,0 +1,24 @@
+[
+  {
+    "slot": "profile",
+    "originalName": "test-avatar.png",
+    "originalType": "image/png",
+    "originalBytes": 70,
+    "optimizedType": "image/webp",
+    "optimizedBytes": 564,
+    "reductionPercent": -706,
+    "width": 1,
+    "height": 1
+  },
+  {
+    "slot": "banner",
+    "originalName": "test-banner.jpg",
+    "originalType": "image/jpeg",
+    "originalBytes": 70,
+    "optimizedType": "image/webp",
+    "optimizedBytes": 564,
+    "reductionPercent": -706,
+    "width": 1,
+    "height": 1
+  }
+]

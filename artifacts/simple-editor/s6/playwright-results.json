@@ -1,0 +1,8 @@
+{
+  "errors": [
+    "Config validation failed: [Config is null or not an object]",
+    "Roundtrip failed: btnPresetId did not restore as 'legacy'"
+  ],
+  "pageErrors": [],
+  "failedRequests": []
+}

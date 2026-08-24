@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEW TITLE TEST - Perfil Bio Link</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@400;600;800&family=Oswald:wght@300;400;500;700&family=Playfair+Display:ital,wght@0,600;1,400&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-start: #ff0000;
+            --bg-mid: #b46a94;
+            --bg-end: #0000ff;
+            --bg-angle: 180deg;
+            --bg-image: none;
+            --bg-overlay: 0;
+            --banner-img: none;
+
+            --text-primary: #FFFFFF;
+            --text-subtitle: #2C2C2C;
+            --btn-text-color: #ffffff;
+
+            --btn-bg-start: rgba(255, 255, 255, 0.15);
+            --btn-bg-end: rgba(255, 255, 255, 0.35);
+            --btn-border-color: rgba(255, 255, 255, 0.7);
+            
+            --accent-bg-start: #f5d1e6;
+            --accent-bg-end: #e0a3c7;
+            --accent-icon-color: #5c2d47;
+
+            --profile-border-color: #5c2d47;
+            --profile-border-width: 4px;
+            --profile-size: 170px;
+            --profile-radius: 50%;
+
+            --font-logo: 'Cinzel', serif;
+            --font-heading: 'Oswald', sans-serif;
+            --font-subtitle: 'Oswald', sans-serif;
+            --font-body: 'Inter', sans-serif;
+
+            --btn-radius: 9999px;
+
+            --logo-size: 3.2rem;
+            --title-size: 2.2rem;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-image: var(--bg-image);
+            background-size: cover;
+            background-position: center;
+            background-color: var(--bg-mid);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(var(--bg-angle), var(--bg-start) 0%, var(--bg-mid) 50%, var(--bg-end) 100%);
+            opacity: calc(1 - var(--bg-overlay));
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .render-banner {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 250px;
+            background-image: var(--banner-img);
+            background-size: cover;
+            background-position: center;
+            -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%);
+            mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%);
+            z-index: 1;
+            opacity: 0.8;
+        }
+
+        .main-container {
+            width: 100%;
+            max-width: 450px;
+            min-height: 100vh;
+            padding: 2.5rem 1.5rem 3rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .social-icon-link {
+            transition: all 0.2s ease;
+            color: var(--text-primary);
+            opacity: 0.8;
+        }
+        .social-icon-link:hover {
+            transform: translateY(-2px);
+            opacity: 1;
+        }
+
+        .render-logo {
+            font-family: var(--font-logo);
+            font-size: var(--logo-size);
+        }
+
+        .render-subtitle {
+            font-family: var(--font-subtitle);
+            color: var(--text-subtitle);
+        }
+
+        .render-title {
+            font-family: var(--font-heading);
+            font-size: var(--title-size);
+        }
+
+        .render-btn {
+            background: linear-gradient(90deg, var(--btn-bg-start) 0%, var(--btn-bg-end) 100%);
+            border: 1px solid var(--btn-border-color);
+            border-radius: var(--btn-radius);
+            color: var(--btn-text-color);
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.2);
+        }
+
+        .render-btn-icon {
+            background: linear-gradient(135deg, var(--accent-bg-start) 0%, var(--accent-bg-end) 100%);
+            color: var(--accent-icon-color);
+            box-shadow: inset 0 2px 4px rgba(255,255,255,0.6), inset 0 -2px 4px rgba(0,0,0,0.15);
+        }
+    </style>
+</head>
+<body>
+    <div class="render-banner"></div>
+    <main class="main-container text-center flex flex-col items-center">
+        <!-- BRAND LOGO -->
+        <div class="render-logo mb-4 tracking-tight leading-none">NEW LOGO TEST</div>
+
+        <!-- PROFILE PICTURE -->
+        <div class="mb-4 bg-transparent shadow-2xl" style="border: var(--profile-border-width) solid var(--profile-border-color); border-radius: var(--profile-radius); width: var(--profile-size); height: var(--profile-size); padding: 4px;">
+            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=400&auto=format&fit=crop" class="w-full h-full object-cover shadow-inner" style="border-radius: calc(var(--profile-radius) * 0.9);">
+        </div>
+
+        <!-- SUBTITLE -->
+        <h2 class="render-subtitle uppercase tracking-[0.25em] font-semibold mb-1 text-sm">CONSULTORA</h2>
+
+        <!-- MAIN TITLE -->
+        <h1 class="render-title uppercase font-medium tracking-wide mb-3">NEW TITLE TEST</h1>
+
+        <!-- SOCIAL ICONS -->
+        <div class="flex items-center justify-center gap-4 mb-6 z-10 text-xl">
+            <a href="https://instagram.com/test" class="social-icon-link" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+        </div>
+
+        <!-- BUTTONS GRID -->
+        <div class="w-full grid gap-3 mb-8 grid-cols-2">
+            
+            <a href="#" class="render-btn flex items-stretch overflow-hidden text-decoration-none col-span-full justify-self-center w-[70%]">
+                <span class="flex-1 py-2.5 px-3 text-xs font-medium flex items-center justify-center border-r border-white/20 truncate">
+                    Facebook
+                </span>
+                <div class="render-btn-icon min-w-[42px] flex items-center justify-center px-2">
+                    <i class="fa-brands fa-facebook-f text-base"></i>
+                </div>
+            </a>
+            <a href="#" class="render-btn flex items-stretch overflow-hidden text-decoration-none w-full">
+                <span class="flex-1 py-2.5 px-3 text-xs font-medium flex items-center justify-center border-r border-white/20 truncate">
+                    Instagram
+                </span>
+                <div class="render-btn-icon min-w-[42px] flex items-center justify-center px-2">
+                    <i class="fa-brands fa-instagram text-base"></i>
+                </div>
+            </a>
+            <a href="mailto:ejemplo@correo.com" class="render-btn flex items-stretch overflow-hidden text-decoration-none w-full">
+                <span class="flex-1 py-2.5 px-3 text-xs font-medium flex items-center justify-center border-r border-white/20 truncate">
+                    E-mail
+                </span>
+                <div class="render-btn-icon min-w-[42px] flex items-center justify-center px-2">
+                    <i class="fa-regular fa-envelope text-base"></i>
+                </div>
+            </a>
+            <a href="#" class="render-btn flex items-stretch overflow-hidden text-decoration-none w-full">
+                <span class="flex-1 py-2.5 px-3 text-xs font-medium flex items-center justify-center border-r border-white/20 truncate">
+                    Whatsapp
+                </span>
+                <div class="render-btn-icon min-w-[42px] flex items-center justify-center px-2">
+                    <i class="fa-brands fa-whatsapp text-base"></i>
+                </div>
+            </a>
+            <a href="#" class="render-btn flex items-stretch overflow-hidden text-decoration-none w-full">
+                <span class="flex-1 py-2.5 px-3 text-xs font-medium flex items-center justify-center border-r border-white/20 truncate">
+                    Localiza��o
+                </span>
+                <div class="render-btn-icon min-w-[42px] flex items-center justify-center px-2">
+                    <i class="fa-solid fa-location-dot text-base"></i>
+                </div>
+            </a>
+        </div>
+
+        <!-- FOOTER CTA -->
+        <div class="mt-auto flex items-center gap-2 text-white/90 text-xs font-medium animate-pulse">
+            <i class="fa-solid fa-hand-pointer"></i>
+            <span>Clique para interagir</span>
+        </div>
+    </main>
+</body>
+</html>

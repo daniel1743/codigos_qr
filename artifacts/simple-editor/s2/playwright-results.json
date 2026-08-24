@@ -1,0 +1,9 @@
+{
+  "errors": [
+    "Config validation failed: [Config is null or not an object]",
+    "Config validation failed: [Unsupported schemaVersion]",
+    "Config validation failed: [Unsupported schemaVersion]"
+  ],
+  "pageErrors": [],
+  "failedRequests": []
+}

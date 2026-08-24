@@ -10,6 +10,7 @@ import {
 import { useEffect, type ReactNode } from "react";
 import { Toaster } from "../components/ui/sonner";
 import { PremiumMobileNavDrawer } from "../components/navigation/PremiumMobileNavDrawer";
+import { MobileBottomNav } from "../components/navigation/MobileBottomNav";
 
 import appCss from "../styles.css?url";
 
@@ -170,6 +171,7 @@ function RootComponent() {
       <PremiumMobileNavDrawer>
         <Outlet />
       </PremiumMobileNavDrawer>
+      <MobileBottomNav />
       <Toaster position="bottom-right" />
     </QueryClientProvider>
   );

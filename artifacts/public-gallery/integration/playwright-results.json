@@ -1,0 +1,21 @@
+{
+  "url": "http://127.0.0.1:8083/template-bank",
+  "consoleErrors": [],
+  "pageErrors": [],
+  "checks": [
+    {
+      "viewport": "desktop",
+      "heading": 1,
+      "search": 1,
+      "retry": 0,
+      "cards": 0
+    },
+    {
+      "viewport": "mobile",
+      "heading": 1,
+      "search": 1,
+      "retry": 0,
+      "cards": 0
+    }
+  ]
+}

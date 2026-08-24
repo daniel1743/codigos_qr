@@ -1,0 +1,7 @@
+{
+  "errors": [
+    "Config validation failed: [Config is null or not an object]"
+  ],
+  "pageErrors": [],
+  "failedRequests": []
+}

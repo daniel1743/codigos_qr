@@ -37,6 +37,7 @@ const MIN_DRAWER_WIDTH = 286;
 const EDGE_ZONE = 28;
 const OPEN_VELOCITY = 0.45;
 const CLOSE_VELOCITY = -0.45;
+const MOBILE_DRAWER_REPLACED_BY_BOTTOM_NAV = true;
 
 type DrawerMode = "closed" | "dragging" | "settling" | "open";
 
@@ -91,6 +92,7 @@ export function PremiumMobileNavDrawer({ children }: PremiumMobileNavDrawerProps
   } | null>(null);
 
   const hiddenForRoute =
+    MOBILE_DRAWER_REPLACED_BY_BOTTOM_NAV ||
     pathname.startsWith("/p/") ||
     pathname.startsWith("/d/") ||
     (pathname !== "/" &&
