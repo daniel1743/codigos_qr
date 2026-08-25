@@ -1,0 +1,12 @@
+{
+  "command": "npm run build",
+  "startedAt": "2026-08-25T00:48:00Z",
+  "finishedAt": "2026-08-25T00:51:00Z",
+  "exitCode": 0,
+  "result": "PASS",
+  "relevantOutput": [
+    "vite build completed client, ssr, and nitro vercel output",
+    "Generated .vercel/output/nitro.json",
+    "Warnings only: vite-tsconfig-paths native support notice; esbuild options ignored because oxc options were set."
+  ]
+}

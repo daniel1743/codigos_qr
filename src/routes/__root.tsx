@@ -4,13 +4,17 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
+import type { Session } from "@supabase/supabase-js";
 import { Toaster } from "../components/ui/sonner";
 import { PremiumMobileNavDrawer } from "../components/navigation/PremiumMobileNavDrawer";
 import { MobileBottomNav } from "../components/navigation/MobileBottomNav";
+import { DesktopNavbar } from "../components/navigation/DesktopNavbar";
+import { getBrowserSupabaseClient } from "../lib/supabase/client";
 
 import appCss from "../styles.css?url";
 
@@ -167,12 +171,59 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <DesktopNavbar />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <PremiumMobileNavDrawer>
+      <PrivateMobileNavigationShell>
         <Outlet />
-      </PremiumMobileNavDrawer>
-      <MobileBottomNav />
+      </PrivateMobileNavigationShell>
       <Toaster position="bottom-right" />
     </QueryClientProvider>
+  );
+}
+
+function PrivateMobileNavigationShell({ children }: { children: ReactNode }) {
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const supabase = useMemo(() => getBrowserSupabaseClient(), []);
+  const [session, setSession] = useState<Session | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadSession = async () => {
+      const {
+        data: { session: currentSession },
+      } = await supabase.auth.getSession();
+      if (!cancelled) setSession(currentSession);
+    };
+
+    loadSession();
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, currentSession) => {
+      if (!cancelled) setSession(currentSession);
+    });
+
+    return () => {
+      cancelled = true;
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
+
+  const isPrivateMobileRoute =
+    (pathname === "/" && Boolean(session)) ||
+    pathname === "/editor" ||
+    pathname === "/profile" ||
+    pathname === "/encrypted-documents" ||
+    pathname === "/admin" ||
+    pathname === "/template-builder" ||
+    pathname === "/template-bank";
+
+  if (!isPrivateMobileRoute) return <>{children}</>;
+
+  return (
+    <PremiumMobileNavDrawer>
+      {children}
+      <MobileBottomNav />
+    </PremiumMobileNavDrawer>
   );
 }

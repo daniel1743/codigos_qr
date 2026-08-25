@@ -1,0 +1,120 @@
+{
+  "base": "http://127.0.0.1:8082",
+  "consoleErrors": [],
+  "pageErrors": [],
+  "checks": [
+    {
+      "name": "deep-link-home",
+      "expectedPath": "/",
+      "current": "/",
+      "active": "Inicio",
+      "navCount": 5,
+      "navVisible": true,
+      "pass": true
+    },
+    {
+      "name": "tap-QRs",
+      "expectedPath": "/editor",
+      "current": "/editor",
+      "active": "QRs",
+      "navCount": 5,
+      "navVisible": true,
+      "pass": true
+    },
+    {
+      "name": "tap-Crear",
+      "expectedPath": "/template-builder",
+      "current": "/template-builder",
+      "active": "Crear",
+      "navCount": 5,
+      "navVisible": true,
+      "pass": true
+    },
+    {
+      "name": "tap-Plantillas",
+      "expectedPath": "/template-bank",
+      "current": "/template-bank",
+      "active": "Plantillas",
+      "navCount": 5,
+      "navVisible": true,
+      "pass": true
+    },
+    {
+      "name": "tap-Perfil",
+      "expectedPath": "/profile",
+      "current": "/profile",
+      "active": "Perfil",
+      "navCount": 5,
+      "navVisible": true,
+      "pass": true
+    },
+    {
+      "name": "tap-Inicio",
+      "expectedPath": "/",
+      "current": "/",
+      "active": "Inicio",
+      "navCount": 5,
+      "navVisible": true,
+      "pass": true
+    },
+    {
+      "name": "browser-back-observed",
+      "expectedPath": "/profile",
+      "current": "/profile",
+      "active": "Perfil",
+      "navCount": 5,
+      "navVisible": true,
+      "pass": true
+    },
+    {
+      "name": "browser-forward-observed",
+      "expectedPath": "/",
+      "current": "/",
+      "active": "Inicio",
+      "navCount": 5,
+      "navVisible": true,
+      "pass": true
+    },
+    {
+      "name": "deep-link-template-bank",
+      "expectedPath": "/template-bank",
+      "current": "/template-bank",
+      "active": "Plantillas",
+      "navCount": 5,
+      "navVisible": true,
+      "pass": true
+    },
+    {
+      "name": "responsive-320",
+      "width": 320,
+      "overflow": false,
+      "navCount": 5,
+      "navVisible": true,
+      "pass": true
+    },
+    {
+      "name": "responsive-375",
+      "width": 375,
+      "overflow": false,
+      "navCount": 5,
+      "navVisible": true,
+      "pass": true
+    },
+    {
+      "name": "responsive-430",
+      "width": 430,
+      "overflow": false,
+      "navCount": 5,
+      "navVisible": true,
+      "pass": true
+    },
+    {
+      "name": "responsive-768",
+      "width": 768,
+      "overflow": false,
+      "navCount": 5,
+      "navVisible": true,
+      "pass": true
+    }
+  ]
+}

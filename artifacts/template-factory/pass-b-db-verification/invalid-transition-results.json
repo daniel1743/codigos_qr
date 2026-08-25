@@ -1,0 +1,8 @@
+{
+  "executedAt": "2026-08-25T01:44:54.735Z",
+  "attempted": false,
+  "transition": "GENERATED_PRIVATE -> PUBLIC",
+  "expected": "REJECTED",
+  "verdict": "BLOCKED",
+  "reason": "Blocked before workflow testing; no QA fixture created."
+}

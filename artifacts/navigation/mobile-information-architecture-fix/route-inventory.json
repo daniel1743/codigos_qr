@@ -1,0 +1,38 @@
+{
+  "task": "CRIPQER-MOBILE-NAV-INFORMATION-ARCHITECTURE-FIX",
+  "routes": {
+    "template": {
+      "label": "Plantilla",
+      "path": "/template-bank",
+      "source": "src/routes/template-bank.tsx"
+    },
+    "qr": {
+      "label": "QR",
+      "path": "/editor",
+      "search": {
+        "tab": "qr"
+      },
+      "source": "src/routes/editor.tsx",
+      "notes": "Uses the existing editor route with tab=qr to open QR-only editor state. No new URL was invented."
+    },
+    "editor": {
+      "label": "Editor",
+      "path": "/template-builder",
+      "source": "src/routes/template-builder.tsx"
+    },
+    "secureDocuments": {
+      "label": "Seguridad",
+      "path": "/encrypted-documents",
+      "source": "src/routes/encrypted-documents.tsx"
+    },
+    "profile": {
+      "label": "Mi Perfil",
+      "path": "/profile",
+      "source": "src/routes/profile.tsx"
+    },
+    "publicProfile": {
+      "pathPatterns": ["/p/$publicId", "/$alias"],
+      "sources": ["src/routes/p.$publicId.tsx", "src/routes/$alias.tsx"]
+    }
+  }
+}

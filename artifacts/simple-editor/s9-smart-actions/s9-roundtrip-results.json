@@ -1,0 +1,40 @@
+[
+  {
+    "test": "WhatsApp button roundtrip",
+    "status": "PASS",
+    "detail": {
+      "pass": true,
+      "loaded": {
+        "actionType": "whatsapp",
+        "url": "+56912345678",
+        "waMessage": "Hola desde Cripqer",
+        "text": "WhatsApp Test",
+        "icon": "fa-brands fa-whatsapp"
+      }
+    }
+  },
+  {
+    "test": "Backward compat (old button without actionType)",
+    "status": "PASS",
+    "detail": {
+      "pass": true,
+      "actionType": "url",
+      "waMessage": ""
+    }
+  },
+  {
+    "test": "Mixed template (5 action types)",
+    "status": "PASS",
+    "detail": {
+      "count": 5,
+      "pass": true,
+      "hrefs": [
+        "https://example.com/",
+        "tel:+56912345678",
+        "https://wa.me/56912345678?&text=Hola",
+        "https://calendly.com/test",
+        "https://maps.google.com/test"
+      ]
+    }
+  }
+]

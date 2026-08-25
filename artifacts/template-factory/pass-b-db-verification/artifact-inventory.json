@@ -1,0 +1,70 @@
+{
+  "generatedAt": "2026-08-25T01:44:54.735Z",
+  "summary": {
+    "total": 12,
+    "present": 12,
+    "missing": 0
+  },
+  "artifacts": [
+    {
+      "path": "artifacts/template-factory/pass-b-db-verification/live-schema.json",
+      "exists": true,
+      "size_bytes": 4080
+    },
+    {
+      "path": "artifacts/template-factory/pass-b-db-verification/rls-policies.json",
+      "exists": true,
+      "size_bytes": 4925
+    },
+    {
+      "path": "artifacts/template-factory/pass-b-db-verification/admin-access-results.json",
+      "exists": true,
+      "size_bytes": 1847
+    },
+    {
+      "path": "artifacts/template-factory/pass-b-db-verification/insert-results.json",
+      "exists": true,
+      "size_bytes": 356
+    },
+    {
+      "path": "artifacts/template-factory/pass-b-db-verification/workflow-transition-results.json",
+      "exists": true,
+      "size_bytes": 362
+    },
+    {
+      "path": "artifacts/template-factory/pass-b-db-verification/invalid-transition-results.json",
+      "exists": true,
+      "size_bytes": 236
+    },
+    {
+      "path": "artifacts/template-factory/pass-b-db-verification/publication-visibility-results.json",
+      "exists": true,
+      "size_bytes": 853
+    },
+    {
+      "path": "artifacts/template-factory/pass-b-db-verification/non-admin-results.json",
+      "exists": true,
+      "size_bytes": 223
+    },
+    {
+      "path": "artifacts/template-factory/pass-b-db-verification/admin-ui-results.json",
+      "exists": true,
+      "size_bytes": 234
+    },
+    {
+      "path": "artifacts/template-factory/pass-b-db-verification/status-count-results.json",
+      "exists": true,
+      "size_bytes": 1131
+    },
+    {
+      "path": "artifacts/template-factory/pass-b-db-verification/cleanup-results.json",
+      "exists": true,
+      "size_bytes": 773
+    },
+    {
+      "path": "artifacts/template-factory/pass-b-db-verification/PASS_B_DB_VERIFICATION_REPORT.md",
+      "exists": true,
+      "size_bytes": 4899
+    }
+  ]
+}

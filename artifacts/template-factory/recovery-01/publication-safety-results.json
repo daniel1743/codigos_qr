@@ -1,0 +1,16 @@
+{
+  "executedAt": "2026-08-25T02:04:58.687Z",
+  "exportedSymbols": [
+    "INITIAL_PUBLICATION_STATUS",
+    "assertSafeForIngestion",
+    "buildIngestionRecord"
+  ],
+  "forbiddenSymbols": [],
+  "initialStatus": "GENERATED_PRIVATE",
+  "initialIsPublic": false,
+  "statusOverrideRejected": true,
+  "statusOverrideError": "Ingesta insegura: publication_status debe ser GENERATED_PRIVATE, se recibió PUBLIC",
+  "publicFlagOverrideRejected": true,
+  "publicFlagOverrideError": "Ingesta insegura: is_public debe ser false",
+  "verdict": "PASS"
+}

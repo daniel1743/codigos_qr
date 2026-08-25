@@ -1,0 +1,11 @@
+{
+  "executedAt": "2026-08-25T01:44:54.735Z",
+  "attempted": false,
+  "marker": {
+    "generation_source": "qa_pass_b_verification",
+    "batch_id": "PASS-B-DB-QA-01",
+    "name": "__QA_PASS_B_WORKFLOW_DO_NOT_PUBLISH__"
+  },
+  "verdict": "BLOCKED",
+  "reason": "Prerequisite admin authentication/SQL access was not available. No QA fixture was inserted."
+}

@@ -1,0 +1,22 @@
+{
+  "executedAt": "2026-08-25T01:44:54.735Z",
+  "cleanupRequired": true,
+  "qaFixtureCreated": false,
+  "deleteAttempted": false,
+  "publicContaminationCheck": {
+    "name": "template_bank_public_visibility_anon_limit5",
+    "method": "GET",
+    "url": "https://mlinfiuhkxdhlveflbkj.supabase.co/rest/v1/template_bank?select=id,name,publication_status,is_public,generation_source,batch_id&limit=5",
+    "executedAt": "2026-08-25T01:38:56.1691680Z",
+    "ok": true,
+    "statusCode": 200,
+    "responseType": "System.Object[]",
+    "rowCount": 0,
+    "error": null
+  },
+  "verdict": "PASS_NO_QA_FIXTURE_CREATED",
+  "notes": [
+    "No QA fixture was inserted, so there was nothing to delete/archive.",
+    "Anon template_bank probe returned 0 rows at the time of check."
+  ]
+}

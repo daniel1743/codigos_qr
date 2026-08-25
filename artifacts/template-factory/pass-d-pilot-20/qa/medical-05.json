@@ -1,0 +1,48 @@
+{
+  "template_id": "tpl-medical-generator-v1-0005",
+  "industry": "medical",
+  "seed": "pilot-20-v1-medical-05",
+  "recipe": "medical_clean",
+  "generatorVersion": "generator-v1",
+  "configHash": "46a95bea",
+  "themeId": "executive-blue",
+  "buttonPresetId": "premium",
+  "layout": "list",
+  "typography": {
+    "logo": "'Oswald', sans-serif",
+    "heading": "'Oswald', sans-serif"
+  },
+  "buttonCount": 5,
+  "configPath": "configs/medical-05.json",
+  "screenshotPath": "screenshots/medical-05.png",
+  "qa": {
+    "score": 100,
+    "scoreNormalized": 1,
+    "passed": [
+      "schemaValid",
+      "rendererSuccess",
+      "noOverflow",
+      "buttonIntegrity",
+      "assetIntegrity",
+      "urlSafety",
+      "roundTrip"
+    ],
+    "failed": [],
+    "findings": [],
+    "blockingOk": true
+  },
+  "quality": {
+    "score": 1,
+    "dimensions": {
+      "schema_validity": 0.2,
+      "renderer_success": 0.2,
+      "responsive_integrity": 0.15,
+      "content_completeness": 0.15,
+      "action_validity": 0.15,
+      "visual_qa": 0.15,
+      "variation_bonus": 0
+    }
+  },
+  "visualFindings": [],
+  "status": "PASS"
+}

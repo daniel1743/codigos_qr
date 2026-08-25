@@ -1,0 +1,13 @@
+{
+  "executedAt": "2026-08-25T01:44:54.735Z",
+  "attempted": false,
+  "sequence": [
+    "GENERATED_PRIVATE -> REVIEW_PENDING",
+    "REVIEW_PENDING -> APPROVED",
+    "APPROVED -> PUBLIC",
+    "PUBLIC -> APPROVED",
+    "APPROVED -> ARCHIVED"
+  ],
+  "verdict": "BLOCKED",
+  "reason": "No isolated QA fixture could be inserted through an authenticated admin path."
+}

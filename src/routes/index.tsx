@@ -1,5 +1,7 @@
+"use client";
+
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ArrowRight,
   BadgeCheck,
@@ -22,6 +24,8 @@ import {
   X,
 } from "lucide-react";
 import type { ReactNode } from "react";
+import type { Session } from "@supabase/supabase-js";
+import { getBrowserSupabaseClient } from "../lib/supabase/client";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -168,6 +172,52 @@ const faqs = [
 
 function Index() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [authStatus, setAuthStatus] = useState<"loading" | "guest" | "authenticated">("loading");
+  const [session, setSession] = useState<Session | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const fallbackTimer = window.setTimeout(() => {
+      if (!cancelled) setAuthStatus((current) => (current === "loading" ? "guest" : current));
+    }, 1200);
+    const supabase = getBrowserSupabaseClient();
+
+    const loadSession = async () => {
+      const {
+        data: { session: currentSession },
+      } = await supabase.auth.getSession();
+      if (cancelled) return;
+      setSession(currentSession);
+      setAuthStatus(currentSession ? "authenticated" : "guest");
+    };
+
+    loadSession();
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, currentSession) => {
+      if (cancelled) return;
+      setSession(currentSession);
+      setAuthStatus(currentSession ? "authenticated" : "guest");
+    });
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(fallbackTimer);
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  if (authStatus === "loading") {
+    return (
+      <main className="grid min-h-screen place-items-center bg-slate-950 px-6 text-white">
+        <div className="h-10 w-10 animate-spin rounded-full border-2 border-white/20 border-t-white" />
+      </main>
+    );
+  }
+
+  if (authStatus === "authenticated") {
+    return <AuthenticatedHome session={session} />;
+  }
 
   return (
     <main className="min-h-screen overflow-x-clip bg-white text-[#111936]">
@@ -213,6 +263,128 @@ function Index() {
       <FAQSection />
       <FinalCTASection />
       <LandingFooter />
+    </main>
+  );
+}
+
+function AuthenticatedHome({ session }: { session: Session | null }) {
+  const firstName =
+    session?.user.user_metadata?.["full_name"]?.split(" ")?.[0] ||
+    session?.user.email?.split("@")?.[0] ||
+    "Cuenta";
+  const quickPanels = [
+    {
+      title: "Biblioteca",
+      description: "Explora plantillas para tu perfil y próximos diseños.",
+      to: "/template-bank",
+      icon: Store,
+      stat: "Plantillas",
+    },
+    {
+      title: "Mis QR",
+      description: "Edita tu QR principal, enlaces y vista pública.",
+      to: "/editor",
+      icon: LinkIcon,
+      stat: "Perfil activo",
+    },
+    {
+      title: "Crear",
+      description: "Abre el constructor para preparar nuevas experiencias.",
+      to: "/template-builder",
+      icon: Sparkles,
+      stat: "Editor",
+    },
+    {
+      title: "Documentos seguros",
+      description: "Comparte archivos con controles de acceso.",
+      to: "/encrypted-documents",
+      icon: Shield,
+      stat: "Protección",
+    },
+  ];
+
+  return (
+    <main className="min-h-screen bg-[#f5f7fb] px-4 pb-28 pt-6 text-slate-950 sm:px-6 lg:px-8 lg:pb-12">
+      <div className="mx-auto max-w-7xl">
+        <section className="grid gap-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 lg:grid-cols-[1.35fr_0.65fr]">
+          <div>
+            <p className="text-sm font-semibold text-indigo-600">Inicio</p>
+            <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
+              Hola, {firstName}
+            </h1>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
+              Este es tu panel interno de Cripqer. La landing queda reservada para visitantes sin sesión.
+            </p>
+            <div className="mt-5 flex flex-wrap gap-3">
+              <Link to="/editor" className={primaryButton}>
+                Abrir editor
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+              <Link to="/template-bank" className={secondaryButton}>
+                Ver biblioteca
+              </Link>
+            </div>
+          </div>
+          <div className="grid gap-3 rounded-xl bg-slate-950 p-4 text-white">
+            <div className="flex items-center gap-3">
+              <span className="grid h-11 w-11 place-items-center rounded-lg bg-indigo-500">
+                <BadgeCheck className="h-5 w-5" />
+              </span>
+              <div>
+                <p className="text-sm font-semibold">Sesión activa</p>
+                <p className="truncate text-xs text-slate-400">{session?.user.email}</p>
+              </div>
+            </div>
+            <Link
+              to="/profile"
+              className="inline-flex min-h-11 items-center justify-center rounded-lg bg-white px-4 text-sm font-semibold text-slate-950"
+            >
+              Ver cuenta
+            </Link>
+          </div>
+        </section>
+
+        <section className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {quickPanels.map((panel) => {
+            const Icon = panel.icon;
+            return (
+              <Link
+                key={panel.title}
+                to={panel.to}
+                className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-indigo-200 hover:shadow-md"
+              >
+                <div className="flex items-center justify-between gap-4">
+                  <span className="grid h-12 w-12 place-items-center rounded-xl bg-indigo-50 text-indigo-600">
+                    <Icon className="h-5 w-5" />
+                  </span>
+                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+                    {panel.stat}
+                  </span>
+                </div>
+                <h2 className="mt-5 text-lg font-bold tracking-tight">{panel.title}</h2>
+                <p className="mt-2 min-h-12 text-sm leading-6 text-slate-600">{panel.description}</p>
+                <span className="mt-4 inline-flex items-center text-sm font-semibold text-indigo-600">
+                  Entrar
+                  <ChevronRight className="ml-1 h-4 w-4 transition group-hover:translate-x-0.5" />
+                </span>
+              </Link>
+            );
+          })}
+        </section>
+
+        <section className="mt-6 grid gap-4 lg:grid-cols-3">
+          {[
+            ["QR principal", "Mantén tu código conectado a tu perfil editable."],
+            ["Plantillas", "La biblioteca queda lista para llenar con tus templates finales."],
+            ["Próximos módulos", "Aquí podemos sumar métricas, borradores y accesos recientes."],
+          ].map(([title, description]) => (
+            <div key={title} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <h2 className="font-bold tracking-tight">{title}</h2>
+              <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
+            </div>
+          ))}
+        </section>
+      </div>
     </main>
   );
 }

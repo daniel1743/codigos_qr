@@ -1,0 +1,42 @@
+{
+  "generatedAt": "2026-08-25T02:03:39.955Z",
+  "results": [
+    {
+      "industry": "medical",
+      "template_id": "tpl-medical-generator-v1-0001",
+      "seed": "pilot-20-v1-medical-01",
+      "sameConfig": true,
+      "sameConfigHash": true,
+      "configHashA": "53b03940",
+      "configHashB": "53b03940"
+    },
+    {
+      "industry": "legal",
+      "template_id": "tpl-legal-generator-v1-0006",
+      "seed": "pilot-20-v1-legal-01",
+      "sameConfig": true,
+      "sameConfigHash": true,
+      "configHashA": "0a2ab71e",
+      "configHashB": "0a2ab71e"
+    },
+    {
+      "industry": "restaurant",
+      "template_id": "tpl-restaurant-generator-v1-0011",
+      "seed": "pilot-20-v1-restaurant-01",
+      "sameConfig": true,
+      "sameConfigHash": true,
+      "configHashA": "56702a9f",
+      "configHashB": "56702a9f"
+    },
+    {
+      "industry": "barber",
+      "template_id": "tpl-barber-generator-v1-0016",
+      "seed": "pilot-20-v1-barber-01",
+      "sameConfig": true,
+      "sameConfigHash": true,
+      "configHashA": "dcd974dd",
+      "configHashB": "dcd974dd"
+    }
+  ],
+  "verdict": "PASS"
+}

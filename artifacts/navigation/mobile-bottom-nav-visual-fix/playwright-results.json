@@ -1,0 +1,17 @@
+{
+  "build": "PASS",
+  "tests": [
+    {
+      "name": "Nav is visible",
+      "status": "PASS"
+    },
+    {
+      "name": "Profile selected state screenshot captured",
+      "status": "PASS"
+    },
+    {
+      "name": "5 nav items present",
+      "status": "PASS"
+    }
+  ]
+}

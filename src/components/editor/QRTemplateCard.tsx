@@ -1,8 +1,29 @@
+import { useState, useEffect } from "react";
 import { Crown, Check } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import type { QRTemplate } from "../../constants/qr-templates";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
+
+function DeferredQRCodeSVG({ template, demoUrl }: { template: QRTemplate, demoUrl: string }) {
+  const [shouldRender, setShouldRender] = useState(false);
+  useEffect(() => {
+    const timer = setTimeout(() => setShouldRender(true), 50);
+    return () => clearTimeout(timer);
+  }, []);
+  if (!shouldRender) return <div className="w-[120px] h-[120px] bg-slate-100 rounded-md animate-pulse" />;
+  return (
+    <QRCodeSVG
+      value={demoUrl}
+      size={120}
+      level="H"
+      marginSize={2}
+      bgColor={template.qr_background_color}
+      fgColor={template.qr_foreground_color}
+      style={{ width: "100%", height: "100%" }}
+    />
+  );
+}
 
 interface QRTemplateCardProps {
   template: QRTemplate;
@@ -57,15 +78,7 @@ export function QRTemplateCard({
 
       {/* Preview del QR */}
       <div className="flex aspect-square w-full items-center justify-center overflow-hidden rounded-xl border bg-white p-3 shadow-sm">
-        <QRCodeSVG
-          value={DEMO_URL}
-          size={120}
-          level="H"
-          marginSize={2}
-          bgColor={template.qr_background_color}
-          fgColor={template.qr_foreground_color}
-          style={{ width: "100%", height: "100%" }}
-        />
+        <DeferredQRCodeSVG template={template} demoUrl={DEMO_URL} />
       </div>
 
       {/* Info */}

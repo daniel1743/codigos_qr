@@ -1,0 +1,133 @@
+{
+  "executedAt": "2026-08-25T01:44:54.735Z",
+  "liveInspection": {
+    "executed": false,
+    "verdict": "BLOCKED",
+    "reason": "pg_policies requires SQL/service-role/owner access; anon REST cannot inspect policy definitions and CLI is not linked to target project."
+  },
+  "localMigrationPolicyInventory": [
+    {
+      "source": "supabase/migrations/20260819213000_create_admin_system.sql",
+      "name": "Super admin can read all admin users",
+      "relation": "admin_users"
+    },
+    {
+      "source": "supabase/migrations/20260819213000_create_admin_system.sql",
+      "name": "Super admin can insert admin users",
+      "relation": "admin_users"
+    },
+    {
+      "source": "supabase/migrations/20260819213000_create_admin_system.sql",
+      "name": "Admin can read all premium users",
+      "relation": "premium_users"
+    },
+    {
+      "source": "supabase/migrations/20260819213000_create_admin_system.sql",
+      "name": "User can read own premium status",
+      "relation": "premium_users"
+    },
+    {
+      "source": "supabase/migrations/20260819213000_create_admin_system.sql",
+      "name": "Admin can insert premium users",
+      "relation": "premium_users"
+    },
+    {
+      "source": "supabase/migrations/20260819213000_create_admin_system.sql",
+      "name": "Admin can update premium users",
+      "relation": "premium_users"
+    },
+    {
+      "source": "supabase/migrations/20260819213000_create_admin_system.sql",
+      "name": "Admin can delete premium users",
+      "relation": "premium_users"
+    },
+    {
+      "source": "supabase/migrations/20260819213000_create_admin_system.sql",
+      "name": "Admin can read all invitation codes",
+      "relation": "invitation_codes"
+    },
+    {
+      "source": "supabase/migrations/20260819213000_create_admin_system.sql",
+      "name": "Anyone can read active codes for validation",
+      "relation": "invitation_codes"
+    },
+    {
+      "source": "supabase/migrations/20260819213000_create_admin_system.sql",
+      "name": "Admin can insert invitation codes",
+      "relation": "invitation_codes"
+    },
+    {
+      "source": "supabase/migrations/20260819213000_create_admin_system.sql",
+      "name": "Admin can update invitation codes",
+      "relation": "invitation_codes"
+    },
+    {
+      "source": "supabase/migrations/20260821060000_fix_constraints_and_admin_rls.sql",
+      "name": "Super admin can read all admin users",
+      "relation": "admin_users"
+    },
+    {
+      "source": "supabase/migrations/20260821060000_fix_constraints_and_admin_rls.sql",
+      "name": "Super admin can insert admin users",
+      "relation": "admin_users"
+    },
+    {
+      "source": "supabase/migrations/20260824_create_admin_users.sql",
+      "name": "Admins can view admin list",
+      "relation": "admin_users"
+    },
+    {
+      "source": "supabase/migrations/20260824_create_admin_users.sql",
+      "name": "Admins can add admins",
+      "relation": "admin_users"
+    },
+    {
+      "source": "supabase/migrations/20260824_template_factory_workflow.sql",
+      "name": "Public templates visible to everyone",
+      "relation": "template_bank"
+    },
+    {
+      "source": "supabase/migrations/20260824_template_factory_workflow.sql",
+      "name": "Users can view own templates",
+      "relation": "template_bank"
+    },
+    {
+      "source": "supabase/migrations/20260824_template_factory_workflow.sql",
+      "name": "Admin can view all templates",
+      "relation": "template_bank"
+    },
+    {
+      "source": "supabase/migrations/20260824_template_factory_workflow.sql",
+      "name": "Admin can update templates",
+      "relation": "template_bank"
+    },
+    {
+      "source": "supabase/migrations/20260824_template_factory_workflow.sql",
+      "name": "Admin can delete templates",
+      "relation": "template_bank"
+    }
+  ],
+  "recursivePolicyRiskFoundInLocalMigrations": [
+    {
+      "source": "supabase/migrations/20260824_create_admin_users.sql",
+      "policy": "Admins can view admin list",
+      "risk": "Policy on admin_users queries admin_users in USING, recursive under RLS."
+    },
+    {
+      "source": "supabase/migrations/20260824_create_admin_users.sql",
+      "policy": "Admins can add admins",
+      "risk": "Policy on admin_users queries admin_users in WITH CHECK, recursive under RLS."
+    },
+    {
+      "source": "supabase/migrations/20260819213000_create_admin_system.sql",
+      "policy": "Super admin can read all admin users",
+      "risk": "Historical recursive policy; later fixed by check_is_super_admin migration, but 20260824 migration can reintroduce recursion."
+    }
+  ],
+  "existingSafeArchitecture": {
+    "function": "public.check_is_super_admin(uuid)",
+    "source": "supabase/migrations/20260821060000_fix_constraints_and_admin_rls.sql",
+    "recommendation": "Use/drop recursive admin_users policies and route admin checks through SECURITY DEFINER check_is_super_admin."
+  },
+  "verdict": "BLOCKED"
+}

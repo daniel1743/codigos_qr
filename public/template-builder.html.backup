@@ -1,0 +1,2397 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-900">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Motor Editor de Plantillas Premium - Style Canvas</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@400;600;800&family=Oswald:wght@300;400;500;700&family=Playfair+Display:ital,wght@0,600;1,400&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SortableJS para Drag & Drop suave -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+
+    <style>
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(100, 116, 139, 0.5);
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(148, 163, 184, 0.8);
+        }
+
+        /* Phone Canvas Simulated Frames */
+        .phone-frame {
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 0 12px #1e293b, 0 0 0 14px #334155;
+            transition: all 0.3s ease;
+        }
+
+        /* Canvas Live Dynamic Preview Engine CSS Variables */
+        :root {
+            --bg-start: #95547B;
+            --bg-mid: #B46A94;
+            --bg-end: #8C476E;
+            --bg-angle: 180deg;
+
+            --text-primary: #FFFFFF;
+            --text-subtitle: #2C2C2C;
+            --btn-text-color: #FFFFFF;
+
+            --btn-bg-start: rgba(255, 255, 255, 0.1);
+            --btn-bg-end: rgba(255, 255, 255, 0.25);
+            --btn-border-color: rgba(255, 255, 255, 0.7);
+            
+            --accent-bg-start: #f5d1e6;
+            --accent-bg-end: #e0a3c7;
+            --accent-icon-color: #5c2d47;
+
+            --profile-border-color: #5c2d47;
+            --profile-border-width: 4px;
+            --profile-size: 170px;
+            --profile-radius: 50%;
+
+            --font-logo: 'Cinzel', serif;
+            --font-heading: 'Oswald', sans-serif;
+            --font-subtitle: 'Oswald', sans-serif;
+            --font-body: 'Inter', sans-serif;
+
+            --btn-radius: 9999px;
+            --btn-grid-cols: 2;
+            --btn-gap: 1rem;
+
+            --logo-size: 3.2rem;
+            --title-size: 2.2rem;
+            --subtitle-size: 1rem;
+            
+            --bg-image: none;
+            --bg-overlay: 0;
+            --banner-img: none;
+        }
+
+        /* Dynamic Classes for Live Render Container */
+        .render-bg {
+            background-image: var(--bg-image);
+            background-size: cover;
+            background-position: center;
+            background-color: var(--bg-mid); /* Fallback */
+            position: relative;
+        }
+        
+        .render-bg::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(var(--bg-angle), var(--bg-start) 0%, var(--bg-mid) 50%, var(--bg-end) 100%);
+            opacity: calc(1 - var(--bg-overlay));
+            pointer-events: none;
+            z-index: 0;
+        }
+
+                .render-banner {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: var(--banner-height, 250px);
+            background-image: var(--banner-img);
+            background-size: cover;
+            background-position: center var(--banner-pos-y, 50%);
+            -webkit-mask-image: var(--banner-mask, linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%));
+            mask-image: var(--banner-mask, linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%));
+            z-index: 1;
+            opacity: var(--banner-opacity, 0.8);
+            transition: all 0.3s ease;
+        }
+
+        .render-content-wrapper {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+        }
+
+        .social-icon-link {
+            transition: all 0.2s ease;
+            color: var(--text-primary);
+            opacity: 0.8;
+        }
+        .social-icon-link:hover {
+            transform: translateY(-2px);
+            opacity: 1;
+        }
+
+        .render-logo {
+            font-family: var(--font-logo);
+            font-size: var(--logo-size);
+            color: var(--text-primary);
+        }
+
+        .render-subtitle {
+            font-family: var(--font-subtitle);
+            color: var(--text-subtitle);
+            font-size: var(--subtitle-size);
+        }
+
+        .render-title {
+            font-family: var(--font-heading);
+            color: var(--text-primary);
+            font-size: var(--title-size);
+        }
+
+        .render-btn {
+            background: linear-gradient(90deg, var(--btn-bg-start) 0%, var(--btn-bg-end) 100%);
+            border: var(--btn-border-width, 1px) solid var(--btn-border-color);
+            border-radius: var(--btn-radius);
+            color: var(--btn-text-color);
+            font-family: var(--font-body);
+            transition: all 0.2s ease;
+            box-shadow: var(--btn-shadow, 0 4px 6px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.2));
+            backdrop-filter: var(--btn-backdrop, blur(8px));
+            -webkit-backdrop-filter: var(--btn-backdrop, blur(8px));
+        }
+
+        .render-btn:hover {
+            transform: var(--btn-hover-transform, translateY(-2px));
+            box-shadow: var(--btn-hover-shadow, 0 6px 12px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.3));
+        }
+
+        .render-btn-icon {
+            background: linear-gradient(135deg, var(--accent-bg-start) 0%, var(--accent-bg-end) 100%);
+            color: var(--accent-icon-color);
+            box-shadow: inset 0 2px 4px rgba(255,255,255,0.6), inset 0 -2px 4px rgba(0,0,0,0.15);
+        }
+
+        /* Drag handle highlight */
+        .sortable-ghost {
+            opacity: 0.4;
+            background: rgba(236, 72, 153, 0.2) !important;
+            border: 2px dashed #ec4899 !important;
+        }
+
+        html,
+        body {
+            height: 100%;
+            min-height: 100%;
+            overscroll-behavior: none;
+        }
+
+        input,
+        select,
+        button,
+        textarea {
+            font-size: 16px;
+        }
+
+        #phone-container {
+            transform-origin: center center;
+            touch-action: pan-y pinch-zoom;
+        }
+
+        #render-canvas {
+            -webkit-overflow-scrolling: touch;
+        }
+
+        @media (max-width: 1180px) {
+            #phone-container:not(.desktop-view) {
+                width: min(390px, calc(100vw - 28rem)) !important;
+                height: min(780px, calc(100dvh - 7.5rem)) !important;
+            }
+            #phone-container.desktop-view {
+                max-width: 850px;
+                width: 100% !important;
+                height: auto !important;
+                aspect-ratio: 85 / 78;
+                min-width: 320px;
+            }
+        }
+
+        @media (max-width: 900px) {
+            body {
+                overflow: auto !important;
+                min-height: 100dvh;
+            }
+
+            body > header {
+                height: auto !important;
+                min-height: 64px;
+                gap: 0.75rem;
+                align-items: flex-start !important;
+                padding: 0.75rem !important;
+                position: sticky;
+                top: 0;
+            }
+
+            body > header > div:first-child {
+                min-width: 0;
+            }
+
+            body > header h1 {
+                max-width: 46vw;
+                font-size: 0.95rem !important;
+                line-height: 1.1;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            body > header p {
+                display: none;
+            }
+
+            body > header > div:last-child {
+                gap: 0.5rem !important;
+                flex-wrap: wrap;
+                justify-content: flex-end;
+            }
+
+            body > header > div:last-child button {
+                min-height: 38px;
+                padding: 0.55rem 0.7rem !important;
+            }
+
+            body > header > div:last-child button:first-child {
+                width: 38px;
+                padding-inline: 0 !important;
+                justify-content: center;
+                font-size: 0;
+            }
+
+            body > header > div:last-child button:first-child i {
+                font-size: 0.8rem;
+            }
+
+            body > .flex-1.flex {
+                min-height: calc(100dvh - 70px);
+                flex-direction: column !important;
+                overflow: visible !important;
+            }
+
+            body > .flex-1.flex > aside {
+                width: 100% !important;
+                height: 52dvh !important;
+                min-height: 360px;
+                max-height: 560px;
+                border-right: 0 !important;
+                border-bottom: 1px solid rgb(30 41 59);
+                overflow: hidden !important;
+            }
+
+            body > .flex-1.flex > aside > .flex-1 {
+                padding: 0.85rem !important;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            body > .flex-1.flex > main {
+                min-height: 48dvh;
+                padding: 1rem !important;
+                overflow: hidden !important;
+                justify-content: flex-start !important;
+            }
+
+            #phone-container:not(.desktop-view) {
+                width: min(390px, calc(100vw - 2rem)) !important;
+                height: min(780px, calc(48dvh - 2rem)) !important;
+            }
+            #phone-container.desktop-view {
+                width: 100% !important;
+                height: auto !important;
+                aspect-ratio: 85 / 78;
+                margin-block: 0 !important;
+                border-radius: 20px !important;
+                min-height: 430px;
+                margin-block: 0 !important;
+                border-radius: 34px !important;
+                border-width: 3px !important;
+                box-shadow: 0 18px 42px -16px rgba(0, 0, 0, 0.85), 0 0 0 7px #1e293b, 0 0 0 8px #334155;
+            }
+
+            .render-content-wrapper {
+                padding-left: 1rem !important;
+                padding-right: 1rem !important;
+            }
+
+            #view-buttons-grid {
+                grid-template-columns: 1fr !important;
+            }
+
+            .render-btn {
+                min-height: 44px;
+            }
+        }
+
+        @media (max-width: 520px) {
+            body > header {
+                align-items: center !important;
+            }
+
+            body > header h1 {
+                max-width: 38vw;
+                font-size: 0.82rem !important;
+            }
+
+            body > header .fa-wand-magic-sparkles {
+                font-size: 1rem !important;
+            }
+
+            body > .flex-1.flex > aside {
+                height: 55dvh !important;
+                min-height: 380px;
+            }
+
+            body > .flex-1.flex > main {
+                min-height: 45dvh;
+            }
+
+            #phone-container:not(.desktop-view) {
+                height: min(780px, calc(45dvh - 1.25rem)) !important;
+                min-height: 360px;
+            }
+
+            .render-logo {
+                font-size: clamp(1.8rem, 9vw, var(--logo-size)) !important;
+            }
+
+            .render-title {
+                font-size: clamp(1.35rem, 7vw, var(--title-size)) !important;
+            }
+
+            .render-subtitle {
+                letter-spacing: 0.16em !important;
+            }
+        }            .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        </style>
+</head>
+<body class="h-full text-slate-100 flex flex-col font-sans overflow-hidden">
+
+    <!-- TOP NAVBAR -->
+    <header class="h-16 bg-slate-950 border-b border-slate-800 px-6 flex items-center justify-between z-30 shrink-0">
+        <div class="flex items-center gap-3">
+            <div class="bg-gradient-to-tr from-pink-500 to-purple-600 p-2 rounded-xl text-white shadow-lg shadow-pink-500/20">
+                <i class="fa-solid fa-wand-magic-sparkles text-xl"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-lg tracking-wide bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">Canvas Engine Studio</h1>
+                <p class="text-xs text-slate-400">Motor de Plantillas Reutilizables & Editables</p>
+            </div>
+        </div>
+
+        <!-- Center Controls: Devices Switch -->
+        <div class="hidden md:flex items-center gap-1 bg-slate-900 border border-slate-800 p-1 rounded-xl">
+            <button id="view-mobile" onclick="setDeviceView('mobile')" class="px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-2 bg-pink-600 text-white shadow transition">
+                <i class="fa-solid fa-mobile-screen-button"></i> M�vil
+            </button>
+
+            <button id="view-desktop" onclick="setDeviceView('desktop')" class="px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-2 text-slate-400 hover:text-white transition">
+                <i class="fa-solid fa-desktop"></i> Desktop
+            </button>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center gap-3">
+            <button onclick="resetTemplate()" class="px-3 py-2 text-xs font-medium text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-xl transition flex items-center gap-2">
+                <i class="fa-solid fa-rotate-left"></i> Restablecer
+            </button>
+            <button onclick="openExportModal()" class="px-4 py-2 text-xs font-bold text-white bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 rounded-xl shadow-lg shadow-pink-500/25 transition flex items-center gap-2">
+                <i class="fa-solid fa-code"></i> Exportar HTML/CSS
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN STUDIO CONTAINER -->
+    <div class="flex-1 flex overflow-hidden">
+
+        <!-- LEFT CONTROL PANEL (CANVA STYLE EDITOR) -->
+        <aside class="w-96 bg-slate-950 border-r border-slate-800 flex flex-col shrink-0 z-20 overflow-hidden">
+            
+            <!-- Editor Tabs Header -->
+            <div class="flex border-b border-slate-800 bg-slate-900/50">
+                <button onclick="switchTab('content')" id="tab-btn-content" class="flex-1 py-3 text-xs font-bold border-b-2 border-pink-500 text-pink-400 flex items-center justify-center gap-2 transition">
+                    <i class="fa-solid fa-pen-to-square"></i> Contenido
+                </button>
+                <button onclick="switchTab('styles')" id="tab-btn-styles" class="flex-1 py-3 text-xs font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center justify-center gap-2 transition">
+                    <i class="fa-solid fa-palette"></i> Estilo & Color
+                </button>
+                <button onclick="switchTab('layout')" id="tab-btn-layout" class="flex-1 py-3 text-xs font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center justify-center gap-2 transition">
+                    <i class="fa-solid fa-layer-group"></i> Disposici�n
+                </button>
+            </div>
+
+            <!-- Tab Contents Wrapper -->
+            <div class="flex-1 overflow-y-auto p-5 space-y-6">
+
+                <!-- ================= TAB 1: CONTENIDO ================= -->
+                <div id="tab-content" class="space-y-5">
+                    
+                    <!-- Banner Section -->
+                    <div class="bg-slate-900/70 p-4 rounded-2xl border border-slate-800 space-y-3">
+                        <h3 class="text-xs font-bold tracking-wider text-pink-400 uppercase flex items-center gap-2">
+                            <i class="fa-solid fa-panorama"></i> Banner Superior
+                        </h3>
+                                                                        <div>
+                            <input type="file" id="file-banner-img" accept="image/jpeg, image/png, image/webp, image/avif, image/heic" class="hidden" onchange="handleImageUpload(event, 'banner')">
+                            <div class="flex gap-2 mb-2">
+                                <button onclick="document.getElementById('file-banner-img').click()" id="btn-upload-banner" class="flex-1 bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold py-2 px-3 rounded-xl transition">
+                                    <i class="fa-solid fa-upload mr-1"></i> Subir banner
+                                </button>
+                                <button onclick="removeImage('banner')" class="bg-slate-800 hover:bg-rose-500/20 hover:text-rose-400 text-slate-400 text-xs font-bold py-2 px-3 rounded-xl transition">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </div>
+                            <details class="text-xs text-slate-500 group mb-3">
+                                <summary class="cursor-pointer hover:text-slate-300">O usar URL de imagen...</summary>
+                                <div class="mt-2">
+                                    <input type="text" id="input-banner-img" value="" placeholder="Dejar en blanco para omitir" oninput="updateContent()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-pink-500 focus:outline-none transition">
+                                </div>
+                            </details>
+
+                            <!-- S4: Premium Banner Controls -->
+                            <div id="banner-controls" class="space-y-4 mt-4 pt-4 border-t border-slate-800">
+                                <div>
+                                    <label class="text-[11px] text-slate-400 mb-2 block font-medium">Altura del banner</label>
+                                    <div class="flex gap-2">
+                                        <button onclick="setBannerHeight('compact')" class="banner-height-btn flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold py-1.5 rounded-xl transition">Compacto</button>
+                                        <button onclick="setBannerHeight('medium')" class="banner-height-btn flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold py-1.5 rounded-xl transition">Medio</button>
+                                        <button onclick="setBannerHeight('large')" class="banner-height-btn flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold py-1.5 rounded-xl transition">Grande</button>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="text-[11px] text-slate-400 mb-1 flex justify-between font-medium">
+                                        <span>Posici?n de imagen</span>
+                                        <span id="banner-pos-val" class="text-slate-500">Centro</span>
+                                    </label>
+                                    <input type="range" id="range-banner-pos" min="0" max="100" value="50" oninput="updateBannerSettings()" class="w-full accent-pink-500">
+                                    <div class="flex justify-between text-[9px] text-slate-500 mt-1"><span>Arriba</span><span>Abajo</span></div>
+                                </div>
+
+                                <div>
+                                    <label class="text-[11px] text-slate-400 mb-2 block font-medium">Fusi?n con el fondo</label>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <button onclick="setBannerFusion('none')" class="banner-fusion-btn bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold py-1.5 rounded-lg transition">Sin fusi?n</button>
+                                        <button onclick="setBannerFusion('soft')" class="banner-fusion-btn bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold py-1.5 rounded-lg transition">Suave</button>
+                                        <button onclick="setBannerFusion('medium')" class="banner-fusion-btn bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold py-1.5 rounded-lg transition">Media</button>
+                                        <button onclick="setBannerFusion('deep')" class="banner-fusion-btn bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold py-1.5 rounded-lg transition">Intensa</button>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="text-[11px] text-slate-400 mb-1 flex justify-between font-medium">
+                                        <span>Intensidad de fusi?n</span>
+                                        <span id="banner-fusion-val" class="text-slate-500">60%</span>
+                                    </label>
+                                    <input type="range" id="range-banner-fusion" min="0" max="100" value="60" oninput="updateBannerSettings()" class="w-full accent-pink-500">
+                                </div>
+
+                                <div>
+                                    <label class="text-[11px] text-slate-400 mb-1 flex justify-between font-medium">
+                                        <span>Intensidad de imagen</span>
+                                        <span id="banner-opacity-val" class="text-slate-500">100%</span>
+                                    </label>
+                                    <input type="range" id="range-banner-opacity" min="30" max="100" value="100" oninput="updateBannerSettings()" class="w-full accent-pink-500">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Branding Header Section -->
+                    <div class="bg-slate-900/70 p-4 rounded-2xl border border-slate-800 space-y-3">
+                        <h3 class="text-xs font-bold tracking-wider text-pink-400 uppercase flex items-center gap-2">
+                            <i class="fa-solid fa-font"></i> Marca & T�tulo
+                        </h3>
+                        <div>
+                            <label class="text-[11px] text-slate-400 mb-1 block font-medium">Texto del Logo / Marca</label>
+                            <input type="text" id="input-logo-text" value="Eudora" oninput="updateContent()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-pink-500 focus:outline-none transition">
+                        </div>
+                        <div>
+                            <label class="text-[11px] text-slate-400 mb-1 block font-medium">Subt�tulo (Cargo / Rol)</label>
+                            <input type="text" id="input-subtitle-text" value="CONSULTORA" oninput="updateContent()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-pink-500 focus:outline-none transition">
+                        </div>
+                        <div>
+                            <label class="text-[11px] text-slate-400 mb-1 block font-medium">Nombre Principal</label>
+                            <input type="text" id="input-title-text" value="VANESA ALVES" oninput="updateContent()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-pink-500 focus:outline-none transition">
+                        </div>
+                    </div>
+
+                    <!-- Profile Image Section -->
+                    <div class="bg-slate-900/70 p-4 rounded-2xl border border-slate-800 space-y-3">
+                        <h3 class="text-xs font-bold tracking-wider text-pink-400 uppercase flex items-center gap-2">
+                            <i class="fa-solid fa-image"></i> Imagen de Perfil
+                        </h3>
+                                                <div>
+                            <input type="file" id="file-profile-img" accept="image/jpeg, image/png, image/webp, image/avif, image/heic" class="hidden" onchange="handleImageUpload(event, 'profile')">
+                            <div class="flex gap-2 mb-2">
+                                <button onclick="document.getElementById('file-profile-img').click()" id="btn-upload-profile" class="flex-1 bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold py-2 px-3 rounded-xl transition">
+                                    <i class="fa-solid fa-upload mr-1"></i> Subir foto
+                                </button>
+                                <button onclick="removeImage('profile')" class="bg-slate-800 hover:bg-rose-500/20 hover:text-rose-400 text-slate-400 text-xs font-bold py-2 px-3 rounded-xl transition">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </div>
+                            <details class="text-xs text-slate-500 group">
+                                <summary class="cursor-pointer hover:text-slate-300">O usar URL de imagen...</summary>
+                                <div class="mt-2">
+                                    <input type="text" id="input-profile-img" value="https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=400&auto=format&fit=crop" oninput="updateContent()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-pink-500 focus:outline-none transition">
+                                </div>
+                            </details>
+                        </div>
+                    </div>
+
+                    <!-- Redes Sociales Section -->
+                    <div class="bg-slate-900/70 p-4 rounded-2xl border border-slate-800 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-xs font-bold tracking-wider text-pink-400 uppercase flex items-center gap-2">
+                                <i class="fa-solid fa-hashtag"></i> Redes Sociales
+                            </h3>
+                        </div>
+                        <p class="text-[10px] text-slate-400">Iconos pequeños bajo el título.</p>
+
+                        <!-- S8 Social Platforms Selector -->
+                        <div class="flex flex-wrap gap-1.5 mb-2">
+                            <button onclick="window.addSocial('instagram')" class="text-[9px] px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-md transition">
+                                <i class="fa-brands fa-instagram mr-1"></i>IG
+                            </button>
+                            <button onclick="window.addSocial('facebook')" class="text-[9px] px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-md transition">
+                                <i class="fa-brands fa-facebook-f mr-1"></i>FB
+                            </button>
+                            <button onclick="window.addSocial('tiktok')" class="text-[9px] px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-md transition">
+                                <i class="fa-brands fa-tiktok mr-1"></i>TT
+                            </button>
+                            <button onclick="window.addSocial('youtube')" class="text-[9px] px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-md transition">
+                                <i class="fa-brands fa-youtube mr-1"></i>YT
+                            </button>
+                            <button onclick="window.addSocial('linkedin')" class="text-[9px] px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-md transition">
+                                <i class="fa-brands fa-linkedin-in mr-1"></i>LI
+                            </button>
+                            <button onclick="window.addSocial('whatsapp')" class="text-[9px] px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-md transition">
+                                <i class="fa-brands fa-whatsapp mr-1"></i>WA
+                            </button>
+                        </div>
+
+                        <div id="socials-list" class="space-y-2">
+                            <!-- Socials rendered by renderSocialsEditor() -->
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Buttons Section -->
+                    <div class="bg-slate-900/70 p-4 rounded-2xl border border-slate-800 space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-xs font-bold tracking-wider text-pink-400 uppercase flex items-center gap-2">
+                                <i class="fa-solid fa-link"></i> Enlaces & Botones
+                            </h3>
+                            <button onclick="addButton()" class="text-xs bg-pink-500/20 hover:bg-pink-500/30 text-pink-300 border border-pink-500/40 px-2.5 py-1 rounded-lg transition flex items-center gap-1 font-semibold">
+                                <i class="fa-solid fa-plus text-[10px]"></i> A�adir
+                            </button>
+                        </div>
+                        
+                        <p class="text-[11px] text-slate-400">Arrastra para reordenar los enlaces en el canvas:</p>
+                        
+                        <!-- List of Sortable Draggable Button Controls -->
+                        <div id="buttons-control-list" class="space-y-2.5">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Footer Note Section -->
+                    <div class="bg-slate-900/70 p-4 rounded-2xl border border-slate-800 space-y-3">
+                        <h3 class="text-xs font-bold tracking-wider text-pink-400 uppercase flex items-center gap-2">
+                            <i class="fa-solid fa-hand-pointer"></i> Pie de P�gina / CTA
+                        </h3>
+                        <div>
+                            <label class="text-[11px] text-slate-400 mb-1 block font-medium">Texto de Interacci�n</label>
+                            <input type="text" id="input-footer-text" value="Clique para interagir" oninput="updateContent()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-pink-500 focus:outline-none transition">
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- ================= TAB 2: ESTILOS & COLORES ================= -->
+                <div id="tab-styles" class="space-y-5 hidden">
+                    
+                                      <!-- S5 THEME SELECTOR -->
+                      <div class="bg-slate-900/70 p-4 rounded-2xl border border-slate-800">
+                          <h3 class="text-xs font-bold tracking-wider text-pink-400 uppercase flex items-center gap-2 mb-3">
+                              <i class="fa-solid fa-wand-magic-sparkles"></i> Temas Premium
+                          </h3>
+                          <div id="theme-swatches-container" class="flex gap-4 overflow-x-auto pb-2 -mx-2 px-2 snap-x hide-scrollbar">
+                              <!-- Swatches rendered via JS -->
+                          </div>
+                      </div>
+
+                      <!-- Background Config -->
+                    <div class="bg-slate-900/70 p-4 rounded-2xl border border-slate-800 space-y-3">
+                        <h3 class="text-xs font-bold tracking-wider text-pink-400 uppercase flex items-center gap-2">
+                            <i class="fa-solid fa-droplet"></i> Fondo General
+                        </h3>
+                                                <div>
+                            <input type="file" id="file-bg-img" accept="image/jpeg, image/png, image/webp, image/avif, image/heic" class="hidden" onchange="handleImageUpload(event, 'background')">
+                            <div class="flex gap-2 mb-2">
+                                <button onclick="document.getElementById('file-bg-img').click()" id="btn-upload-background" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold py-2 px-3 rounded-xl transition">
+                                    <i class="fa-solid fa-upload mr-1"></i> Subir fondo
+                                </button>
+                                <button onclick="removeImage('background')" class="bg-slate-800 hover:bg-rose-500/20 hover:text-rose-400 text-slate-400 text-xs font-bold py-2 px-3 rounded-xl transition">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </div>
+                            <details class="text-xs text-slate-500 group mb-3">
+                                <summary class="cursor-pointer hover:text-slate-300">O usar URL de imagen...</summary>
+                                <div class="mt-2">
+                                    <input type="text" id="input-bg-image" value="" placeholder="La imagen se ver? detr?s del degradado" oninput="updateStyles()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-pink-500 focus:outline-none transition mb-2">
+                                </div>
+                            </details>
+                            
+                            <label class="text-[11px] text-slate-400 mb-1 block font-medium">Fuerza de la Imagen (0% = Solo Degradado): <span id="overlay-val">0</span>%</label>
+                            <input type="range" id="range-bg-overlay" min="0" max="100" value="0" oninput="updateStyles()" class="w-full accent-pink-500">
+                        </div>
+                        <div class="h-px w-full bg-slate-800 my-2"></div>
+                        <label class="text-[11px] text-slate-400 block font-medium">Colores del Degradado (Overlay)</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <div>
+                                <label class="text-[10px] text-slate-400 block mb-1">Color Inicio</label>
+                                <input type="color" id="color-bg-start" value="#95547B" onchange="updateStyles()" class="w-full h-8 bg-slate-950 border border-slate-800 rounded-lg cursor-pointer">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-400 block mb-1">Color Medio</label>
+                                <input type="color" id="color-bg-mid" value="#B46A94" onchange="updateStyles()" class="w-full h-8 bg-slate-950 border border-slate-800 rounded-lg cursor-pointer">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-400 block mb-1">Color Fin</label>
+                                <input type="color" id="color-bg-end" value="#8C476E" onchange="updateStyles()" class="w-full h-8 bg-slate-950 border border-slate-800 rounded-lg cursor-pointer">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-[11px] text-slate-400 mb-1 block font-medium">�ngulo del Gradiente: <span id="angle-val">180</span>�</label>
+                            <input type="range" id="range-bg-angle" min="0" max="360" value="180" oninput="updateStyles()" class="w-full accent-pink-500">
+                        </div>
+                    </div>
+
+                    <!-- Button Aesthetics Config -->
+                                            <!-- Texto Section -->
+                        <div class="bg-slate-900/70 p-4 rounded-2xl border border-slate-800 space-y-3">
+                            <h3 class="text-xs font-bold tracking-wider text-pink-400 uppercase flex items-center gap-2">
+                                <i class="fa-solid fa-font"></i> Colores de Texto
+                            </h3>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="text-[10px] text-slate-400 block mb-1">Texto Principal</label>
+                                    <input type="color" id="color-text-primary" value="#FFFFFF" onchange="updateStyles()" class="w-full h-8 bg-slate-950 border border-slate-800 rounded-lg cursor-pointer">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] text-slate-400 block mb-1">Subt?tulo</label>
+                                    <input type="color" id="color-text-subtitle" value="#2C2C2C" onchange="updateStyles()" class="w-full h-8 bg-slate-950 border border-slate-800 rounded-lg cursor-pointer">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] text-slate-400 block mb-1">Borde del Perfil</label>
+                                    <input type="color" id="color-profile-border" value="#5c2d47" onchange="updateStyles()" class="w-full h-8 bg-slate-950 border border-slate-800 rounded-lg cursor-pointer">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Botones Config -->
+
+<div class="bg-slate-900/70 p-4 rounded-2xl border border-slate-800 space-y-3">
+                                                  <h3 class="text-xs font-bold tracking-wider text-pink-400 uppercase flex items-center gap-2 mb-3">
+                              <i class="fa-solid fa-cubes"></i> Estilo de Botones
+                          </h3>
+                          
+                          <!-- S6 Presets -->
+                          <div class="mb-4">
+                              <div id="btn-preset-swatches" class="flex flex-wrap gap-2">
+                                  <!-- Swatches rendered via JS -->
+                              </div>
+                          </div>
+                          
+                          <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="text-[10px] text-slate-400 block mb-1">Fondo Bot�n (Inicio)</label>
+                                <input type="color" id="color-btn-start" value="#ffffff" onchange="updateStyles()" class="w-full h-8 bg-slate-950 border border-slate-800 rounded-lg cursor-pointer">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-400 block mb-1">Fondo Bot�n (Fin)</label>
+                                <input type="color" id="color-btn-end" value="#ffffff" onchange="updateStyles()" class="w-full h-8 bg-slate-950 border border-slate-800 rounded-lg cursor-pointer">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="text-[10px] text-slate-400 block mb-1">Pill/Icono (Inicio)</label>
+                                <input type="color" id="color-accent-start" value="#f5d1e6" onchange="updateStyles()" class="w-full h-8 bg-slate-950 border border-slate-800 rounded-lg cursor-pointer">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-400 block mb-1">Pill/Icono (Fin)</label>
+                                <input type="color" id="color-accent-end" value="#e0a3c7" onchange="updateStyles()" class="w-full h-8 bg-slate-950 border border-slate-800 rounded-lg cursor-pointer">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="text-[10px] text-slate-400 block mb-1">Color del Icono</label>
+                                <input type="color" id="color-accent-icon" value="#5c2d47" onchange="updateStyles()" class="w-full h-8 bg-slate-950 border border-slate-800 rounded-lg cursor-pointer">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-400 block mb-1">Texto del Bot�n</label>
+                                <input type="color" id="color-btn-text" value="#ffffff" onchange="updateStyles()" class="w-full h-8 bg-slate-950 border border-slate-800 rounded-lg cursor-pointer">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-[11px] text-slate-400 mb-1 block font-medium">Borde de Botones</label>
+                            <input type="color" id="color-btn-border" value="#ffffff" onchange="updateStyles()" class="w-full h-8 bg-slate-950 border border-slate-800 rounded-lg cursor-pointer">
+                        </div>
+                    </div>
+
+                    <!-- Typography Selector Section -->
+                    <div class="bg-slate-900/70 p-4 rounded-2xl border border-slate-800 space-y-3">
+                        <h3 class="text-xs font-bold tracking-wider text-pink-400 uppercase flex items-center gap-2">
+                            <i class="fa-solid fa-text-height"></i> Tipograf�a & Fuetes
+                        </h3>
+                        <div>
+                            <label class="text-[11px] text-slate-400 mb-1 block font-medium">Fuente del Logo</label>
+                            <select id="select-font-logo" onchange="updateStyles()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-pink-500 focus:outline-none">
+                                <option value="'Cinzel', serif">Cinzel (Elegante Serifa)</option>
+                                <option value="'Playfair Display', serif">Playfair Display (Cl�sico Luxury)</option>
+                                <option value="'Montserrat', sans-serif">Montserrat (Moderno Bold)</option>
+                                <option value="'Oswald', sans-serif">Oswald (Condensada)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-[11px] text-slate-400 mb-1 block font-medium">Fuente T�tulos / Nombre</label>
+                            <select id="select-font-heading" onchange="updateStyles()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-pink-500 focus:outline-none">
+                                <option value="'Oswald', sans-serif">Oswald (Condensada)</option>
+                                <option value="'Poppins', sans-serif">Poppins (Limpio & Redondo)</option>
+                                <option value="'Montserrat', sans-serif">Montserrat (Moderno)</option>
+                                <option value="'Inter', sans-serif">Inter (Minimalista)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- ================= TAB 3: DISPOSICI�N & SIZES ================= -->
+                <div id="tab-layout" class="space-y-5 hidden">
+                    
+                    <!-- Avatar Settings -->
+                    <div class="bg-slate-900/70 p-4 rounded-2xl border border-slate-800 space-y-4">
+                        <h3 class="text-xs font-bold tracking-wider text-pink-400 uppercase flex items-center gap-2">
+                            <i class="fa-solid fa-user-circle"></i> Configuraci�n de Avatar
+                        </h3>
+                        
+                        <div>
+                            <label class="text-[11px] text-slate-400 mb-2 block font-medium">Forma del Avatar</label>
+                            <div class="grid grid-cols-3 gap-2">
+                                <button onclick="setAvatarShape('50%', this)" class="avatar-shape-btn ring-2 ring-pink-500  class="py-1.5 text-[11px] bg-slate-950 border border-slate-800 rounded-full text-slate-300 hover:border-pink-500 transition">C�rculo</button>
+                                <button onclick="setAvatarShape('24px', this)" class="avatar-shape-btn  class="py-1.5 text-[11px] bg-slate-950 border border-slate-800 rounded-2xl text-slate-300 hover:border-pink-500 transition">Cuadrado Red.</button>
+                                <button onclick="setAvatarShape('0px', this)" class="avatar-shape-btn  class="py-1.5 text-[11px] bg-slate-950 border border-slate-800 rounded text-slate-300 hover:border-pink-500 transition">Cuadrado</button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-[11px] text-slate-400 mb-1">
+                                <span>Grosor del Anillo (Borde)</span>
+                                <span id="val-profile-border">4px</span>
+                            </div>
+                            <input type="range" id="range-profile-border" min="0" max="10" step="1" value="4" oninput="updateLayoutSizes()" class="w-full accent-pink-500">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-[11px] text-slate-400 mb-1">
+                                <span>Tama�o Foto Perfil</span>
+                                <span id="val-profile-size">170px</span>
+                            </div>
+                            <input type="range" id="range-profile-size" min="100" max="260" step="5" value="170" oninput="updateLayoutSizes()" class="w-full accent-pink-500">
+                        </div>
+                    </div>
+
+                    <!-- Element Dimensions -->
+                    <div class="bg-slate-900/70 p-4 rounded-2xl border border-slate-800 space-y-4">
+                        <h3 class="text-xs font-bold tracking-wider text-pink-400 uppercase flex items-center gap-2">
+                            <i class="fa-solid fa-up-right-and-down-left-from-center"></i> Tama�os de Elementos
+                        </h3>
+                        
+                        <div>
+                            <div class="flex justify-between text-[11px] text-slate-400 mb-1">
+                                <span>Tama�o de Logo</span>
+                                <span id="val-logo-size">3.2rem</span>
+                            </div>
+                            <input type="range" id="range-logo-size" min="1.8" max="5.0" step="0.1" value="3.2" oninput="updateLayoutSizes()" class="w-full accent-pink-500">
+                        </div>
+
+                        
+
+                        <div>
+                            <div class="flex justify-between text-[11px] text-slate-400 mb-1">
+                                <span>Tama�o Nombre Principal</span>
+                                <span id="val-title-size">2.2rem</span>
+                            </div>
+                            <input type="range" id="range-title-size" min="1.5" max="3.8" step="0.1" value="2.2" oninput="updateLayoutSizes()" class="w-full accent-pink-500">
+                        </div>
+                    </div>
+
+                    <!-- Button Grid Layouts -->
+                    <div class="bg-slate-900/70 p-4 rounded-2xl border border-slate-800 space-y-4">
+                        <h3 class="text-xs font-bold tracking-wider text-pink-400 uppercase flex items-center gap-2">
+                            <i class="fa-solid fa-table-cells"></i> Disposici�n de Botones (Grid)
+                        </h3>
+                        
+                        <div>
+                            <label class="text-[11px] text-slate-400 mb-2 block font-medium">Columnas de Botones</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button onclick="setGridCols(1)" id="btn-col-1" class="py-2 px-3 text-xs border border-slate-700 bg-slate-950 rounded-xl text-slate-300 font-medium hover:border-pink-500 transition">
+                                    <i class="fa-solid fa-bars mb-1 block text-base"></i> 1 Columna (Lista)
+                                </button>
+                                <button onclick="setGridCols(2)" id="btn-col-2" class="py-2 px-3 text-xs border border-pink-500 bg-pink-500/20 rounded-xl text-pink-300 font-medium transition">
+                                    <i class="fa-solid fa-table-columns mb-1 block text-base"></i> 2 Columnas (Grid)
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="text-[11px] text-slate-400 mb-2 block font-medium">Redondeo de Bordes (Border Radius)</label>
+                            <div class="grid grid-cols-3 gap-2">
+                                <button onclick="setBtnRadius('0px', this)" class="btn-radius-btn  class="py-1.5 text-[11px] bg-slate-950 border border-slate-800 rounded text-slate-300 hover:border-pink-500">Rectos</button>
+                                <button onclick="setBtnRadius('16px', this)" class="btn-radius-btn  class="py-1.5 text-[11px] bg-slate-950 border border-slate-800 rounded-xl text-slate-300 hover:border-pink-500">Suave</button>
+                                <button onclick="setBtnRadius('9999px', this)" class="btn-radius-btn ring-2 ring-pink-500  class="py-1.5 text-[11px] bg-slate-950 border border-slate-800 rounded-full text-slate-300 hover:border-pink-500">Pill (Redondo)</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </aside>
+
+        <!-- RIGHT LIVE PREVIEW CANVAS AREA -->
+        <main class="flex-1 bg-slate-900/50 flex flex-col items-center justify-center p-6 relative overflow-y-auto">
+            
+            <!-- Canvas Phone Wrapper -->
+            <div id="phone-container" class="phone-frame w-[390px] h-[780px] bg-slate-950 rounded-[48px] overflow-hidden relative flex flex-col my-auto border-4 border-slate-800">
+                
+                <!-- Phone Top Bar Notch / Speaker -->
+                <div class="absolute top-0 inset-x-0 h-6 bg-slate-950/80 backdrop-blur z-30 flex justify-center items-center">
+                    <div class="w-20 h-3.5 bg-slate-900 rounded-full flex items-center justify-center gap-2 px-2">
+                        <div class="w-2 h-2 rounded-full bg-slate-800"></div>
+                        <div class="w-8 h-1 rounded-full bg-slate-800"></div>
+                    </div>
+                </div>
+
+                <!-- LIVE RENDER ENGINE CANVAS CONTAINER -->
+                <div id="render-canvas" class="render-bg flex-1 flex flex-col relative text-center select-none transition-all overflow-y-auto overflow-x-hidden">
+                    
+                    <!-- BANNER SUPERIOR FUSIONADO -->
+                    <div id="view-banner" class="render-banner"></div>
+
+                    <!-- CONTENIDO -->
+                    <div class="render-content-wrapper px-6 pt-10 pb-8">
+                        
+                        <!-- LOGO -->
+                        <div id="view-logo" class="render-logo z-10 mb-4 tracking-tight leading-none">
+                            Eudora
+                        </div>
+
+                        <!-- PROFILE PICTURE -->
+                        <div id="view-profile-wrapper" class="z-10 mb-4 bg-transparent shadow-2xl transition-all" style="border: var(--profile-border-width) solid var(--profile-border-color); border-radius: var(--profile-radius); width: var(--profile-size); height: var(--profile-size); padding: 4px;">
+                            <img id="view-profile-img" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=400&auto=format&fit=crop" class="w-full h-full object-cover shadow-inner transition-all" style="border-radius: calc(var(--profile-radius) * 0.9);">
+                        </div>
+
+                        <!-- SUBTITLE -->
+                        <h2 id="view-subtitle" class="render-subtitle z-10 uppercase tracking-[0.25em] font-semibold mb-1">
+                            CONSULTORA
+                        </h2>
+
+                        <!-- MAIN TITLE -->
+                        <h1 id="view-title" class="render-title z-10 uppercase font-medium tracking-wide mb-3">
+                            VANESA ALVES
+                        </h1>
+
+                        <!-- SOCIAL MEDIA ICONS ROW -->
+                        <div id="view-social-icons" class="flex items-center justify-center gap-4 mb-6 z-10 text-xl hidden">
+                            <!-- Injected by JS -->
+                        </div>
+
+                        <!-- DYNAMIC BUTTONS GRID -->
+                        <div id="view-buttons-grid" class="w-full z-10 grid grid-cols-2 gap-3 mb-8 transition-all">
+                            <!-- Dynamic rendered buttons here -->
+                        </div>
+
+                        <!-- FOOTER CTA -->
+                        <div class="mt-auto z-10 flex items-center gap-2 text-white/90 text-xs font-medium animate-pulse">
+                            <i class="fa-solid fa-hand-pointer"></i>
+                            <span id="view-footer-text">Clique para interagir</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+    <!-- EXPORT HTML CODE MODAL -->
+    <div id="export-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-6 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-3xl w-full flex flex-col max-h-[85vh] shadow-2xl overflow-hidden">
+            <div class="p-5 border-b border-slate-800 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-code text-pink-500 text-lg"></i>
+                    <h3 class="font-bold text-white text-base">C�digo HTML Exportable</h3>
+                </div>
+                <button onclick="closeExportModal()" class="text-slate-400 hover:text-white p-2">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <div class="p-5 flex-1 overflow-y-auto bg-slate-950 font-mono text-xs text-pink-300">
+                <pre id="export-code-content" class="whitespace-pre-wrap break-all"></pre>
+            </div>
+            <div class="p-4 border-t border-slate-800 flex justify-end gap-3 bg-slate-900">
+                <button onclick="closeExportModal()" class="px-4 py-2 text-xs font-medium text-slate-400 hover:text-white">Cerrar</button>
+                <button onclick="copyToClipboard()" class="px-5 py-2 text-xs font-bold bg-pink-600 hover:bg-pink-500 text-white rounded-xl shadow-lg transition flex items-center gap-2">
+                    <i class="fa-solid fa-copy"></i> Copiar C�digo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT APPLICATION STATE & LOGIC -->
+    <script>
+        // Initial Template State Data
+        
+        
+        // ---------------------------------------------------------
+        // S3 IMAGE OPTIMIZATION
+        // ---------------------------------------------------------
+        window.activeObjectUrls = {};
+
+        function revokeObjectUrl(slot) {
+            if (window.activeObjectUrls[slot]) {
+                URL.revokeObjectURL(window.activeObjectUrls[slot]);
+                delete window.activeObjectUrls[slot];
+            }
+        }
+
+        async function optimizeImage(file, options) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                const url = URL.createObjectURL(file);
+                
+                img.onload = () => {
+                    URL.revokeObjectURL(url);
+                    
+                    let targetWidth = img.width;
+                    let targetHeight = img.height;
+                    const maxDim = options.maxDimension || 1920;
+                    
+                    if (targetWidth > maxDim || targetHeight > maxDim) {
+                        if (targetWidth > targetHeight) {
+                            targetHeight = Math.round((targetHeight * maxDim) / targetWidth);
+                            targetWidth = maxDim;
+                        } else {
+                            targetWidth = Math.round((targetWidth * maxDim) / targetHeight);
+                            targetHeight = maxDim;
+                        }
+                    }
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = targetWidth;
+                    canvas.height = targetHeight;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+                    
+                    canvas.toBlob((blob) => {
+                        if(!blob) return reject(new Error("Fallo en compresi?n de imagen"));
+                        
+                        resolve({
+                            blob: blob,
+                            metadata: {
+                                originalName: file.name,
+                                originalType: file.type,
+                                originalBytes: file.size,
+                                optimizedType: blob.type,
+                                optimizedBytes: blob.size,
+                                reductionPercent: Math.round((1 - (blob.size / file.size)) * 100),
+                                width: targetWidth,
+                                height: targetHeight
+                            }
+                        });
+                    }, options.format || 'image/webp', options.quality || 0.85);
+                };
+                
+                img.onerror = () => {
+                    URL.revokeObjectURL(url);
+                    reject(new Error("No pudimos leer esa imagen."));
+                };
+                
+                img.src = url;
+            });
+        }
+
+        window.prepareImageForUpload = function(slot, blob, metadata) {
+            // Stub for S4 backend upload
+            console.log(`[Backend Stub] Image ready for slot: ${slot}`, metadata);
+        };
+
+        async function handleImageUpload(event, slot) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/heic'];
+            if (!validTypes.includes(file.type)) {
+                alert("Ese formato de imagen no es compatible.");
+                event.target.value = '';
+                return;
+            }
+
+            const btnId = `btn-upload-${slot}`;
+            const btn = document.getElementById(btnId);
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin mr-1"></i> Optimizando...`;
+            btn.disabled = true;
+
+            try {
+                const maxDim = slot === 'profile' ? 1200 : 1920;
+                const result = await optimizeImage(file, { maxDimension: maxDim, format: 'image/webp', quality: 0.85 });
+                
+                console.log("Optimization Result:", result.metadata);
+                // Save to output for Playwright verification
+                if (!window.optimizationResults) window.optimizationResults = [];
+                window.optimizationResults.push({ slot: slot, ...result.metadata });
+
+                revokeObjectUrl(slot);
+                const objectUrl = URL.createObjectURL(result.blob);
+                window.activeObjectUrls[slot] = objectUrl;
+
+                if (slot === 'profile') {
+                    appState.identity.profileImg = objectUrl;
+                } else if (slot === 'banner') {
+                    appState.identity.bannerImg = objectUrl;
+                } else if (slot === 'background') {
+                    appState.appearance.bgImage = objectUrl;
+                }
+
+                window.prepareImageForUpload(slot, result.blob, result.metadata);
+                
+                syncControlsFromState();
+                if (slot === 'background') {
+                    applyStateToCSS();
+                } else {
+                    renderCanvas();
+                }
+            } catch (err) {
+                alert(err.message || "Error al procesar la imagen.");
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                event.target.value = '';
+            }
+        }
+
+        function removeImage(slot) {
+            revokeObjectUrl(slot);
+            if (slot === 'profile') {
+                appState.identity.profileImg = DEFAULT_TEMPLATE_CONFIG.identity.profileImg;
+            } else if (slot === 'banner') {
+                appState.identity.bannerImg = '';
+            } else if (slot === 'background') {
+                appState.appearance.bgImage = '';
+            }
+            syncControlsFromState();
+            if(slot === 'background') applyStateToCSS();
+            else renderCanvas();
+        }
+        
+        // ---------------------------------------------------------
+
+        // ---------------------------------------------------------
+        // S2 CONFIG FOUNDATION
+        // ---------------------------------------------------------
+        const DEFAULT_TEMPLATE_CONFIG = {
+            schemaVersion: 1,
+            identity: {
+                logoText: 'Eudora',
+                subtitleText: 'CONSULTORA',
+                titleText: 'VANESA ALVES',
+                profileImg: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=400&auto=format&fit=crop',
+                bannerImg: ''
+            },
+            socials: {
+                enabled: true,
+                displayMode: 'icons',
+                items: []
+            },
+            content: {
+                footerText: 'Clique para interagir'
+            },
+            links: [
+                { id: 'b1', text: 'Facebook', icon: 'fa-brands fa-facebook-f', url: '#', fullWidth: true },
+                { id: 'b2', text: 'Instagram', icon: 'fa-brands fa-instagram', url: '#', fullWidth: false },
+                { id: 'b3', text: 'E-mail', icon: 'fa-regular fa-envelope', url: 'mailto:ejemplo@correo.com', fullWidth: false },
+                { id: 'b4', text: 'Whatsapp', icon: 'fa-brands fa-whatsapp', url: '#', fullWidth: false },
+                { id: 'b5', text: 'Localiza??o', icon: 'fa-solid fa-location-dot', url: '#', fullWidth: false }
+            ],
+            appearance: {
+                bgImage: '',
+                bgOverlay: 0,
+                bgStart: '#95547B',
+                bgMid: '#B46A94',
+                bgEnd: '#8C476E',
+                bgAngle: 180,
+                btnBgStart: '#ffffff',
+                btnBgEnd: '#ffffff',
+                btnBorderColor: '#ffffff',
+                accentBgStart: '#f5d1e6',
+                accentBgEnd: '#e0a3c7',
+                accentIconColor: '#5c2d47',
+                btnTextColor: '#ffffff',
+                fontLogo: 'Cinzel',
+                fontHeading: 'Cinzel',
+                fontSubtitle: 'Oswald',
+                fontBody: 'Oswald',
+                                                                themeId: 'custom',
+                btnPresetId: 'glass',
+                textPrimary: '#FFFFFF',
+                textSubtitle: '#2C2C2C',
+                profileBorderColor: '#5c2d47',
+                profileRadius: '50%',
+                btnRadius: '9999px',
+                banner: {
+                    enabled: true,
+                    heightPreset: 'medium',
+                    positionY: 50,
+                    imageOpacity: 100,
+                    fusionPreset: 'soft',
+                    fusionStrength: 60
+                }
+            },
+            layout: {
+                gridCols: 2,
+                profileBorder: 4,
+                profileSize: 170,
+                logoSize: 3.2,
+                titleSize: 2.2,
+                devicePreview: 'mobile'
+            }
+        };
+
+        // Current volatile state
+        let appState = JSON.parse(JSON.stringify(DEFAULT_TEMPLATE_CONFIG));
+
+        window.validateTemplateConfig = function(config) {
+            if (!config || typeof config !== 'object') return { valid: false, errors: ['Config is null or not an object'] };
+            if (config.schemaVersion !== 1) return { valid: false, errors: ['Unsupported schemaVersion'] };
+            const errors = [];
+            if (config.links && !Array.isArray(config.links)) errors.push('links must be an array');
+            if (config.links) {
+                config.links.forEach((l, i) => {
+                    if (!l.id) errors.push(`Link at index ${i} is missing an id`);
+                });
+            }
+            if (config.layout && config.layout.gridCols && typeof config.layout.gridCols !== 'number') errors.push('gridCols must be a number');
+            return { valid: errors.length === 0, errors };
+        };
+
+        window.normalizeTemplateConfig = function(config) {
+            const def = JSON.parse(JSON.stringify(DEFAULT_TEMPLATE_CONFIG));
+            if (!config || typeof config !== 'object') return def;
+            
+            const merge = (target, source) => {
+                for (const key in source) {
+                    if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+                        if (!target[key]) target[key] = {};
+                        merge(target[key], source[key]);
+                    } else if (Array.isArray(source[key])) {
+                        // For links, ensure each has an ID
+                        target[key] = source[key].map(item => {
+                            if (!item.id) item.id = 'id_' + Math.random().toString(36).substr(2, 9);
+                            return item;
+                        });
+                    } else {
+                        target[key] = source[key];
+                    }
+                }
+            };
+            
+            
+            if (config.appearance && config.appearance.btnBgStart && !config.appearance.btnPresetId) {
+                def.appearance.btnPresetId = 'legacy';
+            }
+
+            merge(def, config);
+
+            // S8: Normalize Socials after merge
+            if (!def.socials || !def.socials.items) {
+                def.socials = {
+                    enabled: true,
+                    displayMode: 'icons',
+                    items: []
+                };
+            }
+
+
+            // S9: Normalize Smart Actions on links
+            if (def.links && Array.isArray(def.links)) {
+                def.links = def.links.map(btn => {
+                    if (!btn.actionType) {
+                        // Auto-detect from existing url
+                        const u = (btn.url || '').toLowerCase();
+                        if (u.startsWith('mailto:')) btn.actionType = 'email';
+                        else if (u.startsWith('tel:')) btn.actionType = 'phone';
+                        else if (u.includes('wa.me')) btn.actionType = 'whatsapp';
+                        else btn.actionType = 'url';
+                    }
+                    if (typeof btn.waMessage === 'undefined') btn.waMessage = '';
+                    return btn;
+                });
+            }
+
+            return def;
+        };
+
+        window.getTemplateConfig = function() {
+            return JSON.parse(JSON.stringify(appState));
+        };
+
+        window.loadTemplateConfig = function(config) {
+            const validation = window.validateTemplateConfig(config);
+            if (!validation.valid) {
+                console.error("Config validation failed:", validation.errors);
+                // We shouldn't crash, we just normalize
+            }
+            appState = window.normalizeTemplateConfig(config);
+            
+            syncControlsFromState();
+            applyStateToCSS();
+            renderCanvas();
+            renderControlsList();
+            setDeviceView(appState.layout.devicePreview);
+        };
+
+        function hexToRgba(hex, alpha) {
+            let r = 0, g = 0, b = 0;
+            if(hex.length === 4){
+                r = parseInt(hex[1]+hex[1], 16);
+                g = parseInt(hex[2]+hex[2], 16);
+                b = parseInt(hex[3]+hex[3], 16);
+            } else if(hex.length === 7){
+                r = parseInt(hex[1]+hex[2], 16);
+                g = parseInt(hex[3]+hex[4], 16);
+                b = parseInt(hex[5]+hex[6], 16);
+            }
+            return `rgba(${r},${g},${b},${alpha})`;
+        }
+
+        function applyStateToCSS() {
+            const root = document.documentElement;
+            const a = appState.appearance;
+            const l = appState.layout;
+            
+            
+            root.style.setProperty('--bg-image', a.bgImage ? `url('${a.bgImage}')` : 'none');
+            root.style.setProperty('--bg-overlay', a.bgOverlay / 100);
+            root.style.setProperty('--bg-start', a.bgStart);
+            root.style.setProperty('--bg-mid', a.bgMid);
+            root.style.setProperty('--bg-end', a.bgEnd);
+            root.style.setProperty('--bg-angle', `${a.bgAngle}deg`);
+            root.style.setProperty('--text-primary', a.textPrimary);
+            root.style.setProperty('--text-subtitle', a.textSubtitle);
+            root.style.setProperty('--profile-border-color', a.profileBorderColor);
+            const btnPreset = BUTTON_PRESETS.find(p => p.id === (a.btnPresetId || 'legacy')) || BUTTON_PRESETS.find(p => p.id === 'legacy');
+            root.style.setProperty('--btn-bg-start', hexToRgba(a.btnBgStart, btnPreset.bgStartOpacity));
+            root.style.setProperty('--btn-bg-end', hexToRgba(a.btnBgEnd, btnPreset.bgEndOpacity));
+            root.style.setProperty('--btn-border-color', hexToRgba(a.btnBorderColor, btnPreset.borderOpacity));
+            root.style.setProperty('--btn-border-width', btnPreset.borderWidth);
+            root.style.setProperty('--btn-shadow', btnPreset.shadow);
+            root.style.setProperty('--btn-backdrop', btnPreset.backdropFilter);
+            root.style.setProperty('--btn-hover-transform', btnPreset.hoverTransform);
+            root.style.setProperty('--btn-hover-shadow', btnPreset.hoverShadow);
+
+            root.style.setProperty('--accent-bg-start', a.accentBgStart);
+            root.style.setProperty('--accent-bg-end', a.accentBgEnd);
+            root.style.setProperty('--accent-icon-color', a.accentIconColor);
+
+            root.style.setProperty('--btn-text-color', a.btnTextColor);
+
+            root.style.setProperty('--font-logo', a.fontLogo);
+            root.style.setProperty('--font-heading', a.fontHeading);
+            root.style.setProperty('--font-subtitle', a.fontSubtitle);
+            root.style.setProperty('--font-body', a.fontBody);
+
+            root.style.setProperty('--profile-radius', a.profileRadius);
+            root.style.setProperty('--btn-radius', a.btnRadius);
+            
+            
+            // Banner CSS application
+            const banner = a.banner;
+            root.style.setProperty('--banner-pos-y', `${banner.positionY}%`);
+            root.style.setProperty('--banner-opacity', banner.imageOpacity / 100);
+            
+            let heightPx = '250px';
+            if (banner.heightPreset === 'compact') heightPx = '180px';
+            else if (banner.heightPreset === 'large') heightPx = '350px';
+            root.style.setProperty('--banner-height', heightPx);
+
+            let mask = 'none';
+            if (banner.fusionPreset !== 'none') {
+                const strength = banner.fusionStrength / 100; // 0 to 1
+                let startFade = 100; // Where the gradient begins to fade to transparent
+                let endFade = 100;   // Where the gradient becomes fully transparent
+                
+                // We ALWAYS fade to transparent at 100% (the bottom edge).
+                // The strength controls how high up the banner the fade starts.
+                if (banner.fusionPreset === 'soft') {
+                    startFade = 100 - (30 * strength);
+                } else if (banner.fusionPreset === 'medium') {
+                    startFade = 100 - (60 * strength);
+                } else if (banner.fusionPreset === 'deep') {
+                    startFade = 100 - (90 * strength);
+                }
+                
+                // e.g. linear-gradient(to bottom, black 0%, black 50%, transparent 100%)
+                mask = `linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) ${startFade}%, rgba(0,0,0,0) ${endFade}%)`;
+            }
+            
+            // To ensure compatibility across browsers
+            root.style.setProperty('--banner-mask', mask);
+
+            root.style.setProperty('--profile-border-width', `${l.profileBorder}px`);
+            root.style.setProperty('--profile-size', `${l.profileSize}px`);
+            root.style.setProperty('--logo-size', `${l.logoSize}rem`);
+            root.style.setProperty('--title-size', `${l.titleSize}rem`);
+        }
+
+        function syncControlsFromState() {
+              renderThemeSelector();
+              renderButtonPresetSelector();
+            // Identity
+            document.getElementById('input-logo-text').value = appState.identity.logoText;
+            document.getElementById('input-subtitle-text').value = appState.identity.subtitleText;
+            document.getElementById('input-title-text').value = appState.identity.titleText;
+            document.getElementById('input-profile-img').value = appState.identity.profileImg;
+            document.getElementById('input-banner-img').value = appState.identity.bannerImg;
+
+            // Content
+            document.getElementById('input-footer-text').value = appState.content.footerText;
+            renderSocialsEditor();
+
+            // Socials
+            
+
+            // Appearance - Background
+            document.getElementById('input-bg-image').value = appState.appearance.bgImage;
+            document.getElementById('range-bg-overlay').value = appState.appearance.bgOverlay;
+            document.getElementById('overlay-val').textContent = appState.appearance.bgOverlay;
+            
+              document.getElementById('color-bg-start').value = appState.appearance.bgStart;
+              document.getElementById('color-bg-mid').value = appState.appearance.bgMid;
+              document.getElementById('color-bg-end').value = appState.appearance.bgEnd;
+              document.getElementById('range-bg-angle').value = appState.appearance.bgAngle;
+              document.getElementById('angle-val').textContent = appState.appearance.bgAngle;
+
+              // Appearance - Text & Profile
+              document.getElementById('color-text-primary').value = appState.appearance.textPrimary;
+              document.getElementById('color-text-subtitle').value = appState.appearance.textSubtitle;
+              document.getElementById('color-profile-border').value = appState.appearance.profileBorderColor;
+
+              // Appearance - Buttons
+            document.getElementById('color-btn-start').value = appState.appearance.btnBgStart;
+            document.getElementById('color-btn-end').value = appState.appearance.btnBgEnd;
+            document.getElementById('color-btn-border').value = appState.appearance.btnBorderColor;
+            document.getElementById('color-btn-text').value = appState.appearance.btnTextColor;
+            
+            // Appearance - Accents
+            document.getElementById('color-accent-start').value = appState.appearance.accentBgStart;
+            document.getElementById('color-accent-end').value = appState.appearance.accentBgEnd;
+            document.getElementById('color-accent-icon').value = appState.appearance.accentIconColor;
+
+            // Typography
+            document.getElementById('select-font-logo').value = appState.appearance.fontLogo;
+            document.getElementById('select-font-heading').value = appState.appearance.fontHeading;
+
+            // Layout
+            document.getElementById('range-profile-border').value = appState.layout.profileBorder;
+            document.getElementById('val-profile-border').textContent = `${appState.layout.profileBorder}px`;
+            document.getElementById('range-profile-size').value = appState.layout.profileSize;
+            document.getElementById('val-profile-size').textContent = `${appState.layout.profileSize}px`;
+            document.getElementById('range-logo-size').value = appState.layout.logoSize;
+            document.getElementById('val-logo-size').textContent = `${appState.layout.logoSize}rem`;
+            document.getElementById('range-title-size').value = appState.layout.titleSize;
+            document.getElementById('val-title-size').textContent = `${appState.layout.titleSize}rem`;
+
+            // Active Shape buttons
+            document.querySelectorAll('.avatar-shape-btn').forEach(btn => btn.classList.remove('ring-2', 'ring-pink-500'));
+            const avatarBtns = Array.from(document.querySelectorAll('.avatar-shape-btn'));
+            const activeAvatar = avatarBtns.find(b => b.getAttribute('onclick').includes(appState.appearance.profileRadius));
+            if(activeAvatar) activeAvatar.classList.add('ring-2', 'ring-pink-500');
+
+            document.querySelectorAll('.btn-radius-btn').forEach(btn => btn.classList.remove('ring-2', 'ring-pink-500'));
+            const radiusBtns = Array.from(document.querySelectorAll('.btn-radius-btn'));
+            const activeRadius = radiusBtns.find(b => b.getAttribute('onclick').includes(appState.appearance.btnRadius));
+            if(activeRadius) activeRadius.classList.add('ring-2', 'ring-pink-500');
+            
+            // Grid cols
+            
+            // Banner S4 Sync
+            document.getElementById('range-banner-pos').value = appState.appearance.banner.positionY;
+            document.getElementById('range-banner-fusion').value = appState.appearance.banner.fusionStrength;
+            document.getElementById('range-banner-opacity').value = appState.appearance.banner.imageOpacity;
+            syncBannerButtons();
+            
+            // Labels
+            let posLabel = 'Centro';
+            if (appState.appearance.banner.positionY < 33) posLabel = 'Arriba';
+            else if (appState.appearance.banner.positionY > 66) posLabel = 'Abajo';
+            document.getElementById('banner-pos-val').textContent = posLabel;
+            document.getElementById('banner-fusion-val').textContent = `${appState.appearance.banner.fusionStrength}%`;
+            document.getElementById('banner-opacity-val').textContent = `${appState.appearance.banner.imageOpacity}%`;
+
+            document.querySelectorAll('.grid-col-btn').forEach(btn => btn.classList.remove('ring-2', 'ring-pink-500'));
+            const activeGrid = Array.from(document.querySelectorAll('.grid-col-btn')).find(b => b.getAttribute('onclick').includes(appState.layout.gridCols));
+            if(activeGrid) activeGrid.classList.add('ring-2', 'ring-pink-500');
+        }
+        // ---------------------------------------------------------
+// Available FontAwesome Icons for dropdown picker
+        const availableIcons = [
+            { name: 'Facebook', class: 'fa-brands fa-facebook-f' },
+            { name: 'Instagram', class: 'fa-brands fa-instagram' },
+            { name: 'Whatsapp', class: 'fa-brands fa-whatsapp' },
+            { name: 'Email', class: 'fa-regular fa-envelope' },
+            { name: 'Ubicaci�n', class: 'fa-solid fa-location-dot' },
+            { name: 'TikTok', class: 'fa-brands fa-tiktok' },
+            { name: 'YouTube', class: 'fa-brands fa-youtube' },
+            { name: 'Twitter/X', class: 'fa-brands fa-x-twitter' },
+            { name: 'Sitio Web', class: 'fa-solid fa-globe' },
+            { name: 'Tel�fono', class: 'fa-solid fa-phone' },
+            { name: 'Tienda', class: 'fa-solid fa-bag-shopping' },
+            { name: 'Descargar', class: 'fa-solid fa-download' },
+            { name: 'Calendario', class: 'fa-regular fa-calendar' }
+        ];
+
+        // S9: Smart Action Types Registry
+        const ACTION_TYPES = [
+            { id: 'url',      label: 'Sitio web',  icon: 'fa-solid fa-link',         placeholder: 'https://example.com' },
+            { id: 'phone',    label: 'Llamar',      icon: 'fa-solid fa-phone',        placeholder: '+56912345678' },
+            { id: 'email',    label: 'Email',       icon: 'fa-regular fa-envelope',   placeholder: 'contacto@example.com' },
+            { id: 'whatsapp', label: 'WhatsApp',    icon: 'fa-brands fa-whatsapp',    placeholder: '+56912345678' },
+            { id: 'location', label: 'Ubicación',   icon: 'fa-solid fa-location-dot', placeholder: 'https://maps.google.com/...' },
+            { id: 'booking',  label: 'Reservar',    icon: 'fa-regular fa-calendar',   placeholder: 'https://calendly.com/...' },
+            { id: 'download', label: 'Descargar',   icon: 'fa-solid fa-download',     placeholder: 'https://.../archivo.pdf' },
+        ];
+
+        // S9: Map action type to its default icon class
+        function getActionDefaultIcon(actionType) {
+            const at = ACTION_TYPES.find(a => a.id === actionType);
+            return at ? at.icon : 'fa-solid fa-link';
+        }
+
+        // S9: Get placeholder for action type
+        function getActionPlaceholder(actionType) {
+            const at = ACTION_TYPES.find(a => a.id === actionType);
+            return at ? at.placeholder : 'https://example.com';
+        }
+
+        // S9: Get contextual label for the target input
+        function getActionFieldLabel(actionType) {
+            switch (actionType) {
+                case 'phone':    return 'Teléfono';
+                case 'whatsapp': return 'Teléfono';
+                case 'email':    return 'Email';
+                case 'location': return 'Enlace de ubicación';
+                case 'booking':  return 'Enlace de reserva';
+                case 'download': return 'Enlace del archivo';
+                default:         return 'URL';
+            }
+        }
+
+        // S9: Resolve action type + target value into a safe href
+        function resolveActionHref(btn) {
+            const type = btn.actionType || 'url';
+            const val = (btn.url || '').trim();
+            if (!val || val === '#') return '#';
+
+            // Safety check: block dangerous protocols
+            const lower = val.toLowerCase();
+            if (lower.startsWith('javascript:') || lower.startsWith('data:') || lower.startsWith('file:') || lower.startsWith('vbscript:')) {
+                return '#';
+            }
+
+            switch (type) {
+                case 'phone': {
+                    const cleaned = val.replace(/[\s\-\(\)]/g, '');
+                    return 'tel:' + cleaned;
+                }
+                case 'email': {
+                    const addr = val.replace(/^mailto:/i, '');
+                    return 'mailto:' + addr;
+                }
+                case 'whatsapp': {
+                    const num = val.replace(/[\s\-\(\)\+]/g, '');
+                    const msg = btn.waMessage ? '&text=' + encodeURIComponent(btn.waMessage) : '';
+                    return 'https://wa.me/' + num + '?' + msg;
+                }
+                case 'location':
+                case 'booking':
+                case 'download':
+                case 'url':
+                default:
+                    return normalizeUrl(val);
+            }
+        }
+
+        // S9: Basic input validation for action types
+        function validateActionInput(actionType, value) {
+            if (!value || value === '#') return { valid: true, msg: '' }; // empty is OK, just no link
+            const v = value.trim();
+            switch (actionType) {
+                case 'phone':
+                case 'whatsapp': {
+                    const hasDigits = /\d/.test(v);
+                    const validChars = /^[\+\d\s\-\(\)]+$/.test(v);
+                    if (!hasDigits || !validChars) return { valid: false, msg: 'Ingresa un número válido' };
+                    return { valid: true, msg: '' };
+                }
+                case 'email': {
+                    const cleaned = v.replace(/^mailto:/i, '');
+                    if (!cleaned.includes('@') || !cleaned.includes('.')) return { valid: false, msg: 'Ingresa un email válido' };
+                    return { valid: true, msg: '' };
+                }
+                case 'url':
+                case 'location':
+                case 'booking':
+                case 'download': {
+                    const lower = v.toLowerCase();
+                    if (lower.startsWith('javascript:') || lower.startsWith('data:') || lower.startsWith('file:') || lower.startsWith('vbscript:')) {
+                        return { valid: false, msg: 'Protocolo no permitido' };
+                    }
+                    return { valid: true, msg: '' };
+                }
+                default:
+                    return { valid: true, msg: '' };
+            }
+        }
+
+        // S9: Handle action type change with smart icon defaults
+        function onActionTypeChange(btnId, newType) {
+            const btn = appState.links.find(b => b.id === btnId);
+            if (!btn) return;
+
+            const oldType = btn.actionType || 'url';
+            const oldDefaultIcon = getActionDefaultIcon(oldType);
+            const newDefaultIcon = getActionDefaultIcon(newType);
+
+            // Smart icon default: only auto-change if current icon was the old default
+            if (btn.icon === oldDefaultIcon) {
+                btn.icon = newDefaultIcon;
+            }
+
+            btn.actionType = newType;
+            renderControlsList();
+            renderCanvas();
+        }
+
+        // Init on DOM Content Loaded
+        
+        // S8: Platform Registry
+        const SOCIAL_PLATFORMS = {
+            instagram: { id: 'instagram', label: 'Instagram', placeholder: 'instagram.com/usuario', icon: '<i class="fa-brands fa-instagram"></i>' },
+            facebook: { id: 'facebook', label: 'Facebook', placeholder: 'facebook.com/usuario', icon: '<i class="fa-brands fa-facebook-f"></i>' },
+            tiktok: { id: 'tiktok', label: 'TikTok', placeholder: 'tiktok.com/@usuario', icon: '<i class="fa-brands fa-tiktok"></i>' },
+            youtube: { id: 'youtube', label: 'YouTube', placeholder: 'youtube.com/@canal', icon: '<i class="fa-brands fa-youtube"></i>' },
+            linkedin: { id: 'linkedin', label: 'LinkedIn', placeholder: 'linkedin.com/in/usuario', icon: '<i class="fa-brands fa-linkedin-in"></i>' },
+            twitter: { id: 'twitter', label: 'X / Twitter', placeholder: 'twitter.com/usuario', icon: '<i class="fa-brands fa-x-twitter"></i>' },
+            whatsapp: { id: 'whatsapp', label: 'WhatsApp', placeholder: 'wa.me/1234567890', icon: '<i class="fa-brands fa-whatsapp"></i>' },
+            telegram: { id: 'telegram', label: 'Telegram', placeholder: 't.me/usuario', icon: '<i class="fa-brands fa-telegram"></i>' },
+            email: { id: 'email', label: 'Email', placeholder: 'correo@dominio.com', icon: '<i class="fa-regular fa-envelope"></i>' },
+            website: { id: 'website', label: 'Website', placeholder: 'https://www.dominio.com', icon: '<i class="fa-solid fa-globe"></i>' }
+        };
+
+        window.addSocial = function(platformId) {
+            const platform = SOCIAL_PLATFORMS[platformId];
+            if (!platform) return;
+            const newItem = {
+                id: 'social_' + Math.random().toString(36).substr(2, 9),
+                platform: platformId,
+                label: platform.label,
+                url: '',
+                iconId: platform.id,
+                enabled: true
+            };
+            appState.socials.items.push(newItem);
+            renderSocialsEditor();
+            updateContent();
+        }
+
+        window.removeSocial = function(id) {
+            appState.socials.items = appState.socials.items.filter(s => s.id !== id);
+            renderSocialsEditor();
+            updateContent();
+        }
+
+        window.toggleSocial = function(id) {
+            const item = appState.socials.items.find(s => s.id === id);
+            if (item) {
+                item.enabled = !item.enabled;
+                renderSocialsEditor();
+                updateContent();
+            }
+        }
+
+        window.updateSocialUrl = function(id, url) {
+            const item = appState.socials.items.find(s => s.id === id);
+            if (item) {
+                item.url = url;
+                updateContent();
+            }
+        }
+        
+        function normalizeUrl(url, platformId) {
+            url = url.trim();
+            if (!url) return '';
+            if (url.toLowerCase().startsWith('javascript:') || url.toLowerCase().startsWith('data:') || url.toLowerCase().startsWith('file:') || url.toLowerCase().startsWith('vbscript:')) return '';
+            if (platformId === 'email' && !url.startsWith('mailto:')) {
+                if (url.includes('@')) return 'mailto:' + url;
+            }
+            if (!url.startsWith('http') && !url.startsWith('mailto:') && !url.startsWith('tel:')) {
+                return 'https://' + url;
+            }
+            return url;
+        }
+
+        window.renderSocialsEditor = function() {
+            const container = document.getElementById('socials-list');
+            if (!container) return;
+            container.innerHTML = '';
+            
+            appState.socials.items.forEach((item, index) => {
+                const platform = SOCIAL_PLATFORMS[item.platform];
+                const iconHtml = platform ? platform.icon : '<i class="fa-solid fa-link"></i>';
+                const el = document.createElement('div');
+                el.className = `flex items-center gap-2 bg-slate-950 p-2 rounded-lg border ${item.enabled ? 'border-slate-800' : 'border-slate-800/50 opacity-50'}`;
+                el.dataset.id = item.id;
+                el.innerHTML = `
+                    <div class="cursor-grab text-slate-600 px-1 hover:text-slate-400 drag-handle"><i class="fa-solid fa-grip-vertical"></i></div>
+                    <div class="w-8 h-8 rounded bg-slate-900 flex items-center justify-center text-slate-400 shrink-0">
+                        ${iconHtml}
+                    </div>
+                    <div class="flex-1 flex flex-col justify-center">
+                        <div class="text-[10px] font-semibold text-slate-500 mb-0.5">${item.label}</div>
+                        <input type="text" placeholder="${platform ? platform.placeholder : ''}" value="${item.url}" oninput="window.updateSocialUrl('${item.id}', this.value)" class="w-full bg-transparent text-xs text-white focus:outline-none">
+                    </div>
+                    <button onclick="window.toggleSocial('${item.id}')" class="w-7 h-7 flex items-center justify-center rounded bg-slate-900 text-slate-400 hover:text-white" title="${item.enabled ? 'Desactivar' : 'Activar'}">
+                        <i class="fa-solid ${item.enabled ? 'fa-eye' : 'fa-eye-slash'}"></i>
+                    </button>
+                    <button onclick="window.removeSocial('${item.id}')" class="w-7 h-7 flex items-center justify-center rounded bg-red-900/30 text-red-400 hover:bg-red-900/50" aria-label="Eliminar">
+                        <i class="fa-solid fa-trash-can text-xs"></i>
+                    </button>
+                `;
+                container.appendChild(el);
+            });
+        }
+
+          document.addEventListener('DOMContentLoaded', () => {
+            renderControlsList();
+            renderCanvas();
+            setupSortable();
+            applyResponsiveDeviceView();
+            window.addEventListener('resize', applyResponsiveDeviceView);        });
+
+        // Tab Switching Engine
+        function switchTab(tab) {
+            ['content', 'styles', 'layout'].forEach(t => {
+                document.getElementById(`tab-${t}`).classList.add('hidden');
+                document.getElementById(`tab-btn-${t}`).classList.remove('border-pink-500', 'text-pink-400');
+                document.getElementById(`tab-btn-${t}`).classList.add('border-transparent', 'text-slate-400');
+            });
+
+            document.getElementById(`tab-${tab}`).classList.remove('hidden');
+            document.getElementById(`tab-btn-${tab}`).classList.add('border-pink-500', 'text-pink-400');
+            document.getElementById(`tab-btn-${tab}`).classList.remove('border-transparent', 'text-slate-400');
+        }
+
+        function applyResponsiveDeviceView() {
+            const container = document.getElementById('phone-container');
+            if (!container) return;
+            if (window.innerWidth <= 900) {
+                container.classList.remove('w-[850px]', 'h-[780px]', 'rounded-3xl', 'desktop-view');
+                container.classList.add('w-[390px]', 'h-[780px]', 'rounded-[48px]');
+            }
+        }
+        // Device View Switcher
+        
+        // ---------------------------------------------------------
+        // S4 PREMIUM BANNER FUSION
+        // ---------------------------------------------------------
+        
+        // ---------------------------------------------------------
+        // S5 PREMIUM THEMES
+        // ---------------------------------------------------------
+        const PREMIUM_THEMES = [
+            { id: 'black-gold', label: 'Black + Gold', bgClass: 'bg-black', accentClass: 'bg-[#D4AF37]', appearance: { bgStart: '#000000', bgMid: '#0a0a0a', bgEnd: '#111111', textPrimary: '#FFFFFF', textSubtitle: '#D4AF37', btnBgStart: '#1a1a1a', btnBgEnd: '#111111', btnBorderColor: '#D4AF37', btnTextColor: '#FFFFFF', accentBgStart: '#D4AF37', accentBgEnd: '#B5952F', accentIconColor: '#000000', profileBorderColor: '#D4AF37', banner: { enabled: true, heightPreset: 'medium', positionY: 50, imageOpacity: 80, fusionPreset: 'deep', fusionStrength: 80 } } },
+            { id: 'black-silver', label: 'Black + Silver', bgClass: 'bg-[#121212]', accentClass: 'bg-[#C0C0C0]', appearance: { bgStart: '#121212', bgMid: '#1a1a1a', bgEnd: '#0f0f0f', textPrimary: '#FFFFFF', textSubtitle: '#C0C0C0', btnBgStart: '#222222', btnBgEnd: '#1a1a1a', btnBorderColor: '#C0C0C0', btnTextColor: '#FFFFFF', accentBgStart: '#e0e0e0', accentBgEnd: '#a0a0a0', accentIconColor: '#121212', profileBorderColor: '#C0C0C0', banner: { enabled: true, heightPreset: 'medium', positionY: 50, imageOpacity: 70, fusionPreset: 'deep', fusionStrength: 90 } } },
+            { id: 'platinum', label: 'Platinum', bgClass: 'bg-[#e5e4e2]', accentClass: 'bg-[#8a8d8f]', appearance: { bgStart: '#e5e4e2', bgMid: '#d8d7d5', bgEnd: '#c4c3c0', textPrimary: '#222222', textSubtitle: '#555555', btnBgStart: '#ffffff', btnBgEnd: '#f0f0f0', btnBorderColor: '#8a8d8f', btnTextColor: '#111111', accentBgStart: '#a0a3a5', accentBgEnd: '#7a7d7f', accentIconColor: '#ffffff', profileBorderColor: '#8a8d8f', banner: { enabled: true, heightPreset: 'medium', positionY: 50, imageOpacity: 90, fusionPreset: 'soft', fusionStrength: 50 } } },
+            { id: 'rose-gold', label: 'Rose Gold', bgClass: 'bg-[#faf0e6]', accentClass: 'bg-[#b76e79]', appearance: { bgStart: '#faf0e6', bgMid: '#fdf5e6', bgEnd: '#f5ebe0', textPrimary: '#4a3b3c', textSubtitle: '#b76e79', btnBgStart: '#ffffff', btnBgEnd: '#fffbfb', btnBorderColor: '#b76e79', btnTextColor: '#4a3b3c', accentBgStart: '#c98a93', accentBgEnd: '#a45763', accentIconColor: '#ffffff', profileBorderColor: '#b76e79', banner: { enabled: true, heightPreset: 'medium', positionY: 50, imageOpacity: 100, fusionPreset: 'medium', fusionStrength: 60 } } },
+            { id: 'emerald-luxury', label: 'Emerald Luxury', bgClass: 'bg-[#042A2B]', accentClass: 'bg-[#D4AF37]', appearance: { bgStart: '#042A2B', bgMid: '#063A3C', bgEnd: '#021A1B', textPrimary: '#FFFFFF', textSubtitle: '#E8D595', btnBgStart: '#084A4D', btnBgEnd: '#053133', btnBorderColor: '#D4AF37', btnTextColor: '#FFFFFF', accentBgStart: '#D4AF37', accentBgEnd: '#B5952F', accentIconColor: '#042A2B', profileBorderColor: '#D4AF37', banner: { enabled: true, heightPreset: 'medium', positionY: 50, imageOpacity: 85, fusionPreset: 'deep', fusionStrength: 85 } } },
+            { id: 'executive-blue', label: 'Executive Blue', bgClass: 'bg-[#001f3f]', accentClass: 'bg-[#7FDBFF]', appearance: { bgStart: '#001f3f', bgMid: '#002b59', bgEnd: '#001122', textPrimary: '#FFFFFF', textSubtitle: '#7FDBFF', btnBgStart: '#003366', btnBgEnd: '#001f3f', btnBorderColor: '#0074D9', btnTextColor: '#FFFFFF', accentBgStart: '#7FDBFF', accentBgEnd: '#39CCCC', accentIconColor: '#001f3f', profileBorderColor: '#7FDBFF', banner: { enabled: true, heightPreset: 'medium', positionY: 50, imageOpacity: 90, fusionPreset: 'medium', fusionStrength: 70 } } },
+            { id: 'burgundy-elegant', label: 'Burgundy Elegant', bgClass: 'bg-[#4a0404]', accentClass: 'bg-[#e5b382]', appearance: { bgStart: '#4a0404', bgMid: '#5c0606', bgEnd: '#330202', textPrimary: '#FFFFFF', textSubtitle: '#e5b382', btnBgStart: '#6e0909', btnBgEnd: '#4a0404', btnBorderColor: '#e5b382', btnTextColor: '#FFFFFF', accentBgStart: '#e5b382', accentBgEnd: '#c49364', accentIconColor: '#4a0404', profileBorderColor: '#e5b382', banner: { enabled: true, heightPreset: 'medium', positionY: 50, imageOpacity: 85, fusionPreset: 'deep', fusionStrength: 90 } } },
+            { id: 'ivory-gold', label: 'Ivory + Gold', bgClass: 'bg-[#FFFFF0]', accentClass: 'bg-[#CFB53B]', appearance: { bgStart: '#FFFFF0', bgMid: '#FDFFF5', bgEnd: '#F0F0D8', textPrimary: '#2b2b2b', textSubtitle: '#CFB53B', btnBgStart: '#ffffff', btnBgEnd: '#fcfcfc', btnBorderColor: '#CFB53B', btnTextColor: '#111111', accentBgStart: '#E8D595', accentBgEnd: '#CFB53B', accentIconColor: '#ffffff', profileBorderColor: '#CFB53B', banner: { enabled: true, heightPreset: 'medium', positionY: 50, imageOpacity: 100, fusionPreset: 'soft', fusionStrength: 40 } } },
+            { id: 'graphite', label: 'Graphite', bgClass: 'bg-[#2b2b2b]', accentClass: 'bg-[#111111]', appearance: { bgStart: '#2b2b2b', bgMid: '#333333', bgEnd: '#1a1a1a', textPrimary: '#FFFFFF', textSubtitle: '#a0a0a0', btnBgStart: '#444444', btnBgEnd: '#2b2b2b', btnBorderColor: '#555555', btnTextColor: '#FFFFFF', accentBgStart: '#ffffff', accentBgEnd: '#e0e0e0', accentIconColor: '#111111', profileBorderColor: '#555555', banner: { enabled: true, heightPreset: 'medium', positionY: 50, imageOpacity: 70, fusionPreset: 'medium', fusionStrength: 75 } } },
+            { id: 'premium-white', label: 'Premium White', bgClass: 'bg-[#FFFFFF]', accentClass: 'bg-[#000000]', appearance: { bgStart: '#FFFFFF', bgMid: '#FAFAFA', bgEnd: '#F0F0F0', textPrimary: '#111111', textSubtitle: '#555555', btnBgStart: '#FFFFFF', btnBgEnd: '#F9F9F9', btnBorderColor: '#DDDDDD', btnTextColor: '#111111', accentBgStart: '#222222', accentBgEnd: '#000000', accentIconColor: '#FFFFFF', profileBorderColor: '#E0E0E0', banner: { enabled: true, heightPreset: 'medium', positionY: 50, imageOpacity: 100, fusionPreset: 'soft', fusionStrength: 30 } } }
+        ];
+
+        
+        // ---------------------------------------------------------
+        // S6 BUTTON PRESETS
+        // ---------------------------------------------------------
+        const BUTTON_PRESETS = [
+            { id: 'solid', label: 'Solid', bgStartOpacity: 1, bgEndOpacity: 1, borderOpacity: 0.1, borderWidth: '1px', shadow: '0 2px 4px rgba(0,0,0,0.05)', backdropFilter: 'none', hoverTransform: 'translateY(-1px)', hoverShadow: '0 4px 8px rgba(0,0,0,0.1)' },
+            { id: 'glass', label: 'Glass', bgStartOpacity: 0.15, bgEndOpacity: 0.35, borderOpacity: 0.5, borderWidth: '1px', shadow: '0 4px 6px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.2)', backdropFilter: 'blur(12px)', hoverTransform: 'translateY(-2px)', hoverShadow: '0 6px 12px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.3)' },
+            { id: 'outline', label: 'Outline', bgStartOpacity: 0, bgEndOpacity: 0, borderOpacity: 0.6, borderWidth: '1.5px', shadow: 'none', backdropFilter: 'none', hoverTransform: 'translateY(-1px)', hoverShadow: '0 4px 12px rgba(0,0,0,0.08)' },
+            { id: 'soft', label: 'Soft', bgStartOpacity: 0.1, bgEndOpacity: 0.1, borderOpacity: 0, borderWidth: '0px', shadow: 'none', backdropFilter: 'none', hoverTransform: 'scale(1.02)', hoverShadow: '0 2px 8px rgba(0,0,0,0.05)' },
+            { id: 'premium', label: 'Premium', bgStartOpacity: 1, bgEndOpacity: 1, borderOpacity: 0.3, borderWidth: '1px', shadow: '0 8px 16px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.2)', backdropFilter: 'none', hoverTransform: 'translateY(-2px)', hoverShadow: '0 12px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.3)' },
+            { id: 'minimal', label: 'Minimal', bgStartOpacity: 0.05, bgEndOpacity: 0.05, borderOpacity: 0.15, borderWidth: '1px', shadow: 'none', backdropFilter: 'none', hoverTransform: 'translateY(-1px)', hoverShadow: '0 2px 6px rgba(0,0,0,0.04)' },
+            { id: 'legacy', label: 'Custom', bgStartOpacity: 0.15, bgEndOpacity: 0.35, borderOpacity: 0.7, borderWidth: '1px', shadow: '0 4px 6px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.2)', backdropFilter: 'none', hoverTransform: 'translateY(-2px)', hoverShadow: '0 6px 12px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.3)' }
+        ];
+
+        function renderButtonPresetSelector() {
+            const container = document.getElementById('btn-preset-swatches');
+            if(!container) return;
+            
+            const visiblePresets = BUTTON_PRESETS.filter(p => p.id !== 'legacy');
+            container.innerHTML = visiblePresets.map(preset => {
+                const isActive = appState.appearance.btnPresetId === preset.id;
+                return `
+                <div class="flex flex-col items-center gap-1 cursor-pointer" onclick="applyButtonPreset('${preset.id}')">
+                    <div class="w-10 h-6 rounded-md flex items-center justify-center transition border ${isActive ? 'border-pink-500 bg-pink-500/10' : 'border-slate-700 bg-slate-800 hover:border-slate-500'}">
+                        <span class="text-[9px] font-medium ${isActive ? 'text-pink-400' : 'text-slate-400'}">${preset.label}</span>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        function applyButtonPreset(presetId) {
+            appState.appearance.btnPresetId = presetId;
+            syncControlsFromState();
+            applyStateToCSS();
+        }
+
+        function renderThemeSelector() {
+            const container = document.getElementById('theme-swatches-container');
+            if(!container) return;
+            container.innerHTML = PREMIUM_THEMES.map(theme => {
+                const isActive = appState.appearance.themeId === theme.id;
+                return `
+                <div class="flex flex-col items-center gap-1 cursor-pointer" onclick="applyTheme('${theme.id}')">
+                    <div class="w-12 h-12 rounded-xl flex overflow-hidden shadow-lg border-2 transition ${isActive ? 'border-pink-500 scale-110' : 'border-slate-800 hover:border-slate-500'}">
+                        <div class="flex-1 ${theme.bgClass}"></div>
+                        <div class="w-4 ${theme.accentClass}"></div>
+                    </div>
+                    <span class="text-[9px] text-center font-medium ${isActive ? 'text-pink-400' : 'text-slate-400'} whitespace-nowrap">${theme.label}</span>
+                </div>
+                `;
+            }).join('');
+        }
+
+        function applyTheme(themeId) {
+            const theme = PREMIUM_THEMES.find(t => t.id === themeId);
+            if (!theme) return;
+            
+            // Deep merge theme appearance over appState.appearance
+            for (const key in theme.appearance) {
+                if (typeof theme.appearance[key] === 'object') {
+                    appState.appearance[key] = { ...appState.appearance[key], ...theme.appearance[key] };
+                } else {
+                    appState.appearance[key] = theme.appearance[key];
+                }
+            }
+            appState.appearance.themeId = theme.id;
+            
+            syncControlsFromState();
+            applyStateToCSS();
+        }
+
+        function updateBannerSettings() {
+            appState.appearance.themeId = 'custom';
+            renderThemeSelector();
+              renderButtonPresetSelector();
+            const b = appState.appearance.banner;
+            b.positionY = document.getElementById('range-banner-pos').value;
+            b.fusionStrength = document.getElementById('range-banner-fusion').value;
+            b.imageOpacity = document.getElementById('range-banner-opacity').value;
+
+            // Update Labels
+            let posLabel = 'Centro';
+            if (b.positionY < 33) posLabel = 'Arriba';
+            else if (b.positionY > 66) posLabel = 'Abajo';
+            document.getElementById('banner-pos-val').textContent = posLabel;
+
+            document.getElementById('banner-fusion-val').textContent = `${b.fusionStrength}%`;
+            document.getElementById('banner-opacity-val').textContent = `${b.imageOpacity}%`;
+
+            applyStateToCSS();
+        }
+
+        function setBannerHeight(preset) {
+            appState.appearance.banner.heightPreset = preset;
+            syncBannerButtons();
+            applyStateToCSS();
+        }
+
+        function setBannerFusion(preset) {
+            appState.appearance.banner.fusionPreset = preset;
+            syncBannerButtons();
+            applyStateToCSS();
+        }
+
+        function syncBannerButtons() {
+            const b = appState.appearance.banner;
+            
+            document.querySelectorAll('.banner-height-btn').forEach(btn => {
+                btn.classList.remove('ring-2', 'ring-pink-500');
+                if (btn.getAttribute('onclick').includes(b.heightPreset)) btn.classList.add('ring-2', 'ring-pink-500');
+            });
+
+            document.querySelectorAll('.banner-fusion-btn').forEach(btn => {
+                btn.classList.remove('ring-2', 'ring-pink-500');
+                if (btn.getAttribute('onclick').includes(b.fusionPreset)) btn.classList.add('ring-2', 'ring-pink-500');
+            });
+            
+            // Toggle visibility of banner controls if no image is present (Optional but nice)
+            const controls = document.getElementById('banner-controls');
+            if (appState.identity.bannerImg) {
+                controls.classList.remove('opacity-50', 'pointer-events-none');
+            } else {
+                controls.classList.add('opacity-50', 'pointer-events-none');
+            }
+        }
+
+        function setDeviceView(mode) {
+            appState.layout.devicePreview = mode;
+            const container = document.getElementById('phone-container');
+            const btnMobile = document.getElementById('view-mobile');
+            const btnDesktop = document.getElementById('view-desktop');
+
+            if (mode === 'desktop') {
+                container.classList.remove('w-[390px]', 'h-[780px]', 'rounded-[48px]');
+                container.classList.add('w-[850px]', 'h-[780px]', 'rounded-3xl', 'desktop-view');
+                btnDesktop.classList.add('bg-pink-600', 'text-white');
+                btnDesktop.classList.remove('text-slate-400');
+                btnMobile.classList.remove('bg-pink-600', 'text-white');
+                btnMobile.classList.add('text-slate-400');
+            } else {
+                container.classList.remove('w-[850px]', 'h-[780px]', 'rounded-3xl', 'desktop-view');
+                container.classList.add('w-[390px]', 'h-[780px]', 'rounded-[48px]');
+                btnMobile.classList.add('bg-pink-600', 'text-white');
+                btnMobile.classList.remove('text-slate-400');
+                btnDesktop.classList.remove('bg-pink-600', 'text-white');
+                btnDesktop.classList.add('text-slate-400');
+            }
+        }
+
+        // Render Button Controls List in Left Sidebar
+        function renderControlsList() {
+            const container = document.getElementById('buttons-control-list');
+            container.innerHTML = '';
+
+            appState.links.forEach((btn, index) => {
+                const card = document.createElement('div');
+                card.className = 'bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2 relative group';
+                card.setAttribute('data-id', btn.id);
+
+                const actionType = btn.actionType || 'url';
+                const fieldLabel = getActionFieldLabel(actionType);
+                const fieldPlaceholder = getActionPlaceholder(actionType);
+                const validation = validateActionInput(actionType, btn.url);
+                const validationClass = (!validation.valid) ? 'border-red-500/60' : 'border-slate-800';
+                const waMessageRow = actionType === 'whatsapp' ? `
+                    <input type="text" value="${btn.waMessage || ''}" oninput="updateButtonData('${btn.id}', 'waMessage', this.value)" placeholder="Mensaje opcional para WhatsApp" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1 text-xs text-slate-400 focus:outline-none focus:border-pink-500 mt-1">
+                ` : '';
+
+                card.innerHTML = `
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2 cursor-grab drag-handle text-slate-500 hover:text-slate-300">
+                            <i class="fa-solid fa-grip-vertical"></i>
+                            <span class="text-xs font-bold text-slate-300">#${index + 1}</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <button onclick="toggleFullWidth('${btn.id}')" title="Alternar Ancho Completo" class="text-[10px] px-2 py-1 rounded ${btn.fullWidth ? 'bg-pink-500/20 text-pink-300 border border-pink-500/30' : 'bg-slate-800 text-slate-400'}">
+                                ${btn.fullWidth ? 'Ancho Completo' : 'Normal'}
+                            </button>
+                            <button onclick="removeButton('${btn.id}')" class="text-slate-500 hover:text-rose-400 p-1">
+                                <i class="fa-solid fa-trash-can text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="text" value="${btn.text}" oninput="updateButtonData('${btn.id}', 'text', this.value)" placeholder="Texto" class="bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none focus:border-pink-500">
+                        <select onchange="onActionTypeChange('${btn.id}', this.value)" class="bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:border-pink-500" title="Acción">
+                            ${ACTION_TYPES.map(at => `<option value="${at.id}" ${at.id === actionType ? 'selected' : ''}>${at.label}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="text" value="${btn.url === '#' ? '' : btn.url}" oninput="updateButtonData('${btn.id}', 'url', this.value)" placeholder="${fieldPlaceholder}" class="bg-slate-900 border ${validationClass} rounded-lg px-2.5 py-1 text-xs text-slate-400 focus:outline-none focus:border-pink-500" title="${fieldLabel}">
+                        <select onchange="updateButtonData('${btn.id}', 'icon', this.value)" class="bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:border-pink-500">
+                            ${availableIcons.map(i => `<option value="${i.class}" ${i.class === btn.icon ? 'selected' : ''}>${i.name}</option>`).join('')}
+                        </select>
+                    </div>
+                    ${!validation.valid ? `<p class="text-[10px] text-red-400 mt-0.5">${validation.msg}</p>` : ''}
+                    ${waMessageRow}
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Setup Drag & Drop using SortableJS
+        function setupSortable() {
+            const el = document.getElementById('buttons-control-list');
+            Sortable.create(el, {
+                handle: '.drag-handle',
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                onEnd: function () {
+                    const newOrderIds = Array.from(el.children).map(child => child.getAttribute('data-id'));
+                    appState.links.sort((a, b) => newOrderIds.indexOf(a.id) - newOrderIds.indexOf(b.id));
+                    renderCanvas();
+                    renderControlsList();
+                }
+            });
+        }
+
+        // Button Data Manipulations
+        function addButton() {
+            const id = 'b' + Date.now() + Math.random().toString(36).substr(2, 5);
+            appState.links.push({
+                id: id,
+                text: 'Nuevo Botón',
+                icon: 'fa-solid fa-link',
+                url: '#',
+                fullWidth: false,
+                actionType: 'url',
+                waMessage: ''
+            });
+            renderControlsList();
+            renderCanvas();
+        }
+
+        function removeButton(id) {
+            appState.links = appState.links.filter(b => b.id !== id);
+            renderControlsList();
+            renderCanvas();
+        }
+
+        function toggleFullWidth(id) {
+            const btn = appState.links.find(b => b.id === id);
+            if (btn) {
+                btn.fullWidth = !btn.fullWidth;
+                renderControlsList();
+                renderCanvas();
+            }
+        }
+
+        function updateButtonData(id, key, val) {
+            const btn = appState.links.find(b => b.id === id);
+            if(btn) {
+                btn[key] = val;
+                renderCanvas();
+            }
+        }
+
+        // Live Text Content Update
+        function updateContent() {
+            appState.identity.logoText = document.getElementById('input-logo-text').value;
+            appState.identity.subtitleText = document.getElementById('input-subtitle-text').value;
+            appState.identity.titleText = document.getElementById('input-title-text').value;
+            appState.identity.profileImg = document.getElementById('input-profile-img').value;
+            appState.identity.bannerImg = document.getElementById('input-banner-img').value;
+            appState.content.footerText = document.getElementById('input-footer-text').value;
+
+            
+
+            renderCanvas();
+        }
+
+        // Live Style Custom Properties Update
+        function updateStyles() {
+            appState.appearance.themeId = 'custom';
+            renderThemeSelector();
+              renderButtonPresetSelector();
+            appState.appearance.bgImage = document.getElementById('input-bg-image').value;
+            appState.appearance.bgOverlay = document.getElementById('range-bg-overlay').value;
+            
+              appState.appearance.bgStart = document.getElementById('color-bg-start').value;
+              appState.appearance.bgMid = document.getElementById('color-bg-mid').value;
+              appState.appearance.bgEnd = document.getElementById('color-bg-end').value;
+              appState.appearance.bgAngle = document.getElementById('range-bg-angle').value;
+              
+              appState.appearance.textPrimary = document.getElementById('color-text-primary').value;
+              appState.appearance.textSubtitle = document.getElementById('color-text-subtitle').value;
+              appState.appearance.profileBorderColor = document.getElementById('color-profile-border').value;
+
+              appState.appearance.btnBgStart = document.getElementById('color-btn-start').value; document.getElementById('color-btn-start').value;
+            appState.appearance.btnBgEnd = document.getElementById('color-btn-end').value;
+            appState.appearance.btnBorderColor = document.getElementById('color-btn-border').value;
+            
+            appState.appearance.accentBgStart = document.getElementById('color-accent-start').value;
+            appState.appearance.accentBgEnd = document.getElementById('color-accent-end').value;
+            appState.appearance.accentIconColor = document.getElementById('color-accent-icon').value;
+
+            appState.appearance.btnTextColor = document.getElementById('color-btn-text').value;
+
+            appState.appearance.fontLogo = document.getElementById('select-font-logo').value;
+            appState.appearance.fontHeading = document.getElementById('select-font-heading').value;
+            
+            document.getElementById('overlay-val').textContent = appState.appearance.bgOverlay;
+            document.getElementById('angle-val').textContent = appState.appearance.bgAngle;
+
+            applyStateToCSS();
+        }
+
+        function updateLayoutSizes() {
+            appState.layout.logoSize = document.getElementById('range-logo-size').value;
+            appState.layout.profileSize = document.getElementById('range-profile-size').value;
+            appState.layout.titleSize = document.getElementById('range-title-size').value;
+            appState.layout.profileBorder = document.getElementById('range-profile-border').value;
+
+            document.getElementById('val-logo-size').textContent = `${appState.layout.logoSize}rem`;
+            document.getElementById('val-profile-size').textContent = `${appState.layout.profileSize}px`;
+            document.getElementById('val-title-size').textContent = `${appState.layout.titleSize}rem`;
+            document.getElementById('val-profile-border').textContent = `${appState.layout.profileBorder}px`;
+            
+            applyStateToCSS();
+        }
+
+        function setGridCols(cols, btnElement) {
+            appState.layout.gridCols = cols;
+            appState.layout.gridCols = cols;
+            const btn1 = document.getElementById('btn-col-1');
+            const btn2 = document.getElementById('btn-col-2');
+
+            if (cols === 1) {
+                btn1.className = 'py-2 px-3 text-xs border border-pink-500 bg-pink-500/20 rounded-xl text-pink-300 font-medium transition';
+                btn2.className = 'py-2 px-3 text-xs border border-slate-700 bg-slate-950 rounded-xl text-slate-300 font-medium hover:border-pink-500 transition';
+            } else {
+                btn2.className = 'py-2 px-3 text-xs border border-pink-500 bg-pink-500/20 rounded-xl text-pink-300 font-medium transition';
+                btn1.className = 'py-2 px-3 text-xs border border-slate-700 bg-slate-950 rounded-xl text-slate-300 font-medium hover:border-pink-500 transition';
+            }
+            renderCanvas();
+        }
+
+        function setBtnRadius(radius, btnElement) {
+            appState.appearance.btnRadius = radius;
+            applyStateToCSS();
+            document.querySelectorAll('.btn-radius-btn').forEach(btn => btn.classList.remove('ring-2', 'ring-pink-500'));
+            if(btnElement) btnElement.classList.add('ring-2', 'ring-pink-500');
+            
+        }
+
+        function setAvatarShape(radius, btnElement) {
+            appState.appearance.profileRadius = radius;
+            applyStateToCSS();
+            document.querySelectorAll('.avatar-shape-btn').forEach(btn => btn.classList.remove('ring-2', 'ring-pink-500'));
+            if(btnElement) btnElement.classList.add('ring-2', 'ring-pink-500');
+            
+        }
+
+        // Helper Hex to RGBA
+        
+
+        // Render Live Preview
+        function renderCanvas() {
+            document.documentElement.style.setProperty('--banner-img', appState.identity.bannerImg ? `url('${appState.identity.bannerImg}')` : 'none');
+            
+            document.getElementById('view-logo').textContent = appState.identity.logoText;
+            document.getElementById('view-subtitle').textContent = appState.identity.subtitleText;
+            document.getElementById('view-title').textContent = appState.identity.titleText;
+            document.getElementById('view-profile-img').src = appState.identity.profileImg;
+            document.getElementById('view-footer-text').textContent = appState.content.footerText;
+
+            // Render Social Icons from socials.items
+            const socialContainer = document.getElementById('view-social-icons');
+            socialContainer.innerHTML = '';
+            let hasSocials = false;
+
+            if (appState.socials && appState.socials.items && appState.socials.items.length > 0) {
+                appState.socials.items.forEach(item => {
+                    if (item.enabled && item.url) {
+                        hasSocials = true;
+                        const platform = SOCIAL_PLATFORMS[item.platform];
+                        const iconHtml = platform ? platform.icon : '<i class="fa-solid fa-link"></i>';
+                        const normalizedUrl = normalizeUrl(item.url, item.platform);
+                        socialContainer.innerHTML += `<a href="${normalizedUrl}" class="social-icon-link" target="_blank" rel="noopener noreferrer">${iconHtml}</a>`;
+                    }
+                });
+            }
+
+            if(hasSocials) {
+                socialContainer.classList.remove('hidden');
+            } else {
+                socialContainer.classList.add('hidden');
+            }
+
+            const gridContainer = document.getElementById('view-buttons-grid');
+            gridContainer.className = `w-full z-10 grid gap-3 mb-8 transition-all ${appState.layout.gridCols === 1 ? 'grid-cols-1' : 'grid-cols-2'}`;
+            gridContainer.innerHTML = '';
+
+            appState.links.forEach(btn => {
+                const a = document.createElement('a');
+                a.href = resolveActionHref(btn);
+                if ((btn.actionType || 'url') === 'download') a.setAttribute('download', '');
+                a.onclick = (e) => e.preventDefault(); // Prevent navigation inside studio
+                a.className = `render-btn flex items-stretch overflow-hidden text-decoration-none ${btn.fullWidth ? 'col-span-full justify-self-center w-[70%]' : 'w-full'}`;
+                
+                a.innerHTML = `
+                    <span class="flex-1 py-2.5 px-3 text-xs font-medium flex items-center justify-center border-r border-white/20 truncate">
+                        ${btn.text}
+                    </span>
+                    <div class="render-btn-icon min-w-[42px] flex items-center justify-center px-2">
+                        <i class="${btn.icon} text-base"></i>
+                    </div>
+                `;
+                gridContainer.appendChild(a);
+            });
+        }
+
+        // EXPORT ENGINE: Build dynamic standalone HTML Code
+        function openExportModal() {
+            const root = getComputedStyle(document.documentElement);
+            
+            const generatedHtml = `<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${appState.identity.titleText} - Perfil Bio Link</title>
+    <script src="https://cdn.tailwindcss.com"><\/script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@400;600;800&family=Oswald:wght@300;400;500;700&family=Playfair+Display:ital,wght@0,600;1,400&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-start: ${root.getPropertyValue('--bg-start')};
+            --bg-mid: ${root.getPropertyValue('--bg-mid')};
+            --bg-end: ${root.getPropertyValue('--bg-end')};
+            --bg-angle: ${root.getPropertyValue('--bg-angle')};
+            --bg-image: ${root.getPropertyValue('--bg-image')};
+            --bg-overlay: ${root.getPropertyValue('--bg-overlay')};
+            --banner-img: ${root.getPropertyValue('--banner-img')};
+
+            --text-primary: ${root.getPropertyValue('--text-primary')};
+            --text-subtitle: ${root.getPropertyValue('--text-subtitle')};
+            --btn-text-color: ${root.getPropertyValue('--btn-text-color')};
+
+            --btn-bg-start: ${root.getPropertyValue('--btn-bg-start')};
+            --btn-bg-end: ${root.getPropertyValue('--btn-bg-end')};
+            --btn-border-color: ${root.getPropertyValue('--btn-border-color')};
+            
+            --accent-bg-start: ${root.getPropertyValue('--accent-bg-start')};
+            --accent-bg-end: ${root.getPropertyValue('--accent-bg-end')};
+            --accent-icon-color: ${root.getPropertyValue('--accent-icon-color')};
+
+            --profile-border-color: ${root.getPropertyValue('--profile-border-color')};
+            --profile-border-width: ${root.getPropertyValue('--profile-border-width')};
+            --profile-size: ${root.getPropertyValue('--profile-size')};
+            --profile-radius: ${root.getPropertyValue('--profile-radius')};
+
+            --font-logo: ${root.getPropertyValue('--font-logo')};
+            --font-heading: ${root.getPropertyValue('--font-heading')};
+            --font-subtitle: ${root.getPropertyValue('--font-subtitle')};
+            --font-body: ${root.getPropertyValue('--font-body')};
+
+            --btn-radius: ${root.getPropertyValue('--btn-radius')};
+
+            --logo-size: ${root.getPropertyValue('--logo-size')};
+            --title-size: ${root.getPropertyValue('--title-size')};
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-image: var(--bg-image);
+            background-size: cover;
+            background-position: center;
+            background-color: var(--bg-mid);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(var(--bg-angle), var(--bg-start) 0%, var(--bg-mid) 50%, var(--bg-end) 100%);
+            opacity: calc(1 - var(--bg-overlay));
+            pointer-events: none;
+            z-index: 0;
+        }
+
+                .render-banner {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: var(--banner-height, 250px);
+            background-image: var(--banner-img);
+            background-size: cover;
+            background-position: center var(--banner-pos-y, 50%);
+            -webkit-mask-image: var(--banner-mask, linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%));
+            mask-image: var(--banner-mask, linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%));
+            z-index: 1;
+            opacity: var(--banner-opacity, 0.8);
+            transition: all 0.3s ease;
+        }
+
+        .main-container {
+            width: 100%;
+            max-width: 450px;
+            min-height: 100vh;
+            padding: 2.5rem 1.5rem 3rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .social-icon-link {
+            transition: all 0.2s ease;
+            color: var(--text-primary);
+            opacity: 0.8;
+        }
+        .social-icon-link:hover {
+            transform: translateY(-2px);
+            opacity: 1;
+        }
+
+        .render-logo {
+            font-family: var(--font-logo);
+            font-size: var(--logo-size);
+        }
+
+        .render-subtitle {
+            font-family: var(--font-subtitle);
+            color: var(--text-subtitle);
+        }
+
+        .render-title {
+            font-family: var(--font-heading);
+            font-size: var(--title-size);
+        }
+
+        .render-btn {
+            background: linear-gradient(90deg, var(--btn-bg-start) 0%, var(--btn-bg-end) 100%);
+            border: 1px solid var(--btn-border-color);
+            border-radius: var(--btn-radius);
+            color: var(--btn-text-color);
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.2);
+        }
+
+        .render-btn-icon {
+            background: linear-gradient(135deg, var(--accent-bg-start) 0%, var(--accent-bg-end) 100%);
+            color: var(--accent-icon-color);
+            box-shadow: inset 0 2px 4px rgba(255,255,255,0.6), inset 0 -2px 4px rgba(0,0,0,0.15);
+        }
+            .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        </style>
+</head>
+<body>
+    <div class="render-banner"></div>
+    <main class="main-container text-center flex flex-col items-center">
+        <!-- BRAND LOGO -->
+        <div class="render-logo mb-4 tracking-tight leading-none">${appState.identity.logoText}</div>
+
+        <!-- PROFILE PICTURE -->
+        <div class="mb-4 bg-transparent shadow-2xl" style="border: var(--profile-border-width) solid var(--profile-border-color); border-radius: var(--profile-radius); width: var(--profile-size); height: var(--profile-size); padding: 4px;">
+            <img src="${appState.identity.profileImg}" class="w-full h-full object-cover shadow-inner" style="border-radius: calc(var(--profile-radius) * 0.9);">
+        </div>
+
+        <!-- SUBTITLE -->
+        <h2 class="render-subtitle uppercase tracking-[0.25em] font-semibold mb-1 text-sm">${appState.identity.subtitleText}</h2>
+
+        <!-- MAIN TITLE -->
+        <h1 class="render-title uppercase font-medium tracking-wide mb-3">${appState.identity.titleText}</h1>
+
+        <!-- SOCIAL ICONS -->
+        <div class="flex items-center justify-center gap-4 mb-6 z-10 text-xl">
+            ${document.getElementById('view-social-icons').innerHTML}
+        </div>
+
+        <!-- BUTTONS GRID -->
+        <div class="w-full grid gap-3 mb-8 ${appState.layout.gridCols === 1 ? 'grid-cols-1' : 'grid-cols-2'}">
+            ${appState.links.map(btn => `
+            <a href="${btn.url}" class="render-btn flex items-stretch overflow-hidden text-decoration-none ${btn.fullWidth ? 'col-span-full justify-self-center w-[70%]' : 'w-full'}">
+                <span class="flex-1 py-2.5 px-3 text-xs font-medium flex items-center justify-center border-r border-white/20 truncate">
+                    ${btn.text}
+                </span>
+                <div class="render-btn-icon min-w-[42px] flex items-center justify-center px-2">
+                    <i class="${btn.icon} text-base"></i>
+                </div>
+            </a>`).join('')}
+        </div>
+
+        <!-- FOOTER CTA -->
+        <div class="mt-auto flex items-center gap-2 text-white/90 text-xs font-medium animate-pulse">
+            <i class="fa-solid fa-hand-pointer"></i>
+            <span>${appState.content.footerText}</span>
+        </div>
+    </main>
+</body>
+</html>`;
+
+            document.getElementById('export-code-content').textContent = generatedHtml;
+            document.getElementById('export-modal').classList.remove('hidden');
+        }
+
+        function closeExportModal() {
+            document.getElementById('export-modal').classList.add('hidden');
+        }
+
+        function copyToClipboard() {
+            const code = document.getElementById('export-code-content').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('�C�digo HTML copiado al portapapeles!');
+            }).catch(() => {
+                // Fallback for document.execCommand
+                const textarea = document.createElement('textarea');
+                textarea.value = code;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                alert('�C�digo HTML copiado al portapapeles!');
+            });
+        }
+
+        function resetTemplate() {
+            if(confirm('?Deseas restablecer la plantilla a sus valores iniciales?')) {
+                window.loadTemplateConfig(DEFAULT_TEMPLATE_CONFIG);
+            }
+        }
+    </script>
+</body>
+</html>

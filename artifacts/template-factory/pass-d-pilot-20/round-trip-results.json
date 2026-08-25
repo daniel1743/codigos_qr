@@ -1,0 +1,2698 @@
+{
+  "generatedAt": "2026-08-25T02:03:39.973Z",
+  "results": [
+    {
+      "template_id": "tpl-medical-generator-v1-0001",
+      "industry": "medical",
+      "seed": "pilot-20-v1-medical-01",
+      "recipe": "medical_clean",
+      "generatorVersion": "generator-v1",
+      "configHash": "53b03940",
+      "themeId": "premium-white",
+      "buttonPresetId": "premium",
+      "layout": "list",
+      "typography": {
+        "logo": "'Oswald', sans-serif",
+        "heading": "'Poppins', sans-serif"
+      },
+      "buttonCount": 1,
+      "configPath": "configs/medical-01.json",
+      "screenshotPath": "screenshots/medical-01.png",
+      "localRoundTrip": {
+        "ok": true,
+        "differences": [],
+        "result": {
+          "schemaVersion": 1,
+          "identity": {
+            "logoText": "Clínica Aurora",
+            "subtitleText": "MEDICINA GENERAL",
+            "titleText": "DRA. ELENA VARGAS",
+            "profileImg": "https://images.unsplash.com/photo-1622253692010-333f2da6031d?q=80&w=400&auto=format&fit=crop",
+            "bannerImg": "https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?q=80&w=1280&auto=format&fit=crop"
+          },
+          "socials": {
+            "enabled": true,
+            "displayMode": "icons",
+            "items": [
+              {
+                "id": "pilot_20_v1_t0_s1",
+                "platform": "whatsapp",
+                "label": "WhatsApp",
+                "url": "https://wa.me/56900000000",
+                "iconId": "whatsapp",
+                "enabled": true
+              },
+              {
+                "id": "pilot_20_v1_t0_s2",
+                "platform": "email",
+                "label": "Email",
+                "url": "contacto@example.com",
+                "iconId": "email",
+                "enabled": true
+              },
+              {
+                "id": "pilot_20_v1_t0_s3",
+                "platform": "website",
+                "label": "Website",
+                "url": "https://www.example.com",
+                "iconId": "website",
+                "enabled": true
+              }
+            ]
+          },
+          "content": {
+            "footerText": "Toca para agendar tu hora"
+          },
+          "links": [
+            {
+              "id": "pilot_20_v1_t0_b1",
+              "text": "Reservar consulta",
+              "icon": "fa-regular fa-calendar",
+              "url": "https://example.com/reservas",
+              "actionType": "booking",
+              "fullWidth": true,
+              "waMessage": ""
+            }
+          ],
+          "appearance": {
+            "bgImage": "",
+            "bgOverlay": 0,
+            "bgStart": "#FFFFFF",
+            "bgMid": "#FAFAFA",
+            "bgEnd": "#F0F0F0",
+            "bgAngle": 180,
+            "btnBgStart": "#FFFFFF",
+            "btnBgEnd": "#F9F9F9",
+            "btnBorderColor": "#DDDDDD",
+            "accentBgStart": "#222222",
+            "accentBgEnd": "#000000",
+            "accentIconColor": "#FFFFFF",
+            "btnTextColor": "#111111",
+            "fontLogo": "'Oswald', sans-serif",
+            "fontHeading": "'Poppins', sans-serif",
+            "fontSubtitle": "'Poppins', sans-serif",
+            "fontBody": "'Poppins', sans-serif",
+            "themeId": "premium-white",
+            "btnPresetId": "premium",
+            "textPrimary": "#111111",
+            "textSubtitle": "#555555",
+            "profileBorderColor": "#E0E0E0",
+            "profileRadius": "50%",
+            "btnRadius": "9999px",
+            "banner": {
+              "enabled": true,
+              "heightPreset": "medium",
+              "positionY": 50,
+              "imageOpacity": 100,
+              "fusionPreset": "soft",
+              "fusionStrength": 30
+            }
+          },
+          "layout": {
+            "gridCols": 1,
+            "profileBorder": 2,
+            "profileSize": 160,
+            "logoSize": 3.6,
+            "titleSize": 2.5,
+            "devicePreview": "mobile"
+          }
+        }
+      },
+      "rendererDifferences": [],
+      "waMessagePreserved": true,
+      "verdict": "PASS"
+    },
+    {
+      "template_id": "tpl-medical-generator-v1-0002",
+      "industry": "medical",
+      "seed": "pilot-20-v1-medical-02",
+      "recipe": "medical_clean",
+      "generatorVersion": "generator-v1",
+      "configHash": "743813a6",
+      "themeId": "executive-blue",
+      "buttonPresetId": "outline",
+      "layout": "list",
+      "typography": {
+        "logo": "'Montserrat', sans-serif",
+        "heading": "'Montserrat', sans-serif"
+      },
+      "buttonCount": 2,
+      "configPath": "configs/medical-02.json",
+      "screenshotPath": "screenshots/medical-02.png",
+      "localRoundTrip": {
+        "ok": true,
+        "differences": [],
+        "result": {
+          "schemaVersion": 1,
+          "identity": {
+            "logoText": "Clínica Aurora",
+            "subtitleText": "MEDICINA GENERAL",
+            "titleText": "DRA. ELENA VARGAS",
+            "profileImg": "https://images.unsplash.com/photo-1594824476967-48c8b964273f?q=80&w=400&auto=format&fit=crop",
+            "bannerImg": "https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?q=80&w=1280&auto=format&fit=crop"
+          },
+          "socials": {
+            "enabled": true,
+            "displayMode": "icons",
+            "items": [
+              {
+                "id": "pilot_20_v1_t1_s1",
+                "platform": "website",
+                "label": "Website",
+                "url": "https://www.example.com",
+                "iconId": "website",
+                "enabled": true
+              }
+            ]
+          },
+          "content": {
+            "footerText": "Estamos para atenderte"
+          },
+          "links": [
+            {
+              "id": "pilot_20_v1_t1_b1",
+              "text": "Reservar consulta",
+              "icon": "fa-regular fa-calendar",
+              "url": "https://example.com/reservas",
+              "actionType": "booking",
+              "fullWidth": false,
+              "waMessage": ""
+            },
+            {
+              "id": "pilot_20_v1_t1_b2",
+              "text": "Llamar",
+              "icon": "fa-solid fa-phone",
+              "url": "+56221234567",
+              "actionType": "phone",
+              "fullWidth": false,
+              "waMessage": ""
+            }
+          ],
+          "appearance": {
+            "bgImage": "",
+            "bgOverlay": 0,
+            "bgStart": "#001f3f",
+            "bgMid": "#002b59",
+            "bgEnd": "#001122",
+            "bgAngle": 180,
+            "btnBgStart": "#003366",
+            "btnBgEnd": "#001f3f",
+            "btnBorderColor": "#0074D9",
+            "accentBgStart": "#7FDBFF",
+            "accentBgEnd": "#39CCCC",
+            "accentIconColor": "#001f3f",
+            "btnTextColor": "#FFFFFF",
+            "fontLogo": "'Montserrat', sans-serif",
+            "fontHeading": "'Montserrat', sans-serif",
+            "fontSubtitle": "'Montserrat', sans-serif",
+            "fontBody": "'Montserrat', sans-serif",
+            "themeId": "executive-blue",
+            "btnPresetId": "outline",
+            "textPrimary": "#FFFFFF",
+            "textSubtitle": "#7FDBFF",
+            "profileBorderColor": "#7FDBFF",
+            "profileRadius": "24px",
+            "btnRadius": "16px",
+            "banner": {
+              "enabled": true,
+              "heightPreset": "medium",
+              "positionY": 50,
+              "imageOpacity": 90,
+              "fusionPreset": "medium",
+              "fusionStrength": 70
+            }
+          },
+          "layout": {
+            "gridCols": 1,
+            "profileBorder": 5,
+            "profileSize": 185,
+            "logoSize": 3.6,
+            "titleSize": 2.5,
+            "devicePreview": "mobile"
+          }
+        }
+      },
+      "rendererDifferences": [],
+      "waMessagePreserved": true,
+      "verdict": "PASS"
+    },
+    {
+      "template_id": "tpl-medical-generator-v1-0003",
+      "industry": "medical",
+      "seed": "pilot-20-v1-medical-03",
+      "recipe": "medical_clean",
+      "generatorVersion": "generator-v1",
+      "configHash": "ebf9c25b",
+      "themeId": "executive-blue",
+      "buttonPresetId": "solid",
+      "layout": "list",
+      "typography": {
+        "logo": "'Playfair Display', serif",
+        "heading": "'Poppins', sans-serif"
+      },
+      "buttonCount": 3,
+      "configPath": "configs/medical-03.json",
+      "screenshotPath": "screenshots/medical-03.png",
+      "localRoundTrip": {
+        "ok": true,
+        "differences": [],
+        "result": {
+          "schemaVersion": 1,
+          "identity": {
+            "logoText": "Instituto Nexo",
+            "subtitleText": "NUTRICIÓN CLÍNICA",
+            "titleText": "DR. ANDRÉS PARRA",
+            "profileImg": "https://images.unsplash.com/photo-1594824476967-48c8b964273f?q=80&w=400&auto=format&fit=crop",
+            "bannerImg": ""
+          },
+          "socials": {
+            "enabled": true,
+            "displayMode": "icons",
+            "items": [
+              {
+                "id": "pilot_20_v1_t2_s1",
+                "platform": "instagram",
+                "label": "Instagram",
+                "url": "https://instagram.com/demo.cripqer",
+                "iconId": "instagram",
+                "enabled": true
+              },
+              {
+                "id": "pilot_20_v1_t2_s2",
+                "platform": "website",
+                "label": "Website",
+                "url": "https://www.example.com",
+                "iconId": "website",
+                "enabled": true
+              }
+            ]
+          },
+          "content": {
+            "footerText": "Estamos para atenderte"
+          },
+          "links": [
+            {
+              "id": "pilot_20_v1_t2_b1",
+              "text": "Reservar consulta",
+              "icon": "fa-regular fa-calendar",
+              "url": "https://example.com/reservas",
+              "actionType": "booking",
+              "fullWidth": true,
+              "waMessage": ""
+            },
+            {
+              "id": "pilot_20_v1_t2_b2",
+              "text": "WhatsApp",
+              "icon": "fa-brands fa-whatsapp",
+              "url": "+56912345678",
+              "actionType": "whatsapp",
+              "fullWidth": false,
+              "waMessage": ""
+            },
+            {
+              "id": "pilot_20_v1_t2_b3",
+              "text": "Convenios",
+              "icon": "fa-solid fa-globe",
+              "url": "https://example.com/convenios",
+              "actionType": "url",
+              "fullWidth": false,
+              "waMessage": ""
+            }
+          ],
+          "appearance": {
+            "bgImage": "",
+            "bgOverlay": 0,
+            "bgStart": "#001f3f",
+            "bgMid": "#002b59",
+            "bgEnd": "#001122",
+            "bgAngle": 180,
+            "btnBgStart": "#003366",
+            "btnBgEnd": "#001f3f",
+            "btnBorderColor": "#0074D9",
+            "accentBgStart": "#7FDBFF",
+            "accentBgEnd": "#39CCCC",
+            "accentIconColor": "#001f3f",
+            "btnTextColor": "#FFFFFF",
+            "fontLogo": "'Playfair Display', serif",
+            "fontHeading": "'Poppins', sans-serif",
+            "fontSubtitle": "'Poppins', sans-serif",
+            "fontBody": "'Poppins', sans-serif",
+            "themeId": "executive-blue",
+            "btnPresetId": "solid",
+            "textPrimary": "#FFFFFF",
+            "textSubtitle": "#7FDBFF",
+            "profileBorderColor": "#7FDBFF",
+            "profileRadius": "24px",
+            "btnRadius": "9999px",
+            "banner": {
+              "enabled": false,
+              "heightPreset": "medium",
+              "positionY": 50,
+              "imageOpacity": 90,
+              "fusionPreset": "medium",
+              "fusionStrength": 70
+            }
+          },
+          "layout": {
+            "gridCols": 1,
+            "profileBorder": 3,
+            "profileSize": 150,
+            "logoSize": 3.4,
+            "titleSize": 2,
+            "devicePreview": "mobile"
+          }
+        }
+      },
+      "rendererDifferences": [],
+      "waMessagePreserved": true,
+      "verdict": "PASS"
+    },
+    {
+      "template_id": "tpl-medical-generator-v1-0004",
+      "industry": "medical",
+      "seed": "pilot-20-v1-medical-04",
+      "recipe": "medical_clean",
+      "generatorVersion": "generator-v1",
+      "configHash": "32d94e46",
+      "themeId": "executive-blue",
+      "buttonPresetId": "outline",
+      "layout": "list",
+      "typography": {
+        "logo": "'Cinzel', serif",
+        "heading": "'Oswald', sans-serif"
+      },
+      "buttonCount": 4,
+      "configPath": "configs/medical-04.json",
+      "screenshotPath": "screenshots/medical-04.png",
+      "localRoundTrip": {
+        "ok": true,
+        "differences": [],
+        "result": {
+          "schemaVersion": 1,
+          "identity": {
+            "logoText": "Centro Vitalis",
+            "subtitleText": "MEDICINA INTERNA",
+            "titleText": "DR. MARTÍN SOLÍS",
+            "profileImg": "https://images.unsplash.com/photo-1622253692010-333f2da6031d?q=80&w=400&auto=format&fit=crop",
+            "bannerImg": "https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?q=80&w=1280&auto=format&fit=crop"
+          },
+          "socials": {
+            "enabled": true,
+            "displayMode": "icons",
+            "items": [
+              {
+                "id": "pilot_20_v1_t3_s1",
+                "platform": "whatsapp",
+                "label": "WhatsApp",
+                "url": "https://wa.me/56900000000",
+                "iconId": "whatsapp",
+                "enabled": true
+              },
+              {
+                "id": "pilot_20_v1_t3_s2",
+                "platform": "instagram",
+                "label": "Instagram",
+                "url": "https://instagram.com/demo.cripqer",
+                "iconId": "instagram",
+                "enabled": true
+              }
+            ]
+          },
+          "content": {
+            "footerText": "Reserva tu consulta en línea"
+          },
+          "links": [
+            {
+              "id": "pilot_20_v1_t3_b1",
+              "text": "Reservar consulta",
+              "icon": "fa-regular fa-calendar",
+              "url": "https://example.com/reservas",
+              "actionType": "booking",
+              "fullWidth": false,
+              "waMessage": ""
+            },
+            {
+              "id": "pilot_20_v1_t3_b2",
+              "text": "WhatsApp",
+              "icon": "fa-brands fa-whatsapp",
+              "url": "+56912345678",
+              "actionType": "whatsapp",
+              "fullWidth": false,
+              "waMessage": ""
+            },
+            {
+              "id": "pilot_20_v1_t3_b3",
+              "text": "Convenios",
+              "icon": "fa-solid fa-globe",
+              "url": "https://example.com/convenios",
+              "actionType": "url",
+              "fullWidth": false,
+              "waMessage": ""
+            },
+            {
+              "id": "pilot_20_v1_t3_b4",
+              "text": "Ubicación",
+              "icon": "fa-solid fa-location-dot",
+              "url": "https://maps.google.com/?q=clinica",
+              "actionType": "location",
+              "fullWidth": false,
+              "waMessage": ""
+            }
+          ],
+          "appearance": {
+            "bgImage": "",
+            "bgOverlay": 0,
+            "bgStart": "#001f3f",
+            "bgMid": "#002b59",
+            "bgEnd": "#001122",
+            "bgAngle": 180,
+            "btnBgStart": "#003366",
+            "btnBgEnd": "#001f3f",
+            "btnBorderColor": "#0074D9",
+            "accentBgStart": "#7FDBFF",
+            "accentBgEnd": "#39CCCC",
+            "accentIconColor": "#001f3f",
+            "btnTextColor": "#FFFFFF",
+            "fontLogo": "'Cinzel', serif",
+            "fontHeading": "'Oswald', sans-serif",
+            "fontSubtitle": "'Oswald', sans-serif",
+            "fontBody": "'Oswald', sans-serif",
+            "themeId": "executive-blue",
+            "btnPresetId": "outline",
+            "textPrimary": "#FFFFFF",
+            "textSubtitle": "#7FDBFF",
+            "profileBorderColor": "#7FDBFF",
+            "profileRadius": "24px",
+            "btnRadius": "9999px",
+            "banner": {
+              "enabled": true,
+              "heightPreset": "medium",
+              "positionY": 50,
+              "imageOpacity": 90,
+              "fusionPreset": "medium",
+              "fusionStrength": 70
+            }
+          },
+          "layout": {
+            "gridCols": 1,
+            "profileBorder": 5,
+            "profileSize": 180,
+            "logoSize": 3,
+            "titleSize": 2.3,
+            "devicePreview": "mobile"
+          }
+        }
+      },
+      "rendererDifferences": [],
+      "waMessagePreserved": true,
+      "verdict": "PASS"
+    },
+    {
+      "template_id": "tpl-medical-generator-v1-0005",
+      "industry": "medical",
+      "seed": "pilot-20-v1-medical-05",
+      "recipe": "medical_clean",
+      "generatorVersion": "generator-v1",
+      "configHash": "46a95bea",
+      "themeId": "executive-blue",
+      "buttonPresetId": "premium",
+      "layout": "list",
+      "typography": {
+        "logo": "'Oswald', sans-serif",
+        "heading": "'Oswald', sans-serif"
+      },
+      "buttonCount": 5,
+      "configPath": "configs/medical-05.json",
+      "screenshotPath": "screenshots/medical-05.png",
+      "localRoundTrip": {
+        "ok": true,
+        "differences": [],
+        "result": {
+          "schemaVersion": 1,
+          "identity": {
+            "logoText": "Centro Vitalis",
+            "subtitleText": "MEDICINA INTERNA",
+            "titleText": "DR. MARTÍN SOLÍS",
+            "profileImg": "https://images.unsplash.com/photo-1622253692010-333f2da6031d?q=80&w=400&auto=format&fit=crop",
+            "bannerImg": "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=1280&auto=format&fit=crop"
+          },
+          "socials": {
+            "enabled": true,
+            "displayMode": "icons",
+            "items": [
+              {
+                "id": "pilot_20_v1_t4_s1",
+                "platform": "email",
+                "label": "Email",
+                "url": "contacto@example.com",
+                "iconId": "email",
+                "enabled": true
+              }
+            ]
+          },
+          "content": {
+            "footerText": "Estamos para atenderte"
+          },
+          "links": [
+            {
+              "id": "pilot_20_v1_t4_b1",
+              "text": "Reservar consulta",
+              "icon": "fa-regular fa-calendar",
+              "url": "https://example.com/reservas",
+              "actionType": "booking",
+              "fullWidth": true,
+              "waMessage": ""
+            },
+            {
+              "id": "pilot_20_v1_t4_b2",
+              "text": "WhatsApp",
+              "icon": "fa-brands fa-whatsapp",
+              "url": "+56912345678",
+              "actionType": "whatsapp",
+              "fullWidth": false,
+              "waMessage": ""
+            },
+            {
+              "id": "pilot_20_v1_t4_b3",
+              "text": "Convenios",
+              "icon": "fa-solid fa-globe",
+              "url": "https://example.com/convenios",
+              "actionType": "url",
+              "fullWidth": false,
+              "waMessage": ""
+            },
+            {
+              "id": "pilot_20_v1_t4_b4",
+              "text": "Ubicación",
+              "icon": "fa-solid fa-location-dot",
+              "url": "https://maps.google.com/?q=clinica",
+              "actionType": "location",
+              "fullWidth": false,
+              "waMessage": ""
+            },
+            {
+              "id": "pilot_20_v1_t4_b5",
+              "text": "Instagram",
+              "icon": "fa-brands fa-instagram",
+              "url": "https://instagram.com/demo.clinica",
+              "actionType": "url",
+              "fullWidth": false,
+              "waMessage": ""
+            }
+          ],
+          "appearance": {
+            "bgImage": "",
+            "bgOverlay": 0,
+            "bgStart": "#001f3f",
+            "bgMid": "#002b59",
+            "bgEnd": "#001122",
+            "bgAngle": 180,
+            "btnBgStart": "#003366",
+            "btnBgEnd": "#001f3f",
+            "btnBorderColor": "#0074D9",
+            "accentBgStart": "#7FDBFF",
+            "accentBgEnd": "#39CCCC",
+            "accentIconColor": "#001f3f",
+            "btnTextColor": "#FFFFFF",
+            "fontLogo": "'Oswald', sans-serif",
+            "fontHeading": "'Oswald', sans-serif",
+            "fontSubtitle": "'Oswald', sans-serif",
+            "fontBody": "'Oswald', sans-serif",
+            "themeId": "executive-blue",
+            "btnPresetId": "premium",
+            "textPrimary": "#FFFFFF",
+            "textSubtitle": "#7FDBFF",
+            "profileBorderColor": "#7FDBFF",
+            "profileRadius": "50%",
+            "btnRadius": "9999px",
+            "banner": {
+              "enabled": true,
+              "heightPreset": "medium",
+              "positionY": 50,
+              "imageOpacity": 90,
+              "fusionPreset": "medium",
+              "fusionStrength": 70
+            }
+          },
+          "layout": {
+            "gridCols": 1,
+            "profileBorder": 4,
+            "profileSize": 165,
+            "logoSize": 3.8,
+            "titleSize": 2.2,
+            "devicePreview": "mobile"
+          }
+        }
+      },
+      "rendererDifferences": [],
+      "waMessagePreserved": true,
+      "verdict": "PASS"
+    },
+    {
+      "template_id": "tpl-legal-generator-v1-0006",
+      "industry": "legal",
+      "seed": "pilot-20-v1-legal-01",
+      "recipe": "lawyer_executive",
+      "generatorVersion": "generator-v1",
+      "configHash": "0a2ab71e",
+      "themeId": "black-gold",
+      "buttonPresetId": "outline",
+      "layout": "list",
+      "typography": {
+        "logo": "'Cinzel', serif",
+        "heading": "'Montserrat', sans-serif"
+      },
+      "buttonCount": 1,
+      "configPath": "configs/legal-01.json",
+      "screenshotPath": "screenshots/legal-01.png",
+      "localRoundTrip": {
+        "ok": true,
+        "differences": [],
+        "result": {
+          "schemaVersion": 1,
+          "identity": {
+            "logoText": "Bufete Lértora",
+            "subtitleText": "DERECHO DE FAMILIA",
+            "titleText": "DRA. PAULA LÉRTORA",
+            "profileImg": "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=400&auto=format&fit=crop",
+            "bannerImg": "https://images.unsplash.com/photo-1497366754035-f200968a6e72?q=80&w=1280&auto=format&fit=crop"
+          },
+          "socials": {
+            "enabled": true,
+            "displayMode": "icons",
+            "items": [
+              {
+                "id": "pilot_20_v1_t5_s1",
+                "platform": "linkedin",
+                "label": "LinkedIn",
+                "url": "https://linkedin.com/company/demo-cripqer",
+                "iconId": "linkedin",
+                "enabled": true
+              },
+              {
+                "id": "pilot_20_v1_t5_s2",
+                "platform": "email",
+                "label": "Email",
+                "url": "contacto@example.com",
+                "iconId": "email",
+                "enabled": true
+              },
+              {
+                "id": "pilot_20_v1_t5_s3",
+                "platform": "website",
+                "label": "Website",
+                "url": "https://www.example.com",
+                "iconId": "website",
+                "enabled": true
+              }
+            ]
+          },
+          "content": {
+            "footerText": "Agenda tu primera consulta"
+          },
+          "links": [
+            {
+              "id": "pilot_20_v1_t5_b1",
+              "text": "Solicitar consulta",
+              "icon": "fa-regular fa-calendar",
+              "url": "https://example.com/agenda",
+              "actionType": "booking",
+              "fullWidth": true,
+              "waMessage": ""
+            }
+          ],
+          "appearance": {
+            "bgImage": "",
+            "bgOverlay": 0,
+            "bgStart": "#000000",
+            "bgMid": "#0a0a0a",
+            "bgEnd": "#111111",
+            "bgAngle": 180,
+            "btnBgStart": "#1a1a1a",
+            "btnBgEnd": "#111111",
+            "btnBorderColor": "#D4AF37",
+            "accentBgStart": "#D4AF37",
+            "accentBgEnd": "#B5952F",
+            "accentIconColor": "#000000",
+            "btnTextColor": "#FFFFFF",
+            "fontLogo": "'Cinzel', serif",
+            "fontHeading": "'Montserrat', sans-serif",
+            "fontSubtitle": "'Montserrat', sans-serif",
+            "fontBody": "'Montserrat', sans-serif",
+            "themeId": "black-gold",
+            "btnPresetId": "outline",
+            "textPrimary": "#FFFFFF",
+            "textSubtitle": "#D4AF37",
+            "profileBorderColor": "#D4AF37",
+            "profileRadius": "24px",
+            "btnRadius": "0px",
+            "banner": {
+              "enabled": true,
+              "heightPreset": "medium",
+              "positionY": 50,
+              "imageOpacity": 80,
+              "fusionPreset": "deep",
+              "fusionStrength": 80
+            }
+          },
+          "layout": {
+            "gridCols": 1,
+            "profileBorder": 3,
+            "profileSize": 190,
+            "logoSize": 3.5,
+            "titleSize": 1.8,
+            "devicePreview": "mobile"
+          }
+        }
+      },
+      "rendererDifferences": [],
+      "waMessagePreserved": true,
+      "verdict": "PASS"
+    },
+    {
+      "template_id": "tpl-legal-generator-v1-0007",
+      "industry": "legal",
+      "seed": "pilot-20-v1-legal-02",
+      "recipe": "lawyer_executive",
+      "generatorVersion": "generator-v1",
+      "configHash": "7428ac4f",
+      "themeId": "executive-blue",
+      "buttonPresetId": "premium",
+      "layout": "list",
+      "typography": {
+        "logo": "'Cinzel', serif",
+        "heading": "'Oswald', sans-serif"
+      },
+      "buttonCount": 2,
+      "configPath": "configs/legal-02.json",
+      "screenshotPath": "screenshots/legal-02.png",
+      "localRoundTrip": {
+        "ok": true,
+        "differences": [],
+        "result": {
+          "schemaVersion": 1,
+          "identity": {
+            "logoText": "Nexo Legal",
+            "subtitleText": "DERECHO LABORAL",
+            "titleText": "DR. JOAQUÍN BRAVO",
+            "profileImg": "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=400&auto=format&fit=crop",
+            "bannerImg": "https://images.unsplash.com/photo-1497366754035-f200968a6e72?q=80&w=1280&auto=format&fit=crop"
+          },
+          "socials": {
+            "enabled": true,
+            "displayMode": "icons",
+            "items": [
+              {
+                "id": "pilot_20_v1_t6_s1",
+                "platform": "linkedin",
+                "label": "LinkedIn",
+                "url": "https://linkedin.com/company/demo-cripqer",
+                "iconId": "linkedin",
+                "enabled": true
+              },
+              {
+                "id": "pilot_20_v1_t6_s2",
+                "platform": "email",
+                "label": "Email",
+                "url": "contacto@example.com",
+                "iconId": "email",
+                "enabled": true
+              },
+              {
+                "id": "pilot_20_v1_t6_s3",
+                "platform": "website",
+                "label": "Website",
+                "url": "https://www.example.com",
+                "iconId": "website",
+                "enabled": true
+              }
+            ]
+          },
+          "content": {
+            "footerText": "Toca para solicitar una reunión"
+          },
+          "links": [
+            {
+              "id": "pilot_20_v1_t6_b1",
+              "text": "Solicitar consulta",
+              "icon": "fa-regular fa-calendar",
+              "url": "https://example.com/agenda",
+              "actionType": "booking",
+              "fullWidth": false,
+              "waMessage": ""
+            },
+            {
+              "id": "pilot_20_v1_t6_b2",
+              "text": "Correo",
+              "icon": "fa-regular fa-envelope",
+              "url": "contacto@example.com",
+              "actionType": "email",
+              "fullWidth": false,
+              "waMessage": ""
+            }
+          ],
+          "appearance": {
+            "bgImage": "",
+            "bgOverlay": 0,
+            "bgStart": "#001f3f",
+            "bgMid": "#002b59",
+            "bgEnd": "#001122",
+            "bgAngle": 180,
+            "btnBgStart": "#003366",
+            "btnBgEnd": "#001f3f",
+            "btnBorderColor": "#0074D9",
+            "accentBgStart": "#7FDBFF",
+            "accentBgEnd": "#39CCCC",
+            "accentIconColor": "#001f3f",
+            "btnTextColor": "#FFFFFF",
+            "fontLogo": "'Cinzel', serif",
+            "fontHeading": "'Oswald', sans-serif",
+            "fontSubtitle": "'Oswald', sans-serif",
+            "fontBody": "'Oswald', sans-serif",
+            "themeId": "executive-blue",
+            "btnPresetId": "premium",
+            "textPrimary": "#FFFFFF",
+            "textSubtitle": "#7FDBFF",
+            "profileBorderColor": "#7FDBFF",
+            "profileRadius": "24px",
+            "btnRadius": "16px",
+            "banner": {
+              "enabled": true,
+              "heightPreset": "medium",
+              "positionY": 50,
+              "imageOpacity": 90,
+              "fusionPreset": "medium",
+              "fusionStrength": 70
+            }
+          },
+          "layout": {
+            "gridCols": 1,
+            "profileBorder": 2,
+            "profileSize": 190,
+            "logoSize": 2.8,
+            "titleSize": 2.5,
+            "devicePreview": "mobile"
+          }
+        }
+      },
+      "rendererDifferences": [],
+      "waMessagePreserved": true,
+      "verdict": "PASS"
+    },
+    {
+      "template_id": "tpl-legal-generator-v1-0008",
+      "industry": "legal",
+      "seed": "pilot-20-v1-legal-03",
+      "recipe": "lawyer_executive",
+      "generatorVersion": "generator-v1",
+      "configHash": "19d346eb",
+      "themeId": "executive-blue",
+      "buttonPresetId": "premium",
+      "layout": "grid",
+      "typography": {
+        "logo": "'Playfair Display', serif",
+        "heading": "'Poppins', sans-serif"
+      },
+      "buttonCount": 3,
+      "configPath": "configs/legal-03.json",
+      "screenshotPath": "screenshots/legal-03.png",
+      "localRoundTrip": {
+        "ok": true,
+        "differences": [],
+        "result": {
+          "schemaVersion": 1,
+          "identity": {
+            "logoText": "Nexo Legal",
+            "subtitleText": "DERECHO LABORAL",
+            "titleText": "DR. JOAQUÍN BRAVO",
+            "profileImg": "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=400&auto=format&fit=crop",
+            "bannerImg": "https://images.unsplash.com/photo-1497366754035-f200968a6e72?q=80&w=1280&auto=format&fit=crop"
+          },
+          "socials": {
+            "enabled": true,
+            "displayMode": "icons",
+            "items": [
+              {
+                "id": "pilot_20_v1_t7_s1",
+                "platform": "linkedin",
+                "label": "LinkedIn",
+                "url": "https://linkedin.com/company/demo-cripqer",
+                "iconId": "linkedin",
+                "enabled": true
+              }
+            ]
+          },
+          "content": {
+            "footerText": "Agenda tu primera consulta"
+          },
+          "links": [
+            {
+              "id": "pilot_20_v1_t7_b1",
+              "text": "Solicitar consulta",
+              "icon": "fa-regular fa-calendar",
+              "url": "https://example.com/agenda",
+              "actionType": "booking",
+              "fullWidth": true,
+              "waMessage": ""
+            },
+            {
+              "id": "pilot_20_v1_t7_b2",
+              "text": "Correo",
+              "icon": "fa-regular fa-envelope",
+              "url": "contacto@example.com",
+              "actionType": "email",
+              "fullWidth": false,
+              "waMessage": ""
+            },
+            {
+              "id": "pilot_20_v1_t7_b3",
+              "text": "Áreas de práctica",
+              "icon": "fa-solid fa-globe",
+              "url": "https://example.com/areas",
+              "actionType": "url",
+              "fullWidth": false,
+              "waMessage": ""
+            }
+          ],
+          "appearance": {
+            "bgImage": "",
+            "bgOverlay": 0,
+            "bgStart": "#001f3f",
+            "bgMid": "#002b59",
+            "bgEnd": "#001122",
+            "bgAngle": 180,
+            "btnBgStart": "#003366",
+            "btnBgEnd": "#001f3f",
+            "btnBorderColor": "#0074D9",
+            "accentBgStart": "#7FDBFF",
+            "accentBgEnd": "#39CCCC",
+            "accentIconColor": "#001f3f",
+            "btnTextColor": "#FFFFFF",
+            "fontLogo": "'Playfair Display', serif",
+            "fontHeading": "'Poppins', sans-serif",
+            "fontSubtitle": "'Poppins', sans-serif",
+            "fontBody": "'Poppins', sans-serif",
+            "themeId": "executive-blue",
+            "btnPresetId": "premium",
+            "textPrimary": "#FFFFFF",
+            "textSubtitle": "#7FDBFF",
+            "profileBorderColor": "#7FDBFF",
+            "profileRadius": "0px",
+            "btnRadius": "0px",
+            "banner": {
+              "enabled": true,
+              "heightPreset": "medium",
+              "positionY": 50,
+              "imageOpacity": 90,
+              "fusionPreset": "medium",
+              "fusionStrength": 70
+            }
+          },
+          "layout": {
+            "gridCols": 2,
+            "profileBorder": 5,
+            "profileSize": 175,
+            "logoSize": 3.8,
+            "titleSize": 2.6,
+            "devicePreview": "mobile"
+          }
+        }
+      },
+      "rendererDifferences": [],
+      "waMessagePreserved": true,
+      "verdict": "PASS"
+    },
+    {
+      "template_id": "tpl-legal-generator-v1-0009",
+      "industry": "legal",
+      "seed": "pilot-20-v1-legal-04",
+      "recipe": "lawyer_executive",
+      "generatorVersion": "generator-v1",
+      "configHash": "d81af56c",
+      "themeId": "graphite",
+      "buttonPresetId": "minimal",
+      "layout": "list",
+      "typography": {
+        "logo": "'Playfair Display', serif",
+        "heading": "'Montserrat', sans-serif"
+      },
+      "buttonCount": 4,
+      "configPath": "configs/legal-04.json",
+      "screenshotPath": "screenshots/legal-04.png",
+      "localRoundTrip": {
+        "ok": true,
+        "differences": [],
+        "result": {
+          "schemaVersion": 1,
+          "identity": {
+            "logoText": "Estudio Marín",
+            "subtitleText": "DERECHO CORPORATIVO",
+            "titleText": "DR. TOMÁS MARÍN",
+            "profileImg": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=400&auto=format&fit=crop",
+            "bannerImg": ""
+          },
+          "socials": {
+            "enabled": true,
+            "displayMode": "icons",
+            "items": [
+              {
+                "id": "pilot_20_v1_t8_s1",
+                "platform": "email",
+                "label": "Email",
+                "url": "contacto@example.com",
+                "iconId": "email",
+                "enabled": true
+              },
+              {
+                "id": "pilot_20_v1_t8_s2",
+                "platform": "whatsapp",
+                "label": "WhatsApp",
+                "url": "https://wa.me/56900000000",
+                "iconId": "whatsapp",
+                "enabled": true
+              }
+            ]
+          },
+          "content": {
+            "footerText": "Agenda tu primera consulta"
+          },
+          "links": [
+            {
+              "id": "pilot_20_v1_t8_b1",
+              "text": "Solicitar consulta",
+              "icon": "fa-regular fa-calendar",
+              "url": "https://example.com/agenda",
+              "actionType": "booking",
+              "fullWidth": false,
+              "waMessage": ""
+            },
+            {
+              "id": "pilot_20_v1_t8_b2",
+              "text": "Correo",
+              "icon": "fa-regular fa-envelope",
+              "url": "contacto@example.com",
+              "actionType": "email",
+              "fullWidth": false,
+              "waMessage": ""
+            },
+            {
+              "id": "pilot_20_v1_t8_b3",
+              "text": "Equipo",
+              "icon": "fa-solid fa-globe",
+              "url": "https://example.com/equipo",
+              "actionType": "url",
+              "fullWidth": false,
+              "waMessage": ""
+            },
+            {
+              "id": "pilot_20_v1_t8_b4",
+              "text": "Ubicación",
+              "icon": "fa-solid fa-location-dot",
+              "url": "https://maps.google.com/?q=estudio",
+              "actionType": "location",
+              "fullWidth": false,
+              "waMessage": ""
+            }
+          ],
+          "appearance": {
+            "bgImage": "",
+            "bgOverlay": 0,
+            "bgStart": "#2b2b2b",
+            "bgMid": "#333333",
+            "bgEnd": "#1a1a1a",
+            "bgAngle": 180,
+            "btnBgStart": "#444444",
+            "btnBgEnd": "#2b2b2b",
+            "btnBorderColor": "#555555",
+            "accentBgStart": "#ffffff",
+            "accentBgEnd": "#e0e0e0",
+            "accentIconColor": "#111111",
+            "btnTextColor": "#FFFFFF",
+            "fontLogo": "'Playfair Display', serif",
+            "fontHeading": "'Montserrat', sans-serif",
+            "fontSubtitle": "'Montserrat', sans-serif",
+            "fontBody": "'Montserrat', sans-serif",
+            "themeId": "graphite",
+            "btnPresetId": "minimal",
+            "textPrimary": "#FFFFFF",
+            "textSubtitle": "#a0a0a0",
+            "profileBorderColor": "#555555",
+            "profileRadius": "50%",
+            "btnRadius": "0px",
+            "banner": {
+              "enabled": false,
+              "heightPreset": "medium",
+              "positionY": 50,
+              "imageOpacity": 70,
+              "fusionPreset": "medium",
+              "fusionStrength": 75
+            }
+          },
+          "layout": {
+            "gridCols": 1,
+            "profileBorder": 2,
+            "profileSize": 190,
+            "logoSize": 3.5,
+            "titleSize": 2,
+            "devicePreview": "mobile"
+          }
+        }
+      },
+      "rendererDifferences": [],
+      "waMessagePreserved": true,
+      "verdict": "PASS"
+    },
+    {
+      "template_id": "tpl-legal-generator-v1-0010",
+      "industry": "legal",
+      "seed": "pilot-20-v1-legal-05",
+      "recipe": "lawyer_executive",
+      "generatorVersion": "generator-v1",
+      "configHash": "89e9f1e2",
+      "themeId": "executive-blue",
+      "buttonPresetId": "outline",
+      "layout": "list",
+      "typography": {
+        "logo": "'Cinzel', serif",
+        "heading": "'Inter', sans-serif"
+      },
+      "buttonCount": 5,
+      "configPath": "configs/legal-05.json",
+      "screenshotPath": "screenshots/legal-05.png",
+      "localRoundTrip": {
+        "ok": true,
+        "differences": [],
+        "result": {
+          "schemaVersion": 1,
+          "identity": {
+            "logoText": "Nexo Legal",
+            "subtitleText": "DERECHO LABORAL",
+            "titleText": "DR. JOAQUÍN BRAVO",
+            "profileImg": "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=400&auto=format&fit=crop",
+            "bannerImg": ""
+          },
+          "socials": {
+            "enabled": true,
+            "displayMode": "icons",
+            "items": [
+              {
+                "id": "pilot_20_v1_t9_s1",
+                "platform": "email",
+                "label": "Email",
+                "url": "contacto@example.com",
+                "iconId": "email",
+                "enabled": true
+              },
+              {
+                "id": "pilot_20_v1_t9_s2",
+                "platform": "whatsapp",
+                "label": "WhatsApp",
+                "url": "https://wa.me/56900000000",
+                "iconId": "whatsapp",
+                "enabled": true
+              }
+            ]
+          },
+          "content": {
+            "footerText": "Conversemos tu caso"
+          },
+          "links": [
+            {
+              "id": "pilot_20_v1_t9_b1",
+              "text": "Solicitar consulta",
+              "icon": "fa-regular fa-calendar",
+              "url": "https://example.com/agenda",
+              "actionType": "booking",
+              "fullWidth": true,
+              "waMessage": ""
+            },
+            {
+              "id": "pilot_20_v1_t9_b2",
+              "text": "WhatsApp",
+              "icon": "fa-brands fa-whatsapp",
+              "url": "+56987654321",
+              "actionType": "whatsapp",
+              "fullWidth": false,
+              "waMessage": ""
+            },
+            {
+              "id": "pilot_20_v1_t9_b3",
+              "text": "Equipo",
+              "icon": "fa-solid fa-globe",
+              "url": "https://example.com/equipo",
+              "actionType": "url",
+              "fullWidth": false,
+              "waMessage": ""
+            },
+            {
+              "id": "pilot_20_v1_t9_b4",
+              "text": "Ubicación",
+              "icon": "fa-solid fa-location-dot",
+              "url": "https://maps.google.com/?q=estudio",
+              "actionType": "location",
+              "fullWidth": false,
+              "waMessage": ""
+            },
+            {
+              "id": "pilot_20_v1_t9_b5",
+              "text": "LinkedIn",
+              "icon": "fa-solid fa-globe",
+              "url": "https://linkedin.com/company/demo",
+              "actionType": "url",
+              "fullWidth": false,
+              "waMessage": ""
+            }
+          ],
+          "appearance": {
+            "bgImage": "",
+            "bgOverlay": 0,
+            "bgStart": "#001f3f",
+            "bgMid": "#002b59",
+            "bgEnd": "#001122",
+            "bgAngle": 180,
+            "btnBgStart": "#003366",
+            "btnBgEnd": "#001f3f",
+            "btnBorderColor": "#0074D9",
+            "accentBgStart": "#7FDBFF",
+            "accentBgEnd": "#39CCCC",
+            "accentIconColor": "#001f3f",
+            "btnTextColor": "#FFFFFF",
+            "fontLogo": "'Cinzel', serif",
+            "fontHeading": "'Inter', sans-serif",
+            "fontSubtitle": "'Inter', sans-serif",
+            "fontBody": "'Inter', sans-serif",
+            "themeId": "executive-blue",
+            "btnPresetId": "outline",
+            "textPrimary": "#FFFFFF",
+            "textSubtitle": "#7FDBFF",
+            "profileBorderColor": "#7FDBFF",
+            "profileRadius": "50%",
+            "btnRadius": "16px",
+            "banner": {
+              "enabled": false,
+              "heightPreset": "medium",
+              "positionY": 50,
+              "imageOpacity": 90,
+              "fusionPreset": "medium",
+              "fusionStrength": 70
+            }
+          },
+          "layout": {
+            "gridCols": 1,
+            "profileBorder": 4,
+            "profileSize": 160,
+            "logoSize": 3.8,
+            "titleSize": 2.5,
+            "devicePreview": "mobile"
+          }
+        }
+      },
+      "rendererDifferences": [],
+      "waMessagePreserved": true,
+      "verdict": "PASS"
+    },
+    {
+      "template_id": "tpl-restaurant-generator-v1-0011",
+      "industry": "restaurant",
+      "seed": "pilot-20-v1-restaurant-01",
+      "recipe": "restaurant_premium",
+      "generatorVersion": "generator-v1",
+      "configHash": "56702a9f",
+      "themeId": "burgundy-elegant",
+      "buttonPresetId": "glass",
+      "layout": "list",
+      "typography": {
+        "logo": "'Cinzel', serif",
+        "heading": "'Montserrat', sans-serif"
+      },
+      "buttonCount": 1,
+      "configPath": "configs/restaurant-01.json",
+      "screenshotPath": "screenshots/restaurant-01.png",
+      "localRoundTrip": {
+        "ok": true,
+        "differences": [],
+        "result": {
+          "schemaVersion": 1,
+          "identity": {
+            "logoText": "La Cocina",
+            "subtitleText": "RESTAURANTE",
+            "titleText": "CASA DE AUTOR",
+            "profileImg": "https://images.unsplash.com/photo-1577219491135-ce391730fb2c?q=80&w=400&auto=format&fit=crop",
+            "bannerImg": ""
+          },
+          "socials": {
+            "enabled": true,
+            "displayMode": "icons",
+            "items": [
+              {
+                "id": "pilot_20_v1_t10_s1",
+                "platform": "instagram",
+                "label": "Instagram",
+                "url": "https://instagram.com/demo.cripqer",
+                "iconId": "instagram",
+                "enabled": true
+              },
+              {
+                "id": "pilot_20_v1_t10_s2",
+                "platform": "facebook",
+                "label": "Facebook",
+                "url": "https://facebook.com/demo.cripqer",
+                "iconId": "facebook",
+                "enabled": true
+              },
+              {
+                "id": "pilot_20_v1_t10_s3",
+                "platform": "whatsapp",
+                "label": "WhatsApp",
+                "url": "https://wa.me/56900000000",
+                "iconId": "whatsapp",
+                "enabled": true
+              },
+              {
+                "id": "pilot_20_v1_t10_s4",
+                "platform": "website",
+                "label": "Website",
+                "url": "https://www.example.com",
+                "iconId": "website",
+                "enabled": true
+              }
+            ]
+          },
+          "content": {
+            "footerText": "Reserva y conoce el menú"
+          },
+          "links": [
+            {
+              "id": "pilot_20_v1_t10_b1",
+              "text": "Reservar mesa",
+              "icon": "fa-regular fa-calendar",
+              "url": "https://example.com/reservar",
+              "actionType": "booking",
+              "fullWidth": true,
+              "waMessage": ""
+            }
+          ],
+          "appearance": {
+            "bgImage": "",
+            "bgOverlay": 0,
+            "bgStart": "#4a0404",
+            "bgMid": "#5c0606",
+            "bgEnd": "#330202",
+            "bgAngle": 180,
+            "btnBgStart": "#6e0909",
+            "btnBgEnd": "#4a0404",
+            "btnBorderColor": "#e5b382",
+            "accentBgStart": "#e5b382",
+            "accentBgEnd": "#c49364",
+            "accentIconColor": "#4a0404",
+            "btnTextColor": "#FFFFFF",
+            "fontLogo": "'Cinzel', serif",
+            "fontHeading": "'Montserrat', sans-serif",
+            "fontSubtitle": "'Montserrat', sans-serif",
+            "fontBody": "'Montserrat', sans-serif",
+            "themeId": "burgundy-elegant",
+            "btnPresetId": "glass",
+            "textPrimary": "#FFFFFF",
+            "textSubtitle": "#e5b382",
+            "profileBorderColor": "#e5b382",
+            "profileRadius": "24px",
+            "btnRadius": "9999px",
+            "banner": {
+              "enabled": false,
+              "heightPreset": "medium",
+              "positionY": 50,
+              "imageOpacity": 85,
+              "fusionPreset": "deep",
+              "fusionStrength": 90
+            }
+          },
+          "layout": {
+            "gridCols": 1,
+            "profileBorder": 5,
+            "profileSize": 165,
+            "logoSize": 2.8,
+            "titleSize": 2.2,
+            "devicePreview": "mobile"
+          }
+        }
+      },
+      "rendererDifferences": [],
+      "waMessagePreserved": true,
+      "verdict": "PASS"
+    },
+    {
+      "template_id": "tpl-restaurant-generator-v1-0012",
+      "industry": "restaurant",
+      "seed": "pilot-20-v1-restaurant-02",
+      "recipe": "restaurant_premium",
+      "generatorVersion": "generator-v1",
+      "configHash": "b9aa20f6",
+      "themeId": "burgundy-elegant",
+      "buttonPresetId": "solid",
+      "layout": "grid",
+      "typography": {
+        "logo": "'Oswald', sans-serif",
+        "heading": "'Montserrat', sans-serif"
+      },
+      "buttonCount": 2,
+      "configPath": "configs/restaurant-02.json",
+      "screenshotPath": "screenshots/restaurant-02.png",
+      "localRoundTrip": {
+        "ok": true,
+        "differences": [],
+        "result": {
+          "schemaVersion": 1,
+          "identity": {
+            "logoText": "Marea",
+            "subtitleText": "COCINA DE MAR",
+            "titleText": "PRODUCTO DEL DÍA",
+            "profileImg": "https://images.unsplash.com/photo-1583394293214-28ded15ee548?q=80&w=400&auto=format&fit=crop",
+            "bannerImg": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=1280&auto=format&fit=crop"
+          },
+          "socials": {
+            "enabled": true,
+            "displayMode": "icons",
+            "items": [
+              {
+                "id": "pilot_20_v1_t11_s1",
+                "platform": "instagram",
+                "label": "Instagram",
+                "url": "https://instagram.com/demo.cripqer",
+                "iconId": "instagram",
+                "enabled": true
+              },
+              {
+                "id": "pilot_20_v1_t11_s2",
+                "platform": "whatsapp",
+                "label": "WhatsApp",
+                "url": "https://wa.me/56900000000",
+                "iconId": "whatsapp",
+                "enabled": true
+              },
+              {
+                "id": "pilot_20_v1_t11_s3",
+                "platform": "website",
+                "label": "Website",
+                "url": "https://www.example.com",
+                "iconId": "website",
+                "enabled": true
+              }
+            ]
+          },
+          "content": {
+            "footerText": "Te esperamos hoy"
+          },
+          "links": [
+            {
+              "id": "pilot_20_v1_t11_b1",
+              "text": "Reservar mesa",
+              "icon": "fa-regular fa-calendar",
+              "url": "https://example.com/reservar",
+              "actionType": "booking",
+              "fullWidth": false,
+              "waMessage": ""
+            },
+            {
+              "id": "pilot_20_v1_t11_b2",
+              "text": "Ver menú",
+              "icon": "fa-solid fa-globe",
+              "url": "https://example.com/menu",
+              "actionType": "url",
+              "fullWidth": false,
+              "waMessage": ""
+            }
+          ],
+          "appearance": {
+            "bgImage": "",
+            "bgOverlay": 0,
+            "bgStart": "#4a0404",
+            "bgMid": "#5c0606",
+            "bgEnd": "#330202",
+            "bgAngle": 180,
+            "btnBgStart": "#6e0909",
+            "btnBgEnd": "#4a0404",
+            "btnBorderColor": "#e5b382",
+            "accentBgStart": "#e5b382",
+            "accentBgEnd": "#c49364",
+            "accentIconColor": "#4a0404",
+            "btnTextColor": "#FFFFFF",
+            "fontLogo": "'Oswald', sans-serif",
+            "fontHeading": "'Montserrat', sans-serif",
+            "fontSubtitle": "'Montserrat', sans-serif",
+            "fontBody": "'Montserrat', sans-serif",
+            "themeId": "burgundy-elegant",
+            "btnPresetId": "solid",
+            "textPrimary": "#FFFFFF",
+            "textSubtitle": "#e5b382",
+            "profileBorderColor": "#e5b382",
+            "profileRadius": "24px",
+            "btnRadius": "16px",
+            "banner": {
+              "enabled": true,
+              "heightPreset": "medium",
+              "positionY": 50,
+              "imageOpacity": 85,
+              "fusionPreset": "deep",
+              "fusionStrength": 90
+            }
+          },
+          "layout": {
+            "gridCols": 2,
+            "profileBorder": 4,
+            "profileSize": 170,
+            "logoSize": 3.8,
+            "titleSize": 2.2,
+            "devicePreview": "mobile"
+          }
+        }
+      },
+      "rendererDifferences": [],
+      "waMessagePreserved": true,
+      "verdict": "PASS"
+    },
+    {
+      "template_id": "tpl-restaurant-generator-v1-0013",
+      "industry": "restaurant",
+      "seed": "pilot-20-v1-restaurant-03",
+      "recipe": "restaurant_premium",
+      "generatorVersion": "generator-v1",
+      "configHash": "db05a6b9",
+      "themeId": "black-gold",
+      "buttonPresetId": "glass",
+      "layout": "grid",
+      "typography": {
+        "logo": "'Oswald', sans-serif",
+        "heading": "'Oswald', sans-serif"
+      },
+      "buttonCount": 3,
+      "configPath": "configs/restaurant-03.json",
+      "screenshotPath": "screenshots/restaurant-03.png",
+      "localRoundTrip": {
+        "ok": true,
+        "differences": [],
+        "result": {
+          "schemaVersion": 1,
+          "identity": {
+            "logoText": "Sal & Brasa",
+            "subtitleText": "PARRILLA",
+            "titleText": "COCINA A LA LEÑA",
+            "profileImg": "https://images.unsplash.com/photo-1577219491135-ce391730fb2c?q=80&w=400&auto=format&fit=crop",
+            "bannerImg": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=1280&auto=format&fit=crop"
+          },
+          "socials": {
+            "enabled": true,
+            "displayMode": "icons",
+            "items": [
+              {
+                "id": "pilot_20_v1_t12_s1",
+                "platform": "instagram",
+                "label": "Instagram",
+                "url": "https://instagram.com/demo.cripqer",
+                "iconId": "instagram",
+                "enabled": true
+              },
+              {
+                "id": "pilot_20_v1_t12_s2",
+                "platform": "facebook",
+                "label": "Facebook",
+                "url": "https://facebook.com/demo.cripqer",
+                "iconId": "facebook",
+                "enabled": true
+              },
+              {
+                "id": "pilot_20_v1_t12_s3",
+                "platform": "whatsapp",
+                "label": "WhatsApp",
+                "url": "https://wa.me/56900000000",
+                "iconId": "whatsapp",
+                "enabled": true
+              },
+              {
+                "id": "pilot_20_v1_t12_s4",
+                "platform": "website",
+                "label": "Website",
+                "url": "https://www.example.com",
+                "iconId": "website",
+                "enabled": true
+              }
+            ]
+          },
+          "content": {
+            "footerText": "Toca para reservar tu mesa"
+          },
+          "links": [
+            {
+              "id": "pilot_20_v1_t12_b1",
+              "text": "Reservar mesa",
+              "icon": "fa-regular fa-calendar",
+              "url": "https://example.com/reservar",
+              "actionType": "booking",
+              "fullWidth": true,
+              "waMessage": ""
+            },
+            {
+              "id": "pilot_20_v1_t12_b2",
+              "text": "Ver menú",
+              "icon": "fa-solid fa-globe",
+              "url": "https://example.com/menu",
+              "actionType": "url",
+              "fullWidth": false,
+              "waMessage": ""
+            },
+            {
+              "id": "pilot_20_v1_t12_b3",
+              "text": "Llamar",
+              "icon": "fa-solid fa-phone",
+              "url": "+56224455667",
+              "actionType": "phone",
+              "fullWidth": false,
+              "waMessage": ""
+            }
+          ],
+          "appearance": {
+            "bgImage": "",
+            "bgOverlay": 0,
+            "bgStart": "#000000",
+            "bgMid": "#0a0a0a",
+            "bgEnd": "#111111",
+            "bgAngle": 180,
+            "btnBgStart": "#1a1a1a",
+            "btnBgEnd": "#111111",
+            "btnBorderColor": "#D4AF37",
+            "accentBgStart": "#D4AF37",
+            "accentBgEnd": "#B5952F",
+            "accentIconColor": "#000000",
+            "btnTextColor": "#FFFFFF",
+            "fontLogo": "'Oswald', sans-serif",
+            "fontHeading": "'Oswald', sans-serif",
+            "fontSubtitle": "'Oswald', sans-serif",
+            "fontBody": "'Oswald', sans-serif",
+            "themeId": "black-gold",
+            "btnPresetId": "glass",
+            "textPrimary": "#FFFFFF",
+            "textSubtitle": "#D4AF37",
+            "profileBorderColor": "#D4AF37",
+            "profileRadius": "50%",
+            "btnRadius": "9999px",
+            "banner": {
+              "enabled": true,
+              "heightPreset": "medium",
+              "positionY": 50,
+              "imageOpacity": 80,
+              "fusionPreset": "deep",
+              "fusionStrength": 80
+            }
+          },
+          "layout": {
+            "gridCols": 2,
+            "profileBorder": 3,
+            "profileSize": 185,
+            "logoSize": 3.8,
+            "titleSize": 2.3,
+            "devicePreview": "mobile"
+          }
+        }
+      },
+      "rendererDifferences": [],
+      "waMessagePreserved": true,
+      "verdict": "PASS"
+    },
+    {
+      "template_id": "tpl-restaurant-generator-v1-0014",
+      "industry": "restaurant",
+      "seed": "pilot-20-v1-restaurant-04",
+      "recipe": "restaurant_premium",
+      "generatorVersion": "generator-v1",
+      "configHash": "1a3ab88f",
+      "themeId": "ivory-gold",
+      "buttonPresetId": "solid",
+      "layout": "list",
+      "typography": {
+        "logo": "'Oswald', sans-serif",
+        "heading": "'Oswald', sans-serif"
+      },
+      "buttonCount": 4,
+      "configPath": "configs/restaurant-04.json",
+      "screenshotPath": "screenshots/restaurant-04.png",
+      "localRoundTrip": {
+        "ok": true,
+        "differences": [],
+        "result": {
+          "schemaVersion": 1,
+          "identity": {
+            "logoText": "Marea",
+            "subtitleText": "COCINA DE MAR",
+            "titleText": "PRODUCTO DEL DÍA",
+            "profileImg": "https://images.unsplash.com/photo-1583394293214-28ded15ee548?q=80&w=400&auto=format&fit=crop",
+            "bannerImg": "https://images.unsplash.com/photo-1552566626-52f8b828add9?q=80&w=1280&auto=format&fit=crop"
+          },
+          "socials": {
+            "enabled": true,
+            "displayMode": "icons",
+            "items": [
+              {
+                "id": "pilot_20_v1_t13_s1",
+                "platform": "instagram",
+                "label": "Instagram",
+                "url": "https://instagram.com/demo.cripqer",
+                "iconId": "instagram",
+                "enabled": true
+              },
+              {
+                "id": "pilot_20_v1_t13_s2",
+                "platform": "website",
+                "label": "Website",
+                "url": "https://www.example.com",
+                "iconId": "website",
+                "enabled": true
+              }
+            ]
+          },
+          "content": {
+            "footerText": "Te esperamos hoy"
+          },
+          "links": [
+            {
+              "id": "pilot_20_v1_t13_b1",
+              "text": "Reservar mesa",
+              "icon": "fa-regular fa-calendar",
+              "url": "https://example.com/reservar",
+              "actionType": "booking",
+              "fullWidth": false,
+              "waMessage": ""
+            },
+            {
+              "id": "pilot_20_v1_t13_b2",
+              "text": "Ver menú",
+              "icon": "fa-solid fa-globe",
+              "url": "https://example.com/menu",
+              "actionType": "url",
+              "fullWidth": false,
+              "waMessage": ""
+            },
+            {
+              "id": "pilot_20_v1_t13_b3",
+              "text": "Llamar",
+              "icon": "fa-solid fa-phone",
+              "url": "+56224455667",
+              "actionType": "phone",
+              "fullWidth": false,
+              "waMessage": ""
+            },
+            {
+              "id": "pilot_20_v1_t13_b4",
+              "text": "Ubicación",
+              "icon": "fa-solid fa-location-dot",
+              "url": "https://maps.google.com/?q=restaurante",
+              "actionType": "location",
+              "fullWidth": false,
+              "waMessage": ""
+            }
+          ],
+          "appearance": {
+            "bgImage": "",
+            "bgOverlay": 0,
+            "bgStart": "#FFFFF0",
+            "bgMid": "#FDFFF5",
+            "bgEnd": "#F0F0D8",
+            "bgAngle": 180,
+            "btnBgStart": "#ffffff",
+            "btnBgEnd": "#fcfcfc",
+            "btnBorderColor": "#CFB53B",
+            "accentBgStart": "#E8D595",
+            "accentBgEnd": "#CFB53B",
+            "accentIconColor": "#ffffff",
+            "btnTextColor": "#111111",
+            "fontLogo": "'Oswald', sans-serif",
+            "fontHeading": "'Oswald', sans-serif",
+            "fontSubtitle": "'Oswald', sans-serif",
+            "fontBody": "'Oswald', sans-serif",
+            "themeId": "ivory-gold",
+            "btnPresetId": "solid",
+            "textPrimary": "#2b2b2b",
+            "textSubtitle": "#CFB53B",
+            "profileBorderColor": "#CFB53B",
+            "profileRadius": "50%",
+            "btnRadius": "16px",
+            "banner": {
+              "enabled": true,
+              "heightPreset": "medium",
+              "positionY": 50,
+              "imageOpacity": 100,
+              "fusionPreset": "soft",
+              "fusionStrength": 40
+            }
+          },
+          "layout": {
+            "gridCols": 1,
+            "profileBorder": 3,
+            "profileSize": 180,
+            "logoSize": 3.4,
+            "titleSize": 2.1,
+            "devicePreview": "mobile"
+          }
+        }
+      },
+      "rendererDifferences": [],
+      "waMessagePreserved": true,
+      "verdict": "PASS"
+    },
+    {
+      "template_id": "tpl-restaurant-generator-v1-0015",
+      "industry": "restaurant",
+      "seed": "pilot-20-v1-restaurant-05",
+      "recipe": "restaurant_premium",
+      "generatorVersion": "generator-v1",
+      "configHash": "38544a3f",
+      "themeId": "black-gold",
+      "buttonPresetId": "premium",
+      "layout": "list",
+      "typography": {
+        "logo": "'Montserrat', sans-serif",
+        "heading": "'Poppins', sans-serif"
+      },
+      "buttonCount": 5,
+      "configPath": "configs/restaurant-05.json",
+      "screenshotPath": "screenshots/restaurant-05.png",
+      "localRoundTrip": {
+        "ok": true,
+        "differences": [],
+        "result": {
+          "schemaVersion": 1,
+          "identity": {
+            "logoText": "Verde Limón",
+            "subtitleText": "COCINA DE AUTOR",
+            "titleText": "MENÚ DE TEMPORADA",
+            "profileImg": "https://images.unsplash.com/photo-1577219491135-ce391730fb2c?q=80&w=400&auto=format&fit=crop",
+            "bannerImg": "https://images.unsplash.com/photo-1552566626-52f8b828add9?q=80&w=1280&auto=format&fit=crop"
+          },
+          "socials": {
+            "enabled": true,
+            "displayMode": "icons",
+            "items": [
+              {
+                "id": "pilot_20_v1_t14_s1",
+                "platform": "instagram",
+                "label": "Instagram",
+                "url": "https://instagram.com/demo.cripqer",
+                "iconId": "instagram",
+                "enabled": true
+              },
+              {
+                "id": "pilot_20_v1_t14_s2",
+                "platform": "facebook",
+                "label": "Facebook",
+                "url": "https://facebook.com/demo.cripqer",
+                "iconId": "facebook",
+                "enabled": true
+              },
+              {
+                "id": "pilot_20_v1_t14_s3",
+                "platform": "whatsapp",
+                "label": "WhatsApp",
+                "url": "https://wa.me/56900000000",
+                "iconId": "whatsapp",
+                "enabled": true
+              },
+              {
+                "id": "pilot_20_v1_t14_s4",
+                "platform": "website",
+                "label": "Website",
+                "url": "https://www.example.com",
+                "iconId": "website",
+                "enabled": true
+              }
+            ]
+          },
+          "content": {
+            "footerText": "Toca para reservar tu mesa"
+          },
+          "links": [
+            {
+              "id": "pilot_20_v1_t14_b1",
+              "text": "Reservar mesa",
+              "icon": "fa-regular fa-calendar",
+              "url": "https://example.com/reservar",
+              "actionType": "booking",
+              "fullWidth": true,
+              "waMessage": ""
+            },
+            {
+              "id": "pilot_20_v1_t14_b2",
+              "text": "Carta de vinos",
+              "icon": "fa-solid fa-download",
+              "url": "https://example.com/carta.pdf",
+              "actionType": "download",
+              "fullWidth": false,
+              "waMessage": ""
+            },
+            {
+              "id": "pilot_20_v1_t14_b3",
+              "text": "WhatsApp",
+              "icon": "fa-brands fa-whatsapp",
+              "url": "+56911223344",
+              "actionType": "whatsapp",
+              "fullWidth": false,
+              "waMessage": ""
+            },
+            {
+              "id": "pilot_20_v1_t14_b4",
+              "text": "Ubicación",
+              "icon": "fa-solid fa-location-dot",
+              "url": "https://maps.google.com/?q=restaurante",
+              "actionType": "location",
+              "fullWidth": false,
+              "waMessage": ""
+            },
+            {
+              "id": "pilot_20_v1_t14_b5",
+              "text": "Instagram",
+              "icon": "fa-brands fa-instagram",
+              "url": "https://instagram.com/demo.resto",
+              "actionType": "url",
+              "fullWidth": false,
+              "waMessage": ""
+            }
+          ],
+          "appearance": {
+            "bgImage": "",
+            "bgOverlay": 0,
+            "bgStart": "#000000",
+            "bgMid": "#0a0a0a",
+            "bgEnd": "#111111",
+            "bgAngle": 180,
+            "btnBgStart": "#1a1a1a",
+            "btnBgEnd": "#111111",
+            "btnBorderColor": "#D4AF37",
+            "accentBgStart": "#D4AF37",
+            "accentBgEnd": "#B5952F",
+            "accentIconColor": "#000000",
+            "btnTextColor": "#FFFFFF",
+            "fontLogo": "'Montserrat', sans-serif",
+            "fontHeading": "'Poppins', sans-serif",
+            "fontSubtitle": "'Poppins', sans-serif",
+            "fontBody": "'Poppins', sans-serif",
+            "themeId": "black-gold",
+            "btnPresetId": "premium",
+            "textPrimary": "#FFFFFF",
+            "textSubtitle": "#D4AF37",
+            "profileBorderColor": "#D4AF37",
+            "profileRadius": "50%",
+            "btnRadius": "16px",
+            "banner": {
+              "enabled": true,
+              "heightPreset": "medium",
+              "positionY": 50,
+              "imageOpacity": 80,
+              "fusionPreset": "deep",
+              "fusionStrength": 80
+            }
+          },
+          "layout": {
+            "gridCols": 1,
+            "profileBorder": 4,
+            "profileSize": 175,
+            "logoSize": 3.4,
+            "titleSize": 1.8,
+            "devicePreview": "mobile"
+          }
+        }
+      },
+      "rendererDifferences": [],
+      "waMessagePreserved": true,
+      "verdict": "PASS"
+    },
+    {
+      "template_id": "tpl-barber-generator-v1-0016",
+      "industry": "barber",
+      "seed": "pilot-20-v1-barber-01",
+      "recipe": "barber_modern",
+      "generatorVersion": "generator-v1",
+      "configHash": "dcd974dd",
+      "themeId": "black-gold",
+      "buttonPresetId": "solid",
+      "layout": "list",
+      "typography": {
+        "logo": "'Playfair Display', serif",
+        "heading": "'Montserrat', sans-serif"
+      },
+      "buttonCount": 1,
+      "configPath": "configs/barber-01.json",
+      "screenshotPath": "screenshots/barber-01.png",
+      "localRoundTrip": {
+        "ok": true,
+        "differences": [],
+        "result": {
+          "schemaVersion": 1,
+          "identity": {
+            "logoText": "Roble",
+            "subtitleText": "GROOMING",
+            "titleText": "CUIDADO MASCULINO",
+            "profileImg": "https://images.unsplash.com/photo-1621605815971-fbc98d665033?q=80&w=400&auto=format&fit=crop",
+            "bannerImg": "https://images.unsplash.com/photo-1503951458645-643d53bfd90f?q=80&w=1280&auto=format&fit=crop"
+          },
+          "socials": {
+            "enabled": true,
+            "displayMode": "icons",
+            "items": [
+              {
+                "id": "pilot_20_v1_t15_s1",
+                "platform": "tiktok",
+                "label": "TikTok",
+                "url": "https://tiktok.com/@demo.cripqer",
+                "iconId": "tiktok",
+                "enabled": true
+              },
+              {
+                "id": "pilot_20_v1_t15_s2",
+                "platform": "website",
+                "label": "Website",
+                "url": "https://www.example.com",
+                "iconId": "website",
+                "enabled": true
+              }
+            ]
+          },
+          "content": {
+            "footerText": "Reserva en segundos"
+          },
+          "links": [
+            {
+              "id": "pilot_20_v1_t15_b1",
+              "text": "Reservar cita",
+              "icon": "fa-regular fa-calendar",
+              "url": "https://example.com/agenda",
+              "actionType": "booking",
+              "fullWidth": true,
+              "waMessage": ""
+            }
+          ],
+          "appearance": {
+            "bgImage": "",
+            "bgOverlay": 0,
+            "bgStart": "#000000",
+            "bgMid": "#0a0a0a",
+            "bgEnd": "#111111",
+            "bgAngle": 180,
+            "btnBgStart": "#1a1a1a",
+            "btnBgEnd": "#111111",
+            "btnBorderColor": "#D4AF37",
+            "accentBgStart": "#D4AF37",
+            "accentBgEnd": "#B5952F",
+            "accentIconColor": "#000000",
+            "btnTextColor": "#FFFFFF",
+            "fontLogo": "'Playfair Display', serif",
+            "fontHeading": "'Montserrat', sans-serif",
+            "fontSubtitle": "'Montserrat', sans-serif",
+            "fontBody": "'Montserrat', sans-serif",
+            "themeId": "black-gold",
+            "btnPresetId": "solid",
+            "textPrimary": "#FFFFFF",
+            "textSubtitle": "#D4AF37",
+            "profileBorderColor": "#D4AF37",
+            "profileRadius": "0px",
+            "btnRadius": "16px",
+            "banner": {
+              "enabled": true,
+              "heightPreset": "medium",
+              "positionY": 50,
+              "imageOpacity": 80,
+              "fusionPreset": "deep",
+              "fusionStrength": 80
+            }
+          },
+          "layout": {
+            "gridCols": 1,
+            "profileBorder": 4,
+            "profileSize": 165,
+            "logoSize": 3.8,
+            "titleSize": 2.3,
+            "devicePreview": "mobile"
+          }
+        }
+      },
+      "rendererDifferences": [],
+      "waMessagePreserved": true,
+      "verdict": "PASS"
+    },
+    {
+      "template_id": "tpl-barber-generator-v1-0017",
+      "industry": "barber",
+      "seed": "pilot-20-v1-barber-02",
+      "recipe": "barber_modern",
+      "generatorVersion": "generator-v1",
+      "configHash": "f78dc5b8",
+      "themeId": "black-silver",
+      "buttonPresetId": "soft",
+      "layout": "list",
+      "typography": {
+        "logo": "'Cinzel', serif",
+        "heading": "'Poppins', sans-serif"
+      },
+      "buttonCount": 2,
+      "configPath": "configs/barber-02.json",
+      "screenshotPath": "screenshots/barber-02.png",
+      "localRoundTrip": {
+        "ok": true,
+        "differences": [],
+        "result": {
+          "schemaVersion": 1,
+          "identity": {
+            "logoText": "StyleCut",
+            "subtitleText": "BARBERÍA",
+            "titleText": "CORTE Y BARBA",
+            "profileImg": "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?q=80&w=400&auto=format&fit=crop",
+            "bannerImg": "https://images.unsplash.com/photo-1503951458645-643d53bfd90f?q=80&w=1280&auto=format&fit=crop"
+          },
+          "socials": {
+            "enabled": true,
+            "displayMode": "icons",
+            "items": [
+              {
+                "id": "pilot_20_v1_t16_s1",
+                "platform": "tiktok",
+                "label": "TikTok",
+                "url": "https://tiktok.com/@demo.cripqer",
+                "iconId": "tiktok",
+                "enabled": true
+              },
+              {
+                "id": "pilot_20_v1_t16_s2",
+                "platform": "whatsapp",
+                "label": "WhatsApp",
+                "url": "https://wa.me/56900000000",
+                "iconId": "whatsapp",
+                "enabled": true
+              },
+              {
+                "id": "pilot_20_v1_t16_s3",
+                "platform": "website",
+                "label": "Website",
+                "url": "https://www.example.com",
+                "iconId": "website",
+                "enabled": true
+              }
+            ]
+          },
+          "content": {
+            "footerText": "Toca para reservar tu hora"
+          },
+          "links": [
+            {
+              "id": "pilot_20_v1_t16_b1",
+              "text": "Reservar cita",
+              "icon": "fa-regular fa-calendar",
+              "url": "https://example.com/agenda",
+              "actionType": "booking",
+              "fullWidth": false,
+              "waMessage": ""
+            },
+            {
+              "id": "pilot_20_v1_t16_b2",
+              "text": "WhatsApp",
+              "icon": "fa-brands fa-whatsapp",
+              "url": "+56955667788",
+              "actionType": "whatsapp",
+              "fullWidth": false,
+              "waMessage": ""
+            }
+          ],
+          "appearance": {
+            "bgImage": "",
+            "bgOverlay": 0,
+            "bgStart": "#121212",
+            "bgMid": "#1a1a1a",
+            "bgEnd": "#0f0f0f",
+            "bgAngle": 180,
+            "btnBgStart": "#222222",
+            "btnBgEnd": "#1a1a1a",
+            "btnBorderColor": "#C0C0C0",
+            "accentBgStart": "#e0e0e0",
+            "accentBgEnd": "#a0a0a0",
+            "accentIconColor": "#121212",
+            "btnTextColor": "#FFFFFF",
+            "fontLogo": "'Cinzel', serif",
+            "fontHeading": "'Poppins', sans-serif",
+            "fontSubtitle": "'Poppins', sans-serif",
+            "fontBody": "'Poppins', sans-serif",
+            "themeId": "black-silver",
+            "btnPresetId": "soft",
+            "textPrimary": "#FFFFFF",
+            "textSubtitle": "#C0C0C0",
+            "profileBorderColor": "#C0C0C0",
+            "profileRadius": "50%",
+            "btnRadius": "16px",
+            "banner": {
+              "enabled": true,
+              "heightPreset": "medium",
+              "positionY": 50,
+              "imageOpacity": 70,
+              "fusionPreset": "deep",
+              "fusionStrength": 90
+            }
+          },
+          "layout": {
+            "gridCols": 1,
+            "profileBorder": 2,
+            "profileSize": 160,
+            "logoSize": 3.2,
+            "titleSize": 2.3,
+            "devicePreview": "mobile"
+          }
+        }
+      },
+      "rendererDifferences": [],
+      "waMessagePreserved": true,
+      "verdict": "PASS"
+    },
+    {
+      "template_id": "tpl-barber-generator-v1-0018",
+      "industry": "barber",
+      "seed": "pilot-20-v1-barber-03",
+      "recipe": "barber_modern",
+      "generatorVersion": "generator-v1",
+      "configHash": "a5bc7d23",
+      "themeId": "black-silver",
+      "buttonPresetId": "minimal",
+      "layout": "grid",
+      "typography": {
+        "logo": "'Playfair Display', serif",
+        "heading": "'Montserrat', sans-serif"
+      },
+      "buttonCount": 3,
+      "configPath": "configs/barber-03.json",
+      "screenshotPath": "screenshots/barber-03.png",
+      "localRoundTrip": {
+        "ok": true,
+        "differences": [],
+        "result": {
+          "schemaVersion": 1,
+          "identity": {
+            "logoText": "Navaja",
+            "subtitleText": "BARBER SHOP",
+            "titleText": "ESTILO CLÁSICO",
+            "profileImg": "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?q=80&w=400&auto=format&fit=crop",
+            "bannerImg": "https://images.unsplash.com/photo-1585747860715-2ba37e788b70?q=80&w=1280&auto=format&fit=crop"
+          },
+          "socials": {
+            "enabled": true,
+            "displayMode": "icons",
+            "items": [
+              {
+                "id": "pilot_20_v1_t17_s1",
+                "platform": "tiktok",
+                "label": "TikTok",
+                "url": "https://tiktok.com/@demo.cripqer",
+                "iconId": "tiktok",
+                "enabled": true
+              },
+              {
+                "id": "pilot_20_v1_t17_s2",
+                "platform": "whatsapp",
+                "label": "WhatsApp",
+                "url": "https://wa.me/56900000000",
+                "iconId": "whatsapp",
+                "enabled": true
+              },
+              {
+                "id": "pilot_20_v1_t17_s3",
+                "platform": "website",
+                "label": "Website",
+                "url": "https://www.example.com",
+                "iconId": "website",
+                "enabled": true
+              }
+            ]
+          },
+          "content": {
+            "footerText": "Reserva en segundos"
+          },
+          "links": [
+            {
+              "id": "pilot_20_v1_t17_b1",
+              "text": "Reservar cita",
+              "icon": "fa-regular fa-calendar",
+              "url": "https://example.com/agenda",
+              "actionType": "booking",
+              "fullWidth": true,
+              "waMessage": ""
+            },
+            {
+              "id": "pilot_20_v1_t17_b2",
+              "text": "WhatsApp",
+              "icon": "fa-brands fa-whatsapp",
+              "url": "+56955667788",
+              "actionType": "whatsapp",
+              "fullWidth": false,
+              "waMessage": ""
+            },
+            {
+              "id": "pilot_20_v1_t17_b3",
+              "text": "Galería",
+              "icon": "fa-solid fa-globe",
+              "url": "https://example.com/galeria",
+              "actionType": "url",
+              "fullWidth": false,
+              "waMessage": ""
+            }
+          ],
+          "appearance": {
+            "bgImage": "",
+            "bgOverlay": 0,
+            "bgStart": "#121212",
+            "bgMid": "#1a1a1a",
+            "bgEnd": "#0f0f0f",
+            "bgAngle": 180,
+            "btnBgStart": "#222222",
+            "btnBgEnd": "#1a1a1a",
+            "btnBorderColor": "#C0C0C0",
+            "accentBgStart": "#e0e0e0",
+            "accentBgEnd": "#a0a0a0",
+            "accentIconColor": "#121212",
+            "btnTextColor": "#FFFFFF",
+            "fontLogo": "'Playfair Display', serif",
+            "fontHeading": "'Montserrat', sans-serif",
+            "fontSubtitle": "'Montserrat', sans-serif",
+            "fontBody": "'Montserrat', sans-serif",
+            "themeId": "black-silver",
+            "btnPresetId": "minimal",
+            "textPrimary": "#FFFFFF",
+            "textSubtitle": "#C0C0C0",
+            "profileBorderColor": "#C0C0C0",
+            "profileRadius": "50%",
+            "btnRadius": "0px",
+            "banner": {
+              "enabled": true,
+              "heightPreset": "medium",
+              "positionY": 50,
+              "imageOpacity": 70,
+              "fusionPreset": "deep",
+              "fusionStrength": 90
+            }
+          },
+          "layout": {
+            "gridCols": 2,
+            "profileBorder": 3,
+            "profileSize": 165,
+            "logoSize": 3.5,
+            "titleSize": 2,
+            "devicePreview": "mobile"
+          }
+        }
+      },
+      "rendererDifferences": [],
+      "waMessagePreserved": true,
+      "verdict": "PASS"
+    },
+    {
+      "template_id": "tpl-barber-generator-v1-0019",
+      "industry": "barber",
+      "seed": "pilot-20-v1-barber-04",
+      "recipe": "barber_modern",
+      "generatorVersion": "generator-v1",
+      "configHash": "630fbb00",
+      "themeId": "graphite",
+      "buttonPresetId": "minimal",
+      "layout": "grid",
+      "typography": {
+        "logo": "'Playfair Display', serif",
+        "heading": "'Inter', sans-serif"
+      },
+      "buttonCount": 4,
+      "configPath": "configs/barber-04.json",
+      "screenshotPath": "screenshots/barber-04.png",
+      "localRoundTrip": {
+        "ok": true,
+        "differences": [],
+        "result": {
+          "schemaVersion": 1,
+          "identity": {
+            "logoText": "Navaja",
+            "subtitleText": "BARBER SHOP",
+            "titleText": "ESTILO CLÁSICO",
+            "profileImg": "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?q=80&w=400&auto=format&fit=crop",
+            "bannerImg": "https://images.unsplash.com/photo-1503951458645-643d53bfd90f?q=80&w=1280&auto=format&fit=crop"
+          },
+          "socials": {
+            "enabled": true,
+            "displayMode": "icons",
+            "items": [
+              {
+                "id": "pilot_20_v1_t18_s1",
+                "platform": "tiktok",
+                "label": "TikTok",
+                "url": "https://tiktok.com/@demo.cripqer",
+                "iconId": "tiktok",
+                "enabled": true
+              },
+              {
+                "id": "pilot_20_v1_t18_s2",
+                "platform": "whatsapp",
+                "label": "WhatsApp",
+                "url": "https://wa.me/56900000000",
+                "iconId": "whatsapp",
+                "enabled": true
+              }
+            ]
+          },
+          "content": {
+            "footerText": "Toca para reservar tu hora"
+          },
+          "links": [
+            {
+              "id": "pilot_20_v1_t18_b1",
+              "text": "Reservar cita",
+              "icon": "fa-regular fa-calendar",
+              "url": "https://example.com/agenda",
+              "actionType": "booking",
+              "fullWidth": false,
+              "waMessage": ""
+            },
+            {
+              "id": "pilot_20_v1_t18_b2",
+              "text": "WhatsApp",
+              "icon": "fa-brands fa-whatsapp",
+              "url": "+56955667788",
+              "actionType": "whatsapp",
+              "fullWidth": false,
+              "waMessage": ""
+            },
+            {
+              "id": "pilot_20_v1_t18_b3",
+              "text": "Galería",
+              "icon": "fa-solid fa-globe",
+              "url": "https://example.com/galeria",
+              "actionType": "url",
+              "fullWidth": false,
+              "waMessage": ""
+            },
+            {
+              "id": "pilot_20_v1_t18_b4",
+              "text": "Ubicación",
+              "icon": "fa-solid fa-location-dot",
+              "url": "https://maps.google.com/?q=barberia",
+              "actionType": "location",
+              "fullWidth": false,
+              "waMessage": ""
+            }
+          ],
+          "appearance": {
+            "bgImage": "",
+            "bgOverlay": 0,
+            "bgStart": "#2b2b2b",
+            "bgMid": "#333333",
+            "bgEnd": "#1a1a1a",
+            "bgAngle": 180,
+            "btnBgStart": "#444444",
+            "btnBgEnd": "#2b2b2b",
+            "btnBorderColor": "#555555",
+            "accentBgStart": "#ffffff",
+            "accentBgEnd": "#e0e0e0",
+            "accentIconColor": "#111111",
+            "btnTextColor": "#FFFFFF",
+            "fontLogo": "'Playfair Display', serif",
+            "fontHeading": "'Inter', sans-serif",
+            "fontSubtitle": "'Inter', sans-serif",
+            "fontBody": "'Inter', sans-serif",
+            "themeId": "graphite",
+            "btnPresetId": "minimal",
+            "textPrimary": "#FFFFFF",
+            "textSubtitle": "#a0a0a0",
+            "profileBorderColor": "#555555",
+            "profileRadius": "24px",
+            "btnRadius": "16px",
+            "banner": {
+              "enabled": true,
+              "heightPreset": "medium",
+              "positionY": 50,
+              "imageOpacity": 70,
+              "fusionPreset": "medium",
+              "fusionStrength": 75
+            }
+          },
+          "layout": {
+            "gridCols": 2,
+            "profileBorder": 3,
+            "profileSize": 160,
+            "logoSize": 3.6,
+            "titleSize": 1.8,
+            "devicePreview": "mobile"
+          }
+        }
+      },
+      "rendererDifferences": [],
+      "waMessagePreserved": true,
+      "verdict": "PASS"
+    },
+    {
+      "template_id": "tpl-barber-generator-v1-0020",
+      "industry": "barber",
+      "seed": "pilot-20-v1-barber-05",
+      "recipe": "barber_modern",
+      "generatorVersion": "generator-v1",
+      "configHash": "ab9f470c",
+      "themeId": "black-silver",
+      "buttonPresetId": "solid",
+      "layout": "list",
+      "typography": {
+        "logo": "'Cinzel', serif",
+        "heading": "'Poppins', sans-serif"
+      },
+      "buttonCount": 5,
+      "configPath": "configs/barber-05.json",
+      "screenshotPath": "screenshots/barber-05.png",
+      "localRoundTrip": {
+        "ok": true,
+        "differences": [],
+        "result": {
+          "schemaVersion": 1,
+          "identity": {
+            "logoText": "Navaja",
+            "subtitleText": "BARBER SHOP",
+            "titleText": "ESTILO CLÁSICO",
+            "profileImg": "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?q=80&w=400&auto=format&fit=crop",
+            "bannerImg": "https://images.unsplash.com/photo-1585747860715-2ba37e788b70?q=80&w=1280&auto=format&fit=crop"
+          },
+          "socials": {
+            "enabled": true,
+            "displayMode": "icons",
+            "items": [
+              {
+                "id": "pilot_20_v1_t19_s1",
+                "platform": "instagram",
+                "label": "Instagram",
+                "url": "https://instagram.com/demo.cripqer",
+                "iconId": "instagram",
+                "enabled": true
+              },
+              {
+                "id": "pilot_20_v1_t19_s2",
+                "platform": "tiktok",
+                "label": "TikTok",
+                "url": "https://tiktok.com/@demo.cripqer",
+                "iconId": "tiktok",
+                "enabled": true
+              }
+            ]
+          },
+          "content": {
+            "footerText": "Toca para reservar tu hora"
+          },
+          "links": [
+            {
+              "id": "pilot_20_v1_t19_b1",
+              "text": "Reservar cita",
+              "icon": "fa-regular fa-calendar",
+              "url": "https://example.com/agenda",
+              "actionType": "booking",
+              "fullWidth": true,
+              "waMessage": ""
+            },
+            {
+              "id": "pilot_20_v1_t19_b2",
+              "text": "WhatsApp",
+              "icon": "fa-brands fa-whatsapp",
+              "url": "+56955667788",
+              "actionType": "whatsapp",
+              "fullWidth": false,
+              "waMessage": ""
+            },
+            {
+              "id": "pilot_20_v1_t19_b3",
+              "text": "Servicios",
+              "icon": "fa-solid fa-globe",
+              "url": "https://example.com/servicios",
+              "actionType": "url",
+              "fullWidth": false,
+              "waMessage": ""
+            },
+            {
+              "id": "pilot_20_v1_t19_b4",
+              "text": "Ubicación",
+              "icon": "fa-solid fa-location-dot",
+              "url": "https://maps.google.com/?q=barberia",
+              "actionType": "location",
+              "fullWidth": false,
+              "waMessage": ""
+            },
+            {
+              "id": "pilot_20_v1_t19_b5",
+              "text": "TikTok",
+              "icon": "fa-brands fa-tiktok",
+              "url": "https://tiktok.com/@demo.barber",
+              "actionType": "url",
+              "fullWidth": false,
+              "waMessage": ""
+            }
+          ],
+          "appearance": {
+            "bgImage": "",
+            "bgOverlay": 0,
+            "bgStart": "#121212",
+            "bgMid": "#1a1a1a",
+            "bgEnd": "#0f0f0f",
+            "bgAngle": 180,
+            "btnBgStart": "#222222",
+            "btnBgEnd": "#1a1a1a",
+            "btnBorderColor": "#C0C0C0",
+            "accentBgStart": "#e0e0e0",
+            "accentBgEnd": "#a0a0a0",
+            "accentIconColor": "#121212",
+            "btnTextColor": "#FFFFFF",
+            "fontLogo": "'Cinzel', serif",
+            "fontHeading": "'Poppins', sans-serif",
+            "fontSubtitle": "'Poppins', sans-serif",
+            "fontBody": "'Poppins', sans-serif",
+            "themeId": "black-silver",
+            "btnPresetId": "solid",
+            "textPrimary": "#FFFFFF",
+            "textSubtitle": "#C0C0C0",
+            "profileBorderColor": "#C0C0C0",
+            "profileRadius": "50%",
+            "btnRadius": "16px",
+            "banner": {
+              "enabled": true,
+              "heightPreset": "medium",
+              "positionY": 50,
+              "imageOpacity": 70,
+              "fusionPreset": "deep",
+              "fusionStrength": 90
+            }
+          },
+          "layout": {
+            "gridCols": 1,
+            "profileBorder": 5,
+            "profileSize": 170,
+            "logoSize": 3.5,
+            "titleSize": 1.8,
+            "devicePreview": "mobile"
+          }
+        }
+      },
+      "rendererDifferences": [],
+      "waMessagePreserved": true,
+      "verdict": "PASS"
+    }
+  ],
+  "verdict": "PASS"
+}

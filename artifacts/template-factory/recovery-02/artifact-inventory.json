@@ -1,0 +1,434 @@
+{
+  "generatedAt": "2026-08-25T00:57:03.102Z",
+  "scope": [
+    "Recovery 01 accepted artifacts",
+    "Recovery 02 artifacts"
+  ],
+  "summary": {
+    "total": 42,
+    "present": 42,
+    "missing": 0
+  },
+  "artifacts": [
+    {
+      "path": "artifacts/template-factory/recovery-01/determinism-results.json",
+      "associated_phase": "Recovery 01 accepted baseline",
+      "associated_test": "determinism-results.json",
+      "type": "file",
+      "exists": true,
+      "size_bytes": 1442,
+      "non_empty": true,
+      "status": "PRESENT"
+    },
+    {
+      "path": "artifacts/template-factory/recovery-01/pass-a-roundtrip-results.json",
+      "associated_phase": "Recovery 01 accepted baseline",
+      "associated_test": "pass-a-roundtrip-results.json",
+      "type": "file",
+      "exists": true,
+      "size_bytes": 3280,
+      "non_empty": true,
+      "status": "PRESENT"
+    },
+    {
+      "path": "artifacts/template-factory/recovery-01/pipeline-results.json",
+      "associated_phase": "Recovery 01 accepted baseline",
+      "associated_test": "pipeline-results.json",
+      "type": "file",
+      "exists": true,
+      "size_bytes": 11498,
+      "non_empty": true,
+      "status": "PRESENT"
+    },
+    {
+      "path": "artifacts/template-factory/recovery-01/publication-safety-results.json",
+      "associated_phase": "Recovery 01 accepted baseline",
+      "associated_test": "publication-safety-results.json",
+      "type": "file",
+      "exists": true,
+      "size_bytes": 539,
+      "non_empty": true,
+      "status": "PRESENT"
+    },
+    {
+      "path": "artifacts/template-factory/recovery-01/RECOVERY_01_REPORT.md",
+      "associated_phase": "Recovery 01 accepted baseline",
+      "associated_test": "RECOVERY_01_REPORT.md",
+      "type": "file",
+      "exists": true,
+      "size_bytes": 13868,
+      "non_empty": true,
+      "status": "PRESENT"
+    },
+    {
+      "path": "artifacts/template-factory/recovery-01/registry-parity-results.json",
+      "associated_phase": "Recovery 01 accepted baseline",
+      "associated_test": "registry-parity-results.json",
+      "type": "file",
+      "exists": true,
+      "size_bytes": 4899,
+      "non_empty": true,
+      "status": "PRESENT"
+    },
+    {
+      "path": "artifacts/template-factory/recovery-01/generated-test-configs/barber-2btn.json",
+      "associated_phase": "Recovery 01 accepted baseline",
+      "associated_test": "generated config",
+      "type": "file",
+      "exists": true,
+      "size_bytes": 2748,
+      "non_empty": true,
+      "status": "PRESENT"
+    },
+    {
+      "path": "artifacts/template-factory/recovery-01/generated-test-configs/legal-3btn.json",
+      "associated_phase": "Recovery 01 accepted baseline",
+      "associated_test": "generated config",
+      "type": "file",
+      "exists": true,
+      "size_bytes": 2998,
+      "non_empty": true,
+      "status": "PRESENT"
+    },
+    {
+      "path": "artifacts/template-factory/recovery-01/generated-test-configs/medical-1btn.json",
+      "associated_phase": "Recovery 01 accepted baseline",
+      "associated_test": "generated config",
+      "type": "file",
+      "exists": true,
+      "size_bytes": 2336,
+      "non_empty": true,
+      "status": "PRESENT"
+    },
+    {
+      "path": "artifacts/template-factory/recovery-01/generated-test-configs/medical-5btn.json",
+      "associated_phase": "Recovery 01 accepted baseline",
+      "associated_test": "generated config",
+      "type": "file",
+      "exists": true,
+      "size_bytes": 3263,
+      "non_empty": true,
+      "status": "PRESENT"
+    },
+    {
+      "path": "artifacts/template-factory/recovery-01/generated-test-configs/restaurant-4btn.json",
+      "associated_phase": "Recovery 01 accepted baseline",
+      "associated_test": "generated config",
+      "type": "file",
+      "exists": true,
+      "size_bytes": 3460,
+      "non_empty": true,
+      "status": "PRESENT"
+    },
+    {
+      "path": "artifacts/template-factory/recovery-01/screenshots/barber-2btn.png",
+      "associated_phase": "Recovery 01 accepted baseline",
+      "associated_test": "screenshot",
+      "type": "file",
+      "exists": true,
+      "size_bytes": 179568,
+      "non_empty": true,
+      "status": "PRESENT"
+    },
+    {
+      "path": "artifacts/template-factory/recovery-01/screenshots/legal-3btn.png",
+      "associated_phase": "Recovery 01 accepted baseline",
+      "associated_test": "screenshot",
+      "type": "file",
+      "exists": true,
+      "size_bytes": 172979,
+      "non_empty": true,
+      "status": "PRESENT"
+    },
+    {
+      "path": "artifacts/template-factory/recovery-01/screenshots/medical-1btn.png",
+      "associated_phase": "Recovery 01 accepted baseline",
+      "associated_test": "screenshot",
+      "type": "file",
+      "exists": true,
+      "size_bytes": 151401,
+      "non_empty": true,
+      "status": "PRESENT"
+    },
+    {
+      "path": "artifacts/template-factory/recovery-01/screenshots/medical-5btn.png",
+      "associated_phase": "Recovery 01 accepted baseline",
+      "associated_test": "screenshot",
+      "type": "file",
+      "exists": true,
+      "size_bytes": 147102,
+      "non_empty": true,
+      "status": "PRESENT"
+    },
+    {
+      "path": "artifacts/template-factory/recovery-01/screenshots/restaurant-4btn.png",
+      "associated_phase": "Recovery 01 accepted baseline",
+      "associated_test": "screenshot",
+      "type": "file",
+      "exists": true,
+      "size_bytes": 182740,
+      "non_empty": true,
+      "status": "PRESENT"
+    },
+    {
+      "path": "artifacts/template-factory/recovery-02/.tsc-before.txt",
+      "associated_phase": "Recovery 02",
+      "associated_test": ".tsc-before.txt",
+      "type": "file",
+      "exists": true,
+      "size_bytes": 8634,
+      "non_empty": true,
+      "status": "PRESENT"
+    },
+    {
+      "path": "artifacts/template-factory/recovery-02/.tsc-after.txt",
+      "associated_phase": "Recovery 02",
+      "associated_test": ".tsc-after.txt",
+      "type": "file",
+      "exists": true,
+      "size_bytes": 5537,
+      "non_empty": true,
+      "status": "PRESENT"
+    },
+    {
+      "path": "artifacts/template-factory/recovery-02/type-error-attribution.json",
+      "associated_phase": "Recovery 02",
+      "associated_test": "type-error-attribution.json",
+      "type": "file",
+      "exists": true,
+      "size_bytes": 22410,
+      "non_empty": true,
+      "status": "PRESENT"
+    },
+    {
+      "path": "artifacts/template-factory/recovery-02/test-generation-results.json",
+      "associated_phase": "Recovery 02",
+      "associated_test": "test-generation-results.json",
+      "type": "file",
+      "exists": true,
+      "size_bytes": 59369,
+      "non_empty": true,
+      "status": "PRESENT"
+    },
+    {
+      "path": "artifacts/template-factory/recovery-02/artifact-inventory.json",
+      "associated_phase": "Recovery 02",
+      "associated_test": "artifact-inventory.json",
+      "type": "file",
+      "exists": true,
+      "size_bytes": 13052,
+      "non_empty": true,
+      "status": "PRESENT"
+    },
+    {
+      "path": "artifacts/template-factory/recovery-02/regression-results.json",
+      "associated_phase": "Recovery 02",
+      "associated_test": "regression-results.json",
+      "type": "file",
+      "exists": true,
+      "size_bytes": 292,
+      "non_empty": true,
+      "status": "PRESENT"
+    },
+    {
+      "path": "artifacts/template-factory/recovery-02/build-results.json",
+      "associated_phase": "Recovery 02",
+      "associated_test": "build-results.json",
+      "type": "file",
+      "exists": true,
+      "size_bytes": 401,
+      "non_empty": true,
+      "status": "PRESENT"
+    },
+    {
+      "path": "artifacts/template-factory/recovery-02/RECOVERY_02_REPORT.md",
+      "associated_phase": "Recovery 02",
+      "associated_test": "RECOVERY_02_REPORT.md",
+      "type": "file",
+      "exists": true,
+      "size_bytes": 5534,
+      "non_empty": true,
+      "status": "PRESENT"
+    },
+    {
+      "path": "artifacts/template-factory/recovery-02/generated-test-configs/",
+      "associated_phase": "Recovery 02",
+      "associated_test": "generated config directory",
+      "type": "directory",
+      "exists": true,
+      "size_bytes": 8,
+      "non_empty": true,
+      "status": "PRESENT"
+    },
+    {
+      "path": "artifacts/template-factory/recovery-02/screenshots/",
+      "associated_phase": "Recovery 02",
+      "associated_test": "screenshot directory",
+      "type": "directory",
+      "exists": true,
+      "size_bytes": 8,
+      "non_empty": true,
+      "status": "PRESENT"
+    },
+    {
+      "path": "artifacts/template-factory/recovery-02/generated-test-configs/medical-01.json",
+      "associated_phase": "Recovery 02",
+      "associated_test": "authorized 8 generated config",
+      "type": "file",
+      "exists": true,
+      "size_bytes": 2573,
+      "non_empty": true,
+      "status": "PRESENT"
+    },
+    {
+      "path": "artifacts/template-factory/recovery-02/generated-test-configs/medical-02.json",
+      "associated_phase": "Recovery 02",
+      "associated_test": "authorized 8 generated config",
+      "type": "file",
+      "exists": true,
+      "size_bytes": 3306,
+      "non_empty": true,
+      "status": "PRESENT"
+    },
+    {
+      "path": "artifacts/template-factory/recovery-02/generated-test-configs/legal-01.json",
+      "associated_phase": "Recovery 02",
+      "associated_test": "authorized 8 generated config",
+      "type": "file",
+      "exists": true,
+      "size_bytes": 2695,
+      "non_empty": true,
+      "status": "PRESENT"
+    },
+    {
+      "path": "artifacts/template-factory/recovery-02/generated-test-configs/legal-02.json",
+      "associated_phase": "Recovery 02",
+      "associated_test": "authorized 8 generated config",
+      "type": "file",
+      "exists": true,
+      "size_bytes": 3053,
+      "non_empty": true,
+      "status": "PRESENT"
+    },
+    {
+      "path": "artifacts/template-factory/recovery-02/generated-test-configs/restaurant-01.json",
+      "associated_phase": "Recovery 02",
+      "associated_test": "authorized 8 generated config",
+      "type": "file",
+      "exists": true,
+      "size_bytes": 2557,
+      "non_empty": true,
+      "status": "PRESENT"
+    },
+    {
+      "path": "artifacts/template-factory/recovery-02/generated-test-configs/restaurant-02.json",
+      "associated_phase": "Recovery 02",
+      "associated_test": "authorized 8 generated config",
+      "type": "file",
+      "exists": true,
+      "size_bytes": 3277,
+      "non_empty": true,
+      "status": "PRESENT"
+    },
+    {
+      "path": "artifacts/template-factory/recovery-02/generated-test-configs/barber-01.json",
+      "associated_phase": "Recovery 02",
+      "associated_test": "authorized 8 generated config",
+      "type": "file",
+      "exists": true,
+      "size_bytes": 2757,
+      "non_empty": true,
+      "status": "PRESENT"
+    },
+    {
+      "path": "artifacts/template-factory/recovery-02/generated-test-configs/barber-02.json",
+      "associated_phase": "Recovery 02",
+      "associated_test": "authorized 8 generated config",
+      "type": "file",
+      "exists": true,
+      "size_bytes": 3410,
+      "non_empty": true,
+      "status": "PRESENT"
+    },
+    {
+      "path": "artifacts/template-factory/recovery-02/screenshots/medical-01.png",
+      "associated_phase": "Recovery 02",
+      "associated_test": "authorized 8 screenshot",
+      "type": "file",
+      "exists": true,
+      "size_bytes": 154337,
+      "non_empty": true,
+      "status": "PRESENT"
+    },
+    {
+      "path": "artifacts/template-factory/recovery-02/screenshots/medical-02.png",
+      "associated_phase": "Recovery 02",
+      "associated_test": "authorized 8 screenshot",
+      "type": "file",
+      "exists": true,
+      "size_bytes": 148442,
+      "non_empty": true,
+      "status": "PRESENT"
+    },
+    {
+      "path": "artifacts/template-factory/recovery-02/screenshots/legal-01.png",
+      "associated_phase": "Recovery 02",
+      "associated_test": "authorized 8 screenshot",
+      "type": "file",
+      "exists": true,
+      "size_bytes": 104147,
+      "non_empty": true,
+      "status": "PRESENT"
+    },
+    {
+      "path": "artifacts/template-factory/recovery-02/screenshots/legal-02.png",
+      "associated_phase": "Recovery 02",
+      "associated_test": "authorized 8 screenshot",
+      "type": "file",
+      "exists": true,
+      "size_bytes": 156252,
+      "non_empty": true,
+      "status": "PRESENT"
+    },
+    {
+      "path": "artifacts/template-factory/recovery-02/screenshots/restaurant-01.png",
+      "associated_phase": "Recovery 02",
+      "associated_test": "authorized 8 screenshot",
+      "type": "file",
+      "exists": true,
+      "size_bytes": 207697,
+      "non_empty": true,
+      "status": "PRESENT"
+    },
+    {
+      "path": "artifacts/template-factory/recovery-02/screenshots/restaurant-02.png",
+      "associated_phase": "Recovery 02",
+      "associated_test": "authorized 8 screenshot",
+      "type": "file",
+      "exists": true,
+      "size_bytes": 170504,
+      "non_empty": true,
+      "status": "PRESENT"
+    },
+    {
+      "path": "artifacts/template-factory/recovery-02/screenshots/barber-01.png",
+      "associated_phase": "Recovery 02",
+      "associated_test": "authorized 8 screenshot",
+      "type": "file",
+      "exists": true,
+      "size_bytes": 158445,
+      "non_empty": true,
+      "status": "PRESENT"
+    },
+    {
+      "path": "artifacts/template-factory/recovery-02/screenshots/barber-02.png",
+      "associated_phase": "Recovery 02",
+      "associated_test": "authorized 8 screenshot",
+      "type": "file",
+      "exists": true,
+      "size_bytes": 103866,
+      "non_empty": true,
+      "status": "PRESENT"
+    }
+  ]
+}

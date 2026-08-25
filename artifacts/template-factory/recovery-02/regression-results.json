@@ -1,0 +1,9 @@
+{
+  "command": "npx playwright test tests/template-factory/pipeline.spec.ts --project=template-factory --reporter=line",
+  "exitCode": 0,
+  "testsPassed": 5,
+  "testsFailed": 0,
+  "duration": "55.3s",
+  "verdict": "PASS",
+  "notes": "Recovery 01 core suite rerun after Recovery 02 changes."
+}

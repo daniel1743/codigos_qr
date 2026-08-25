@@ -1,0 +1,41 @@
+[
+  {
+    "test": "ACTION_TYPES registry exists",
+    "status": "PASS"
+  },
+  {
+    "test": "CTA-URL href resolution",
+    "status": "PASS",
+    "detail": "https://example.com"
+  },
+  {
+    "test": "CTA-PHONE href resolution",
+    "status": "PASS",
+    "detail": "tel:+56912345678"
+  },
+  {
+    "test": "CTA-EMAIL href resolution",
+    "status": "PASS",
+    "detail": "mailto:test@example.com"
+  },
+  {
+    "test": "CTA-WHATSAPP href resolution",
+    "status": "PASS",
+    "detail": "https://wa.me/56912345678?&text=Hola!"
+  },
+  {
+    "test": "CTA-LOCATION href resolution",
+    "status": "PASS",
+    "detail": "https://maps.google.com/test"
+  },
+  {
+    "test": "CTA-BOOKING href resolution",
+    "status": "PASS",
+    "detail": "https://calendly.com/test"
+  },
+  {
+    "test": "CTA-DOWNLOAD href resolution",
+    "status": "PASS",
+    "detail": "https://example.com/file.pdf"
+  }
+]

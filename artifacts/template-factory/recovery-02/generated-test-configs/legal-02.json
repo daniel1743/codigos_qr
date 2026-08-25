@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 1,
+  "identity": {
+    "logoText": "Estudio Marín",
+    "subtitleText": "DERECHO CORPORATIVO",
+    "titleText": "DR. TOMÁS MARÍN",
+    "profileImg": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=400&auto=format&fit=crop",
+    "bannerImg": "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=1280&auto=format&fit=crop"
+  },
+  "socials": {
+    "enabled": true,
+    "displayMode": "icons",
+    "items": [
+      {
+        "id": "rec02_authorized_8_t3_s1",
+        "platform": "linkedin",
+        "label": "LinkedIn",
+        "url": "https://linkedin.com/company/demo-cripqer",
+        "iconId": "linkedin",
+        "enabled": true
+      },
+      {
+        "id": "rec02_authorized_8_t3_s2",
+        "platform": "email",
+        "label": "Email",
+        "url": "contacto@example.com",
+        "iconId": "email",
+        "enabled": true
+      }
+    ]
+  },
+  "content": {
+    "footerText": "Toca para solicitar una reunión"
+  },
+  "links": [
+    {
+      "id": "rec02_authorized_8_t3_b1",
+      "text": "Solicitar consulta",
+      "icon": "fa-regular fa-calendar",
+      "url": "https://example.com/agenda",
+      "actionType": "booking",
+      "fullWidth": false,
+      "waMessage": ""
+    },
+    {
+      "id": "rec02_authorized_8_t3_b2",
+      "text": "WhatsApp",
+      "icon": "fa-brands fa-whatsapp",
+      "url": "+56987654321",
+      "actionType": "whatsapp",
+      "fullWidth": false,
+      "waMessage": ""
+    },
+    {
+      "id": "rec02_authorized_8_t3_b3",
+      "text": "Equipo",
+      "icon": "fa-solid fa-globe",
+      "url": "https://example.com/equipo",
+      "actionType": "url",
+      "fullWidth": false,
+      "waMessage": ""
+    },
+    {
+      "id": "rec02_authorized_8_t3_b4",
+      "text": "Ubicación",
+      "icon": "fa-solid fa-location-dot",
+      "url": "https://maps.google.com/?q=estudio",
+      "actionType": "location",
+      "fullWidth": false,
+      "waMessage": ""
+    }
+  ],
+  "appearance": {
+    "bgImage": "",
+    "bgOverlay": 0,
+    "bgStart": "#2b2b2b",
+    "bgMid": "#333333",
+    "bgEnd": "#1a1a1a",
+    "bgAngle": 180,
+    "btnBgStart": "#444444",
+    "btnBgEnd": "#2b2b2b",
+    "btnBorderColor": "#555555",
+    "accentBgStart": "#ffffff",
+    "accentBgEnd": "#e0e0e0",
+    "accentIconColor": "#111111",
+    "btnTextColor": "#FFFFFF",
+    "fontLogo": "'Cinzel', serif",
+    "fontHeading": "'Poppins', sans-serif",
+    "fontSubtitle": "'Poppins', sans-serif",
+    "fontBody": "'Poppins', sans-serif",
+    "themeId": "graphite",
+    "btnPresetId": "solid",
+    "textPrimary": "#FFFFFF",
+    "textSubtitle": "#a0a0a0",
+    "profileBorderColor": "#555555",
+    "profileRadius": "50%",
+    "btnRadius": "16px",
+    "banner": {
+      "enabled": true,
+      "heightPreset": "medium",
+      "positionY": 50,
+      "imageOpacity": 70,
+      "fusionPreset": "medium",
+      "fusionStrength": 75
+    }
+  },
+  "layout": {
+    "gridCols": 2,
+    "profileBorder": 3,
+    "profileSize": 170,
+    "logoSize": 2.8,
+    "titleSize": 2.3,
+    "devicePreview": "mobile"
+  }
+}

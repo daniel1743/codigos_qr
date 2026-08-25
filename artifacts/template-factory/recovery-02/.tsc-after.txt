@@ -1,0 +1,37 @@
+src/components/admin/AnalyticsGlobalPanel.tsx(73,36): error TS7006: Parameter 'e' implicitly has an 'any' type.
+src/components/admin/AnalyticsGlobalPanel.tsx(74,37): error TS7006: Parameter 'e' implicitly has an 'any' type.
+src/components/admin/AnalyticsGlobalPanel.tsx(75,50): error TS7006: Parameter 'e' implicitly has an 'any' type.
+src/components/admin/AnalyticsGlobalPanel.tsx(84,23): error TS7006: Parameter 'e' implicitly has an 'any' type.
+src/components/admin/AnalyticsGlobalPanel.tsx(93,23): error TS7006: Parameter 'e' implicitly has an 'any' type.
+src/components/admin/AnalyticsGlobalPanel.tsx(101,23): error TS7006: Parameter 'e' implicitly has an 'any' type.
+src/components/admin/LogosPanel.tsx(175,7): error TS2532: Object is possibly 'undefined'.
+src/components/admin/PremiumPanel.tsx(69,42): error TS7006: Parameter 'u' implicitly has an 'any' type.
+src/components/admin/UsersPanel.tsx(79,49): error TS7006: Parameter 'p' implicitly has an 'any' type.
+src/components/admin/UsersPanel.tsx(90,52): error TS7006: Parameter 'p' implicitly has an 'any' type.
+src/components/admin/UsersPanel.tsx(98,48): error TS7006: Parameter 'a' implicitly has an 'any' type.
+src/components/editor/AppearanceSection.tsx(161,16): error TS2375: Type '{ profile: Partial<Profile>; onChange: (updates: Partial<Profile>) => void; links: Partial<ProfileLink>[]; onManageLinkImages: (() => void) | undefined; }' is not assignable to type 'SocialCoversSectionProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'onManageLinkImages' are incompatible.
+    Type '(() => void) | undefined' is not assignable to type '() => void'.
+      Type 'undefined' is not assignable to type '() => void'.
+src/components/editor/ContextualPropertiesPanel.tsx(491,48): error TS2538: Type 'undefined' cannot be used as an index type.
+src/components/editor/PremiumMaxProPicker.tsx(71,13): error TS2353: Object literal may only specify known properties, and 'ringColor' does not exist in type 'Properties<string | number, string & {}>'.
+src/components/editor/ProfileSection.tsx(232,46): error TS2538: Type 'undefined' cannot be used as an index type.
+src/components/navigation/DesktopNavbar.tsx(19,15): error TS2305: Module '"@hugeicons/core-free-icons"' has no exported member 'IconSvgElement'.
+src/components/navigation/DesktopNavbar.tsx(324,43): error TS2345: Argument of type '"/admin"' is not assignable to parameter of type '"/" | "/profile"'.
+src/components/navigation/MobileBottomNav.tsx(8,15): error TS2305: Module '"@hugeicons/core-free-icons"' has no exported member 'IconSvgElement'.
+src/components/navigation/MobileBottomNav.tsx(38,68): error TS4111: Property 'tab' comes from an index signature, so it must be accessed with ['tab'].
+src/components/navigation/MobileBottomNav.tsx(153,16): error TS2375: Type '{ children: Element[]; key: "template" | "profile" | "qr" | "editor" | "secure-documents"; ref: (node: HTMLAnchorElement | null) => void; to: "/editor" | "/encrypted-documents" | "/profile" | "/template-bank" | "/template-builder"; search: MobileSearch | undefined; "aria-current": "page" | undefined; "aria-label": s...' is not assignable to type 'MakeOptionalSearchParams<RouterCore<Route<Register, any, "/", "/", string, "__root__", undefined, {}, { queryClient: QueryClient; }, AnyContext, AnyContext, ... 6 more ..., undefined>, "never", false, RouterHistory, Record<...>>, string, "/editor" | ... 3 more ... | "/template-builder">' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'search' are incompatible.
+    Type 'MobileSearch | undefined' is not assignable to type 'true | {} | ParamsReducerFn<RouterCore<Route<Register, any, "/", "/", string, "__root__", undefined, {}, { queryClient: QueryClient; }, AnyContext, AnyContext, ... 6 more ..., undefined>, "never", false, RouterHistory, Record<...>>, "SEARCH", string, "/editor" | ... 3 more ... | "/template-builder">'.
+      Type 'undefined' is not assignable to type 'true | {} | ParamsReducerFn<RouterCore<Route<Register, any, "/", "/", string, "__root__", undefined, {}, { queryClient: QueryClient; }, AnyContext, AnyContext, ... 6 more ..., undefined>, "never", false, RouterHistory, Record<...>>, "SEARCH", string, "/editor" | ... 3 more ... | "/template-builder">'.
+src/components/navigation/PremiumMobileNavDrawer.tsx(16,15): error TS2305: Module '"@hugeicons/core-free-icons"' has no exported member 'IconSvgElement'.
+src/components/template-bank/TemplateBankGallery.tsx(87,42): error TS7031: Binding element 'data' implicitly has an 'any' type.
+src/routes/__root.tsx(202,42): error TS7006: Parameter '_event' implicitly has an 'any' type.
+src/routes/__root.tsx(202,50): error TS7006: Parameter 'currentSession' implicitly has an 'any' type.
+src/routes/index.tsx(197,42): error TS7006: Parameter '_event' implicitly has an 'any' type.
+src/routes/index.tsx(197,50): error TS7006: Parameter 'currentSession' implicitly has an 'any' type.
+src/services/template.service.ts(140,16): error TS7006: Parameter 'template' implicitly has an 'any' type.
+src/services/template.service.ts(141,13): error TS7006: Parameter 'template' implicitly has an 'any' type.
+vite.config.ts(40,7): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Object literal may only specify known properties, and 'tsconfigRaw' does not exist in type 'ESBuildOptions'.

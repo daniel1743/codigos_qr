@@ -1,0 +1,31 @@
+{
+  "executedAt": "2026-08-25T01:44:54.735Z",
+  "liveAdminCounts": {
+    "executed": false,
+    "verdict": "BLOCKED",
+    "reason": "Requires authenticated admin access."
+  },
+  "anonPublicTemplateBankProbe": {
+    "name": "template_bank_public_visibility_anon_limit5",
+    "method": "GET",
+    "url": "https://mlinfiuhkxdhlveflbkj.supabase.co/rest/v1/template_bank?select=id,name,publication_status,is_public,generation_source,batch_id&limit=5",
+    "executedAt": "2026-08-25T01:38:56.1691680Z",
+    "ok": true,
+    "statusCode": 200,
+    "responseType": "System.Object[]",
+    "rowCount": 0,
+    "error": null
+  },
+  "zeroCounterTrap": {
+    "inspectedFile": "src/services/template-factory-admin.service.ts",
+    "previousBehavior": "catch block returned all zero counts after DB error",
+    "patchApplied": true,
+    "newBehavior": "catch block logs and rethrows, allowing Admin UI loadData catch to show DB error instead of fake empty counters",
+    "buildValidation": {
+      "command": "npm run build",
+      "exitCode": 0,
+      "verdict": "PASS"
+    }
+  },
+  "verdict": "PASS_FOR_CODE_PATCH_BLOCKED_FOR_LIVE_ADMIN_COUNTS"
+}

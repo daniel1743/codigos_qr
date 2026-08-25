@@ -1,0 +1,48 @@
+{
+  "template_id": "tpl-legal-generator-v1-0009",
+  "industry": "legal",
+  "seed": "pilot-20-v1-legal-04",
+  "recipe": "lawyer_executive",
+  "generatorVersion": "generator-v1",
+  "configHash": "d81af56c",
+  "themeId": "graphite",
+  "buttonPresetId": "minimal",
+  "layout": "list",
+  "typography": {
+    "logo": "'Playfair Display', serif",
+    "heading": "'Montserrat', sans-serif"
+  },
+  "buttonCount": 4,
+  "configPath": "configs/legal-04.json",
+  "screenshotPath": "screenshots/legal-04.png",
+  "qa": {
+    "score": 100,
+    "scoreNormalized": 1,
+    "passed": [
+      "schemaValid",
+      "rendererSuccess",
+      "noOverflow",
+      "buttonIntegrity",
+      "assetIntegrity",
+      "urlSafety",
+      "roundTrip"
+    ],
+    "failed": [],
+    "findings": [],
+    "blockingOk": true
+  },
+  "quality": {
+    "score": 0.98,
+    "dimensions": {
+      "schema_validity": 0.2,
+      "renderer_success": 0.2,
+      "responsive_integrity": 0.15,
+      "content_completeness": 0.15,
+      "action_validity": 0.15,
+      "visual_qa": 0.15,
+      "variation_bonus": -0.02
+    }
+  },
+  "visualFindings": [],
+  "status": "PASS"
+}

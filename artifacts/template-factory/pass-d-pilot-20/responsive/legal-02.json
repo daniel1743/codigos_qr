@@ -1,0 +1,63 @@
+{
+  "template_id": "tpl-legal-generator-v1-0007",
+  "industry": "legal",
+  "seed": "pilot-20-v1-legal-02",
+  "recipe": "lawyer_executive",
+  "generatorVersion": "generator-v1",
+  "configHash": "7428ac4f",
+  "themeId": "executive-blue",
+  "buttonPresetId": "premium",
+  "layout": "list",
+  "typography": {
+    "logo": "'Cinzel', serif",
+    "heading": "'Oswald', sans-serif"
+  },
+  "buttonCount": 2,
+  "configPath": "configs/legal-02.json",
+  "screenshotPath": "screenshots/legal-02.png",
+  "viewports": [
+    {
+      "name": "320x700",
+      "width": 320,
+      "height": 700,
+      "overflowPx": 0,
+      "overflow": false
+    },
+    {
+      "name": "375x812",
+      "width": 375,
+      "height": 812,
+      "overflowPx": 0,
+      "overflow": false
+    },
+    {
+      "name": "390x844",
+      "width": 390,
+      "height": 844,
+      "overflowPx": 0,
+      "overflow": false
+    },
+    {
+      "name": "768x1024",
+      "width": 768,
+      "height": 1024,
+      "overflowPx": 0,
+      "overflow": false
+    },
+    {
+      "name": "1280x800",
+      "width": 1280,
+      "height": 800,
+      "overflowPx": 0,
+      "overflow": false
+    },
+    {
+      "name": "430x932",
+      "width": 430,
+      "height": 932,
+      "overflowPx": 0,
+      "overflow": false
+    }
+  ],
+  "verdict": "PASS"
+}

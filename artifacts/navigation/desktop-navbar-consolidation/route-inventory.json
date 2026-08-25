@@ -1,0 +1,11 @@
+{
+  "routes": [
+    {"current_label": "Inicio", "route": "/", "new_top_level": "Inicio"},
+    {"current_label": "Mis QRs", "route": "/editor", "new_top_level": "QR", "new_label": "Mis QR"},
+    {"current_label": "Crear", "route": "/template-builder", "new_top_level": "Plantillas", "new_label": "Editor"},
+    {"current_label": "Plantillas / Banco de Plantillas", "route": "/template-bank", "new_top_level": "Plantillas", "new_label": "Biblioteca"},
+    {"current_label": "Docs Seguros", "route": "/encrypted-documents", "new_top_level": "Seguridad", "new_label": "Documentos Seguros"},
+    {"current_label": "Mi perfil", "route": "/profile", "new_top_level": "Perfil", "new_label": "Mi Perfil"},
+    {"current_label": "Admin", "route": "/admin", "new_top_level": "Administración", "new_label": "Administración"}
+  ]
+}

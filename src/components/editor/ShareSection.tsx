@@ -524,79 +524,10 @@ export function ShareSection({
 
           <div className="space-y-5">
             <div className="flex flex-col items-center space-y-5 rounded-2xl border bg-card p-5 shadow-sm">
-              <h3 className="text-xl font-bold text-center">Tu código QR</h3>
+              <h3 className="text-xl font-bold text-center">Acciones Rápidas</h3>
               <p className="text-center text-muted-foreground text-sm max-w-[280px]">
-                Este QR apunta permanentemente a tu página. Su destino no cambiará aunque edites el
-                diseño.
+                Tu código QR se previsualiza arriba. Usa estas acciones para interactuar con tu página.
               </p>
-
-              <QRFrameShell frameStyle={selectedFrame.id} className="w-full max-w-[260px]">
-                {usesAdvancedQR ? (
-                  <QRCodeAdvanced
-                    key={`adv-${publicUrl}-${qrVersion}-${JSON.stringify(profile.qr_gradient)}-${fgColor}-${bgColor}-${logoEnabled}-${profile.qr_effect}`}
-                    options={{
-                      data: publicUrl,
-                      width: 240,
-                      height: 240,
-                      margin: 4,
-                      dotsColor: profile.qr_gradient || fgColor,
-                      backgroundColor: bgColor,
-                      dotsType: (profile.qr_dots_type || "square") as DotsType,
-                      cornersSquareType: (profile.qr_corners_square_type ||
-                        "extra-rounded") as CornerSquareType,
-                      cornersDotType: (profile.qr_corners_dot_type || "dot") as CornerDotType,
-                      cornersSquareColor: profile.qr_corners_square_color || fgColor,
-                      cornersDotColor: cornerDotColor,
-                      cornerSquareColors: {
-                        topLeft: cornerTopLeftColor,
-                        topRight: cornerTopRightColor,
-                        bottomLeft: cornerBottomLeftColor,
-                      },
-                      frameStyle: qrFrameStyle,
-                      effect: (profile.qr_effect || "none") as QREffectType,
-                      ...(logoEnabled && logoUrl ? { image: logoUrl } : {}),
-                      ...(logoEnabled && logoUrl
-                        ? {
-                            imageOptions: {
-                              hideBackgroundDots: true,
-                              imageSize: 0.22,
-                              margin: 4,
-                              crossOrigin: "anonymous",
-                            },
-                          }
-                        : {}),
-                      qrOptions: { errorCorrectionLevel: "H" },
-                    }}
-                    className="flex h-full w-full items-center justify-center [&_canvas]:h-full [&_canvas]:w-full"
-                  />
-                ) : exportFormat === "svg" ? (
-                  <QRCodeSVG
-                    key={`svg-${publicUrl}-${qrVersion}-${fgColor}-${bgColor}-${logoEnabled}`}
-                    id="qr-preview-svg"
-                    value={publicUrl}
-                    size={240}
-                    level="H"
-                    marginSize={4}
-                    bgColor={bgColor}
-                    fgColor={fgColor}
-                    {...(previewImageSettings ? { imageSettings: previewImageSettings } : {})}
-                    style={{ width: "100%", height: "100%" }}
-                  />
-                ) : (
-                  <QRCodeCanvas
-                    key={`png-${publicUrl}-${qrVersion}-${fgColor}-${bgColor}-${logoEnabled}`}
-                    id="qr-preview-canvas"
-                    value={publicUrl}
-                    size={240}
-                    level="H"
-                    marginSize={4}
-                    bgColor={bgColor}
-                    fgColor={fgColor}
-                    {...(previewImageSettings ? { imageSettings: previewImageSettings } : {})}
-                    style={{ width: "100%", height: "100%" }}
-                  />
-                )}
-              </QRFrameShell>
 
               <div className="grid w-full gap-2">
                 <Button

@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "identity": {
+    "logoText": "Nexo Legal",
+    "subtitleText": "DERECHO LABORAL",
+    "titleText": "DR. JOAQUÍN BRAVO",
+    "profileImg": "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=400&auto=format&fit=crop",
+    "bannerImg": "https://images.unsplash.com/photo-1497366754035-f200968a6e72?q=80&w=1280&auto=format&fit=crop"
+  },
+  "socials": {
+    "enabled": true,
+    "displayMode": "icons",
+    "items": [
+      {
+        "id": "pilot_20_v1_t7_s1",
+        "platform": "linkedin",
+        "label": "LinkedIn",
+        "url": "https://linkedin.com/company/demo-cripqer",
+        "iconId": "linkedin",
+        "enabled": true
+      }
+    ]
+  },
+  "content": {
+    "footerText": "Agenda tu primera consulta"
+  },
+  "links": [
+    {
+      "id": "pilot_20_v1_t7_b1",
+      "text": "Solicitar consulta",
+      "icon": "fa-regular fa-calendar",
+      "url": "https://example.com/agenda",
+      "actionType": "booking",
+      "fullWidth": true,
+      "waMessage": ""
+    },
+    {
+      "id": "pilot_20_v1_t7_b2",
+      "text": "Correo",
+      "icon": "fa-regular fa-envelope",
+      "url": "contacto@example.com",
+      "actionType": "email",
+      "fullWidth": false,
+      "waMessage": ""
+    },
+    {
+      "id": "pilot_20_v1_t7_b3",
+      "text": "Áreas de práctica",
+      "icon": "fa-solid fa-globe",
+      "url": "https://example.com/areas",
+      "actionType": "url",
+      "fullWidth": false,
+      "waMessage": ""
+    }
+  ],
+  "appearance": {
+    "bgImage": "",
+    "bgOverlay": 0,
+    "bgStart": "#001f3f",
+    "bgMid": "#002b59",
+    "bgEnd": "#001122",
+    "bgAngle": 180,
+    "btnBgStart": "#003366",
+    "btnBgEnd": "#001f3f",
+    "btnBorderColor": "#0074D9",
+    "accentBgStart": "#7FDBFF",
+    "accentBgEnd": "#39CCCC",
+    "accentIconColor": "#001f3f",
+    "btnTextColor": "#FFFFFF",
+    "fontLogo": "'Playfair Display', serif",
+    "fontHeading": "'Poppins', sans-serif",
+    "fontSubtitle": "'Poppins', sans-serif",
+    "fontBody": "'Poppins', sans-serif",
+    "themeId": "executive-blue",
+    "btnPresetId": "premium",
+    "textPrimary": "#FFFFFF",
+    "textSubtitle": "#7FDBFF",
+    "profileBorderColor": "#7FDBFF",
+    "profileRadius": "0px",
+    "btnRadius": "0px",
+    "banner": {
+      "enabled": true,
+      "heightPreset": "medium",
+      "positionY": 50,
+      "imageOpacity": 90,
+      "fusionPreset": "medium",
+      "fusionStrength": 70
+    }
+  },
+  "layout": {
+    "gridCols": 2,
+    "profileBorder": 5,
+    "profileSize": 175,
+    "logoSize": 3.8,
+    "titleSize": 2.6,
+    "devicePreview": "mobile"
+  }
+}

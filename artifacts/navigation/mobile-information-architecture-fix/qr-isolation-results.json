@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "method": "code inspection + production build",
+  "assertions": {
+    "qrNavDestination": "/editor?tab=qr",
+    "editorReadsQrSearchParam": true,
+    "qrTabSetsSelectedTarget": "qr",
+    "qrPreviewComponent": "EditorQRPreview",
+    "landingPreviewComponent": "PublicProfileView",
+    "landingRenderedWhenQrTabActive": false
+  },
+  "evidence": [
+    "src/routes/editor.tsx reads URLSearchParams(window.location.search) and switches to activeTab 'qr' when tab=qr.",
+    "src/routes/editor.tsx renders EditorQRPreview when activeTab === 'qr'.",
+    "src/routes/editor.tsx renders PublicProfileView only in the non-QR branch."
+  ]
+}

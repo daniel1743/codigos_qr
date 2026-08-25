@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "tests": [
+    { "name": "DesktopNavbar exists and is visible", "status": "PASS" },
+    { "name": "All 5 main routes are present in DesktopNavbar", "status": "PASS" },
+    { "name": "Admin link is present when admin", "status": "PASS" },
+    { "name": "Secondary global navbar in editor is removed", "status": "PASS" },
+    { "name": "Editor contextual tabs are preserved", "status": "PASS" }
+  ]
+}

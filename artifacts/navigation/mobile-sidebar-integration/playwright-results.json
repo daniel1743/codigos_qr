@@ -1,0 +1,32 @@
+{
+  "build": {
+    "command": "npm run build",
+    "status": "PASS"
+  },
+  "manual_playwright_checks": {
+    "open_sidebar_390": {
+      "status": "PASS",
+      "observed": {
+        "ariaExpanded": "true",
+        "ariaHidden": "false",
+        "mainTransform": "matrix(0.965, 0, 0, 0.965, 327.6, 8)"
+      }
+    },
+    "docs_route_anchor": {
+      "status": "PASS",
+      "observedUrl": "http://127.0.0.1:4184/encrypted-documents"
+    },
+    "screenshots": {
+      "status": "PARTIAL",
+      "paths": [
+        "artifacts/navigation/mobile-sidebar-integration/sidebar-open-320.png",
+        "artifacts/navigation/mobile-sidebar-integration/sidebar-open-390.png",
+        "artifacts/navigation/mobile-sidebar-integration/sidebar-open-768.png"
+      ]
+    }
+  },
+  "notes": [
+    "Initial React-only handler did not hydrate reliably in the root shell, so the integrated component includes a delayed v6 DOM controller scoped to the sidebar IDs.",
+    "The drawer uses Hugeicons imports from @hugeicons/react and @hugeicons/core-free-icons."
+  ]
+}

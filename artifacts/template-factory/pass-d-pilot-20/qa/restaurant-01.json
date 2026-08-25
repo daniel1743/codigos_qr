@@ -1,0 +1,48 @@
+{
+  "template_id": "tpl-restaurant-generator-v1-0011",
+  "industry": "restaurant",
+  "seed": "pilot-20-v1-restaurant-01",
+  "recipe": "restaurant_premium",
+  "generatorVersion": "generator-v1",
+  "configHash": "56702a9f",
+  "themeId": "burgundy-elegant",
+  "buttonPresetId": "glass",
+  "layout": "list",
+  "typography": {
+    "logo": "'Cinzel', serif",
+    "heading": "'Montserrat', sans-serif"
+  },
+  "buttonCount": 1,
+  "configPath": "configs/restaurant-01.json",
+  "screenshotPath": "screenshots/restaurant-01.png",
+  "qa": {
+    "score": 100,
+    "scoreNormalized": 1,
+    "passed": [
+      "schemaValid",
+      "rendererSuccess",
+      "noOverflow",
+      "buttonIntegrity",
+      "assetIntegrity",
+      "urlSafety",
+      "roundTrip"
+    ],
+    "failed": [],
+    "findings": [],
+    "blockingOk": true
+  },
+  "quality": {
+    "score": 0.98,
+    "dimensions": {
+      "schema_validity": 0.2,
+      "renderer_success": 0.2,
+      "responsive_integrity": 0.15,
+      "content_completeness": 0.15,
+      "action_validity": 0.15,
+      "visual_qa": 0.15,
+      "variation_bonus": -0.02
+    }
+  },
+  "visualFindings": [],
+  "status": "PASS"
+}

@@ -1,0 +1,45 @@
+{
+  "executedAt": "2026-08-25T01:44:54.735Z",
+  "prerequisiteGate": "BLOCKED",
+  "anonAdminUsersProbe": {
+    "command": "GET /rest/v1/admin_users?select=user_id&limit=1 as anon",
+    "url": "https://mlinfiuhkxdhlveflbkj.supabase.co/rest/v1/admin_users?select=user_id&limit=1",
+    "executedAt": "2026-08-25T01:36:48.1576035Z",
+    "ok": true,
+    "statusCode": 200,
+    "response": [],
+    "error": null
+  },
+  "authenticatedAdminUsersProbe": {
+    "executed": false,
+    "verdict": "BLOCKED",
+    "reason": "No authenticated Supabase admin/session JWT was available in the workspace, and Supabase CLI is not linked to/listing the live project."
+  },
+  "superAdminRecognition": {
+    "executed": false,
+    "verdict": "BLOCKED",
+    "reason": "Cannot prove current authenticated admin is super_admin without a live authenticated session or SQL access."
+  },
+  "cliEvidence": {
+    "supabaseStatus": {
+      "command": "supabase status",
+      "exitCode": 1,
+      "result": "BLOCKED_LOCAL_DOCKER_UNAVAILABLE",
+      "relevantOutput": "failed to inspect container health: dockerDesktopLinuxEngine pipe not found"
+    },
+    "supabaseProjectsList": {
+      "command": "supabase projects list",
+      "exitCode": 0,
+      "result": "CLI_AUTHENTICATED_BUT_TARGET_PROJECT_NOT_ACCESSIBLE_OR_NOT_LINKED",
+      "targetProjectRef": "mlinfiuhkxdhlveflbkj",
+      "listedTargetProject": false,
+      "relevantOutput": "Cannot find project ref. Have you run supabase link? Listed projects did not include mlinfiuhkxdhlveflbkj."
+    }
+  },
+  "knownUserReportedIncident": {
+    "code": "42P17",
+    "message": "infinite recursion detected in policy for relation admin_users",
+    "note": "User-provided browser evidence from authenticated admin flow remains the relevant blocker until rechecked with admin credentials."
+  },
+  "verdict": "PASS_B_DB_BLOCKED"
+}

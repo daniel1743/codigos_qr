@@ -1,0 +1,6 @@
+{
+  "executedAt": "2026-08-25T01:44:54.735Z",
+  "executed": false,
+  "verdict": "BLOCKED",
+  "reason": "No authenticated admin browser/session was available to open Biblioteca and verify live counts/actions. No UI result was faked."
+}

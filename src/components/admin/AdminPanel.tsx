@@ -24,6 +24,7 @@ import { PremiumPanel } from "./PremiumPanel";
 import { InvitationCodesPanel } from "./InvitationCodesPanel";
 import { LogosPanel } from "./LogosPanel";
 import { AnalyticsGlobalPanel } from "./AnalyticsGlobalPanel";
+import { TemplateLibraryPanel } from "./TemplateLibraryPanel";
 import { isAdminEmail } from "../../lib/admin-check";
 
 interface GlobalStats {
@@ -247,10 +248,14 @@ export function AdminPanel() {
 
       {/* Main Tabs */}
       <Tabs defaultValue="dashboard" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 lg:w-auto lg:grid-cols-6">
+        <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:grid-cols-7">
           <TabsTrigger value="dashboard" className="gap-2">
             <BarChart3 className="h-4 w-4" />
             <span className="hidden sm:inline">Dashboard</span>
+          </TabsTrigger>
+          <TabsTrigger value="templates" className="gap-2">
+            <Sparkles className="h-4 w-4" />
+            <span className="hidden sm:inline">Biblioteca</span>
           </TabsTrigger>
           <TabsTrigger value="users" className="gap-2">
             <Users className="h-4 w-4" />
@@ -273,6 +278,11 @@ export function AdminPanel() {
             <span className="hidden sm:inline">Analytics</span>
           </TabsTrigger>
         </TabsList>
+
+        {/* Templates Tab */}
+        <TabsContent value="templates" className="space-y-6">
+          <TemplateLibraryPanel />
+        </TabsContent>
 
         {/* Dashboard Tab */}
         <TabsContent value="dashboard" className="space-y-6">

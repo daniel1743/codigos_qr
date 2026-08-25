@@ -1,0 +1,54 @@
+[
+  {
+    "test": "Reject javascript:",
+    "status": "PASS",
+    "detail": "#"
+  },
+  {
+    "test": "Reject data:",
+    "status": "PASS",
+    "detail": "#"
+  },
+  {
+    "test": "Reject file:",
+    "status": "PASS",
+    "detail": "#"
+  },
+  {
+    "test": "Reject vbscript:",
+    "status": "PASS",
+    "detail": "#"
+  },
+  {
+    "test": "Validate phone: \"abc\"",
+    "status": "PASS",
+    "detail": {
+      "valid": false,
+      "msg": "Ingresa un número válido"
+    }
+  },
+  {
+    "test": "Validate email: \"notanemail\"",
+    "status": "PASS",
+    "detail": {
+      "valid": false,
+      "msg": "Ingresa un email válido"
+    }
+  },
+  {
+    "test": "Validate phone: \"+56912345678\"",
+    "status": "PASS",
+    "detail": {
+      "valid": true,
+      "msg": ""
+    }
+  },
+  {
+    "test": "Validate email: \"test@test.com\"",
+    "status": "PASS",
+    "detail": {
+      "valid": true,
+      "msg": ""
+    }
+  }
+]

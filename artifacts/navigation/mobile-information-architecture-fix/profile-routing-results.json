@@ -1,0 +1,26 @@
+{
+  "status": "PASS",
+  "method": "code inspection + production build",
+  "profileActions": {
+    "viewPublicProfile": {
+      "usesRealProfileData": ["slug", "public_id"],
+      "destination": "getAliasProfileUrl(slug) or getPublicProfileUrl(public_id)"
+    },
+    "editLanding": {
+      "destination": "/template-builder"
+    },
+    "viewQr": {
+      "destination": "/editor?tab=qr"
+    },
+    "editQr": {
+      "destination": "/editor?tab=qr"
+    },
+    "viewLink": {
+      "usesRealProfileData": ["slug", "public_id"]
+    },
+    "editLink": {
+      "destination": "/editor?tab=qr"
+    }
+  },
+  "notes": "Mi Perfil exposes view/edit access points only. It does not duplicate QR or landing editors."
+}

@@ -1,0 +1,34 @@
+{
+  "parity": {
+    "Docs Seguros": {
+      "old_location": "editor secondary nav",
+      "new_location": "DesktopNavbar",
+      "route": "/encrypted-documents",
+      "status": "TRANSFERRED"
+    },
+    "Editor Básico": {
+      "old_location": "editor secondary nav",
+      "new_location": "DesktopNavbar",
+      "route": "/template-builder",
+      "status": "TRANSFERRED"
+    },
+    "Banco de Plantillas": {
+      "old_location": "editor secondary nav",
+      "new_location": "DesktopNavbar",
+      "route": "/template-bank",
+      "status": "TRANSFERRED"
+    },
+    "Mi perfil": {
+      "old_location": "editor secondary nav",
+      "new_location": "DesktopNavbar Profile Menu",
+      "route": "/profile",
+      "status": "TRANSFERRED"
+    },
+    "Admin": {
+      "old_location": "editor secondary nav",
+      "new_location": "DesktopNavbar Profile Menu",
+      "route": "/admin",
+      "status": "TRANSFERRED"
+    }
+  }
+}

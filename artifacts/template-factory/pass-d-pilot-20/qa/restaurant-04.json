@@ -1,0 +1,48 @@
+{
+  "template_id": "tpl-restaurant-generator-v1-0014",
+  "industry": "restaurant",
+  "seed": "pilot-20-v1-restaurant-04",
+  "recipe": "restaurant_premium",
+  "generatorVersion": "generator-v1",
+  "configHash": "1a3ab88f",
+  "themeId": "ivory-gold",
+  "buttonPresetId": "solid",
+  "layout": "list",
+  "typography": {
+    "logo": "'Oswald', sans-serif",
+    "heading": "'Oswald', sans-serif"
+  },
+  "buttonCount": 4,
+  "configPath": "configs/restaurant-04.json",
+  "screenshotPath": "screenshots/restaurant-04.png",
+  "qa": {
+    "score": 100,
+    "scoreNormalized": 1,
+    "passed": [
+      "schemaValid",
+      "rendererSuccess",
+      "noOverflow",
+      "buttonIntegrity",
+      "assetIntegrity",
+      "urlSafety",
+      "roundTrip"
+    ],
+    "failed": [],
+    "findings": [],
+    "blockingOk": true
+  },
+  "quality": {
+    "score": 1,
+    "dimensions": {
+      "schema_validity": 0.2,
+      "renderer_success": 0.2,
+      "responsive_integrity": 0.15,
+      "content_completeness": 0.15,
+      "action_validity": 0.15,
+      "visual_qa": 0.15,
+      "variation_bonus": 0
+    }
+  },
+  "visualFindings": [],
+  "status": "PASS"
+}

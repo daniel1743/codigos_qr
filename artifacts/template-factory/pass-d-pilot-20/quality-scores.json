@@ -1,0 +1,909 @@
+{
+  "generatedAt": "2026-08-25T02:03:40.005Z",
+  "scoreRange": {
+    "min": 0,
+    "max": 1
+  },
+  "results": [
+    {
+      "template_id": "tpl-medical-generator-v1-0001",
+      "industry": "medical",
+      "seed": "pilot-20-v1-medical-01",
+      "recipe": "medical_clean",
+      "generatorVersion": "generator-v1",
+      "configHash": "53b03940",
+      "themeId": "premium-white",
+      "buttonPresetId": "premium",
+      "layout": "list",
+      "typography": {
+        "logo": "'Oswald', sans-serif",
+        "heading": "'Poppins', sans-serif"
+      },
+      "buttonCount": 1,
+      "configPath": "configs/medical-01.json",
+      "screenshotPath": "screenshots/medical-01.png",
+      "qaScore": 1,
+      "dimensions": {
+        "schema_validity": 0.2,
+        "renderer_success": 0.2,
+        "responsive_integrity": 0.15,
+        "content_completeness": 0.15,
+        "action_validity": 0.15,
+        "visual_qa": 0.15,
+        "variation_bonus": 0
+      },
+      "qa": {
+        "score": 100,
+        "scoreNormalized": 1,
+        "passed": [
+          "schemaValid",
+          "rendererSuccess",
+          "noOverflow",
+          "buttonIntegrity",
+          "assetIntegrity",
+          "urlSafety",
+          "roundTrip"
+        ],
+        "failed": [],
+        "findings": [],
+        "blockingOk": true
+      },
+      "recommendedStatus": "READY_FOR_HUMAN_REVIEW"
+    },
+    {
+      "template_id": "tpl-medical-generator-v1-0002",
+      "industry": "medical",
+      "seed": "pilot-20-v1-medical-02",
+      "recipe": "medical_clean",
+      "generatorVersion": "generator-v1",
+      "configHash": "743813a6",
+      "themeId": "executive-blue",
+      "buttonPresetId": "outline",
+      "layout": "list",
+      "typography": {
+        "logo": "'Montserrat', sans-serif",
+        "heading": "'Montserrat', sans-serif"
+      },
+      "buttonCount": 2,
+      "configPath": "configs/medical-02.json",
+      "screenshotPath": "screenshots/medical-02.png",
+      "qaScore": 1,
+      "dimensions": {
+        "schema_validity": 0.2,
+        "renderer_success": 0.2,
+        "responsive_integrity": 0.15,
+        "content_completeness": 0.15,
+        "action_validity": 0.15,
+        "visual_qa": 0.15,
+        "variation_bonus": 0
+      },
+      "qa": {
+        "score": 100,
+        "scoreNormalized": 1,
+        "passed": [
+          "schemaValid",
+          "rendererSuccess",
+          "noOverflow",
+          "buttonIntegrity",
+          "assetIntegrity",
+          "urlSafety",
+          "roundTrip"
+        ],
+        "failed": [],
+        "findings": [],
+        "blockingOk": true
+      },
+      "recommendedStatus": "READY_FOR_HUMAN_REVIEW"
+    },
+    {
+      "template_id": "tpl-medical-generator-v1-0003",
+      "industry": "medical",
+      "seed": "pilot-20-v1-medical-03",
+      "recipe": "medical_clean",
+      "generatorVersion": "generator-v1",
+      "configHash": "ebf9c25b",
+      "themeId": "executive-blue",
+      "buttonPresetId": "solid",
+      "layout": "list",
+      "typography": {
+        "logo": "'Playfair Display', serif",
+        "heading": "'Poppins', sans-serif"
+      },
+      "buttonCount": 3,
+      "configPath": "configs/medical-03.json",
+      "screenshotPath": "screenshots/medical-03.png",
+      "qaScore": 0.98,
+      "dimensions": {
+        "schema_validity": 0.2,
+        "renderer_success": 0.2,
+        "responsive_integrity": 0.15,
+        "content_completeness": 0.15,
+        "action_validity": 0.15,
+        "visual_qa": 0.15,
+        "variation_bonus": -0.02
+      },
+      "qa": {
+        "score": 100,
+        "scoreNormalized": 1,
+        "passed": [
+          "schemaValid",
+          "rendererSuccess",
+          "noOverflow",
+          "buttonIntegrity",
+          "assetIntegrity",
+          "urlSafety",
+          "roundTrip"
+        ],
+        "failed": [],
+        "findings": [],
+        "blockingOk": true
+      },
+      "recommendedStatus": "READY_FOR_HUMAN_REVIEW"
+    },
+    {
+      "template_id": "tpl-medical-generator-v1-0004",
+      "industry": "medical",
+      "seed": "pilot-20-v1-medical-04",
+      "recipe": "medical_clean",
+      "generatorVersion": "generator-v1",
+      "configHash": "32d94e46",
+      "themeId": "executive-blue",
+      "buttonPresetId": "outline",
+      "layout": "list",
+      "typography": {
+        "logo": "'Cinzel', serif",
+        "heading": "'Oswald', sans-serif"
+      },
+      "buttonCount": 4,
+      "configPath": "configs/medical-04.json",
+      "screenshotPath": "screenshots/medical-04.png",
+      "qaScore": 1,
+      "dimensions": {
+        "schema_validity": 0.2,
+        "renderer_success": 0.2,
+        "responsive_integrity": 0.15,
+        "content_completeness": 0.15,
+        "action_validity": 0.15,
+        "visual_qa": 0.15,
+        "variation_bonus": 0
+      },
+      "qa": {
+        "score": 100,
+        "scoreNormalized": 1,
+        "passed": [
+          "schemaValid",
+          "rendererSuccess",
+          "noOverflow",
+          "buttonIntegrity",
+          "assetIntegrity",
+          "urlSafety",
+          "roundTrip"
+        ],
+        "failed": [],
+        "findings": [],
+        "blockingOk": true
+      },
+      "recommendedStatus": "READY_FOR_HUMAN_REVIEW"
+    },
+    {
+      "template_id": "tpl-medical-generator-v1-0005",
+      "industry": "medical",
+      "seed": "pilot-20-v1-medical-05",
+      "recipe": "medical_clean",
+      "generatorVersion": "generator-v1",
+      "configHash": "46a95bea",
+      "themeId": "executive-blue",
+      "buttonPresetId": "premium",
+      "layout": "list",
+      "typography": {
+        "logo": "'Oswald', sans-serif",
+        "heading": "'Oswald', sans-serif"
+      },
+      "buttonCount": 5,
+      "configPath": "configs/medical-05.json",
+      "screenshotPath": "screenshots/medical-05.png",
+      "qaScore": 1,
+      "dimensions": {
+        "schema_validity": 0.2,
+        "renderer_success": 0.2,
+        "responsive_integrity": 0.15,
+        "content_completeness": 0.15,
+        "action_validity": 0.15,
+        "visual_qa": 0.15,
+        "variation_bonus": 0
+      },
+      "qa": {
+        "score": 100,
+        "scoreNormalized": 1,
+        "passed": [
+          "schemaValid",
+          "rendererSuccess",
+          "noOverflow",
+          "buttonIntegrity",
+          "assetIntegrity",
+          "urlSafety",
+          "roundTrip"
+        ],
+        "failed": [],
+        "findings": [],
+        "blockingOk": true
+      },
+      "recommendedStatus": "READY_FOR_HUMAN_REVIEW"
+    },
+    {
+      "template_id": "tpl-legal-generator-v1-0006",
+      "industry": "legal",
+      "seed": "pilot-20-v1-legal-01",
+      "recipe": "lawyer_executive",
+      "generatorVersion": "generator-v1",
+      "configHash": "0a2ab71e",
+      "themeId": "black-gold",
+      "buttonPresetId": "outline",
+      "layout": "list",
+      "typography": {
+        "logo": "'Cinzel', serif",
+        "heading": "'Montserrat', sans-serif"
+      },
+      "buttonCount": 1,
+      "configPath": "configs/legal-01.json",
+      "screenshotPath": "screenshots/legal-01.png",
+      "qaScore": 1,
+      "dimensions": {
+        "schema_validity": 0.2,
+        "renderer_success": 0.2,
+        "responsive_integrity": 0.15,
+        "content_completeness": 0.15,
+        "action_validity": 0.15,
+        "visual_qa": 0.15,
+        "variation_bonus": 0
+      },
+      "qa": {
+        "score": 100,
+        "scoreNormalized": 1,
+        "passed": [
+          "schemaValid",
+          "rendererSuccess",
+          "noOverflow",
+          "buttonIntegrity",
+          "assetIntegrity",
+          "urlSafety",
+          "roundTrip"
+        ],
+        "failed": [],
+        "findings": [],
+        "blockingOk": true
+      },
+      "recommendedStatus": "READY_FOR_HUMAN_REVIEW"
+    },
+    {
+      "template_id": "tpl-legal-generator-v1-0007",
+      "industry": "legal",
+      "seed": "pilot-20-v1-legal-02",
+      "recipe": "lawyer_executive",
+      "generatorVersion": "generator-v1",
+      "configHash": "7428ac4f",
+      "themeId": "executive-blue",
+      "buttonPresetId": "premium",
+      "layout": "list",
+      "typography": {
+        "logo": "'Cinzel', serif",
+        "heading": "'Oswald', sans-serif"
+      },
+      "buttonCount": 2,
+      "configPath": "configs/legal-02.json",
+      "screenshotPath": "screenshots/legal-02.png",
+      "qaScore": 1,
+      "dimensions": {
+        "schema_validity": 0.2,
+        "renderer_success": 0.2,
+        "responsive_integrity": 0.15,
+        "content_completeness": 0.15,
+        "action_validity": 0.15,
+        "visual_qa": 0.15,
+        "variation_bonus": 0
+      },
+      "qa": {
+        "score": 100,
+        "scoreNormalized": 1,
+        "passed": [
+          "schemaValid",
+          "rendererSuccess",
+          "noOverflow",
+          "buttonIntegrity",
+          "assetIntegrity",
+          "urlSafety",
+          "roundTrip"
+        ],
+        "failed": [],
+        "findings": [],
+        "blockingOk": true
+      },
+      "recommendedStatus": "READY_FOR_HUMAN_REVIEW"
+    },
+    {
+      "template_id": "tpl-legal-generator-v1-0008",
+      "industry": "legal",
+      "seed": "pilot-20-v1-legal-03",
+      "recipe": "lawyer_executive",
+      "generatorVersion": "generator-v1",
+      "configHash": "19d346eb",
+      "themeId": "executive-blue",
+      "buttonPresetId": "premium",
+      "layout": "grid",
+      "typography": {
+        "logo": "'Playfair Display', serif",
+        "heading": "'Poppins', sans-serif"
+      },
+      "buttonCount": 3,
+      "configPath": "configs/legal-03.json",
+      "screenshotPath": "screenshots/legal-03.png",
+      "qaScore": 1,
+      "dimensions": {
+        "schema_validity": 0.2,
+        "renderer_success": 0.2,
+        "responsive_integrity": 0.15,
+        "content_completeness": 0.15,
+        "action_validity": 0.15,
+        "visual_qa": 0.15,
+        "variation_bonus": 0
+      },
+      "qa": {
+        "score": 100,
+        "scoreNormalized": 1,
+        "passed": [
+          "schemaValid",
+          "rendererSuccess",
+          "noOverflow",
+          "buttonIntegrity",
+          "assetIntegrity",
+          "urlSafety",
+          "roundTrip"
+        ],
+        "failed": [],
+        "findings": [],
+        "blockingOk": true
+      },
+      "recommendedStatus": "READY_FOR_HUMAN_REVIEW"
+    },
+    {
+      "template_id": "tpl-legal-generator-v1-0009",
+      "industry": "legal",
+      "seed": "pilot-20-v1-legal-04",
+      "recipe": "lawyer_executive",
+      "generatorVersion": "generator-v1",
+      "configHash": "d81af56c",
+      "themeId": "graphite",
+      "buttonPresetId": "minimal",
+      "layout": "list",
+      "typography": {
+        "logo": "'Playfair Display', serif",
+        "heading": "'Montserrat', sans-serif"
+      },
+      "buttonCount": 4,
+      "configPath": "configs/legal-04.json",
+      "screenshotPath": "screenshots/legal-04.png",
+      "qaScore": 0.98,
+      "dimensions": {
+        "schema_validity": 0.2,
+        "renderer_success": 0.2,
+        "responsive_integrity": 0.15,
+        "content_completeness": 0.15,
+        "action_validity": 0.15,
+        "visual_qa": 0.15,
+        "variation_bonus": -0.02
+      },
+      "qa": {
+        "score": 100,
+        "scoreNormalized": 1,
+        "passed": [
+          "schemaValid",
+          "rendererSuccess",
+          "noOverflow",
+          "buttonIntegrity",
+          "assetIntegrity",
+          "urlSafety",
+          "roundTrip"
+        ],
+        "failed": [],
+        "findings": [],
+        "blockingOk": true
+      },
+      "recommendedStatus": "READY_FOR_HUMAN_REVIEW"
+    },
+    {
+      "template_id": "tpl-legal-generator-v1-0010",
+      "industry": "legal",
+      "seed": "pilot-20-v1-legal-05",
+      "recipe": "lawyer_executive",
+      "generatorVersion": "generator-v1",
+      "configHash": "89e9f1e2",
+      "themeId": "executive-blue",
+      "buttonPresetId": "outline",
+      "layout": "list",
+      "typography": {
+        "logo": "'Cinzel', serif",
+        "heading": "'Inter', sans-serif"
+      },
+      "buttonCount": 5,
+      "configPath": "configs/legal-05.json",
+      "screenshotPath": "screenshots/legal-05.png",
+      "qaScore": 0.98,
+      "dimensions": {
+        "schema_validity": 0.2,
+        "renderer_success": 0.2,
+        "responsive_integrity": 0.15,
+        "content_completeness": 0.15,
+        "action_validity": 0.15,
+        "visual_qa": 0.15,
+        "variation_bonus": -0.02
+      },
+      "qa": {
+        "score": 100,
+        "scoreNormalized": 1,
+        "passed": [
+          "schemaValid",
+          "rendererSuccess",
+          "noOverflow",
+          "buttonIntegrity",
+          "assetIntegrity",
+          "urlSafety",
+          "roundTrip"
+        ],
+        "failed": [],
+        "findings": [],
+        "blockingOk": true
+      },
+      "recommendedStatus": "READY_FOR_HUMAN_REVIEW"
+    },
+    {
+      "template_id": "tpl-restaurant-generator-v1-0011",
+      "industry": "restaurant",
+      "seed": "pilot-20-v1-restaurant-01",
+      "recipe": "restaurant_premium",
+      "generatorVersion": "generator-v1",
+      "configHash": "56702a9f",
+      "themeId": "burgundy-elegant",
+      "buttonPresetId": "glass",
+      "layout": "list",
+      "typography": {
+        "logo": "'Cinzel', serif",
+        "heading": "'Montserrat', sans-serif"
+      },
+      "buttonCount": 1,
+      "configPath": "configs/restaurant-01.json",
+      "screenshotPath": "screenshots/restaurant-01.png",
+      "qaScore": 0.98,
+      "dimensions": {
+        "schema_validity": 0.2,
+        "renderer_success": 0.2,
+        "responsive_integrity": 0.15,
+        "content_completeness": 0.15,
+        "action_validity": 0.15,
+        "visual_qa": 0.15,
+        "variation_bonus": -0.02
+      },
+      "qa": {
+        "score": 100,
+        "scoreNormalized": 1,
+        "passed": [
+          "schemaValid",
+          "rendererSuccess",
+          "noOverflow",
+          "buttonIntegrity",
+          "assetIntegrity",
+          "urlSafety",
+          "roundTrip"
+        ],
+        "failed": [],
+        "findings": [],
+        "blockingOk": true
+      },
+      "recommendedStatus": "READY_FOR_HUMAN_REVIEW"
+    },
+    {
+      "template_id": "tpl-restaurant-generator-v1-0012",
+      "industry": "restaurant",
+      "seed": "pilot-20-v1-restaurant-02",
+      "recipe": "restaurant_premium",
+      "generatorVersion": "generator-v1",
+      "configHash": "b9aa20f6",
+      "themeId": "burgundy-elegant",
+      "buttonPresetId": "solid",
+      "layout": "grid",
+      "typography": {
+        "logo": "'Oswald', sans-serif",
+        "heading": "'Montserrat', sans-serif"
+      },
+      "buttonCount": 2,
+      "configPath": "configs/restaurant-02.json",
+      "screenshotPath": "screenshots/restaurant-02.png",
+      "qaScore": 1,
+      "dimensions": {
+        "schema_validity": 0.2,
+        "renderer_success": 0.2,
+        "responsive_integrity": 0.15,
+        "content_completeness": 0.15,
+        "action_validity": 0.15,
+        "visual_qa": 0.15,
+        "variation_bonus": 0
+      },
+      "qa": {
+        "score": 100,
+        "scoreNormalized": 1,
+        "passed": [
+          "schemaValid",
+          "rendererSuccess",
+          "noOverflow",
+          "buttonIntegrity",
+          "assetIntegrity",
+          "urlSafety",
+          "roundTrip"
+        ],
+        "failed": [],
+        "findings": [],
+        "blockingOk": true
+      },
+      "recommendedStatus": "READY_FOR_HUMAN_REVIEW"
+    },
+    {
+      "template_id": "tpl-restaurant-generator-v1-0013",
+      "industry": "restaurant",
+      "seed": "pilot-20-v1-restaurant-03",
+      "recipe": "restaurant_premium",
+      "generatorVersion": "generator-v1",
+      "configHash": "db05a6b9",
+      "themeId": "black-gold",
+      "buttonPresetId": "glass",
+      "layout": "grid",
+      "typography": {
+        "logo": "'Oswald', sans-serif",
+        "heading": "'Oswald', sans-serif"
+      },
+      "buttonCount": 3,
+      "configPath": "configs/restaurant-03.json",
+      "screenshotPath": "screenshots/restaurant-03.png",
+      "qaScore": 1,
+      "dimensions": {
+        "schema_validity": 0.2,
+        "renderer_success": 0.2,
+        "responsive_integrity": 0.15,
+        "content_completeness": 0.15,
+        "action_validity": 0.15,
+        "visual_qa": 0.15,
+        "variation_bonus": 0
+      },
+      "qa": {
+        "score": 100,
+        "scoreNormalized": 1,
+        "passed": [
+          "schemaValid",
+          "rendererSuccess",
+          "noOverflow",
+          "buttonIntegrity",
+          "assetIntegrity",
+          "urlSafety",
+          "roundTrip"
+        ],
+        "failed": [],
+        "findings": [],
+        "blockingOk": true
+      },
+      "recommendedStatus": "READY_FOR_HUMAN_REVIEW"
+    },
+    {
+      "template_id": "tpl-restaurant-generator-v1-0014",
+      "industry": "restaurant",
+      "seed": "pilot-20-v1-restaurant-04",
+      "recipe": "restaurant_premium",
+      "generatorVersion": "generator-v1",
+      "configHash": "1a3ab88f",
+      "themeId": "ivory-gold",
+      "buttonPresetId": "solid",
+      "layout": "list",
+      "typography": {
+        "logo": "'Oswald', sans-serif",
+        "heading": "'Oswald', sans-serif"
+      },
+      "buttonCount": 4,
+      "configPath": "configs/restaurant-04.json",
+      "screenshotPath": "screenshots/restaurant-04.png",
+      "qaScore": 1,
+      "dimensions": {
+        "schema_validity": 0.2,
+        "renderer_success": 0.2,
+        "responsive_integrity": 0.15,
+        "content_completeness": 0.15,
+        "action_validity": 0.15,
+        "visual_qa": 0.15,
+        "variation_bonus": 0
+      },
+      "qa": {
+        "score": 100,
+        "scoreNormalized": 1,
+        "passed": [
+          "schemaValid",
+          "rendererSuccess",
+          "noOverflow",
+          "buttonIntegrity",
+          "assetIntegrity",
+          "urlSafety",
+          "roundTrip"
+        ],
+        "failed": [],
+        "findings": [],
+        "blockingOk": true
+      },
+      "recommendedStatus": "READY_FOR_HUMAN_REVIEW"
+    },
+    {
+      "template_id": "tpl-restaurant-generator-v1-0015",
+      "industry": "restaurant",
+      "seed": "pilot-20-v1-restaurant-05",
+      "recipe": "restaurant_premium",
+      "generatorVersion": "generator-v1",
+      "configHash": "38544a3f",
+      "themeId": "black-gold",
+      "buttonPresetId": "premium",
+      "layout": "list",
+      "typography": {
+        "logo": "'Montserrat', sans-serif",
+        "heading": "'Poppins', sans-serif"
+      },
+      "buttonCount": 5,
+      "configPath": "configs/restaurant-05.json",
+      "screenshotPath": "screenshots/restaurant-05.png",
+      "qaScore": 1,
+      "dimensions": {
+        "schema_validity": 0.2,
+        "renderer_success": 0.2,
+        "responsive_integrity": 0.15,
+        "content_completeness": 0.15,
+        "action_validity": 0.15,
+        "visual_qa": 0.15,
+        "variation_bonus": 0
+      },
+      "qa": {
+        "score": 100,
+        "scoreNormalized": 1,
+        "passed": [
+          "schemaValid",
+          "rendererSuccess",
+          "noOverflow",
+          "buttonIntegrity",
+          "assetIntegrity",
+          "urlSafety",
+          "roundTrip"
+        ],
+        "failed": [],
+        "findings": [],
+        "blockingOk": true
+      },
+      "recommendedStatus": "READY_FOR_HUMAN_REVIEW"
+    },
+    {
+      "template_id": "tpl-barber-generator-v1-0016",
+      "industry": "barber",
+      "seed": "pilot-20-v1-barber-01",
+      "recipe": "barber_modern",
+      "generatorVersion": "generator-v1",
+      "configHash": "dcd974dd",
+      "themeId": "black-gold",
+      "buttonPresetId": "solid",
+      "layout": "list",
+      "typography": {
+        "logo": "'Playfair Display', serif",
+        "heading": "'Montserrat', sans-serif"
+      },
+      "buttonCount": 1,
+      "configPath": "configs/barber-01.json",
+      "screenshotPath": "screenshots/barber-01.png",
+      "qaScore": 1,
+      "dimensions": {
+        "schema_validity": 0.2,
+        "renderer_success": 0.2,
+        "responsive_integrity": 0.15,
+        "content_completeness": 0.15,
+        "action_validity": 0.15,
+        "visual_qa": 0.15,
+        "variation_bonus": 0
+      },
+      "qa": {
+        "score": 100,
+        "scoreNormalized": 1,
+        "passed": [
+          "schemaValid",
+          "rendererSuccess",
+          "noOverflow",
+          "buttonIntegrity",
+          "assetIntegrity",
+          "urlSafety",
+          "roundTrip"
+        ],
+        "failed": [],
+        "findings": [],
+        "blockingOk": true
+      },
+      "recommendedStatus": "READY_FOR_HUMAN_REVIEW"
+    },
+    {
+      "template_id": "tpl-barber-generator-v1-0017",
+      "industry": "barber",
+      "seed": "pilot-20-v1-barber-02",
+      "recipe": "barber_modern",
+      "generatorVersion": "generator-v1",
+      "configHash": "f78dc5b8",
+      "themeId": "black-silver",
+      "buttonPresetId": "soft",
+      "layout": "list",
+      "typography": {
+        "logo": "'Cinzel', serif",
+        "heading": "'Poppins', sans-serif"
+      },
+      "buttonCount": 2,
+      "configPath": "configs/barber-02.json",
+      "screenshotPath": "screenshots/barber-02.png",
+      "qaScore": 1,
+      "dimensions": {
+        "schema_validity": 0.2,
+        "renderer_success": 0.2,
+        "responsive_integrity": 0.15,
+        "content_completeness": 0.15,
+        "action_validity": 0.15,
+        "visual_qa": 0.15,
+        "variation_bonus": 0
+      },
+      "qa": {
+        "score": 100,
+        "scoreNormalized": 1,
+        "passed": [
+          "schemaValid",
+          "rendererSuccess",
+          "noOverflow",
+          "buttonIntegrity",
+          "assetIntegrity",
+          "urlSafety",
+          "roundTrip"
+        ],
+        "failed": [],
+        "findings": [],
+        "blockingOk": true
+      },
+      "recommendedStatus": "READY_FOR_HUMAN_REVIEW"
+    },
+    {
+      "template_id": "tpl-barber-generator-v1-0018",
+      "industry": "barber",
+      "seed": "pilot-20-v1-barber-03",
+      "recipe": "barber_modern",
+      "generatorVersion": "generator-v1",
+      "configHash": "a5bc7d23",
+      "themeId": "black-silver",
+      "buttonPresetId": "minimal",
+      "layout": "grid",
+      "typography": {
+        "logo": "'Playfair Display', serif",
+        "heading": "'Montserrat', sans-serif"
+      },
+      "buttonCount": 3,
+      "configPath": "configs/barber-03.json",
+      "screenshotPath": "screenshots/barber-03.png",
+      "qaScore": 1,
+      "dimensions": {
+        "schema_validity": 0.2,
+        "renderer_success": 0.2,
+        "responsive_integrity": 0.15,
+        "content_completeness": 0.15,
+        "action_validity": 0.15,
+        "visual_qa": 0.15,
+        "variation_bonus": 0
+      },
+      "qa": {
+        "score": 100,
+        "scoreNormalized": 1,
+        "passed": [
+          "schemaValid",
+          "rendererSuccess",
+          "noOverflow",
+          "buttonIntegrity",
+          "assetIntegrity",
+          "urlSafety",
+          "roundTrip"
+        ],
+        "failed": [],
+        "findings": [],
+        "blockingOk": true
+      },
+      "recommendedStatus": "READY_FOR_HUMAN_REVIEW"
+    },
+    {
+      "template_id": "tpl-barber-generator-v1-0019",
+      "industry": "barber",
+      "seed": "pilot-20-v1-barber-04",
+      "recipe": "barber_modern",
+      "generatorVersion": "generator-v1",
+      "configHash": "630fbb00",
+      "themeId": "graphite",
+      "buttonPresetId": "minimal",
+      "layout": "grid",
+      "typography": {
+        "logo": "'Playfair Display', serif",
+        "heading": "'Inter', sans-serif"
+      },
+      "buttonCount": 4,
+      "configPath": "configs/barber-04.json",
+      "screenshotPath": "screenshots/barber-04.png",
+      "qaScore": 1,
+      "dimensions": {
+        "schema_validity": 0.2,
+        "renderer_success": 0.2,
+        "responsive_integrity": 0.15,
+        "content_completeness": 0.15,
+        "action_validity": 0.15,
+        "visual_qa": 0.15,
+        "variation_bonus": 0
+      },
+      "qa": {
+        "score": 100,
+        "scoreNormalized": 1,
+        "passed": [
+          "schemaValid",
+          "rendererSuccess",
+          "noOverflow",
+          "buttonIntegrity",
+          "assetIntegrity",
+          "urlSafety",
+          "roundTrip"
+        ],
+        "failed": [],
+        "findings": [],
+        "blockingOk": true
+      },
+      "recommendedStatus": "READY_FOR_HUMAN_REVIEW"
+    },
+    {
+      "template_id": "tpl-barber-generator-v1-0020",
+      "industry": "barber",
+      "seed": "pilot-20-v1-barber-05",
+      "recipe": "barber_modern",
+      "generatorVersion": "generator-v1",
+      "configHash": "ab9f470c",
+      "themeId": "black-silver",
+      "buttonPresetId": "solid",
+      "layout": "list",
+      "typography": {
+        "logo": "'Cinzel', serif",
+        "heading": "'Poppins', sans-serif"
+      },
+      "buttonCount": 5,
+      "configPath": "configs/barber-05.json",
+      "screenshotPath": "screenshots/barber-05.png",
+      "qaScore": 1,
+      "dimensions": {
+        "schema_validity": 0.2,
+        "renderer_success": 0.2,
+        "responsive_integrity": 0.15,
+        "content_completeness": 0.15,
+        "action_validity": 0.15,
+        "visual_qa": 0.15,
+        "variation_bonus": 0
+      },
+      "qa": {
+        "score": 100,
+        "scoreNormalized": 1,
+        "passed": [
+          "schemaValid",
+          "rendererSuccess",
+          "noOverflow",
+          "buttonIntegrity",
+          "assetIntegrity",
+          "urlSafety",
+          "roundTrip"
+        ],
+        "failed": [],
+        "findings": [],
+        "blockingOk": true
+      },
+      "recommendedStatus": "READY_FOR_HUMAN_REVIEW"
+    }
+  ]
+}

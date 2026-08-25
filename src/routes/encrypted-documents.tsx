@@ -373,7 +373,7 @@ function EncryptedDocumentsApp({ userId }: { userId: string }) {
       </header>
 
       {/* Main Content */}
-      <main className="mx-auto w-full max-w-7xl overflow-x-hidden px-3 py-4 sm:px-4 sm:py-8">
+      <main className="mx-auto w-full max-w-7xl overflow-x-hidden px-3 py-4 pb-28 sm:px-4 sm:py-8 sm:pb-8">
         {view === "list" ? (
           <DocumentsList
             userId={userId}

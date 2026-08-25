@@ -1,0 +1,28 @@
+{
+  "viewports": [
+    {
+      "viewport": "320",
+      "navY": 628,
+      "anchoredBottom": "PASS",
+      "status": "PASS"
+    },
+    {
+      "viewport": "375",
+      "navY": 740,
+      "anchoredBottom": "PASS",
+      "status": "PASS"
+    },
+    {
+      "viewport": "390",
+      "navY": 772,
+      "anchoredBottom": "PASS",
+      "status": "PASS"
+    },
+    {
+      "viewport": "430",
+      "navY": 860,
+      "anchoredBottom": "PASS",
+      "status": "PASS"
+    }
+  ]
+}

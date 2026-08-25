@@ -1,0 +1,10 @@
+{
+  "generatedAt": "2026-08-25T02:14:08.499Z",
+  "command": "npx playwright test tests/template-factory/pipeline.spec.ts tests/template-factory/recovery-02-generation.spec.ts --project=template-factory --reporter=line",
+  "exitCode": 0,
+  "testsPassed": 6,
+  "testsFailed": 0,
+  "recovery01": "5/5 PASS",
+  "recovery02": "1/1 PASS",
+  "verdict": "PASS"
+}

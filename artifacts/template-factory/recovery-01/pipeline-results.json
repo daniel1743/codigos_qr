@@ -1,0 +1,477 @@
+{
+  "executedAt": "2026-08-25T02:04:58.117Z",
+  "rendererUrl": "file:// public/template-builder.html",
+  "matrix": [
+    {
+      "industry": "medical",
+      "recipe": "medical_clean",
+      "buttonCount": 1,
+      "seed": "rec01-m1"
+    },
+    {
+      "industry": "medical",
+      "recipe": "medical_clean",
+      "buttonCount": 5,
+      "seed": "rec01-m5"
+    },
+    {
+      "industry": "legal",
+      "recipe": "lawyer_executive",
+      "buttonCount": 3,
+      "seed": "rec01-l3"
+    },
+    {
+      "industry": "restaurant",
+      "recipe": "restaurant_premium",
+      "buttonCount": 4,
+      "seed": "rec01-r4"
+    },
+    {
+      "industry": "barber",
+      "recipe": "barber_modern",
+      "buttonCount": 2,
+      "seed": "rec01-b2"
+    }
+  ],
+  "results": [
+    {
+      "label": "medical-1btn",
+      "industry": "medical",
+      "recipe": "medical_clean",
+      "buttonCount": 1,
+      "seed": "rec01-m1",
+      "templateId": "tpl-medical-generator-v1-0001",
+      "configHash": "218ae74f",
+      "themeId": "emerald-luxury",
+      "btnPresetId": "solid",
+      "steps": {
+        "step1_generate": true,
+        "step2_normalize": true,
+        "step3_validate": true,
+        "step4_serialize": true,
+        "step5_openRenderer": true,
+        "step6_applyConfig": true,
+        "step7_render": true,
+        "step8_inspect": true,
+        "step9_readBack": true,
+        "step10_roundTrip": true,
+        "step11_qa": true
+      },
+      "localValidation": {
+        "valid": true,
+        "errors": []
+      },
+      "rendererValidation": {
+        "valid": true,
+        "errors": []
+      },
+      "nonSerializable": [],
+      "renderedButtonCount": 1,
+      "renderedTitle": "DRA. CAMILA REYES",
+      "serializedBytes": 1775,
+      "editorRoundTripDifferences": [],
+      "viewports": [
+        {
+          "name": "320x700",
+          "width": 320,
+          "overflowPx": 0,
+          "overflow": false
+        },
+        {
+          "name": "375x812",
+          "width": 375,
+          "overflowPx": 0,
+          "overflow": false
+        },
+        {
+          "name": "390x844",
+          "width": 390,
+          "overflowPx": 0,
+          "overflow": false
+        },
+        {
+          "name": "768x1024",
+          "width": 768,
+          "overflowPx": 0,
+          "overflow": false
+        },
+        {
+          "name": "1280x800",
+          "width": 1280,
+          "overflowPx": 0,
+          "overflow": false
+        }
+      ],
+      "unsafeUrls": [],
+      "qaScore": 100,
+      "qaScoreNormalized": 1,
+      "qaPassed": [
+        "schemaValid",
+        "rendererSuccess",
+        "noOverflow",
+        "buttonIntegrity",
+        "assetIntegrity",
+        "urlSafety",
+        "roundTrip"
+      ],
+      "qaFailed": [],
+      "qaBlockingOk": true,
+      "screenshot": "screenshots/medical-1btn.png"
+    },
+    {
+      "label": "medical-5btn",
+      "industry": "medical",
+      "recipe": "medical_clean",
+      "buttonCount": 5,
+      "seed": "rec01-m5",
+      "templateId": "tpl-medical-generator-v1-0001",
+      "configHash": "e94c5e42",
+      "themeId": "emerald-luxury",
+      "btnPresetId": "solid",
+      "steps": {
+        "step1_generate": true,
+        "step2_normalize": true,
+        "step3_validate": true,
+        "step4_serialize": true,
+        "step5_openRenderer": true,
+        "step6_applyConfig": true,
+        "step7_render": true,
+        "step8_inspect": true,
+        "step9_readBack": true,
+        "step10_roundTrip": true,
+        "step11_qa": true
+      },
+      "localValidation": {
+        "valid": true,
+        "errors": []
+      },
+      "rendererValidation": {
+        "valid": true,
+        "errors": []
+      },
+      "nonSerializable": [],
+      "renderedButtonCount": 5,
+      "renderedTitle": "DR. MARTÍN SOLÍS",
+      "serializedBytes": 2437,
+      "editorRoundTripDifferences": [],
+      "viewports": [
+        {
+          "name": "320x700",
+          "width": 320,
+          "overflowPx": 0,
+          "overflow": false
+        },
+        {
+          "name": "375x812",
+          "width": 375,
+          "overflowPx": 0,
+          "overflow": false
+        },
+        {
+          "name": "390x844",
+          "width": 390,
+          "overflowPx": 0,
+          "overflow": false
+        },
+        {
+          "name": "768x1024",
+          "width": 768,
+          "overflowPx": 0,
+          "overflow": false
+        },
+        {
+          "name": "1280x800",
+          "width": 1280,
+          "overflowPx": 0,
+          "overflow": false
+        }
+      ],
+      "unsafeUrls": [],
+      "qaScore": 100,
+      "qaScoreNormalized": 1,
+      "qaPassed": [
+        "schemaValid",
+        "rendererSuccess",
+        "noOverflow",
+        "buttonIntegrity",
+        "assetIntegrity",
+        "urlSafety",
+        "roundTrip"
+      ],
+      "qaFailed": [],
+      "qaBlockingOk": true,
+      "screenshot": "screenshots/medical-5btn.png"
+    },
+    {
+      "label": "legal-3btn",
+      "industry": "legal",
+      "recipe": "lawyer_executive",
+      "buttonCount": 3,
+      "seed": "rec01-l3",
+      "templateId": "tpl-legal-generator-v1-0001",
+      "configHash": "7ee759cf",
+      "themeId": "executive-blue",
+      "btnPresetId": "outline",
+      "steps": {
+        "step1_generate": true,
+        "step2_normalize": true,
+        "step3_validate": true,
+        "step4_serialize": true,
+        "step5_openRenderer": true,
+        "step6_applyConfig": true,
+        "step7_render": true,
+        "step8_inspect": true,
+        "step9_readBack": true,
+        "step10_roundTrip": true,
+        "step11_qa": true
+      },
+      "localValidation": {
+        "valid": true,
+        "errors": []
+      },
+      "rendererValidation": {
+        "valid": true,
+        "errors": []
+      },
+      "nonSerializable": [],
+      "renderedButtonCount": 3,
+      "renderedTitle": "DR. TOMÁS MARÍN",
+      "serializedBytes": 2228,
+      "editorRoundTripDifferences": [],
+      "viewports": [
+        {
+          "name": "320x700",
+          "width": 320,
+          "overflowPx": 0,
+          "overflow": false
+        },
+        {
+          "name": "375x812",
+          "width": 375,
+          "overflowPx": 0,
+          "overflow": false
+        },
+        {
+          "name": "390x844",
+          "width": 390,
+          "overflowPx": 0,
+          "overflow": false
+        },
+        {
+          "name": "768x1024",
+          "width": 768,
+          "overflowPx": 0,
+          "overflow": false
+        },
+        {
+          "name": "1280x800",
+          "width": 1280,
+          "overflowPx": 0,
+          "overflow": false
+        }
+      ],
+      "unsafeUrls": [],
+      "qaScore": 100,
+      "qaScoreNormalized": 1,
+      "qaPassed": [
+        "schemaValid",
+        "rendererSuccess",
+        "noOverflow",
+        "buttonIntegrity",
+        "assetIntegrity",
+        "urlSafety",
+        "roundTrip"
+      ],
+      "qaFailed": [],
+      "qaBlockingOk": true,
+      "screenshot": "screenshots/legal-3btn.png"
+    },
+    {
+      "label": "restaurant-4btn",
+      "industry": "restaurant",
+      "recipe": "restaurant_premium",
+      "buttonCount": 4,
+      "seed": "rec01-r4",
+      "templateId": "tpl-restaurant-generator-v1-0001",
+      "configHash": "77354113",
+      "themeId": "ivory-gold",
+      "btnPresetId": "glass",
+      "steps": {
+        "step1_generate": true,
+        "step2_normalize": true,
+        "step3_validate": true,
+        "step4_serialize": true,
+        "step5_openRenderer": true,
+        "step6_applyConfig": true,
+        "step7_render": true,
+        "step8_inspect": true,
+        "step9_readBack": true,
+        "step10_roundTrip": true,
+        "step11_qa": true
+      },
+      "localValidation": {
+        "valid": true,
+        "errors": []
+      },
+      "rendererValidation": {
+        "valid": true,
+        "errors": []
+      },
+      "nonSerializable": [],
+      "renderedButtonCount": 4,
+      "renderedTitle": "COCINA A LA LEÑA",
+      "serializedBytes": 2551,
+      "editorRoundTripDifferences": [],
+      "viewports": [
+        {
+          "name": "320x700",
+          "width": 320,
+          "overflowPx": 0,
+          "overflow": false
+        },
+        {
+          "name": "375x812",
+          "width": 375,
+          "overflowPx": 0,
+          "overflow": false
+        },
+        {
+          "name": "390x844",
+          "width": 390,
+          "overflowPx": 0,
+          "overflow": false
+        },
+        {
+          "name": "768x1024",
+          "width": 768,
+          "overflowPx": 0,
+          "overflow": false
+        },
+        {
+          "name": "1280x800",
+          "width": 1280,
+          "overflowPx": 0,
+          "overflow": false
+        }
+      ],
+      "unsafeUrls": [],
+      "qaScore": 100,
+      "qaScoreNormalized": 1,
+      "qaPassed": [
+        "schemaValid",
+        "rendererSuccess",
+        "noOverflow",
+        "buttonIntegrity",
+        "assetIntegrity",
+        "urlSafety",
+        "roundTrip"
+      ],
+      "qaFailed": [],
+      "qaBlockingOk": true,
+      "screenshot": "screenshots/restaurant-4btn.png"
+    },
+    {
+      "label": "barber-2btn",
+      "industry": "barber",
+      "recipe": "barber_modern",
+      "buttonCount": 2,
+      "seed": "rec01-b2",
+      "templateId": "tpl-barber-generator-v1-0001",
+      "configHash": "fac11abc",
+      "themeId": "black-gold",
+      "btnPresetId": "outline",
+      "steps": {
+        "step1_generate": true,
+        "step2_normalize": true,
+        "step3_validate": true,
+        "step4_serialize": true,
+        "step5_openRenderer": true,
+        "step6_applyConfig": true,
+        "step7_render": true,
+        "step8_inspect": true,
+        "step9_readBack": true,
+        "step10_roundTrip": true,
+        "step11_qa": true
+      },
+      "localValidation": {
+        "valid": true,
+        "errors": []
+      },
+      "rendererValidation": {
+        "valid": true,
+        "errors": []
+      },
+      "nonSerializable": [],
+      "renderedButtonCount": 2,
+      "renderedTitle": "ESTILO CLÁSICO",
+      "serializedBytes": 2048,
+      "editorRoundTripDifferences": [],
+      "viewports": [
+        {
+          "name": "320x700",
+          "width": 320,
+          "overflowPx": 0,
+          "overflow": false
+        },
+        {
+          "name": "375x812",
+          "width": 375,
+          "overflowPx": 0,
+          "overflow": false
+        },
+        {
+          "name": "390x844",
+          "width": 390,
+          "overflowPx": 0,
+          "overflow": false
+        },
+        {
+          "name": "768x1024",
+          "width": 768,
+          "overflowPx": 0,
+          "overflow": false
+        },
+        {
+          "name": "1280x800",
+          "width": 1280,
+          "overflowPx": 0,
+          "overflow": false
+        }
+      ],
+      "unsafeUrls": [],
+      "qaScore": 100,
+      "qaScoreNormalized": 1,
+      "qaPassed": [
+        "schemaValid",
+        "rendererSuccess",
+        "noOverflow",
+        "buttonIntegrity",
+        "assetIntegrity",
+        "urlSafety",
+        "roundTrip"
+      ],
+      "qaFailed": [],
+      "qaBlockingOk": true,
+      "screenshot": "screenshots/barber-2btn.png"
+    }
+  ],
+  "screenshotsProduced": [
+    "medical-1btn.png",
+    "medical-5btn.png",
+    "legal-3btn.png",
+    "restaurant-4btn.png",
+    "barber-2btn.png"
+  ],
+  "medicalVariation": {
+    "hashes": [
+      "218ae74f",
+      "e94c5e42"
+    ],
+    "allDifferent": true
+  },
+  "rendererErrors": {
+    "pageErrors": [],
+    "consoleErrors": []
+  },
+  "verdict": "PASS"
+}

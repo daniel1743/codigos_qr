@@ -1,0 +1,113 @@
+{
+  "executedAt": "2026-08-25T01:38:57.0168550Z",
+  "liveProjectUrl": "https://mlinfiuhkxdhlveflbkj.supabase.co",
+  "method": "PostgREST anon key schema/read probes; not SQL information_schema",
+  "template_bank": {
+    "requiredColumns": [
+      "publication_status",
+      "category",
+      "industry",
+      "style",
+      "theme",
+      "layout",
+      "schema_version",
+      "generation_source",
+      "generator_version",
+      "batch_id",
+      "validation_status",
+      "qa_score",
+      "qa_findings",
+      "approved_by",
+      "approved_at",
+      "published_at",
+      "archived_at",
+      "rejected_at",
+      "rejection_reason"
+    ],
+    "probe": {
+      "name": "template_bank_required_columns_anon_limit0",
+      "method": "GET",
+      "url": "https://mlinfiuhkxdhlveflbkj.supabase.co/rest/v1/template_bank?select=publication_status,category,industry,style,theme,layout,schema_version,generation_source,generator_version,batch_id,validation_status,qa_score,qa_findings,approved_by,approved_at,published_at,archived_at,rejected_at,rejection_reason&limit=0",
+      "executedAt": "2026-08-25T01:38:52.1796024Z",
+      "ok": true,
+      "statusCode": 200,
+      "responseType": "System.Object[]",
+      "rowCount": 0,
+      "error": null
+    },
+    "verdict": "PASS_PARTIAL_ANON_COLUMN_PROBE"
+  },
+  "admin_users": {
+    "expectedActualColumns": [
+      "id",
+      "user_id",
+      "email",
+      "role",
+      "created_at",
+      "created_by"
+    ],
+    "probe": {
+      "name": "admin_users_actual_columns_anon_limit0",
+      "method": "GET",
+      "url": "https://mlinfiuhkxdhlveflbkj.supabase.co/rest/v1/admin_users?select=id,user_id,email,role,created_at,created_by&limit=0",
+      "executedAt": "2026-08-25T01:38:55.4183865Z",
+      "ok": true,
+      "statusCode": 200,
+      "responseType": "System.Object[]",
+      "rowCount": 0,
+      "error": null
+    },
+    "verdict": "PASS_PARTIAL_ANON_COLUMN_PROBE"
+  },
+  "limitations": [
+    "No service_role key present in repo env.",
+    "Supabase CLI account is not linked to or listing project mlinfiuhkxdhlveflbkj.",
+    "RLS policies cannot be inspected through anon REST."
+  ],
+  "checks": [
+    {
+      "name": "template_bank_required_columns_anon_limit0",
+      "method": "GET",
+      "url": "https://mlinfiuhkxdhlveflbkj.supabase.co/rest/v1/template_bank?select=publication_status,category,industry,style,theme,layout,schema_version,generation_source,generator_version,batch_id,validation_status,qa_score,qa_findings,approved_by,approved_at,published_at,archived_at,rejected_at,rejection_reason&limit=0",
+      "executedAt": "2026-08-25T01:38:52.1796024Z",
+      "ok": true,
+      "statusCode": 200,
+      "responseType": "System.Object[]",
+      "rowCount": 0,
+      "error": null
+    },
+    {
+      "name": "admin_users_actual_columns_anon_limit0",
+      "method": "GET",
+      "url": "https://mlinfiuhkxdhlveflbkj.supabase.co/rest/v1/admin_users?select=id,user_id,email,role,created_at,created_by&limit=0",
+      "executedAt": "2026-08-25T01:38:55.4183865Z",
+      "ok": true,
+      "statusCode": 200,
+      "responseType": "System.Object[]",
+      "rowCount": 0,
+      "error": null
+    },
+    {
+      "name": "template_bank_public_visibility_anon_limit5",
+      "method": "GET",
+      "url": "https://mlinfiuhkxdhlveflbkj.supabase.co/rest/v1/template_bank?select=id,name,publication_status,is_public,generation_source,batch_id&limit=5",
+      "executedAt": "2026-08-25T01:38:56.1691680Z",
+      "ok": true,
+      "statusCode": 200,
+      "responseType": "System.Object[]",
+      "rowCount": 0,
+      "error": null
+    },
+    {
+      "name": "admin_users_prereq_anon_limit1",
+      "method": "GET",
+      "url": "https://mlinfiuhkxdhlveflbkj.supabase.co/rest/v1/admin_users?select=user_id&limit=1",
+      "executedAt": "2026-08-25T01:38:56.5151203Z",
+      "ok": true,
+      "statusCode": 200,
+      "responseType": "System.Object[]",
+      "rowCount": 0,
+      "error": null
+    }
+  ]
+}

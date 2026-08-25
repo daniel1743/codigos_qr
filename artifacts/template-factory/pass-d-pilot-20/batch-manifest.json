@@ -1,0 +1,182 @@
+{
+  "generatedAt": "2026-08-25T02:03:39.923Z",
+  "batchId": "PILOT-20-V1",
+  "matrix": [
+    {
+      "industry": "medical",
+      "recipe": "medical_clean",
+      "buttonCount": 1,
+      "seed": "pilot-20-v1-medical-01",
+      "file": "medical-01",
+      "globalIndex": 0
+    },
+    {
+      "industry": "medical",
+      "recipe": "medical_clean",
+      "buttonCount": 2,
+      "seed": "pilot-20-v1-medical-02",
+      "file": "medical-02",
+      "globalIndex": 1
+    },
+    {
+      "industry": "medical",
+      "recipe": "medical_clean",
+      "buttonCount": 3,
+      "seed": "pilot-20-v1-medical-03",
+      "file": "medical-03",
+      "globalIndex": 2
+    },
+    {
+      "industry": "medical",
+      "recipe": "medical_clean",
+      "buttonCount": 4,
+      "seed": "pilot-20-v1-medical-04",
+      "file": "medical-04",
+      "globalIndex": 3
+    },
+    {
+      "industry": "medical",
+      "recipe": "medical_clean",
+      "buttonCount": 5,
+      "seed": "pilot-20-v1-medical-05",
+      "file": "medical-05",
+      "globalIndex": 4
+    },
+    {
+      "industry": "legal",
+      "recipe": "lawyer_executive",
+      "buttonCount": 1,
+      "seed": "pilot-20-v1-legal-01",
+      "file": "legal-01",
+      "globalIndex": 5
+    },
+    {
+      "industry": "legal",
+      "recipe": "lawyer_executive",
+      "buttonCount": 2,
+      "seed": "pilot-20-v1-legal-02",
+      "file": "legal-02",
+      "globalIndex": 6
+    },
+    {
+      "industry": "legal",
+      "recipe": "lawyer_executive",
+      "buttonCount": 3,
+      "seed": "pilot-20-v1-legal-03",
+      "file": "legal-03",
+      "globalIndex": 7
+    },
+    {
+      "industry": "legal",
+      "recipe": "lawyer_executive",
+      "buttonCount": 4,
+      "seed": "pilot-20-v1-legal-04",
+      "file": "legal-04",
+      "globalIndex": 8
+    },
+    {
+      "industry": "legal",
+      "recipe": "lawyer_executive",
+      "buttonCount": 5,
+      "seed": "pilot-20-v1-legal-05",
+      "file": "legal-05",
+      "globalIndex": 9
+    },
+    {
+      "industry": "restaurant",
+      "recipe": "restaurant_premium",
+      "buttonCount": 1,
+      "seed": "pilot-20-v1-restaurant-01",
+      "file": "restaurant-01",
+      "globalIndex": 10
+    },
+    {
+      "industry": "restaurant",
+      "recipe": "restaurant_premium",
+      "buttonCount": 2,
+      "seed": "pilot-20-v1-restaurant-02",
+      "file": "restaurant-02",
+      "globalIndex": 11
+    },
+    {
+      "industry": "restaurant",
+      "recipe": "restaurant_premium",
+      "buttonCount": 3,
+      "seed": "pilot-20-v1-restaurant-03",
+      "file": "restaurant-03",
+      "globalIndex": 12
+    },
+    {
+      "industry": "restaurant",
+      "recipe": "restaurant_premium",
+      "buttonCount": 4,
+      "seed": "pilot-20-v1-restaurant-04",
+      "file": "restaurant-04",
+      "globalIndex": 13
+    },
+    {
+      "industry": "restaurant",
+      "recipe": "restaurant_premium",
+      "buttonCount": 5,
+      "seed": "pilot-20-v1-restaurant-05",
+      "file": "restaurant-05",
+      "globalIndex": 14
+    },
+    {
+      "industry": "barber",
+      "recipe": "barber_modern",
+      "buttonCount": 1,
+      "seed": "pilot-20-v1-barber-01",
+      "file": "barber-01",
+      "globalIndex": 15
+    },
+    {
+      "industry": "barber",
+      "recipe": "barber_modern",
+      "buttonCount": 2,
+      "seed": "pilot-20-v1-barber-02",
+      "file": "barber-02",
+      "globalIndex": 16
+    },
+    {
+      "industry": "barber",
+      "recipe": "barber_modern",
+      "buttonCount": 3,
+      "seed": "pilot-20-v1-barber-03",
+      "file": "barber-03",
+      "globalIndex": 17
+    },
+    {
+      "industry": "barber",
+      "recipe": "barber_modern",
+      "buttonCount": 4,
+      "seed": "pilot-20-v1-barber-04",
+      "file": "barber-04",
+      "globalIndex": 18
+    },
+    {
+      "industry": "barber",
+      "recipe": "barber_modern",
+      "buttonCount": 5,
+      "seed": "pilot-20-v1-barber-05",
+      "file": "barber-05",
+      "globalIndex": 19
+    }
+  ],
+  "summary": {
+    "batchId": "PILOT-20-V1",
+    "total": 20,
+    "pass": 20,
+    "fail": 0,
+    "distribution": {
+      "medical": 5,
+      "legal": 5,
+      "restaurant": 5,
+      "barber": 5
+    },
+    "exactDuplicates": 0,
+    "nearDuplicateGroups": 0,
+    "responsiveSamples": 8,
+    "verdict": "PASS"
+  }
+}

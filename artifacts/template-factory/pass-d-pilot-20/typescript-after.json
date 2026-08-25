@@ -1,0 +1,274 @@
+{
+  "generatedAt": "2026-08-25T02:14:08.496Z",
+  "command": "npx tsc --noEmit --pretty false",
+  "exitCode": 2,
+  "totalErrors": 37,
+  "templateFactoryErrors": 0,
+  "errors": [
+    {
+      "id": "TS-1",
+      "file": "src/components/admin/AnalyticsGlobalPanel.tsx",
+      "line": 73,
+      "column": 36,
+      "code": "TS7006",
+      "message": "Parameter 'e' implicitly has an 'any' type."
+    },
+    {
+      "id": "TS-2",
+      "file": "src/components/admin/AnalyticsGlobalPanel.tsx",
+      "line": 74,
+      "column": 37,
+      "code": "TS7006",
+      "message": "Parameter 'e' implicitly has an 'any' type."
+    },
+    {
+      "id": "TS-3",
+      "file": "src/components/admin/AnalyticsGlobalPanel.tsx",
+      "line": 75,
+      "column": 50,
+      "code": "TS7006",
+      "message": "Parameter 'e' implicitly has an 'any' type."
+    },
+    {
+      "id": "TS-4",
+      "file": "src/components/admin/AnalyticsGlobalPanel.tsx",
+      "line": 84,
+      "column": 23,
+      "code": "TS7006",
+      "message": "Parameter 'e' implicitly has an 'any' type."
+    },
+    {
+      "id": "TS-5",
+      "file": "src/components/admin/AnalyticsGlobalPanel.tsx",
+      "line": 93,
+      "column": 23,
+      "code": "TS7006",
+      "message": "Parameter 'e' implicitly has an 'any' type."
+    },
+    {
+      "id": "TS-6",
+      "file": "src/components/admin/AnalyticsGlobalPanel.tsx",
+      "line": 101,
+      "column": 23,
+      "code": "TS7006",
+      "message": "Parameter 'e' implicitly has an 'any' type."
+    },
+    {
+      "id": "TS-7",
+      "file": "src/components/admin/LogosPanel.tsx",
+      "line": 175,
+      "column": 7,
+      "code": "TS2532",
+      "message": "Object is possibly 'undefined'."
+    },
+    {
+      "id": "TS-8",
+      "file": "src/components/admin/PremiumPanel.tsx",
+      "line": 69,
+      "column": 42,
+      "code": "TS7006",
+      "message": "Parameter 'u' implicitly has an 'any' type."
+    },
+    {
+      "id": "TS-9",
+      "file": "src/components/admin/UsersPanel.tsx",
+      "line": 79,
+      "column": 49,
+      "code": "TS7006",
+      "message": "Parameter 'p' implicitly has an 'any' type."
+    },
+    {
+      "id": "TS-10",
+      "file": "src/components/admin/UsersPanel.tsx",
+      "line": 90,
+      "column": 52,
+      "code": "TS7006",
+      "message": "Parameter 'p' implicitly has an 'any' type."
+    },
+    {
+      "id": "TS-11",
+      "file": "src/components/admin/UsersPanel.tsx",
+      "line": 98,
+      "column": 48,
+      "code": "TS7006",
+      "message": "Parameter 'a' implicitly has an 'any' type."
+    },
+    {
+      "id": "TS-12",
+      "file": "src/components/editor/AppearanceSection.tsx",
+      "line": 161,
+      "column": 16,
+      "code": "TS2375",
+      "message": "Type '{ profile: Partial<Profile>; onChange: (updates: Partial<Profile>) => void; links: Partial<ProfileLink>[]; onManageLinkImages: (() => void) | undefined; }' is not assignable to type 'SocialCoversSectionProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties."
+    },
+    {
+      "id": "TS-13",
+      "raw": "  Types of property 'onManageLinkImages' are incompatible."
+    },
+    {
+      "id": "TS-14",
+      "raw": "    Type '(() => void) | undefined' is not assignable to type '() => void'."
+    },
+    {
+      "id": "TS-15",
+      "raw": "      Type 'undefined' is not assignable to type '() => void'."
+    },
+    {
+      "id": "TS-16",
+      "file": "src/components/editor/ContextualPropertiesPanel.tsx",
+      "line": 491,
+      "column": 48,
+      "code": "TS2538",
+      "message": "Type 'undefined' cannot be used as an index type."
+    },
+    {
+      "id": "TS-17",
+      "file": "src/components/editor/PremiumMaxProPicker.tsx",
+      "line": 71,
+      "column": 13,
+      "code": "TS2353",
+      "message": "Object literal may only specify known properties, and 'ringColor' does not exist in type 'Properties<string | number, string & {}>'."
+    },
+    {
+      "id": "TS-18",
+      "file": "src/components/editor/ProfileSection.tsx",
+      "line": 232,
+      "column": 46,
+      "code": "TS2538",
+      "message": "Type 'undefined' cannot be used as an index type."
+    },
+    {
+      "id": "TS-19",
+      "file": "src/components/navigation/DesktopNavbar.tsx",
+      "line": 19,
+      "column": 15,
+      "code": "TS2305",
+      "message": "Module '\"@hugeicons/core-free-icons\"' has no exported member 'IconSvgElement'."
+    },
+    {
+      "id": "TS-20",
+      "file": "src/components/navigation/DesktopNavbar.tsx",
+      "line": 324,
+      "column": 43,
+      "code": "TS2345",
+      "message": "Argument of type '\"/admin\"' is not assignable to parameter of type '\"/\" | \"/profile\"'."
+    },
+    {
+      "id": "TS-21",
+      "file": "src/components/navigation/MobileBottomNav.tsx",
+      "line": 8,
+      "column": 15,
+      "code": "TS2305",
+      "message": "Module '\"@hugeicons/core-free-icons\"' has no exported member 'IconSvgElement'."
+    },
+    {
+      "id": "TS-22",
+      "file": "src/components/navigation/MobileBottomNav.tsx",
+      "line": 38,
+      "column": 68,
+      "code": "TS4111",
+      "message": "Property 'tab' comes from an index signature, so it must be accessed with ['tab']."
+    },
+    {
+      "id": "TS-23",
+      "file": "src/components/navigation/MobileBottomNav.tsx",
+      "line": 153,
+      "column": 16,
+      "code": "TS2375",
+      "message": "Type '{ children: Element[]; key: \"template\" | \"profile\" | \"qr\" | \"editor\" | \"secure-documents\"; ref: (node: HTMLAnchorElement | null) => void; to: \"/editor\" | \"/encrypted-documents\" | \"/profile\" | \"/template-bank\" | \"/template-builder\"; search: MobileSearch | undefined; \"aria-current\": \"page\" | undefined; \"aria-label\": s...' is not assignable to type 'MakeOptionalSearchParams<RouterCore<Route<Register, any, \"/\", \"/\", string, \"__root__\", undefined, {}, { queryClient: QueryClient; }, AnyContext, AnyContext, ... 6 more ..., undefined>, \"never\", false, RouterHistory, Record<...>>, string, \"/editor\" | ... 3 more ... | \"/template-builder\">' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties."
+    },
+    {
+      "id": "TS-24",
+      "raw": "  Types of property 'search' are incompatible."
+    },
+    {
+      "id": "TS-25",
+      "raw": "    Type 'MobileSearch | undefined' is not assignable to type 'true | {} | ParamsReducerFn<RouterCore<Route<Register, any, \"/\", \"/\", string, \"__root__\", undefined, {}, { queryClient: QueryClient; }, AnyContext, AnyContext, ... 6 more ..., undefined>, \"never\", false, RouterHistory, Record<...>>, \"SEARCH\", string, \"/editor\" | ... 3 more ... | \"/template-builder\">'."
+    },
+    {
+      "id": "TS-26",
+      "raw": "      Type 'undefined' is not assignable to type 'true | {} | ParamsReducerFn<RouterCore<Route<Register, any, \"/\", \"/\", string, \"__root__\", undefined, {}, { queryClient: QueryClient; }, AnyContext, AnyContext, ... 6 more ..., undefined>, \"never\", false, RouterHistory, Record<...>>, \"SEARCH\", string, \"/editor\" | ... 3 more ... | \"/template-builder\">'."
+    },
+    {
+      "id": "TS-27",
+      "file": "src/components/navigation/PremiumMobileNavDrawer.tsx",
+      "line": 16,
+      "column": 15,
+      "code": "TS2305",
+      "message": "Module '\"@hugeicons/core-free-icons\"' has no exported member 'IconSvgElement'."
+    },
+    {
+      "id": "TS-28",
+      "file": "src/components/template-bank/TemplateBankGallery.tsx",
+      "line": 87,
+      "column": 42,
+      "code": "TS7031",
+      "message": "Binding element 'data' implicitly has an 'any' type."
+    },
+    {
+      "id": "TS-29",
+      "file": "src/routes/__root.tsx",
+      "line": 202,
+      "column": 42,
+      "code": "TS7006",
+      "message": "Parameter '_event' implicitly has an 'any' type."
+    },
+    {
+      "id": "TS-30",
+      "file": "src/routes/__root.tsx",
+      "line": 202,
+      "column": 50,
+      "code": "TS7006",
+      "message": "Parameter 'currentSession' implicitly has an 'any' type."
+    },
+    {
+      "id": "TS-31",
+      "file": "src/routes/index.tsx",
+      "line": 197,
+      "column": 42,
+      "code": "TS7006",
+      "message": "Parameter '_event' implicitly has an 'any' type."
+    },
+    {
+      "id": "TS-32",
+      "file": "src/routes/index.tsx",
+      "line": 197,
+      "column": 50,
+      "code": "TS7006",
+      "message": "Parameter 'currentSession' implicitly has an 'any' type."
+    },
+    {
+      "id": "TS-33",
+      "file": "src/services/template.service.ts",
+      "line": 140,
+      "column": 16,
+      "code": "TS7006",
+      "message": "Parameter 'template' implicitly has an 'any' type."
+    },
+    {
+      "id": "TS-34",
+      "file": "src/services/template.service.ts",
+      "line": 141,
+      "column": 13,
+      "code": "TS7006",
+      "message": "Parameter 'template' implicitly has an 'any' type."
+    },
+    {
+      "id": "TS-35",
+      "file": "vite.config.ts",
+      "line": 40,
+      "column": 7,
+      "code": "TS2769",
+      "message": "No overload matches this call."
+    },
+    {
+      "id": "TS-36",
+      "raw": "  The last overload gave the following error."
+    },
+    {
+      "id": "TS-37",
+      "raw": "    Object literal may only specify known properties, and 'tsconfigRaw' does not exist in type 'ESBuildOptions'."
+    }
+  ],
+  "verdict": "PASS_NO_NEW_TEMPLATE_FACTORY_ERRORS"
+}

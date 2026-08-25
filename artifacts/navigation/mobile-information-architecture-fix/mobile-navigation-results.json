@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "method": "code inspection + production build",
+  "bottomNav": {
+    "destinationCount": 5,
+    "order": ["Plantilla", "QR", "Editor", "Seguridad", "Mi Perfil"],
+    "routes": ["/template-bank", "/editor?tab=qr", "/template-builder", "/encrypted-documents", "/profile"],
+    "iconLibrary": "Hugeicons"
+  },
+  "evidence": [
+    "src/components/navigation/MobileBottomNav.tsx defines exactly five items.",
+    "QR item uses the existing /editor route with search { tab: 'qr' }.",
+    "Encrypted documents route is now included in hiddenForRoute allowlist.",
+    "Build passed with exit code 0."
+  ]
+}

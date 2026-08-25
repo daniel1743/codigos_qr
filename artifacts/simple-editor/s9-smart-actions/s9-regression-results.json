@@ -1,0 +1,30 @@
+[
+  {
+    "test": "Themes registry exists",
+    "status": "PASS"
+  },
+  {
+    "test": "Button presets exist (>=6)",
+    "status": "PASS"
+  },
+  {
+    "test": "S8 socials system exists",
+    "status": "PASS"
+  },
+  {
+    "test": "Avatar upload function exists",
+    "status": "PASS"
+  },
+  {
+    "test": "Banner system exists",
+    "status": "PASS"
+  },
+  {
+    "test": "Config roundtrip functions exist",
+    "status": "PASS"
+  },
+  {
+    "test": "Button add/remove functions exist",
+    "status": "PASS"
+  }
+]

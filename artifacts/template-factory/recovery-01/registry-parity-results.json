@@ -1,0 +1,210 @@
+{
+  "executedAt": "2026-08-25T02:04:34.675Z",
+  "renderer": {
+    "themeIds": [
+      "black-gold",
+      "black-silver",
+      "platinum",
+      "rose-gold",
+      "emerald-luxury",
+      "executive-blue",
+      "burgundy-elegant",
+      "ivory-gold",
+      "graphite",
+      "premium-white"
+    ],
+    "buttonPresetIds": [
+      "solid",
+      "glass",
+      "outline",
+      "soft",
+      "premium",
+      "minimal",
+      "legacy"
+    ],
+    "iconClasses": [
+      "fa-brands fa-facebook-f",
+      "fa-brands fa-instagram",
+      "fa-brands fa-whatsapp",
+      "fa-regular fa-envelope",
+      "fa-solid fa-location-dot",
+      "fa-brands fa-tiktok",
+      "fa-brands fa-youtube",
+      "fa-brands fa-x-twitter",
+      "fa-solid fa-globe",
+      "fa-solid fa-phone",
+      "fa-solid fa-bag-shopping",
+      "fa-solid fa-download",
+      "fa-regular fa-calendar"
+    ],
+    "actionTypeIds": [
+      "url",
+      "phone",
+      "email",
+      "whatsapp",
+      "location",
+      "booking",
+      "download"
+    ],
+    "socialPlatformIds": [
+      "instagram",
+      "facebook",
+      "tiktok",
+      "youtube",
+      "linkedin",
+      "twitter",
+      "whatsapp",
+      "telegram",
+      "email",
+      "website"
+    ],
+    "defaultConfig": {
+      "schemaVersion": 1,
+      "identity": {
+        "logoText": "Eudora",
+        "subtitleText": "CONSULTORA",
+        "titleText": "VANESA ALVES",
+        "profileImg": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=400&auto=format&fit=crop",
+        "bannerImg": ""
+      },
+      "socials": {
+        "enabled": true,
+        "displayMode": "icons",
+        "items": []
+      },
+      "content": {
+        "footerText": "Clique para interagir"
+      },
+      "links": [
+        {
+          "id": "b1",
+          "text": "Facebook",
+          "icon": "fa-brands fa-facebook-f",
+          "url": "#",
+          "fullWidth": true
+        },
+        {
+          "id": "b2",
+          "text": "Instagram",
+          "icon": "fa-brands fa-instagram",
+          "url": "#",
+          "fullWidth": false
+        },
+        {
+          "id": "b3",
+          "text": "E-mail",
+          "icon": "fa-regular fa-envelope",
+          "url": "mailto:ejemplo@correo.com",
+          "fullWidth": false
+        },
+        {
+          "id": "b4",
+          "text": "Whatsapp",
+          "icon": "fa-brands fa-whatsapp",
+          "url": "#",
+          "fullWidth": false
+        },
+        {
+          "id": "b5",
+          "text": "Localiza??o",
+          "icon": "fa-solid fa-location-dot",
+          "url": "#",
+          "fullWidth": false
+        }
+      ],
+      "appearance": {
+        "bgImage": "",
+        "bgOverlay": 0,
+        "bgStart": "#95547B",
+        "bgMid": "#B46A94",
+        "bgEnd": "#8C476E",
+        "bgAngle": 180,
+        "btnBgStart": "#ffffff",
+        "btnBgEnd": "#ffffff",
+        "btnBorderColor": "#ffffff",
+        "accentBgStart": "#f5d1e6",
+        "accentBgEnd": "#e0a3c7",
+        "accentIconColor": "#5c2d47",
+        "btnTextColor": "#ffffff",
+        "fontLogo": "Cinzel",
+        "fontHeading": "Cinzel",
+        "fontSubtitle": "Oswald",
+        "fontBody": "Oswald",
+        "themeId": "custom",
+        "btnPresetId": "glass",
+        "textPrimary": "#FFFFFF",
+        "textSubtitle": "#2C2C2C",
+        "profileBorderColor": "#5c2d47",
+        "profileRadius": "50%",
+        "btnRadius": "9999px",
+        "banner": {
+          "enabled": true,
+          "heightPreset": "medium",
+          "positionY": 50,
+          "imageOpacity": 100,
+          "fusionPreset": "soft",
+          "fusionStrength": 60
+        }
+      },
+      "layout": {
+        "gridCols": 2,
+        "profileBorder": 4,
+        "profileSize": 170,
+        "logoSize": 3.2,
+        "titleSize": 2.2,
+        "devicePreview": "mobile"
+      }
+    }
+  },
+  "generator": {
+    "themeIds": [
+      "black-gold",
+      "black-silver",
+      "platinum",
+      "rose-gold",
+      "emerald-luxury",
+      "executive-blue",
+      "burgundy-elegant",
+      "ivory-gold",
+      "graphite",
+      "premium-white"
+    ],
+    "buttonPresetIds": [
+      "solid",
+      "glass",
+      "outline",
+      "soft",
+      "premium",
+      "minimal"
+    ],
+    "iconClasses": [
+      "fa-brands fa-facebook-f",
+      "fa-brands fa-instagram",
+      "fa-brands fa-whatsapp",
+      "fa-regular fa-envelope",
+      "fa-solid fa-location-dot",
+      "fa-brands fa-tiktok",
+      "fa-brands fa-youtube",
+      "fa-brands fa-x-twitter",
+      "fa-solid fa-globe",
+      "fa-solid fa-phone",
+      "fa-solid fa-bag-shopping",
+      "fa-solid fa-download",
+      "fa-regular fa-calendar"
+    ],
+    "actionTypeIds": [
+      "url",
+      "phone",
+      "email",
+      "whatsapp",
+      "location",
+      "booking",
+      "download"
+    ]
+  },
+  "unknownThemes": [],
+  "unknownPresets": [],
+  "unknownIcons": [],
+  "unknownActions": [],
+  "verdict": "PASS"
+}

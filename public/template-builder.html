@@ -399,7 +399,7 @@
         <!-- Center Controls: Devices Switch -->
         <div class="hidden md:flex items-center gap-1 bg-slate-900 border border-slate-800 p-1 rounded-xl">
             <button id="view-mobile" onclick="setDeviceView('mobile')" class="px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-2 bg-pink-600 text-white shadow transition">
-                <i class="fa-solid fa-mobile-screen-button"></i> Móvil
+                <i class="fa-solid fa-mobile-screen-button"></i> Mï¿½vil
             </button>
 
             <button id="view-desktop" onclick="setDeviceView('desktop')" class="px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-2 text-slate-400 hover:text-white transition">
@@ -419,10 +419,10 @@
     </header>
 
     <!-- MAIN STUDIO CONTAINER -->
-    <div class="flex-1 flex overflow-hidden">
+    <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
 
         <!-- LEFT CONTROL PANEL (CANVA STYLE EDITOR) -->
-        <aside class="w-96 bg-slate-950 border-r border-slate-800 flex flex-col shrink-0 z-20 overflow-hidden">
+        <aside class="w-full md:w-96 bg-slate-950 border-r border-slate-800 flex flex-col shrink-0 z-20 overflow-hidden order-2 md:order-1">
             
             <!-- Editor Tabs Header -->
             <div class="flex border-b border-slate-800 bg-slate-900/50">
@@ -433,7 +433,7 @@
                     <i class="fa-solid fa-palette"></i> Estilo & Color
                 </button>
                 <button onclick="switchTab('layout')" id="tab-btn-layout" class="flex-1 py-3 text-xs font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center justify-center gap-2 transition">
-                    <i class="fa-solid fa-layer-group"></i> Disposición
+                    <i class="fa-solid fa-layer-group"></i> Disposiciï¿½n
                 </button>
             </div>
 
@@ -517,14 +517,14 @@
                     <!-- Branding Header Section -->
                     <div class="bg-slate-900/70 p-4 rounded-2xl border border-slate-800 space-y-3">
                         <h3 class="text-xs font-bold tracking-wider text-pink-400 uppercase flex items-center gap-2">
-                            <i class="fa-solid fa-font"></i> Marca & Título
+                            <i class="fa-solid fa-font"></i> Marca & Tï¿½tulo
                         </h3>
                         <div>
                             <label class="text-[11px] text-slate-400 mb-1 block font-medium">Texto del Logo / Marca</label>
                             <input type="text" id="input-logo-text" value="Eudora" oninput="updateContent()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-pink-500 focus:outline-none transition">
                         </div>
                         <div>
-                            <label class="text-[11px] text-slate-400 mb-1 block font-medium">Subtítulo (Cargo / Rol)</label>
+                            <label class="text-[11px] text-slate-400 mb-1 block font-medium">Subtï¿½tulo (Cargo / Rol)</label>
                             <input type="text" id="input-subtitle-text" value="CONSULTORA" oninput="updateContent()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-pink-500 focus:outline-none transition">
                         </div>
                         <div>
@@ -557,29 +557,39 @@
                         </div>
                     </div>
 
-                    <!-- Redes Sociales Pequeñas Section -->
+                    <!-- Redes Sociales Section -->
                     <div class="bg-slate-900/70 p-4 rounded-2xl border border-slate-800 space-y-3">
-                        <h3 class="text-xs font-bold tracking-wider text-pink-400 uppercase flex items-center gap-2">
-                            <i class="fa-solid fa-hashtag"></i> Fila de Redes Sociales
-                        </h3>
-                        <p class="text-[10px] text-slate-400">Iconos pequeños bajo el título. Deja en blanco los que no uses.</p>
-                        <div class="grid grid-cols-2 gap-2">
-                            <div class="flex items-center bg-slate-950 border border-slate-800 rounded-lg overflow-hidden">
-                                <span class="pl-2.5 text-slate-500"><i class="fa-brands fa-instagram"></i></span>
-                                <input type="text" id="social-ig" placeholder="URL Instagram" oninput="updateContent()" class="w-full bg-transparent px-2 py-1.5 text-xs text-white focus:outline-none">
-                            </div>
-                            <div class="flex items-center bg-slate-950 border border-slate-800 rounded-lg overflow-hidden">
-                                <span class="pl-2.5 text-slate-500"><i class="fa-brands fa-tiktok"></i></span>
-                                <input type="text" id="social-tk" placeholder="URL TikTok" oninput="updateContent()" class="w-full bg-transparent px-2 py-1.5 text-xs text-white focus:outline-none">
-                            </div>
-                            <div class="flex items-center bg-slate-950 border border-slate-800 rounded-lg overflow-hidden">
-                                <span class="pl-2.5 text-slate-500"><i class="fa-brands fa-youtube"></i></span>
-                                <input type="text" id="social-yt" placeholder="URL YouTube" oninput="updateContent()" class="w-full bg-transparent px-2 py-1.5 text-xs text-white focus:outline-none">
-                            </div>
-                            <div class="flex items-center bg-slate-950 border border-slate-800 rounded-lg overflow-hidden">
-                                <span class="pl-2.5 text-slate-500"><i class="fa-brands fa-linkedin-in"></i></span>
-                                <input type="text" id="social-li" placeholder="URL LinkedIn" oninput="updateContent()" class="w-full bg-transparent px-2 py-1.5 text-xs text-white focus:outline-none">
-                            </div>
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-xs font-bold tracking-wider text-pink-400 uppercase flex items-center gap-2">
+                                <i class="fa-solid fa-hashtag"></i> Redes Sociales
+                            </h3>
+                        </div>
+                        <p class="text-[10px] text-slate-400">Iconos pequeÃ±os bajo el tÃ­tulo.</p>
+
+                        <!-- S8 Social Platforms Selector -->
+                        <div class="flex flex-wrap gap-1.5 mb-2">
+                            <button onclick="window.addSocial('instagram')" class="text-[9px] px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-md transition">
+                                <i class="fa-brands fa-instagram mr-1"></i>IG
+                            </button>
+                            <button onclick="window.addSocial('facebook')" class="text-[9px] px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-md transition">
+                                <i class="fa-brands fa-facebook-f mr-1"></i>FB
+                            </button>
+                            <button onclick="window.addSocial('tiktok')" class="text-[9px] px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-md transition">
+                                <i class="fa-brands fa-tiktok mr-1"></i>TT
+                            </button>
+                            <button onclick="window.addSocial('youtube')" class="text-[9px] px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-md transition">
+                                <i class="fa-brands fa-youtube mr-1"></i>YT
+                            </button>
+                            <button onclick="window.addSocial('linkedin')" class="text-[9px] px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-md transition">
+                                <i class="fa-brands fa-linkedin-in mr-1"></i>LI
+                            </button>
+                            <button onclick="window.addSocial('whatsapp')" class="text-[9px] px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-md transition">
+                                <i class="fa-brands fa-whatsapp mr-1"></i>WA
+                            </button>
+                        </div>
+
+                        <div id="socials-list" class="space-y-2">
+                            <!-- Socials rendered by renderSocialsEditor() -->
                         </div>
                     </div>
 
@@ -590,7 +600,7 @@
                                 <i class="fa-solid fa-link"></i> Enlaces & Botones
                             </h3>
                             <button onclick="addButton()" class="text-xs bg-pink-500/20 hover:bg-pink-500/30 text-pink-300 border border-pink-500/40 px-2.5 py-1 rounded-lg transition flex items-center gap-1 font-semibold">
-                                <i class="fa-solid fa-plus text-[10px]"></i> Añadir
+                                <i class="fa-solid fa-plus text-[10px]"></i> Aï¿½adir
                             </button>
                         </div>
                         
@@ -605,10 +615,10 @@
                     <!-- Footer Note Section -->
                     <div class="bg-slate-900/70 p-4 rounded-2xl border border-slate-800 space-y-3">
                         <h3 class="text-xs font-bold tracking-wider text-pink-400 uppercase flex items-center gap-2">
-                            <i class="fa-solid fa-hand-pointer"></i> Pie de Página / CTA
+                            <i class="fa-solid fa-hand-pointer"></i> Pie de Pï¿½gina / CTA
                         </h3>
                         <div>
-                            <label class="text-[11px] text-slate-400 mb-1 block font-medium">Texto de Interacción</label>
+                            <label class="text-[11px] text-slate-400 mb-1 block font-medium">Texto de Interacciï¿½n</label>
                             <input type="text" id="input-footer-text" value="Clique para interagir" oninput="updateContent()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-pink-500 focus:outline-none transition">
                         </div>
                     </div>
@@ -670,7 +680,7 @@
                             </div>
                         </div>
                         <div>
-                            <label class="text-[11px] text-slate-400 mb-1 block font-medium">Ángulo del Gradiente: <span id="angle-val">180</span>°</label>
+                            <label class="text-[11px] text-slate-400 mb-1 block font-medium">ï¿½ngulo del Gradiente: <span id="angle-val">180</span>ï¿½</label>
                             <input type="range" id="range-bg-angle" min="0" max="360" value="180" oninput="updateStyles()" class="w-full accent-pink-500">
                         </div>
                     </div>
@@ -713,11 +723,11 @@
                           
                           <div class="grid grid-cols-2 gap-3">
                             <div>
-                                <label class="text-[10px] text-slate-400 block mb-1">Fondo Botón (Inicio)</label>
+                                <label class="text-[10px] text-slate-400 block mb-1">Fondo Botï¿½n (Inicio)</label>
                                 <input type="color" id="color-btn-start" value="#ffffff" onchange="updateStyles()" class="w-full h-8 bg-slate-950 border border-slate-800 rounded-lg cursor-pointer">
                             </div>
                             <div>
-                                <label class="text-[10px] text-slate-400 block mb-1">Fondo Botón (Fin)</label>
+                                <label class="text-[10px] text-slate-400 block mb-1">Fondo Botï¿½n (Fin)</label>
                                 <input type="color" id="color-btn-end" value="#ffffff" onchange="updateStyles()" class="w-full h-8 bg-slate-950 border border-slate-800 rounded-lg cursor-pointer">
                             </div>
                         </div>
@@ -737,7 +747,7 @@
                                 <input type="color" id="color-accent-icon" value="#5c2d47" onchange="updateStyles()" class="w-full h-8 bg-slate-950 border border-slate-800 rounded-lg cursor-pointer">
                             </div>
                             <div>
-                                <label class="text-[10px] text-slate-400 block mb-1">Texto del Botón</label>
+                                <label class="text-[10px] text-slate-400 block mb-1">Texto del Botï¿½n</label>
                                 <input type="color" id="color-btn-text" value="#ffffff" onchange="updateStyles()" class="w-full h-8 bg-slate-950 border border-slate-800 rounded-lg cursor-pointer">
                             </div>
                         </div>
@@ -750,19 +760,19 @@
                     <!-- Typography Selector Section -->
                     <div class="bg-slate-900/70 p-4 rounded-2xl border border-slate-800 space-y-3">
                         <h3 class="text-xs font-bold tracking-wider text-pink-400 uppercase flex items-center gap-2">
-                            <i class="fa-solid fa-text-height"></i> Tipografía & Fuetes
+                            <i class="fa-solid fa-text-height"></i> Tipografï¿½a & Fuetes
                         </h3>
                         <div>
                             <label class="text-[11px] text-slate-400 mb-1 block font-medium">Fuente del Logo</label>
                             <select id="select-font-logo" onchange="updateStyles()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-pink-500 focus:outline-none">
                                 <option value="'Cinzel', serif">Cinzel (Elegante Serifa)</option>
-                                <option value="'Playfair Display', serif">Playfair Display (Clásico Luxury)</option>
+                                <option value="'Playfair Display', serif">Playfair Display (Clï¿½sico Luxury)</option>
                                 <option value="'Montserrat', sans-serif">Montserrat (Moderno Bold)</option>
                                 <option value="'Oswald', sans-serif">Oswald (Condensada)</option>
                             </select>
                         </div>
                         <div>
-                            <label class="text-[11px] text-slate-400 mb-1 block font-medium">Fuente Títulos / Nombre</label>
+                            <label class="text-[11px] text-slate-400 mb-1 block font-medium">Fuente Tï¿½tulos / Nombre</label>
                             <select id="select-font-heading" onchange="updateStyles()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-pink-500 focus:outline-none">
                                 <option value="'Oswald', sans-serif">Oswald (Condensada)</option>
                                 <option value="'Poppins', sans-serif">Poppins (Limpio & Redondo)</option>
@@ -774,19 +784,19 @@
 
                 </div>
 
-                <!-- ================= TAB 3: DISPOSICIÓN & SIZES ================= -->
+                <!-- ================= TAB 3: DISPOSICIï¿½N & SIZES ================= -->
                 <div id="tab-layout" class="space-y-5 hidden">
                     
                     <!-- Avatar Settings -->
                     <div class="bg-slate-900/70 p-4 rounded-2xl border border-slate-800 space-y-4">
                         <h3 class="text-xs font-bold tracking-wider text-pink-400 uppercase flex items-center gap-2">
-                            <i class="fa-solid fa-user-circle"></i> Configuración de Avatar
+                            <i class="fa-solid fa-user-circle"></i> Configuraciï¿½n de Avatar
                         </h3>
                         
                         <div>
                             <label class="text-[11px] text-slate-400 mb-2 block font-medium">Forma del Avatar</label>
                             <div class="grid grid-cols-3 gap-2">
-                                <button onclick="setAvatarShape('50%', this)" class="avatar-shape-btn ring-2 ring-pink-500  class="py-1.5 text-[11px] bg-slate-950 border border-slate-800 rounded-full text-slate-300 hover:border-pink-500 transition">Círculo</button>
+                                <button onclick="setAvatarShape('50%', this)" class="avatar-shape-btn ring-2 ring-pink-500  class="py-1.5 text-[11px] bg-slate-950 border border-slate-800 rounded-full text-slate-300 hover:border-pink-500 transition">Cï¿½rculo</button>
                                 <button onclick="setAvatarShape('24px', this)" class="avatar-shape-btn  class="py-1.5 text-[11px] bg-slate-950 border border-slate-800 rounded-2xl text-slate-300 hover:border-pink-500 transition">Cuadrado Red.</button>
                                 <button onclick="setAvatarShape('0px', this)" class="avatar-shape-btn  class="py-1.5 text-[11px] bg-slate-950 border border-slate-800 rounded text-slate-300 hover:border-pink-500 transition">Cuadrado</button>
                             </div>
@@ -802,7 +812,7 @@
 
                         <div>
                             <div class="flex justify-between text-[11px] text-slate-400 mb-1">
-                                <span>Tamaño Foto Perfil</span>
+                                <span>Tamaï¿½o Foto Perfil</span>
                                 <span id="val-profile-size">170px</span>
                             </div>
                             <input type="range" id="range-profile-size" min="100" max="260" step="5" value="170" oninput="updateLayoutSizes()" class="w-full accent-pink-500">
@@ -812,12 +822,12 @@
                     <!-- Element Dimensions -->
                     <div class="bg-slate-900/70 p-4 rounded-2xl border border-slate-800 space-y-4">
                         <h3 class="text-xs font-bold tracking-wider text-pink-400 uppercase flex items-center gap-2">
-                            <i class="fa-solid fa-up-right-and-down-left-from-center"></i> Tamaños de Elementos
+                            <i class="fa-solid fa-up-right-and-down-left-from-center"></i> Tamaï¿½os de Elementos
                         </h3>
                         
                         <div>
                             <div class="flex justify-between text-[11px] text-slate-400 mb-1">
-                                <span>Tamaño de Logo</span>
+                                <span>Tamaï¿½o de Logo</span>
                                 <span id="val-logo-size">3.2rem</span>
                             </div>
                             <input type="range" id="range-logo-size" min="1.8" max="5.0" step="0.1" value="3.2" oninput="updateLayoutSizes()" class="w-full accent-pink-500">
@@ -827,7 +837,7 @@
 
                         <div>
                             <div class="flex justify-between text-[11px] text-slate-400 mb-1">
-                                <span>Tamaño Nombre Principal</span>
+                                <span>Tamaï¿½o Nombre Principal</span>
                                 <span id="val-title-size">2.2rem</span>
                             </div>
                             <input type="range" id="range-title-size" min="1.5" max="3.8" step="0.1" value="2.2" oninput="updateLayoutSizes()" class="w-full accent-pink-500">
@@ -837,7 +847,7 @@
                     <!-- Button Grid Layouts -->
                     <div class="bg-slate-900/70 p-4 rounded-2xl border border-slate-800 space-y-4">
                         <h3 class="text-xs font-bold tracking-wider text-pink-400 uppercase flex items-center gap-2">
-                            <i class="fa-solid fa-table-cells"></i> Disposición de Botones (Grid)
+                            <i class="fa-solid fa-table-cells"></i> Disposiciï¿½n de Botones (Grid)
                         </h3>
                         
                         <div>
@@ -868,10 +878,10 @@
         </aside>
 
         <!-- RIGHT LIVE PREVIEW CANVAS AREA -->
-        <main class="flex-1 bg-slate-900/50 flex flex-col items-center justify-center p-6 relative overflow-y-auto">
+        <main class="flex-1 bg-slate-900/50 flex flex-col items-center justify-center p-6 relative overflow-y-auto order-1 md:order-2">
             
             <!-- Canvas Phone Wrapper -->
-            <div id="phone-container" class="phone-frame w-[390px] h-[780px] bg-slate-950 rounded-[48px] overflow-hidden relative flex flex-col my-auto border-4 border-slate-800">
+            <div id="phone-container" class="phone-frame w-[390px] h-[780px] max-w-full max-h-[100%] shrink-0 bg-slate-950 rounded-[48px] overflow-hidden relative flex flex-col my-auto border-4 border-slate-800" style="transform-origin: top center; transform: scale(min(1, calc((100vw - 3rem) / 390)));">
                 
                 <!-- Phone Top Bar Notch / Speaker -->
                 <div class="absolute top-0 inset-x-0 h-6 bg-slate-950/80 backdrop-blur z-30 flex justify-center items-center">
@@ -939,7 +949,7 @@
             <div class="p-5 border-b border-slate-800 flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <i class="fa-solid fa-code text-pink-500 text-lg"></i>
-                    <h3 class="font-bold text-white text-base">Código HTML Exportable</h3>
+                    <h3 class="font-bold text-white text-base">Cï¿½digo HTML Exportable</h3>
                 </div>
                 <button onclick="closeExportModal()" class="text-slate-400 hover:text-white p-2">
                     <i class="fa-solid fa-xmark text-xl"></i>
@@ -951,7 +961,7 @@
             <div class="p-4 border-t border-slate-800 flex justify-end gap-3 bg-slate-900">
                 <button onclick="closeExportModal()" class="px-4 py-2 text-xs font-medium text-slate-400 hover:text-white">Cerrar</button>
                 <button onclick="copyToClipboard()" class="px-5 py-2 text-xs font-bold bg-pink-600 hover:bg-pink-500 text-white rounded-xl shadow-lg transition flex items-center gap-2">
-                    <i class="fa-solid fa-copy"></i> Copiar Código
+                    <i class="fa-solid fa-copy"></i> Copiar Cï¿½digo
                 </button>
             </div>
         </div>
@@ -1118,7 +1128,11 @@
                 profileImg: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=400&auto=format&fit=crop',
                 bannerImg: ''
             },
-            socials: { ig: '', tk: '', yt: '', li: '' },
+            socials: {
+                enabled: true,
+                displayMode: 'icons',
+                items: []
+            },
             content: {
                 footerText: 'Clique para interagir'
             },
@@ -1215,8 +1229,35 @@
             if (config.appearance && config.appearance.btnBgStart && !config.appearance.btnPresetId) {
                 def.appearance.btnPresetId = 'legacy';
             }
-            
+
             merge(def, config);
+
+            // S8: Normalize Socials after merge
+            if (!def.socials || !def.socials.items) {
+                def.socials = {
+                    enabled: true,
+                    displayMode: 'icons',
+                    items: []
+                };
+            }
+
+
+            // S9: Normalize Smart Actions on links
+            if (def.links && Array.isArray(def.links)) {
+                def.links = def.links.map(btn => {
+                    if (!btn.actionType) {
+                        // Auto-detect from existing url
+                        const u = (btn.url || '').toLowerCase();
+                        if (u.startsWith('mailto:')) btn.actionType = 'email';
+                        else if (u.startsWith('tel:')) btn.actionType = 'phone';
+                        else if (u.includes('wa.me')) btn.actionType = 'whatsapp';
+                        else btn.actionType = 'url';
+                    }
+                    if (typeof btn.waMessage === 'undefined') btn.waMessage = '';
+                    return btn;
+                });
+            }
+
             return def;
         };
 
@@ -1344,12 +1385,10 @@
 
             // Content
             document.getElementById('input-footer-text').value = appState.content.footerText;
+            renderSocialsEditor();
 
             // Socials
-            document.getElementById('social-ig').value = appState.socials.ig;
-            document.getElementById('social-tk').value = appState.socials.tk;
-            document.getElementById('social-yt').value = appState.socials.yt;
-            document.getElementById('social-li').value = appState.socials.li;
+            
 
             // Appearance - Background
             document.getElementById('input-bg-image').value = appState.appearance.bgImage;
@@ -1430,17 +1469,239 @@
             { name: 'Instagram', class: 'fa-brands fa-instagram' },
             { name: 'Whatsapp', class: 'fa-brands fa-whatsapp' },
             { name: 'Email', class: 'fa-regular fa-envelope' },
-            { name: 'Ubicación', class: 'fa-solid fa-location-dot' },
+            { name: 'Ubicaciï¿½n', class: 'fa-solid fa-location-dot' },
             { name: 'TikTok', class: 'fa-brands fa-tiktok' },
             { name: 'YouTube', class: 'fa-brands fa-youtube' },
             { name: 'Twitter/X', class: 'fa-brands fa-x-twitter' },
             { name: 'Sitio Web', class: 'fa-solid fa-globe' },
-            { name: 'Teléfono', class: 'fa-solid fa-phone' },
-            { name: 'Tienda', class: 'fa-solid fa-bag-shopping' }
+            { name: 'Telï¿½fono', class: 'fa-solid fa-phone' },
+            { name: 'Tienda', class: 'fa-solid fa-bag-shopping' },
+            { name: 'Descargar', class: 'fa-solid fa-download' },
+            { name: 'Calendario', class: 'fa-regular fa-calendar' }
         ];
 
+        // S9: Smart Action Types Registry
+        const ACTION_TYPES = [
+            { id: 'url',      label: 'Sitio web',  icon: 'fa-solid fa-link',         placeholder: 'https://example.com' },
+            { id: 'phone',    label: 'Llamar',      icon: 'fa-solid fa-phone',        placeholder: '+56912345678' },
+            { id: 'email',    label: 'Email',       icon: 'fa-regular fa-envelope',   placeholder: 'contacto@example.com' },
+            { id: 'whatsapp', label: 'WhatsApp',    icon: 'fa-brands fa-whatsapp',    placeholder: '+56912345678' },
+            { id: 'location', label: 'UbicaciÃ³n',   icon: 'fa-solid fa-location-dot', placeholder: 'https://maps.google.com/...' },
+            { id: 'booking',  label: 'Reservar',    icon: 'fa-regular fa-calendar',   placeholder: 'https://calendly.com/...' },
+            { id: 'download', label: 'Descargar',   icon: 'fa-solid fa-download',     placeholder: 'https://.../archivo.pdf' },
+        ];
+
+        // S9: Map action type to its default icon class
+        function getActionDefaultIcon(actionType) {
+            const at = ACTION_TYPES.find(a => a.id === actionType);
+            return at ? at.icon : 'fa-solid fa-link';
+        }
+
+        // S9: Get placeholder for action type
+        function getActionPlaceholder(actionType) {
+            const at = ACTION_TYPES.find(a => a.id === actionType);
+            return at ? at.placeholder : 'https://example.com';
+        }
+
+        // S9: Get contextual label for the target input
+        function getActionFieldLabel(actionType) {
+            switch (actionType) {
+                case 'phone':    return 'TelÃ©fono';
+                case 'whatsapp': return 'TelÃ©fono';
+                case 'email':    return 'Email';
+                case 'location': return 'Enlace de ubicaciÃ³n';
+                case 'booking':  return 'Enlace de reserva';
+                case 'download': return 'Enlace del archivo';
+                default:         return 'URL';
+            }
+        }
+
+        // S9: Resolve action type + target value into a safe href
+        function resolveActionHref(btn) {
+            const type = btn.actionType || 'url';
+            const val = (btn.url || '').trim();
+            if (!val || val === '#') return '#';
+
+            // Safety check: block dangerous protocols
+            const lower = val.toLowerCase();
+            if (lower.startsWith('javascript:') || lower.startsWith('data:') || lower.startsWith('file:') || lower.startsWith('vbscript:')) {
+                return '#';
+            }
+
+            switch (type) {
+                case 'phone': {
+                    const cleaned = val.replace(/[\s\-\(\)]/g, '');
+                    return 'tel:' + cleaned;
+                }
+                case 'email': {
+                    const addr = val.replace(/^mailto:/i, '');
+                    return 'mailto:' + addr;
+                }
+                case 'whatsapp': {
+                    const num = val.replace(/[\s\-\(\)\+]/g, '');
+                    const msg = btn.waMessage ? '&text=' + encodeURIComponent(btn.waMessage) : '';
+                    return 'https://wa.me/' + num + '?' + msg;
+                }
+                case 'location':
+                case 'booking':
+                case 'download':
+                case 'url':
+                default:
+                    return normalizeUrl(val);
+            }
+        }
+
+        // S9: Basic input validation for action types
+        function validateActionInput(actionType, value) {
+            if (!value || value === '#') return { valid: true, msg: '' }; // empty is OK, just no link
+            const v = value.trim();
+            switch (actionType) {
+                case 'phone':
+                case 'whatsapp': {
+                    const hasDigits = /\d/.test(v);
+                    const validChars = /^[\+\d\s\-\(\)]+$/.test(v);
+                    if (!hasDigits || !validChars) return { valid: false, msg: 'Ingresa un nÃºmero vÃ¡lido' };
+                    return { valid: true, msg: '' };
+                }
+                case 'email': {
+                    const cleaned = v.replace(/^mailto:/i, '');
+                    if (!cleaned.includes('@') || !cleaned.includes('.')) return { valid: false, msg: 'Ingresa un email vÃ¡lido' };
+                    return { valid: true, msg: '' };
+                }
+                case 'url':
+                case 'location':
+                case 'booking':
+                case 'download': {
+                    const lower = v.toLowerCase();
+                    if (lower.startsWith('javascript:') || lower.startsWith('data:') || lower.startsWith('file:') || lower.startsWith('vbscript:')) {
+                        return { valid: false, msg: 'Protocolo no permitido' };
+                    }
+                    return { valid: true, msg: '' };
+                }
+                default:
+                    return { valid: true, msg: '' };
+            }
+        }
+
+        // S9: Handle action type change with smart icon defaults
+        function onActionTypeChange(btnId, newType) {
+            const btn = appState.links.find(b => b.id === btnId);
+            if (!btn) return;
+
+            const oldType = btn.actionType || 'url';
+            const oldDefaultIcon = getActionDefaultIcon(oldType);
+            const newDefaultIcon = getActionDefaultIcon(newType);
+
+            // Smart icon default: only auto-change if current icon was the old default
+            if (btn.icon === oldDefaultIcon) {
+                btn.icon = newDefaultIcon;
+            }
+
+            btn.actionType = newType;
+            renderControlsList();
+            renderCanvas();
+        }
+
         // Init on DOM Content Loaded
-        document.addEventListener('DOMContentLoaded', () => {
+        
+        // S8: Platform Registry
+        const SOCIAL_PLATFORMS = {
+            instagram: { id: 'instagram', label: 'Instagram', placeholder: 'instagram.com/usuario', icon: '<i class="fa-brands fa-instagram"></i>' },
+            facebook: { id: 'facebook', label: 'Facebook', placeholder: 'facebook.com/usuario', icon: '<i class="fa-brands fa-facebook-f"></i>' },
+            tiktok: { id: 'tiktok', label: 'TikTok', placeholder: 'tiktok.com/@usuario', icon: '<i class="fa-brands fa-tiktok"></i>' },
+            youtube: { id: 'youtube', label: 'YouTube', placeholder: 'youtube.com/@canal', icon: '<i class="fa-brands fa-youtube"></i>' },
+            linkedin: { id: 'linkedin', label: 'LinkedIn', placeholder: 'linkedin.com/in/usuario', icon: '<i class="fa-brands fa-linkedin-in"></i>' },
+            twitter: { id: 'twitter', label: 'X / Twitter', placeholder: 'twitter.com/usuario', icon: '<i class="fa-brands fa-x-twitter"></i>' },
+            whatsapp: { id: 'whatsapp', label: 'WhatsApp', placeholder: 'wa.me/1234567890', icon: '<i class="fa-brands fa-whatsapp"></i>' },
+            telegram: { id: 'telegram', label: 'Telegram', placeholder: 't.me/usuario', icon: '<i class="fa-brands fa-telegram"></i>' },
+            email: { id: 'email', label: 'Email', placeholder: 'correo@dominio.com', icon: '<i class="fa-regular fa-envelope"></i>' },
+            website: { id: 'website', label: 'Website', placeholder: 'https://www.dominio.com', icon: '<i class="fa-solid fa-globe"></i>' }
+        };
+
+        window.addSocial = function(platformId) {
+            const platform = SOCIAL_PLATFORMS[platformId];
+            if (!platform) return;
+            const newItem = {
+                id: 'social_' + Math.random().toString(36).substr(2, 9),
+                platform: platformId,
+                label: platform.label,
+                url: '',
+                iconId: platform.id,
+                enabled: true
+            };
+            appState.socials.items.push(newItem);
+            renderSocialsEditor();
+            updateContent();
+        }
+
+        window.removeSocial = function(id) {
+            appState.socials.items = appState.socials.items.filter(s => s.id !== id);
+            renderSocialsEditor();
+            updateContent();
+        }
+
+        window.toggleSocial = function(id) {
+            const item = appState.socials.items.find(s => s.id === id);
+            if (item) {
+                item.enabled = !item.enabled;
+                renderSocialsEditor();
+                updateContent();
+            }
+        }
+
+        window.updateSocialUrl = function(id, url) {
+            const item = appState.socials.items.find(s => s.id === id);
+            if (item) {
+                item.url = url;
+                updateContent();
+            }
+        }
+        
+        function normalizeUrl(url, platformId) {
+            url = url.trim();
+            if (!url) return '';
+            if (url.toLowerCase().startsWith('javascript:') || url.toLowerCase().startsWith('data:') || url.toLowerCase().startsWith('file:') || url.toLowerCase().startsWith('vbscript:')) return '';
+            if (platformId === 'email' && !url.startsWith('mailto:')) {
+                if (url.includes('@')) return 'mailto:' + url;
+            }
+            if (!url.startsWith('http') && !url.startsWith('mailto:') && !url.startsWith('tel:')) {
+                return 'https://' + url;
+            }
+            return url;
+        }
+
+        window.renderSocialsEditor = function() {
+            const container = document.getElementById('socials-list');
+            if (!container) return;
+            container.innerHTML = '';
+            
+            appState.socials.items.forEach((item, index) => {
+                const platform = SOCIAL_PLATFORMS[item.platform];
+                const iconHtml = platform ? platform.icon : '<i class="fa-solid fa-link"></i>';
+                const el = document.createElement('div');
+                el.className = `flex items-center gap-2 bg-slate-950 p-2 rounded-lg border ${item.enabled ? 'border-slate-800' : 'border-slate-800/50 opacity-50'}`;
+                el.dataset.id = item.id;
+                el.innerHTML = `
+                    <div class="cursor-grab text-slate-600 px-1 hover:text-slate-400 drag-handle"><i class="fa-solid fa-grip-vertical"></i></div>
+                    <div class="w-8 h-8 rounded bg-slate-900 flex items-center justify-center text-slate-400 shrink-0">
+                        ${iconHtml}
+                    </div>
+                    <div class="flex-1 flex flex-col justify-center">
+                        <div class="text-[10px] font-semibold text-slate-500 mb-0.5">${item.label}</div>
+                        <input type="text" placeholder="${platform ? platform.placeholder : ''}" value="${item.url}" oninput="window.updateSocialUrl('${item.id}', this.value)" class="w-full bg-transparent text-xs text-white focus:outline-none">
+                    </div>
+                    <button onclick="window.toggleSocial('${item.id}')" class="w-7 h-7 flex items-center justify-center rounded bg-slate-900 text-slate-400 hover:text-white" title="${item.enabled ? 'Desactivar' : 'Activar'}">
+                        <i class="fa-solid ${item.enabled ? 'fa-eye' : 'fa-eye-slash'}"></i>
+                    </button>
+                    <button onclick="window.removeSocial('${item.id}')" class="w-7 h-7 flex items-center justify-center rounded bg-red-900/30 text-red-400 hover:bg-red-900/50" aria-label="Eliminar">
+                        <i class="fa-solid fa-trash-can text-xs"></i>
+                    </button>
+                `;
+                container.appendChild(el);
+            });
+        }
+
+          document.addEventListener('DOMContentLoaded', () => {
             renderControlsList();
             renderCanvas();
             setupSortable();
@@ -1650,6 +1911,15 @@
                 card.className = 'bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2 relative group';
                 card.setAttribute('data-id', btn.id);
 
+                const actionType = btn.actionType || 'url';
+                const fieldLabel = getActionFieldLabel(actionType);
+                const fieldPlaceholder = getActionPlaceholder(actionType);
+                const validation = validateActionInput(actionType, btn.url);
+                const validationClass = (!validation.valid) ? 'border-red-500/60' : 'border-slate-800';
+                const waMessageRow = actionType === 'whatsapp' ? `
+                    <input type="text" value="${btn.waMessage || ''}" oninput="updateButtonData('${btn.id}', 'waMessage', this.value)" placeholder="Mensaje opcional para WhatsApp" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1 text-xs text-slate-400 focus:outline-none focus:border-pink-500 mt-1">
+                ` : '';
+
                 card.innerHTML = `
                     <div class="flex items-center justify-between gap-2">
                         <div class="flex items-center gap-2 cursor-grab drag-handle text-slate-500 hover:text-slate-300">
@@ -1667,11 +1937,18 @@
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                         <input type="text" value="${btn.text}" oninput="updateButtonData('${btn.id}', 'text', this.value)" placeholder="Texto" class="bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none focus:border-pink-500">
+                        <select onchange="onActionTypeChange('${btn.id}', this.value)" class="bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:border-pink-500" title="AcciÃ³n">
+                            ${ACTION_TYPES.map(at => `<option value="${at.id}" ${at.id === actionType ? 'selected' : ''}>${at.label}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="text" value="${btn.url === '#' ? '' : btn.url}" oninput="updateButtonData('${btn.id}', 'url', this.value)" placeholder="${fieldPlaceholder}" class="bg-slate-900 border ${validationClass} rounded-lg px-2.5 py-1 text-xs text-slate-400 focus:outline-none focus:border-pink-500" title="${fieldLabel}">
                         <select onchange="updateButtonData('${btn.id}', 'icon', this.value)" class="bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:border-pink-500">
                             ${availableIcons.map(i => `<option value="${i.class}" ${i.class === btn.icon ? 'selected' : ''}>${i.name}</option>`).join('')}
                         </select>
                     </div>
-                    <input type="text" value="${btn.url}" oninput="updateButtonData('${btn.id}', 'url', this.value)" placeholder="URL de Destino / Link" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1 text-xs text-slate-400 focus:outline-none focus:border-pink-500">
+                    ${!validation.valid ? `<p class="text-[10px] text-red-400 mt-0.5">${validation.msg}</p>` : ''}
+                    ${waMessageRow}
                 `;
                 container.appendChild(card);
             });
@@ -1698,10 +1975,12 @@
             const id = 'b' + Date.now() + Math.random().toString(36).substr(2, 5);
             appState.links.push({
                 id: id,
-                text: 'Nuevo Bot?n',
+                text: 'Nuevo BotÃ³n',
                 icon: 'fa-solid fa-link',
                 url: '#',
-                fullWidth: false
+                fullWidth: false,
+                actionType: 'url',
+                waMessage: ''
             });
             renderControlsList();
             renderCanvas();
@@ -1739,12 +2018,7 @@
             appState.identity.bannerImg = document.getElementById('input-banner-img').value;
             appState.content.footerText = document.getElementById('input-footer-text').value;
 
-            appState.socials = {
-                ig: document.getElementById('social-ig').value,
-                tk: document.getElementById('social-tk').value,
-                yt: document.getElementById('social-yt').value,
-                li: document.getElementById('social-li').value
-            };
+            
 
             renderCanvas();
         }
@@ -1844,24 +2118,22 @@
             document.getElementById('view-profile-img').src = appState.identity.profileImg;
             document.getElementById('view-footer-text').textContent = appState.content.footerText;
 
-            // Render Social Icons
+            // Render Social Icons from socials.items
             const socialContainer = document.getElementById('view-social-icons');
             socialContainer.innerHTML = '';
             let hasSocials = false;
-            
-            const socialMap = [
-                { id: 'ig', icon: 'fa-brands fa-instagram' },
-                { id: 'tk', icon: 'fa-brands fa-tiktok' },
-                { id: 'yt', icon: 'fa-brands fa-youtube' },
-                { id: 'li', icon: 'fa-brands fa-linkedin-in' }
-            ];
 
-            socialMap.forEach(s => {
-                if(appState.socials[s.id]) {
-                    hasSocials = true;
-                    socialContainer.innerHTML += `<a href="${appState.socials[s.id]}" class="social-icon-link" target="_blank"><i class="${s.icon}"></i></a>`;
-                }
-            });
+            if (appState.socials && appState.socials.items && appState.socials.items.length > 0) {
+                appState.socials.items.forEach(item => {
+                    if (item.enabled && item.url) {
+                        hasSocials = true;
+                        const platform = SOCIAL_PLATFORMS[item.platform];
+                        const iconHtml = platform ? platform.icon : '<i class="fa-solid fa-link"></i>';
+                        const normalizedUrl = normalizeUrl(item.url, item.platform);
+                        socialContainer.innerHTML += `<a href="${normalizedUrl}" class="social-icon-link" target="_blank" rel="noopener noreferrer">${iconHtml}</a>`;
+                    }
+                });
+            }
 
             if(hasSocials) {
                 socialContainer.classList.remove('hidden');
@@ -1875,7 +2147,8 @@
 
             appState.links.forEach(btn => {
                 const a = document.createElement('a');
-                a.href = btn.url || '#';
+                a.href = resolveActionHref(btn);
+                if ((btn.actionType || 'url') === 'download') a.setAttribute('download', '');
                 a.onclick = (e) => e.preventDefault(); // Prevent navigation inside studio
                 a.className = `render-btn flex items-stretch overflow-hidden text-decoration-none ${btn.fullWidth ? 'col-span-full justify-self-center w-[70%]' : 'w-full'}`;
                 
@@ -2101,7 +2374,7 @@
         function copyToClipboard() {
             const code = document.getElementById('export-code-content').textContent;
             navigator.clipboard.writeText(code).then(() => {
-                alert('¡Código HTML copiado al portapapeles!');
+                alert('ï¿½Cï¿½digo HTML copiado al portapapeles!');
             }).catch(() => {
                 // Fallback for document.execCommand
                 const textarea = document.createElement('textarea');
@@ -2110,7 +2383,7 @@
                 textarea.select();
                 document.execCommand('copy');
                 document.body.removeChild(textarea);
-                alert('¡Código HTML copiado al portapapeles!');
+                alert('ï¿½Cï¿½digo HTML copiado al portapapeles!');
             });
         }
 

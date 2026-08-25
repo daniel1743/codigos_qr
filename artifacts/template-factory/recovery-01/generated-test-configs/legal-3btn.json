@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "identity": {
+    "logoText": "Estudio Marín",
+    "subtitleText": "DERECHO CORPORATIVO",
+    "titleText": "DR. TOMÁS MARÍN",
+    "profileImg": "https://images.unsplash.com/photo-1556157382-97eda2d62296?q=80&w=400&auto=format&fit=crop",
+    "bannerImg": "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=1280&auto=format&fit=crop"
+  },
+  "socials": {
+    "enabled": true,
+    "displayMode": "icons",
+    "items": [
+      {
+        "id": "rec01_pipeline_t0_s1",
+        "platform": "email",
+        "label": "Email",
+        "url": "contacto@example.com",
+        "iconId": "email",
+        "enabled": true
+      },
+      {
+        "id": "rec01_pipeline_t0_s2",
+        "platform": "whatsapp",
+        "label": "WhatsApp",
+        "url": "https://wa.me/56900000000",
+        "iconId": "whatsapp",
+        "enabled": true
+      },
+      {
+        "id": "rec01_pipeline_t0_s3",
+        "platform": "website",
+        "label": "Website",
+        "url": "https://www.example.com",
+        "iconId": "website",
+        "enabled": true
+      }
+    ]
+  },
+  "content": {
+    "footerText": "Conversemos tu caso"
+  },
+  "links": [
+    {
+      "id": "rec01_pipeline_t0_b1",
+      "text": "Solicitar consulta",
+      "icon": "fa-regular fa-calendar",
+      "url": "https://example.com/agenda",
+      "actionType": "booking",
+      "fullWidth": true,
+      "waMessage": ""
+    },
+    {
+      "id": "rec01_pipeline_t0_b2",
+      "text": "Correo",
+      "icon": "fa-regular fa-envelope",
+      "url": "contacto@example.com",
+      "actionType": "email",
+      "fullWidth": false,
+      "waMessage": ""
+    },
+    {
+      "id": "rec01_pipeline_t0_b3",
+      "text": "Áreas de práctica",
+      "icon": "fa-solid fa-globe",
+      "url": "https://example.com/areas",
+      "actionType": "url",
+      "fullWidth": false,
+      "waMessage": ""
+    }
+  ],
+  "appearance": {
+    "bgImage": "",
+    "bgOverlay": 0,
+    "bgStart": "#001f3f",
+    "bgMid": "#002b59",
+    "bgEnd": "#001122",
+    "bgAngle": 180,
+    "btnBgStart": "#003366",
+    "btnBgEnd": "#001f3f",
+    "btnBorderColor": "#0074D9",
+    "accentBgStart": "#7FDBFF",
+    "accentBgEnd": "#39CCCC",
+    "accentIconColor": "#001f3f",
+    "btnTextColor": "#FFFFFF",
+    "fontLogo": "'Playfair Display', serif",
+    "fontHeading": "'Montserrat', sans-serif",
+    "fontSubtitle": "'Montserrat', sans-serif",
+    "fontBody": "'Montserrat', sans-serif",
+    "themeId": "executive-blue",
+    "btnPresetId": "outline",
+    "textPrimary": "#FFFFFF",
+    "textSubtitle": "#7FDBFF",
+    "profileBorderColor": "#7FDBFF",
+    "profileRadius": "50%",
+    "btnRadius": "16px",
+    "banner": {
+      "enabled": true,
+      "heightPreset": "medium",
+      "positionY": 50,
+      "imageOpacity": 90,
+      "fusionPreset": "medium",
+      "fusionStrength": 70
+    }
+  },
+  "layout": {
+    "gridCols": 2,
+    "profileBorder": 4,
+    "profileSize": 185,
+    "logoSize": 3.4,
+    "titleSize": 2.1,
+    "devicePreview": "mobile"
+  }
+}

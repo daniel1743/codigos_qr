@@ -1,0 +1,59 @@
+{
+  "testedAt": "2026-08-24",
+  "server": "http://127.0.0.1:4199",
+  "viewport": {
+    "width": 390,
+    "height": 844,
+    "isMobile": true,
+    "hasTouch": true,
+    "deviceScaleFactor": 2
+  },
+  "results": {
+    "homeIsolation": {
+      "ready": "loading",
+      "bodyStartsWith": "QRio ProductoQRPlantillasDocumentosRecursos Iniciar sesionCrear cuenta Confiable",
+      "shell": false,
+      "trigger": false,
+      "drawer": false
+    },
+    "privateInitial": {
+      "ready": "complete",
+      "controller": true,
+      "shell": true,
+      "trigger": true,
+      "expanded": "false",
+      "menuWidth": "341.6px",
+      "menuInert": true,
+      "menuAriaHidden": "true",
+      "mainTransform": "matrix(1, 0, 0, 1, 0, 0)",
+      "mainTransition": "0s"
+    },
+    "afterClickOpen": {
+      "expanded": "true",
+      "mainTransform": "matrix(0.965, 0, 0, 0.965, 327.6, 8)",
+      "radius": "38px",
+      "menuInert": false,
+      "menuAriaHidden": "false",
+      "mainInert": true,
+      "scrimOpacity": "0.2"
+    },
+    "afterEscape": {
+      "expanded": "false",
+      "mainTransform": "matrix(1, 0, 0, 1, 0, 0)",
+      "menuInert": true,
+      "mainInert": false
+    },
+    "afterOutsideClick": {
+      "expanded": "false",
+      "mainTransform": "matrix(1, 0, 0, 1, 0, 0)"
+    },
+    "duringTouchDrag": {
+      "transform": "matrix(0.983974, 0, 0, 0.983974, 150, 3.663)",
+      "transitionDuration": "0s"
+    },
+    "afterTouchEnd": {
+      "expanded": "true",
+      "transform": "matrix(0.965, 0, 0, 0.965, 327.6, 8)"
+    }
+  }
+}

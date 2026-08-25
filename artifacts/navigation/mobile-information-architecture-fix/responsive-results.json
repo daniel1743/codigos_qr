@@ -1,0 +1,17 @@
+{
+  "status": "NOT EXECUTED",
+  "requiredViewports": [
+    { "width": 320, "height": 700 },
+    { "width": 375, "height": 812 },
+    { "width": 390, "height": 844 },
+    { "width": 430, "height": 932 }
+  ],
+  "reason": "Authenticated mobile shell requires a real Supabase session. No credentials/session were available in this environment.",
+  "codeLevelChecks": {
+    "bubbleWidthReducedFrom": 96,
+    "bubbleWidthReducedTo": 68,
+    "reductionApproxPercent": 29,
+    "whiteOuterHaloRemoved": true,
+    "safeAreaPreserved": "pb-[calc(env(safe-area-inset-bottom)+1rem)]"
+  }
+}

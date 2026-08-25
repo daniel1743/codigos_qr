@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "identity": {
+    "logoText": "Sal & Brasa",
+    "subtitleText": "PARRILLA",
+    "titleText": "COCINA A LA LEÑA",
+    "profileImg": "https://images.unsplash.com/photo-1577219491135-ce391730fb2c?q=80&w=400&auto=format&fit=crop",
+    "bannerImg": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=1280&auto=format&fit=crop"
+  },
+  "socials": {
+    "enabled": true,
+    "displayMode": "icons",
+    "items": [
+      {
+        "id": "pilot_20_v1_t12_s1",
+        "platform": "instagram",
+        "label": "Instagram",
+        "url": "https://instagram.com/demo.cripqer",
+        "iconId": "instagram",
+        "enabled": true
+      },
+      {
+        "id": "pilot_20_v1_t12_s2",
+        "platform": "facebook",
+        "label": "Facebook",
+        "url": "https://facebook.com/demo.cripqer",
+        "iconId": "facebook",
+        "enabled": true
+      },
+      {
+        "id": "pilot_20_v1_t12_s3",
+        "platform": "whatsapp",
+        "label": "WhatsApp",
+        "url": "https://wa.me/56900000000",
+        "iconId": "whatsapp",
+        "enabled": true
+      },
+      {
+        "id": "pilot_20_v1_t12_s4",
+        "platform": "website",
+        "label": "Website",
+        "url": "https://www.example.com",
+        "iconId": "website",
+        "enabled": true
+      }
+    ]
+  },
+  "content": {
+    "footerText": "Toca para reservar tu mesa"
+  },
+  "links": [
+    {
+      "id": "pilot_20_v1_t12_b1",
+      "text": "Reservar mesa",
+      "icon": "fa-regular fa-calendar",
+      "url": "https://example.com/reservar",
+      "actionType": "booking",
+      "fullWidth": true,
+      "waMessage": ""
+    },
+    {
+      "id": "pilot_20_v1_t12_b2",
+      "text": "Ver menú",
+      "icon": "fa-solid fa-globe",
+      "url": "https://example.com/menu",
+      "actionType": "url",
+      "fullWidth": false,
+      "waMessage": ""
+    },
+    {
+      "id": "pilot_20_v1_t12_b3",
+      "text": "Llamar",
+      "icon": "fa-solid fa-phone",
+      "url": "+56224455667",
+      "actionType": "phone",
+      "fullWidth": false,
+      "waMessage": ""
+    }
+  ],
+  "appearance": {
+    "bgImage": "",
+    "bgOverlay": 0,
+    "bgStart": "#000000",
+    "bgMid": "#0a0a0a",
+    "bgEnd": "#111111",
+    "bgAngle": 180,
+    "btnBgStart": "#1a1a1a",
+    "btnBgEnd": "#111111",
+    "btnBorderColor": "#D4AF37",
+    "accentBgStart": "#D4AF37",
+    "accentBgEnd": "#B5952F",
+    "accentIconColor": "#000000",
+    "btnTextColor": "#FFFFFF",
+    "fontLogo": "'Oswald', sans-serif",
+    "fontHeading": "'Oswald', sans-serif",
+    "fontSubtitle": "'Oswald', sans-serif",
+    "fontBody": "'Oswald', sans-serif",
+    "themeId": "black-gold",
+    "btnPresetId": "glass",
+    "textPrimary": "#FFFFFF",
+    "textSubtitle": "#D4AF37",
+    "profileBorderColor": "#D4AF37",
+    "profileRadius": "50%",
+    "btnRadius": "9999px",
+    "banner": {
+      "enabled": true,
+      "heightPreset": "medium",
+      "positionY": 50,
+      "imageOpacity": 80,
+      "fusionPreset": "deep",
+      "fusionStrength": 80
+    }
+  },
+  "layout": {
+    "gridCols": 2,
+    "profileBorder": 3,
+    "profileSize": 185,
+    "logoSize": 3.8,
+    "titleSize": 2.3,
+    "devicePreview": "mobile"
+  }
+}

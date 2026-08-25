@@ -263,7 +263,7 @@ export function TemplateBankGallery() {
   }
 
   return (
-    <div className="min-h-screen bg-[#121212] text-white">
+    <div className="min-h-screen bg-[#121212] text-white pb-28 lg:pb-0">
       <header className="sticky top-0 z-20 border-b border-[#2A2A2A] bg-[#121212]/95 px-4 pb-4 pt-8 backdrop-blur-sm md:px-8">
         <div className="mx-auto flex max-w-7xl flex-col gap-6">
           <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">

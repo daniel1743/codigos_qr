@@ -1,0 +1,124 @@
+{
+  "schemaVersion": 1,
+  "identity": {
+    "logoText": "Navaja",
+    "subtitleText": "BARBER SHOP",
+    "titleText": "ESTILO CLÁSICO",
+    "profileImg": "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?q=80&w=400&auto=format&fit=crop",
+    "bannerImg": "https://images.unsplash.com/photo-1585747860715-2ba37e788b70?q=80&w=1280&auto=format&fit=crop"
+  },
+  "socials": {
+    "enabled": true,
+    "displayMode": "icons",
+    "items": [
+      {
+        "id": "pilot_20_v1_t19_s1",
+        "platform": "instagram",
+        "label": "Instagram",
+        "url": "https://instagram.com/demo.cripqer",
+        "iconId": "instagram",
+        "enabled": true
+      },
+      {
+        "id": "pilot_20_v1_t19_s2",
+        "platform": "tiktok",
+        "label": "TikTok",
+        "url": "https://tiktok.com/@demo.cripqer",
+        "iconId": "tiktok",
+        "enabled": true
+      }
+    ]
+  },
+  "content": {
+    "footerText": "Toca para reservar tu hora"
+  },
+  "links": [
+    {
+      "id": "pilot_20_v1_t19_b1",
+      "text": "Reservar cita",
+      "icon": "fa-regular fa-calendar",
+      "url": "https://example.com/agenda",
+      "actionType": "booking",
+      "fullWidth": true,
+      "waMessage": ""
+    },
+    {
+      "id": "pilot_20_v1_t19_b2",
+      "text": "WhatsApp",
+      "icon": "fa-brands fa-whatsapp",
+      "url": "+56955667788",
+      "actionType": "whatsapp",
+      "fullWidth": false,
+      "waMessage": ""
+    },
+    {
+      "id": "pilot_20_v1_t19_b3",
+      "text": "Servicios",
+      "icon": "fa-solid fa-globe",
+      "url": "https://example.com/servicios",
+      "actionType": "url",
+      "fullWidth": false,
+      "waMessage": ""
+    },
+    {
+      "id": "pilot_20_v1_t19_b4",
+      "text": "Ubicación",
+      "icon": "fa-solid fa-location-dot",
+      "url": "https://maps.google.com/?q=barberia",
+      "actionType": "location",
+      "fullWidth": false,
+      "waMessage": ""
+    },
+    {
+      "id": "pilot_20_v1_t19_b5",
+      "text": "TikTok",
+      "icon": "fa-brands fa-tiktok",
+      "url": "https://tiktok.com/@demo.barber",
+      "actionType": "url",
+      "fullWidth": false,
+      "waMessage": ""
+    }
+  ],
+  "appearance": {
+    "bgImage": "",
+    "bgOverlay": 0,
+    "bgStart": "#121212",
+    "bgMid": "#1a1a1a",
+    "bgEnd": "#0f0f0f",
+    "bgAngle": 180,
+    "btnBgStart": "#222222",
+    "btnBgEnd": "#1a1a1a",
+    "btnBorderColor": "#C0C0C0",
+    "accentBgStart": "#e0e0e0",
+    "accentBgEnd": "#a0a0a0",
+    "accentIconColor": "#121212",
+    "btnTextColor": "#FFFFFF",
+    "fontLogo": "'Cinzel', serif",
+    "fontHeading": "'Poppins', sans-serif",
+    "fontSubtitle": "'Poppins', sans-serif",
+    "fontBody": "'Poppins', sans-serif",
+    "themeId": "black-silver",
+    "btnPresetId": "solid",
+    "textPrimary": "#FFFFFF",
+    "textSubtitle": "#C0C0C0",
+    "profileBorderColor": "#C0C0C0",
+    "profileRadius": "50%",
+    "btnRadius": "16px",
+    "banner": {
+      "enabled": true,
+      "heightPreset": "medium",
+      "positionY": 50,
+      "imageOpacity": 70,
+      "fusionPreset": "deep",
+      "fusionStrength": 90
+    }
+  },
+  "layout": {
+    "gridCols": 1,
+    "profileBorder": 5,
+    "profileSize": 170,
+    "logoSize": 3.5,
+    "titleSize": 1.8,
+    "devicePreview": "mobile"
+  }
+}

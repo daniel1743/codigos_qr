@@ -1,0 +1,19 @@
+{
+  "status": "BLOCKED",
+  "reason": "The mobile bottom nav is rendered only inside the authenticated private shell. This environment does not have a real logged-in Supabase session or test credentials.",
+  "build": {
+    "command": "npm run build",
+    "status": "PASS",
+    "exitCode": 0
+  },
+  "notExecutedScreenshots": [
+    "mobile-nav-template.png",
+    "mobile-nav-qr.png",
+    "mobile-nav-editor.png",
+    "mobile-nav-security.png",
+    "mobile-nav-profile.png",
+    "qr-page-no-landing.png",
+    "bubble-active-375.png",
+    "bubble-active-390.png"
+  ]
+}

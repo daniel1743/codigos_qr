@@ -1,0 +1,226 @@
+{
+  "generatedAt": "2026-08-25T02:03:40.006Z",
+  "publishAllowed": false,
+  "entries": [
+    {
+      "template_id": "tpl-medical-generator-v1-0001",
+      "industry": "medical",
+      "seed": "pilot-20-v1-medical-01",
+      "recipe": "medical_clean",
+      "screenshot_path": "screenshots/medical-01.png",
+      "config_path": "configs/medical-01.json",
+      "qa_score": 1,
+      "qa_findings": [],
+      "recommended_status": "READY_FOR_HUMAN_REVIEW"
+    },
+    {
+      "template_id": "tpl-medical-generator-v1-0002",
+      "industry": "medical",
+      "seed": "pilot-20-v1-medical-02",
+      "recipe": "medical_clean",
+      "screenshot_path": "screenshots/medical-02.png",
+      "config_path": "configs/medical-02.json",
+      "qa_score": 1,
+      "qa_findings": [],
+      "recommended_status": "READY_FOR_HUMAN_REVIEW"
+    },
+    {
+      "template_id": "tpl-medical-generator-v1-0003",
+      "industry": "medical",
+      "seed": "pilot-20-v1-medical-03",
+      "recipe": "medical_clean",
+      "screenshot_path": "screenshots/medical-03.png",
+      "config_path": "configs/medical-03.json",
+      "qa_score": 0.98,
+      "qa_findings": [],
+      "recommended_status": "READY_FOR_HUMAN_REVIEW"
+    },
+    {
+      "template_id": "tpl-medical-generator-v1-0004",
+      "industry": "medical",
+      "seed": "pilot-20-v1-medical-04",
+      "recipe": "medical_clean",
+      "screenshot_path": "screenshots/medical-04.png",
+      "config_path": "configs/medical-04.json",
+      "qa_score": 1,
+      "qa_findings": [],
+      "recommended_status": "READY_FOR_HUMAN_REVIEW"
+    },
+    {
+      "template_id": "tpl-medical-generator-v1-0005",
+      "industry": "medical",
+      "seed": "pilot-20-v1-medical-05",
+      "recipe": "medical_clean",
+      "screenshot_path": "screenshots/medical-05.png",
+      "config_path": "configs/medical-05.json",
+      "qa_score": 1,
+      "qa_findings": [],
+      "recommended_status": "READY_FOR_HUMAN_REVIEW"
+    },
+    {
+      "template_id": "tpl-legal-generator-v1-0006",
+      "industry": "legal",
+      "seed": "pilot-20-v1-legal-01",
+      "recipe": "lawyer_executive",
+      "screenshot_path": "screenshots/legal-01.png",
+      "config_path": "configs/legal-01.json",
+      "qa_score": 1,
+      "qa_findings": [],
+      "recommended_status": "READY_FOR_HUMAN_REVIEW"
+    },
+    {
+      "template_id": "tpl-legal-generator-v1-0007",
+      "industry": "legal",
+      "seed": "pilot-20-v1-legal-02",
+      "recipe": "lawyer_executive",
+      "screenshot_path": "screenshots/legal-02.png",
+      "config_path": "configs/legal-02.json",
+      "qa_score": 1,
+      "qa_findings": [],
+      "recommended_status": "READY_FOR_HUMAN_REVIEW"
+    },
+    {
+      "template_id": "tpl-legal-generator-v1-0008",
+      "industry": "legal",
+      "seed": "pilot-20-v1-legal-03",
+      "recipe": "lawyer_executive",
+      "screenshot_path": "screenshots/legal-03.png",
+      "config_path": "configs/legal-03.json",
+      "qa_score": 1,
+      "qa_findings": [],
+      "recommended_status": "READY_FOR_HUMAN_REVIEW"
+    },
+    {
+      "template_id": "tpl-legal-generator-v1-0009",
+      "industry": "legal",
+      "seed": "pilot-20-v1-legal-04",
+      "recipe": "lawyer_executive",
+      "screenshot_path": "screenshots/legal-04.png",
+      "config_path": "configs/legal-04.json",
+      "qa_score": 0.98,
+      "qa_findings": [],
+      "recommended_status": "READY_FOR_HUMAN_REVIEW"
+    },
+    {
+      "template_id": "tpl-legal-generator-v1-0010",
+      "industry": "legal",
+      "seed": "pilot-20-v1-legal-05",
+      "recipe": "lawyer_executive",
+      "screenshot_path": "screenshots/legal-05.png",
+      "config_path": "configs/legal-05.json",
+      "qa_score": 0.98,
+      "qa_findings": [],
+      "recommended_status": "READY_FOR_HUMAN_REVIEW"
+    },
+    {
+      "template_id": "tpl-restaurant-generator-v1-0011",
+      "industry": "restaurant",
+      "seed": "pilot-20-v1-restaurant-01",
+      "recipe": "restaurant_premium",
+      "screenshot_path": "screenshots/restaurant-01.png",
+      "config_path": "configs/restaurant-01.json",
+      "qa_score": 0.98,
+      "qa_findings": [],
+      "recommended_status": "READY_FOR_HUMAN_REVIEW"
+    },
+    {
+      "template_id": "tpl-restaurant-generator-v1-0012",
+      "industry": "restaurant",
+      "seed": "pilot-20-v1-restaurant-02",
+      "recipe": "restaurant_premium",
+      "screenshot_path": "screenshots/restaurant-02.png",
+      "config_path": "configs/restaurant-02.json",
+      "qa_score": 1,
+      "qa_findings": [],
+      "recommended_status": "READY_FOR_HUMAN_REVIEW"
+    },
+    {
+      "template_id": "tpl-restaurant-generator-v1-0013",
+      "industry": "restaurant",
+      "seed": "pilot-20-v1-restaurant-03",
+      "recipe": "restaurant_premium",
+      "screenshot_path": "screenshots/restaurant-03.png",
+      "config_path": "configs/restaurant-03.json",
+      "qa_score": 1,
+      "qa_findings": [],
+      "recommended_status": "READY_FOR_HUMAN_REVIEW"
+    },
+    {
+      "template_id": "tpl-restaurant-generator-v1-0014",
+      "industry": "restaurant",
+      "seed": "pilot-20-v1-restaurant-04",
+      "recipe": "restaurant_premium",
+      "screenshot_path": "screenshots/restaurant-04.png",
+      "config_path": "configs/restaurant-04.json",
+      "qa_score": 1,
+      "qa_findings": [],
+      "recommended_status": "READY_FOR_HUMAN_REVIEW"
+    },
+    {
+      "template_id": "tpl-restaurant-generator-v1-0015",
+      "industry": "restaurant",
+      "seed": "pilot-20-v1-restaurant-05",
+      "recipe": "restaurant_premium",
+      "screenshot_path": "screenshots/restaurant-05.png",
+      "config_path": "configs/restaurant-05.json",
+      "qa_score": 1,
+      "qa_findings": [],
+      "recommended_status": "READY_FOR_HUMAN_REVIEW"
+    },
+    {
+      "template_id": "tpl-barber-generator-v1-0016",
+      "industry": "barber",
+      "seed": "pilot-20-v1-barber-01",
+      "recipe": "barber_modern",
+      "screenshot_path": "screenshots/barber-01.png",
+      "config_path": "configs/barber-01.json",
+      "qa_score": 1,
+      "qa_findings": [],
+      "recommended_status": "READY_FOR_HUMAN_REVIEW"
+    },
+    {
+      "template_id": "tpl-barber-generator-v1-0017",
+      "industry": "barber",
+      "seed": "pilot-20-v1-barber-02",
+      "recipe": "barber_modern",
+      "screenshot_path": "screenshots/barber-02.png",
+      "config_path": "configs/barber-02.json",
+      "qa_score": 1,
+      "qa_findings": [],
+      "recommended_status": "READY_FOR_HUMAN_REVIEW"
+    },
+    {
+      "template_id": "tpl-barber-generator-v1-0018",
+      "industry": "barber",
+      "seed": "pilot-20-v1-barber-03",
+      "recipe": "barber_modern",
+      "screenshot_path": "screenshots/barber-03.png",
+      "config_path": "configs/barber-03.json",
+      "qa_score": 1,
+      "qa_findings": [],
+      "recommended_status": "READY_FOR_HUMAN_REVIEW"
+    },
+    {
+      "template_id": "tpl-barber-generator-v1-0019",
+      "industry": "barber",
+      "seed": "pilot-20-v1-barber-04",
+      "recipe": "barber_modern",
+      "screenshot_path": "screenshots/barber-04.png",
+      "config_path": "configs/barber-04.json",
+      "qa_score": 1,
+      "qa_findings": [],
+      "recommended_status": "READY_FOR_HUMAN_REVIEW"
+    },
+    {
+      "template_id": "tpl-barber-generator-v1-0020",
+      "industry": "barber",
+      "seed": "pilot-20-v1-barber-05",
+      "recipe": "barber_modern",
+      "screenshot_path": "screenshots/barber-05.png",
+      "config_path": "configs/barber-05.json",
+      "qa_score": 1,
+      "qa_findings": [],
+      "recommended_status": "READY_FOR_HUMAN_REVIEW"
+    }
+  ]
+}

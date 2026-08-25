@@ -1,0 +1,9 @@
+{
+  "command": "GET /rest/v1/admin_users?select=user_id&limit=1 as anon",
+  "url": "https://mlinfiuhkxdhlveflbkj.supabase.co/rest/v1/admin_users?select=user_id&limit=1",
+  "executedAt": "2026-08-25T01:36:48.1576035Z",
+  "ok": true,
+  "statusCode": 200,
+  "response": [],
+  "error": null
+}

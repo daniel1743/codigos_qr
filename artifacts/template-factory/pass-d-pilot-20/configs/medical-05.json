@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "identity": {
+    "logoText": "Centro Vitalis",
+    "subtitleText": "MEDICINA INTERNA",
+    "titleText": "DR. MARTÍN SOLÍS",
+    "profileImg": "https://images.unsplash.com/photo-1622253692010-333f2da6031d?q=80&w=400&auto=format&fit=crop",
+    "bannerImg": "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=1280&auto=format&fit=crop"
+  },
+  "socials": {
+    "enabled": true,
+    "displayMode": "icons",
+    "items": [
+      {
+        "id": "pilot_20_v1_t4_s1",
+        "platform": "email",
+        "label": "Email",
+        "url": "contacto@example.com",
+        "iconId": "email",
+        "enabled": true
+      }
+    ]
+  },
+  "content": {
+    "footerText": "Estamos para atenderte"
+  },
+  "links": [
+    {
+      "id": "pilot_20_v1_t4_b1",
+      "text": "Reservar consulta",
+      "icon": "fa-regular fa-calendar",
+      "url": "https://example.com/reservas",
+      "actionType": "booking",
+      "fullWidth": true,
+      "waMessage": ""
+    },
+    {
+      "id": "pilot_20_v1_t4_b2",
+      "text": "WhatsApp",
+      "icon": "fa-brands fa-whatsapp",
+      "url": "+56912345678",
+      "actionType": "whatsapp",
+      "fullWidth": false,
+      "waMessage": ""
+    },
+    {
+      "id": "pilot_20_v1_t4_b3",
+      "text": "Convenios",
+      "icon": "fa-solid fa-globe",
+      "url": "https://example.com/convenios",
+      "actionType": "url",
+      "fullWidth": false,
+      "waMessage": ""
+    },
+    {
+      "id": "pilot_20_v1_t4_b4",
+      "text": "Ubicación",
+      "icon": "fa-solid fa-location-dot",
+      "url": "https://maps.google.com/?q=clinica",
+      "actionType": "location",
+      "fullWidth": false,
+      "waMessage": ""
+    },
+    {
+      "id": "pilot_20_v1_t4_b5",
+      "text": "Instagram",
+      "icon": "fa-brands fa-instagram",
+      "url": "https://instagram.com/demo.clinica",
+      "actionType": "url",
+      "fullWidth": false,
+      "waMessage": ""
+    }
+  ],
+  "appearance": {
+    "bgImage": "",
+    "bgOverlay": 0,
+    "bgStart": "#001f3f",
+    "bgMid": "#002b59",
+    "bgEnd": "#001122",
+    "bgAngle": 180,
+    "btnBgStart": "#003366",
+    "btnBgEnd": "#001f3f",
+    "btnBorderColor": "#0074D9",
+    "accentBgStart": "#7FDBFF",
+    "accentBgEnd": "#39CCCC",
+    "accentIconColor": "#001f3f",
+    "btnTextColor": "#FFFFFF",
+    "fontLogo": "'Oswald', sans-serif",
+    "fontHeading": "'Oswald', sans-serif",
+    "fontSubtitle": "'Oswald', sans-serif",
+    "fontBody": "'Oswald', sans-serif",
+    "themeId": "executive-blue",
+    "btnPresetId": "premium",
+    "textPrimary": "#FFFFFF",
+    "textSubtitle": "#7FDBFF",
+    "profileBorderColor": "#7FDBFF",
+    "profileRadius": "50%",
+    "btnRadius": "9999px",
+    "banner": {
+      "enabled": true,
+      "heightPreset": "medium",
+      "positionY": 50,
+      "imageOpacity": 90,
+      "fusionPreset": "medium",
+      "fusionStrength": 70
+    }
+  },
+  "layout": {
+    "gridCols": 1,
+    "profileBorder": 4,
+    "profileSize": 165,
+    "logoSize": 3.8,
+    "titleSize": 2.2,
+    "devicePreview": "mobile"
+  }
+}

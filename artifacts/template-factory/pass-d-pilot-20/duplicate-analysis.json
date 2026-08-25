@@ -1,0 +1,159 @@
+{
+  "generatedAt": "2026-08-25T02:03:39.957Z",
+  "exactDuplicates": 0,
+  "nearDuplicates": [],
+  "variation": {
+    "medical": {
+      "count": 5,
+      "themes": [
+        "premium-white",
+        "executive-blue"
+      ],
+      "buttonPresets": [
+        "premium",
+        "outline",
+        "solid"
+      ],
+      "layouts": [
+        "list"
+      ],
+      "typography": [
+        "'Oswald', sans-serif / 'Poppins', sans-serif",
+        "'Montserrat', sans-serif / 'Montserrat', sans-serif",
+        "'Playfair Display', serif / 'Poppins', sans-serif",
+        "'Cinzel', serif / 'Oswald', sans-serif",
+        "'Oswald', sans-serif / 'Oswald', sans-serif"
+      ],
+      "buttonCounts": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "hashes": [
+        "53b03940",
+        "743813a6",
+        "ebf9c25b",
+        "32d94e46",
+        "46a95bea"
+      ],
+      "verdict": "PASS"
+    },
+    "legal": {
+      "count": 5,
+      "themes": [
+        "black-gold",
+        "executive-blue",
+        "graphite"
+      ],
+      "buttonPresets": [
+        "outline",
+        "premium",
+        "minimal"
+      ],
+      "layouts": [
+        "list",
+        "grid"
+      ],
+      "typography": [
+        "'Cinzel', serif / 'Montserrat', sans-serif",
+        "'Cinzel', serif / 'Oswald', sans-serif",
+        "'Playfair Display', serif / 'Poppins', sans-serif",
+        "'Playfair Display', serif / 'Montserrat', sans-serif",
+        "'Cinzel', serif / 'Inter', sans-serif"
+      ],
+      "buttonCounts": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "hashes": [
+        "0a2ab71e",
+        "7428ac4f",
+        "19d346eb",
+        "d81af56c",
+        "89e9f1e2"
+      ],
+      "verdict": "PASS"
+    },
+    "restaurant": {
+      "count": 5,
+      "themes": [
+        "burgundy-elegant",
+        "black-gold",
+        "ivory-gold"
+      ],
+      "buttonPresets": [
+        "glass",
+        "solid",
+        "premium"
+      ],
+      "layouts": [
+        "list",
+        "grid"
+      ],
+      "typography": [
+        "'Cinzel', serif / 'Montserrat', sans-serif",
+        "'Oswald', sans-serif / 'Montserrat', sans-serif",
+        "'Oswald', sans-serif / 'Oswald', sans-serif",
+        "'Montserrat', sans-serif / 'Poppins', sans-serif"
+      ],
+      "buttonCounts": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "hashes": [
+        "56702a9f",
+        "b9aa20f6",
+        "db05a6b9",
+        "1a3ab88f",
+        "38544a3f"
+      ],
+      "verdict": "PASS"
+    },
+    "barber": {
+      "count": 5,
+      "themes": [
+        "black-gold",
+        "black-silver",
+        "graphite"
+      ],
+      "buttonPresets": [
+        "solid",
+        "soft",
+        "minimal"
+      ],
+      "layouts": [
+        "list",
+        "grid"
+      ],
+      "typography": [
+        "'Playfair Display', serif / 'Montserrat', sans-serif",
+        "'Cinzel', serif / 'Poppins', sans-serif",
+        "'Playfair Display', serif / 'Inter', sans-serif"
+      ],
+      "buttonCounts": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "hashes": [
+        "dcd974dd",
+        "f78dc5b8",
+        "a5bc7d23",
+        "630fbb00",
+        "ab9f470c"
+      ],
+      "verdict": "PASS"
+    }
+  },
+  "verdict": "PASS"
+}

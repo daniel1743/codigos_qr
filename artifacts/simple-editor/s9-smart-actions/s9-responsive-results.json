@@ -1,0 +1,10 @@
+[
+  {
+    "test": "Controls fit at iPhone 13 (375x812)",
+    "status": "PASS"
+  },
+  {
+    "test": "Controls fit at Desktop (1280x800)",
+    "status": "PASS"
+  }
+]

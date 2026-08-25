@@ -1,0 +1,124 @@
+{
+  "schemaVersion": 1,
+  "identity": {
+    "logoText": "Clínica Aurora",
+    "subtitleText": "MEDICINA GENERAL",
+    "titleText": "DRA. ELENA VARGAS",
+    "profileImg": "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?q=80&w=400&auto=format&fit=crop",
+    "bannerImg": "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=1280&auto=format&fit=crop"
+  },
+  "socials": {
+    "enabled": true,
+    "displayMode": "icons",
+    "items": [
+      {
+        "id": "rec02_authorized_8_t1_s1",
+        "platform": "whatsapp",
+        "label": "WhatsApp",
+        "url": "https://wa.me/56900000000",
+        "iconId": "whatsapp",
+        "enabled": true
+      },
+      {
+        "id": "rec02_authorized_8_t1_s2",
+        "platform": "instagram",
+        "label": "Instagram",
+        "url": "https://instagram.com/demo.cripqer",
+        "iconId": "instagram",
+        "enabled": true
+      }
+    ]
+  },
+  "content": {
+    "footerText": "Reserva tu consulta en línea"
+  },
+  "links": [
+    {
+      "id": "rec02_authorized_8_t1_b1",
+      "text": "Reservar consulta",
+      "icon": "fa-regular fa-calendar",
+      "url": "https://example.com/reservas",
+      "actionType": "booking",
+      "fullWidth": true,
+      "waMessage": ""
+    },
+    {
+      "id": "rec02_authorized_8_t1_b2",
+      "text": "Llamar",
+      "icon": "fa-solid fa-phone",
+      "url": "+56221234567",
+      "actionType": "phone",
+      "fullWidth": false,
+      "waMessage": ""
+    },
+    {
+      "id": "rec02_authorized_8_t1_b3",
+      "text": "Convenios",
+      "icon": "fa-solid fa-globe",
+      "url": "https://example.com/convenios",
+      "actionType": "url",
+      "fullWidth": false,
+      "waMessage": ""
+    },
+    {
+      "id": "rec02_authorized_8_t1_b4",
+      "text": "Ubicación",
+      "icon": "fa-solid fa-location-dot",
+      "url": "https://maps.google.com/?q=clinica",
+      "actionType": "location",
+      "fullWidth": false,
+      "waMessage": ""
+    },
+    {
+      "id": "rec02_authorized_8_t1_b5",
+      "text": "Instagram",
+      "icon": "fa-brands fa-instagram",
+      "url": "https://instagram.com/demo.clinica",
+      "actionType": "url",
+      "fullWidth": false,
+      "waMessage": ""
+    }
+  ],
+  "appearance": {
+    "bgImage": "",
+    "bgOverlay": 0,
+    "bgStart": "#FFFFFF",
+    "bgMid": "#FAFAFA",
+    "bgEnd": "#F0F0F0",
+    "bgAngle": 180,
+    "btnBgStart": "#FFFFFF",
+    "btnBgEnd": "#F9F9F9",
+    "btnBorderColor": "#DDDDDD",
+    "accentBgStart": "#222222",
+    "accentBgEnd": "#000000",
+    "accentIconColor": "#FFFFFF",
+    "btnTextColor": "#111111",
+    "fontLogo": "'Cinzel', serif",
+    "fontHeading": "'Oswald', sans-serif",
+    "fontSubtitle": "'Oswald', sans-serif",
+    "fontBody": "'Oswald', sans-serif",
+    "themeId": "premium-white",
+    "btnPresetId": "outline",
+    "textPrimary": "#111111",
+    "textSubtitle": "#555555",
+    "profileBorderColor": "#E0E0E0",
+    "profileRadius": "50%",
+    "btnRadius": "9999px",
+    "banner": {
+      "enabled": true,
+      "heightPreset": "medium",
+      "positionY": 50,
+      "imageOpacity": 100,
+      "fusionPreset": "soft",
+      "fusionStrength": 30
+    }
+  },
+  "layout": {
+    "gridCols": 1,
+    "profileBorder": 2,
+    "profileSize": 155,
+    "logoSize": 2.8,
+    "titleSize": 2.6,
+    "devicePreview": "mobile"
+  }
+}
