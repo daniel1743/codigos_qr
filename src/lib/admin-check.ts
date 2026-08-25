@@ -1,5 +1,16 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+function isExpectedAdminAccessDenial(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+  const record = error as Record<string, unknown>;
+  return (
+    record["status"] === 401 ||
+    record["code"] === "401" ||
+    record["code"] === "42501" ||
+    record["code"] === "PGRST301"
+  );
+}
+
 /**
  * Verificar si un usuario es administrador
  */
@@ -12,7 +23,9 @@ export async function isUserAdmin(supabase: SupabaseClient, userId: string): Pro
       .maybeSingle();
 
     if (error) {
-      console.error("Error checking admin status:", error);
+      if (!isExpectedAdminAccessDenial(error)) {
+        console.error("Error checking admin status:", error);
+      }
       return false;
     }
 

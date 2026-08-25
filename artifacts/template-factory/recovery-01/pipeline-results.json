@@ -1,5 +1,5 @@
 {
-  "executedAt": "2026-08-25T02:04:58.117Z",
+  "executedAt": "2026-08-25T14:51:56.762Z",
   "rendererUrl": "file:// public/template-builder.html",
   "matrix": [
     {
@@ -41,8 +41,8 @@
       "buttonCount": 1,
       "seed": "rec01-m1",
       "templateId": "tpl-medical-generator-v1-0001",
-      "configHash": "218ae74f",
-      "themeId": "emerald-luxury",
+      "configHash": "2e55b3ba",
+      "themeId": "executive-blue",
       "btnPresetId": "solid",
       "steps": {
         "step1_generate": true,
@@ -125,7 +125,7 @@
       "buttonCount": 5,
       "seed": "rec01-m5",
       "templateId": "tpl-medical-generator-v1-0001",
-      "configHash": "e94c5e42",
+      "configHash": "7d3a49e8",
       "themeId": "emerald-luxury",
       "btnPresetId": "solid",
       "steps": {
@@ -209,8 +209,8 @@
       "buttonCount": 3,
       "seed": "rec01-l3",
       "templateId": "tpl-legal-generator-v1-0001",
-      "configHash": "7ee759cf",
-      "themeId": "executive-blue",
+      "configHash": "54104f3d",
+      "themeId": "burgundy-elegant",
       "btnPresetId": "outline",
       "steps": {
         "step1_generate": true,
@@ -293,8 +293,8 @@
       "buttonCount": 4,
       "seed": "rec01-r4",
       "templateId": "tpl-restaurant-generator-v1-0001",
-      "configHash": "77354113",
-      "themeId": "ivory-gold",
+      "configHash": "6877dff8",
+      "themeId": "burgundy-elegant",
       "btnPresetId": "glass",
       "steps": {
         "step1_generate": true,
@@ -320,7 +320,7 @@
       "nonSerializable": [],
       "renderedButtonCount": 4,
       "renderedTitle": "COCINA A LA LEÑA",
-      "serializedBytes": 2551,
+      "serializedBytes": 2556,
       "editorRoundTripDifferences": [],
       "viewports": [
         {
@@ -377,7 +377,7 @@
       "buttonCount": 2,
       "seed": "rec01-b2",
       "templateId": "tpl-barber-generator-v1-0001",
-      "configHash": "fac11abc",
+      "configHash": "ae913d6c",
       "themeId": "black-gold",
       "btnPresetId": "outline",
       "steps": {
@@ -464,8 +464,8 @@
   ],
   "medicalVariation": {
     "hashes": [
-      "218ae74f",
-      "e94c5e42"
+      "2e55b3ba",
+      "7d3a49e8"
     ],
     "allDifferent": true
   },

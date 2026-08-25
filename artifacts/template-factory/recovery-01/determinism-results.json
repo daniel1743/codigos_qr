@@ -1,5 +1,5 @@
 {
-  "executedAt": "2026-08-25T02:04:35.200Z",
+  "executedAt": "2026-08-25T14:51:44.731Z",
   "test1": {
     "input": {
       "industry": "medical",
@@ -9,8 +9,8 @@
     },
     "ranTwice": true,
     "sameSeedIdentical": true,
-    "hashA": "6d28d508",
-    "hashB": "6d28d508",
+    "hashA": "5fdfb46a",
+    "hashB": "5fdfb46a",
     "hashesMatch": true,
     "differences": []
   },
@@ -19,7 +19,7 @@
       "seed": "cripqer-audit-seed-999"
     },
     "differentSeedDiffers": true,
-    "hashC": "ded200e6",
+    "hashC": "235cbc4b",
     "differenceCount": 32,
     "sampleDifferences": [
       "identity.logoText: \"Salud Integral\" vs \"Clínica Aurora\"",
@@ -30,10 +30,10 @@
       "content.footerText: \"Toca para agendar tu hora\" vs \"Estamos para atenderte\"",
       "links[2].text: \"Especialidades\" vs \"Convenios\"",
       "links[2].url: \"https://example.com/especialidades\" vs \"https://example.com/convenios\"",
-      "appearance.bgStart: \"#FFFFFF\" vs \"#001f3f\"",
-      "appearance.bgMid: \"#FAFAFA\" vs \"#002b59\"",
-      "appearance.bgEnd: \"#F0F0F0\" vs \"#001122\"",
-      "appearance.btnBgStart: \"#FFFFFF\" vs \"#003366\""
+      "appearance.bgStart: \"#061B33\" vs \"#FFF7F4\"",
+      "appearance.bgMid: \"#0E2B4D\" vs \"#FFFFFF\"",
+      "appearance.bgEnd: \"#061B33\" vs \"#FFF7F4\"",
+      "appearance.btnBgStart: \"#0E2B4D\" vs \"#FFFFFF\""
     ]
   },
   "verdict": "PASS"

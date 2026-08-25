@@ -90,16 +90,16 @@
   "appearance": {
     "bgImage": "",
     "bgOverlay": 0,
-    "bgStart": "#000000",
-    "bgMid": "#0a0a0a",
-    "bgEnd": "#111111",
+    "bgStart": "#030303",
+    "bgMid": "#14110A",
+    "bgEnd": "#030303",
     "bgAngle": 180,
-    "btnBgStart": "#1a1a1a",
-    "btnBgEnd": "#111111",
+    "btnBgStart": "#14110A",
+    "btnBgEnd": "#030303",
     "btnBorderColor": "#D4AF37",
     "accentBgStart": "#D4AF37",
-    "accentBgEnd": "#B5952F",
-    "accentIconColor": "#000000",
+    "accentBgEnd": "#F0D98A",
+    "accentIconColor": "#030303",
     "btnTextColor": "#FFFFFF",
     "fontLogo": "'Montserrat', sans-serif",
     "fontHeading": "'Poppins', sans-serif",
@@ -116,9 +116,9 @@
       "enabled": false,
       "heightPreset": "medium",
       "positionY": 50,
-      "imageOpacity": 80,
+      "imageOpacity": 82,
       "fusionPreset": "deep",
-      "fusionStrength": 80
+      "fusionStrength": 82
     }
   },
   "layout": {

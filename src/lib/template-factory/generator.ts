@@ -34,16 +34,22 @@ import {
   type Recipe,
 } from "./recipes";
 import {
+  paletteToThemeAppearance,
+  selectTemplatePalette,
+  type SemanticPaletteTokens,
+  type TemplatePaletteId,
+} from "./palettes";
+import {
   ACTION_DEFAULT_ICON,
   BUTTON_PRESET_IDS,
   FONT_HEADING_VALUES,
   FONT_LOGO_VALUES,
   SOCIAL_PLATFORM_LABELS,
-  THEME_APPEARANCE,
   isKnownIcon,
   type ButtonPresetId,
   type SocialPlatformId,
   type ThemeId,
+  THEME_APPEARANCE,
 } from "./registries";
 import { SeededRandom, deriveSeed, stableHash } from "./seed";
 
@@ -75,6 +81,8 @@ export interface ResolvedGenerationParameters {
   buttonCount: ButtonCount;
   themeId: ThemeId;
   buttonPresetId: ButtonPresetId;
+  paletteId: TemplatePaletteId;
+  paletteTokens: SemanticPaletteTokens;
   seed: string | number;
   seedValue: number;
   batchId: string;
@@ -103,6 +111,8 @@ export interface GeneratedTemplate {
     style: string;
     themeId: ThemeId;
     buttonPresetId: ButtonPresetId;
+    paletteId: TemplatePaletteId;
+    paletteTokens: SemanticPaletteTokens;
     layout: string;
     buttonCount: ButtonCount;
     batchId: string;
@@ -174,10 +184,21 @@ export function generateTemplate(input: GenerateTemplateInput): GeneratedTemplat
   const titleSize = Number((rng.int(18, 26) / 10).toFixed(1)); // 1.8..2.6 rem
   const fontLogo = rng.pick(FONT_LOGO_VALUES);
   const fontHeading = rng.pick(FONT_HEADING_VALUES);
+  const layoutKind = gridCols === 1 ? "list" : "grid";
+  const palette = selectTemplatePalette({
+    industry: input.industry,
+    style: recipe.style,
+    layout: layoutKind,
+    modePreference: "auto",
+    seed: input.seed,
+    batchId: input.batchId,
+    index,
+  });
+  const paletteAppearance = paletteToThemeAppearance(palette);
+  const resolvedThemeId = palette.preferredThemeId;
 
   // 8. Ensamblado sobre defaults canónicos -------------------------------
   const config = cloneDefaults();
-  const themeAppearance = THEME_APPEARANCE[themeId];
 
   config.identity = {
     logoText: identity.logoText,
@@ -192,14 +213,15 @@ export function generateTemplate(input: GenerateTemplateInput): GeneratedTemplat
 
   config.appearance = {
     ...config.appearance,
-    ...themeAppearance,
+    ...THEME_APPEARANCE[themeId],
+    ...paletteAppearance,
     banner: {
-      ...themeAppearance.banner,
+      ...paletteAppearance.banner,
       // Sin imagen de banner, el bloque queda deshabilitado para no dejar una
       // franja de máscara vacía sobre el fondo.
-      enabled: Boolean(banner) && themeAppearance.banner.enabled,
+      enabled: Boolean(banner) && paletteAppearance.banner.enabled,
     },
-    themeId,
+    themeId: resolvedThemeId,
     btnPresetId: buttonPresetId,
     profileRadius,
     btnRadius,
@@ -230,8 +252,10 @@ export function generateTemplate(input: GenerateTemplateInput): GeneratedTemplat
     industry: input.industry,
     recipeId: recipe.id,
     buttonCount,
-    themeId,
+    themeId: resolvedThemeId,
     buttonPresetId,
+    paletteId: palette.id,
+    paletteTokens: palette.tokens,
     seed: input.seed,
     seedValue: rng.seedValue,
     batchId: input.batchId,
@@ -258,9 +282,11 @@ export function generateTemplate(input: GenerateTemplateInput): GeneratedTemplat
       uiIndustry: dataset.uiName,
       category: dataset.category,
       style: recipe.style,
-      themeId,
+      themeId: resolvedThemeId,
       buttonPresetId,
-      layout: gridCols === 1 ? "list" : "grid",
+      paletteId: palette.id,
+      paletteTokens: palette.tokens,
+      layout: layoutKind,
       buttonCount,
       batchId: input.batchId,
       generatorVersion: GENERATOR_VERSION,

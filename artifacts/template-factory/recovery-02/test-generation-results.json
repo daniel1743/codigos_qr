@@ -1,5 +1,5 @@
 {
-  "executedAt": "2026-08-25T02:05:15.769Z",
+  "executedAt": "2026-08-25T14:52:09.615Z",
   "matrix": [
     {
       "industry": "medical",
@@ -65,8 +65,8 @@
       "seed": "rec02-medical-01",
       "buttonCount": 2,
       "templateId": "tpl-medical-generator-v1-0001",
-      "configHash": "34943644",
-      "themeId": "executive-blue",
+      "configHash": "8216d624",
+      "themeId": "platinum",
       "buttonPresetId": "premium",
       "content": {
         "titleText": "DR. ANDRÉS PARRA",
@@ -81,7 +81,7 @@
         "errors": []
       },
       "serialization": {
-        "bytes": 1945,
+        "bytes": 1937,
         "nonSerializable": []
       },
       "renderer": {
@@ -164,35 +164,35 @@
             "appearance": {
               "bgImage": "",
               "bgOverlay": 0,
-              "bgStart": "#001f3f",
-              "bgMid": "#002b59",
-              "bgEnd": "#001122",
+              "bgStart": "#F7F8FA",
+              "bgMid": "#FFFFFF",
+              "bgEnd": "#F7F8FA",
               "bgAngle": 180,
-              "btnBgStart": "#003366",
-              "btnBgEnd": "#001f3f",
-              "btnBorderColor": "#0074D9",
-              "accentBgStart": "#7FDBFF",
-              "accentBgEnd": "#39CCCC",
-              "accentIconColor": "#001f3f",
-              "btnTextColor": "#FFFFFF",
+              "btnBgStart": "#FFFFFF",
+              "btnBgEnd": "#F7F8FA",
+              "btnBorderColor": "#C8CDD3",
+              "accentBgStart": "#7F8791",
+              "accentBgEnd": "#E7EAEE",
+              "accentIconColor": "#20242A",
+              "btnTextColor": "#20242A",
               "fontLogo": "'Montserrat', sans-serif",
               "fontHeading": "'Poppins', sans-serif",
               "fontSubtitle": "'Poppins', sans-serif",
               "fontBody": "'Poppins', sans-serif",
-              "themeId": "executive-blue",
+              "themeId": "platinum",
               "btnPresetId": "premium",
-              "textPrimary": "#FFFFFF",
-              "textSubtitle": "#7FDBFF",
-              "profileBorderColor": "#7FDBFF",
+              "textPrimary": "#20242A",
+              "textSubtitle": "#626A73",
+              "profileBorderColor": "#C8CDD3",
               "profileRadius": "50%",
               "btnRadius": "16px",
               "banner": {
                 "enabled": true,
                 "heightPreset": "medium",
                 "positionY": 50,
-                "imageOpacity": 90,
-                "fusionPreset": "medium",
-                "fusionStrength": 70
+                "imageOpacity": 96,
+                "fusionPreset": "soft",
+                "fusionStrength": 42
               }
             },
             "layout": {
@@ -264,7 +264,7 @@
       "screenshotPath": "screenshots/medical-01.png",
       "screenshot": {
         "exists": true,
-        "sizeBytes": 154337,
+        "sizeBytes": 156641,
         "pngReadable": true
       },
       "publicationStatus": "GENERATED_PRIVATE",
@@ -278,8 +278,8 @@
       "seed": "rec02-medical-02",
       "buttonCount": 5,
       "templateId": "tpl-medical-generator-v1-0002",
-      "configHash": "128b2cab",
-      "themeId": "premium-white",
+      "configHash": "2d1d7267",
+      "themeId": "rose-gold",
       "buttonPresetId": "outline",
       "content": {
         "titleText": "DRA. ELENA VARGAS",
@@ -297,7 +297,7 @@
         "errors": []
       },
       "serialization": {
-        "bytes": 2480,
+        "bytes": 2475,
         "nonSerializable": []
       },
       "renderer": {
@@ -410,35 +410,35 @@
             "appearance": {
               "bgImage": "",
               "bgOverlay": 0,
-              "bgStart": "#FFFFFF",
-              "bgMid": "#FAFAFA",
-              "bgEnd": "#F0F0F0",
+              "bgStart": "#FFF7F4",
+              "bgMid": "#FFFFFF",
+              "bgEnd": "#FFF7F4",
               "bgAngle": 180,
               "btnBgStart": "#FFFFFF",
-              "btnBgEnd": "#F9F9F9",
-              "btnBorderColor": "#DDDDDD",
-              "accentBgStart": "#222222",
-              "accentBgEnd": "#000000",
-              "accentIconColor": "#FFFFFF",
-              "btnTextColor": "#111111",
+              "btnBgEnd": "#FFF7F4",
+              "btnBorderColor": "#C996A0",
+              "accentBgStart": "#B76E79",
+              "accentBgEnd": "#F2C8D0",
+              "accentIconColor": "#3D3032",
+              "btnTextColor": "#3D3032",
               "fontLogo": "'Cinzel', serif",
               "fontHeading": "'Oswald', sans-serif",
               "fontSubtitle": "'Oswald', sans-serif",
               "fontBody": "'Oswald', sans-serif",
-              "themeId": "premium-white",
+              "themeId": "rose-gold",
               "btnPresetId": "outline",
-              "textPrimary": "#111111",
-              "textSubtitle": "#555555",
-              "profileBorderColor": "#E0E0E0",
+              "textPrimary": "#3D3032",
+              "textSubtitle": "#A86672",
+              "profileBorderColor": "#C996A0",
               "profileRadius": "50%",
               "btnRadius": "9999px",
               "banner": {
                 "enabled": true,
                 "heightPreset": "medium",
                 "positionY": 50,
-                "imageOpacity": 100,
+                "imageOpacity": 96,
                 "fusionPreset": "soft",
-                "fusionStrength": 30
+                "fusionStrength": 42
               }
             },
             "layout": {
@@ -510,7 +510,7 @@
       "screenshotPath": "screenshots/medical-02.png",
       "screenshot": {
         "exists": true,
-        "sizeBytes": 148442,
+        "sizeBytes": 152778,
         "pngReadable": true
       },
       "publicationStatus": "GENERATED_PRIVATE",
@@ -524,8 +524,8 @@
       "seed": "rec02-legal-01",
       "buttonCount": 2,
       "templateId": "tpl-legal-generator-v1-0003",
-      "configHash": "9ce2cd25",
-      "themeId": "graphite",
+      "configHash": "d113aae1",
+      "themeId": "executive-blue",
       "buttonPresetId": "minimal",
       "content": {
         "titleText": "DR. TOMÁS MARÍN",
@@ -540,7 +540,7 @@
         "errors": []
       },
       "serialization": {
-        "bytes": 1993,
+        "bytes": 1997,
         "nonSerializable": []
       },
       "renderer": {
@@ -631,35 +631,35 @@
             "appearance": {
               "bgImage": "",
               "bgOverlay": 0,
-              "bgStart": "#2b2b2b",
-              "bgMid": "#333333",
-              "bgEnd": "#1a1a1a",
+              "bgStart": "#071C38",
+              "bgMid": "#102D52",
+              "bgEnd": "#071C38",
               "bgAngle": 180,
-              "btnBgStart": "#444444",
-              "btnBgEnd": "#2b2b2b",
-              "btnBorderColor": "#555555",
-              "accentBgStart": "#ffffff",
-              "accentBgEnd": "#e0e0e0",
-              "accentIconColor": "#111111",
+              "btnBgStart": "#102D52",
+              "btnBgEnd": "#071C38",
+              "btnBorderColor": "#3D78AA",
+              "accentBgStart": "#6CA8D7",
+              "accentBgEnd": "#C9E3F4",
+              "accentIconColor": "#071C38",
               "btnTextColor": "#FFFFFF",
               "fontLogo": "'Montserrat', sans-serif",
               "fontHeading": "'Inter', sans-serif",
               "fontSubtitle": "'Inter', sans-serif",
               "fontBody": "'Inter', sans-serif",
-              "themeId": "graphite",
+              "themeId": "executive-blue",
               "btnPresetId": "minimal",
               "textPrimary": "#FFFFFF",
-              "textSubtitle": "#a0a0a0",
-              "profileBorderColor": "#555555",
+              "textSubtitle": "#9FC9E6",
+              "profileBorderColor": "#3D78AA",
               "profileRadius": "0px",
               "btnRadius": "16px",
               "banner": {
                 "enabled": false,
                 "heightPreset": "medium",
                 "positionY": 50,
-                "imageOpacity": 70,
-                "fusionPreset": "medium",
-                "fusionStrength": 75
+                "imageOpacity": 82,
+                "fusionPreset": "deep",
+                "fusionStrength": 82
               }
             },
             "layout": {
@@ -731,7 +731,7 @@
       "screenshotPath": "screenshots/legal-01.png",
       "screenshot": {
         "exists": true,
-        "sizeBytes": 104147,
+        "sizeBytes": 111016,
         "pngReadable": true
       },
       "publicationStatus": "GENERATED_PRIVATE",
@@ -745,8 +745,8 @@
       "seed": "rec02-legal-02",
       "buttonCount": 4,
       "templateId": "tpl-legal-generator-v1-0004",
-      "configHash": "822b828c",
-      "themeId": "graphite",
+      "configHash": "d4550dc0",
+      "themeId": "black-gold",
       "buttonPresetId": "solid",
       "content": {
         "titleText": "DR. TOMÁS MARÍN",
@@ -866,35 +866,35 @@
             "appearance": {
               "bgImage": "",
               "bgOverlay": 0,
-              "bgStart": "#2b2b2b",
-              "bgMid": "#333333",
-              "bgEnd": "#1a1a1a",
+              "bgStart": "#030303",
+              "bgMid": "#14110A",
+              "bgEnd": "#030303",
               "bgAngle": 180,
-              "btnBgStart": "#444444",
-              "btnBgEnd": "#2b2b2b",
-              "btnBorderColor": "#555555",
-              "accentBgStart": "#ffffff",
-              "accentBgEnd": "#e0e0e0",
-              "accentIconColor": "#111111",
+              "btnBgStart": "#14110A",
+              "btnBgEnd": "#030303",
+              "btnBorderColor": "#D4AF37",
+              "accentBgStart": "#D4AF37",
+              "accentBgEnd": "#F0D98A",
+              "accentIconColor": "#030303",
               "btnTextColor": "#FFFFFF",
               "fontLogo": "'Cinzel', serif",
               "fontHeading": "'Poppins', sans-serif",
               "fontSubtitle": "'Poppins', sans-serif",
               "fontBody": "'Poppins', sans-serif",
-              "themeId": "graphite",
+              "themeId": "black-gold",
               "btnPresetId": "solid",
               "textPrimary": "#FFFFFF",
-              "textSubtitle": "#a0a0a0",
-              "profileBorderColor": "#555555",
+              "textSubtitle": "#D4AF37",
+              "profileBorderColor": "#D4AF37",
               "profileRadius": "50%",
               "btnRadius": "16px",
               "banner": {
                 "enabled": true,
                 "heightPreset": "medium",
                 "positionY": 50,
-                "imageOpacity": 70,
-                "fusionPreset": "medium",
-                "fusionStrength": 75
+                "imageOpacity": 82,
+                "fusionPreset": "deep",
+                "fusionStrength": 82
               }
             },
             "layout": {
@@ -966,7 +966,7 @@
       "screenshotPath": "screenshots/legal-02.png",
       "screenshot": {
         "exists": true,
-        "sizeBytes": 156252,
+        "sizeBytes": 159751,
         "pngReadable": true
       },
       "publicationStatus": "GENERATED_PRIVATE",
@@ -980,7 +980,7 @@
       "seed": "rec02-restaurant-01",
       "buttonCount": 2,
       "templateId": "tpl-restaurant-generator-v1-0005",
-      "configHash": "0460e7af",
+      "configHash": "1df76471",
       "themeId": "ivory-gold",
       "buttonPresetId": "glass",
       "content": {
@@ -996,7 +996,7 @@
         "errors": []
       },
       "serialization": {
-        "bytes": 1930,
+        "bytes": 1929,
         "nonSerializable": []
       },
       "renderer": {
@@ -1079,35 +1079,35 @@
             "appearance": {
               "bgImage": "",
               "bgOverlay": 0,
-              "bgStart": "#FFFFF0",
-              "bgMid": "#FDFFF5",
-              "bgEnd": "#F0F0D8",
+              "bgStart": "#FFF4EA",
+              "bgMid": "#FFFFFF",
+              "bgEnd": "#FFF4EA",
               "bgAngle": 180,
-              "btnBgStart": "#ffffff",
-              "btnBgEnd": "#fcfcfc",
-              "btnBorderColor": "#CFB53B",
-              "accentBgStart": "#E8D595",
-              "accentBgEnd": "#CFB53B",
-              "accentIconColor": "#ffffff",
-              "btnTextColor": "#111111",
+              "btnBgStart": "#FFFFFF",
+              "btnBgEnd": "#FFF4EA",
+              "btnBorderColor": "#D58E68",
+              "accentBgStart": "#C96B3C",
+              "accentBgEnd": "#F1C8AD",
+              "accentIconColor": "#3A241C",
+              "btnTextColor": "#3A241C",
               "fontLogo": "'Montserrat', sans-serif",
               "fontHeading": "'Poppins', sans-serif",
               "fontSubtitle": "'Poppins', sans-serif",
               "fontBody": "'Poppins', sans-serif",
               "themeId": "ivory-gold",
               "btnPresetId": "glass",
-              "textPrimary": "#2b2b2b",
-              "textSubtitle": "#CFB53B",
-              "profileBorderColor": "#CFB53B",
+              "textPrimary": "#3A241C",
+              "textSubtitle": "#7A594A",
+              "profileBorderColor": "#D58E68",
               "profileRadius": "50%",
               "btnRadius": "16px",
               "banner": {
                 "enabled": true,
                 "heightPreset": "medium",
                 "positionY": 50,
-                "imageOpacity": 100,
+                "imageOpacity": 96,
                 "fusionPreset": "soft",
-                "fusionStrength": 40
+                "fusionStrength": 42
               }
             },
             "layout": {
@@ -1179,7 +1179,7 @@
       "screenshotPath": "screenshots/restaurant-01.png",
       "screenshot": {
         "exists": true,
-        "sizeBytes": 207697,
+        "sizeBytes": 206324,
         "pngReadable": true
       },
       "publicationStatus": "GENERATED_PRIVATE",
@@ -1193,7 +1193,7 @@
       "seed": "rec02-restaurant-02",
       "buttonCount": 4,
       "templateId": "tpl-restaurant-generator-v1-0006",
-      "configHash": "a613467f",
+      "configHash": "e7f1c14b",
       "themeId": "black-gold",
       "buttonPresetId": "solid",
       "content": {
@@ -1323,14 +1323,14 @@
               "bgImage": "",
               "bgOverlay": 0,
               "bgStart": "#000000",
-              "bgMid": "#0a0a0a",
-              "bgEnd": "#111111",
+              "bgMid": "#141414",
+              "bgEnd": "#000000",
               "bgAngle": 180,
-              "btnBgStart": "#1a1a1a",
-              "btnBgEnd": "#111111",
-              "btnBorderColor": "#D4AF37",
+              "btnBgStart": "#141414",
+              "btnBgEnd": "#000000",
+              "btnBorderColor": "#B9972F",
               "accentBgStart": "#D4AF37",
-              "accentBgEnd": "#B5952F",
+              "accentBgEnd": "#E9CD74",
               "accentIconColor": "#000000",
               "btnTextColor": "#FFFFFF",
               "fontLogo": "'Montserrat', sans-serif",
@@ -1341,16 +1341,16 @@
               "btnPresetId": "solid",
               "textPrimary": "#FFFFFF",
               "textSubtitle": "#D4AF37",
-              "profileBorderColor": "#D4AF37",
+              "profileBorderColor": "#B9972F",
               "profileRadius": "50%",
               "btnRadius": "9999px",
               "banner": {
                 "enabled": true,
                 "heightPreset": "medium",
                 "positionY": 50,
-                "imageOpacity": 80,
+                "imageOpacity": 82,
                 "fusionPreset": "deep",
-                "fusionStrength": 80
+                "fusionStrength": 82
               }
             },
             "layout": {
@@ -1422,7 +1422,7 @@
       "screenshotPath": "screenshots/restaurant-02.png",
       "screenshot": {
         "exists": true,
-        "sizeBytes": 170504,
+        "sizeBytes": 170849,
         "pngReadable": true
       },
       "publicationStatus": "GENERATED_PRIVATE",
@@ -1436,7 +1436,7 @@
       "seed": "rec02-barber-01",
       "buttonCount": 2,
       "templateId": "tpl-barber-generator-v1-0007",
-      "configHash": "87d61281",
+      "configHash": "fc6c04c9",
       "themeId": "black-gold",
       "buttonPresetId": "soft",
       "content": {
@@ -1544,14 +1544,14 @@
               "bgImage": "",
               "bgOverlay": 0,
               "bgStart": "#000000",
-              "bgMid": "#0a0a0a",
-              "bgEnd": "#111111",
+              "bgMid": "#141414",
+              "bgEnd": "#000000",
               "bgAngle": 180,
-              "btnBgStart": "#1a1a1a",
-              "btnBgEnd": "#111111",
-              "btnBorderColor": "#D4AF37",
+              "btnBgStart": "#141414",
+              "btnBgEnd": "#000000",
+              "btnBorderColor": "#B9972F",
               "accentBgStart": "#D4AF37",
-              "accentBgEnd": "#B5952F",
+              "accentBgEnd": "#E9CD74",
               "accentIconColor": "#000000",
               "btnTextColor": "#FFFFFF",
               "fontLogo": "'Playfair Display', serif",
@@ -1562,16 +1562,16 @@
               "btnPresetId": "soft",
               "textPrimary": "#FFFFFF",
               "textSubtitle": "#D4AF37",
-              "profileBorderColor": "#D4AF37",
+              "profileBorderColor": "#B9972F",
               "profileRadius": "50%",
               "btnRadius": "16px",
               "banner": {
                 "enabled": true,
                 "heightPreset": "medium",
                 "positionY": 50,
-                "imageOpacity": 80,
+                "imageOpacity": 82,
                 "fusionPreset": "deep",
-                "fusionStrength": 80
+                "fusionStrength": 82
               }
             },
             "layout": {
@@ -1643,7 +1643,7 @@
       "screenshotPath": "screenshots/barber-01.png",
       "screenshot": {
         "exists": true,
-        "sizeBytes": 158445,
+        "sizeBytes": 158523,
         "pngReadable": true
       },
       "publicationStatus": "GENERATED_PRIVATE",
@@ -1657,7 +1657,7 @@
       "seed": "rec02-barber-02",
       "buttonCount": 5,
       "templateId": "tpl-barber-generator-v1-0008",
-      "configHash": "bb9c0e5e",
+      "configHash": "eb1bb2ba",
       "themeId": "black-gold",
       "buttonPresetId": "minimal",
       "content": {
@@ -1797,16 +1797,16 @@
             "appearance": {
               "bgImage": "",
               "bgOverlay": 0,
-              "bgStart": "#000000",
-              "bgMid": "#0a0a0a",
-              "bgEnd": "#111111",
+              "bgStart": "#030303",
+              "bgMid": "#14110A",
+              "bgEnd": "#030303",
               "bgAngle": 180,
-              "btnBgStart": "#1a1a1a",
-              "btnBgEnd": "#111111",
+              "btnBgStart": "#14110A",
+              "btnBgEnd": "#030303",
               "btnBorderColor": "#D4AF37",
               "accentBgStart": "#D4AF37",
-              "accentBgEnd": "#B5952F",
-              "accentIconColor": "#000000",
+              "accentBgEnd": "#F0D98A",
+              "accentIconColor": "#030303",
               "btnTextColor": "#FFFFFF",
               "fontLogo": "'Montserrat', sans-serif",
               "fontHeading": "'Poppins', sans-serif",
@@ -1823,9 +1823,9 @@
                 "enabled": false,
                 "heightPreset": "medium",
                 "positionY": 50,
-                "imageOpacity": 80,
+                "imageOpacity": 82,
                 "fusionPreset": "deep",
-                "fusionStrength": 80
+                "fusionStrength": 82
               }
             },
             "layout": {
@@ -1897,7 +1897,7 @@
       "screenshotPath": "screenshots/barber-02.png",
       "screenshot": {
         "exists": true,
-        "sizeBytes": 103866,
+        "sizeBytes": 107237,
         "pngReadable": true
       },
       "publicationStatus": "GENERATED_PRIVATE",
@@ -1924,22 +1924,22 @@
       },
       "sameConfig": true,
       "sameConfigHash": true,
-      "configHashA": "34943644",
-      "configHashB": "34943644"
+      "configHashA": "8216d624",
+      "configHashB": "8216d624"
     },
     "variation": {
       "medical": {
         "hashes": [
-          "34943644",
-          "128b2cab"
+          "8216d624",
+          "2d1d7267"
         ],
         "seeds": [
           "rec02-medical-01",
           "rec02-medical-02"
         ],
         "themeIds": [
-          "executive-blue",
-          "premium-white"
+          "platinum",
+          "rose-gold"
         ],
         "buttonPresetIds": [
           "premium",
@@ -1962,16 +1962,16 @@
       },
       "legal": {
         "hashes": [
-          "9ce2cd25",
-          "822b828c"
+          "d113aae1",
+          "d4550dc0"
         ],
         "seeds": [
           "rec02-legal-01",
           "rec02-legal-02"
         ],
         "themeIds": [
-          "graphite",
-          "graphite"
+          "executive-blue",
+          "black-gold"
         ],
         "buttonPresetIds": [
           "minimal",
@@ -1993,8 +1993,8 @@
       },
       "restaurant": {
         "hashes": [
-          "0460e7af",
-          "a613467f"
+          "1df76471",
+          "e7f1c14b"
         ],
         "seeds": [
           "rec02-restaurant-01",
@@ -2024,8 +2024,8 @@
       },
       "barber": {
         "hashes": [
-          "87d61281",
-          "bb9c0e5e"
+          "fc6c04c9",
+          "eb1bb2ba"
         ],
         "seeds": [
           "rec02-barber-01",
