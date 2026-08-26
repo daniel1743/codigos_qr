@@ -39,6 +39,7 @@ interface GlobalStats {
 export function AdminPanel() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("dashboard");
   const [stats, setStats] = useState<GlobalStats>({
     totalUsers: 0,
     premiumUsers: 0,
@@ -247,7 +248,7 @@ export function AdminPanel() {
       </div>
 
       {/* Main Tabs */}
-      <Tabs defaultValue="dashboard" className="space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:grid-cols-7">
           <TabsTrigger value="dashboard" className="gap-2">
             <BarChart3 className="h-4 w-4" />
@@ -319,19 +320,35 @@ export function AdminPanel() {
             </CardHeader>
             <CardContent>
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Button variant="outline" className="h-auto flex-col gap-2 py-4">
+                <Button
+                  variant="outline"
+                  className="h-auto flex-col gap-2 py-4"
+                  onClick={() => setActiveTab("users")}
+                >
                   <Users className="h-6 w-6" />
                   <span className="text-sm">Ver Usuarios</span>
                 </Button>
-                <Button variant="outline" className="h-auto flex-col gap-2 py-4">
+                <Button
+                  variant="outline"
+                  className="h-auto flex-col gap-2 py-4"
+                  onClick={() => setActiveTab("premium")}
+                >
                   <Crown className="h-6 w-6 text-amber-500" />
                   <span className="text-sm">Otorgar Premium</span>
                 </Button>
-                <Button variant="outline" className="h-auto flex-col gap-2 py-4">
+                <Button
+                  variant="outline"
+                  className="h-auto flex-col gap-2 py-4"
+                  onClick={() => setActiveTab("codes")}
+                >
                   <Ticket className="h-6 w-6 text-blue-500" />
                   <span className="text-sm">Crear Código</span>
                 </Button>
-                <Button variant="outline" className="h-auto flex-col gap-2 py-4">
+                <Button
+                  variant="outline"
+                  className="h-auto flex-col gap-2 py-4"
+                  onClick={() => setActiveTab("logos")}
+                >
                   <ImageIcon className="h-6 w-6 text-purple-500" />
                   <span className="text-sm">Subir Logo</span>
                 </Button>

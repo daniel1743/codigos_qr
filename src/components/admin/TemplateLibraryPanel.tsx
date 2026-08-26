@@ -63,6 +63,7 @@ import {
   archiveTemplatesBulk,
   publishTemplatesBulk,
 } from "../../services/template-factory-admin.service";
+import { CleanTemplatePreview } from "./CleanTemplatePreview";
 import { TemplateDetailModal } from "./TemplateDetailModal";
 
 const STATUS_ICONS: Record<PublicationStatus, React.ReactNode> = {

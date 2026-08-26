@@ -10,7 +10,6 @@ export default defineConfig({
   vite: {
     optimizeDeps: {
       include: [
-        "@tanstack/react-router",
         "@supabase/supabase-js",
         "@supabase/ssr",
         "lucide-react",
