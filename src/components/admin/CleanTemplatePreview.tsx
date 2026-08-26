@@ -79,6 +79,13 @@ export function CleanTemplatePreview({
       ref={containerRef}
       className={"flex h-full min-h-0 w-full items-center justify-center overflow-hidden " + className}
     >
+      <style>{`
+        .force-preview-height > div {
+          min-height: 100% !important;
+          display: flex;
+          flex-direction: column;
+        }
+      `}</style>
       <div
         className={"transition-transform duration-200 origin-center " + frameClass}
         style={{
@@ -89,7 +96,7 @@ export function CleanTemplatePreview({
       >
         <div
           className={
-            "h-full w-full overflow-auto hide-scrollbar " +
+            "h-full w-full overflow-auto hide-scrollbar force-preview-height " +
             (interactive ? "" : "pointer-events-none")
           }
         >

@@ -188,6 +188,24 @@ export async function sendToReview(templateId: string): Promise<void> {
  */
 export async function approveTemplate(templateId: string): Promise<void> {
   try {
+    const { data: existing } = await supabase
+      .from("template_bank")
+      .select("publication_status")
+      .eq("id", templateId)
+      .single();
+
+    if (
+      existing &&
+      (existing.publication_status === "GENERATED_PRIVATE" ||
+       existing.publication_status === "REJECTED" ||
+       existing.publication_status === "ARCHIVED")
+    ) {
+      await supabase
+        .from("template_bank")
+        .update({ publication_status: "REVIEW_PENDING" })
+        .eq("id", templateId);
+    }
+
     const { error } = await supabase
       .from("template_bank")
       .update({
@@ -598,6 +616,24 @@ export async function deleteAdminTemplate(templateId: string): Promise<void> {
  * Bulk Action Helpers
  */
 export async function approveTemplatesBulk(templateIds: string[]): Promise<void> {
+  const { data, error: readError } = await supabase
+    .from("template_bank")
+    .select("id,publication_status")
+    .in("id", templateIds);
+  
+  if (readError) throw readError;
+
+  const rows = (data ?? []) as Array<{ id: string; publication_status: PublicationStatus | null }>;
+  
+  const needsReviewFirst = rows
+    .filter(r => r.publication_status === "GENERATED_PRIVATE" || r.publication_status === "REJECTED" || r.publication_status === "ARCHIVED")
+    .map(r => r.id);
+
+  if (needsReviewFirst.length > 0) {
+    const { error: reviewError } = await supabase.from("template_bank").update({ publication_status: "REVIEW_PENDING" }).in("id", needsReviewFirst);
+    if (reviewError) throw reviewError;
+  }
+
   const { error } = await supabase.from("template_bank").update({ publication_status: "APPROVED" }).in("id", templateIds);
   if (error) throw error;
 }
