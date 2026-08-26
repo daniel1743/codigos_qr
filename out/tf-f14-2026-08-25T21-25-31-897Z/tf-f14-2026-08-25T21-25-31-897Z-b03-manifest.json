@@ -1,0 +1,24 @@
+{
+  "id": "tf-f14-2026-08-25T21-25-31-897Z-b03",
+  "generationDate": "2026-08-25T21:28:10.666Z",
+  "industries": [
+    "barber",
+    "beauty",
+    "dental",
+    "hair_salon",
+    "legal",
+    "medical",
+    "restaurant",
+    "spa",
+    "tattoo",
+    "veterinary"
+  ],
+  "requestedQuantity": 100,
+  "generated": 100,
+  "failed": 0,
+  "approved": 0,
+  "rejected": 0,
+  "published": 0,
+  "averageQaScore": 1,
+  "generatorVersion": "generator-v1"
+}

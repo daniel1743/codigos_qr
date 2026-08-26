@@ -1,0 +1,13 @@
+{
+  "batch_id": "prod-batch-barber-final-10-2026-08-26T01-52-43-023Z",
+  "existing_fingerprints_excluded": 15,
+  "dry_run_new_unique": 10,
+  "live_inserted": 10,
+  "duplicates": 0,
+  "final_unique_barber_total": 25,
+  "PUBLIC": 0,
+  "is_public_true": 0,
+  "failed": 0,
+  "new_generated_private": 10,
+  "verdict": "UNIQUENESS_POOL_PASS"
+}

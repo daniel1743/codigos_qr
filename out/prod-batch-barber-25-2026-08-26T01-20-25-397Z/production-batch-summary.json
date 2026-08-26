@@ -1,0 +1,16 @@
+{
+  "batch_id": "prod-batch-barber-25-2026-08-26T01-20-25-397Z",
+  "requested": 25,
+  "generated": 5,
+  "validated": 5,
+  "inserted": 5,
+  "failed": 20,
+  "duplicates": 0,
+  "generated_private_count": 5,
+  "public_count": 0,
+  "is_public_true_count": 0,
+  "supabase_result": "OK",
+  "admin_visibility_result": "VISIBLE_IN_ADMIN_LIBRARY_QUERY",
+  "exit_code": 0,
+  "final_verdict": "BATCH_PARTIAL"
+}

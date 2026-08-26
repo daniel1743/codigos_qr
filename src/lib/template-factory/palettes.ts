@@ -1,3 +1,4 @@
+import type { TemplateConfig } from "./config";
 import type { IndustryId } from "./industries";
 import type { ThemeAppearance, ThemeId } from "./registries";
 import { SeededRandom, deriveSeed } from "./seed";
@@ -29,7 +30,7 @@ export interface SemanticPaletteTokens {
 export interface TemplatePalette {
   id: string;
   name: string;
-  industries: readonly (IndustryId | "veterinary" | "beauty" | "creator" | "real_estate" | "fitness" | "entertainment_and_betting_visual")[];
+  industries: readonly (IndustryId | "veterinary" | "beauty" | "creator" | "real_estate" | "fitness" | "entertainment_and_betting_visual" | "hospitality" | "professional" | "gaming_entertainment" | "universal")[];
   tone: PaletteTone;
   tier: PaletteTier;
   mode: PaletteMode;
@@ -38,14 +39,33 @@ export interface TemplatePalette {
   tokens: SemanticPaletteTokens;
 }
 
+export type SemanticPaletteOverride = Partial<SemanticPaletteTokens>;
+
+export interface EditablePalettePreset {
+  id: TemplatePaletteId;
+  name: string;
+  tone: PaletteTone;
+  tier: PaletteTier;
+  mode: PaletteMode;
+  contrastProfile: ContrastProfile;
+  tokens: SemanticPaletteTokens;
+}
+
+export interface AppliedPaletteResult {
+  config: TemplateConfig;
+  paletteId: TemplatePaletteId;
+  tokens: SemanticPaletteTokens;
+  overrides: SemanticPaletteOverride;
+}
+
 const family = <T extends readonly TemplatePalette[]>(palettes: T) => palettes;
 
 export const TEMPLATE_PALETTES = family([
-  p("obsidian-gold", "Obsidian Gold", ["legal", "restaurant", "barber"], "luxury", "premium_pro", "dark", "high", "black-gold", ["#030303", "#14110A", "#FFFFFF", "#D4AF37", "#D4AF37", "#F0D98A", "#D4AF37"]),
-  p("platinum-graphite", "Platinum Graphite", ["legal", "real_estate", "barber"], "luxury", "premium", "balanced", "high", "black-silver", ["#161616", "#2B2B2B", "#FFFFFF", "#C9CDD1", "#D7DADF", "#F1F3F5", "#8A8F95"]),
-  p("rose-platinum", "Rose Platinum", ["beauty", "medical"], "luxury", "premium_pro", "light", "standard", "rose-gold", ["#FFF7F4", "#FFFFFF", "#3D3032", "#A86672", "#B76E79", "#F2C8D0", "#C996A0"]),
-  p("silver-frost", "Silver Frost", ["medical", "beauty", "real_estate"], "luxury", "premium", "light", "standard", "platinum", ["#F7F8FA", "#FFFFFF", "#20242A", "#626A73", "#7F8791", "#E7EAEE", "#C8CDD3"]),
-  p("champagne-noir", "Champagne Noir", ["restaurant", "beauty", "legal"], "luxury", "premium_pro", "dark", "high", "black-gold", ["#070605", "#17130F", "#FFFFFF", "#E8D6AC", "#D7B56D", "#F2E1B7", "#B9944D"]),
+  p("obsidian-gold", "Obsidian Gold", ["universal", "legal", "restaurant", "barber"], "luxury", "premium_pro", "dark", "high", "black-gold", ["#030303", "#14110A", "#FFFFFF", "#D4AF37", "#D4AF37", "#F0D98A", "#D4AF37"]),
+  p("platinum-graphite", "Platinum Graphite", ["universal", "legal", "real_estate", "barber"], "luxury", "premium", "balanced", "high", "black-silver", ["#161616", "#2B2B2B", "#FFFFFF", "#C9CDD1", "#D7DADF", "#F1F3F5", "#8A8F95"]),
+  p("rose-platinum", "Rose Platinum", ["universal", "beauty", "medical"], "luxury", "premium_pro", "light", "standard", "rose-gold", ["#FFF7F4", "#FFFFFF", "#3D3032", "#A86672", "#B76E79", "#F2C8D0", "#C996A0"]),
+  p("silver-frost", "Silver Frost", ["universal", "medical", "beauty", "real_estate"], "luxury", "premium", "light", "standard", "platinum", ["#F7F8FA", "#FFFFFF", "#20242A", "#626A73", "#7F8791", "#E7EAEE", "#C8CDD3"]),
+  p("champagne-noir", "Champagne Noir", ["universal", "restaurant", "beauty", "legal"], "luxury", "premium_pro", "dark", "high", "black-gold", ["#070605", "#17130F", "#FFFFFF", "#E8D6AC", "#D7B56D", "#F2E1B7", "#B9944D"]),
   p("ivory-bronze", "Ivory Bronze", ["restaurant", "real_estate", "legal"], "luxury", "premium", "light", "standard", "ivory-gold", ["#FFFDF4", "#FFFFFF", "#2C261F", "#745B3B", "#B07A3A", "#E8C999", "#C69B68"]),
 
   p("clinical-trust", "Clinical Trust", ["medical"], "clinical", "premium", "light", "high", "premium-white", ["#F7FBFF", "#FFFFFF", "#112233", "#496578", "#2D8AC8", "#D8EEF9", "#B8D6E8"]),
@@ -101,6 +121,16 @@ export const TEMPLATE_PALETTES = family([
   p("midnight-gold", "Midnight Gold", ["entertainment_and_betting_visual", "restaurant"], "entertainment", "premium_pro", "dark", "high", "black-gold", ["#05050A", "#15151F", "#FFFFFF", "#E4CC85", "#D4AF37", "#ECD680", "#B5902C"]),
   p("electric-blue", "Electric Blue", ["entertainment_and_betting_visual", "creator"], "entertainment", "premium_pro", "dark", "high", "executive-blue", ["#030817", "#0B1632", "#FFFFFF", "#B9D5FF", "#2EA8FF", "#B8E0FF", "#1E7DC7"]),
   p("dark-neon", "Dark Neon", ["entertainment_and_betting_visual"], "entertainment", "premium_pro", "dark", "high", "graphite", ["#07070B", "#171724", "#FFFFFF", "#D4C8FF", "#8A6CFF", "#D8CCFF", "#6752C8"]),
+
+  p("titanium", "Titanium", ["universal", "professional", "legal"], "executive", "premium", "balanced", "high", "platinum", ["#1C1E21", "#2A2D31", "#FFFFFF", "#B0B5BB", "#9098A1", "#DDE1E5", "#6B747D"]),
+  p("pearl", "Pearl", ["universal", "beauty", "professional"], "luxury", "premium", "light", "soft", "premium-white", ["#FDFDFC", "#FFFFFF", "#282625", "#817A76", "#D1CBC7", "#F0EDE9", "#E1DCD7"]),
+  p("emerald-luxury", "Emerald Luxury", ["universal", "real_estate", "hospitality"], "luxury", "premium_pro", "dark", "high", "emerald-luxury", ["#021814", "#0A332C", "#FFFFFF", "#C3E8D9", "#D4AF37", "#E0F5EB", "#0F4D42"]),
+  p("sapphire", "Sapphire", ["universal", "medical", "professional"], "executive", "premium_pro", "dark", "high", "executive-blue", ["#040B16", "#0D1E3A", "#FFFFFF", "#A3C2F0", "#3E7BDE", "#C9DEFF", "#1C438A"]),
+  p("ruby-noir", "Ruby Noir", ["universal", "restaurant", "hospitality"], "luxury", "premium_pro", "dark", "high", "burgundy-elegant", ["#140205", "#2D070D", "#FFFFFF", "#E09DA9", "#A62137", "#F2C7CE", "#5E0B19"]),
+
+  p("professional-slate", "Professional Slate", ["professional", "legal"], "executive", "premium", "light", "standard", "platinum", ["#F2F4F6", "#FFFFFF", "#1E252B", "#5C6B7A", "#334155", "#E2E8F0", "#94A3B8"]),
+  p("hospitality-warm", "Hospitality Warm", ["hospitality", "restaurant"], "warm", "premium", "light", "standard", "ivory-gold", ["#FDF8F2", "#FFFFFF", "#3D2B1F", "#8B6C5A", "#C28E6E", "#F4DFD2", "#D4A588"]),
+  p("gaming-purple", "Gaming Purple", ["gaming_entertainment", "creator"], "entertainment", "premium_pro", "dark", "high", "graphite", ["#090514", "#160D2D", "#FFFFFF", "#D2B8FF", "#8B5CF6", "#E8D9FF", "#4C1D95"]),
 ] as const);
 
 export type TemplatePaletteId = (typeof TEMPLATE_PALETTES)[number]["id"];
@@ -113,8 +143,77 @@ export function getTemplatePalette(id: string): TemplatePalette {
   return palette;
 }
 
+export function getEditablePalettePresets(): EditablePalettePreset[] {
+  return TEMPLATE_PALETTES.map((palette) => ({
+    id: palette.id,
+    name: palette.name,
+    tone: palette.tone,
+    tier: palette.tier,
+    mode: palette.mode,
+    contrastProfile: palette.contrastProfile,
+    tokens: { ...palette.tokens },
+  }));
+}
+
+export function resolvePaletteTokens(
+  paletteId: string,
+  overrides: SemanticPaletteOverride = {},
+): { palette: TemplatePalette; tokens: SemanticPaletteTokens; overrides: SemanticPaletteOverride } {
+  const palette = getTemplatePalette(paletteId);
+  const cleanOverrides = filterPaletteOverrides(overrides);
+
+  return {
+    palette,
+    tokens: {
+      ...palette.tokens,
+      ...cleanOverrides,
+    },
+    overrides: cleanOverrides,
+  };
+}
+
+export function previewPaletteForTemplateConfig(
+  config: TemplateConfig,
+  paletteId: string,
+  overrides: SemanticPaletteOverride = {},
+): AppliedPaletteResult {
+  return applyPaletteToTemplateConfig(config, paletteId, overrides);
+}
+
+export function applyPaletteToTemplateConfig(
+  config: TemplateConfig,
+  paletteId: string,
+  overrides: SemanticPaletteOverride = {},
+): AppliedPaletteResult {
+  const { palette, tokens, overrides: cleanOverrides } = resolvePaletteTokens(paletteId, overrides);
+  const appearance = paletteTokensToAppearance(palette, tokens);
+  const next: TemplateConfig = {
+    ...config,
+    paletteId: palette.id,
+    paletteTokens: tokens,
+    paletteOverrides: cleanOverrides,
+    appearance: {
+      ...config.appearance,
+      ...appearance,
+      themeId: palette.preferredThemeId,
+      btnPresetId: getCompatibleButtonPreset(palette, config.appearance.btnPresetId),
+      banner: {
+        ...config.appearance.banner,
+        ...appearance.banner,
+      },
+    },
+  };
+
+  return {
+    config: next,
+    paletteId: palette.id,
+    tokens,
+    overrides: cleanOverrides,
+  };
+}
+
 export function getPalettesForIndustry(industry: IndustryId): TemplatePalette[] {
-  return TEMPLATE_PALETTES.filter((palette) => palette.industries.includes(industry));
+  return TEMPLATE_PALETTES.filter((palette) => palette.industries.includes(industry) || palette.industries.includes("universal"));
 }
 
 export function selectTemplatePalette(input: {
@@ -141,7 +240,13 @@ export function selectTemplatePalette(input: {
 }
 
 export function paletteToThemeAppearance(palette: TemplatePalette): ThemeAppearance {
-  const { tokens } = palette;
+  return paletteTokensToAppearance(palette, palette.tokens);
+}
+
+function paletteTokensToAppearance(
+  palette: TemplatePalette,
+  tokens: SemanticPaletteTokens,
+): ThemeAppearance {
   return {
     bgStart: tokens.background,
     bgMid: tokens.surface,
@@ -158,6 +263,40 @@ export function paletteToThemeAppearance(palette: TemplatePalette): ThemeAppeara
     profileBorderColor: tokens.border,
     banner: bannerForPalette(palette),
   };
+}
+
+function getCompatibleButtonPreset(
+  palette: TemplatePalette,
+  currentPreset: string | undefined,
+): string {
+  if (currentPreset && currentPreset !== "legacy") return currentPreset;
+  if (palette.tier === "premium_pro" || palette.tone === "luxury") return "premium";
+  if (palette.mode === "dark" || palette.mode === "balanced") return "glass";
+  if (palette.contrastProfile === "soft") return "soft";
+  return "solid";
+}
+
+function filterPaletteOverrides(overrides: SemanticPaletteOverride): SemanticPaletteOverride {
+  const allowed = new Set<keyof SemanticPaletteTokens>([
+    "background",
+    "surface",
+    "textPrimary",
+    "textSecondary",
+    "accent",
+    "accentSoft",
+    "border",
+  ]);
+  const clean: SemanticPaletteOverride = {};
+
+  (Object.entries(overrides) as [keyof SemanticPaletteTokens, string | undefined][]).forEach(
+    ([key, value]) => {
+      if (allowed.has(key) && typeof value === "string" && value.trim()) {
+        clean[key] = value;
+      }
+    },
+  );
+
+  return clean;
 }
 
 function bannerForPalette(palette: TemplatePalette): ThemeAppearance["banner"] {

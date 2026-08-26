@@ -55,13 +55,34 @@ export interface AdminTemplateFilters {
   status?: PublicationStatus | "all";
   category?: string;
   industry?: string;
-  batch?: string;
+  batch_id?: string;
+  generator_version?: string;
+  min_qa_score?: number;
+  recipe?: string;
+  palette?: string;
+  created_after?: string;
+  created_before?: string;
   search?: string;
-  validationStatus?: ValidationStatus;
+  sortBy?: "created_at" | "qa_score" | "industry" | "batch_id";
+  sortOrder?: "asc" | "desc";
+}
+
+export interface AdminBatchSummary {
+  id: string;
+  generationDate: string;
+  industries: string[];
+  requestedQuantity: number;
+  generated: number;
+  failed: number;
+  approved: number;
+  rejected: number;
+  published: number;
+  averageQaScore: number | null;
+  generatorVersion: string;
 }
 
 /**
- * Get all templates for admin library (requires admin access)
+ * Get templates for admin panel with extensive filtering and sorting
  */
 export async function getAdminTemplates(
   filters?: AdminTemplateFilters
@@ -69,36 +90,52 @@ export async function getAdminTemplates(
   try {
     let query = supabase.from("template_bank").select("*");
 
-    // Apply filters
-    if (filters?.status && filters.status !== "all") {
-      query = query.eq("publication_status", filters.status);
+    if (filters) {
+      if (filters.status && filters.status !== "all") {
+        query = query.eq("publication_status", filters.status);
+      }
+      if (filters.category && filters.category !== "all") {
+        query = query.eq("category", filters.category);
+      }
+      if (filters.industry && filters.industry !== "all") {
+        query = query.eq("industry", filters.industry);
+      }
+      if (filters.batch_id && filters.batch_id !== "all") {
+        query = query.eq("batch_id", filters.batch_id);
+      }
+      if (filters.generator_version && filters.generator_version !== "all") {
+        query = query.eq("generator_version", filters.generator_version);
+      }
+      if (filters.min_qa_score !== undefined) {
+        query = query.gte("qa_score", filters.min_qa_score);
+      }
+      if (filters.recipe && filters.recipe !== "all") {
+        query = query.ilike("config_json::text", "%\"recipe\":\"" + filters.recipe + "\"%");
+      }
+      if (filters.palette && filters.palette !== "all") {
+        query = query.ilike("config_json::text", "%\"palette\":\"" + filters.palette + "\"%");
+      }
+      if (filters.created_after) {
+        query = query.gte("created_at", filters.created_after);
+      }
+      if (filters.created_before) {
+        query = query.lte("created_at", filters.created_before);
+      }
+      if (filters.search) {
+        query = query.or(
+          "name.ilike.%" + filters.search + "%,description.ilike.%" + filters.search + "%,batch_id.ilike.%" + filters.search + "%"
+        );
+      }
+
+      // Sorting
+      const sortBy = filters.sortBy || "created_at";
+      const sortOrder = filters.sortOrder || "desc";
+      query = query.order(sortBy, { ascending: sortOrder === "asc" });
+    } else {
+      query = query.order("created_at", { ascending: false });
     }
 
-    if (filters?.category) {
-      query = query.eq("category", filters.category);
-    }
-
-    if (filters?.industry) {
-      query = query.eq("industry", filters.industry);
-    }
-
-    if (filters?.batch) {
-      query = query.eq("batch_id", filters.batch);
-    }
-
-    if (filters?.validationStatus) {
-      query = query.eq("validation_status", filters.validationStatus);
-    }
-
-    if (filters?.search) {
-      query = query.or(
-        `name.ilike.%${filters.search}%,category.ilike.%${filters.search}%,industry.ilike.%${filters.search}%,batch_id.ilike.%${filters.search}%`
-      );
-    }
-
-    const { data, error } = await query.order("created_at", {
-      ascending: false,
-    });
+    const { data, error } = await query;
 
     if (error) throw error;
     return (data || []) as AdminTemplateRecord[];
@@ -193,6 +230,17 @@ export async function rejectTemplate(
  */
 export async function publishTemplate(templateId: string): Promise<void> {
   try {
+    const { data: existing, error: readError } = await supabase
+      .from("template_bank")
+      .select("publication_status")
+      .eq("id", templateId)
+      .single();
+
+    if (readError) throw readError;
+    if ((existing as { publication_status?: PublicationStatus } | null)?.publication_status !== "APPROVED") {
+      throw new Error("Solo se pueden publicar plantillas aprobadas tras revisión humana.");
+    }
+
     const { error } = await supabase
       .from("template_bank")
       .update({
@@ -394,6 +442,92 @@ export async function getTemplateBatches(): Promise<string[]> {
 }
 
 /**
+ * Build batch-level metadata for the admin batch management view.
+ */
+export async function getTemplateBatchSummaries(): Promise<AdminBatchSummary[]> {
+  try {
+    const { data, error } = await supabase
+      .from("template_bank")
+      .select("batch_id,created_at,industry,publication_status,qa_score,generator_version")
+      .not("batch_id", "is", null)
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+
+    const batches = new Map<string, AdminBatchSummary & { qaTotal: number; qaCount: number }>();
+    const rows = (data ?? []) as Array<{
+      batch_id: string | null;
+      created_at: string;
+      industry: string | null;
+      publication_status: PublicationStatus | null;
+      qa_score: number | null;
+      generator_version: string | null;
+    }>;
+
+    rows.forEach((row) => {
+      if (!row.batch_id) return;
+      const current =
+        batches.get(row.batch_id) ||
+        {
+          id: row.batch_id,
+          generationDate: row.created_at,
+          industries: [],
+          requestedQuantity: 0,
+          generated: 0,
+          failed: 0,
+          approved: 0,
+          rejected: 0,
+          published: 0,
+          averageQaScore: null,
+          generatorVersion: row.generator_version || "-",
+          qaTotal: 0,
+          qaCount: 0,
+        };
+
+      current.requestedQuantity += 1;
+      current.generated += 1;
+      if (row.industry && !current.industries.includes(row.industry)) {
+        current.industries.push(row.industry);
+      }
+      if (row.publication_status === "APPROVED") current.approved += 1;
+      if (row.publication_status === "REJECTED") current.rejected += 1;
+      if (row.publication_status === "PUBLIC") current.published += 1;
+      if (typeof row.qa_score === "number") {
+        current.qaTotal += row.qa_score;
+        current.qaCount += 1;
+        current.averageQaScore = Number((current.qaTotal / current.qaCount).toFixed(2));
+      }
+      if (new Date(row.created_at).getTime() < new Date(current.generationDate).getTime()) {
+        current.generationDate = row.created_at;
+      }
+      if (row.generator_version) current.generatorVersion = row.generator_version;
+
+      batches.set(row.batch_id, current);
+    });
+
+    return Array.from(batches.values()).map(({ qaTotal, qaCount, ...batch }) => ({
+      ...batch,
+      industries: batch.industries.sort(),
+    }));
+  } catch (error) {
+    console.error("[Template Factory] Error getting batch summaries:", error);
+    throw error;
+  }
+}
+
+/**
+ * Archive every template in a batch. This is intentionally not a publish action.
+ */
+export async function archiveBatch(batchId: string): Promise<void> {
+  const { error } = await supabase
+    .from("template_bank")
+    .update({ publication_status: "ARCHIVED" })
+    .eq("batch_id", batchId);
+
+  if (error) throw error;
+}
+
+/**
  * Create template for testing/manual addition
  * (Future generator will use this interface)
  */
@@ -458,3 +592,45 @@ export async function deleteAdminTemplate(templateId: string): Promise<void> {
     throw error;
   }
 }
+
+
+/**
+ * Bulk Action Helpers
+ */
+export async function approveTemplatesBulk(templateIds: string[]): Promise<void> {
+  const { error } = await supabase.from("template_bank").update({ publication_status: "APPROVED" }).in("id", templateIds);
+  if (error) throw error;
+}
+
+export async function sendToReviewBulk(templateIds: string[]): Promise<void> {
+  const { error } = await supabase.from("template_bank").update({ publication_status: "REVIEW_PENDING" }).in("id", templateIds);
+  if (error) throw error;
+}
+
+export async function rejectTemplatesBulk(templateIds: string[], reason?: string): Promise<void> {
+  const { error } = await supabase.from("template_bank").update({ publication_status: "REJECTED", rejection_reason: reason }).in("id", templateIds);
+  if (error) throw error;
+}
+
+export async function archiveTemplatesBulk(templateIds: string[]): Promise<void> {
+  const { error } = await supabase.from("template_bank").update({ publication_status: "ARCHIVED" }).in("id", templateIds);
+  if (error) throw error;
+}
+
+export async function publishTemplatesBulk(templateIds: string[]): Promise<void> {
+  const { data, error: readError } = await supabase
+    .from("template_bank")
+    .select("id,publication_status")
+    .in("id", templateIds);
+  if (readError) throw readError;
+
+  const rows = (data ?? []) as Array<{ id: string; publication_status: PublicationStatus | null }>;
+  const unsafe = rows.filter((row) => row.publication_status !== "APPROVED");
+  if (unsafe.length > 0 || rows.length !== templateIds.length) {
+    throw new Error("Solo se pueden publicar plantillas aprobadas tras revisión humana.");
+  }
+
+  const { error } = await supabase.from("template_bank").update({ publication_status: "PUBLIC", is_public: true }).in("id", templateIds);
+  if (error) throw error;
+}
+

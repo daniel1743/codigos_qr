@@ -1,0 +1,5 @@
+{
+  "phase": "phase_7_edit",
+  "status": "BLOCKED",
+  "blockedReason": "SUPABASE_SERVICE_ROLE_KEY is missing from .env.local/process env; controlled live ingestion cannot run safely."
+}

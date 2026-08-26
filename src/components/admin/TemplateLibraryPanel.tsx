@@ -3,34 +3,33 @@
  * Private administrative template library with workflow management
  */
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import {
   Library,
   Search,
-  Filter,
-  Eye,
   Check,
   X,
   Archive,
+  Download,
   RotateCcw,
   Trash2,
   Sparkles,
-  AlertCircle,
-  FileText,
   Loader2,
-  ChevronRight,
   Globe,
   Clock,
   CheckCircle2,
   XCircle,
   ArchiveX,
-  Pencil,
+  ChevronRight,
+  LayoutGrid,
+  Maximize2
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
+import { Checkbox } from "../ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -49,40 +48,22 @@ import {
 import { toast } from "sonner";
 import {
   type AdminTemplateRecord,
+  type AdminBatchSummary,
   type PublicationStatus,
+  archiveBatch,
   getAdminTemplates,
+  getTemplateBatchSummaries,
   getStatusCounts,
   getTemplateCategories,
   getTemplateIndustries,
-  sendToReview,
-  approveTemplate,
-  rejectTemplate,
-  publishTemplate,
-  unpublishTemplate,
-  archiveTemplate,
-  restoreTemplate,
-  returnToReview,
-  deleteAdminTemplate,
+  getTemplateBatches,
+  sendToReviewBulk,
+  approveTemplatesBulk,
+  rejectTemplatesBulk,
+  archiveTemplatesBulk,
+  publishTemplatesBulk,
 } from "../../services/template-factory-admin.service";
-
-const STATUS_LABELS: Record<PublicationStatus | "all", string> = {
-  all: "Todas",
-  GENERATED_PRIVATE: "Generadas",
-  REVIEW_PENDING: "En revisión",
-  APPROVED: "Aprobadas",
-  PUBLIC: "Publicadas",
-  ARCHIVED: "Archivadas",
-  REJECTED: "Rechazadas",
-};
-
-const STATUS_COLORS: Record<PublicationStatus, string> = {
-  GENERATED_PRIVATE: "bg-blue-500/10 text-blue-400 border-blue-500/30",
-  REVIEW_PENDING: "bg-yellow-500/10 text-yellow-400 border-yellow-500/30",
-  APPROVED: "bg-green-500/10 text-green-400 border-green-500/30",
-  PUBLIC: "bg-purple-500/10 text-purple-400 border-purple-500/30",
-  ARCHIVED: "bg-gray-500/10 text-gray-400 border-gray-500/30",
-  REJECTED: "bg-red-500/10 text-red-400 border-red-500/30",
-};
+import { TemplateDetailModal } from "./TemplateDetailModal";
 
 const STATUS_ICONS: Record<PublicationStatus, React.ReactNode> = {
   GENERATED_PRIVATE: <Sparkles className="h-3 w-3" />,
@@ -96,39 +77,68 @@ const STATUS_ICONS: Record<PublicationStatus, React.ReactNode> = {
 export function TemplateLibraryPanel() {
   const [templates, setTemplates] = useState<AdminTemplateRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // View states
+  const [viewMode, setViewMode] = useState<"grid" | "large">("grid");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  
+  // Filters
   const [statusFilter, setStatusFilter] = useState<PublicationStatus | "all">("all");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [industryFilter, setIndustryFilter] = useState<string>("all");
+  const [batchFilter, setBatchFilter] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string>("created_at");
   const [searchTerm, setSearchTerm] = useState("");
+  
+  // Metadata options
   const [statusCounts, setStatusCounts] = useState<Record<string, number>>({});
   const [categories, setCategories] = useState<string[]>([]);
+  const [industries, setIndustries] = useState<string[]>([]);
+  const [batches, setBatches] = useState<string[]>([]);
+  const [batchSummaries, setBatchSummaries] = useState<AdminBatchSummary[]>([]);
+  
+  // Modal states
   const [selectedTemplate, setSelectedTemplate] = useState<AdminTemplateRecord | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [actionInProgress, setActionInProgress] = useState(false);
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const [templateToDelete, setTemplateToDelete] = useState<string | null>(null);
+  
+  // Bulk Publish explicit confirmation
+  const [bulkPublishConfirmOpen, setBulkPublishConfirmOpen] = useState(false);
+  const [batchToArchive, setBatchToArchive] = useState<AdminBatchSummary | null>(null);
 
   useEffect(() => {
     loadData();
-  }, [statusFilter, categoryFilter, searchTerm]);
+  }, [statusFilter, categoryFilter, industryFilter, batchFilter, sortBy, searchTerm]);
 
   async function loadData() {
     setLoading(true);
     try {
       const filters = {
         status: statusFilter,
-        ...(categoryFilter !== "all" ? { category: categoryFilter } : {}),
-        ...(searchTerm ? { search: searchTerm } : {}),
+        category: categoryFilter !== "all" ? categoryFilter : undefined,
+        industry: industryFilter !== "all" ? industryFilter : undefined,
+        batch_id: batchFilter !== "all" ? batchFilter : undefined,
+        search: searchTerm || undefined,
+        sortBy: sortBy as any,
+        sortOrder: "desc" as const,
       };
 
-      const [templatesData, counts, cats] = await Promise.all([
+      const [templatesData, counts, cats, inds, bats, batchData] = await Promise.all([
         getAdminTemplates(filters),
         getStatusCounts(),
         getTemplateCategories(),
+        getTemplateIndustries(),
+        getTemplateBatches(),
+        getTemplateBatchSummaries()
       ]);
 
       setTemplates(templatesData);
       setStatusCounts(counts);
       setCategories(cats);
+      setIndustries(inds);
+      setBatches(bats);
+      setBatchSummaries(batchData);
+      setSelectedIds(new Set());
     } catch (error) {
       console.error("Error loading templates:", error);
       toast.error("Error al cargar plantillas");
@@ -137,510 +147,438 @@ export function TemplateLibraryPanel() {
     }
   }
 
-  async function handleAction(
-    action: string,
-    templateId: string,
-    templateName: string
-  ) {
-    if (actionInProgress) return;
-
-    setActionInProgress(true);
-    try {
-      switch (action) {
-        case "sendToReview":
-          await sendToReview(templateId);
-          toast.success(`"${templateName}" enviada a revisión`);
-          break;
-        case "approve":
-          await approveTemplate(templateId);
-          toast.success(`"${templateName}" aprobada`);
-          break;
-        case "reject":
-          await rejectTemplate(templateId);
-          toast.success(`"${templateName}" rechazada`);
-          break;
-        case "publish":
-          await publishTemplate(templateId);
-          toast.success(`"${templateName}" publicada`);
-          break;
-        case "unpublish":
-          await unpublishTemplate(templateId);
-          toast.success(`"${templateName}" despublicada`);
-          break;
-        case "archive":
-          await archiveTemplate(templateId);
-          toast.success(`"${templateName}" archivada`);
-          break;
-        case "restore":
-          await restoreTemplate(templateId);
-          toast.success(`"${templateName}" restaurada`);
-          break;
-        case "returnToReview":
-          await returnToReview(templateId);
-          toast.success(`"${templateName}" devuelta a revisión`);
-          break;
-      }
-
-      await loadData();
-      if (selectedTemplate?.id === templateId) {
-        const updated = await getAdminTemplates({ status: "all" });
-        setSelectedTemplate(updated.find((t) => t.id === templateId) || null);
-      }
-    } catch (error: any) {
-      console.error("Error performing action:", error);
-      toast.error(error.message || "Error al realizar acción");
-    } finally {
-      setActionInProgress(false);
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedIds(new Set(templates.map((t) => t.id)));
+    } else {
+      setSelectedIds(new Set());
     }
-  }
+  };
 
-  async function handleDelete() {
-    if (!templateToDelete || actionInProgress) return;
+  const handleInspectBatch = (batchId: string) => {
+    setBatchFilter(batchId);
+    setStatusFilter("all");
+  };
 
+  const handleArchiveBatch = async () => {
+    if (!batchToArchive || actionInProgress) return;
     setActionInProgress(true);
     try {
-      await deleteAdminTemplate(templateToDelete);
-      toast.success("Plantilla eliminada");
-      setDeleteConfirmOpen(false);
-      setTemplateToDelete(null);
+      await archiveBatch(batchToArchive.id);
+      toast.success("Batch archivado: " + batchToArchive.id);
+      setBatchToArchive(null);
       await loadData();
-      if (selectedTemplate?.id === templateToDelete) {
-        setSelectedTemplate(null);
-        setPreviewOpen(false);
-      }
     } catch (error) {
-      console.error("Error deleting template:", error);
-      toast.error("Error al eliminar plantilla");
+      console.error("Batch archive failed", error);
+      toast.error("Fallo al archivar el batch.");
     } finally {
       setActionInProgress(false);
     }
-  }
+  };
 
-  function getAvailableActions(status: PublicationStatus): string[] {
-    const actions: Record<PublicationStatus, string[]> = {
-      GENERATED_PRIVATE: ["sendToReview", "archive"],
-      REVIEW_PENDING: ["approve", "reject", "archive"],
-      APPROVED: ["publish", "returnToReview", "archive"],
-      PUBLIC: ["unpublish", "archive"],
-      REJECTED: ["returnToReview", "archive"],
-      ARCHIVED: ["restore"],
-    };
+  const handleExportBatchManifest = async (batch: AdminBatchSummary) => {
+    try {
+      const batchTemplates = await getAdminTemplates({
+        status: "all",
+        batch_id: batch.id,
+        sortBy: "created_at",
+        sortOrder: "asc",
+      });
+      const manifest = {
+        batch,
+        templates: batchTemplates.map((template) => ({
+          id: template.id,
+          name: template.name,
+          industry: template.industry,
+          publication_status: template.publication_status,
+          qa_score: template.qa_score,
+          generator_version: template.generator_version,
+          created_at: template.created_at,
+        })),
+      };
+      const blob = new Blob([JSON.stringify(manifest, null, 2)], {
+        type: "application/json",
+      });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = batch.id + "-manifest.json";
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Batch manifest export failed", error);
+      toast.error("No se pudo exportar el manifest.");
+    }
+  };
 
-    return actions[status] || [];
-  }
+  const handleSelect = (id: string, checked: boolean) => {
+    const newSet = new Set(selectedIds);
+    if (checked) newSet.add(id);
+    else newSet.delete(id);
+    setSelectedIds(newSet);
+  };
 
-  const filteredTemplates = useMemo(() => {
-    return templates;
-  }, [templates]);
+  const handleBulkAction = async (action: "approve" | "review" | "reject" | "archive" | "publish") => {
+    if (selectedIds.size === 0 || actionInProgress) return;
+    
+    if (action === "publish" && !bulkPublishConfirmOpen) {
+      setBulkPublishConfirmOpen(true);
+      return;
+    }
+
+    setActionInProgress(true);
+    const ids = Array.from(selectedIds);
+    try {
+      if (action === "approve") await approveTemplatesBulk(ids);
+      else if (action === "review") await sendToReviewBulk(ids);
+      else if (action === "reject") await rejectTemplatesBulk(ids);
+      else if (action === "archive") await archiveTemplatesBulk(ids);
+      if (action === "publish") {
+        await publishTemplatesBulk(ids);
+        setBulkPublishConfirmOpen(false);
+      }
+      
+      toast.success("Accin " + action + " completada en " + ids.length + " plantillas.");
+      await loadData();
+    } catch (error) {
+      console.error("Bulk action failed", error);
+      toast.error("Fallo al ejecutar la accin.");
+    } finally {
+      setActionInProgress(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-purple-500/10 via-pink-500/5 to-background p-8">
-        <div className="relative z-10">
-          <div className="mb-4 flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-pink-500">
-              <Library className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <h2 className="text-3xl font-bold tracking-tight">Biblioteca de Plantillas</h2>
-              <p className="text-sm text-muted-foreground">
-                Gestión administrativa del Template Factory
-              </p>
-            </div>
-          </div>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">Review Center</h2>
+          <p className="text-muted-foreground">
+            Control de calidad y publicacin (Total: {statusCounts.all || 0})
+          </p>
         </div>
-        <div className="absolute right-0 top-0 h-full w-1/3 opacity-5">
-          <Library className="h-full w-full" />
+        
+        <div className="flex gap-2 bg-muted p-1 rounded-lg">
+          <Button 
+            variant={viewMode === "grid" ? "secondary" : "ghost"} 
+            size="sm" 
+            onClick={() => setViewMode("grid")}
+          >
+            <LayoutGrid className="h-4 w-4" />
+          </Button>
+          <Button 
+            variant={viewMode === "large" ? "secondary" : "ghost"} 
+            size="sm"
+            onClick={() => setViewMode("large")}
+          >
+            <Maximize2 className="h-4 w-4" />
+          </Button>
         </div>
       </div>
 
-      {/* Status Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-7">
-        {(
-          [
-            "all",
-            "GENERATED_PRIVATE",
-            "REVIEW_PENDING",
-            "APPROVED",
-            "PUBLIC",
-            "ARCHIVED",
-            "REJECTED",
-          ] as const
-        ).map((status) => {
-          const count = statusCounts[status] || 0;
-          const isActive = statusFilter === status;
+      <Tabs defaultValue="templates" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="templates">Plantillas</TabsTrigger>
+          <TabsTrigger value="batches">Batches</TabsTrigger>
+        </TabsList>
 
-          return (
-            <Card
-              key={status}
-              className={`cursor-pointer transition-colors ${
-                isActive ? "border-purple-500 bg-purple-500/5" : "hover:bg-accent"
-              }`}
-              onClick={() => setStatusFilter(status)}
+        <TabsContent value="templates" className="space-y-4">
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle>Filtros Avanzados</CardTitle>
+              <CardDescription>Explora los resultados generados</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col gap-4">
+            <div className="flex flex-wrap gap-4">
+              <div className="flex-1 min-w-[200px]">
+                <div className="relative">
+                  <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Buscar por ID, nombre..."
+                    className="pl-8"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+              </div>
+              
+              <Select value={statusFilter} onValueChange={(v: any) => setStatusFilter(v)}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Estado" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos ({statusCounts.all || 0})</SelectItem>
+                  <SelectItem value="GENERATED_PRIVATE">Generadas ({statusCounts.GENERATED_PRIVATE || 0})</SelectItem>
+                  <SelectItem value="REVIEW_PENDING">En Revisin ({statusCounts.REVIEW_PENDING || 0})</SelectItem>
+                  <SelectItem value="APPROVED">Aprobadas ({statusCounts.APPROVED || 0})</SelectItem>
+                  <SelectItem value="PUBLIC">Publicadas ({statusCounts.PUBLIC || 0})</SelectItem>
+                  <SelectItem value="REJECTED">Rechazadas ({statusCounts.REJECTED || 0})</SelectItem>
+                  <SelectItem value="ARCHIVED">Archivadas ({statusCounts.ARCHIVED || 0})</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Select value={industryFilter} onValueChange={setIndustryFilter}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Industria" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas las Industrias</SelectItem>
+                  {industries.map(i => <SelectItem key={i} value={i} className="capitalize">{i}</SelectItem>)}
+                </SelectContent>
+              </Select>
+              
+              <Select value={batchFilter} onValueChange={setBatchFilter}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Batch" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los Batches</SelectItem>
+                  {batches.map(b => <SelectItem key={b} value={b} className="font-mono text-xs">{b.slice(0, 8)}...</SelectItem>)}
+                </SelectContent>
+              </Select>
+              
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Ordenar por" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="created_at">Ms recientes</SelectItem>
+                  <SelectItem value="qa_score">QA Score</SelectItem>
+                  <SelectItem value="industry">Industria</SelectItem>
+                  <SelectItem value="batch_id">Lote (Batch)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="batches" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Gestin de Batches</CardTitle>
+              <CardDescription>Inspecciona lotes, filtra plantillas, archiva batches y exporta manifests.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {batchSummaries.length === 0 ? (
+                <div className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
+                  No hay batches registrados.
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b text-left text-muted-foreground">
+                        <th className="p-2 font-medium">ID</th>
+                        <th className="p-2 font-medium">Fecha</th>
+                        <th className="p-2 font-medium">Industrias</th>
+                        <th className="p-2 font-medium text-right">Solic.</th>
+                        <th className="p-2 font-medium text-right">Gen.</th>
+                        <th className="p-2 font-medium text-right">Fall.</th>
+                        <th className="p-2 font-medium text-right">Aprob.</th>
+                        <th className="p-2 font-medium text-right">Rech.</th>
+                        <th className="p-2 font-medium text-right">Publ.</th>
+                        <th className="p-2 font-medium text-right">QA</th>
+                        <th className="p-2 font-medium">Versin</th>
+                        <th className="p-2 font-medium text-right">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {batchSummaries.map((batch) => (
+                        <tr key={batch.id} className="border-b">
+                          <td className="max-w-[180px] truncate p-2 font-mono text-xs" title={batch.id}>{batch.id}</td>
+                          <td className="p-2">{new Date(batch.generationDate).toLocaleDateString()}</td>
+                          <td className="max-w-[220px] truncate p-2 capitalize" title={batch.industries.join(", ")}>{batch.industries.join(", ")}</td>
+                          <td className="p-2 text-right">{batch.requestedQuantity}</td>
+                          <td className="p-2 text-right">{batch.generated}</td>
+                          <td className="p-2 text-right">{batch.failed}</td>
+                          <td className="p-2 text-right">{batch.approved}</td>
+                          <td className="p-2 text-right">{batch.rejected}</td>
+                          <td className="p-2 text-right">{batch.published}</td>
+                          <td className="p-2 text-right">{batch.averageQaScore == null ? "-" : Math.round(batch.averageQaScore * 100) + "%"}</td>
+                          <td className="p-2 font-mono text-xs">{batch.generatorVersion}</td>
+                          <td className="p-2">
+                            <div className="flex justify-end gap-1">
+                              <Button variant="ghost" size="sm" onClick={() => handleInspectBatch(batch.id)}>
+                                <Maximize2 className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="sm" onClick={() => handleInspectBatch(batch.id)}>
+                                <Search className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="sm" onClick={() => setBatchToArchive(batch)}>
+                                <Archive className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="sm" onClick={() => handleExportBatchManifest(batch)}>
+                                <Download className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      {/* Bulk Actions Bar */}
+      {selectedIds.size > 0 && (
+        <div className="bg-primary text-primary-foreground p-3 rounded-lg flex items-center justify-between sticky top-4 z-10 shadow-lg">
+          <div className="font-medium px-2">
+            {selectedIds.size} plantillas seleccionadas
+          </div>
+          <div className="flex gap-2">
+            <Button variant="secondary" size="sm" onClick={() => handleBulkAction("review")}>
+              <Clock className="h-4 w-4 mr-2" /> A Revisin
+            </Button>
+            <Button variant="secondary" size="sm" onClick={() => handleBulkAction("approve")}>
+              <Check className="h-4 w-4 mr-2" /> Aprobar
+            </Button>
+            <Button variant="secondary" size="sm" onClick={() => handleBulkAction("reject")}>
+              <X className="h-4 w-4 mr-2" /> Rechazar
+            </Button>
+            <Button variant="secondary" size="sm" onClick={() => handleBulkAction("archive")}>
+              <Archive className="h-4 w-4 mr-2" /> Archivar
+            </Button>
+            <Button 
+              size="sm" 
+              className="bg-green-600 hover:bg-green-700 text-white ml-4"
+              onClick={() => handleBulkAction("publish")}
             >
-              <CardHeader className="pb-2">
-                <CardTitle className="flex items-center gap-2 text-sm font-medium">
-                  {status !== "all" && STATUS_ICONS[status]}
-                  {STATUS_LABELS[status]}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{count}</div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
-
-      {/* Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Filtros</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col gap-4 md:flex-row">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Buscar por nombre, categoría, industria o batch..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-
-            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="w-full md:w-[200px]">
-                <SelectValue placeholder="Categoría" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas las categorías</SelectItem>
-                {categories.map((cat) => (
-                  <SelectItem key={cat} value={cat}>
-                    {cat}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              <Globe className="h-4 w-4 mr-2" /> Publicar
+            </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      )}
 
-      {/* Templates Grid */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <span>
-              Plantillas{" "}
-              <span className="text-sm font-normal text-muted-foreground">
-                ({filteredTemplates.length})
-              </span>
-            </span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-purple-500" />
-            </div>
-          ) : filteredTemplates.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <AlertCircle className="mb-4 h-12 w-12 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">
-                No se encontraron plantillas con los filtros aplicados
-              </p>
-            </div>
-          ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {filteredTemplates.map((template) => (
-                <Card
-                  key={template.id}
-                  className="group cursor-pointer overflow-hidden transition-all hover:shadow-lg"
+      {loading ? (
+        <div className="flex h-64 items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      ) : templates.length === 0 ? (
+        <div className="flex h-64 flex-col items-center justify-center rounded-lg border border-dashed text-muted-foreground bg-muted/20">
+          <Library className="h-12 w-12 mb-4 opacity-50" />
+          <p>No se encontraron plantillas</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 px-2">
+            <Checkbox 
+              checked={selectedIds.size === templates.length && templates.length > 0}
+              onCheckedChange={handleSelectAll}
+            />
+            <span className="text-sm font-medium">Seleccionar todas</span>
+          </div>
+          
+          <div className={"grid gap-4 " + (viewMode === "grid" ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "grid-cols-1 md:grid-cols-2")}>
+            {templates.map((template) => (
+              <Card 
+                key={template.id} 
+                className={"overflow-hidden transition-all " + (selectedIds.has(template.id) ? "ring-2 ring-primary" : "")}
+              >
+                <div className="p-3 border-b flex items-center gap-2 bg-muted/20">
+                  <Checkbox 
+                    checked={selectedIds.has(template.id)}
+                    onCheckedChange={(c) => handleSelect(template.id, !!c)}
+                  />
+                  <Badge variant="outline" className="text-[10px] ml-auto">
+                    {STATUS_ICONS[template.publication_status]}
+                    <span className="ml-1">{template.publication_status.replace("_", " ")}</span>
+                  </Badge>
+                </div>
+                
+                <div
+                  className={"relative bg-muted/10 p-3 " + (viewMode === "grid" ? "h-56" : "h-80")}
                   onClick={() => {
                     setSelectedTemplate(template);
                     setPreviewOpen(true);
                   }}
                 >
-                  <div className="relative aspect-[9/16] overflow-hidden bg-muted">
-                    {template.preview_image ? (
-                      <img
-                        src={template.preview_image}
-                        alt={template.name}
-                        className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                      />
-                    ) : (
-                      <div className="flex h-full items-center justify-center">
-                        <FileText className="h-12 w-12 text-muted-foreground" />
-                      </div>
-                    )}
-
-                    <div className="absolute left-2 top-2">
-                      <Badge
-                        className={`gap-1 border ${
-                          STATUS_COLORS[template.publication_status]
-                        }`}
-                      >
-                        {STATUS_ICONS[template.publication_status]}
-                        {STATUS_LABELS[template.publication_status]}
-                      </Badge>
-                    </div>
-
-                    {template.batch_id && (
-                      <div className="absolute right-2 top-2">
-                        <Badge variant="secondary" className="text-xs">
-                          {template.batch_id}
-                        </Badge>
-                      </div>
-                    )}
-                  </div>
-
-                  <CardContent className="p-4">
-                    <h3 className="mb-2 truncate font-semibold">{template.name}</h3>
-                    <div className="flex flex-wrap gap-1">
-                      {template.category && (
-                        <Badge variant="outline" className="text-xs">
-                          {template.category}
-                        </Badge>
-                      )}
-                      {template.industry && (
-                        <Badge variant="outline" className="text-xs">
-                          {template.industry}
-                        </Badge>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Preview/Detail Dialog */}
-      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-        <DialogContent className="max-w-4xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              {selectedTemplate?.name}
-              {selectedTemplate && (
-                <Badge
-                  className={`gap-1 border ${
-                    STATUS_COLORS[selectedTemplate.publication_status]
-                  }`}
-                >
-                  {STATUS_ICONS[selectedTemplate.publication_status]}
-                  {STATUS_LABELS[selectedTemplate.publication_status]}
-                </Badge>
-              )}
-            </DialogTitle>
-            <DialogDescription>
-              {selectedTemplate?.description || "Sin descripción"}
-            </DialogDescription>
-          </DialogHeader>
-
-          {selectedTemplate && (
-            <div className="space-y-4">
-              {/* Preview */}
-              <div className="flex justify-center rounded-lg bg-muted p-4">
-                {selectedTemplate.preview_image ? (
-                  <img
-                    src={selectedTemplate.preview_image}
-                    alt={selectedTemplate.name}
-                    className="max-h-96 rounded-lg border"
+                  <CleanTemplatePreview
+                    config={template.config_json}
+                    deviceMode="mobile"
+                    className="cursor-pointer"
                   />
-                ) : (
-                  <div className="flex h-64 w-full items-center justify-center">
-                    <FileText className="h-16 w-16 text-muted-foreground" />
-                  </div>
-                )}
-              </div>
-
-              {/* Metadata */}
-              <div className="grid gap-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Categoría:</span>
-                  <span>{selectedTemplate.category || "—"}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Industria:</span>
-                  <span>{selectedTemplate.industry || "—"}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Tema:</span>
-                  <span>{selectedTemplate.theme || "—"}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Schema Version:</span>
-                  <span>{selectedTemplate.schema_version}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Fuente:</span>
-                  <span>{selectedTemplate.generation_source}</span>
-                </div>
-                {selectedTemplate.batch_id && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Batch:</span>
-                    <span className="font-mono text-xs">{selectedTemplate.batch_id}</span>
-                  </div>
-                )}
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Validación:</span>
-                  <Badge
-                    variant={
-                      selectedTemplate.validation_status === "valid"
-                        ? "default"
-                        : "destructive"
-                    }
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="secondary"
+                    className="absolute right-3 top-3 h-8 w-8 shadow"
+                    title="Abrir preview detallado"
                   >
-                    {selectedTemplate.validation_status}
-                  </Badge>
+                    <Maximize2 className="h-4 w-4" />
+                  </Button>
                 </div>
-                {selectedTemplate.qa_score != null && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">QA Score:</span>
-                    <span>{(selectedTemplate.qa_score * 100).toFixed(0)}%</span>
+
+                <CardContent className="p-4 space-y-3">
+                  <div>
+                    <h3 className="font-semibold truncate">{template.name}</h3>
+                    <p className="text-xs text-muted-foreground capitalize">{template.industry || "General"}  {template.config_json?.recipe}</p>
                   </div>
-                )}
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Usos:</span>
-                  <span>{selectedTemplate.usage_count}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Creada:</span>
-                  <span>{new Date(selectedTemplate.created_at).toLocaleDateString()}</span>
-                </div>
-                {selectedTemplate.approved_at && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Aprobada:</span>
-                    <span>{new Date(selectedTemplate.approved_at).toLocaleDateString()}</span>
+                  
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="bg-muted p-2 rounded flex flex-col">
+                      <span className="text-muted-foreground">QA Score</span>
+                      <span className="font-medium text-sm text-green-600">{((template.qa_score || 0) * 100).toFixed(0)}%</span>
+                    </div>
+                    <div className="bg-muted p-2 rounded flex flex-col">
+                      <span className="text-muted-foreground">Paleta</span>
+                      <span className="font-medium truncate">{template.config_json?.paletteId || template.config_json?.palette || "-"}</span>
+                    </div>
                   </div>
-                )}
-                {selectedTemplate.published_at && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Publicada:</span>
-                    <span>{new Date(selectedTemplate.published_at).toLocaleDateString()}</span>
-                  </div>
-                )}
-              </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
 
-              {/* Actions */}
-              <DialogFooter className="flex flex-wrap gap-2">
-                {getAvailableActions(selectedTemplate.publication_status).map((action) => {
-                  const actionConfig: Record<
-                    string,
-                    { label: string; icon: React.ReactNode; variant?: any }
-                  > = {
-                    sendToReview: {
-                      label: "Enviar a Revisión",
-                      icon: <ChevronRight className="h-4 w-4" />,
-                    },
-                    approve: {
-                      label: "Aprobar",
-                      icon: <Check className="h-4 w-4" />,
-                      variant: "default",
-                    },
-                    reject: {
-                      label: "Rechazar",
-                      icon: <X className="h-4 w-4" />,
-                      variant: "destructive",
-                    },
-                    publish: {
-                      label: "Publicar",
-                      icon: <Globe className="h-4 w-4" />,
-                      variant: "default",
-                    },
-                    unpublish: {
-                      label: "Despublicar",
-                      icon: <Globe className="h-4 w-4" />,
-                      variant: "outline",
-                    },
-                    archive: {
-                      label: "Archivar",
-                      icon: <Archive className="h-4 w-4" />,
-                      variant: "outline",
-                    },
-                    restore: {
-                      label: "Restaurar",
-                      icon: <RotateCcw className="h-4 w-4" />,
-                      variant: "default",
-                    },
-                    returnToReview: {
-                      label: "Devolver a Revisión",
-                      icon: <RotateCcw className="h-4 w-4" />,
-                      variant: "outline",
-                    },
-                  };
+      <TemplateDetailModal 
+        template={selectedTemplate}
+        open={previewOpen}
+        onOpenChange={setPreviewOpen}
+      />
 
-                  const config = actionConfig[action];
-                  if (!config) return null;
-
-                  return (
-                    <Button
-                      key={action}
-                      variant={config.variant || "outline"}
-                      size="sm"
-                      disabled={actionInProgress}
-                      onClick={() =>
-                        handleAction(action, selectedTemplate.id, selectedTemplate.name)
-                      }
-                    >
-                      {actionInProgress ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        config.icon
-                      )}
-                      {config.label}
-                    </Button>
-                  );
-                })}
-
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  disabled={actionInProgress}
-                  onClick={() => {
-                    setTemplateToDelete(selectedTemplate.id);
-                    setDeleteConfirmOpen(true);
-                  }}
-                >
-                  <Trash2 className="h-4 w-4" />
-                  Eliminar
-                </Button>
-              </DialogFooter>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+      <Dialog open={bulkPublishConfirmOpen} onOpenChange={setBulkPublishConfirmOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>¿Eliminar plantilla?</DialogTitle>
+            <DialogTitle>Confirmar Publicacin Masiva</DialogTitle>
             <DialogDescription>
-              Esta acción no se puede deshacer. La plantilla será eliminada permanentemente.
+              Est a punto de publicar {selectedIds.size} plantillas. Estas plantillas sern visibles de inmediato para todos los usuarios finales en el Template Builder.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setDeleteConfirmOpen(false)}
-              disabled={actionInProgress}
-            >
+            <Button variant="outline" onClick={() => setBulkPublishConfirmOpen(false)} disabled={actionInProgress}>
               Cancelar
             </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDelete}
-              disabled={actionInProgress}
-            >
-              {actionInProgress ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Trash2 className="h-4 w-4" />
-              )}
-              Eliminar
+            <Button variant="default" className="bg-green-600 hover:bg-green-700 text-white" onClick={() => handleBulkAction("publish")} disabled={actionInProgress}>
+              {actionInProgress ? <Loader2 className="h-4 w-4 animate-spin" /> : <Globe className="h-4 w-4 mr-2" />}
+              S, publicar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!batchToArchive} onOpenChange={(open) => !open && setBatchToArchive(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Archivar batch</DialogTitle>
+            <DialogDescription>
+              Esta accin archivar todas las plantillas del batch seleccionado. No publica ni aprueba plantillas.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setBatchToArchive(null)} disabled={actionInProgress}>
+              Cancelar
+            </Button>
+            <Button variant="destructive" onClick={handleArchiveBatch} disabled={actionInProgress}>
+              {actionInProgress ? <Loader2 className="h-4 w-4 animate-spin" /> : <Archive className="h-4 w-4 mr-2" />}
+              Archivar batch
             </Button>
           </DialogFooter>
         </DialogContent>

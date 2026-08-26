@@ -1,0 +1,15 @@
+{
+  "phase": "phase_1_generate",
+  "batchId": "cripqer-e2e-pilot-10-2026-08-25T22-35-29-291Z",
+  "requested": 10,
+  "generated": 10,
+  "generationFailures": [],
+  "duplicateCount": 0,
+  "validated": 10,
+  "rendered": 10,
+  "qaPassed": 10,
+  "cleanPreviews": 10,
+  "rejected": 0,
+  "failures": [],
+  "renderer": "file:///C:/Users/Lenovo/Desktop/proyectos%20desplegados%20importante/generador%20de%20QR/public/template-builder.html"
+}

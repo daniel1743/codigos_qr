@@ -1,0 +1,10 @@
+{
+  "verifyIn": "/admin",
+  "status": "PASS",
+  "privateLibraryRows": 10,
+  "previewVisible": 10,
+  "industryVisible": 10,
+  "qaScoreVisible": 10,
+  "stateVisible": 10,
+  "batchFilterWorks": true
+}

@@ -1,0 +1,7 @@
+{
+  "status": "PARTIAL",
+  "normalUserDoesNotSeePrivateTemplates": true,
+  "normalUserDoesNotApprovePublish": "not_executed_without_normal_user_session",
+  "userDoesNotModifyMaster": "not_executed_in_this_resume_scope",
+  "userADoesNotModifyUserBCopy": "not_executed_without_two_user_sessions"
+}

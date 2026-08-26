@@ -34,7 +34,7 @@ import {
   type Recipe,
 } from "./recipes";
 import {
-  paletteToThemeAppearance,
+  applyPaletteToTemplateConfig,
   selectTemplatePalette,
   type SemanticPaletteTokens,
   type TemplatePaletteId,
@@ -194,7 +194,6 @@ export function generateTemplate(input: GenerateTemplateInput): GeneratedTemplat
     batchId: input.batchId,
     index,
   });
-  const paletteAppearance = paletteToThemeAppearance(palette);
   const resolvedThemeId = palette.preferredThemeId;
 
   // 8. Ensamblado sobre defaults canónicos -------------------------------
@@ -214,13 +213,6 @@ export function generateTemplate(input: GenerateTemplateInput): GeneratedTemplat
   config.appearance = {
     ...config.appearance,
     ...THEME_APPEARANCE[themeId],
-    ...paletteAppearance,
-    banner: {
-      ...paletteAppearance.banner,
-      // Sin imagen de banner, el bloque queda deshabilitado para no dejar una
-      // franja de máscara vacía sobre el fondo.
-      enabled: Boolean(banner) && paletteAppearance.banner.enabled,
-    },
     themeId: resolvedThemeId,
     btnPresetId: buttonPresetId,
     profileRadius,
@@ -229,6 +221,21 @@ export function generateTemplate(input: GenerateTemplateInput): GeneratedTemplat
     fontHeading,
     fontSubtitle: fontHeading,
     fontBody: fontHeading,
+  };
+
+  const paletteApplied = applyPaletteToTemplateConfig(config, palette.id);
+  config.paletteId = paletteApplied.paletteId;
+  config.paletteTokens = paletteApplied.tokens;
+  config.paletteOverrides = paletteApplied.overrides;
+  config.appearance = {
+    ...paletteApplied.config.appearance,
+    btnPresetId: buttonPresetId,
+    banner: {
+      ...paletteApplied.config.appearance.banner,
+      // Sin imagen de banner, el bloque queda deshabilitado para no dejar una
+      // franja de máscara vacía sobre el fondo.
+      enabled: Boolean(banner) && paletteApplied.config.appearance.banner.enabled,
+    },
   };
 
   config.layout = {
@@ -507,6 +514,8 @@ export interface GenerateBatchInput {
   batchId: string;
   recipePool?: readonly string[];
   buttonCountPool?: readonly ButtonCount[];
+  excludeConfigHashes?: readonly string[];
+  maxCandidateAttempts?: number;
   metadata?: Record<string, unknown>;
 }
 
@@ -558,11 +567,16 @@ export function generateBatch(input: GenerateBatchInput): BatchSummary {
   const failures: BatchSummary["failures"] = [];
   const duplicates: BatchSummary["duplicates"] = [];
   const seenHashes = new Map<string, string>();
+  const excludedHashes = new Set(input.excludeConfigHashes ?? []);
+  const maxCandidateAttempts =
+    input.maxCandidateAttempts && input.maxCandidateAttempts > 0
+      ? input.maxCandidateAttempts
+      : input.count * 10;
 
-  for (let index = 0; index < input.count; index++) {
+  for (let candidateIndex = 0; templates.length < input.count && candidateIndex < maxCandidateAttempts; candidateIndex++) {
     // Selector estable por índice: no consume el RNG de la plantilla, así que
     // cambiar `count` no altera las plantillas ya generadas.
-    const selector = new SeededRandom(deriveSeed(input.seed, `select:${input.batchId}:${index}`));
+    const selector = new SeededRandom(deriveSeed(input.seed, `select:${input.batchId}:${candidateIndex}`));
     const recipeId = selector.pick(recipePool);
     const buttonCount = selector.pick(buttonCountPool);
 
@@ -573,19 +587,28 @@ export function generateBatch(input: GenerateBatchInput): BatchSummary {
         buttonCount,
         seed: input.seed,
         batchId: input.batchId,
-        index,
+        index: candidateIndex,
         metadata: input.metadata,
       });
 
       if (!generated.validation.valid) {
-        failures.push({ index, errors: generated.validation.errors });
+        failures.push({ index: candidateIndex, errors: generated.validation.errors });
+        continue;
+      }
+
+      if (excludedHashes.has(generated.configHash)) {
+        duplicates.push({
+          index: candidateIndex,
+          configHash: generated.configHash,
+          duplicateOfTemplateId: "excluded",
+        });
         continue;
       }
 
       const previous = seenHashes.get(generated.configHash);
       if (previous) {
         duplicates.push({
-          index,
+          index: candidateIndex,
           configHash: generated.configHash,
           duplicateOfTemplateId: previous,
         });
@@ -596,7 +619,7 @@ export function generateBatch(input: GenerateBatchInput): BatchSummary {
       templates.push(generated);
     } catch (error) {
       failures.push({
-        index,
+        index: candidateIndex,
         errors: [error instanceof Error ? error.message : String(error)],
       });
     }

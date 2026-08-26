@@ -1,0 +1,28 @@
+{
+  "requestedCall": "ingestToTemplateBank(records, { mode: 'live' })",
+  "adapterResult": {
+    "insertedCount": 10,
+    "skippedCount": 0,
+    "failedCount": 0,
+    "insertedIds": [
+      "f03fa14c-5674-45c3-b663-587d0c972fc5",
+      "a4615859-f105-4aa9-99e8-889ee7d13515",
+      "ee4950d9-aeb1-4b10-8f85-229a6e22f440",
+      "feb9662f-7c58-4782-bd65-c640f386509b",
+      "2fec2bb8-9c79-4c0b-a1bb-6f7aa4e2f394",
+      "948b4128-9d35-4a6d-97bd-b36af02722f3",
+      "acf126c9-d6cb-4e16-83bd-49b97adcff49",
+      "8196926f-b9c2-4df0-8f41-611dee471105",
+      "163276b4-0a16-43e3-93cc-800cb7ac0ea8",
+      "0fe43a78-3df1-441a-8892-abd7d828a189"
+    ],
+    "errors": []
+  },
+  "rowsInTemplateBank": 10,
+  "generatedPrivate": 10,
+  "notPublic": 10,
+  "batchIdRegistered": 10,
+  "qaScoreRegistered": 10,
+  "configLinked": 10,
+  "hardFail": false
+}

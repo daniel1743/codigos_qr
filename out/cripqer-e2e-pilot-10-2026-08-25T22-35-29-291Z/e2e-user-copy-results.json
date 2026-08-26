@@ -1,0 +1,5 @@
+{
+  "phase": "phase_6_user_copy",
+  "status": "BLOCKED",
+  "blockedReason": "SUPABASE_SERVICE_ROLE_KEY is missing from .env.local/process env; controlled live ingestion cannot run safely."
+}

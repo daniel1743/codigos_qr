@@ -13,6 +13,7 @@
  * marca FAIL si divergen. El generador siempre parte de estos defaults.
  */
 
+import type { SemanticPaletteTokens } from "./palettes";
 import type { ActionTypeId } from "./registries";
 
 export const SCHEMA_VERSION = 1;
@@ -48,6 +49,12 @@ export interface TemplateConfigBanner {
 
 export interface TemplateConfig {
   schemaVersion: number;
+  /** Palette preset selected by the user or generator. */
+  paletteId?: string;
+  /** Resolved semantic tokens after applying the preset and user overrides. */
+  paletteTokens?: SemanticPaletteTokens;
+  /** Per-token edits made after a preset was applied. */
+  paletteOverrides?: Partial<SemanticPaletteTokens>;
   identity: {
     logoText: string;
     subtitleText: string;

@@ -1,0 +1,162 @@
+[
+  {
+    "phase": "generation",
+    "chunk": 0,
+    "index": 0,
+    "errors": [
+      "El dataset no tiene suficientes acciones distintas: se pidieron 4, hay 1"
+    ]
+  },
+  {
+    "phase": "generation",
+    "chunk": 0,
+    "index": 1,
+    "errors": [
+      "El dataset no tiene suficientes acciones distintas: se pidieron 2, hay 1"
+    ]
+  },
+  {
+    "phase": "generation",
+    "chunk": 0,
+    "index": 2,
+    "errors": [
+      "El dataset no tiene suficientes acciones distintas: se pidieron 2, hay 1"
+    ]
+  },
+  {
+    "phase": "generation",
+    "chunk": 0,
+    "index": 3,
+    "errors": [
+      "El dataset no tiene suficientes acciones distintas: se pidieron 5, hay 1"
+    ]
+  },
+  {
+    "phase": "generation",
+    "chunk": 0,
+    "index": 4,
+    "errors": [
+      "El dataset no tiene suficientes acciones distintas: se pidieron 5, hay 1"
+    ]
+  },
+  {
+    "phase": "generation",
+    "chunk": 0,
+    "index": 5,
+    "errors": [
+      "El dataset no tiene suficientes acciones distintas: se pidieron 2, hay 1"
+    ]
+  },
+  {
+    "phase": "generation",
+    "chunk": 0,
+    "index": 6,
+    "errors": [
+      "El dataset no tiene suficientes acciones distintas: se pidieron 3, hay 1"
+    ]
+  },
+  {
+    "phase": "generation",
+    "chunk": 0,
+    "index": 7,
+    "errors": [
+      "El dataset no tiene suficientes acciones distintas: se pidieron 2, hay 1"
+    ]
+  },
+  {
+    "phase": "generation",
+    "chunk": 0,
+    "index": 8,
+    "errors": [
+      "El dataset no tiene suficientes acciones distintas: se pidieron 3, hay 1"
+    ]
+  },
+  {
+    "phase": "generation",
+    "chunk": 1,
+    "index": 0,
+    "errors": [
+      "El dataset no tiene suficientes acciones distintas: se pidieron 3, hay 1"
+    ]
+  },
+  {
+    "phase": "generation",
+    "chunk": 1,
+    "index": 1,
+    "errors": [
+      "El dataset no tiene suficientes acciones distintas: se pidieron 2, hay 1"
+    ]
+  },
+  {
+    "phase": "generation",
+    "chunk": 1,
+    "index": 2,
+    "errors": [
+      "El dataset no tiene suficientes acciones distintas: se pidieron 3, hay 1"
+    ]
+  },
+  {
+    "phase": "generation",
+    "chunk": 1,
+    "index": 3,
+    "errors": [
+      "El dataset no tiene suficientes acciones distintas: se pidieron 5, hay 1"
+    ]
+  },
+  {
+    "phase": "generation",
+    "chunk": 1,
+    "index": 4,
+    "errors": [
+      "El dataset no tiene suficientes acciones distintas: se pidieron 5, hay 1"
+    ]
+  },
+  {
+    "phase": "generation",
+    "chunk": 1,
+    "index": 5,
+    "errors": [
+      "El dataset no tiene suficientes acciones distintas: se pidieron 3, hay 1"
+    ]
+  },
+  {
+    "phase": "generation",
+    "chunk": 1,
+    "index": 7,
+    "errors": [
+      "El dataset no tiene suficientes acciones distintas: se pidieron 5, hay 1"
+    ]
+  },
+  {
+    "phase": "generation",
+    "chunk": 1,
+    "index": 9,
+    "errors": [
+      "El dataset no tiene suficientes acciones distintas: se pidieron 2, hay 1"
+    ]
+  },
+  {
+    "phase": "generation",
+    "chunk": 2,
+    "index": 1,
+    "errors": [
+      "El dataset no tiene suficientes acciones distintas: se pidieron 5, hay 1"
+    ]
+  },
+  {
+    "phase": "generation",
+    "chunk": 2,
+    "index": 2,
+    "errors": [
+      "El dataset no tiene suficientes acciones distintas: se pidieron 2, hay 1"
+    ]
+  },
+  {
+    "phase": "generation",
+    "chunk": 2,
+    "index": 3,
+    "errors": [
+      "El dataset no tiene suficientes acciones distintas: se pidieron 3, hay 1"
+    ]
+  }
+]

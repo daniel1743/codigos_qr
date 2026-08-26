@@ -1,0 +1,212 @@
+{
+  "phaseId": "TF-F14-SCALE-PRODUCTION",
+  "runId": "tf-f14-2026-08-25T21-25-31-897Z",
+  "requestedPrivateCandidates": 500,
+  "generatedPrivateCandidates": 500,
+  "outputDir": "C:\\Users\\Lenovo\\Desktop\\proyectos desplegados importante\\generador de QR\\out\\tf-f14-2026-08-25T21-25-31-897Z",
+  "strategy": {
+    "controlledBatchSize": 100,
+    "batchCount": 5,
+    "industries": [
+      "medical",
+      "legal",
+      "restaurant",
+      "barber",
+      "dental",
+      "veterinary",
+      "beauty",
+      "spa",
+      "hair_salon",
+      "tattoo"
+    ],
+    "automaticPublication": false,
+    "publicLibraryPrinciple": "curated, not everything generated"
+  },
+  "batches": [
+    {
+      "id": "tf-f14-2026-08-25T21-25-31-897Z-b01",
+      "generationDate": "2026-08-25T21:29:36.616Z",
+      "industries": [
+        "barber",
+        "beauty",
+        "dental",
+        "hair_salon",
+        "legal",
+        "medical",
+        "restaurant",
+        "spa",
+        "tattoo",
+        "veterinary"
+      ],
+      "requestedQuantity": 100,
+      "generated": 100,
+      "failed": 0,
+      "approved": 0,
+      "rejected": 0,
+      "published": 0,
+      "averageQaScore": 1,
+      "generatorVersion": "generator-v1"
+    },
+    {
+      "id": "tf-f14-2026-08-25T21-25-31-897Z-b02",
+      "generationDate": "2026-08-25T21:29:36.616Z",
+      "industries": [
+        "barber",
+        "beauty",
+        "dental",
+        "hair_salon",
+        "legal",
+        "medical",
+        "restaurant",
+        "spa",
+        "tattoo",
+        "veterinary"
+      ],
+      "requestedQuantity": 100,
+      "generated": 100,
+      "failed": 0,
+      "approved": 0,
+      "rejected": 0,
+      "published": 0,
+      "averageQaScore": 1,
+      "generatorVersion": "generator-v1"
+    },
+    {
+      "id": "tf-f14-2026-08-25T21-25-31-897Z-b03",
+      "generationDate": "2026-08-25T21:29:36.617Z",
+      "industries": [
+        "barber",
+        "beauty",
+        "dental",
+        "hair_salon",
+        "legal",
+        "medical",
+        "restaurant",
+        "spa",
+        "tattoo",
+        "veterinary"
+      ],
+      "requestedQuantity": 100,
+      "generated": 100,
+      "failed": 0,
+      "approved": 0,
+      "rejected": 0,
+      "published": 0,
+      "averageQaScore": 1,
+      "generatorVersion": "generator-v1"
+    },
+    {
+      "id": "tf-f14-2026-08-25T21-25-31-897Z-b04",
+      "generationDate": "2026-08-25T21:29:36.617Z",
+      "industries": [
+        "barber",
+        "beauty",
+        "dental",
+        "hair_salon",
+        "legal",
+        "medical",
+        "restaurant",
+        "spa",
+        "tattoo",
+        "veterinary"
+      ],
+      "requestedQuantity": 100,
+      "generated": 100,
+      "failed": 0,
+      "approved": 0,
+      "rejected": 0,
+      "published": 0,
+      "averageQaScore": 1,
+      "generatorVersion": "generator-v1"
+    },
+    {
+      "id": "tf-f14-2026-08-25T21-25-31-897Z-b05",
+      "generationDate": "2026-08-25T21:29:36.617Z",
+      "industries": [
+        "barber",
+        "beauty",
+        "dental",
+        "hair_salon",
+        "legal",
+        "medical",
+        "restaurant",
+        "spa",
+        "tattoo",
+        "veterinary"
+      ],
+      "requestedQuantity": 100,
+      "generated": 100,
+      "failed": 0,
+      "approved": 0,
+      "rejected": 0,
+      "published": 0,
+      "averageQaScore": 1,
+      "generatorVersion": "generator-v1"
+    }
+  ],
+  "monitor": {
+    "duplicateRate": 0,
+    "failureRate": 0,
+    "rendererCrashes": 0,
+    "qaDistribution": {
+      "0.95-1.00": 500,
+      "0.90-0.94": 0,
+      "0.85-0.89": 0,
+      "below-0.85": 0
+    },
+    "averageQaScore": 1,
+    "mostUsedIndustries": [
+      {
+        "industry": "medical",
+        "count": 50
+      },
+      {
+        "industry": "legal",
+        "count": 50
+      },
+      {
+        "industry": "restaurant",
+        "count": 50
+      },
+      {
+        "industry": "barber",
+        "count": 50
+      },
+      {
+        "industry": "dental",
+        "count": 50
+      },
+      {
+        "industry": "veterinary",
+        "count": 50
+      },
+      {
+        "industry": "beauty",
+        "count": 50
+      },
+      {
+        "industry": "spa",
+        "count": 50
+      },
+      {
+        "industry": "hair_salon",
+        "count": 50
+      },
+      {
+        "industry": "tattoo",
+        "count": 50
+      }
+    ],
+    "userTemplateAdoption": {
+      "status": "not_measured_in_local_generation",
+      "reason": "requires live usage_count / user clone telemetry after ingestion"
+    },
+    "accidentalPublication": 0
+  },
+  "targets": {
+    "privateCandidates": true,
+    "controlledBatchSizes": true,
+    "noUncontrolledThousands": true,
+    "accidentalPublication": true
+  }
+}

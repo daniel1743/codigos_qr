@@ -14,6 +14,7 @@ import {
 import { toast } from "sonner";
 import { getBrowserSupabaseClient } from "@/lib/supabase/client";
 import { getPremiumOverrideByEmail, getUserEntitlements } from "@/lib/entitlements";
+import { CleanTemplatePreview } from "../admin/CleanTemplatePreview";
 import {
   getPublicTemplates,
   incrementTemplateUsage,
@@ -40,7 +41,11 @@ type SortFilter = "popular" | "recent" | "trend";
 interface Filters {
   search: string;
   plan: PlanFilter;
+  industry: string;
   category: string;
+  style: string;
+  palette: string;
+  themeMode: "all" | "light" | "dark";
   activeTags: string[];
   sort: SortFilter;
 }
@@ -70,7 +75,11 @@ export function TemplateBankGallery() {
   const [filters, setFilters] = useState<Filters>({
     search: "",
     plan: "all",
+    industry: "all",
     category: "all",
+    style: "all",
+    palette: "all",
+    themeMode: "all",
     activeTags: [],
     sort: "popular",
   });
@@ -134,9 +143,10 @@ export function TemplateBankGallery() {
     }
   }
 
-  const categories = useMemo(() => {
-    return Array.from(new Set(templates.map((template) => template.category).filter(Boolean))).sort();
-  }, [templates]);
+  const categories = useMemo(() => Array.from(new Set(templates.map((t) => t.category).filter(Boolean))).sort(), [templates]);
+  const industries = useMemo(() => Array.from(new Set(templates.map((t) => t.industry).filter(Boolean))).sort(), [templates]);
+  const styles = useMemo(() => Array.from(new Set(templates.map((t) => t.style).filter(Boolean))).sort(), [templates]);
+  const palettes = useMemo(() => Array.from(new Set(templates.map((t) => t.palette).filter(Boolean))).sort(), [templates]);
 
   const filteredTemplates = useMemo(() => {
     let result = templates.filter((template) => template.status === "PUBLIC");
@@ -146,19 +156,23 @@ export function TemplateBankGallery() {
       result = result.filter((template) => {
         return (
           template.name.toLowerCase().includes(term) ||
+          template.industry.toLowerCase().includes(term) ||
           template.category.toLowerCase().includes(term) ||
           template.tags.some((tag) => tag.toLowerCase().includes(term))
         );
       });
     }
 
-    if (filters.plan === "free") result = result.filter((template) => template.plan === "free");
-    if (filters.plan === "premium")
-      result = result.filter((template) => template.plan === "premium");
-    if (filters.plan === "favorites")
-      result = result.filter((template) => favorites.includes(template.id));
-    if (filters.category !== "all")
-      result = result.filter((template) => template.category === filters.category);
+    if (filters.plan === "free") result = result.filter((t) => t.plan === "free");
+    if (filters.plan === "premium") result = result.filter((t) => t.plan === "premium");
+    if (filters.plan === "favorites") result = result.filter((t) => favorites.includes(t.id));
+    
+    if (filters.industry !== "all") result = result.filter((t) => t.industry === filters.industry);
+    if (filters.category !== "all") result = result.filter((t) => t.category === filters.category);
+    if (filters.style !== "all") result = result.filter((t) => t.style === filters.style);
+    if (filters.palette !== "all") result = result.filter((t) => t.palette === filters.palette);
+    if (filters.themeMode !== "all") result = result.filter((t) => t.themeMode === filters.themeMode);
+
     if (filters.activeTags.length > 0) {
       result = result.filter((template) =>
         filters.activeTags.every((tag) => template.tags.includes(tag)),
@@ -167,8 +181,7 @@ export function TemplateBankGallery() {
 
     return [...result].sort((a, b) => {
       if (filters.sort === "popular") return b.usageCount - a.usageCount;
-      if (filters.sort === "recent")
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      if (filters.sort === "recent") return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       return (Number(b.isFeatured) * 1000 + b.usageCount) - (Number(a.isFeatured) * 1000 + a.usageCount);
     });
   }, [templates, filters, favorites]);
@@ -219,8 +232,35 @@ export function TemplateBankGallery() {
       }
 
       await incrementTemplateUsage(template.id);
-      window.localStorage.setItem("selected-template-config", JSON.stringify(template.config));
-      window.localStorage.setItem("selected-source-template-id", template.id);
+
+      // TF-F10: Create an editable user-owned instance from a published master template.
+      const { createTemplate } = await import("@/services/template.service");
+      
+      const clonedConfig = {
+        ...structuredClone(template.config || {}),
+        origin_metadata: {
+          source_template_id: template.id,
+          source_template_version: template.config?.schema_version || 1
+        }
+      };
+
+      const userClone = await createTemplate({
+        name: `Copia de ${template.name}`,
+        config_json: clonedConfig,
+        template_type: "private",
+        is_public: false,
+        publication_status: "GENERATED_PRIVATE",
+        industry: template.industry,
+        category: template.category,
+        style: template.style,
+        theme: template.themeMode === "dark" || template.themeMode === "light" ? template.themeMode : undefined,
+        generation_source: "CLONED_FROM_PUBLIC",
+      });
+
+      // Pass the clone to the builder so it saves to the user's private copy (Editor Básico flow)
+      window.localStorage.setItem("selected-template-config", JSON.stringify(userClone.config_json));
+      window.localStorage.setItem("selected-source-template-id", userClone.id);
+      
       toast.success("Plantilla preparada", {
         description: `"${template.name}" lista para el editor.`,
       });
@@ -292,30 +332,86 @@ export function TemplateBankGallery() {
                     <SlidersHorizontal className="h-5 w-5" />
                   </button>
                   {advancedOpen && (
-                    <div className="absolute right-0 top-full z-30 mt-2 w-64 rounded-xl border border-[#3A3A3A] bg-[#1E1E1E] p-4 shadow-2xl">
-                      <h4 className="mb-3 text-sm font-semibold">Características</h4>
-                      <div className="flex flex-col gap-2">
-                        {ADVANCED_TAGS.map((tag) => (
-                          <label
-                            key={tag}
-                            className="flex cursor-pointer items-center gap-2 text-sm text-gray-300 transition-colors hover:text-white"
-                          >
-                            <input
-                              type="checkbox"
-                              checked={filters.activeTags.includes(tag)}
-                              onChange={(event) =>
-                                setFilters((previous) => ({
-                                  ...previous,
-                                  activeTags: event.target.checked
-                                    ? [...previous.activeTags, tag]
-                                    : previous.activeTags.filter((item) => item !== tag),
-                                }))
-                              }
-                              className="rounded border-gray-600 bg-[#2A2A2A] text-[#FF3366] focus:ring-[#FF3366]"
-                            />
-                            <span>{tag}</span>
-                          </label>
-                        ))}
+                    <div className="absolute right-0 top-full z-30 mt-2 w-72 rounded-xl border border-[#3A3A3A] bg-[#1E1E1E] p-4 shadow-2xl flex flex-col gap-4">
+                      
+                      {/* Industry Filter */}
+                      <div>
+                        <label className="text-xs font-semibold text-gray-400 mb-1 block">Industria</label>
+                        <select
+                          value={filters.industry}
+                          onChange={(e) => setFilters(p => ({ ...p, industry: e.target.value }))}
+                          className="w-full rounded border border-[#2A2A2A] bg-[#121212] p-2 text-sm text-white focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF3366]"
+                        >
+                          <option value="all">Todas</option>
+                          {industries.map(i => <option key={i} value={i}>{i}</option>)}
+                        </select>
+                      </div>
+
+                      {/* Style Filter */}
+                      <div>
+                        <label className="text-xs font-semibold text-gray-400 mb-1 block">Estilo</label>
+                        <select
+                          value={filters.style}
+                          onChange={(e) => setFilters(p => ({ ...p, style: e.target.value }))}
+                          className="w-full rounded border border-[#2A2A2A] bg-[#121212] p-2 text-sm text-white focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF3366]"
+                        >
+                          <option value="all">Todos</option>
+                          {styles.map(s => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                      </div>
+
+                      {/* Palette Filter */}
+                      <div>
+                        <label className="text-xs font-semibold text-gray-400 mb-1 block">Paleta / Tono</label>
+                        <select
+                          value={filters.palette}
+                          onChange={(e) => setFilters(p => ({ ...p, palette: e.target.value }))}
+                          className="w-full rounded border border-[#2A2A2A] bg-[#121212] p-2 text-sm text-white focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF3366]"
+                        >
+                          <option value="all">Todas</option>
+                          {palettes.map(p => <option key={p} value={p}>{p}</option>)}
+                        </select>
+                      </div>
+
+                      {/* Theme Mode Filter */}
+                      <div>
+                        <label className="text-xs font-semibold text-gray-400 mb-1 block">Tema</label>
+                        <select
+                          value={filters.themeMode}
+                          onChange={(e) => setFilters(p => ({ ...p, themeMode: e.target.value as any }))}
+                          className="w-full rounded border border-[#2A2A2A] bg-[#121212] p-2 text-sm text-white focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF3366]"
+                        >
+                          <option value="all">Ambos</option>
+                          <option value="light">Claro</option>
+                          <option value="dark">Oscuro</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="text-xs font-semibold text-gray-400 mb-2 block">Características</label>
+                        <div className="flex flex-col gap-2">
+                          {ADVANCED_TAGS.map((tag) => (
+                            <label
+                              key={tag}
+                              className="flex cursor-pointer items-center gap-2 text-sm text-gray-300 transition-colors hover:text-white"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={filters.activeTags.includes(tag)}
+                                onChange={(event) =>
+                                  setFilters((previous) => ({
+                                    ...previous,
+                                    activeTags: event.target.checked
+                                      ? [...previous.activeTags, tag]
+                                      : previous.activeTags.filter((item) => item !== tag),
+                                  }))
+                                }
+                                className="rounded border-gray-600 bg-[#2A2A2A] text-[#FF3366] focus:ring-[#FF3366]"
+                              />
+                              <span>{tag}</span>
+                            </label>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   )}
@@ -529,9 +625,12 @@ export function TemplateBankGallery() {
                   </div>
 
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/80 to-transparent p-4 pt-12">
-                    <h3 className="mb-3 truncate text-sm font-medium text-white transition-colors group-hover:text-[#FF3366] sm:text-base">
+                    <h3 className="truncate text-sm font-bold text-white transition-colors group-hover:text-[#FF3366] sm:text-base">
                       {template.name}
                     </h3>
+                    <p className="mb-3 truncate text-xs font-medium text-gray-300">
+                      {template.industry}
+                    </p>
                     <div className="flex w-full gap-2 md:hidden">
                       <button
                         type="button"
@@ -615,16 +714,8 @@ export function TemplateBankGallery() {
             </div>
 
             <div className="flex flex-1 justify-center overflow-y-auto bg-[#0a0a0a] p-4 md:p-8">
-              <div className="relative w-full max-w-[400px] overflow-hidden rounded-xl border border-[#2A2A2A] bg-[#1E1E1E] shadow-[0_0_50px_rgba(0,0,0,0.5)]">
-                <img
-                  src={validatePreviewUrl(modalTemplate.previewUrl)}
-                  alt={`Vista previa completa de ${modalTemplate.name}`}
-                  className="block h-auto w-full object-cover"
-                  onError={(event) => {
-                    event.currentTarget.onerror = null;
-                    event.currentTarget.src = FALLBACK_IMG;
-                  }}
-                />
+              <div className="relative overflow-hidden rounded-xl border border-[#2A2A2A] bg-[#1E1E1E] shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+                <CleanTemplatePreview config={modalTemplate.config} deviceMode="mobile" />
               </div>
             </div>
 

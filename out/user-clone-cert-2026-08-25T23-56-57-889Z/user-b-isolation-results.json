@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "userBUpdateA": {
+    "blocked": true,
+    "returnedRows": 0,
+    "error": null
+  },
+  "userBUpdateMaster": {
+    "blocked": true,
+    "returnedRows": 0,
+    "error": null
+  },
+  "userAUpdateMaster": {
+    "blocked": true,
+    "returnedRows": 0,
+    "error": null
+  }
+}

@@ -16,16 +16,32 @@ export interface TemplateConfig {
   css_variables?: any;
   template_type: "premium" | "private";
   is_public: boolean;
+  publication_status?: string;
+  industry?: string;
+  category?: string;
+  style?: string;
+  theme?: string;
+  schema_version?: number;
+  generation_source?: string;
+  generator_version?: string;
+  batch_id?: string;
   usage_count: number;
   created_by?: string;
   created_at: string;
   updated_at: string;
 }
 
+const PRIVATE_USER_TEMPLATE_STATUS = "GENERATED_PRIVATE";
+
 export interface PublicTemplateViewModel {
   id: string;
   name: string;
+  industry: string;
   category: string;
+  style: string;
+  palette: string;
+  themeMode: "light" | "dark" | "auto";
+  recipe: string;
   previewUrl: string;
   plan: "free" | "premium";
   tags: string[];
@@ -45,6 +61,12 @@ export interface CreateTemplateData {
   css_variables?: any;
   template_type?: "premium" | "private";
   is_public?: boolean;
+  publication_status?: string;
+  industry?: string;
+  category?: string;
+  style?: string;
+  theme?: string;
+  generation_source?: string;
 }
 
 /**
@@ -54,12 +76,23 @@ export async function getTemplates(
   filter?: "all" | "premium" | "private"
 ): Promise<TemplateConfig[]> {
   try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
     let query = supabase.from("template_bank").select("*");
 
     if (filter === "premium") {
       query = query.eq("template_type", "premium");
     } else if (filter === "private") {
-      query = query.eq("template_type", "private");
+      if (!user) return [];
+      query = query.eq("template_type", "private").eq("created_by", user.id);
+    } else {
+      query = query.or(
+        user
+          ? `and(is_public.eq.true,publication_status.eq.PUBLIC),created_by.eq.${user.id}`
+          : "and(is_public.eq.true,publication_status.eq.PUBLIC)",
+      );
     }
 
     const { data, error } = await query.order("created_at", {
@@ -102,7 +135,25 @@ function readConfigStringArray(config: any, keys: string[]): string[] {
 
 export function mapTemplateToPublicViewModel(template: TemplateConfig): PublicTemplateViewModel {
   const config = template.config_json || {};
-  const category = readConfigString(config, ["category", "rubro", "industry"], "General");
+  
+  // Prefer database columns (from PASS B) over config digging
+  const industry = template.industry || readConfigString(config, ["industry", "rubro"], "General");
+  const category = template.category || readConfigString(config, ["category"], "General");
+  const style = template.style || readConfigString(config, ["style"], "Modern");
+  const palette = config.paletteId || config.palette || "default";
+  const recipe = config.recipe || "custom";
+  const paletteTokens = config.paletteTokens || config.tokens || {};
+  
+  // Heuristic for dark mode if not explicitly tagged
+  const isDark = paletteTokens.background?.toLowerCase().includes("000") ||
+                 paletteTokens.background?.toLowerCase().includes("111") ||
+                 palette.toLowerCase().includes("dark") || 
+                 template.theme === "dark";
+
+  const themeMode = template.theme === "light" || template.theme === "dark" 
+      ? template.theme 
+      : (isDark ? "dark" : "light");
+
   const tags = readConfigStringArray(config, ["tags", "features", "capabilities"]);
   const createdAt = template.created_at;
   const createdDate = new Date(createdAt);
@@ -113,7 +164,12 @@ export function mapTemplateToPublicViewModel(template: TemplateConfig): PublicTe
   return {
     id: template.id,
     name: template.name,
+    industry,
     category,
+    style,
+    palette,
+    themeMode,
+    recipe,
     previewUrl: template.preview_image || readConfigString(config, ["previewUrl", "preview_url"]),
     plan: template.template_type === "premium" ? "premium" : "free",
     tags,
@@ -126,18 +182,23 @@ export function mapTemplateToPublicViewModel(template: TemplateConfig): PublicTe
   };
 }
 
+/**
+ * TF-F9: SECURE PUBLIC FETCH
+ * Only retrieves templates explicitly published to the public catalog.
+ */
 export async function getPublicTemplates(): Promise<PublicTemplateViewModel[]> {
   try {
     const { data, error } = await supabase
       .from("template_bank")
       .select("*")
-      .eq("is_public", true)
+      .eq("publication_status", "PUBLIC") // STRICT
+      .eq("is_public", true)              // STRICT
       .order("usage_count", { ascending: false });
 
     if (error) throw error;
 
     return (data || [])
-      .filter((template) => template.is_public === true)
+      .filter((template) => template.is_public === true && template.publication_status === "PUBLIC") // Paranoia check
       .map((template) => mapTemplateToPublicViewModel(template as TemplateConfig));
   } catch (error) {
     console.error("Error fetching public templates:", error);
@@ -152,10 +213,19 @@ export async function getTemplateById(
   id: string
 ): Promise<TemplateConfig | null> {
   try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
     const { data, error } = await supabase
       .from("template_bank")
       .select("*")
       .eq("id", id)
+      .or(
+        user
+          ? `and(is_public.eq.true,publication_status.eq.PUBLIC),created_by.eq.${user.id}`
+          : "and(is_public.eq.true,publication_status.eq.PUBLIC)",
+      )
       .single();
 
     if (error) throw error;
@@ -184,8 +254,9 @@ export async function createTemplate(
       .insert({
         ...templateData,
         created_by: user.id,
-        template_type: templateData.template_type || "private",
-        is_public: templateData.is_public || false,
+        template_type: "private",
+        is_public: false,
+        publication_status: PRIVATE_USER_TEMPLATE_STATUS,
       })
       .select()
       .single();
@@ -206,10 +277,25 @@ export async function updateTemplate(
   updates: Partial<CreateTemplateData>
 ): Promise<TemplateConfig> {
   try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) throw new Error("User not authenticated");
+
+    const {
+      is_public: _isPublic,
+      publication_status: _publicationStatus,
+      template_type: _templateType,
+      ...safeUpdates
+    } = updates;
+
     const { data, error } = await supabase
       .from("template_bank")
-      .update(updates)
+      .update(safeUpdates)
       .eq("id", id)
+      .eq("created_by", user.id)
+      .neq("publication_status", "PUBLIC")
       .select()
       .single();
 
@@ -226,7 +312,18 @@ export async function updateTemplate(
  */
 export async function deleteTemplate(id: string): Promise<void> {
   try {
-    const { error } = await supabase.from("template_bank").delete().eq("id", id);
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) throw new Error("User not authenticated");
+
+    const { error } = await supabase
+      .from("template_bank")
+      .delete()
+      .eq("id", id)
+      .eq("created_by", user.id)
+      .neq("publication_status", "PUBLIC");
 
     if (error) throw error;
   } catch (error) {
@@ -244,13 +341,17 @@ export async function incrementTemplateUsage(id: string): Promise<void> {
       .from("template_bank")
       .select("usage_count")
       .eq("id", id)
+      .eq("is_public", true)
+      .eq("publication_status", "PUBLIC")
       .single();
 
     if (template) {
       await supabase
         .from("template_bank")
         .update({ usage_count: template.usage_count + 1 })
-        .eq("id", id);
+        .eq("id", id)
+        .eq("is_public", true)
+        .eq("publication_status", "PUBLIC");
     }
   } catch (error) {
     console.error("Error incrementing usage:", error);
@@ -268,6 +369,8 @@ export async function searchTemplates(
       .from("template_bank")
       .select("*")
       .ilike("name", `%${searchTerm}%`)
+      .eq("is_public", true)
+      .eq("publication_status", "PUBLIC")
       .order("created_at", { ascending: false });
 
     if (error) throw error;

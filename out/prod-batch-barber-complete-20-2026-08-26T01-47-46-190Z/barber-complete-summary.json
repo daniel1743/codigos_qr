@@ -1,0 +1,14 @@
+{
+  "batch_id": "prod-batch-barber-complete-20-2026-08-26T01-47-46-190Z",
+  "generated": 20,
+  "validated": 20,
+  "inserted": 10,
+  "failed": 0,
+  "duplicates": 10,
+  "GENERATED_PRIVATE": 10,
+  "PUBLIC": 0,
+  "is_public=true": 0,
+  "total_barber_private_candidates_after_run": 15,
+  "exit_code": 0,
+  "verdict": "BARBER_BATCH_COMPLETE_PARTIAL"
+}

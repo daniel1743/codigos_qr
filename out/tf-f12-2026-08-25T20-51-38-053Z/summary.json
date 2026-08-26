@@ -1,0 +1,37 @@
+{
+  "phaseId": "TF-F12-PRODUCTION-QUALIFICATION-100",
+  "batchId": "tf-f12-2026-08-25T20-51-38-053Z",
+  "renderer": "file:///C:/Users/Lenovo/Desktop/proyectos%20desplegados%20importante/generador%20de%20QR/public/template-builder.html",
+  "requested": 100,
+  "generated": 100,
+  "qualified": 0,
+  "failures": 100,
+  "industryCount": 10,
+  "industries": [
+    "medical",
+    "legal",
+    "restaurant",
+    "barber",
+    "dental",
+    "veterinary",
+    "beauty",
+    "spa",
+    "hair_salon",
+    "tattoo"
+  ],
+  "generationSuccessRate": 0,
+  "exactDuplicates": 0,
+  "rendererCrashes": 100,
+  "accidentalPublication": 0,
+  "privateIngestionCorrect": false,
+  "adminDisplayRows": 0,
+  "targets": {
+    "generationSuccess": false,
+    "exactDuplicates": true,
+    "rendererCrashes": false,
+    "accidentalPublication": true,
+    "privateIngestionCorrect": false,
+    "humanReviewMandatory": true,
+    "automaticPublication": false
+  }
+}

@@ -1,0 +1,1202 @@
+[
+  {
+    "templateId": "tpl-medical-generator-v1-0001",
+    "industry": "medical",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-medical-generator-v1-0001",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-medical-generator-v1-0002",
+    "industry": "medical",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-medical-generator-v1-0002",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-medical-generator-v1-0003",
+    "industry": "medical",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-medical-generator-v1-0003",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-medical-generator-v1-0004",
+    "industry": "medical",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-medical-generator-v1-0004",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-medical-generator-v1-0005",
+    "industry": "medical",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-medical-generator-v1-0005",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-medical-generator-v1-0006",
+    "industry": "medical",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-medical-generator-v1-0006",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-medical-generator-v1-0007",
+    "industry": "medical",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-medical-generator-v1-0007",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-medical-generator-v1-0008",
+    "industry": "medical",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-medical-generator-v1-0008",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-medical-generator-v1-0009",
+    "industry": "medical",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-medical-generator-v1-0009",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-medical-generator-v1-0010",
+    "industry": "medical",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-medical-generator-v1-0010",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-legal-generator-v1-0001",
+    "industry": "legal",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-legal-generator-v1-0001",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-legal-generator-v1-0002",
+    "industry": "legal",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-legal-generator-v1-0002",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-legal-generator-v1-0003",
+    "industry": "legal",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-legal-generator-v1-0003",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-legal-generator-v1-0004",
+    "industry": "legal",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-legal-generator-v1-0004",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-legal-generator-v1-0005",
+    "industry": "legal",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-legal-generator-v1-0005",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-legal-generator-v1-0006",
+    "industry": "legal",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-legal-generator-v1-0006",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-legal-generator-v1-0007",
+    "industry": "legal",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-legal-generator-v1-0007",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-legal-generator-v1-0008",
+    "industry": "legal",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-legal-generator-v1-0008",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-legal-generator-v1-0009",
+    "industry": "legal",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-legal-generator-v1-0009",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-legal-generator-v1-0010",
+    "industry": "legal",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-legal-generator-v1-0010",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-restaurant-generator-v1-0001",
+    "industry": "restaurant",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-restaurant-generator-v1-0001",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-restaurant-generator-v1-0002",
+    "industry": "restaurant",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-restaurant-generator-v1-0002",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-restaurant-generator-v1-0003",
+    "industry": "restaurant",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-restaurant-generator-v1-0003",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-restaurant-generator-v1-0004",
+    "industry": "restaurant",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-restaurant-generator-v1-0004",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-restaurant-generator-v1-0005",
+    "industry": "restaurant",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-restaurant-generator-v1-0005",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-restaurant-generator-v1-0006",
+    "industry": "restaurant",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-restaurant-generator-v1-0006",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-restaurant-generator-v1-0007",
+    "industry": "restaurant",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-restaurant-generator-v1-0007",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-restaurant-generator-v1-0008",
+    "industry": "restaurant",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-restaurant-generator-v1-0008",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-restaurant-generator-v1-0009",
+    "industry": "restaurant",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-restaurant-generator-v1-0009",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-restaurant-generator-v1-0010",
+    "industry": "restaurant",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-restaurant-generator-v1-0010",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-barber-generator-v1-0001",
+    "industry": "barber",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-barber-generator-v1-0001",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-barber-generator-v1-0002",
+    "industry": "barber",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-barber-generator-v1-0002",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-barber-generator-v1-0003",
+    "industry": "barber",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-barber-generator-v1-0003",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-barber-generator-v1-0004",
+    "industry": "barber",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-barber-generator-v1-0004",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-barber-generator-v1-0005",
+    "industry": "barber",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-barber-generator-v1-0005",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-barber-generator-v1-0006",
+    "industry": "barber",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-barber-generator-v1-0006",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-barber-generator-v1-0007",
+    "industry": "barber",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-barber-generator-v1-0007",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-barber-generator-v1-0008",
+    "industry": "barber",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-barber-generator-v1-0008",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-barber-generator-v1-0009",
+    "industry": "barber",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-barber-generator-v1-0009",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-barber-generator-v1-0010",
+    "industry": "barber",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-barber-generator-v1-0010",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-dental-generator-v1-0001",
+    "industry": "dental",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-dental-generator-v1-0001",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-dental-generator-v1-0002",
+    "industry": "dental",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-dental-generator-v1-0002",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-dental-generator-v1-0003",
+    "industry": "dental",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-dental-generator-v1-0003",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-dental-generator-v1-0004",
+    "industry": "dental",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-dental-generator-v1-0004",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-dental-generator-v1-0005",
+    "industry": "dental",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-dental-generator-v1-0005",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-dental-generator-v1-0006",
+    "industry": "dental",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-dental-generator-v1-0006",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-dental-generator-v1-0007",
+    "industry": "dental",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-dental-generator-v1-0007",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-dental-generator-v1-0008",
+    "industry": "dental",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-dental-generator-v1-0008",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-dental-generator-v1-0009",
+    "industry": "dental",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-dental-generator-v1-0009",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-dental-generator-v1-0010",
+    "industry": "dental",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-dental-generator-v1-0010",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-veterinary-generator-v1-0001",
+    "industry": "veterinary",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-veterinary-generator-v1-0001",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-veterinary-generator-v1-0002",
+    "industry": "veterinary",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-veterinary-generator-v1-0002",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-veterinary-generator-v1-0003",
+    "industry": "veterinary",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-veterinary-generator-v1-0003",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-veterinary-generator-v1-0004",
+    "industry": "veterinary",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-veterinary-generator-v1-0004",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-veterinary-generator-v1-0005",
+    "industry": "veterinary",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-veterinary-generator-v1-0005",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-veterinary-generator-v1-0006",
+    "industry": "veterinary",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-veterinary-generator-v1-0006",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-veterinary-generator-v1-0007",
+    "industry": "veterinary",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-veterinary-generator-v1-0007",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-veterinary-generator-v1-0008",
+    "industry": "veterinary",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-veterinary-generator-v1-0008",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-veterinary-generator-v1-0009",
+    "industry": "veterinary",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-veterinary-generator-v1-0009",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-veterinary-generator-v1-0010",
+    "industry": "veterinary",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-veterinary-generator-v1-0010",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-beauty-generator-v1-0001",
+    "industry": "beauty",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-beauty-generator-v1-0001",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-beauty-generator-v1-0002",
+    "industry": "beauty",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-beauty-generator-v1-0002",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-beauty-generator-v1-0003",
+    "industry": "beauty",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-beauty-generator-v1-0003",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-beauty-generator-v1-0004",
+    "industry": "beauty",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-beauty-generator-v1-0004",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-beauty-generator-v1-0005",
+    "industry": "beauty",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-beauty-generator-v1-0005",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-beauty-generator-v1-0006",
+    "industry": "beauty",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-beauty-generator-v1-0006",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-beauty-generator-v1-0007",
+    "industry": "beauty",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-beauty-generator-v1-0007",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-beauty-generator-v1-0008",
+    "industry": "beauty",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-beauty-generator-v1-0008",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-beauty-generator-v1-0009",
+    "industry": "beauty",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-beauty-generator-v1-0009",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-beauty-generator-v1-0010",
+    "industry": "beauty",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-beauty-generator-v1-0010",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-spa-generator-v1-0001",
+    "industry": "spa",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-spa-generator-v1-0001",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-spa-generator-v1-0002",
+    "industry": "spa",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-spa-generator-v1-0002",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-spa-generator-v1-0003",
+    "industry": "spa",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-spa-generator-v1-0003",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-spa-generator-v1-0004",
+    "industry": "spa",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-spa-generator-v1-0004",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-spa-generator-v1-0005",
+    "industry": "spa",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-spa-generator-v1-0005",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-spa-generator-v1-0006",
+    "industry": "spa",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-spa-generator-v1-0006",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-spa-generator-v1-0007",
+    "industry": "spa",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-spa-generator-v1-0007",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-spa-generator-v1-0008",
+    "industry": "spa",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-spa-generator-v1-0008",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-spa-generator-v1-0009",
+    "industry": "spa",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-spa-generator-v1-0009",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-spa-generator-v1-0010",
+    "industry": "spa",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-spa-generator-v1-0010",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-hair_salon-generator-v1-0001",
+    "industry": "hair_salon",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-hair_salon-generator-v1-0001",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-hair_salon-generator-v1-0002",
+    "industry": "hair_salon",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-hair_salon-generator-v1-0002",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-hair_salon-generator-v1-0003",
+    "industry": "hair_salon",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-hair_salon-generator-v1-0003",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-hair_salon-generator-v1-0004",
+    "industry": "hair_salon",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-hair_salon-generator-v1-0004",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-hair_salon-generator-v1-0005",
+    "industry": "hair_salon",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-hair_salon-generator-v1-0005",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-hair_salon-generator-v1-0006",
+    "industry": "hair_salon",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-hair_salon-generator-v1-0006",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-hair_salon-generator-v1-0007",
+    "industry": "hair_salon",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-hair_salon-generator-v1-0007",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-hair_salon-generator-v1-0008",
+    "industry": "hair_salon",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-hair_salon-generator-v1-0008",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-hair_salon-generator-v1-0009",
+    "industry": "hair_salon",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-hair_salon-generator-v1-0009",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-hair_salon-generator-v1-0010",
+    "industry": "hair_salon",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-hair_salon-generator-v1-0010",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-tattoo-generator-v1-0001",
+    "industry": "tattoo",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-tattoo-generator-v1-0001",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-tattoo-generator-v1-0002",
+    "industry": "tattoo",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-tattoo-generator-v1-0002",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-tattoo-generator-v1-0003",
+    "industry": "tattoo",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-tattoo-generator-v1-0003",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-tattoo-generator-v1-0004",
+    "industry": "tattoo",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-tattoo-generator-v1-0004",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-tattoo-generator-v1-0005",
+    "industry": "tattoo",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-tattoo-generator-v1-0005",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-tattoo-generator-v1-0006",
+    "industry": "tattoo",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-tattoo-generator-v1-0006",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-tattoo-generator-v1-0007",
+    "industry": "tattoo",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-tattoo-generator-v1-0007",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-tattoo-generator-v1-0008",
+    "industry": "tattoo",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-tattoo-generator-v1-0008",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-tattoo-generator-v1-0009",
+    "industry": "tattoo",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-tattoo-generator-v1-0009",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  },
+  {
+    "templateId": "tpl-tattoo-generator-v1-0010",
+    "industry": "tattoo",
+    "phase": "private_ingestion",
+    "rejection": {
+      "templateId": "tpl-tattoo-generator-v1-0010",
+      "reason": "blocking-qa-failure",
+      "errors": [
+        "El renderer compartido no pudo renderizar el config"
+      ]
+    }
+  }
+]

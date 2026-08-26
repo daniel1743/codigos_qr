@@ -1,0 +1,148 @@
+{
+  "phaseId": "TF-F15-E2E-CERTIFICATION",
+  "runId": "tf-f15-2026-08-25T21-40-21-210Z",
+  "verdict": "TEMPLATE_FACTORY_PRODUCTION_FAIL",
+  "renderer": "file:///C:/Users/Lenovo/Desktop/proyectos%20desplegados%20importante/generador%20de%20QR/public/template-builder.html",
+  "steps": [
+    {
+      "id": "step_01",
+      "name": "Admin requests generation batch",
+      "status": "PASS",
+      "evidence": "Simulated admin batch request: 1 template, medical industry."
+    },
+    {
+      "id": "step_02",
+      "name": "Factory generates configs",
+      "status": "PASS",
+      "evidence": "Generated tpl-medical-generator-v1-0001."
+    },
+    {
+      "id": "step_03",
+      "name": "Validator checks configs",
+      "status": "PASS",
+      "evidence": "Schema validation and round-trip passed."
+    },
+    {
+      "id": "step_04",
+      "name": "Renderer produces previews",
+      "status": "PASS",
+      "evidence": "Standalone template-builder rendered all QA viewports."
+    },
+    {
+      "id": "step_05",
+      "name": "QA assigns score/findings",
+      "status": "PASS",
+      "evidence": "QA score 1; findings 0."
+    },
+    {
+      "id": "step_06",
+      "name": "Ingestion adapter inserts GENERATED_PRIVATE",
+      "status": "PASS",
+      "evidence": "Private ingestion payload built and safety-asserted locally; live DB insert not executed."
+    },
+    {
+      "id": "step_07",
+      "name": "Admin sees generated candidates",
+      "status": "PASS",
+      "evidence": "Admin row model contains 1 generated private candidate."
+    },
+    {
+      "id": "step_08",
+      "name": "Admin opens clean preview",
+      "status": "PASS",
+      "evidence": "Clean preview renderer path validated with stored config."
+    },
+    {
+      "id": "step_09",
+      "name": "Admin sends selected template to REVIEW",
+      "status": "PASS",
+      "evidence": "Workflow transition simulated: GENERATED_PRIVATE -> REVIEW_PENDING."
+    },
+    {
+      "id": "step_10",
+      "name": "Admin APPROVES",
+      "status": "PASS",
+      "evidence": "Workflow transition simulated: REVIEW_PENDING -> APPROVED."
+    },
+    {
+      "id": "step_11",
+      "name": "Admin PUBLISHES",
+      "status": "PASS",
+      "evidence": "Workflow transition simulated only after APPROVED."
+    },
+    {
+      "id": "step_12",
+      "name": "Template appears in public library",
+      "status": "PASS",
+      "evidence": "Public view model created with status PUBLIC."
+    },
+    {
+      "id": "step_13",
+      "name": "Normal user selects template",
+      "status": "PASS",
+      "evidence": "Selected public template tpl-medical-generator-v1-0001."
+    },
+    {
+      "id": "step_14",
+      "name": "System creates editable user copy",
+      "status": "PASS",
+      "evidence": "User-owned private copy created in memory; master config remains unchanged."
+    },
+    {
+      "id": "step_15",
+      "name": "User opens Editor",
+      "status": "PASS",
+      "evidence": "Template builder accepts copied config."
+    },
+    {
+      "id": "step_16",
+      "name": "User changes text/image/palette/buttons",
+      "status": "PASS",
+      "evidence": "Edited title, semantic palette, and first button text."
+    },
+    {
+      "id": "step_17",
+      "name": "Changes persist",
+      "status": "FAIL",
+      "evidence": "Master template mutated during user edit simulation."
+    },
+    {
+      "id": "step_18",
+      "name": "Public user page renders edited template",
+      "status": "PASS",
+      "evidence": "Edited copied config rendered successfully."
+    }
+  ],
+  "security": [
+    {
+      "id": "security_private_templates_never_leak",
+      "name": "private templates never leak",
+      "status": "PASS",
+      "evidence": "Public fetch code requires is_public=true and publication_status=PUBLIC; local private records are not public."
+    },
+    {
+      "id": "security_user_cannot_edit_master",
+      "name": "user cannot edit master",
+      "status": "PASS",
+      "evidence": "User selection creates a clone; update service scopes edits by created_by and blocks PUBLIC records."
+    },
+    {
+      "id": "security_user_cannot_edit_another_users_config",
+      "name": "user cannot edit another user's config",
+      "status": "NOT_EXECUTED_LIVE",
+      "evidence": "Client service scopes by created_by; live RLS cross-user attempt was not executed in this environment."
+    },
+    {
+      "id": "security_admin_only_workflow_enforced",
+      "name": "admin-only workflow enforced",
+      "status": "NOT_EXECUTED_LIVE",
+      "evidence": "Admin UI gate exists and admin service is separate; live role/RLS enforcement was not executed."
+    },
+    {
+      "id": "security_no_direct_generated_to_public_path",
+      "name": "no direct generated -> public path",
+      "status": "PASS",
+      "evidence": "Publish service now requires APPROVED before PUBLIC."
+    }
+  ]
+}

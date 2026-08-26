@@ -1,1039 +1,343 @@
 "use client";
 
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+/**
+ * Graphite Atelier: landing editorial en grafito, cobre y objetos de producto asimétricos.
+ * Toda interacción de producto es demostrativa; no se simulan servicios ni datos reales.
+ */
+import { createFileRoute } from "@tanstack/react-router";
+import { CripqerMark } from "@/components/CripqerMark";
+import "../landing-graphite.css";
 import {
+  ArrowDown,
   ArrowRight,
-  BadgeCheck,
   CalendarDays,
   Check,
-  ChevronDown,
   ChevronRight,
-  FileArchive,
-  FileSpreadsheet,
-  FileText,
-  Image as ImageIcon,
-  Link as LinkIcon,
-  Lock,
+  Download,
+  Eye,
+  FileLock2,
+  Globe2,
+  Instagram,
+  LayoutTemplate,
+  LockKeyhole,
+  Mail,
+  MapPin,
   Menu,
-  Presentation,
-  Shield,
+  MessageCircle,
+  Phone,
+  QrCode,
+  ScanLine,
+  ShieldCheck,
   Sparkles,
-  Store,
   UserRound,
   X,
 } from "lucide-react";
-import type { ReactNode } from "react";
-import type { Session } from "@supabase/supabase-js";
-import { getBrowserSupabaseClient } from "../lib/supabase/client";
+import { useState, type CSSProperties, type ReactNode, type SyntheticEvent } from "react";
 
 export const Route = createFileRoute("/")({
-  component: Index,
+  component: Home,
 });
 
-const sectionPad =
-  "px-[max(1.25rem,env(safe-area-inset-left))] py-16 sm:px-8 sm:py-20 lg:px-12 lg:py-28";
-const container = "mx-auto max-w-[1480px]";
-const eyebrowClass = "text-sm font-extrabold uppercase tracking-[0.22em] text-[#5638d8]";
-const h2Class =
-  "mt-3 max-w-3xl text-[clamp(2.1rem,4vw,4.25rem)] font-extrabold leading-[1.02] tracking-tight text-[#121a3b]";
-const bodyClass = "mt-5 max-w-2xl text-lg leading-8 text-[#626a80]";
-const primaryButton =
-  "inline-flex min-h-12 items-center justify-center rounded-[10px] bg-[#5638d8] px-6 text-sm font-bold text-white shadow-sm shadow-[#5638d8]/25 transition hover:bg-[#4529bd] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5638d8] focus-visible:ring-offset-2";
-const secondaryButton =
-  "inline-flex min-h-12 items-center justify-center rounded-[10px] border border-[#18213d]/20 px-6 text-sm font-bold text-[#18213d] transition hover:bg-[#18213d]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5638d8] focus-visible:ring-offset-2";
+const assets = {
+  hero: "/assets/cripqer/hero-main.png",
+  qr: "/assets/cripqer/qr-material-study.png",
+  templates: "/assets/cripqer/templates-composition.png",
+  securePanel: "/assets/cripqer/secure-documents-panel.png",
+  securityVault: "/assets/cripqer/security-vault-visual.png",
+};
 
-const ecosystemItems = ["Perfil y Bio", "QR", "Documentos seguros", "Plantillas", "Control"];
-const identityBenefits = [
-  "Perfil, bio y descripción",
-  "Avatar y portada",
-  "Enlaces y botones",
-  "Personalización visual",
-  "Publicar u ocultar contenido",
-  "URL pública estable",
-];
-const stableQrBenefits = [
-  "Actualiza contenido sin reemplazar tu QR",
-  "Personaliza colores y estilos",
-  "Utiliza diferentes marcos",
-  "Exporta para uso digital o impresión",
-];
-const templateSlots = [
-  { name: "Barbara Elite", tier: "Premium" },
-  { name: "Larissa Luxury", tier: "Premium" },
-  { name: "Business", tier: "Base" },
-  { name: "Creator", tier: "Base" },
-  { name: "Beauty", tier: "Base" },
-  { name: "Portfolio / Professional", tier: "Base" },
-];
-const documentCapabilities = [
-  "Contraseña opcional",
-  "Expiración",
-  "Límite de descargas",
-  "Una sola descarga",
-  "Revocación",
-];
-const fileTypes = [
-  { icon: FileSpreadsheet, label: "Excel" },
-  { icon: FileText, label: "PDF" },
-  { icon: FileText, label: "Word" },
-  { icon: Presentation, label: "PowerPoint" },
-  { icon: ImageIcon, label: "Imágenes" },
-  { icon: FileArchive, label: "ZIP" },
-  { icon: FileText, label: "Texto" },
-  { icon: FileText, label: "Otros" },
-];
-const documentRows = [
-  { filename: "Contrato-Proyecto.pdf", labels: ["Protegido", "Expiración"] },
-  { filename: "Reporte.xlsx", labels: ["Cifrado", "1 descarga"] },
-  { filename: "Archivos-Proyecto.zip", labels: ["Acceso protegido", "Límite de descargas"] },
-];
-const steps = [
+const serviceData = [
   {
     number: "01",
-    title: "Crea",
-    description: "Crea tu perfil, añade enlaces o prepara un documento.",
+    title: "QR personalizados",
+    description: "Diseña códigos QR visualmente personalizados para compartir información y dirigir a cada persona a la experiencia adecuada.",
+    items: ["Color y patrones", "Finders y ojos", "Marcos", "Logo central", "Preview en vivo", "Exportación"],
+    icon: QrCode,
+    type: "qr",
   },
   {
     number: "02",
-    title: "Personaliza",
-    description: "Adapta la apariencia, plantilla y QR a tu estilo.",
+    title: "Tu página. Tu identidad.",
+    description: "Construye una micro-landing para presentar lo que haces, centralizar enlaces y dar una primera impresión coherente.",
+    items: ["Avatar y bio", "Botones", "Redes sociales", "CTAs inteligentes", "Apariencia", "Vista móvil"],
+    icon: UserRound,
+    type: "profile",
   },
-  { number: "03", title: "Comparte", description: "Publica y comparte mediante URL o código QR." },
+  {
+    number: "03",
+    title: "Plantillas para cada estilo",
+    description: "Empieza con un diseño profesional y personalízalo para que la forma de presentar tu presencia también hable de ti.",
+    items: ["Biblioteca", "Diseños premium", "Temas visuales", "Estilos de botón", "Personalización", "Preview"],
+    icon: LayoutTemplate,
+    type: "templates",
+  },
   {
     number: "04",
-    title: "Controla",
-    description: "Actualiza, limita, revoca o elimina cuando lo necesites.",
+    title: "Documentos seguros",
+    description: "Comparte archivos mediante enlaces y QR con una capa de protección diseñada para controlar el acceso.",
+    items: ["Archivos cifrados", "Contraseña", "Expiración", "Límites", "Acceso QR", "Registro"],
+    icon: FileLock2,
+    type: "secure",
   },
 ];
-const controlItems = [
-  "Preview",
-  "Perfil",
-  "Enlaces",
-  "Apariencia",
-  "QR",
-  "Documentos",
-  "Publicación",
-  "Revocación",
-];
-const mobileCapabilities = [
-  "Selección táctil",
-  "Edición contextual",
-  "Bottom sheet",
-  "Pinch y pan",
-  "Gestión de enlaces",
-];
-const useCases = [
-  { icon: Store, title: "Negocios", description: "Información, contacto, promociones y enlaces." },
-  { icon: UserRound, title: "Profesionales", description: "Bio, servicios, portfolio y contacto." },
-  { icon: Sparkles, title: "Creadores", description: "Redes, contenido y enlaces." },
-  {
-    icon: CalendarDays,
-    title: "Eventos",
-    description: "Información, ubicación y recursos importantes.",
-  },
-  {
-    icon: FileText,
-    title: "Documentos",
-    description: "Comparte archivos mediante acceso controlado.",
-  },
-  {
-    icon: LinkIcon,
-    title: "Organizaciones",
-    description: "Centraliza información y acceso mediante QR.",
-  },
-];
-const securityItems = [
-  "Cifrado en el navegador",
-  "Storage privado",
-  "Acceso autorizado",
-  "Expiración",
-  "Límites de descarga",
-  "Revocación",
-];
-const faqs = [
-  [
-    "¿Puedo cambiar mis enlaces después de imprimir el QR?",
-    "Sí. Puedes actualizar el contenido vinculado manteniendo una URL pública estable.",
-  ],
-  [
-    "¿Qué puedo compartir desde mi perfil?",
-    "Puedes reunir bio, enlaces, botones, documentos protegidos y una página pública editable.",
-  ],
-  [
-    "¿Cómo funciona el acceso a documentos?",
-    "El archivo se protege y se comparte mediante enlace o QR con controles como contraseña, expiración o límites.",
-  ],
-  [
-    "¿La experiencia móvil usa otro contenido?",
-    "No. La landing y la aplicación se adaptan de forma responsive con una arquitectura compartida.",
-  ],
+
+const actionData = [
+  { label: "Website", example: "Visitar sitio", icon: Globe2 },
+  { label: "WhatsApp", example: "Enviar mensaje", icon: MessageCircle },
+  { label: "Teléfono", example: "Llamar", icon: Phone },
+  { label: "Email", example: "Enviar correo", icon: Mail },
+  { label: "Ubicación", example: "Abrir mapa", icon: MapPin },
+  { label: "Reserva", example: "Reservar", icon: CalendarDays },
+  { label: "Descarga", example: "Descargar", icon: Download },
 ];
 
-function Index() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [authStatus, setAuthStatus] = useState<"loading" | "guest" | "authenticated">("loading");
-  const [session, setSession] = useState<Session | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    const fallbackTimer = window.setTimeout(() => {
-      if (!cancelled) setAuthStatus((current) => (current === "loading" ? "guest" : current));
-    }, 1200);
-    const supabase = getBrowserSupabaseClient();
-
-    const loadSession = async () => {
-      const {
-        data: { session: currentSession },
-      } = await supabase.auth.getSession();
-      if (cancelled) return;
-      setSession(currentSession);
-      setAuthStatus(currentSession ? "authenticated" : "guest");
-    };
-
-    loadSession();
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, currentSession) => {
-      if (cancelled) return;
-      setSession(currentSession);
-      setAuthStatus(currentSession ? "authenticated" : "guest");
-    });
-
-    return () => {
-      cancelled = true;
-      window.clearTimeout(fallbackTimer);
-      subscription.unsubscribe();
-    };
-  }, []);
-
-  if (authStatus === "loading") {
-    return (
-      <main className="grid min-h-screen place-items-center bg-slate-950 px-6 text-white">
-        <div className="h-10 w-10 animate-spin rounded-full border-2 border-white/20 border-t-white" />
-      </main>
-    );
-  }
-
-  if (authStatus === "authenticated") {
-    return <AuthenticatedHome session={session} />;
-  }
-
-  return (
-    <main className="min-h-screen overflow-x-clip bg-white text-[#111936]">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify([
-            {
-              "@context": "https://schema.org",
-              "@type": "WebApplication",
-              name: "QRio",
-              url: "https://www.cripqer.dev/",
-              applicationCategory: "UtilityApplication",
-              operatingSystem: "All",
-              description:
-                "Plataforma para crear perfiles públicos, códigos QR, enlaces y accesos controlados a documentos.",
-            },
-            {
-              "@context": "https://schema.org",
-              "@type": "FAQPage",
-              mainEntity: faqs.map(([question, answer]) => ({
-                "@type": "Question",
-                name: question,
-                acceptedAnswer: { "@type": "Answer", text: answer },
-              })),
-            },
-          ]),
-        }}
-      />
-
-      <LandingHeader mobileMenuOpen={mobileMenuOpen} setMobileMenuOpen={setMobileMenuOpen} />
-      <HeroSection />
-      <EcosystemStrip />
-      <DigitalIdentitySection />
-      <StableQRSection />
-      <TemplatesSection />
-      <SecureDocumentsSection />
-      <HowItWorksSection />
-      <CentralControlSection />
-      <MobileExperienceSection />
-      <UseCasesSection />
-      <SecurityControlSection />
-      <FAQSection />
-      <FinalCTASection />
-      <LandingFooter />
-    </main>
-  );
+function hideMissingAsset(event: SyntheticEvent<HTMLImageElement>) {
+  event.currentTarget.hidden = true;
 }
 
-function AuthenticatedHome({ session }: { session: Session | null }) {
-  const firstName =
-    session?.user.user_metadata?.["full_name"]?.split(" ")?.[0] ||
-    session?.user.email?.split("@")?.[0] ||
-    "Cuenta";
-  const quickPanels = [
-    {
-      title: "Biblioteca",
-      description: "Explora plantillas para tu perfil y próximos diseños.",
-      to: "/template-bank",
-      icon: Store,
-      stat: "Plantillas",
-    },
-    {
-      title: "Mis QR",
-      description: "Edita tu QR principal, enlaces y vista pública.",
-      to: "/editor",
-      icon: LinkIcon,
-      stat: "Perfil activo",
-    },
-    {
-      title: "Crear",
-      description: "Abre el constructor para preparar nuevas experiencias.",
-      to: "/template-builder",
-      icon: Sparkles,
-      stat: "Editor",
-    },
-    {
-      title: "Documentos seguros",
-      description: "Comparte archivos con controles de acceso.",
-      to: "/encrypted-documents",
-      icon: Shield,
-      stat: "Protección",
-    },
-  ];
-
+function Wordmark({ light = false }: { light?: boolean }) {
   return (
-    <main className="min-h-screen bg-[#f5f7fb] px-4 pb-28 pt-6 text-slate-950 sm:px-6 lg:px-8 lg:pb-12">
-      <div className="mx-auto max-w-7xl">
-        <section className="grid gap-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 lg:grid-cols-[1.35fr_0.65fr]">
-          <div>
-            <p className="text-sm font-semibold text-indigo-600">Inicio</p>
-            <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
-              Hola, {firstName}
-            </h1>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
-              Este es tu panel interno de Cripqer. La landing queda reservada para visitantes sin sesión.
-            </p>
-            <div className="mt-5 flex flex-wrap gap-3">
-              <Link to="/editor" className={primaryButton}>
-                Abrir editor
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-              <Link to="/template-bank" className={secondaryButton}>
-                Ver biblioteca
-              </Link>
-            </div>
-          </div>
-          <div className="grid gap-3 rounded-xl bg-slate-950 p-4 text-white">
-            <div className="flex items-center gap-3">
-              <span className="grid h-11 w-11 place-items-center rounded-lg bg-indigo-500">
-                <BadgeCheck className="h-5 w-5" />
-              </span>
-              <div>
-                <p className="text-sm font-semibold">Sesión activa</p>
-                <p className="truncate text-xs text-slate-400">{session?.user.email}</p>
-              </div>
-            </div>
-            <Link
-              to="/profile"
-              className="inline-flex min-h-11 items-center justify-center rounded-lg bg-white px-4 text-sm font-semibold text-slate-950"
-            >
-              Ver cuenta
-            </Link>
-          </div>
-        </section>
-
-        <section className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {quickPanels.map((panel) => {
-            const Icon = panel.icon;
-            return (
-              <Link
-                key={panel.title}
-                to={panel.to}
-                className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-indigo-200 hover:shadow-md"
-              >
-                <div className="flex items-center justify-between gap-4">
-                  <span className="grid h-12 w-12 place-items-center rounded-xl bg-indigo-50 text-indigo-600">
-                    <Icon className="h-5 w-5" />
-                  </span>
-                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
-                    {panel.stat}
-                  </span>
-                </div>
-                <h2 className="mt-5 text-lg font-bold tracking-tight">{panel.title}</h2>
-                <p className="mt-2 min-h-12 text-sm leading-6 text-slate-600">{panel.description}</p>
-                <span className="mt-4 inline-flex items-center text-sm font-semibold text-indigo-600">
-                  Entrar
-                  <ChevronRight className="ml-1 h-4 w-4 transition group-hover:translate-x-0.5" />
-                </span>
-              </Link>
-            );
-          })}
-        </section>
-
-        <section className="mt-6 grid gap-4 lg:grid-cols-3">
-          {[
-            ["QR principal", "Mantén tu código conectado a tu perfil editable."],
-            ["Plantillas", "La biblioteca queda lista para llenar con tus templates finales."],
-            ["Próximos módulos", "Aquí podemos sumar métricas, borradores y accesos recientes."],
-          ].map(([title, description]) => (
-            <div key={title} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-              <h2 className="font-bold tracking-tight">{title}</h2>
-              <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
-            </div>
-          ))}
-        </section>
-      </div>
-    </main>
-  );
-}
-
-function LandingHeader({
-  mobileMenuOpen,
-  setMobileMenuOpen,
-}: {
-  mobileMenuOpen: boolean;
-  setMobileMenuOpen: (open: boolean) => void;
-}) {
-  const navItems = [
-    { label: "Producto", href: "#identity" },
-    { label: "QR", href: "#qr" },
-    { label: "Plantillas", href: "#templates" },
-    { label: "Documentos", href: "#documents" },
-    { label: "Recursos", href: "#faq" },
-  ];
-
-  return (
-    <header className="sticky top-0 z-50 bg-[#fff8f2]/90 pt-[env(safe-area-inset-top)] backdrop-blur-xl">
-      <nav className="mx-auto flex min-h-[76px] max-w-[1480px] items-center justify-between px-[max(1.25rem,env(safe-area-inset-left))] sm:px-8 lg:min-h-[88px] lg:px-12">
-        <Link
-          to="/"
-          className="flex min-h-11 items-center gap-3 text-[1.45rem] font-extrabold tracking-tight sm:text-[1.7rem]"
-        >
-          <LogoMark />
-          <span>QRio</span>
-        </Link>
-        <div className="hidden items-center gap-8 text-[15px] font-semibold text-[#18213d] xl:flex">
-          {navItems.map((item) => (
-            <a
-              key={item.href}
-              href={item.href}
-              className="transition hover:text-[#5638d8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5638d8]"
-            >
-              {item.label}
-            </a>
-          ))}
-        </div>
-        <div className="flex items-center gap-3">
-          <Link
-            to="/profile"
-            className="hidden min-h-12 items-center px-4 text-sm font-semibold text-[#18213d] transition hover:text-[#5638d8] sm:inline-flex"
-          >
-            Iniciar sesión
-          </Link>
-          <Link to="/editor" className={primaryButton}>
-            Crear cuenta
-          </Link>
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-[10px] border border-[#d9cfee] text-[#18213d] transition hover:bg-white/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5638d8] xl:hidden"
-            aria-label="Menú"
-            aria-expanded={mobileMenuOpen}
-          >
-            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
-        </div>
-      </nav>
-      {mobileMenuOpen && (
-        <div className="border-t border-[#ece0d8] bg-[#fff8f2] xl:hidden">
-          <div className="mx-auto max-w-[1480px] px-5 py-4 sm:px-8">
-            <div className="grid gap-2">
-              {navItems.map((item) => (
-                <a
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex min-h-12 items-center justify-between rounded-xl px-4 text-sm font-semibold text-[#18213d] transition hover:bg-white/70"
-                >
-                  {item.label}
-                  <ChevronRight className="h-4 w-4 text-[#5638d8]" />
-                </a>
-              ))}
-              <Link
-                to="/profile"
-                className="flex min-h-12 items-center justify-between rounded-xl px-4 text-sm font-semibold text-[#18213d] transition hover:bg-white/70 sm:hidden"
-              >
-                Iniciar sesión
-                <ArrowRight className="h-4 w-4 text-[#5638d8]" />
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
-    </header>
-  );
-}
-
-function HeroSection() {
-  return (
-    <section className="overflow-hidden bg-[#fff8f2]">
-      <div className="mx-auto grid min-h-[calc(100svh-88px)] max-w-[1480px] grid-cols-1 items-center gap-8 px-[max(1.25rem,env(safe-area-inset-left))] pb-12 pt-8 sm:px-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:px-12 lg:pb-16 lg:pt-12">
-        <div className="max-w-[700px]">
-          <div className="mb-8 inline-flex rounded-full border border-[#5638d8]/25 px-4 py-1.5 text-base font-medium text-[#5638d8]">
-            Confiables. Seguros. Siempre.
-          </div>
-          <h1 className="max-w-[720px] text-[clamp(3rem,5.05vw,5.05rem)] font-extrabold leading-[0.98] tracking-tight text-[#121a3b]">
-            Códigos QR
-            <br />
-            seguros para
-            <br />
-            empresas y personas
-          </h1>
-          <p className="mt-7 max-w-[620px] text-[1.15rem] leading-8 text-[#5f667a] sm:text-[1.25rem]">
-            Genera QR cifrados, QR para banca, hospitales, documentos y bio links desde una sola
-            plataforma.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-x-10 gap-y-4 text-[15px] font-bold text-[#18213d]">
-            {[
-              { icon: Shield, label: "Seguridad" },
-              { icon: BadgeCheck, label: "Confianza" },
-              { icon: UserRound, label: "Para todo público" },
-            ].map((item) => (
-              <span key={item.label} className="inline-flex items-center gap-3">
-                <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-[#f3edf8] text-[#5638d8]">
-                  <item.icon className="h-5 w-5" aria-hidden="true" />
-                </span>
-                {item.label}
-              </span>
-            ))}
-          </div>
-          <div className="mt-9 flex flex-col gap-5 sm:flex-row">
-            <Link to="/editor" className={`${primaryButton} h-16 w-full text-base sm:w-[250px]`}>
-              Crear QR
-              <ArrowRight className="ml-5 h-6 w-6" aria-hidden="true" />
-            </Link>
-            <a
-              href="#how-it-works"
-              className={`${secondaryButton} h-16 w-full text-base sm:w-[250px]`}
-            >
-              Ver soluciones
-            </a>
-          </div>
-        </div>
-        <HeroVisual />
-      </div>
-    </section>
-  );
-}
-
-function HeroVisual() {
-  return (
-    <div className="relative mx-auto flex w-full justify-center lg:justify-end">
-      <img
-        src="/images/landing/hero-qrio.png"
-        alt="QRio permite crear códigos QR seguros para empresas y personas"
-        className="w-[90%] max-w-[520px] object-contain lg:w-[min(100%,760px)] lg:max-w-[760px]"
-      />
-    </div>
-  );
-}
-
-function EcosystemStrip() {
-  return (
-    <section className="bg-[#fff8f2] px-[max(1.25rem,env(safe-area-inset-left))] pb-12 sm:px-8 lg:px-12">
-      <div
-        className={`${container} rounded-[28px] border border-[#eadfd8] bg-white/55 p-4 shadow-sm`}
-      >
-        <div className="grid gap-4 lg:grid-cols-[0.75fr_1.25fr] lg:items-center">
-          <SectionIntro
-            eyebrow="TODO CONECTADO"
-            heading="Una plataforma. Diferentes formas de compartir."
-            compact
-          />
-          <div className="flex gap-3 overflow-x-auto pb-2 [scrollbar-width:none] sm:flex-wrap sm:pb-0">
-            {ecosystemItems.map((item, index) => (
-              <div
-                key={item}
-                className="flex min-h-16 min-w-[168px] items-center gap-3 rounded-2xl border border-[#e5d9ef] bg-white px-4 text-sm font-bold text-[#18213d]"
-              >
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#f3edf8] text-[#5638d8]">
-                  {index + 1}
-                </span>
-                {item}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function DigitalIdentitySection() {
-  return (
-    <section id="identity" className={`${sectionPad} bg-white`}>
-      <TwoColumn
-        eyebrow="IDENTIDAD DIGITAL"
-        heading="Tu identidad digital, lista para compartir."
-        description="Crea una página personal o profesional con tu información, enlaces y estilo, accesible desde una URL pública y desde tu QR."
-        benefits={identityBenefits}
-        visual={
-          <AssetVisual
-            src="/images/landing/identidad-digital.png"
-            alt="Vista de identidad digital con perfil público, enlaces y código QR"
-          />
-        }
-      />
-    </section>
-  );
-}
-
-function StableQRSection() {
-  return (
-    <section id="qr" className={`${sectionPad} bg-[#fff8f2]`}>
-      <TwoColumn
-        eyebrow="QR ESTABLE"
-        heading="Un QR. Infinitas actualizaciones."
-        description="Publica tu QR una vez y mantén una identidad estable mientras actualizas el contenido vinculado."
-        benefits={stableQrBenefits}
-        visual={
-          <AssetVisual
-            src="/images/landing/qr-estable.png"
-            alt="Ilustración de QR estable conectado a páginas, menús, PDF e impresión"
-          />
-        }
-      />
-    </section>
-  );
-}
-
-function TemplatesSection() {
-  return (
-    <section id="templates" className={`${sectionPad} bg-[#f7f5f2]`}>
-      <div className={container}>
-        <SectionIntro
-          eyebrow="PLANTILLAS"
-          heading="Haz que se vea como tu marca."
-          description="Elige una base visual y adapta colores, tipografía, portada, botones y estilo a tu identidad."
-        />
-        <div className="mt-10 grid gap-4 lg:grid-cols-4">
-          {templateSlots.map((slot, index) => (
-            <article
-              key={slot.name}
-              className={`rounded-[24px] border border-[#e2d8d0] bg-white p-4 shadow-sm ${index < 2 ? "lg:col-span-2" : ""}`}
-            >
-              <div
-                className={`aspect-[4/3] rounded-[20px] bg-[linear-gradient(135deg,#f4ede8,#ebe5ff)] p-4 ${index < 2 ? "lg:aspect-[16/9]" : ""}`}
-              >
-                <div
-                  className="h-full rounded-[16px] border border-white/70 bg-white/45"
-                  aria-hidden="true"
-                />
-              </div>
-              <div className="mt-4 flex items-center justify-between gap-3">
-                <h3 className="font-extrabold text-[#121a3b]">{slot.name}</h3>
-                <span className="rounded-full bg-[#f3edf8] px-3 py-1 text-xs font-bold text-[#5638d8]">
-                  {slot.tier}
-                </span>
-              </div>
-            </article>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function SecureDocumentsSection() {
-  return (
-    <section id="documents" className={`${sectionPad} bg-[#f7f3ff]`}>
-      <div className={`${container} grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center`}>
-        <div>
-          <SectionIntro
-            eyebrow="DOCUMENTOS SEGUROS"
-            heading="Comparte archivos de forma segura con un QR."
-            description="Protege un archivo, genera un acceso mediante QR o enlace y controla cómo puede ser descargado."
-          />
-          <FeatureList items={documentCapabilities} />
-          <Link to="/encrypted-documents" className={`${primaryButton} mt-8`}>
-            Proteger un archivo
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Link>
-        </div>
-        <div className="grid gap-5">
-          <AssetVisual
-            src="/images/landing/documentos-seguros.png"
-            alt="Flujo visual para compartir documentos seguros mediante QR"
-          />
-          <div className="rounded-[28px] border border-[#dfd4f0] bg-white p-4 shadow-sm sm:p-6">
-            <div className="grid gap-3 sm:grid-cols-4">
-              {fileTypes.map((type) => (
-                <div
-                  key={type.label}
-                  className="rounded-2xl border border-[#ece7f6] bg-[#fbf9ff] p-3"
-                >
-                  <type.icon className="h-5 w-5 text-[#5638d8]" />
-                  <p className="mt-3 text-sm font-bold">{type.label}</p>
-                </div>
-              ))}
-            </div>
-            <div className="mt-5 grid gap-3">
-              {documentRows.map((row) => (
-                <div
-                  key={row.filename}
-                  className="rounded-2xl border border-[#ece7f6] bg-white p-4"
-                >
-                  <div className="flex items-center gap-3">
-                    <Lock className="h-5 w-5 text-[#5638d8]" />
-                    <p className="font-bold text-[#121a3b]">{row.filename}</p>
-                  </div>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {row.labels.map((label) => (
-                      <span
-                        key={label}
-                        className="rounded-full bg-[#f3edf8] px-3 py-1 text-xs font-bold text-[#5638d8]"
-                      >
-                        {label}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function HowItWorksSection() {
-  return (
-    <section id="how-it-works" className={`${sectionPad} bg-white`}>
-      <div className={container}>
-        <SectionIntro eyebrow="CÓMO FUNCIONA" heading="Todo en pocos minutos." />
-        <div className="mt-10 grid gap-4 lg:grid-cols-4">
-          {steps.map((step) => (
-            <article
-              key={step.number}
-              className="rounded-[24px] border border-[#e2d8d0] bg-white p-6 shadow-sm"
-            >
-              <p className="text-sm font-extrabold text-[#5638d8]">{step.number}</p>
-              <h3 className="mt-4 text-2xl font-extrabold text-[#121a3b]">{step.title}</h3>
-              <p className="mt-3 leading-7 text-[#626a80]">{step.description}</p>
-            </article>
-          ))}
-        </div>
-        <div className="mt-8">
-          <AssetVisual
-            src="/images/landing/como-funciona.png"
-            alt="Resumen visual de los pasos crear, personalizar, compartir y controlar"
-            wide
-          />
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function CentralControlSection() {
-  return (
-    <section id="control" className={`${sectionPad} bg-[#10182f] text-white`}>
-      <div className={`${container} grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:items-center`}>
-        <div>
-          <p className="text-sm font-extrabold uppercase tracking-[0.22em] text-[#b9a8ff]">
-            CONTROL CENTRAL
-          </p>
-          <h2 className="mt-3 max-w-3xl text-[clamp(2.1rem,4vw,4.25rem)] font-extrabold leading-[1.02] tracking-tight">
-            Todo bajo tu control.
-          </h2>
-          <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-300">
-            Gestiona tu perfil, enlaces, apariencia, QR y documentos desde una misma experiencia.
-          </p>
-          <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {controlItems.map((item) => (
-              <span
-                key={item}
-                className="min-h-12 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-bold"
-              >
-                {item}
-              </span>
-            ))}
-          </div>
-        </div>
-        <AssetVisual
-          src="/images/landing/control-central.png"
-          alt="Vista del control central para administrar perfil, enlaces, QR y documentos"
-          dark
-        />
-      </div>
-    </section>
-  );
-}
-
-function MobileExperienceSection() {
-  return (
-    <section id="mobile" className={`${sectionPad} bg-[#fff8f2]`}>
-      <TwoColumn
-        eyebrow="EXPERIENCIA MÓVIL"
-        heading="Gestiona también desde tu teléfono."
-        description="Una experiencia adaptada para trabajar directamente desde pantallas táctiles manteniendo el mismo contenido y configuración."
-        benefits={mobileCapabilities}
-        visual={
-          <AssetVisual
-            src="/images/landing/experiencia-movil.png"
-            alt="Experiencia móvil para gestionar perfil y enlaces desde pantallas táctiles"
-          />
-        }
-      />
-    </section>
-  );
-}
-
-function UseCasesSection() {
-  return (
-    <section id="use-cases" className={`${sectionPad} bg-white`}>
-      <div className={container}>
-        <SectionIntro eyebrow="CASOS DE USO" heading="Un QR para todo lo que quieras compartir." />
-        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {useCases.map((item) => (
-            <article
-              key={item.title}
-              className="rounded-[24px] border border-[#e2d8d0] bg-white p-6 shadow-sm"
-            >
-              <item.icon className="h-6 w-6 text-[#5638d8]" />
-              <h3 className="mt-5 text-xl font-extrabold text-[#121a3b]">{item.title}</h3>
-              <p className="mt-3 leading-7 text-[#626a80]">{item.description}</p>
-            </article>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function SecurityControlSection() {
-  return (
-    <section id="security" className={`${sectionPad} bg-[#f7f5f2]`}>
-      <div className={container}>
-        <SectionIntro eyebrow="SEGURIDAD Y CONTROL" heading="Diseñado para darte control." />
-        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {securityItems.map((item) => (
-            <div
-              key={item}
-              className="flex min-h-20 items-center gap-4 rounded-[22px] border border-[#e2d8d0] bg-white p-5"
-            >
-              <Shield className="h-5 w-5 shrink-0 text-[#5638d8]" />
-              <p className="font-bold text-[#121a3b]">{item}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function FAQSection() {
-  return (
-    <section id="faq" className={`${sectionPad} bg-white`}>
-      <div className="mx-auto max-w-4xl">
-        <h2 className={h2Class}>Preguntas frecuentes</h2>
-        <div className="mt-8 divide-y divide-[#e2d8d0] rounded-[28px] border border-[#e2d8d0] bg-white px-5 shadow-sm">
-          {faqs.map(([question, answer]) => (
-            <details key={question} className="group py-5">
-              <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-4 font-extrabold text-[#121a3b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5638d8]">
-                {question}
-                <ChevronDown className="h-5 w-5 shrink-0 text-[#5638d8] transition group-open:rotate-180" />
-              </summary>
-              <p className="mt-3 leading-7 text-[#626a80]">{answer}</p>
-            </details>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function FinalCTASection() {
-  return (
-    <section className={`${sectionPad} bg-[#fff8f2]`}>
-      <div
-        className={`${container} rounded-[32px] bg-[#5638d8] px-6 py-12 text-center text-white shadow-2xl shadow-[#5638d8]/20 sm:px-10 lg:py-16`}
-      >
-        <h2 className="mx-auto max-w-3xl text-[clamp(2rem,4vw,4.5rem)] font-extrabold leading-tight tracking-tight">
-          Tu próxima conexión puede comenzar con un escaneo.
-        </h2>
-        <p className="mx-auto mt-5 max-w-xl text-lg leading-8 text-white/85">
-          Crea, personaliza y comparte desde un solo lugar.
-        </p>
-        <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
-          <Link
-            to="/editor"
-            className="inline-flex min-h-12 items-center justify-center rounded-[10px] bg-white px-6 text-sm font-bold text-[#5638d8] transition hover:bg-[#f5f1ff] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-          >
-            Crear mi QR
-          </Link>
-          <a
-            href="#how-it-works"
-            className="inline-flex min-h-12 items-center justify-center rounded-[10px] border border-white/40 px-6 text-sm font-bold text-white transition hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-          >
-            Explorar soluciones
-          </a>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function LandingFooter() {
-  const columns = [
-    { title: "Producto", links: ["Identidad digital", "QR estable", "Plantillas"] },
-    { title: "Soluciones", links: ["Documentos", "Móvil", "Control"] },
-    { title: "Recursos", links: ["Cómo funciona", "Casos de uso", "FAQ"] },
-    { title: "Legal", links: ["Privacidad", "Términos"] },
-  ];
-  return (
-    <footer className="border-t border-[#e2d8d0] bg-white px-[max(1.25rem,env(safe-area-inset-left))] py-10 pb-[max(2.5rem,env(safe-area-inset-bottom))] sm:px-8 lg:px-12">
-      <div className={`${container} grid gap-8 lg:grid-cols-[0.8fr_1.2fr]`}>
-        <div>
-          <div className="flex items-center gap-3 text-xl font-extrabold text-[#121a3b]">
-            <LogoMark />
-            QRio
-          </div>
-          <p className="mt-4 max-w-sm leading-7 text-[#626a80]">
-            Plataforma para crear, personalizar y compartir experiencias mediante QR.
-          </p>
-        </div>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {columns.map((column) => (
-            <div key={column.title}>
-              <h3 className="font-extrabold text-[#121a3b]">{column.title}</h3>
-              <div className="mt-4 grid gap-3">
-                {column.links.map((link) => (
-                  <a
-                    key={link}
-                    href="#faq"
-                    className="text-sm font-semibold text-[#626a80] transition hover:text-[#5638d8]"
-                  >
-                    {link}
-                  </a>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </footer>
-  );
-}
-
-function SectionIntro({
-  eyebrow,
-  heading,
-  description,
-  compact = false,
-}: {
-  eyebrow: string;
-  heading: string;
-  description?: string;
-  compact?: boolean;
-}) {
-  return (
-    <div>
-      <p className={eyebrowClass}>{eyebrow}</p>
-      <h2
-        className={
-          compact
-            ? "mt-2 text-2xl font-extrabold tracking-tight text-[#121a3b] sm:text-3xl"
-            : h2Class
-        }
-      >
-        {heading}
-      </h2>
-      {description ? <p className={bodyClass}>{description}</p> : null}
-    </div>
-  );
-}
-
-function TwoColumn({
-  eyebrow,
-  heading,
-  description,
-  benefits,
-  visual,
-}: {
-  eyebrow: string;
-  heading: string;
-  description: string;
-  benefits: string[];
-  visual: ReactNode;
-}) {
-  return (
-    <div className={`${container} grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center`}>
-      <div>
-        <SectionIntro eyebrow={eyebrow} heading={heading} description={description} />
-        <FeatureList items={benefits} />
-      </div>
-      {visual}
-    </div>
-  );
-}
-
-function FeatureList({ items }: { items: string[] }) {
-  return (
-    <ul className="mt-7 grid gap-3 sm:grid-cols-2">
-      {items.map((item) => (
-        <li
-          key={item}
-          className="flex gap-3 rounded-2xl bg-white/70 p-3 text-sm font-bold text-[#18213d] ring-1 ring-[#e5d9ef]"
-        >
-          <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#5638d8]" />
-          {item}
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-function AssetVisual({
-  src,
-  alt,
-  wide = false,
-  dark = false,
-}: {
-  src: string;
-  alt: string;
-  wide?: boolean;
-  dark?: boolean;
-}) {
-  return (
-    <div
-      className={`overflow-hidden rounded-[32px] ${
-        dark
-          ? "border border-white/10 bg-white/5 shadow-2xl shadow-black/25"
-          : "border border-[#e2d8d0] bg-white/60 shadow-sm"
-      }`}
-    >
-      <img
-        src={src}
-        alt={alt}
-        className={`h-auto w-full object-contain ${wide ? "aspect-[16/9]" : "aspect-[16/9] lg:aspect-auto"}`}
-        loading="lazy"
-      />
-    </div>
-  );
-}
-
-function LogoMark() {
-  return (
-    <span
-      className="grid h-9 w-9 grid-cols-2 gap-1 text-[#5638d8] sm:h-10 sm:w-10"
-      aria-hidden="true"
-    >
-      {[1, 2, 3, 4].map((item) => (
-        <span key={item} className="rounded-[5px] border-[5px] border-current" />
-      ))}
+    <span className={`wordmark ${light ? "wordmark-light" : ""}`}>
+      crip<span className="wordmark-q">q</span><span className="wordmark-e">e</span>r
     </span>
+  );
+}
+
+function SectionLead({ eyebrow, number, title, copy }: { eyebrow: string; number?: string; title: ReactNode; copy?: string }) {
+  return (
+    <div className="section-lead reveal">
+      <div className="section-register">
+        <span className="signal-dot" />
+        {eyebrow}
+        {number && <span className="section-number">/{number}</span>}
+      </div>
+      <h2>{title}</h2>
+      {copy && <p>{copy}</p>}
+    </div>
+  );
+}
+
+function QrVisual({ copper = false }: { copper?: boolean }) {
+  const cells = [
+    [1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0],
+    [1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1],
+    [1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0],
+    [1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1],
+    [1, 0, 1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0],
+    [1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1],
+    [0, 0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 1, 0],
+    [1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1],
+    [0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0],
+    [1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1],
+    [0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0],
+    [1, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1],
+  ].flat();
+  return (
+    <div className={`qr-visual ${copper ? "qr-copper" : ""}`} aria-label="Código QR decorativo">
+      {cells.map((filled, index) => <i key={index} className={filled ? "is-filled" : ""} />)}
+      <span className="qr-mark" />
+    </div>
+  );
+}
+
+function PhonePreview({ selected = false }: { selected?: boolean }) {
+  return (
+    <div className="phone-preview" aria-label="Vista previa de perfil digital">
+      <div className="phone-top"><span /><b /></div>
+      <div className="profile-canvas">
+        <div className="profile-avatar">AM</div>
+        <strong>Alex Morgan</strong>
+        <p>Designing clearer digital moments.</p>
+        <div className={`profile-link ${selected ? "is-selected" : ""}`}><Globe2 size={13} /> Portfolio <ChevronRight size={13} /></div>
+        <div className="profile-link"><MessageCircle size={13} /> Escribir mensaje <ChevronRight size={13} /></div>
+        <div className="profile-link"><CalendarDays size={13} /> Reservar una reunión <ChevronRight size={13} /></div>
+        <div className="profile-socials"><Instagram size={13} /><Globe2 size={13} /><Mail size={13} /></div>
+      </div>
+      <div className="phone-home" />
+    </div>
+  );
+}
+
+function QrCustomizer() {
+  return (
+    <div className="qr-customizer">
+      <div className="customizer-toolbar"><span>PERSONALIZAR</span><span className="toolbar-live"><i /> LIVE</span></div>
+      <div className="customizer-body">
+        <div className="customizer-controls">
+          <p>Color principal</p>
+          <div className="swatches"><i className="swatch copper" /><i className="swatch ink active" /><i className="swatch smoke" /><i className="swatch mist" /></div>
+          <p>Marcadores</p>
+          <div className="finder-row"><span className="finder-choice active"><b /></span><span className="finder-choice round"><b /></span><span className="finder-choice dot"><b /></span></div>
+          <p>Marco</p>
+          <div className="frame-choice"><span>●</span> Mi presencia, en un QR <ChevronRight size={12} /></div>
+        </div>
+        <div className="customizer-result"><div className="qr-plaque"><QrVisual copper /></div><span>PREVIEW</span></div>
+      </div>
+    </div>
+  );
+}
+
+function TemplateStack() {
+  return (
+    <div className="template-stack" aria-label="Galería de plantillas">
+      <div className="template-card template-white"><span>AW</span><b>Alex Wilson</b><i /><i /><i /></div>
+      <div className="template-card template-blue"><span>AL</span><b>Atelier Lumen</b><i /><i /><i /></div>
+      <div className="template-card template-gold"><span>JM</span><b>Josephine M.</b><i /><i /><i /></div>
+    </div>
+  );
+}
+
+function SecurePanel() {
+  return (
+    <div className="secure-panel">
+      <div className="secure-file"><div className="secure-file-type">PDF</div><div><b>Propuesta_2026</b><span>2.4 MB · protegido</span></div><Check size={15} /></div>
+      <div className="security-state"><div className="shield-object"><ShieldCheck size={34} /></div><div><span>ESTADO DE ACCESO</span><b>Protegido</b><p>Contraseña + expiración activa</p></div></div>
+      <div className="secure-meta"><span><LockKeyhole size={13} /> Cifrado</span><span><ScanLine size={13} /> Acceso QR</span><span><CalendarDays size={13} /> 18 días</span></div>
+    </div>
+  );
+}
+
+function HeroScene() {
+  return (
+    <div className="hero-scene" aria-label="Escena de producto Cripqer">
+      <img className="hero-art" src={assets.hero} alt="Composición abstracta de objetos digitales Cripqer" onError={hideMissingAsset} />
+      <div className="scene-halo" />
+      <div className="scene-phone"><PhonePreview /></div>
+      <div className="scene-qr"><div className="scene-card-label"><ScanLine size={12} /> QR ACTIVO</div><div className="scene-qr-core"><QrVisual copper /></div><span>CRIPQER / 09.26</span></div>
+      <div className="scene-file"><FileLock2 size={16} /><div><b>Brief_Identidad.pdf</b><span>Seguro · 2,4 MB</span></div><ShieldCheck size={16} /></div>
+      <div className="scene-template"><span>03</span><div><i /><i /><i /></div><b>Plantilla</b></div>
+      <div className="scene-tag"><Sparkles size={13} /> PÁGINA LISTA</div>
+    </div>
+  );
+}
+
+function ServiceVisual({ type }: { type: string }) {
+  if (type === "qr") return <div className="product-visual qr-showcase" data-state="CUSTOMIZE / 01"><img src={assets.qr} alt="Estudio visual de un QR personalizado" onError={hideMissingAsset} /><QrCustomizer /></div>;
+  if (type === "profile") return <div className="product-visual profile-showcase" data-state="PROFILE / LIVE"><div className="soft-light" /><PhonePreview selected /><div className="profile-badge"><Eye size={14} /><span><b>Vista en vivo</b> Cada cambio es inmediato</span></div></div>;
+  if (type === "templates") return <div className="product-visual template-showcase" data-state="THEMES / 12"><img src={assets.templates} alt="Composición de plantillas premium" onError={hideMissingAsset} /><TemplateStack /><div className="template-caption"><LayoutTemplate size={14} /> 12 temas listos para personalizar</div></div>;
+  return <div className="product-visual security-showcase" data-state="ACCESS / LOCKED"><img src={assets.securePanel} alt="Visual de seguridad para documentos" onError={hideMissingAsset} /><SecurePanel /></div>;
+}
+
+function Home() {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const navigateTo = (id: string) => {
+    setMenuOpen(false);
+    document.querySelector(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  return (
+    <main className="cripqer-site">
+      <header className="site-header">
+        <div className="nav-shell">
+          <button className="brand-lockup" onClick={() => navigateTo("#inicio")} aria-label="Ir al inicio de Cripqer">
+            <span className="brand-mark-shell"><CripqerMark className="brand-mark-fallback" /></span>
+            <Wordmark />
+          </button>
+          <nav className={`site-nav ${menuOpen ? "is-open" : ""}`} aria-label="Navegación principal">
+            <button onClick={() => navigateTo("#inicio")}>Inicio</button>
+            <a href="/editor" onClick={() => setMenuOpen(false)}>QR</a>
+            <a href="/template-bank" onClick={() => setMenuOpen(false)}>Plantillas</a>
+            <a href="/template-builder" onClick={() => setMenuOpen(false)}>Editor</a>
+            <a href="/encrypted-documents" onClick={() => setMenuOpen(false)}>Seguridad</a>
+          </nav>
+          <div className="nav-actions">
+            <a className="nav-login" href="/profile">Iniciar sesión</a>
+            <a className="nav-primary" href="/profile">Crear gratis <ArrowRight size={15} /></a>
+          </div>
+          <button className="menu-toggle" aria-label={menuOpen ? "Cerrar menú" : "Abrir menú"} onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? <X /> : <Menu />}</button>
+        </div>
+      </header>
+
+      <section id="inicio" className="hero-section">
+        <div className="technical-grid hero-grid" />
+        <div className="hero-wrap">
+          <div className="hero-copy reveal">
+            <div className="eyebrow"><span className="signal-dot" /> TODO CONECTADO. TODO TUYO.</div>
+            <h1>Tu identidad digital,<br /><em>conectada</em> con un QR.</h1>
+            <p>Crea códigos QR personalizados, páginas de perfil, experiencias digitales y documentos seguros desde una sola plataforma.</p>
+            <div className="hero-actions"><a className="button-primary" href="/editor">Crear mi QR <ArrowRight size={17} /></a><button className="button-ghost" onClick={() => navigateTo("#features")}>Explorar Cripqer <ArrowDown size={16} /></button></div>
+            <div className="hero-meta"><span><i /> Sin código</span><span><i /> Publica en segundos</span></div>
+            <div className="hero-mark-code"><CripqerMark /><span>OPEN MODULE / IDENTITY SYSTEM</span></div>
+          </div>
+          <HeroScene />
+        </div>
+        <div className="hero-baseline"><span>01 — CRIPQER PLATFORM</span><div /><span>IDENTIDAD / QR / CONTROL</span></div>
+      </section>
+
+      <section className="trust-strip" aria-label="Capacidades de Cripqer">
+        <p>Una plataforma. Múltiples formas de conectar.</p>
+        <div>{["QR personalizados", "Landing pages", "Plantillas premium", "Documentos seguros", "Identidad digital"].map((item) => <span key={item}><b /> {item}</span>)}</div>
+      </section>
+
+      <section id="services" className="services-section">
+        <div className="section-frame inspection-frame" data-register="CHAPTER / 02">
+          <SectionLead eyebrow="SERVICIOS" number="02" title={<>Todo lo que necesitas para conectar el mundo físico con tu presencia digital.</>} copy="Cripqer reúne herramientas de identidad, contenido y seguridad en una experiencia simple y coherente." />
+          <div className="services-list">
+            {serviceData.map((service, index) => {
+              const Icon = service.icon;
+              return <article className={`service-row service-${service.type}`} key={service.title}>
+                <div className="service-information reveal">
+                  <div className="service-index"><span>{service.number}</span><Icon size={18} /></div>
+                  <h3>{service.title}</h3>
+                  <p>{service.description}</p>
+                  <ul>{service.items.map((item) => <li key={item}><Check size={13} /> {item}</li>)}</ul>
+                  <a className="text-link" href={service.type === "qr" ? "/editor" : service.type === "profile" ? "/template-builder" : service.type === "templates" ? "/template-bank" : "/encrypted-documents"}>Inspeccionar herramienta <ArrowRight size={15} /></a>
+                </div>
+                <ServiceVisual type={service.type} />
+              </article>;
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section id="features" className="editor-section">
+        <div className="technical-grid" />
+        <div className="section-frame editor-wrap inspection-frame" data-register="CHAPTER / 03">
+          <SectionLead eyebrow="EDITOR VISUAL" number="03" title={<>Diseña visualmente.<br />Publica en segundos.</>} copy="Una experiencia de edición para modificar contenido, estilo y disposición mientras observas el resultado." />
+          <div className="editor-window reveal">
+            <aside className="editor-sidebar"><div className="editor-brand"><CripqerMark /> <span>editor</span></div><div className="editor-tabs"><button className="active"><UserRound /> Contenido</button><button><UserRound /> Avatar</button><button><LayoutTemplate /> Bio</button><button><ChevronRight /> Botones</button><button><Instagram /> Redes</button><button><Sparkles /> Apariencia</button></div><div className="editor-save"><span><i /> Cambios guardados</span><a href="/template-builder">Publicar <ArrowRight size={14} /></a></div></aside>
+            <div className="editor-workspace"><div className="workspace-bar"><span>PREVIEW MÓVIL</span><div><i /><i /><i /></div></div><div className="workspace-canvas"><div className="selection-note"><span /><b>Botón seleccionado</b><small>Arrastra para mover</small></div><PhonePreview selected /></div></div>
+          </div>
+        </div>
+      </section>
+
+      <section className="actions-section">
+        <div className="section-frame actions-wrap inspection-frame" data-register="CHAPTER / 04">
+          <SectionLead eyebrow="MÁS QUE SIMPLES ENLACES" number="04" title={<>Convierte cada botón en una <em>acción.</em></>} copy="Los botones pueden dirigir a cada persona directamente hacia diferentes acciones digitales." />
+          <div className="action-stack reveal">
+            {actionData.map((action, index) => { const Icon = action.icon; return <a className="action-item" style={{ "--delay": `${index * 45}ms` } as CSSProperties} key={action.label} href="/template-builder"><span className="action-icon"><Icon size={18} /></span><span><b>{action.label}</b><small>{action.example}</small></span><ChevronRight size={17} /></a>; })}
+          </div>
+        </div>
+      </section>
+
+      <section id="seguridad" className="security-section">
+        <div className="technical-grid" />
+        <div className="section-frame security-wrap inspection-frame" data-register="CHAPTER / 05">
+          <div className="security-copy reveal"><div className="eyebrow"><span className="signal-dot" /> CRIPQER SECURITY</div><h2>Cuando compartir también necesita <em>protección.</em></h2><p>Documentos Seguros añade una capa especializada para el envío de archivos mediante enlaces y QR.</p><div className="security-badges">{["Cifrado", "Contraseña", "Expiración", "Control de descargas"].map((badge) => <span key={badge}><ShieldCheck size={14} /> {badge}</span>)}</div><a className="button-primary" href="/encrypted-documents">Abrir Documentos Seguros <ArrowRight size={17} /></a></div>
+          <div className="security-object reveal"><img src={assets.securityVault} alt="Objeto visual de un archivo protegido" onError={hideMissingAsset} /><div className="security-ring"><ShieldCheck size={30} /></div><div className="security-status"><span><i /> ENCRIPTADO</span><b>Acceso protegido</b><small>Política activa · 18 días</small></div></div>
+        </div>
+      </section>
+
+      <section id="plantillas" className="templates-section">
+        <div className="section-frame inspection-frame" data-register="CHAPTER / 06">
+          <SectionLead eyebrow="PLANTILLAS" number="05" title={<>Empieza con una gran <em>primera impresión.</em></>} />
+          <div className="template-gallery reveal">
+            {[ ["Black + Gold", "Luxury", "template-luxury"], ["Platinum", "Professional", "template-platinum"], ["Executive Blue", "Business", "template-executive"], ["Rose Gold", "Creator", "template-rose"], ["Premium White", "Minimal", "template-minimal"] ].map(([name, category, style], index) => <article className={`gallery-template ${style}`} data-template={`0${index + 1} / 05`} key={name}><div className="gallery-profile"><span>{index === 0 ? "JM" : index === 1 ? "VL" : index === 2 ? "MH" : index === 3 ? "RS" : "AK"}</span><b>{name}</b><i /><i /><i /><small>cripqer.me</small></div><div className="gallery-caption"><span>{category}</span><a href="/template-bank">Preview <ArrowRight size={13} /></a></div></article>)}
+          </div>
+          <div className="templates-cta"><p>Una biblioteca de puntos de partida para tu presencia conectada.</p><a className="text-link" href="/template-bank">Inspeccionar biblioteca <ArrowRight size={15} /></a></div>
+        </div>
+      </section>
+
+      <section className="use-cases-section">
+        <div className="section-frame inspection-frame" data-register="CHAPTER / 07"><SectionLead eyebrow="PARA PERSONAS Y NEGOCIOS" number="07" title={<>Una identidad digital que <em>viaja contigo.</em></>} />
+          <div className="use-case-grid reveal">{[["01", "Profesionales", "Comparte perfil, contacto, servicios y redes.", UserRound], ["02", "Creadores", "Centraliza contenido, redes y llamadas a la acción.", Sparkles], ["03", "Negocios", "Conecta clientes con información, productos y canales.", QrCode], ["04", "Equipos", "Comparte recursos y experiencias digitales consistentes.", Globe2]].map(([number, title, description, Icon]) => { const Mark = Icon as typeof Globe2; return <article key={title as string}><div><span>{number as string}</span><Mark size={20} /></div><h3>{title as string}</h3><p>{description as string}</p><a href="/template-builder" aria-label={`Explorar ${title as string}`}><ArrowRight size={17} /></a></article>; })}</div>
+        </div>
+      </section>
+
+      <section className="final-cta-section"><div className="cta-orbit cta-orbit-one" /><div className="cta-orbit cta-orbit-two" /><div className="final-cta-card reveal"><div className="final-mark"><CripqerMark /></div><div className="eyebrow"><span className="signal-dot" /> TU PRESENCIA, CONECTADA</div><h2>Tu próximo QR puede<br />hacer mucho más.</h2><p>Construye tu identidad digital y conecta todo desde Cripqer.</p><div><a className="button-primary" href="/profile">Crear gratis <ArrowRight size={17} /></a><a className="button-ghost" href="/template-bank">Ver plantillas</a></div></div></section>
+
+      <footer className="site-footer"><div className="footer-main"><div className="footer-brand"><div className="brand-lockup"><span className="brand-mark-shell"><CripqerMark className="brand-mark-fallback" /></span><Wordmark light /></div><p>Identidad digital conectada mediante QR, perfiles, plantillas y documentos seguros.</p></div><div className="footer-links"><div><h3>Producto</h3>{[["QR", "/editor"], ["Editor", "/template-builder"], ["Plantillas", "/template-bank"], ["Documentos Seguros", "/encrypted-documents"]].map(([link, route]) => <a href={route} key={link}>{link}</a>)}</div><div><h3>Recursos</h3>{["Ayuda", "Privacidad", "Términos"].map((link) => <button onClick={() => navigateTo("#inicio")} key={link}>{link}</button>)}</div><div><h3>Cuenta</h3>{[["Iniciar sesión", "/profile"], ["Crear cuenta", "/profile"]].map(([link, route]) => <a href={route} key={link}>{link}</a>)}</div></div></div><div className="footer-bottom"><span>© 2026 Cripqer</span><span>Diseñado para conectar con precisión.</span></div></footer>
+    </main>
   );
 }
