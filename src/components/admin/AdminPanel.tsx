@@ -325,6 +325,14 @@ export function AdminPanel() {
                   <ImageIcon className="h-6 w-6 text-purple-500" />
                   <span className="text-sm">Subir Logo</span>
                 </Button>
+                <Button
+                  variant="outline"
+                  className="h-auto flex-col gap-2 py-4"
+                  onClick={() => navigate({ to: "/admin/template-studio" })}
+                >
+                  <Settings className="h-6 w-6 text-purple-500" />
+                  <span className="text-sm">Editor administrativo</span>
+                </Button>
               </div>
             </CardContent>
           </Card>

@@ -126,7 +126,7 @@ function EditorQRPreview({
   );
 }
 
-function EditorPage() {
+export function EditorPage() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
