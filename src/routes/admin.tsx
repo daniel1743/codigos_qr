@@ -1,10 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { AdminPanel } from "../components/admin/AdminPanel";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/admin")({
   component: AdminPanelPage,
 });
 
 function AdminPanelPage() {
-  return <AdminPanel />;
+  return <Outlet />;
 }

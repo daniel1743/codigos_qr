@@ -17,6 +17,7 @@ import { Route as EncryptedDocumentsRouteImport } from './routes/encrypted-docum
 import { Route as PowerEditorPreviewRouteImport } from './routes/power-editor-preview'
 import { Route as PowerEditorPreviewMobileRouteImport } from './routes/power-editor-preview-mobile'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminTemplateStudioRouteImport } from './routes/admin/template-studio'
 import { Route as DShortUrlRouteImport } from './routes/d.$shortUrl'
 import { Route as PPublicIdRouteImport } from './routes/p.$publicId'
@@ -62,6 +63,11 @@ const ProfileRoute = ProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminTemplateStudioRoute = AdminTemplateStudioRouteImport.update({
   id: '/template-studio',
   path: '/template-studio',
@@ -90,11 +96,11 @@ export interface FileRoutesByFullPath {
   '/admin/template-studio': typeof AdminTemplateStudioRoute
   '/d/$shortUrl': typeof DShortUrlRoute
   '/p/$publicId': typeof PPublicIdRoute
+  '/admin/': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$alias': typeof AliasRoute
-  '/admin': typeof AdminRouteWithChildren
   '/editor': typeof EditorRoute
   '/encrypted-documents': typeof EncryptedDocumentsRoute
   '/power-editor-preview': typeof PowerEditorPreviewRoute
@@ -103,6 +109,7 @@ export interface FileRoutesByTo {
   '/admin/template-studio': typeof AdminTemplateStudioRoute
   '/d/$shortUrl': typeof DShortUrlRoute
   '/p/$publicId': typeof PPublicIdRoute
+  '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -117,6 +124,7 @@ export interface FileRoutesById {
   '/admin/template-studio': typeof AdminTemplateStudioRoute
   '/d/$shortUrl': typeof DShortUrlRoute
   '/p/$publicId': typeof PPublicIdRoute
+  '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -132,11 +140,11 @@ export interface FileRouteTypes {
     | '/admin/template-studio'
     | '/d/$shortUrl'
     | '/p/$publicId'
+    | '/admin/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/$alias'
-    | '/admin'
     | '/editor'
     | '/encrypted-documents'
     | '/power-editor-preview'
@@ -145,6 +153,7 @@ export interface FileRouteTypes {
     | '/admin/template-studio'
     | '/d/$shortUrl'
     | '/p/$publicId'
+    | '/admin'
   id:
     | '__root__'
     | '/'
@@ -158,6 +167,7 @@ export interface FileRouteTypes {
     | '/admin/template-studio'
     | '/d/$shortUrl'
     | '/p/$publicId'
+    | '/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -231,6 +241,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/template-studio': {
       id: '/admin/template-studio'
       path: '/template-studio'
@@ -257,10 +274,12 @@ declare module '@tanstack/react-router' {
 
 interface AdminRouteChildren {
   AdminTemplateStudioRoute: typeof AdminTemplateStudioRoute
+  AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminTemplateStudioRoute: AdminTemplateStudioRoute,
+  AdminIndexRoute: AdminIndexRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
