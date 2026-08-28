@@ -1,0 +1,78 @@
+{
+  "mode": "dry-run",
+  "templateCount": 12,
+  "blueprints": [
+    {
+      "blueprintKey": "power-golden-atelier",
+      "name": "Golden Atelier",
+      "category": "gold",
+      "fingerprint": "bd6e98399f2598a1d7214fb040dcf8766987009a79283af6a28bcd4951e68478"
+    },
+    {
+      "blueprintKey": "power-platinum-editorial",
+      "name": "Platinum Editorial",
+      "category": "platinum",
+      "fingerprint": "fb79cfb35b5249b8707331272537e99b79a33f0376c3863d0df4a86872989ca5"
+    },
+    {
+      "blueprintKey": "power-obsidian-creator",
+      "name": "Obsidian Creator",
+      "category": "obsidian",
+      "fingerprint": "28c6b41f32b2c25e9129171ec8981f8dc0128511140c193fc0308cbed1d5fd05"
+    },
+    {
+      "blueprintKey": "power-emerald-concierge",
+      "name": "Emerald Concierge",
+      "category": "emerald",
+      "fingerprint": "f0e319cade07410e0732d7f9d163558895db9ed9ac735f4dbcac0fcf034218d4"
+    },
+    {
+      "blueprintKey": "power-cobalt-product-studio",
+      "name": "Cobalt Product Studio",
+      "category": "cobalt",
+      "fingerprint": "9c4db027155a8ae8976461b94de9eeef3709e108478aaf5361d65372de7c1c59"
+    },
+    {
+      "blueprintKey": "power-rose-ceremony",
+      "name": "Rose Ceremony",
+      "category": "rose",
+      "fingerprint": "e90872e51335947c49ab4cf826b68a2a73224a93a0a961a07e5026e2cc59df57"
+    },
+    {
+      "blueprintKey": "power-terracotta-maker",
+      "name": "Terracotta Maker",
+      "category": "terracotta",
+      "fingerprint": "ff98f39bad37cae1fd4dabeb935978294f6d064e9666d3530ea9b95a1f1fc924"
+    },
+    {
+      "blueprintKey": "power-ivory-portfolio",
+      "name": "Ivory Portfolio",
+      "category": "ivory",
+      "fingerprint": "4aa6d254d5741639afa03f0fd9739c58518a9c915c7c3fe16cedb0aa880279a2"
+    },
+    {
+      "blueprintKey": "power-gold-night-market",
+      "name": "Gold Night Market",
+      "category": "gold",
+      "fingerprint": "f4d4e028390f953d2ec1f1e4aae0daf98235b452dd7655f2b33b56e85dd31d1f"
+    },
+    {
+      "blueprintKey": "power-platinum-salon",
+      "name": "Platinum Salon",
+      "category": "platinum",
+      "fingerprint": "a8c75f1f173844a36464223ef66d6ce41f711157d476b526f562ac802c16ffa8"
+    },
+    {
+      "blueprintKey": "power-cobalt-stream",
+      "name": "Cobalt Stream",
+      "category": "cobalt",
+      "fingerprint": "ab8aaca7f17f3b4b2b04ac7ac07f60aa696b95323541db126119f4cc18b7f5a2"
+    },
+    {
+      "blueprintKey": "power-emerald-journal",
+      "name": "Emerald Journal",
+      "category": "emerald",
+      "fingerprint": "fd0b10a556dacd355b02751fdd3fa56e0d55c4de0f6b881a4427cc535d97a997"
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+.ep-premium-card-block { align-items: stretch; }
+.ep-premium-card-block > .ep-rich-card { display: flex; min-width: 0; min-height: 96px; overflow: hidden; align-items: stretch; gap: 0; background: rgba(255,255,255,.06); }
+.ep-premium-card-block > .ep-rich-card.image-right { flex-direction: row; }
+.ep-premium-card-block > .ep-rich-card.image-left { flex-direction: row-reverse; }
+.ep-rich-card-copy { display: grid; flex: 1 1 75%; min-width: 0; align-content: center; gap: 4px; }
+.ep-rich-card-copy b, .ep-rich-card-copy small, .ep-rich-card-cta { display: block; width: 100%; overflow-wrap: anywhere; }
+.ep-rich-card-cta { max-width: 100%; margin-top: 2px; padding: 3px 6px; border: 1px solid currentColor; border-radius: 999px; color: inherit; background: transparent; font-style: normal; cursor: pointer; }
+.ep-rich-card.is-clickable { cursor: pointer; }
+.ep-rich-card.is-clickable:focus-visible { outline: 2px solid var(--ep-copper, #c49a68); outline-offset: 3px; }
+.ep-rich-card-image { display: block; flex: 0 0 25%; min-width: 25%; background: #252a32 center / cover no-repeat; }
+.ep-rich-cards-panel .ep-guidance { align-items: flex-start; }
+.ep-rich-card-editor { display: grid; gap: 9px; margin: 12px 0; padding: 11px; border: 1px solid rgba(196,154,104,.22); border-radius: 11px; background: #1c2026; }
+.ep-rich-card-editor > header { display: flex; justify-content: space-between; gap: 8px; color: #ecd1a4; font-size: 10px; }
+.ep-rich-card-editor > header span { color: #8fa79c; font-family: "DM Mono", monospace; font-size: 8px; }
+.ep-rich-card-editor details { padding: 9px; border: 1px solid rgba(255,255,255,.09); border-radius: 8px; background: rgba(255,255,255,.022); }
+.ep-rich-card-editor summary { color: #e4c391; font-size: 10px; font-weight: 800; cursor: pointer; }
+.ep-rich-card-editor details > :not(summary) { margin-top: 10px; }
+.ep-rich-card-links { border-color: rgba(232,195,142,.24) !important; }
+.ep-rich-paired-controls { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 9px; align-items: end; }
+.ep-rich-range { display: grid; gap: 7px; margin: 5px 0; color: #aeb4bd; font-size: 9px; font-weight: 700; }
+.ep-rich-range > span { display: flex; justify-content: space-between; gap: 7px; }
+.ep-rich-range b { color: #e8c38e; font-family: "DM Mono", monospace; font-size: 8px; font-weight: 500; }
+.ep-rich-range input { width: 100%; accent-color: var(--ep-copper); }
+.ep-rich-choice-grid { display: grid; grid-template-columns: 1fr 1fr minmax(0,1.3fr); gap: 6px; }
+.ep-rich-choice-grid button, .ep-rich-choice-grid select, .ep-rich-image-actions button { min-height: 32px; border: 1px solid rgba(255,255,255,.11); border-radius: 7px; color: #cfd3d9; background: #242930; font-size: 9px; cursor: pointer; }
+.ep-rich-choice-grid button.is-selected { border-color: var(--ep-copper); color: #f1cf9f; background: rgba(196,154,104,.13); }
+.ep-rich-swatches { display: flex; flex-wrap: wrap; gap: 7px; }
+.ep-rich-swatches button { width: 23px; height: 23px; border: 2px solid rgba(255,255,255,.45); border-radius: 50%; cursor: pointer; }
+.ep-rich-swatches button.is-selected { outline: 2px solid #efcf9f; outline-offset: 2px; }
+.ep-rich-image-actions { display: flex; gap: 7px; }
+.ep-rich-image-actions button { display: inline-flex; align-items: center; gap: 5px; padding: 0 9px; color: #edcc9a; background: rgba(196,154,104,.1); }
+.ep-rich-media-library > span { display: block; margin-bottom: 7px; color: #aeb4bd; font-size: 9px; font-weight: 700; }
+.ep-rich-media-library > div { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 6px; }
+.ep-rich-media-library button { position: relative; min-height: 42px; overflow: hidden; border: 1px solid rgba(255,255,255,.16); border-radius: 6px; background: #252a32 center / cover no-repeat; cursor: pointer; }
+.ep-rich-media-library button::after { position: absolute; inset: 0; background: linear-gradient(transparent, rgba(0,0,0,.75)); content: ""; }
+.ep-rich-media-library button.is-selected { outline: 2px solid var(--ep-copper); outline-offset: 1px; }
+.ep-rich-media-library i { position: relative; z-index: 1; display: block; padding: 22px 3px 3px; overflow: hidden; color: #fff; font-size: 7px; font-style: normal; text-align: left; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 480px) { .ep-rich-paired-controls { grid-template-columns: 1fr; }.ep-rich-choice-grid { grid-template-columns: 1fr 1fr; }.ep-rich-choice-grid select { grid-column: 1 / -1; } }

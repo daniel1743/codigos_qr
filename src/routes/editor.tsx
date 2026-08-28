@@ -12,9 +12,11 @@ import { ShareSection } from "../components/editor/ShareSection";
 import type { CornerDotType, CornerSquareType, DotsType, QREffectType } from "../types/qr-advanced";
 import { ChevronLeft } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import type { Session } from "@supabase/supabase-js";
+import { PowerEditorMainEntry } from "../power-editor/client/src/components/PowerEditorMainEntry";
 
 export const Route = createFileRoute("/editor")({
-  component: EditorPage,
+  component: PowerEditorMainEntry,
 });
 
 function EditorQRPreview({
@@ -82,8 +84,8 @@ function EditorQRPreview({
   );
 }
 
-function EditorPage() {
-  const [session, setSession] = useState<any>(null);
+export function LegacyEditorPage() {
+  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const supabase = getBrowserSupabaseClient();
   const loadedUserId = useRef<string | null>(null);
