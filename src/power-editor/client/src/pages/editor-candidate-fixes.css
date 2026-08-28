@@ -114,3 +114,227 @@
 .ep-generated-recipe-swatch.is-rose { background: linear-gradient(135deg, #3d1d30, #ffd6dd); }
 .ep-generated-recipe-swatch.is-terracotta { background: linear-gradient(135deg, #392117, #f7d6b4); }
 .ep-generated-recipe-swatch.is-ivory { background: linear-gradient(135deg, #e8dec8, #422f22); }
+
+/* Header UX: agrupa herramientas sin cambiar handlers ni persistencia. */
+.ep-header {
+  gap: 16px;
+  padding-right: 16px;
+  padding-left: 16px;
+}
+
+.ep-brand {
+  flex: 0 0 auto;
+}
+
+.ep-global-actions {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.ep-action-group {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 12px;
+  background: rgba(255,255,255,.035);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+}
+
+.ep-action-group > button,
+.ep-action-group > select,
+.ep-global-actions > .ep-global-more {
+  min-width: 36px;
+  height: 36px;
+  border-radius: 9px;
+}
+
+.ep-action-group > button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 10px;
+  color: #c8ccd3;
+  background: transparent;
+  font-size: 11px;
+  font-weight: 760;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.ep-action-group > button:hover {
+  color: #f1d2a3;
+  background: rgba(255,255,255,.06);
+}
+
+.ep-action-group > button:disabled {
+  opacity: .35;
+  cursor: not-allowed;
+}
+
+.ep-action-group > select {
+  width: auto;
+  max-width: none;
+  padding: 0 28px 0 10px;
+  border: 1px solid rgba(255,255,255,.1);
+  color: #d7dbe1;
+  background-color: #171a20;
+  font-size: 10px;
+}
+
+.ep-action-group-create {
+  border-color: rgba(196,154,104,.2);
+  background: rgba(196,154,104,.07);
+}
+
+.ep-action-group-create .ep-recipe-catalog-action,
+.ep-action-group-create .ep-add-content {
+  min-width: 96px;
+  color: #f0c78f;
+}
+
+.ep-action-group-create .ep-add-content {
+  background: rgba(196,154,104,.16);
+}
+
+.ep-action-group-canvas button[aria-label="Vista 100%"],
+.ep-action-group-canvas .ep-fit-action {
+  min-width: 48px;
+  padding-right: 12px;
+  padding-left: 12px;
+}
+
+.ep-action-group-output {
+  border-color: rgba(218,174,113,.22);
+  background: rgba(218,174,113,.055);
+}
+
+.ep-action-group-output .ep-save,
+.ep-action-group-output .ep-publish {
+  min-width: 88px;
+  padding-right: 12px;
+  padding-left: 12px;
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.ep-action-group-output .ep-save {
+  display: inline-flex;
+  color: #f2eadf;
+  background: #2b2e34;
+}
+
+.ep-action-group-output .ep-publish {
+  color: #1d140b;
+  background: linear-gradient(135deg, #dfb77a, #c99957);
+}
+
+.ep-action-group-output .ep-publish:hover {
+  color: #140d06;
+  background: linear-gradient(135deg, #edc98f, #d4a45f);
+}
+
+.ep-action-group-context::before,
+.ep-action-group-create::before,
+.ep-action-group-history::before,
+.ep-action-group-canvas::before,
+.ep-action-group-output::before {
+  margin: 0 5px 0 4px;
+  color: #7f858f;
+  font-family: "DM Mono", monospace;
+  font-size: 7px;
+  letter-spacing: .7px;
+  text-transform: uppercase;
+}
+
+.ep-action-group-context::before { content: "Modo"; }
+.ep-action-group-create::before { content: "Crear"; }
+.ep-action-group-history::before { content: "Historial"; }
+.ep-action-group-canvas::before { content: "Canvas"; }
+.ep-action-group-output::before { content: "Salida"; }
+
+@media (max-width: 1320px) {
+  .ep-header { gap: 10px; }
+  .ep-global-actions { gap: 6px; }
+  .ep-action-group { gap: 2px; padding: 3px; }
+  .ep-action-group::before { display: none; }
+  .ep-action-group-create .ep-recipe-catalog-action,
+  .ep-action-group-create .ep-add-content,
+  .ep-action-group-output .ep-save,
+  .ep-action-group-output .ep-publish {
+    min-width: auto;
+  }
+}
+
+@media (max-width: 1040px) {
+  .ep-action-group-history,
+  .ep-action-group-canvas {
+    display: none;
+  }
+
+  .ep-global-actions > .ep-global-more {
+    display: grid !important;
+    place-items: center;
+    color: #d5d8dd;
+    background: #20242a;
+  }
+}
+
+@media (max-width: 760px) {
+  .ep-header {
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+
+  .ep-global-actions {
+    flex: 0 0 auto;
+    gap: 6px;
+  }
+
+  .ep-action-group-context,
+  .ep-action-group-history,
+  .ep-action-group-canvas,
+  .ep-action-group-output > button[aria-label="Vista previa"],
+  .ep-action-group-output > .ep-save {
+    display: none;
+  }
+
+  .ep-action-group {
+    border: 0;
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .ep-action-group-create .ep-recipe-catalog-action {
+    display: none;
+  }
+
+  .ep-action-group-create .ep-add-content {
+    width: 38px;
+    min-width: 38px;
+    padding: 0;
+  }
+
+  .ep-action-group-create .ep-add-content span,
+  .ep-action-group-output .ep-publish {
+    font-size: 0;
+  }
+
+  .ep-action-group-output .ep-publish {
+    width: 38px;
+    min-width: 38px;
+    padding: 0;
+  }
+
+  .ep-action-group-output .ep-publish svg {
+    width: 17px;
+  }
+}
