@@ -79,3 +79,4 @@
 - [ ] Confirmar que `VITE_APP_URL` de Vercel usa el dominio HTTPS final y no `localhost` antes de desplegar el Power Editor V6.
 - [ ] Respaldar en una rama remota dedicada los cambios locales del Power Editor V6 antes de desplegarlo en Vercel.
 - [ ] Crear commits ordenados y hacer push de los cambios validados del Power Editor V6 desde el worktree aislado, sin merge ni despliegue.
+- [x] Crear cuatro commits ordenados y hacer push de los cambios validados del Power Editor V6 a `chore/power-editor-isolated-copy`, sin merge ni despliegue.
