@@ -12,13 +12,15 @@ import {
   Wand2,
   X,
   AlertTriangle,
+  FolderUp,
 } from "lucide-react";
 import { toast } from "sonner";
 import { getBrowserSupabaseClient } from "@/lib/supabase/client";
 import { getPremiumOverrideByEmail, getUserEntitlements } from "@/lib/entitlements";
 import { CleanTemplatePreview } from "../admin/CleanTemplatePreview";
+import { PowerEditorTemplatePreview } from "@/power-editor/client/src/components/PowerEditorTemplatePreview";
 import {
-  getPublicTemplates,
+  getGalleryTemplates,
   incrementTemplateUsage,
   type PublicTemplateViewModel,
 } from "@/services/template.service";
@@ -37,7 +39,7 @@ const ADVANCED_TAGS = [
   "Mapa",
 ];
 
-type PlanFilter = "all" | "free" | "premium" | "favorites";
+type PlanFilter = "all" | "free" | "premium" | "mine" | "favorites";
 type SortFilter = "popular" | "recent" | "trend";
 
 interface Filters {
@@ -54,6 +56,19 @@ interface Filters {
 
 function getFavoriteStorageKey(userId?: string) {
   return `cripqer-template-favorites:${userId || "anonymous"}`;
+}
+
+function isPowerEditorConfig(config: unknown): config is import("@/power-editor/client/src/lib/editorCandidateModel").PageConfig {
+  return Boolean(config && typeof config === "object" && Array.isArray((config as { blocks?: unknown }).blocks));
+}
+
+function GalleryTemplatePreview({ template, deviceMode }: {
+  template: PublicTemplateViewModel;
+  deviceMode: "mobile" | "desktop" | "thumbnail";
+}) {
+  return isPowerEditorConfig(template.config)
+    ? <PowerEditorTemplatePreview config={template.config} deviceMode={deviceMode} />
+    : <CleanTemplatePreview config={template.config} deviceMode={deviceMode} />;
 }
 
 export function TemplateBankGallery() {
@@ -124,8 +139,7 @@ export function TemplateBankGallery() {
     setLoading(true);
     setHasError(false);
     try {
-      const data = await getPublicTemplates();
-      setTemplates(data.filter((template) => template.status === "PUBLIC"));
+      setTemplates(await getGalleryTemplates());
     } catch (error) {
       console.error("[Cripqer] Error loading public templates:", error);
       setHasError(true);
@@ -140,7 +154,7 @@ export function TemplateBankGallery() {
   const palettes = useMemo(() => Array.from(new Set(templates.map((t) => t.palette).filter(Boolean))).sort(), [templates]);
 
   const filteredTemplates = useMemo(() => {
-    let result = templates.filter((template) => template.status === "PUBLIC");
+    let result = templates;
     const term = filters.search.trim().toLowerCase();
 
     if (term) {
@@ -156,6 +170,7 @@ export function TemplateBankGallery() {
 
     if (filters.plan === "free") result = result.filter((t) => t.plan === "free");
     if (filters.plan === "premium") result = result.filter((t) => t.plan === "premium");
+    if (filters.plan === "mine") result = result.filter((t) => t.createdBy === currentUserId);
     if (filters.plan === "favorites") result = result.filter((t) => favorites.includes(t.id));
     
     if (filters.industry !== "all") result = result.filter((t) => t.industry === filters.industry);
@@ -175,7 +190,7 @@ export function TemplateBankGallery() {
       if (filters.sort === "recent") return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       return (Number(b.isFeatured) * 1000 + b.usageCount) - (Number(a.isFeatured) * 1000 + a.usageCount);
     });
-  }, [templates, filters, favorites]);
+  }, [templates, filters, favorites, currentUserId]);
 
   function toggleFavorite(templateId: string) {
     setFavorites((previous) =>
@@ -210,7 +225,8 @@ export function TemplateBankGallery() {
         return;
       }
 
-      if (template.status !== "PUBLIC") {
+      const isOwnedSubmission = template.createdBy === user.id;
+      if (template.status !== "PUBLIC" && !isOwnedSubmission) {
         toast.error("Plantilla no disponible");
         return;
       }
@@ -222,7 +238,7 @@ export function TemplateBankGallery() {
         return;
       }
 
-      await incrementTemplateUsage(template.id);
+      if (template.status === "PUBLIC") await incrementTemplateUsage(template.id);
 
       const profile = await profileService.getProfileByUserId(supabase, user.id);
       if (!profile) {
@@ -255,7 +271,17 @@ export function TemplateBankGallery() {
   }
 
   function clearFilters() {
-    setFilters({ search: "", plan: "all", category: "all", activeTags: [], sort: "popular" });
+    setFilters({
+      search: "",
+      plan: "all",
+      industry: "all",
+      category: "all",
+      style: "all",
+      palette: "all",
+      themeMode: "all",
+      activeTags: [],
+      sort: "popular",
+    });
   }
 
   function onModalKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
@@ -406,6 +432,7 @@ export function TemplateBankGallery() {
               ["all", "Todas"],
               ["free", "Gratis"],
               ["premium", "Premium"],
+              ["mine", "Mis envíos"],
               ["favorites", "Favoritas"],
             ].map(([plan, label]) => (
               <button
@@ -419,6 +446,7 @@ export function TemplateBankGallery() {
                 }`}
               >
                 {plan === "premium" && <Sparkles className="h-4 w-4 text-[#FF3366]" />}
+                {plan === "mine" && <FolderUp className="h-4 w-4" />}
                 {plan === "favorites" && <Heart className="h-4 w-4" />}
                 {label}
               </button>
@@ -522,6 +550,7 @@ export function TemplateBankGallery() {
             {filteredTemplates.map((template) => {
               const isFavorite = favorites.includes(template.id);
               const isBusy = useInFlightId === template.id;
+              const isOwnedSubmission = template.createdBy === currentUserId && template.status !== "PUBLIC";
 
               return (
                 <article
@@ -548,6 +577,11 @@ export function TemplateBankGallery() {
                     >
                       {template.plan === "premium" ? "PRO" : "GRATIS"}
                     </span>
+                    {isOwnedSubmission && (
+                      <span className="rounded border border-emerald-400/30 bg-[#121212]/85 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-emerald-300 backdrop-blur">
+                        {template.status === "REVIEW_PENDING" ? "En revisión" : "Mi envío"}
+                      </span>
+                    )}
                   </div>
                   {template.isNew && (
                     <div className="absolute right-3 top-3 z-10">
@@ -557,7 +591,7 @@ export function TemplateBankGallery() {
                     </div>
                   )}
                   <div className="h-full w-full bg-[#1E1E1E] overflow-hidden relative">
-                    <CleanTemplatePreview config={template.config} deviceMode="thumbnail" />
+                    <GalleryTemplatePreview template={template} deviceMode="thumbnail" />
                   </div>
 
                   <div className="absolute inset-0 z-10 hidden items-center justify-center gap-4 bg-[#121212]/60 backdrop-blur-sm group-hover:flex group-focus-within:flex">
@@ -615,7 +649,7 @@ export function TemplateBankGallery() {
                         }}
                         className="flex-1 rounded-lg bg-[#FF3366] py-2 text-xs font-medium text-white transition-colors hover:bg-[#E62E5C] focus:outline-none focus-visible:ring-2 focus-visible:ring-white disabled:opacity-60"
                       >
-                        {isBusy ? "..." : "Usar"}
+                        {isBusy ? "..." : isOwnedSubmission ? "Editar" : "Usar"}
                       </button>
                       <button
                         type="button"
@@ -675,6 +709,11 @@ export function TemplateBankGallery() {
                 >
                   {modalTemplate.plan === "premium" ? "Premium" : "Gratis"}
                 </span>
+                {modalTemplate.createdBy === currentUserId && modalTemplate.status !== "PUBLIC" && (
+                  <span className="rounded border border-emerald-400/30 bg-emerald-400/10 px-2 py-0.5 text-xs font-semibold text-emerald-300">
+                    {modalTemplate.status === "REVIEW_PENDING" ? "En revisión" : "Privada · Mi envío"}
+                  </span>
+                )}
               </div>
               <div className="mx-3 hidden items-center gap-1 rounded-full border border-[#2A2A2A] bg-[#1E1E1E] p-1 sm:flex">
                 <button
@@ -713,7 +752,7 @@ export function TemplateBankGallery() {
 
             <div className="flex min-h-0 flex-1 justify-center overflow-hidden bg-[#0a0a0a] p-3 md:p-5">
               <div className="relative h-[62vh] w-full max-w-[900px] overflow-hidden rounded-xl border border-[#2A2A2A] bg-[#1E1E1E] shadow-[0_0_50px_rgba(0,0,0,0.5)] md:h-[68vh]">
-                <CleanTemplatePreview config={modalTemplate.config} deviceMode={modalDeviceMode} />
+                <GalleryTemplatePreview template={modalTemplate} deviceMode={modalDeviceMode} />
               </div>
             </div>
 
@@ -743,7 +782,7 @@ export function TemplateBankGallery() {
                 ) : (
                   <Wand2 className="h-5 w-5" />
                 )}
-                <span>Usar esta plantilla</span>
+                <span>{modalTemplate.createdBy === currentUserId && modalTemplate.status !== "PUBLIC" ? "Editar esta plantilla" : "Usar esta plantilla"}</span>
               </button>
             </div>
           </div>

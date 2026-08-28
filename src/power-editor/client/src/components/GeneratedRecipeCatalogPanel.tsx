@@ -1,6 +1,7 @@
-import { LayoutTemplate, Save, Sparkles } from "lucide-react";
+import { LayoutTemplate, Loader2, Save, Send, Sparkles } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { sendPowerEditorTemplateToGallery } from "@/services/template.service";
 import type { PageConfig } from "../lib/editorCandidateModel";
 import { generatedRecipes, type GeneratedRecipe } from "../lib/generatedRecipeCatalog";
 import {
@@ -46,6 +47,8 @@ export function GeneratedRecipeCatalogPanel({
   const [savedTemplates, setSavedTemplates] = useState<TemporaryTemplate[]>(() =>
     typeof window === "undefined" ? [] : readTemporaryTemplates(window.localStorage),
   );
+  const [sendingTemplateId, setSendingTemplateId] = useState<string | null>(null);
+  const [sentTemplateIds, setSentTemplateIds] = useState<string[]>([]);
   const allTemplates = [...recipeTemplates, ...savedTemplates];
 
   const saveCurrentTemplate = () => {
@@ -56,6 +59,39 @@ export function GeneratedRecipeCatalogPanel({
     );
     setSavedTemplates(saveTemporaryTemplate(window.localStorage, template));
     toast.success("Canvas guardado temporalmente en Templates.");
+  };
+
+  const sendToGallery = async (template: TemporaryTemplate) => {
+    if (sendingTemplateId) return;
+    setSendingTemplateId(template.id);
+    try {
+      const result = await sendPowerEditorTemplateToGallery({
+        sourceId: template.id,
+        name: template.name,
+        description: `Template premium editable creado desde ${template.source === "recipe" ? "una receta V6" : "el canvas del Power Editor"}.`,
+        pageConfig: template.pageConfig,
+        industry: "General",
+        category: categoryLabels[template.category] ?? template.category,
+        style: template.archetype.replace(/-/g, " "),
+        theme: "dark",
+        generationSource: template.source === "recipe" ? "power-editor-recipe-v6" : "power-editor-manual",
+      });
+      setSentTemplateIds((current) => current.includes(template.id) ? current : [...current, template.id]);
+      toast.success(result.created ? "Template enviado a tu galería" : "Este template ya está en tu galería", {
+        description: "Aparece en Mis envíos y permanece privado hasta ser aprobado.",
+        action: {
+          label: "Abrir galería",
+          onClick: () => window.location.assign("/template-bank"),
+        },
+      });
+    } catch (error) {
+      console.error("[Cripqer] Error sending template to gallery:", error);
+      toast.error(error instanceof Error && error.message === "User not authenticated"
+        ? "Inicia sesión para enviar templates a la galería"
+        : "No se pudo enviar el template a la galería");
+    } finally {
+      setSendingTemplateId(null);
+    }
   };
 
   const recipesSection = (
@@ -96,12 +132,24 @@ export function GeneratedRecipeCatalogPanel({
             <div>
               <strong>{template.name}</strong>
               <small>
+                <span className="ep-premium-template-badge">Premium</span>
                 {template.source === "recipe" ? "Receta" : "Guardado"} · {categoryLabels[template.category] ?? template.category}
               </small>
             </div>
-            <button type="button" onClick={() => onApply(templateToRecipe(template))}>
-              <LayoutTemplate size={14} /> Editar template
-            </button>
+            <div className="ep-template-card-actions">
+              <button type="button" onClick={() => onApply(templateToRecipe(template))}>
+                <LayoutTemplate size={14} /> Editar
+              </button>
+              <button
+                type="button"
+                className="ep-send-gallery-action"
+                disabled={sendingTemplateId === template.id || sentTemplateIds.includes(template.id)}
+                onClick={() => void sendToGallery(template)}
+              >
+                {sendingTemplateId === template.id ? <Loader2 className="ep-spin" size={14} /> : <Send size={14} />}
+                {sentTemplateIds.includes(template.id) ? "En galería" : "Enviar a galería"}
+              </button>
+            </div>
           </article>
         ))}
       </div>

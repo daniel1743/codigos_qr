@@ -111,6 +111,13 @@
 .ep-generated-recipe-card strong { font-size: .8rem; }
 .ep-generated-recipe-card small { color: var(--ep-muted, #748094); font-size: .67rem; margin-top: .16rem; }
 .ep-generated-recipe-card button { align-items: center; display: inline-flex; gap: .38rem; grid-column: 1 / -1; justify-content: center; min-width: 0; }
+.ep-premium-template-badge { background: rgba(228,181,107,.14); border: 1px solid rgba(228,181,107,.32); border-radius: .3rem; color: #efca8d; display: inline-block; font-size: .58rem; font-weight: 800; margin-right: .35rem; padding: .08rem .28rem; text-transform: uppercase; }
+.ep-template-card-actions { display: grid; gap: .42rem; grid-column: 1 / -1; grid-template-columns: minmax(0,.75fr) minmax(0,1.25fr); }
+.ep-template-card-actions button { grid-column: auto; min-height: 2.25rem; }
+.ep-template-card-actions .ep-send-gallery-action { background: rgba(142,186,152,.12); border-color: rgba(142,186,152,.34); color: #bfe2c7; }
+.ep-template-card-actions .ep-send-gallery-action:disabled { cursor: default; opacity: .62; }
+.ep-spin { animation: ep-spin .8s linear infinite; }
+@keyframes ep-spin { to { transform: rotate(360deg); } }
 .ep-generated-recipe-swatch { border-radius: .55rem; height: 1.8rem; width: 1.8rem; }
 .ep-generated-recipe-swatch.is-gold { background: linear-gradient(135deg, #17130f, #e6bd72); }
 .ep-generated-recipe-swatch.is-platinum { background: linear-gradient(135deg, #18222d, #dbe8ef); }

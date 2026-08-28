@@ -1,0 +1,40 @@
+.ep-power-gallery-preview {
+  align-items: center;
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  overflow: hidden;
+  width: 100%;
+}
+
+.ep-power-gallery-preview.is-thumbnail {
+  align-items: flex-start;
+}
+
+.ep-power-gallery-frame {
+  flex: 0 0 auto;
+  height: 690px;
+  transform-origin: center;
+  width: 390px;
+}
+
+.ep-power-gallery-preview.is-thumbnail .ep-power-gallery-frame {
+  transform-origin: top center;
+}
+
+.ep-power-gallery-preview button {
+  border: 0;
+  font: inherit;
+}
+
+.ep-power-gallery-preview .ep-template {
+  border-radius: 0;
+  box-shadow: none;
+  pointer-events: none;
+}
+
+.ep-power-gallery-preview .ep-composition-canvas-action,
+.ep-power-gallery-preview .ep-selection-hint,
+.ep-power-gallery-preview .ep-selected-delete {
+  display: none;
+}

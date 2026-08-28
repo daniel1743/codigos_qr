@@ -49,9 +49,18 @@ export interface PublicTemplateViewModel {
   isNew: boolean;
   usageCount: number;
   createdAt: string;
-  status: "PUBLIC";
+  status: TemplatePublicationStatus;
+  createdBy?: string;
   config: any;
 }
+
+export type TemplatePublicationStatus =
+  | "GENERATED_PRIVATE"
+  | "REVIEW_PENDING"
+  | "APPROVED"
+  | "PUBLIC"
+  | "ARCHIVED"
+  | "REJECTED";
 
 export interface CreateTemplateData {
   name: string;
@@ -67,6 +76,18 @@ export interface CreateTemplateData {
   style?: string;
   theme?: string;
   generation_source?: string;
+}
+
+export interface SendPowerEditorTemplateData {
+  sourceId: string;
+  name: string;
+  description?: string;
+  pageConfig: any;
+  industry?: string;
+  category?: string;
+  style?: string;
+  theme?: string;
+  generationSource?: string;
 }
 
 /**
@@ -161,6 +182,17 @@ export function mapTemplateToPublicViewModel(template: TemplateConfig): PublicTe
     Number.isFinite(createdDate.getTime()) &&
     Date.now() - createdDate.getTime() < 1000 * 60 * 60 * 24 * 21;
 
+  const status = (
+    ["GENERATED_PRIVATE", "REVIEW_PENDING", "APPROVED", "PUBLIC", "ARCHIVED", "REJECTED"].includes(
+      String(template.publication_status),
+    )
+      ? template.publication_status
+      : template.is_public
+        ? "PUBLIC"
+        : "GENERATED_PRIVATE"
+  ) as TemplatePublicationStatus;
+  const isPremiumConfig = config.profile === "premium" || config.capabilities?.allowAdvancedStyles === true;
+
   return {
     id: template.id,
     name: template.name,
@@ -171,15 +203,84 @@ export function mapTemplateToPublicViewModel(template: TemplateConfig): PublicTe
     themeMode,
     recipe,
     previewUrl: template.preview_image || readConfigString(config, ["previewUrl", "preview_url"]),
-    plan: template.template_type === "premium" ? "premium" : "free",
+    plan: template.template_type === "premium" || isPremiumConfig ? "premium" : "free",
     tags,
     isFeatured: readConfigBoolean(config, ["isFeatured", "featured"], template.usage_count > 25),
     isNew: readConfigBoolean(config, ["isNew", "new"], isNew),
     usageCount: template.usage_count || 0,
     createdAt,
-    status: "PUBLIC",
+    status,
+    createdBy: template.created_by,
     config,
   };
+}
+
+/**
+ * Gallery feed: public catalog plus the current user's private submissions.
+ * Private templates remain visible only to their owner under the database RLS.
+ */
+export async function getGalleryTemplates(): Promise<PublicTemplateViewModel[]> {
+  const [publicTemplates, userTemplates] = await Promise.all([
+    getPublicTemplates(),
+    getUserTemplates(),
+  ]);
+  const merged = new Map(publicTemplates.map((template) => [template.id, template]));
+  userTemplates.forEach((template) => merged.set(template.id, mapTemplateToPublicViewModel(template)));
+  return Array.from(merged.values());
+}
+
+/**
+ * Sends an editor template to the owner's gallery without bypassing review.
+ * A stable source id prevents duplicate submissions from repeated clicks.
+ */
+export async function sendPowerEditorTemplateToGallery(
+  input: SendPowerEditorTemplateData,
+): Promise<{ template: TemplateConfig; created: boolean }> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("User not authenticated");
+
+  const { data: existingRows, error: existingError } = await supabase
+    .from("template_bank")
+    .select("*")
+    .eq("created_by", user.id)
+    .contains("config_json", { gallery_source_id: input.sourceId })
+    .neq("publication_status", "ARCHIVED")
+    .limit(1);
+
+  if (existingError) throw existingError;
+  const existing = existingRows?.[0] as TemplateConfig | undefined;
+  if (existing) return { template: existing, created: false };
+
+  const { data, error } = await supabase
+    .from("template_bank")
+    .insert({
+      name: input.name,
+      description: input.description,
+      config_json: {
+        ...input.pageConfig,
+        gallery_source_id: input.sourceId,
+      },
+      preview_image: null,
+      css_variables: null,
+      template_type: "private",
+      is_public: false,
+      publication_status: PRIVATE_USER_TEMPLATE_STATUS,
+      industry: input.industry || "General",
+      category: input.category || "General",
+      style: input.style || "Power Editor",
+      theme: input.theme || "dark",
+      schema_version: Number(input.pageConfig?.version || 6),
+      generation_source: input.generationSource || "power-editor",
+      validation_status: "valid",
+      created_by: user.id,
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return { template: data as TemplateConfig, created: true };
 }
 
 /**
