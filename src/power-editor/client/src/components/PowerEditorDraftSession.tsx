@@ -40,7 +40,7 @@ export function PowerEditorDraftSession({
           : undefined;
   return (
     <>
-      <p aria-live="polite" role={draft.status === "offline" ? "alert" : "status"}>
+      <p className="sr-only" aria-live="polite" role={draft.status === "offline" ? "alert" : "status"}>
         {statusMessage}
       </p>
       <EditorPremiumDesktop

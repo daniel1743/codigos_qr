@@ -73,19 +73,19 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
           "enabled": true,
           "name": "banner",
           "props": {
-            "height": 184,
+            "height": 164,
             "imageUrl": "/power-editor-samples/banner-01.jpg",
             "imageOpacity": 100,
             "overlayColor": "#17130f",
-            "overlayOpacity": 18,
-            "blend": "medium",
-            "blendStrength": 42,
-            "fusionMode": "custom",
-            "fusionDepth": 44,
+            "overlayOpacity": 30,
+            "blend": "soft",
+            "blendStrength": 52,
+            "fusionMode": "soft",
+            "fusionDepth": 50,
             "fusionStrength": 100,
             "fit": "cover",
             "positionX": 50,
-            "positionY": 42,
+            "positionY": 50,
             "radius": 0,
             "style": {
               "composition": {
@@ -179,11 +179,11 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
             "logo": "Golden Atelier",
             "avatarUrl": "/power-editor-samples/avatar-01.jpg",
             "initials": "GA",
-            "size": 78,
+            "size": 76,
             "shape": "rounded",
             "borderWidth": 2,
             "borderColor": "#e6bd72",
-            "shadow": 24,
+            "shadow": 22,
             "align": "center",
             "verticalPosition": "transition",
             "overlap": 34,
@@ -191,11 +191,11 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
             "logoAlign": "center",
             "style": {
               "composition": {
-                "marginTop": 0,
+                "marginTop": 18,
                 "marginBottom": 0,
-                "padding": 0,
+                "padding": 12,
                 "gap": 12,
-                "width": 100,
+                "width": 92,
                 "maxWidth": 100,
                 "minHeight": 0,
                 "align": "center",
@@ -206,20 +206,20 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "snap": true
               },
               "border": {
-                "style": "none",
-                "width": 0,
+                "style": "solid",
+                "width": 1,
                 "color": "#e6bd72",
-                "opacity": 0,
+                "opacity": 39,
                 "radius": 19
               },
               "shadow": {
-                "preset": "none",
+                "preset": "premium",
                 "x": 0,
                 "y": 10,
                 "blur": 28,
                 "spread": 0,
                 "color": "#000000",
-                "opacity": 0
+                "opacity": 32
               },
               "glow": {
                 "preset": "none",
@@ -237,7 +237,7 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "highlight": 20
               },
               "gradient": {
-                "enabled": false,
+                "enabled": true,
                 "type": "linear",
                 "start": "#17130f",
                 "middle": "#755329",
@@ -253,7 +253,7 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "grayscale": 0,
                 "opacity": 100
               },
-              "effectPreset": "none",
+              "effectPreset": "vignette",
               "blendMode": "soft-light",
               "mask": "none",
               "motion": {
@@ -481,15 +481,9 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "style": {
                   "variant": "premium",
                   "color": "#e6bd72",
-                  "textColor": "#18110b",
-                  "borderColor": "#e6bd72",
-                  "borderWidth": 0,
-                  "radius": 14,
-                  "shadow": 14,
-                  "fontFamily": "Inter",
-                  "fontSize": 12,
-                  "fontWeight": 800,
-                  "letterSpacing": 0
+                  "textColor": "#ffffff",
+                  "radius": 16,
+                  "shadow": 18
                 }
               },
               {
@@ -500,15 +494,9 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "style": {
                   "variant": "gradient",
                   "color": "#e6bd72",
-                  "textColor": "#18110b",
-                  "borderColor": "#e6bd72",
-                  "borderWidth": 0,
-                  "radius": 18,
-                  "shadow": 18,
-                  "fontFamily": "Outfit",
-                  "fontSize": 13,
-                  "fontWeight": 700,
-                  "letterSpacing": 0
+                  "textColor": "#ffffff",
+                  "radius": 16,
+                  "shadow": 18
                 }
               }
             ],
@@ -723,7 +711,7 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "cta": "Conocer",
                 "url": "https://example.com",
                 "icon": "star",
-                "imageUrl": "/power-editor-samples/avatar-02.jpg"
+                "imageUrl": "/power-editor-samples/banner-08.jpg"
               }
             ],
             "style": {
@@ -1536,21 +1524,6 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
             "enabled": true,
             "children": [
               {
-                "id": "ref-heading",
-                "kind": "block",
-                "enabled": true,
-                "blockId": "heading"
-              },
-              {
-                "id": "ref-subtitle",
-                "kind": "block",
-                "enabled": true,
-                "blockId": "subtitle",
-                "style": {
-                  "placement": 1
-                }
-              },
-              {
                 "id": "ref-links",
                 "kind": "block",
                 "enabled": true,
@@ -1561,6 +1534,21 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "kind": "block",
                 "enabled": true,
                 "blockId": "booking-0",
+                "style": {
+                  "placement": 1
+                }
+              },
+              {
+                "id": "ref-heading",
+                "kind": "block",
+                "enabled": true,
+                "blockId": "heading"
+              },
+              {
+                "id": "ref-subtitle",
+                "kind": "block",
+                "enabled": true,
+                "blockId": "subtitle",
                 "style": {
                   "placement": 1
                 }
@@ -1706,19 +1694,19 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
           "enabled": true,
           "name": "banner",
           "props": {
-            "height": 198,
+            "height": 164,
             "imageUrl": "/power-editor-samples/banner-02.jpg",
             "imageOpacity": 100,
             "overlayColor": "#18222d",
-            "overlayOpacity": 24,
+            "overlayOpacity": 30,
             "blend": "soft",
             "blendStrength": 52,
             "fusionMode": "soft",
-            "fusionDepth": 52,
+            "fusionDepth": 50,
             "fusionStrength": 100,
             "fit": "cover",
             "positionX": 50,
-            "positionY": 46,
+            "positionY": 50,
             "radius": 0,
             "style": {
               "composition": {
@@ -1812,23 +1800,23 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
             "logo": "Platinum Editorial",
             "avatarUrl": "/power-editor-samples/avatar-02.jpg",
             "initials": "PE",
-            "size": 85,
+            "size": 76,
             "shape": "circle",
-            "borderWidth": 3,
+            "borderWidth": 2,
             "borderColor": "#dbe8ef",
-            "shadow": 28,
+            "shadow": 22,
             "align": "left",
             "verticalPosition": "transition",
-            "overlap": 40,
+            "overlap": 34,
             "logoWidth": 150,
             "logoAlign": "left",
             "style": {
               "composition": {
-                "marginTop": 0,
+                "marginTop": 18,
                 "marginBottom": 0,
-                "padding": 0,
+                "padding": 12,
                 "gap": 15,
-                "width": 100,
+                "width": 92,
                 "maxWidth": 100,
                 "minHeight": 0,
                 "align": "center",
@@ -1839,20 +1827,20 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "snap": true
               },
               "border": {
-                "style": "none",
-                "width": 0,
+                "style": "solid",
+                "width": 1,
                 "color": "#dbe8ef",
-                "opacity": 0,
+                "opacity": 50,
                 "radius": 26
               },
               "shadow": {
-                "preset": "none",
+                "preset": "soft",
                 "x": 0,
                 "y": 10,
                 "blur": 28,
                 "spread": 0,
                 "color": "#000000",
-                "opacity": 0
+                "opacity": 32
               },
               "glow": {
                 "preset": "none",
@@ -2115,14 +2103,8 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                   "variant": "glass",
                   "color": "#dbe8ef",
                   "textColor": "#ffffff",
-                  "borderColor": "#dbe8ef",
-                  "borderWidth": 0,
-                  "radius": 18,
-                  "shadow": 18,
-                  "fontFamily": "Outfit",
-                  "fontSize": 13,
-                  "fontWeight": 700,
-                  "letterSpacing": 0.3
+                  "radius": 16,
+                  "shadow": 18
                 }
               },
               {
@@ -2134,14 +2116,8 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                   "variant": "outline",
                   "color": "#dbe8ef",
                   "textColor": "#ffffff",
-                  "borderColor": "#dbe8ef",
-                  "borderWidth": 1,
-                  "radius": 999,
-                  "shadow": 22,
-                  "fontFamily": "Sora",
-                  "fontSize": 12,
-                  "fontWeight": 800,
-                  "letterSpacing": 0
+                  "radius": 16,
+                  "shadow": 18
                 }
               }
             ],
@@ -2235,7 +2211,7 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
           "name": "image",
           "props": {
             "label": "Detalle de marca",
-            "url": "/power-editor-samples/banner-10.jpg",
+            "url": "/power-editor-samples/banner-07.jpg",
             "alt": "Detalle visual de plantilla",
             "height": 188,
             "fit": "cover",
@@ -2338,19 +2314,15 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
             "items": [
               {
                 "id": "gallery-1-0",
-                "url": "/power-editor-samples/banner-10.jpg"
+                "url": "/power-editor-samples/banner-02.jpg"
               },
               {
                 "id": "gallery-1-1",
-                "url": "/power-editor-samples/banner-11.jpg"
+                "url": "/power-editor-samples/banner-03.jpg"
               },
               {
                 "id": "gallery-1-2",
-                "url": "/power-editor-samples/banner-12.jpg"
-              },
-              {
-                "id": "gallery-1-3",
-                "url": "/power-editor-samples/avatar-01.jpg"
+                "url": "/power-editor-samples/banner-04.jpg"
               }
             ],
             "style": {
@@ -2719,9 +2691,103 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
           }
         },
         {
+          "id": "ring-1",
+          "type": "ring",
+          "order": 10,
+          "enabled": true,
+          "name": "ring",
+          "props": {
+            "color": "#dbe8ef",
+            "thickness": 2,
+            "size": 132,
+            "partial": true,
+            "position": "bottom-left",
+            "style": {
+              "composition": {
+                "marginTop": 18,
+                "marginBottom": 0,
+                "padding": 12,
+                "gap": 15,
+                "width": 92,
+                "maxWidth": 100,
+                "minHeight": 0,
+                "align": "center",
+                "verticalAlign": "top",
+                "columns": 1,
+                "translateX": 0,
+                "translateY": 0,
+                "snap": true
+              },
+              "border": {
+                "style": "solid",
+                "width": 1,
+                "color": "#dbe8ef",
+                "opacity": 61,
+                "radius": 26
+              },
+              "shadow": {
+                "preset": "premium",
+                "x": 0,
+                "y": 10,
+                "blur": 28,
+                "spread": 0,
+                "color": "#000000",
+                "opacity": 32
+              },
+              "glow": {
+                "preset": "none",
+                "color": "#dbe8ef",
+                "intensity": 0,
+                "blur": 18,
+                "spread": 1
+              },
+              "glass": {
+                "enabled": false,
+                "transparency": 18,
+                "blur": 14,
+                "tint": "#ffffff",
+                "borderOpacity": 18,
+                "highlight": 20
+              },
+              "gradient": {
+                "enabled": false,
+                "type": "linear",
+                "start": "#18222d",
+                "middle": "#63788b",
+                "end": "#18222d",
+                "angle": 135,
+                "position": 50
+              },
+              "filters": {
+                "brightness": 100,
+                "contrast": 100,
+                "saturation": 100,
+                "blur": 0,
+                "grayscale": 0,
+                "opacity": 100
+              },
+              "effectPreset": "vignette",
+              "blendMode": "soft-light",
+              "mask": "none",
+              "motion": {
+                "preset": "none",
+                "duration": 9000,
+                "delay": 0,
+                "intensity": 1,
+                "loop": false
+              },
+              "responsive": {
+                "mobile": {},
+                "tablet": {},
+                "desktop": {}
+              }
+            }
+          }
+        },
+        {
           "id": "socials",
           "type": "socials",
-          "order": 10,
+          "order": 11,
           "enabled": true,
           "name": "socials",
           "props": {
@@ -2835,7 +2901,7 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
         {
           "id": "footer",
           "type": "footer",
-          "order": 11,
+          "order": 12,
           "enabled": true,
           "name": "footer",
           "props": {
@@ -2978,10 +3044,7 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "id": "ref-links",
                 "kind": "block",
                 "enabled": true,
-                "blockId": "links",
-                "style": {
-                  "placement": 4
-                }
+                "blockId": "links"
               }
             ],
             "style": {
@@ -3021,12 +3084,21 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 }
               },
               {
+                "id": "ref-ring-1",
+                "kind": "block",
+                "enabled": true,
+                "blockId": "ring-1",
+                "style": {
+                  "placement": 3
+                }
+              },
+              {
                 "id": "ref-socials",
                 "kind": "block",
                 "enabled": true,
                 "blockId": "socials",
                 "style": {
-                  "placement": 3
+                  "placement": 4
                 }
               },
               {
@@ -3035,7 +3107,7 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "enabled": true,
                 "blockId": "footer",
                 "style": {
-                  "placement": 4
+                  "placement": 5
                 }
               }
             ],
@@ -3110,15 +3182,15 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
           "enabled": true,
           "name": "banner",
           "props": {
-            "height": 212,
+            "height": 164,
             "imageUrl": "/power-editor-samples/banner-03.jpg",
             "imageOpacity": 100,
             "overlayColor": "#101114",
             "overlayOpacity": 30,
             "blend": "soft",
-            "blendStrength": 62,
+            "blendStrength": 52,
             "fusionMode": "soft",
-            "fusionDepth": 60,
+            "fusionDepth": 50,
             "fusionStrength": 100,
             "fit": "cover",
             "positionX": 50,
@@ -3216,23 +3288,23 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
             "logo": "Obsidian Creator",
             "avatarUrl": "/power-editor-samples/avatar-03.jpg",
             "initials": "OC",
-            "size": 92,
+            "size": 76,
             "shape": "circle",
             "borderWidth": 2,
             "borderColor": "#e7b8f0",
-            "shadow": 32,
+            "shadow": 22,
             "align": "left",
             "verticalPosition": "transition",
-            "overlap": 46,
+            "overlap": 34,
             "logoWidth": 150,
             "logoAlign": "left",
             "style": {
               "composition": {
-                "marginTop": 0,
+                "marginTop": 10,
                 "marginBottom": 0,
-                "padding": 0,
+                "padding": 12,
                 "gap": 9,
-                "width": 100,
+                "width": 92,
                 "maxWidth": 100,
                 "minHeight": 0,
                 "align": "center",
@@ -3243,20 +3315,20 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "snap": true
               },
               "border": {
-                "style": "none",
-                "width": 0,
+                "style": "solid",
+                "width": 1,
                 "color": "#e7b8f0",
-                "opacity": 0,
+                "opacity": 61,
                 "radius": 12
               },
               "shadow": {
-                "preset": "none",
+                "preset": "premium",
                 "x": 0,
                 "y": 10,
                 "blur": 28,
                 "spread": 0,
                 "color": "#000000",
-                "opacity": 0
+                "opacity": 32
               },
               "glow": {
                 "preset": "none",
@@ -3516,17 +3588,11 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "url": "https://example.com",
                 "enabled": true,
                 "style": {
-                  "variant": "neon",
+                  "variant": "premium",
                   "color": "#e7b8f0",
                   "textColor": "#ffffff",
-                  "borderColor": "#e7b8f0",
-                  "borderWidth": 0,
-                  "radius": 999,
-                  "shadow": 22,
-                  "fontFamily": "Sora",
-                  "fontSize": 13,
-                  "fontWeight": 800,
-                  "letterSpacing": 0
+                  "radius": 16,
+                  "shadow": 18
                 }
               },
               {
@@ -3535,17 +3601,11 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "url": "https://example.com",
                 "enabled": true,
                 "style": {
-                  "variant": "soft",
+                  "variant": "outline",
                   "color": "#e7b8f0",
                   "textColor": "#ffffff",
-                  "borderColor": "#e7b8f0",
-                  "borderWidth": 0,
-                  "radius": 10,
-                  "shadow": 26,
-                  "fontFamily": "DM Serif Display",
-                  "fontSize": 13,
-                  "fontWeight": 700,
-                  "letterSpacing": 0.3
+                  "radius": 16,
+                  "shadow": 18
                 }
               }
             ],
@@ -3750,9 +3810,7 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "description": "Un recorrido breve por lo esencial.",
                 "cta": "Descubrir",
                 "ctaUrl": "https://example.com",
-                "imageUrl": "/power-editor-samples/avatar-03.jpg",
-                "imageEnabled": true,
-                "imageSide": "right"
+                "imageUrl": "/power-editor-samples/banner-09.jpg"
               },
               {
                 "id": "card-2-b",
@@ -3760,9 +3818,7 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "description": "Reserva una conversación.",
                 "cta": "Reservar",
                 "ctaUrl": "https://example.com",
-                "imageUrl": "/power-editor-samples/avatar-10.jpg",
-                "imageEnabled": true,
-                "imageSide": "left"
+                "imageUrl": "/power-editor-samples/banner-10.jpg"
               }
             ],
             "style": {
@@ -4260,23 +4316,6 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
         "enabled": true,
         "children": [
           {
-            "id": "split-cover",
-            "kind": "overlay",
-            "enabled": true,
-            "children": [
-              {
-                "id": "ref-banner",
-                "kind": "block",
-                "enabled": true,
-                "blockId": "banner"
-              }
-            ],
-            "style": {
-              "minHeight": 156,
-              "overflow": "hidden"
-            }
-          },
-          {
             "id": "split-layout",
             "kind": "row",
             "enabled": true,
@@ -4287,10 +4326,10 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "enabled": true,
                 "children": [
                   {
-                    "id": "ref-video-2",
+                    "id": "ref-banner",
                     "kind": "block",
                     "enabled": true,
-                    "blockId": "video-2"
+                    "blockId": "banner"
                   }
                 ],
                 "style": {
@@ -4302,6 +4341,12 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "kind": "column",
                 "enabled": true,
                 "children": [
+                  {
+                    "id": "ref-links",
+                    "kind": "block",
+                    "enabled": true,
+                    "blockId": "links"
+                  },
                   {
                     "id": "ref-profile",
                     "kind": "block",
@@ -4325,12 +4370,6 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                     "style": {
                       "placement": 2
                     }
-                  },
-                  {
-                    "id": "ref-links",
-                    "kind": "block",
-                    "enabled": true,
-                    "blockId": "links"
                   }
                 ],
                 "style": {
@@ -4482,19 +4521,19 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
           "enabled": true,
           "name": "banner",
           "props": {
-            "height": 184,
+            "height": 164,
             "imageUrl": "/power-editor-samples/banner-04.jpg",
             "imageOpacity": 100,
             "overlayColor": "#102d29",
-            "overlayOpacity": 36,
+            "overlayOpacity": 30,
             "blend": "soft",
-            "blendStrength": 72,
-            "fusionMode": "custom",
-            "fusionDepth": 44,
+            "blendStrength": 52,
+            "fusionMode": "soft",
+            "fusionDepth": 50,
             "fusionStrength": 100,
             "fit": "cover",
             "positionX": 50,
-            "positionY": 54,
+            "positionY": 50,
             "radius": 0,
             "style": {
               "composition": {
@@ -4588,11 +4627,11 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
             "logo": "Emerald Concierge",
             "avatarUrl": "/power-editor-samples/avatar-04.jpg",
             "initials": "EC",
-            "size": 78,
+            "size": 76,
             "shape": "rounded",
-            "borderWidth": 3,
+            "borderWidth": 2,
             "borderColor": "#e2c27d",
-            "shadow": 24,
+            "shadow": 22,
             "align": "center",
             "verticalPosition": "transition",
             "overlap": 34,
@@ -4600,11 +4639,11 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
             "logoAlign": "center",
             "style": {
               "composition": {
-                "marginTop": 0,
+                "marginTop": 18,
                 "marginBottom": 0,
-                "padding": 0,
+                "padding": 12,
                 "gap": 12,
-                "width": 100,
+                "width": 92,
                 "maxWidth": 100,
                 "minHeight": 0,
                 "align": "center",
@@ -4615,20 +4654,20 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "snap": true
               },
               "border": {
-                "style": "none",
-                "width": 0,
+                "style": "solid",
+                "width": 1,
                 "color": "#e2c27d",
-                "opacity": 0,
+                "opacity": 28,
                 "radius": 19
               },
               "shadow": {
-                "preset": "none",
+                "preset": "soft",
                 "x": 0,
                 "y": 10,
                 "blur": 28,
                 "spread": 0,
                 "color": "#000000",
-                "opacity": 0
+                "opacity": 32
               },
               "glow": {
                 "preset": "gold",
@@ -4646,7 +4685,7 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "highlight": 20
               },
               "gradient": {
-                "enabled": false,
+                "enabled": true,
                 "type": "radial",
                 "start": "#102d29",
                 "middle": "#39745d",
@@ -4888,18 +4927,11 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "url": "https://example.com",
                 "enabled": true,
                 "style": {
-                  "variant": "image",
+                  "variant": "glass",
                   "color": "#e2c27d",
                   "textColor": "#ffffff",
-                  "borderColor": "#e2c27d",
-                  "borderWidth": 0,
-                  "radius": 10,
-                  "shadow": 26,
-                  "imageUrl": "/power-editor-samples/banner-04.jpg",
-                  "fontFamily": "DM Serif Display",
-                  "fontSize": 12,
-                  "fontWeight": 700,
-                  "letterSpacing": 0
+                  "radius": 16,
+                  "shadow": 18
                 }
               },
               {
@@ -4908,17 +4940,11 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "url": "https://example.com",
                 "enabled": true,
                 "style": {
-                  "variant": "minimal",
+                  "variant": "gradient",
                   "color": "#e2c27d",
                   "textColor": "#ffffff",
-                  "borderColor": "#e2c27d",
-                  "borderWidth": 1,
-                  "radius": 14,
-                  "shadow": 0,
-                  "fontFamily": "Inter",
-                  "fontSize": 13,
-                  "fontWeight": 800,
-                  "letterSpacing": 0
+                  "radius": 16,
+                  "shadow": 18
                 }
               }
             ],
@@ -5020,7 +5046,7 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "cta": "Explorar",
                 "url": "https://example.com",
                 "icon": "sparkles",
-                "imageUrl": "/power-editor-samples/avatar-06.jpg"
+                "imageUrl": "/power-editor-samples/banner-09.jpg"
               },
               {
                 "id": "service-3-b",
@@ -5029,7 +5055,7 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "cta": "Conocer",
                 "url": "https://example.com",
                 "icon": "star",
-                "imageUrl": "/power-editor-samples/banner-01.jpg"
+                "imageUrl": "/power-editor-samples/banner-10.jpg"
               }
             ],
             "style": {
@@ -5924,19 +5950,19 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
           "enabled": true,
           "name": "banner",
           "props": {
-            "height": 198,
+            "height": 164,
             "imageUrl": "/power-editor-samples/banner-05.jpg",
             "imageOpacity": 100,
             "overlayColor": "#101a40",
-            "overlayOpacity": 18,
-            "blend": "medium",
-            "blendStrength": 42,
+            "overlayOpacity": 30,
+            "blend": "soft",
+            "blendStrength": 52,
             "fusionMode": "soft",
-            "fusionDepth": 52,
+            "fusionDepth": 50,
             "fusionStrength": 100,
             "fit": "cover",
             "positionX": 50,
-            "positionY": 58,
+            "positionY": 50,
             "radius": 0,
             "style": {
               "composition": {
@@ -6030,23 +6056,23 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
             "logo": "Cobalt Product Studio",
             "avatarUrl": "/power-editor-samples/avatar-05.jpg",
             "initials": "CP",
-            "size": 85,
+            "size": 76,
             "shape": "circle",
             "borderWidth": 2,
             "borderColor": "#9cc7ff",
-            "shadow": 28,
+            "shadow": 22,
             "align": "right",
             "verticalPosition": "transition",
-            "overlap": 40,
+            "overlap": 34,
             "logoWidth": 150,
             "logoAlign": "right",
             "style": {
               "composition": {
-                "marginTop": 0,
+                "marginTop": 18,
                 "marginBottom": 0,
-                "padding": 0,
+                "padding": 12,
                 "gap": 15,
-                "width": 100,
+                "width": 92,
                 "maxWidth": 100,
                 "minHeight": 0,
                 "align": "center",
@@ -6057,20 +6083,20 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "snap": true
               },
               "border": {
-                "style": "none",
-                "width": 0,
+                "style": "solid",
+                "width": 1,
                 "color": "#9cc7ff",
-                "opacity": 0,
+                "opacity": 39,
                 "radius": 26
               },
               "shadow": {
-                "preset": "none",
+                "preset": "premium",
                 "x": 0,
                 "y": 10,
                 "blur": 28,
                 "spread": 0,
                 "color": "#000000",
-                "opacity": 0
+                "opacity": 32
               },
               "glow": {
                 "preset": "none",
@@ -6080,7 +6106,7 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "spread": 1
               },
               "glass": {
-                "enabled": false,
+                "enabled": true,
                 "transparency": 18,
                 "blur": 14,
                 "tint": "#eef5ff",
@@ -6104,7 +6130,7 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "grayscale": 0,
                 "opacity": 100
               },
-              "effectPreset": "none",
+              "effectPreset": "gold-glow",
               "blendMode": "soft-light",
               "mask": "none",
               "motion": {
@@ -6332,15 +6358,9 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "style": {
                   "variant": "premium",
                   "color": "#9cc7ff",
-                  "textColor": "#18110b",
-                  "borderColor": "#9cc7ff",
-                  "borderWidth": 0,
-                  "radius": 14,
-                  "shadow": 14,
-                  "fontFamily": "Inter",
-                  "fontSize": 13,
-                  "fontWeight": 800,
-                  "letterSpacing": 0.3
+                  "textColor": "#ffffff",
+                  "radius": 16,
+                  "shadow": 18
                 }
               },
               {
@@ -6349,17 +6369,11 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "url": "https://example.com",
                 "enabled": true,
                 "style": {
-                  "variant": "gradient",
+                  "variant": "outline",
                   "color": "#9cc7ff",
-                  "textColor": "#18110b",
-                  "borderColor": "#9cc7ff",
-                  "borderWidth": 0,
-                  "radius": 18,
-                  "shadow": 18,
-                  "fontFamily": "Outfit",
-                  "fontSize": 12,
-                  "fontWeight": 700,
-                  "letterSpacing": 0
+                  "textColor": "#ffffff",
+                  "radius": 16,
+                  "shadow": 18
                 }
               }
             ],
@@ -6461,7 +6475,7 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "price": "$ —",
                 "cta": "Ver detalles",
                 "url": "https://example.com",
-                "imageUrl": "/power-editor-samples/avatar-10.jpg"
+                "imageUrl": "/power-editor-samples/banner-10.jpg"
               },
               {
                 "id": "product-4-b",
@@ -6470,7 +6484,7 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "price": "$ —",
                 "cta": "Explorar",
                 "url": "https://example.com",
-                "imageUrl": "/power-editor-samples/banner-05.jpg"
+                "imageUrl": "/power-editor-samples/banner-11.jpg"
               }
             ],
             "style": {
@@ -6569,19 +6583,15 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
             "items": [
               {
                 "id": "gallery-4-0",
-                "url": "/power-editor-samples/avatar-07.jpg"
+                "url": "/power-editor-samples/banner-02.jpg"
               },
               {
                 "id": "gallery-4-1",
-                "url": "/power-editor-samples/avatar-08.jpg"
+                "url": "/power-editor-samples/banner-03.jpg"
               },
               {
                 "id": "gallery-4-2",
-                "url": "/power-editor-samples/avatar-09.jpg"
-              },
-              {
-                "id": "gallery-4-3",
-                "url": "/power-editor-samples/avatar-10.jpg"
+                "url": "/power-editor-samples/banner-04.jpg"
               }
             ],
             "style": {
@@ -6681,9 +6691,7 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "description": "Un recorrido breve por lo esencial.",
                 "cta": "Descubrir",
                 "ctaUrl": "https://example.com",
-                "imageUrl": "/power-editor-samples/avatar-12.jpg",
-                "imageEnabled": true,
-                "imageSide": "right"
+                "imageUrl": "/power-editor-samples/banner-12.jpg"
               },
               {
                 "id": "card-4-b",
@@ -6691,9 +6699,7 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "description": "Reserva una conversación.",
                 "cta": "Reservar",
                 "ctaUrl": "https://example.com",
-                "imageUrl": "/power-editor-samples/banner-07.jpg",
-                "imageEnabled": true,
-                "imageSide": "left"
+                "imageUrl": "/power-editor-samples/banner-01.jpg"
               }
             ],
             "style": {
@@ -7187,7 +7193,7 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
         "children": [
           {
             "id": "grid-cover",
-            "kind": "overlay",
+            "kind": "section",
             "enabled": true,
             "children": [
               {
@@ -7198,7 +7204,8 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
               }
             ],
             "style": {
-              "minHeight": 160,
+              "padding": 0,
+              "minHeight": 190,
               "overflow": "hidden"
             }
           },
@@ -7207,6 +7214,12 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
             "kind": "stack",
             "enabled": true,
             "children": [
+              {
+                "id": "ref-links",
+                "kind": "block",
+                "enabled": true,
+                "blockId": "links"
+              },
               {
                 "id": "ref-profile",
                 "kind": "block",
@@ -7230,12 +7243,6 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "style": {
                   "placement": 2
                 }
-              },
-              {
-                "id": "ref-links",
-                "kind": "block",
-                "enabled": true,
-                "blockId": "links"
               }
             ],
             "style": {
@@ -7273,25 +7280,13 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 }
               },
               {
-                "id": "ref-gallery-4",
-                "kind": "block",
-                "enabled": true,
-                "blockId": "gallery-4",
-                "style": {
-                  "placement": {
-                    "columnStart": 3,
-                    "columnSpan": 1
-                  }
-                }
-              },
-              {
                 "id": "ref-socials",
                 "kind": "block",
                 "enabled": true,
                 "blockId": "socials",
                 "style": {
                   "placement": {
-                    "columnStart": 1,
+                    "columnStart": 3,
                     "columnSpan": 1
                   }
                 }
@@ -7426,19 +7421,19 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
           "enabled": true,
           "name": "banner",
           "props": {
-            "height": 212,
+            "height": 164,
             "imageUrl": "/power-editor-samples/banner-06.jpg",
             "imageOpacity": 100,
             "overlayColor": "#3d1d30",
-            "overlayOpacity": 24,
+            "overlayOpacity": 30,
             "blend": "soft",
             "blendStrength": 52,
             "fusionMode": "soft",
-            "fusionDepth": 60,
+            "fusionDepth": 50,
             "fusionStrength": 100,
             "fit": "cover",
             "positionX": 50,
-            "positionY": 42,
+            "positionY": 50,
             "radius": 0,
             "style": {
               "composition": {
@@ -7532,23 +7527,23 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
             "logo": "Rose Ceremony",
             "avatarUrl": "/power-editor-samples/avatar-06.jpg",
             "initials": "RC",
-            "size": 92,
+            "size": 76,
             "shape": "circle",
-            "borderWidth": 3,
+            "borderWidth": 2,
             "borderColor": "#ffd6dd",
-            "shadow": 32,
+            "shadow": 22,
             "align": "center",
             "verticalPosition": "transition",
-            "overlap": 46,
+            "overlap": 34,
             "logoWidth": 150,
             "logoAlign": "center",
             "style": {
               "composition": {
-                "marginTop": 0,
+                "marginTop": 10,
                 "marginBottom": 0,
-                "padding": 0,
+                "padding": 12,
                 "gap": 9,
-                "width": 100,
+                "width": 92,
                 "maxWidth": 100,
                 "minHeight": 0,
                 "align": "center",
@@ -7559,20 +7554,20 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "snap": true
               },
               "border": {
-                "style": "none",
-                "width": 0,
+                "style": "solid",
+                "width": 1,
                 "color": "#ffd6dd",
-                "opacity": 0,
+                "opacity": 50,
                 "radius": 12
               },
               "shadow": {
-                "preset": "none",
+                "preset": "soft",
                 "x": 0,
                 "y": 10,
                 "blur": 28,
                 "spread": 0,
                 "color": "#000000",
-                "opacity": 0
+                "opacity": 32
               },
               "glow": {
                 "preset": "none",
@@ -7606,7 +7601,7 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "grayscale": 0,
                 "opacity": 100
               },
-              "effectPreset": "none",
+              "effectPreset": "vignette",
               "blendMode": "normal",
               "mask": "none",
               "motion": {
@@ -7835,14 +7830,8 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                   "variant": "glass",
                   "color": "#ffd6dd",
                   "textColor": "#ffffff",
-                  "borderColor": "#ffd6dd",
-                  "borderWidth": 0,
-                  "radius": 18,
-                  "shadow": 18,
-                  "fontFamily": "Outfit",
-                  "fontSize": 13,
-                  "fontWeight": 700,
-                  "letterSpacing": 0
+                  "radius": 16,
+                  "shadow": 18
                 }
               },
               {
@@ -7854,14 +7843,8 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                   "variant": "outline",
                   "color": "#ffd6dd",
                   "textColor": "#ffffff",
-                  "borderColor": "#ffd6dd",
-                  "borderWidth": 1,
-                  "radius": 999,
-                  "shadow": 22,
-                  "fontFamily": "Sora",
-                  "fontSize": 13,
-                  "fontWeight": 800,
-                  "letterSpacing": 0.3
+                  "radius": 16,
+                  "shadow": 18
                 }
               }
             ],
@@ -8048,7 +8031,7 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
           "name": "image",
           "props": {
             "label": "Detalle de marca",
-            "url": "/power-editor-samples/banner-03.jpg",
+            "url": "/power-editor-samples/banner-12.jpg",
             "alt": "Detalle visual de plantilla",
             "height": 188,
             "fit": "cover",
@@ -8138,15 +8121,30 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
           }
         },
         {
-          "id": "separator-5",
-          "type": "separator",
+          "id": "gallery-5",
+          "type": "gallery",
           "order": 7,
           "enabled": true,
-          "name": "separator",
+          "name": "gallery",
           "props": {
-            "dividerStyle": "double",
-            "color": "#ffd6dd",
-            "width": 1,
+            "layout": 3,
+            "gap": 8,
+            "radius": 14,
+            "aspectRatio": "1:1",
+            "items": [
+              {
+                "id": "gallery-5-0",
+                "url": "/power-editor-samples/banner-03.jpg"
+              },
+              {
+                "id": "gallery-5-1",
+                "url": "/power-editor-samples/banner-04.jpg"
+              },
+              {
+                "id": "gallery-5-2",
+                "url": "/power-editor-samples/banner-05.jpg"
+              }
+            ],
             "style": {
               "composition": {
                 "marginTop": 10,
@@ -8230,20 +8228,15 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
           }
         },
         {
-          "id": "ornament-5",
-          "type": "ornament",
+          "id": "separator-5",
+          "type": "separator",
           "order": 8,
           "enabled": true,
-          "name": "ornament",
+          "name": "separator",
           "props": {
-            "preset": "gold-corner",
-            "position": "top-left",
-            "insetX": 16,
-            "insetY": 16,
-            "size": 56,
-            "thickness": 2,
+            "dividerStyle": "double",
             "color": "#ffd6dd",
-            "opacity": 78,
+            "width": 1,
             "style": {
               "composition": {
                 "marginTop": 18,
@@ -8327,21 +8320,20 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
           }
         },
         {
-          "id": "particles-5",
-          "type": "particles",
+          "id": "ornament-5",
+          "type": "ornament",
           "order": 9,
           "enabled": true,
-          "name": "particles",
+          "name": "ornament",
           "props": {
-            "preset": "sparkle",
-            "quantity": 18,
-            "size": 3,
-            "opacity": 42,
-            "speed": 9,
-            "direction": "down",
+            "preset": "gold-corner",
+            "position": "top-left",
+            "insetX": 16,
+            "insetY": 16,
+            "size": 56,
+            "thickness": 2,
             "color": "#ffd6dd",
-            "randomness": 70,
-            "blur": 0,
+            "opacity": 78,
             "style": {
               "composition": {
                 "marginTop": 18,
@@ -8425,9 +8417,107 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
           }
         },
         {
+          "id": "particles-5",
+          "type": "particles",
+          "order": 10,
+          "enabled": true,
+          "name": "particles",
+          "props": {
+            "preset": "sparkle",
+            "quantity": 18,
+            "size": 3,
+            "opacity": 42,
+            "speed": 9,
+            "direction": "down",
+            "color": "#ffd6dd",
+            "randomness": 70,
+            "blur": 0,
+            "style": {
+              "composition": {
+                "marginTop": 10,
+                "marginBottom": 0,
+                "padding": 12,
+                "gap": 9,
+                "width": 92,
+                "maxWidth": 100,
+                "minHeight": 0,
+                "align": "center",
+                "verticalAlign": "top",
+                "columns": 1,
+                "translateX": 0,
+                "translateY": 0,
+                "snap": true
+              },
+              "border": {
+                "style": "solid",
+                "width": 1,
+                "color": "#ffd6dd",
+                "opacity": 61,
+                "radius": 12
+              },
+              "shadow": {
+                "preset": "premium",
+                "x": 0,
+                "y": 10,
+                "blur": 28,
+                "spread": 0,
+                "color": "#000000",
+                "opacity": 32
+              },
+              "glow": {
+                "preset": "none",
+                "color": "#ffd6dd",
+                "intensity": 0,
+                "blur": 18,
+                "spread": 1
+              },
+              "glass": {
+                "enabled": true,
+                "transparency": 18,
+                "blur": 14,
+                "tint": "#fff5f7",
+                "borderOpacity": 18,
+                "highlight": 20
+              },
+              "gradient": {
+                "enabled": false,
+                "type": "linear",
+                "start": "#3d1d30",
+                "middle": "#9f617b",
+                "end": "#3d1d30",
+                "angle": 135,
+                "position": 50
+              },
+              "filters": {
+                "brightness": 100,
+                "contrast": 100,
+                "saturation": 100,
+                "blur": 0,
+                "grayscale": 0,
+                "opacity": 100
+              },
+              "effectPreset": "gold-glow",
+              "blendMode": "soft-light",
+              "mask": "none",
+              "motion": {
+                "preset": "none",
+                "duration": 9000,
+                "delay": 0,
+                "intensity": 1,
+                "loop": false
+              },
+              "responsive": {
+                "mobile": {},
+                "tablet": {},
+                "desktop": {}
+              }
+            }
+          }
+        },
+        {
           "id": "socials",
           "type": "socials",
-          "order": 10,
+          "order": 11,
           "enabled": true,
           "name": "socials",
           "props": {
@@ -8541,7 +8631,7 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
         {
           "id": "footer",
           "type": "footer",
-          "order": 11,
+          "order": 12,
           "enabled": true,
           "name": "footer",
           "props": {
@@ -8680,21 +8770,6 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
             "enabled": true,
             "children": [
               {
-                "id": "ref-heading",
-                "kind": "block",
-                "enabled": true,
-                "blockId": "heading"
-              },
-              {
-                "id": "ref-subtitle",
-                "kind": "block",
-                "enabled": true,
-                "blockId": "subtitle",
-                "style": {
-                  "placement": 1
-                }
-              },
-              {
                 "id": "ref-links",
                 "kind": "block",
                 "enabled": true,
@@ -8710,10 +8785,34 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 }
               },
               {
+                "id": "ref-heading",
+                "kind": "block",
+                "enabled": true,
+                "blockId": "heading"
+              },
+              {
+                "id": "ref-subtitle",
+                "kind": "block",
+                "enabled": true,
+                "blockId": "subtitle",
+                "style": {
+                  "placement": 1
+                }
+              },
+              {
                 "id": "ref-image-5",
                 "kind": "block",
                 "enabled": true,
                 "blockId": "image-5"
+              },
+              {
+                "id": "ref-gallery-5",
+                "kind": "block",
+                "enabled": true,
+                "blockId": "gallery-5",
+                "style": {
+                  "placement": 1
+                }
               },
               {
                 "id": "ref-separator-5",
@@ -8721,7 +8820,7 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "enabled": true,
                 "blockId": "separator-5",
                 "style": {
-                  "placement": 1
+                  "placement": 2
                 }
               },
               {
@@ -8730,7 +8829,7 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "enabled": true,
                 "blockId": "ornament-5",
                 "style": {
-                  "placement": 2
+                  "placement": 3
                 }
               },
               {
@@ -8739,7 +8838,7 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "enabled": true,
                 "blockId": "particles-5",
                 "style": {
-                  "placement": 3
+                  "placement": 4
                 }
               },
               {
@@ -8748,7 +8847,7 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "enabled": true,
                 "blockId": "socials",
                 "style": {
-                  "placement": 4
+                  "placement": 5
                 }
               },
               {
@@ -8757,7 +8856,7 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "enabled": true,
                 "blockId": "footer",
                 "style": {
-                  "placement": 5
+                  "placement": 6
                 }
               }
             ],
@@ -8832,19 +8931,19 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
           "enabled": true,
           "name": "banner",
           "props": {
-            "height": 184,
+            "height": 164,
             "imageUrl": "/power-editor-samples/banner-07.jpg",
             "imageOpacity": 100,
             "overlayColor": "#392117",
             "overlayOpacity": 30,
             "blend": "soft",
-            "blendStrength": 62,
-            "fusionMode": "custom",
-            "fusionDepth": 44,
+            "blendStrength": 52,
+            "fusionMode": "soft",
+            "fusionDepth": 50,
             "fusionStrength": 100,
             "fit": "cover",
             "positionX": 50,
-            "positionY": 46,
+            "positionY": 50,
             "radius": 0,
             "style": {
               "composition": {
@@ -8938,11 +9037,11 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
             "logo": "Terracotta Maker",
             "avatarUrl": "/power-editor-samples/avatar-07.jpg",
             "initials": "TM",
-            "size": 78,
+            "size": 76,
             "shape": "rounded",
             "borderWidth": 2,
             "borderColor": "#f7d6b4",
-            "shadow": 24,
+            "shadow": 22,
             "align": "left",
             "verticalPosition": "transition",
             "overlap": 34,
@@ -8950,11 +9049,11 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
             "logoAlign": "left",
             "style": {
               "composition": {
-                "marginTop": 0,
+                "marginTop": 18,
                 "marginBottom": 0,
-                "padding": 0,
+                "padding": 12,
                 "gap": 12,
-                "width": 100,
+                "width": 92,
                 "maxWidth": 100,
                 "minHeight": 0,
                 "align": "center",
@@ -8965,20 +9064,20 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "snap": true
               },
               "border": {
-                "style": "none",
-                "width": 0,
+                "style": "solid",
+                "width": 1,
                 "color": "#f7d6b4",
-                "opacity": 0,
+                "opacity": 61,
                 "radius": 19
               },
               "shadow": {
-                "preset": "none",
+                "preset": "premium",
                 "x": 0,
                 "y": 10,
                 "blur": 28,
                 "spread": 0,
                 "color": "#000000",
-                "opacity": 0
+                "opacity": 32
               },
               "glow": {
                 "preset": "none",
@@ -8996,7 +9095,7 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "highlight": 20
               },
               "gradient": {
-                "enabled": false,
+                "enabled": true,
                 "type": "linear",
                 "start": "#392117",
                 "middle": "#b56548",
@@ -9238,17 +9337,11 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "url": "https://example.com",
                 "enabled": true,
                 "style": {
-                  "variant": "neon",
+                  "variant": "premium",
                   "color": "#f7d6b4",
                   "textColor": "#ffffff",
-                  "borderColor": "#f7d6b4",
-                  "borderWidth": 0,
-                  "radius": 999,
-                  "shadow": 22,
-                  "fontFamily": "Sora",
-                  "fontSize": 12,
-                  "fontWeight": 800,
-                  "letterSpacing": 0
+                  "radius": 16,
+                  "shadow": 18
                 }
               },
               {
@@ -9257,17 +9350,11 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "url": "https://example.com",
                 "enabled": true,
                 "style": {
-                  "variant": "soft",
+                  "variant": "gradient",
                   "color": "#f7d6b4",
                   "textColor": "#ffffff",
-                  "borderColor": "#f7d6b4",
-                  "borderWidth": 0,
-                  "radius": 10,
-                  "shadow": 26,
-                  "fontFamily": "DM Serif Display",
-                  "fontSize": 13,
-                  "fontWeight": 700,
-                  "letterSpacing": 0
+                  "radius": 16,
+                  "shadow": 18
                 }
               }
             ],
@@ -9369,7 +9456,7 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "cta": "Explorar",
                 "url": "https://example.com",
                 "icon": "sparkles",
-                "imageUrl": "/power-editor-samples/banner-06.jpg"
+                "imageUrl": "/power-editor-samples/banner-12.jpg"
               },
               {
                 "id": "service-6-b",
@@ -9378,7 +9465,7 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "cta": "Conocer",
                 "url": "https://example.com",
                 "icon": "star",
-                "imageUrl": "/power-editor-samples/avatar-01.jpg"
+                "imageUrl": "/power-editor-samples/banner-01.jpg"
               }
             ],
             "style": {
@@ -10068,23 +10155,6 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
         "enabled": true,
         "children": [
           {
-            "id": "split-cover",
-            "kind": "overlay",
-            "enabled": true,
-            "children": [
-              {
-                "id": "ref-banner",
-                "kind": "block",
-                "enabled": true,
-                "blockId": "banner"
-              }
-            ],
-            "style": {
-              "minHeight": 156,
-              "overflow": "hidden"
-            }
-          },
-          {
             "id": "split-layout",
             "kind": "row",
             "enabled": true,
@@ -10095,10 +10165,10 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "enabled": true,
                 "children": [
                   {
-                    "id": "ref-video-6",
+                    "id": "ref-banner",
                     "kind": "block",
                     "enabled": true,
-                    "blockId": "video-6"
+                    "blockId": "banner"
                   }
                 ],
                 "style": {
@@ -10110,6 +10180,12 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "kind": "column",
                 "enabled": true,
                 "children": [
+                  {
+                    "id": "ref-links",
+                    "kind": "block",
+                    "enabled": true,
+                    "blockId": "links"
+                  },
                   {
                     "id": "ref-profile",
                     "kind": "block",
@@ -10133,12 +10209,6 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                     "style": {
                       "placement": 2
                     }
-                  },
-                  {
-                    "id": "ref-links",
-                    "kind": "block",
-                    "enabled": true,
-                    "blockId": "links"
                   }
                 ],
                 "style": {
@@ -10299,15 +10369,15 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
           "enabled": true,
           "name": "banner",
           "props": {
-            "height": 198,
+            "height": 164,
             "imageUrl": "/power-editor-samples/banner-08.jpg",
             "imageOpacity": 100,
             "overlayColor": "#e8dec8",
-            "overlayOpacity": 36,
+            "overlayOpacity": 30,
             "blend": "soft",
-            "blendStrength": 72,
+            "blendStrength": 52,
             "fusionMode": "soft",
-            "fusionDepth": 52,
+            "fusionDepth": 50,
             "fusionStrength": 100,
             "fit": "cover",
             "positionX": 50,
@@ -10405,23 +10475,23 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
             "logo": "Ivory Portfolio",
             "avatarUrl": "/power-editor-samples/avatar-08.jpg",
             "initials": "IP",
-            "size": 85,
+            "size": 76,
             "shape": "circle",
-            "borderWidth": 3,
+            "borderWidth": 2,
             "borderColor": "#422f22",
-            "shadow": 28,
+            "shadow": 22,
             "align": "left",
             "verticalPosition": "transition",
-            "overlap": 40,
+            "overlap": 34,
             "logoWidth": 150,
             "logoAlign": "left",
             "style": {
               "composition": {
-                "marginTop": 0,
+                "marginTop": 18,
                 "marginBottom": 0,
-                "padding": 0,
+                "padding": 12,
                 "gap": 15,
-                "width": 100,
+                "width": 92,
                 "maxWidth": 100,
                 "minHeight": 0,
                 "align": "center",
@@ -10432,20 +10502,20 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "snap": true
               },
               "border": {
-                "style": "none",
-                "width": 0,
+                "style": "solid",
+                "width": 1,
                 "color": "#422f22",
-                "opacity": 0,
+                "opacity": 28,
                 "radius": 26
               },
               "shadow": {
-                "preset": "none",
+                "preset": "soft",
                 "x": 0,
                 "y": 10,
                 "blur": 28,
                 "spread": 0,
                 "color": "#000000",
-                "opacity": 0
+                "opacity": 32
               },
               "glow": {
                 "preset": "gold",
@@ -10705,18 +10775,11 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "url": "https://example.com",
                 "enabled": true,
                 "style": {
-                  "variant": "image",
+                  "variant": "glass",
                   "color": "#422f22",
                   "textColor": "#ffffff",
-                  "borderColor": "#422f22",
-                  "borderWidth": 0,
-                  "radius": 10,
-                  "shadow": 26,
-                  "imageUrl": "/power-editor-samples/banner-08.jpg",
-                  "fontFamily": "DM Serif Display",
-                  "fontSize": 13,
-                  "fontWeight": 700,
-                  "letterSpacing": 0.3
+                  "radius": 16,
+                  "shadow": 18
                 }
               },
               {
@@ -10725,17 +10788,11 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "url": "https://example.com",
                 "enabled": true,
                 "style": {
-                  "variant": "minimal",
+                  "variant": "outline",
                   "color": "#422f22",
                   "textColor": "#ffffff",
-                  "borderColor": "#422f22",
-                  "borderWidth": 1,
-                  "radius": 14,
-                  "shadow": 0,
-                  "fontFamily": "Inter",
-                  "fontSize": 12,
-                  "fontWeight": 800,
-                  "letterSpacing": 0
+                  "radius": 16,
+                  "shadow": 18
                 }
               }
             ],
@@ -10835,19 +10892,15 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
             "items": [
               {
                 "id": "gallery-7-0",
-                "url": "/power-editor-samples/banner-03.jpg"
+                "url": "/power-editor-samples/banner-02.jpg"
               },
               {
                 "id": "gallery-7-1",
-                "url": "/power-editor-samples/banner-04.jpg"
+                "url": "/power-editor-samples/banner-03.jpg"
               },
               {
                 "id": "gallery-7-2",
-                "url": "/power-editor-samples/banner-05.jpg"
-              },
-              {
-                "id": "gallery-7-3",
-                "url": "/power-editor-samples/banner-06.jpg"
+                "url": "/power-editor-samples/banner-04.jpg"
               }
             ],
             "style": {
@@ -10940,7 +10993,7 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
           "name": "image",
           "props": {
             "label": "Detalle de marca",
-            "url": "/power-editor-samples/banner-11.jpg",
+            "url": "/power-editor-samples/banner-02.jpg",
             "alt": "Detalle visual de plantilla",
             "height": 188,
             "fit": "cover",
@@ -11044,9 +11097,7 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "description": "Un recorrido breve por lo esencial.",
                 "cta": "Descubrir",
                 "ctaUrl": "https://example.com",
-                "imageUrl": "/power-editor-samples/banner-12.jpg",
-                "imageEnabled": true,
-                "imageSide": "left"
+                "imageUrl": "/power-editor-samples/banner-03.jpg"
               },
               {
                 "id": "card-7-b",
@@ -11054,9 +11105,7 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "description": "Reserva una conversación.",
                 "cta": "Reservar",
                 "ctaUrl": "https://example.com",
-                "imageUrl": "/power-editor-samples/avatar-07.jpg",
-                "imageEnabled": true,
-                "imageSide": "right"
+                "imageUrl": "/power-editor-samples/banner-04.jpg"
               }
             ],
             "style": {
@@ -11558,7 +11607,7 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
         "children": [
           {
             "id": "grid-cover",
-            "kind": "overlay",
+            "kind": "section",
             "enabled": true,
             "children": [
               {
@@ -11569,7 +11618,8 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
               }
             ],
             "style": {
-              "minHeight": 178,
+              "padding": 0,
+              "minHeight": 190,
               "overflow": "hidden"
             }
           },
@@ -11578,6 +11628,12 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
             "kind": "stack",
             "enabled": true,
             "children": [
+              {
+                "id": "ref-links",
+                "kind": "block",
+                "enabled": true,
+                "blockId": "links"
+              },
               {
                 "id": "ref-profile",
                 "kind": "block",
@@ -11601,12 +11657,6 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "style": {
                   "placement": 2
                 }
-              },
-              {
-                "id": "ref-links",
-                "kind": "block",
-                "enabled": true,
-                "blockId": "links"
               }
             ],
             "style": {
@@ -11619,30 +11669,6 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
             "kind": "grid",
             "enabled": true,
             "children": [
-              {
-                "id": "ref-gallery-7",
-                "kind": "block",
-                "enabled": true,
-                "blockId": "gallery-7",
-                "style": {
-                  "placement": {
-                    "columnStart": 1,
-                    "columnSpan": 1
-                  }
-                }
-              },
-              {
-                "id": "ref-image-7",
-                "kind": "block",
-                "enabled": true,
-                "blockId": "image-7",
-                "style": {
-                  "placement": {
-                    "columnStart": 2,
-                    "columnSpan": 1
-                  }
-                }
-              },
               {
                 "id": "ref-cards-7",
                 "kind": "block",
@@ -11794,19 +11820,19 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
           "enabled": true,
           "name": "banner",
           "props": {
-            "height": 212,
+            "height": 164,
             "imageUrl": "/power-editor-samples/banner-09.jpg",
             "imageOpacity": 100,
             "overlayColor": "#17130f",
-            "overlayOpacity": 18,
-            "blend": "medium",
-            "blendStrength": 42,
+            "overlayOpacity": 30,
+            "blend": "soft",
+            "blendStrength": 52,
             "fusionMode": "soft",
-            "fusionDepth": 60,
+            "fusionDepth": 50,
             "fusionStrength": 100,
             "fit": "cover",
             "positionX": 50,
-            "positionY": 54,
+            "positionY": 50,
             "radius": 0,
             "style": {
               "composition": {
@@ -11900,23 +11926,23 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
             "logo": "Gold Night Market",
             "avatarUrl": "/power-editor-samples/avatar-09.jpg",
             "initials": "GN",
-            "size": 92,
+            "size": 76,
             "shape": "circle",
             "borderWidth": 2,
             "borderColor": "#e6bd72",
-            "shadow": 32,
+            "shadow": 22,
             "align": "right",
             "verticalPosition": "transition",
-            "overlap": 46,
+            "overlap": 34,
             "logoWidth": 150,
             "logoAlign": "right",
             "style": {
               "composition": {
-                "marginTop": 0,
+                "marginTop": 10,
                 "marginBottom": 0,
-                "padding": 0,
+                "padding": 12,
                 "gap": 9,
-                "width": 100,
+                "width": 92,
                 "maxWidth": 100,
                 "minHeight": 0,
                 "align": "center",
@@ -11927,20 +11953,20 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "snap": true
               },
               "border": {
-                "style": "none",
-                "width": 0,
+                "style": "solid",
+                "width": 1,
                 "color": "#e6bd72",
-                "opacity": 0,
+                "opacity": 39,
                 "radius": 12
               },
               "shadow": {
-                "preset": "none",
+                "preset": "premium",
                 "x": 0,
                 "y": 10,
                 "blur": 28,
                 "spread": 0,
                 "color": "#000000",
-                "opacity": 0
+                "opacity": 32
               },
               "glow": {
                 "preset": "none",
@@ -12202,15 +12228,9 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "style": {
                   "variant": "premium",
                   "color": "#e6bd72",
-                  "textColor": "#18110b",
-                  "borderColor": "#e6bd72",
-                  "borderWidth": 0,
-                  "radius": 14,
-                  "shadow": 14,
-                  "fontFamily": "Inter",
-                  "fontSize": 13,
-                  "fontWeight": 800,
-                  "letterSpacing": 0
+                  "textColor": "#ffffff",
+                  "radius": 16,
+                  "shadow": 18
                 }
               },
               {
@@ -12219,17 +12239,11 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "url": "https://example.com",
                 "enabled": true,
                 "style": {
-                  "variant": "gradient",
+                  "variant": "outline",
                   "color": "#e6bd72",
-                  "textColor": "#18110b",
-                  "borderColor": "#e6bd72",
-                  "borderWidth": 0,
-                  "radius": 18,
-                  "shadow": 18,
-                  "fontFamily": "Outfit",
-                  "fontSize": 13,
-                  "fontWeight": 700,
-                  "letterSpacing": 0.3
+                  "textColor": "#ffffff",
+                  "radius": 16,
+                  "shadow": 18
                 }
               }
             ],
@@ -12331,7 +12345,7 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "price": "$ —",
                 "cta": "Ver detalles",
                 "url": "https://example.com",
-                "imageUrl": "/power-editor-samples/avatar-02.jpg"
+                "imageUrl": "/power-editor-samples/banner-02.jpg"
               },
               {
                 "id": "product-8-b",
@@ -12340,7 +12354,7 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "price": "$ —",
                 "cta": "Explorar",
                 "url": "https://example.com",
-                "imageUrl": "/power-editor-samples/avatar-09.jpg"
+                "imageUrl": "/power-editor-samples/banner-03.jpg"
               }
             ],
             "style": {
@@ -13239,19 +13253,19 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
           "enabled": true,
           "name": "banner",
           "props": {
-            "height": 184,
+            "height": 164,
             "imageUrl": "/power-editor-samples/banner-10.jpg",
             "imageOpacity": 100,
             "overlayColor": "#18222d",
-            "overlayOpacity": 24,
+            "overlayOpacity": 30,
             "blend": "soft",
             "blendStrength": 52,
-            "fusionMode": "custom",
-            "fusionDepth": 44,
+            "fusionMode": "soft",
+            "fusionDepth": 50,
             "fusionStrength": 100,
             "fit": "cover",
             "positionX": 50,
-            "positionY": 58,
+            "positionY": 50,
             "radius": 0,
             "style": {
               "composition": {
@@ -13345,11 +13359,11 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
             "logo": "Platinum Salon",
             "avatarUrl": "/power-editor-samples/avatar-10.jpg",
             "initials": "PS",
-            "size": 78,
+            "size": 76,
             "shape": "rounded",
-            "borderWidth": 3,
+            "borderWidth": 2,
             "borderColor": "#dbe8ef",
-            "shadow": 24,
+            "shadow": 22,
             "align": "center",
             "verticalPosition": "transition",
             "overlap": 34,
@@ -13357,11 +13371,11 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
             "logoAlign": "center",
             "style": {
               "composition": {
-                "marginTop": 0,
+                "marginTop": 18,
                 "marginBottom": 0,
-                "padding": 0,
+                "padding": 12,
                 "gap": 12,
-                "width": 100,
+                "width": 92,
                 "maxWidth": 100,
                 "minHeight": 0,
                 "align": "center",
@@ -13372,20 +13386,20 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "snap": true
               },
               "border": {
-                "style": "none",
-                "width": 0,
+                "style": "solid",
+                "width": 1,
                 "color": "#dbe8ef",
-                "opacity": 0,
+                "opacity": 50,
                 "radius": 19
               },
               "shadow": {
-                "preset": "none",
+                "preset": "soft",
                 "x": 0,
                 "y": 10,
                 "blur": 28,
                 "spread": 0,
                 "color": "#000000",
-                "opacity": 0
+                "opacity": 32
               },
               "glow": {
                 "preset": "none",
@@ -13395,7 +13409,7 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "spread": 1
               },
               "glass": {
-                "enabled": false,
+                "enabled": true,
                 "transparency": 18,
                 "blur": 14,
                 "tint": "#ffffff",
@@ -13403,7 +13417,7 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "highlight": 20
               },
               "gradient": {
-                "enabled": false,
+                "enabled": true,
                 "type": "radial",
                 "start": "#18222d",
                 "middle": "#63788b",
@@ -13419,7 +13433,7 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "grayscale": 0,
                 "opacity": 100
               },
-              "effectPreset": "none",
+              "effectPreset": "gold-glow",
               "blendMode": "normal",
               "mask": "none",
               "motion": {
@@ -13648,14 +13662,8 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                   "variant": "glass",
                   "color": "#dbe8ef",
                   "textColor": "#ffffff",
-                  "borderColor": "#dbe8ef",
-                  "borderWidth": 0,
-                  "radius": 18,
-                  "shadow": 18,
-                  "fontFamily": "Outfit",
-                  "fontSize": 12,
-                  "fontWeight": 700,
-                  "letterSpacing": 0
+                  "radius": 16,
+                  "shadow": 18
                 }
               },
               {
@@ -13664,17 +13672,11 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "url": "https://example.com",
                 "enabled": true,
                 "style": {
-                  "variant": "outline",
+                  "variant": "gradient",
                   "color": "#dbe8ef",
                   "textColor": "#ffffff",
-                  "borderColor": "#dbe8ef",
-                  "borderWidth": 1,
-                  "radius": 999,
-                  "shadow": 22,
-                  "fontFamily": "Sora",
-                  "fontSize": 13,
-                  "fontWeight": 800,
-                  "letterSpacing": 0
+                  "radius": 16,
+                  "shadow": 18
                 }
               }
             ],
@@ -13776,7 +13778,7 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "cta": "Explorar",
                 "url": "https://example.com",
                 "icon": "sparkles",
-                "imageUrl": "/power-editor-samples/avatar-06.jpg"
+                "imageUrl": "/power-editor-samples/banner-03.jpg"
               },
               {
                 "id": "service-9-b",
@@ -13785,7 +13787,7 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "cta": "Conocer",
                 "url": "https://example.com",
                 "icon": "star",
-                "imageUrl": "/power-editor-samples/banner-01.jpg"
+                "imageUrl": "/power-editor-samples/banner-04.jpg"
               }
             ],
             "style": {
@@ -13880,7 +13882,6 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
             "layout": "cards",
             "featuredId": "",
             "items": [],
-            "sampleAvatarUrl": "/power-editor-samples/avatar-04.jpg",
             "style": {
               "composition": {
                 "marginTop": 10,
@@ -14468,7 +14469,7 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
         "children": [
           {
             "id": "journey-cover",
-            "kind": "overlay",
+            "kind": "section",
             "enabled": true,
             "children": [
               {
@@ -14479,7 +14480,8 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
               }
             ],
             "style": {
-              "minHeight": 176,
+              "padding": 0,
+              "minHeight": 210,
               "overflow": "hidden"
             }
           },
@@ -14690,19 +14692,19 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
           "enabled": true,
           "name": "banner",
           "props": {
-            "height": 198,
+            "height": 164,
             "imageUrl": "/power-editor-samples/banner-11.jpg",
             "imageOpacity": 100,
             "overlayColor": "#101a40",
             "overlayOpacity": 30,
             "blend": "soft",
-            "blendStrength": 62,
+            "blendStrength": 52,
             "fusionMode": "soft",
-            "fusionDepth": 52,
+            "fusionDepth": 50,
             "fusionStrength": 100,
             "fit": "cover",
             "positionX": 50,
-            "positionY": 42,
+            "positionY": 50,
             "radius": 0,
             "style": {
               "composition": {
@@ -14796,23 +14798,23 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
             "logo": "Cobalt Stream",
             "avatarUrl": "/power-editor-samples/avatar-11.jpg",
             "initials": "CS",
-            "size": 85,
+            "size": 76,
             "shape": "circle",
             "borderWidth": 2,
             "borderColor": "#9cc7ff",
-            "shadow": 28,
+            "shadow": 22,
             "align": "left",
             "verticalPosition": "transition",
-            "overlap": 40,
+            "overlap": 34,
             "logoWidth": 150,
             "logoAlign": "left",
             "style": {
               "composition": {
-                "marginTop": 0,
+                "marginTop": 18,
                 "marginBottom": 0,
-                "padding": 0,
+                "padding": 12,
                 "gap": 15,
-                "width": 100,
+                "width": 92,
                 "maxWidth": 100,
                 "minHeight": 0,
                 "align": "center",
@@ -14823,20 +14825,20 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "snap": true
               },
               "border": {
-                "style": "none",
-                "width": 0,
+                "style": "solid",
+                "width": 1,
                 "color": "#9cc7ff",
-                "opacity": 0,
+                "opacity": 61,
                 "radius": 26
               },
               "shadow": {
-                "preset": "none",
+                "preset": "premium",
                 "x": 0,
                 "y": 10,
                 "blur": 28,
                 "spread": 0,
                 "color": "#000000",
-                "opacity": 0
+                "opacity": 32
               },
               "glow": {
                 "preset": "none",
@@ -14870,7 +14872,7 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "grayscale": 0,
                 "opacity": 100
               },
-              "effectPreset": "none",
+              "effectPreset": "vignette",
               "blendMode": "soft-light",
               "mask": "none",
               "motion": {
@@ -15096,17 +15098,11 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "url": "https://example.com",
                 "enabled": true,
                 "style": {
-                  "variant": "neon",
+                  "variant": "premium",
                   "color": "#9cc7ff",
                   "textColor": "#ffffff",
-                  "borderColor": "#9cc7ff",
-                  "borderWidth": 0,
-                  "radius": 999,
-                  "shadow": 22,
-                  "fontFamily": "Sora",
-                  "fontSize": 13,
-                  "fontWeight": 800,
-                  "letterSpacing": 0.3
+                  "radius": 16,
+                  "shadow": 18
                 }
               },
               {
@@ -15115,17 +15111,11 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "url": "https://example.com",
                 "enabled": true,
                 "style": {
-                  "variant": "soft",
+                  "variant": "outline",
                   "color": "#9cc7ff",
                   "textColor": "#ffffff",
-                  "borderColor": "#9cc7ff",
-                  "borderWidth": 0,
-                  "radius": 10,
-                  "shadow": 26,
-                  "fontFamily": "DM Serif Display",
-                  "fontSize": 12,
-                  "fontWeight": 700,
-                  "letterSpacing": 0
+                  "radius": 16,
+                  "shadow": 18
                 }
               }
             ],
@@ -15329,19 +15319,15 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
             "items": [
               {
                 "id": "gallery-10-0",
-                "url": "/power-editor-samples/avatar-01.jpg"
+                "url": "/power-editor-samples/banner-02.jpg"
               },
               {
                 "id": "gallery-10-1",
-                "url": "/power-editor-samples/avatar-02.jpg"
+                "url": "/power-editor-samples/banner-03.jpg"
               },
               {
                 "id": "gallery-10-2",
-                "url": "/power-editor-samples/avatar-03.jpg"
-              },
-              {
-                "id": "gallery-10-3",
-                "url": "/power-editor-samples/avatar-04.jpg"
+                "url": "/power-editor-samples/banner-04.jpg"
               }
             ],
             "style": {
@@ -15840,7 +15826,7 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
         "children": [
           {
             "id": "grid-cover",
-            "kind": "overlay",
+            "kind": "section",
             "enabled": true,
             "children": [
               {
@@ -15851,7 +15837,8 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
               }
             ],
             "style": {
-              "minHeight": 160,
+              "padding": 0,
+              "minHeight": 190,
               "overflow": "hidden"
             }
           },
@@ -15860,6 +15847,12 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
             "kind": "stack",
             "enabled": true,
             "children": [
+              {
+                "id": "ref-links",
+                "kind": "block",
+                "enabled": true,
+                "blockId": "links"
+              },
               {
                 "id": "ref-profile",
                 "kind": "block",
@@ -15883,12 +15876,6 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "style": {
                   "placement": 2
                 }
-              },
-              {
-                "id": "ref-links",
-                "kind": "block",
-                "enabled": true,
-                "blockId": "links"
               }
             ],
             "style": {
@@ -15901,30 +15888,6 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
             "kind": "grid",
             "enabled": true,
             "children": [
-              {
-                "id": "ref-gallery-10",
-                "kind": "block",
-                "enabled": true,
-                "blockId": "gallery-10",
-                "style": {
-                  "placement": {
-                    "columnStart": 1,
-                    "columnSpan": 1
-                  }
-                }
-              },
-              {
-                "id": "ref-video-10",
-                "kind": "block",
-                "enabled": true,
-                "blockId": "video-10",
-                "style": {
-                  "placement": {
-                    "columnStart": 2,
-                    "columnSpan": 1
-                  }
-                }
-              },
               {
                 "id": "ref-socials",
                 "kind": "block",
@@ -16067,19 +16030,19 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
           "enabled": true,
           "name": "banner",
           "props": {
-            "height": 212,
+            "height": 164,
             "imageUrl": "/power-editor-samples/banner-12.jpg",
             "imageOpacity": 100,
             "overlayColor": "#102d29",
-            "overlayOpacity": 36,
+            "overlayOpacity": 30,
             "blend": "soft",
-            "blendStrength": 72,
+            "blendStrength": 52,
             "fusionMode": "soft",
-            "fusionDepth": 60,
+            "fusionDepth": 50,
             "fusionStrength": 100,
             "fit": "cover",
             "positionX": 50,
-            "positionY": 46,
+            "positionY": 50,
             "radius": 0,
             "style": {
               "composition": {
@@ -16173,23 +16136,23 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
             "logo": "Emerald Journal",
             "avatarUrl": "/power-editor-samples/avatar-12.jpg",
             "initials": "EJ",
-            "size": 92,
+            "size": 76,
             "shape": "circle",
-            "borderWidth": 3,
+            "borderWidth": 2,
             "borderColor": "#e2c27d",
-            "shadow": 32,
+            "shadow": 22,
             "align": "center",
             "verticalPosition": "transition",
-            "overlap": 46,
+            "overlap": 34,
             "logoWidth": 150,
             "logoAlign": "center",
             "style": {
               "composition": {
-                "marginTop": 0,
+                "marginTop": 10,
                 "marginBottom": 0,
-                "padding": 0,
+                "padding": 12,
                 "gap": 9,
-                "width": 100,
+                "width": 92,
                 "maxWidth": 100,
                 "minHeight": 0,
                 "align": "center",
@@ -16200,20 +16163,20 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "snap": true
               },
               "border": {
-                "style": "none",
-                "width": 0,
+                "style": "solid",
+                "width": 1,
                 "color": "#e2c27d",
-                "opacity": 0,
+                "opacity": 28,
                 "radius": 12
               },
               "shadow": {
-                "preset": "none",
+                "preset": "soft",
                 "x": 0,
                 "y": 10,
                 "blur": 28,
                 "spread": 0,
                 "color": "#000000",
-                "opacity": 0
+                "opacity": 32
               },
               "glow": {
                 "preset": "gold",
@@ -16473,18 +16436,11 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "url": "https://example.com",
                 "enabled": true,
                 "style": {
-                  "variant": "image",
+                  "variant": "glass",
                   "color": "#e2c27d",
                   "textColor": "#ffffff",
-                  "borderColor": "#e2c27d",
-                  "borderWidth": 0,
-                  "radius": 10,
-                  "shadow": 26,
-                  "imageUrl": "/power-editor-samples/banner-12.jpg",
-                  "fontFamily": "DM Serif Display",
-                  "fontSize": 13,
-                  "fontWeight": 700,
-                  "letterSpacing": 0
+                  "radius": 16,
+                  "shadow": 18
                 }
               },
               {
@@ -16493,17 +16449,11 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "url": "https://example.com",
                 "enabled": true,
                 "style": {
-                  "variant": "minimal",
+                  "variant": "outline",
                   "color": "#e2c27d",
                   "textColor": "#ffffff",
-                  "borderColor": "#e2c27d",
-                  "borderWidth": 1,
-                  "radius": 14,
-                  "shadow": 0,
-                  "fontFamily": "Inter",
-                  "fontSize": 13,
-                  "fontWeight": 800,
-                  "letterSpacing": 0.3
+                  "radius": 16,
+                  "shadow": 18
                 }
               }
             ],
@@ -16890,19 +16840,15 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
             "items": [
               {
                 "id": "gallery-11-0",
-                "url": "/power-editor-samples/avatar-06.jpg"
+                "url": "/power-editor-samples/banner-03.jpg"
               },
               {
                 "id": "gallery-11-1",
-                "url": "/power-editor-samples/avatar-07.jpg"
+                "url": "/power-editor-samples/banner-04.jpg"
               },
               {
                 "id": "gallery-11-2",
-                "url": "/power-editor-samples/avatar-08.jpg"
-              },
-              {
-                "id": "gallery-11-3",
-                "url": "/power-editor-samples/avatar-09.jpg"
+                "url": "/power-editor-samples/banner-05.jpg"
               }
             ],
             "style": {
@@ -17491,23 +17437,6 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
         "enabled": true,
         "children": [
           {
-            "id": "split-cover",
-            "kind": "overlay",
-            "enabled": true,
-            "children": [
-              {
-                "id": "ref-banner",
-                "kind": "block",
-                "enabled": true,
-                "blockId": "banner"
-              }
-            ],
-            "style": {
-              "minHeight": 156,
-              "overflow": "hidden"
-            }
-          },
-          {
             "id": "split-layout",
             "kind": "row",
             "enabled": true,
@@ -17518,10 +17447,19 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "enabled": true,
                 "children": [
                   {
+                    "id": "ref-banner",
+                    "kind": "block",
+                    "enabled": true,
+                    "blockId": "banner"
+                  },
+                  {
                     "id": "ref-faq-11",
                     "kind": "block",
                     "enabled": true,
-                    "blockId": "faq-11"
+                    "blockId": "faq-11",
+                    "style": {
+                      "placement": 1
+                    }
                   },
                   {
                     "id": "ref-map-11",
@@ -17529,7 +17467,7 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                     "enabled": true,
                     "blockId": "map-11",
                     "style": {
-                      "placement": 1
+                      "placement": 2
                     }
                   }
                 ],
@@ -17542,6 +17480,12 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                 "kind": "column",
                 "enabled": true,
                 "children": [
+                  {
+                    "id": "ref-links",
+                    "kind": "block",
+                    "enabled": true,
+                    "blockId": "links"
+                  },
                   {
                     "id": "ref-heading",
                     "kind": "block",
@@ -17556,12 +17500,6 @@ export const generatedRecipes: readonly GeneratedRecipe[] = [
                     "style": {
                       "placement": 1
                     }
-                  },
-                  {
-                    "id": "ref-links",
-                    "kind": "block",
-                    "enabled": true,
-                    "blockId": "links"
                   },
                   {
                     "id": "ref-socials",

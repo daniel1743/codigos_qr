@@ -152,6 +152,8 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const location = useRouterState({ select: (state) => state.location });
+  const isEditorSurface = isFullScreenEditorRoute(location.pathname, location.search);
 
   useEffect(() => {
     // Solo registrar service worker en producción
@@ -171,7 +173,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <DesktopNavbar />
+      {!isEditorSurface && <DesktopNavbar />}
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <PrivateMobileNavigationShell>
         <Outlet />
@@ -181,8 +183,21 @@ function RootComponent() {
   );
 }
 
+function isFullScreenEditorRoute(pathname: string, search: unknown) {
+  const routeSearch = (search || {}) as Record<string, unknown>;
+  const isQrLegacyTab = pathname === "/editor" && routeSearch.tab === "qr";
+  return (
+    !isQrLegacyTab &&
+    (pathname === "/editor" ||
+      pathname === "/power-editor-preview" ||
+      pathname === "/power-editor-preview-mobile" ||
+      pathname.startsWith("/internal/power-editor-draft"))
+  );
+}
+
 function PrivateMobileNavigationShell({ children }: { children: ReactNode }) {
-  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const location = useRouterState({ select: (state) => state.location });
+  const pathname = location.pathname;
   const supabase = useMemo(() => getBrowserSupabaseClient(), []);
   const [session, setSession] = useState<Session | null>(null);
 
@@ -211,6 +226,7 @@ function PrivateMobileNavigationShell({ children }: { children: ReactNode }) {
 
   const isPrivateMobileRoute =
     Boolean(session) &&
+    !isFullScreenEditorRoute(pathname, location.search) &&
     (pathname === "/editor" ||
       pathname === "/profile" ||
       pathname === "/encrypted-documents" ||

@@ -2,16 +2,19 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const assetBase = "/ejemplo%20templates/";
-const media = [
-  "10801392_1262.jpg",
-  "10873522_4607433.jpg",
-  "10d13ddcc4c5b49ceb7b3e27e51f3ca3.jpg",
-  "18425896_SocialMedia_Username_3.jpg",
-  "326395716_b2a06de5-0f47-4a58-9b60-659be2240778.jpg",
-  "9319421_8610.jpg",
-  "9713592_4211679.jpg",
-].map((name) => `${assetBase}${name}`);
+const sampleAssetBase = "/power-editor-samples/";
+const sampleBanners = Array.from(
+  { length: 12 },
+  (_, index) => `${sampleAssetBase}banner-${String(index + 1).padStart(2, "0")}.jpg`,
+);
+const sampleAvatars = Array.from(
+  { length: 12 },
+  (_, index) => `${sampleAssetBase}avatar-${String(index + 1).padStart(2, "0")}.jpg`,
+);
+const media = sampleBanners;
+const pick = (items, index) => items[((index % items.length) + items.length) % items.length];
+const sampleBanner = (index) => pick(sampleBanners, index);
+const sampleAvatar = (index) => pick(sampleAvatars, index);
 
 const palettes = {
   gold: {
@@ -109,7 +112,7 @@ const recipes = [
     avatar: "monogram",
     align: "left",
     linkLayout: 2,
-    extras: ["image", "gallery", "separator", "frame", "shape"],
+    extras: ["image", "gallery", "separator", "frame", "shape", "ring"],
   },
   {
     id: "obsidian-creator",
@@ -155,7 +158,7 @@ const recipes = [
     avatarMedia: 4,
     align: "center",
     linkLayout: 1,
-    extras: ["booking", "image", "separator", "ornament", "particles"],
+    extras: ["booking", "image", "gallery", "separator", "ornament", "particles"],
   },
   {
     id: "terracotta-maker",
@@ -221,7 +224,7 @@ const recipes = [
     avatar: "monogram",
     align: "center",
     linkLayout: 1,
-    extras: ["text", "faq", "map", "separator", "frame"],
+    extras: ["text", "faq", "map", "gallery", "separator", "frame", "particles"],
   },
 ];
 
@@ -416,6 +419,7 @@ function featureBlock(feature, order, palette, index) {
               description: "Reserva una conversación.",
               cta: "Reservar",
               ctaUrl: "https://example.com",
+              imageUrl: pick(media, index + order + 1),
             },
           ],
         },
@@ -452,6 +456,7 @@ function featureBlock(feature, order, palette, index) {
               cta: "Explorar",
               url: "https://example.com",
               icon: "sparkles",
+              imageUrl: image,
             },
             {
               id: `service-${index}-b`,
@@ -460,6 +465,7 @@ function featureBlock(feature, order, palette, index) {
               cta: "Conocer",
               url: "https://example.com",
               icon: "star",
+              imageUrl: pick(media, index + order + 1),
             },
           ],
         },
@@ -489,6 +495,7 @@ function featureBlock(feature, order, palette, index) {
               price: "$ —",
               cta: "Explorar",
               url: "https://example.com",
+              imageUrl: pick(media, index + order + 1),
             },
           ],
         },
@@ -668,7 +675,7 @@ function buildComposition(blocks, macroFamily) {
   const headline = () => take("heading", "text");
   const action = () => take("links", "booking", "contact");
   const identity = () => take("profile")[0];
-  const visual = () => take("video", "image", "gallery", "banner")[0];
+  const visual = () => take("banner", "video", "image", "gallery")[0];
 
   if (macroFamily === "hero-overlay" || macroFamily === "ceremony-overlay") {
     const banner = take("banner")[0];
@@ -693,41 +700,43 @@ function buildComposition(blocks, macroFamily) {
     const profile = identity();
     const cta = action();
     const intro = headline();
-    const left = macroFamily === "journal-columns" ? take("faq", "map", "services").map(blockReference) : media ? [blockReference(media)] : [];
+    const left = macroFamily === "journal-columns" ? [media, ...take("faq", "map", "services")].filter(Boolean).map(blockReference) : media ? [blockReference(media)] : [];
     const right = macroFamily === "journal-columns" ? [...cta.map(blockReference), ...intro.map(blockReference), ...take("socials", "video", "gallery").map(blockReference)] : [...cta.map(blockReference), ...[profile, ...intro].filter(Boolean).map(blockReference)];
     const tracks = macroFamily === "maker-split" ? [60, 40] : macroFamily === "journal-columns" ? [50, 50] : [40, 60];
     return { id: "root", kind: "root", enabled: true, children: [branch("split-layout", "row", [branch("split-left", "column", left, { gap: 16 }), branch("split-right", "column", right, { gap: 16, justify: "center" })], { split: { direction: macroFamily === "maker-split" ? "row-reverse" : "row", tracks, collapse: "stack", minColumnWidth: 180 }, responsive: { mobile: { gap: 18 }, tablet: { gap: 20 }, desktop: { gap: 24 } }, padding: 22 }), branch("split-tail", "stack", rest(), { gap: 16, padding: 24 })] };
   }
 
   if (macroFamily === "commerce-grid" || macroFamily === "stream-grid" || macroFamily === "portfolio-mosaic") {
+    const cover = visual();
     const profile = identity();
     const cta = action();
     const intro = headline();
     const gridItems = macroFamily === "portfolio-mosaic" ? take("gallery", "image", "video", "cards", "products") : take("products", "services", "cards", "gallery", "video", "links", "socials", "map", "faq");
     const columns = macroFamily === "commerce-grid" ? 3 : 2;
-    return { id: "root", kind: "root", enabled: true, children: [branch("grid-intro", "stack", [...cta.map(blockReference), ...[profile, ...intro].filter(Boolean).map(blockReference)], { gap: 12, padding: 24 }), branch("grid-gallery", "grid", gridItems.map((item, index) => blockReference(item, { columnStart: (index % columns) + 1, columnSpan: 1 })), { grid: { columns, autoFlow: "row" }, responsive: { mobile: { grid: { columns: 1 }, gap: 12 }, tablet: { grid: { columns: 2 }, gap: 16 }, desktop: { grid: { columns }, gap: 18 } }, padding: 24 }), branch("grid-tail", "stack", rest(), { gap: 14, padding: 24 })] };
+    return { id: "root", kind: "root", enabled: true, children: [cover ? branch("grid-cover", "section", [blockReference(cover)], { padding: 0, minHeight: 190, overflow: "hidden" }) : null, branch("grid-intro", "stack", [...cta.map(blockReference), ...[profile, ...intro].filter(Boolean).map(blockReference)], { gap: 12, padding: 24 }), branch("grid-gallery", "grid", gridItems.map((item, index) => blockReference(item, { columnStart: (index % columns) + 1, columnSpan: 1 })), { grid: { columns, autoFlow: "row" }, responsive: { mobile: { grid: { columns: 1 }, gap: 12 }, tablet: { grid: { columns: 2 }, gap: 16 }, desktop: { grid: { columns }, gap: 18 } }, padding: 24 }), branch("grid-tail", "stack", rest(), { gap: 14, padding: 24 })].filter(Boolean) };
   }
 
   if (macroFamily === "concierge-fixed-cta" || macroFamily === "market-fixed-cta") {
     const banner = take("banner")[0];
     const profile = identity();
     const cta = action();
-    return { id: "root", kind: "root", enabled: true, children: [cta.length ? branch("fixed-cta", "fixed", cta.map(blockReference), { fixed: { edge: "bottom", inset: 14, zIndex: 16, safeArea: true, maxWidth: 340, reserveSpace: true } }) : null, banner ? branch("fixed-hero", "overlay", [blockReference(banner), ...(profile ? [{ ...blockReference(profile), style: { position: { positionMode: "anchored", anchor: "bottom-center", offsetY: 22, zIndex: 7, width: 70 } } }] : [])], { minHeight: 220, overflow: "visible" }) : null, branch("fixed-body", "stack", [...headline().map(blockReference), ...rest()], { gap: 16, padding: 28 })].filter(Boolean) };
+    return { id: "root", kind: "root", enabled: true, children: [banner ? branch("fixed-hero", "overlay", [blockReference(banner), ...(profile ? [{ ...blockReference(profile), style: { position: { positionMode: "anchored", anchor: "bottom-center", offsetY: 22, zIndex: 7, width: 70 } } }] : [])], { minHeight: 220, overflow: "visible" }) : null, cta.length ? branch("fixed-cta", "fixed", cta.map(blockReference), { fixed: { edge: "bottom", inset: 14, zIndex: 16, safeArea: true, maxWidth: 340, reserveSpace: true } }) : null, branch("fixed-body", "stack", [...headline().map(blockReference), ...rest()], { gap: 16, padding: 28 })].filter(Boolean) };
   }
 
   if (macroFamily === "salon-journey") {
+    const cover = visual();
     const profile = identity();
     const cta = action();
     const intro = headline();
     const story = take("services", "reviews", "booking", "faq", "contact");
-    return { id: "root", kind: "root", enabled: true, children: [branch("journey-action", "section", cta.map(blockReference), { padding: 24, gap: 12 }), branch("journey-intro", "section", [...[profile, ...intro].filter(Boolean).map(blockReference)], { padding: 28, gap: 14, minHeight: 200, verticalAlign: "center" }), ...story.map((item, index) => branch(`journey-step-${index + 1}`, "section", [blockReference(item)], { padding: 24, gap: 12 })), branch("journey-tail", "stack", rest(), { gap: 14, padding: 24 })] };
+    return { id: "root", kind: "root", enabled: true, children: [cover ? branch("journey-cover", "section", [blockReference(cover)], { padding: 0, minHeight: 210, overflow: "hidden" }) : null, branch("journey-action", "section", cta.map(blockReference), { padding: 24, gap: 12 }), branch("journey-intro", "section", [...[profile, ...intro].filter(Boolean).map(blockReference)], { padding: 28, gap: 14, minHeight: 200, verticalAlign: "center" }), ...story.map((item, index) => branch(`journey-step-${index + 1}`, "section", [blockReference(item)], { padding: 24, gap: 12 })), branch("journey-tail", "stack", rest(), { gap: 14, padding: 24 })].filter(Boolean) };
   }
 
   const profile = identity();
   const cta = action();
   const intro = headline();
   const cover = visual();
-  return { id: "root", kind: "root", enabled: true, children: [branch("editorial-cover", "section", [...cta.map(blockReference), ...[profile, ...intro, cover].filter(Boolean).map(blockReference)], { padding: 28, gap: 14, minHeight: 180, verticalAlign: "center" }), branch("editorial-actions", "stack", rest(), { gap: 16, padding: 26 })] };
+  return { id: "root", kind: "root", enabled: true, children: [branch("editorial-cover", "section", [...[cover, profile, ...intro].filter(Boolean).map(blockReference), ...cta.map(blockReference)], { padding: 28, gap: 14, minHeight: 180, verticalAlign: "center" }), branch("editorial-actions", "stack", rest(), { gap: 16, padding: 26 })] };
 }
 
 export function buildTemplate(recipe, index) {
@@ -744,7 +753,7 @@ export function buildTemplate(recipe, index) {
       0,
       {
         height: 164,
-        imageUrl: media[recipe.bannerMedia ?? index % media.length],
+        imageUrl: sampleBanner(index),
         imageOpacity: 100,
         overlayColor: palette.base,
         overlayOpacity: 30,
@@ -759,7 +768,7 @@ export function buildTemplate(recipe, index) {
         radius: 0,
       },
       style(palette, index, "hero"),
-      recipe.banner,
+      true,
     ),
   );
   blocks.push(
@@ -769,20 +778,19 @@ export function buildTemplate(recipe, index) {
       1,
       {
         logo: title,
-        avatarUrl:
-          recipe.avatar === "image" ? media[recipe.avatarMedia ?? (index + 3) % media.length] : "",
+        avatarUrl: sampleAvatar(index),
         initials: title
           .split(" ")
           .map((word) => word[0])
           .join("")
           .slice(0, 2),
-        size: recipe.banner ? 76 : 62,
+        size: 76,
         shape: index % 3 ? "circle" : "rounded",
         borderWidth: 2,
         borderColor: palette.accent,
         shadow: 22,
         align: recipe.align,
-        verticalPosition: recipe.banner ? "transition" : "body",
+        verticalPosition: "transition",
         overlap: 34,
         logoWidth: 150,
         logoAlign: recipe.align,
@@ -1009,6 +1017,82 @@ function mediaSet(template) {
   return new Set([banner, avatar, ...gallery.map((item) => item.url)].filter(Boolean));
 }
 
+const premiumBlockTypes = new Set([
+  "video",
+  "cards",
+  "gallery",
+  "services",
+  "products",
+  "booking",
+  "faq",
+  "contact",
+  "map",
+  "shape",
+  "ring",
+  "ornament",
+  "frame",
+  "particles",
+]);
+
+function visualAssetCount(page) {
+  return page.blocks.reduce((count, block) => {
+    if (!block.enabled) return count;
+    if (block.type === "banner" && block.props.imageUrl) return count + 1;
+    if (block.type === "profile" && block.props.avatarUrl) return count + 1;
+    if (block.type === "image" && block.props.url) return count + 1;
+    if (block.type === "gallery") return count + ((block.props.items ?? []).filter((item) => item.url).length);
+    if (block.type === "cards" || block.type === "services" || block.type === "products")
+      return count + ((block.props.items ?? []).filter((item) => item.imageUrl).length);
+    return count;
+  }, 0);
+}
+
+function buttonVariantCount(page) {
+  const links = page.blocks.find((item) => item.type === "links");
+  return new Set((links?.props.items ?? []).map((item) => item.style?.variant).filter(Boolean)).size;
+}
+
+function styleSignalCount(page) {
+  const visualStyles = page.blocks.map((block) => block.props.style ?? {});
+  return [
+    page.background.gradient,
+    page.background.pattern && page.background.pattern !== "none",
+    page.background.texture && page.background.texture !== "none",
+    page.background.light && page.background.light !== "none",
+    visualStyles.some((item) => item.effectPreset && item.effectPreset !== "none"),
+    visualStyles.some((item) => item.motion?.preset && item.motion.preset !== "none"),
+    page.blocks.some((block) => ["shape", "ring", "ornament", "frame", "particles"].includes(block.type) && block.enabled),
+  ].filter(Boolean).length;
+}
+
+function premiumQuality(template) {
+  const page = template.page_config;
+  const byId = new Map(page.blocks.map((item) => [item.id, item]));
+  const sequence = blockSequence(page.composition, byId);
+  const banner = page.blocks.find((item) => item.type === "banner");
+  const profile = page.blocks.find((item) => item.type === "profile");
+  const premiumBlocks = page.blocks.filter((item) => item.enabled && premiumBlockTypes.has(item.type)).length;
+  const quality = {
+    id: template.id,
+    hasHeroBanner: Boolean(banner?.enabled && String(banner.props.imageUrl ?? "").startsWith(sampleAssetBase)),
+    hasAvatarImage: Boolean(String(profile?.props.avatarUrl ?? "").startsWith(`${sampleAssetBase}avatar-`)),
+    firstBlockType: sequence[0]?.type ?? "",
+    buttonVariants: buttonVariantCount(page),
+    premiumBlocks,
+    visualAssets: visualAssetCount(page),
+    styleSignals: styleSignalCount(page),
+  };
+  const weakReasons = [];
+  if (!quality.hasHeroBanner) weakReasons.push("missing-hero-banner");
+  if (!quality.hasAvatarImage) weakReasons.push("missing-avatar-image");
+  if (quality.firstBlockType !== "banner") weakReasons.push("hero-not-first");
+  if (quality.buttonVariants < 2) weakReasons.push("flat-buttons");
+  if (quality.premiumBlocks < 4) weakReasons.push("few-premium-blocks");
+  if (quality.visualAssets < 3) weakReasons.push("few-visual-assets");
+  if (quality.styleSignals < 2) weakReasons.push("few-style-signals");
+  return { ...quality, weakReasons };
+}
+
 function sharesVerticalSpine(template) {
   const page = template.page_config;
   if (!page.composition) return true;
@@ -1069,6 +1153,10 @@ function pairwiseDistance(templates) {
 export function auditTemplates(templates) {
   const prints = templates.map(fingerprint);
   const duplicates = prints.filter((item, index) => prints.indexOf(item) !== index);
+  const quality = templates.map(premiumQuality);
+  const weakPremiumTemplates = quality
+    .filter((item) => item.weakReasons.length)
+    .map((item) => ({ id: item.id, reasons: item.weakReasons }));
   const coverage = [
     ...new Set(
       templates.flatMap((template) =>
@@ -1104,6 +1192,8 @@ export function auditTemplates(templates) {
       commonVerticalSpineTemplates,
       pairwise: pairs,
     },
+    quality,
+    weakPremiumTemplates,
     coverage,
     missingBlockTypes: [
       "banner",
@@ -1132,17 +1222,17 @@ export function auditTemplates(templates) {
       "particles",
       "footer",
     ].filter((type) => !coverage.includes(type)),
-    pass: duplicates.length === 0 && minFeatureDistance >= 3 && coverage.length === 25 && new Set(macroFingerprints).size === templates.length && maxPerceptualSimilarity < .72 && commonVerticalSpineTemplates.length < templates.length,
+    pass: duplicates.length === 0 && minFeatureDistance >= 3 && coverage.length === 25 && new Set(macroFingerprints).size === templates.length && maxPerceptualSimilarity < .72 && commonVerticalSpineTemplates.length < templates.length && weakPremiumTemplates.length === 0,
   };
 }
 
 export function createTemplatePack() {
   const templates = recipes.map(buildTemplate);
   return {
-    schema: "cripqer.power-editor-template-pack.v2",
+    schema: "cripqer.power-editor-template-pack.v3",
     generatedAt: new Date(0).toISOString(),
-    seed: "power-editor-diversity-v2",
-    generatorVersion: "diversity-v2",
+    seed: "power-editor-premium-assets-v3",
+    generatorVersion: "premium-assets-v3",
     templates,
     audit: auditTemplates(templates),
   };
