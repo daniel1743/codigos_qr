@@ -21,6 +21,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminTemplateStudioRouteImport } from './routes/admin/template-studio'
 import { Route as DShortUrlRouteImport } from './routes/d.$shortUrl'
 import { Route as PPublicIdRouteImport } from './routes/p.$publicId'
+import { Route as InternalPowerEditorDraftProjectIdRouteImport } from './routes/internal/power-editor-draft/$projectId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -83,6 +84,12 @@ const PPublicIdRoute = PPublicIdRouteImport.update({
   path: '/p/$publicId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const InternalPowerEditorDraftProjectIdRoute =
+  InternalPowerEditorDraftProjectIdRouteImport.update({
+    id: '/internal/power-editor-draft/$projectId',
+    path: '/internal/power-editor-draft/$projectId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -97,6 +104,7 @@ export interface FileRoutesByFullPath {
   '/d/$shortUrl': typeof DShortUrlRoute
   '/p/$publicId': typeof PPublicIdRoute
   '/admin/': typeof AdminIndexRoute
+  '/internal/power-editor-draft/$projectId': typeof InternalPowerEditorDraftProjectIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -110,6 +118,7 @@ export interface FileRoutesByTo {
   '/d/$shortUrl': typeof DShortUrlRoute
   '/p/$publicId': typeof PPublicIdRoute
   '/admin': typeof AdminIndexRoute
+  '/internal/power-editor-draft/$projectId': typeof InternalPowerEditorDraftProjectIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -125,6 +134,7 @@ export interface FileRoutesById {
   '/d/$shortUrl': typeof DShortUrlRoute
   '/p/$publicId': typeof PPublicIdRoute
   '/admin/': typeof AdminIndexRoute
+  '/internal/power-editor-draft/$projectId': typeof InternalPowerEditorDraftProjectIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -141,6 +151,7 @@ export interface FileRouteTypes {
     | '/d/$shortUrl'
     | '/p/$publicId'
     | '/admin/'
+    | '/internal/power-editor-draft/$projectId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -154,6 +165,7 @@ export interface FileRouteTypes {
     | '/d/$shortUrl'
     | '/p/$publicId'
     | '/admin'
+    | '/internal/power-editor-draft/$projectId'
   id:
     | '__root__'
     | '/'
@@ -168,6 +180,7 @@ export interface FileRouteTypes {
     | '/d/$shortUrl'
     | '/p/$publicId'
     | '/admin/'
+    | '/internal/power-editor-draft/$projectId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -181,6 +194,7 @@ export interface RootRouteChildren {
   ProfileRoute: typeof ProfileRoute
   DShortUrlRoute: typeof DShortUrlRoute
   PPublicIdRoute: typeof PPublicIdRoute
+  InternalPowerEditorDraftProjectIdRoute: typeof InternalPowerEditorDraftProjectIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -269,6 +283,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PPublicIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/internal/power-editor-draft/$projectId': {
+      id: '/internal/power-editor-draft/$projectId'
+      path: '/internal/power-editor-draft/$projectId'
+      fullPath: '/internal/power-editor-draft/$projectId'
+      preLoaderRoute: typeof InternalPowerEditorDraftProjectIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -295,6 +316,8 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileRoute: ProfileRoute,
   DShortUrlRoute: DShortUrlRoute,
   PPublicIdRoute: PPublicIdRoute,
+  InternalPowerEditorDraftProjectIdRoute:
+    InternalPowerEditorDraftProjectIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

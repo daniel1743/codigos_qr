@@ -36,9 +36,10 @@ import { Button } from "../components/ui/button";
 import type { CornerDotType, CornerSquareType, DotsType, QREffectType } from "../types/qr-advanced";
 
 import type { Session } from "@supabase/supabase-js";
+import { PowerEditorMainEntry } from "../power-editor/client/src/components/PowerEditorMainEntry";
 
 export const Route = createFileRoute("/editor")({
-  component: EditorPage,
+  component: PowerEditorMainEntry,
 });
 
 type TabId = "profile" | "links" | "appearance" | "qr";
@@ -126,7 +127,7 @@ function EditorQRPreview({
   );
 }
 
-export function EditorPage() {
+export function LegacyEditorPage() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 

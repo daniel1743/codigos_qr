@@ -1,3 +1,5 @@
+import type { PageConfig } from "../power-editor/client/src/lib/editorCandidateModel";
+
 // 'square' is kept strictly for safe legacy handling, the UI normalizes it to 'rounded'
 export type AvatarShape = "circle" | "rounded" | "none" | "square";
 export type ButtonRadius = "none" | "rounded" | "full";
@@ -84,6 +86,32 @@ export interface QRVisualVersion {
   logo_url: string | null;
   logo_enabled: boolean;
   created_at: string;
+}
+
+export type PowerEditorRecordStatus = "draft" | "published" | "archived";
+
+export interface PowerEditorTemplate {
+  id: string;
+  owner_user_id: string;
+  name: string;
+  status: PowerEditorRecordStatus;
+  page_config: PageConfig;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PowerEditorProject {
+  id: string;
+  owner_user_id: string;
+  profile_id: string;
+  template_id: string | null;
+  name: string;
+  status: PowerEditorRecordStatus;
+  page_config: PageConfig;
+  published_page_config: PageConfig | null;
+  published_at: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export type PlatformType =
