@@ -76,7 +76,27 @@ export function normalizeOrders(config: PageConfig): PageConfig { return { ...co
 export function updateBlock(config: PageConfig, blockId: string, patch: Partial<PageBlock>): PageConfig { return { ...config, blocks: config.blocks.map(block => block.id === blockId ? { ...block, ...patch, props: patch.props ? { ...block.props, ...patch.props } : block.props } : block) }; }
 export function updateBlockStyle(config: PageConfig, blockId: string, patch: Partial<BlockVisualStyle>): PageConfig { const block = getBlock(config, blockId); if (!block) return config; const style = getBlockStyle(block); return updateBlock(config, blockId, { props: { style: { ...style, ...patch, composition: { ...style.composition, ...patch.composition }, border: { ...style.border, ...patch.border }, shadow: { ...style.shadow, ...patch.shadow }, glow: { ...style.glow, ...patch.glow }, glass: { ...style.glass, ...patch.glass }, gradient: { ...style.gradient, ...patch.gradient }, filters: { ...style.filters, ...patch.filters }, motion: { ...style.motion, ...patch.motion }, responsive: { ...style.responsive, ...patch.responsive } } } }); }
 export function removeBlock(config: PageConfig, blockId: string): PageConfig { return normalizeOrders({ ...config, blocks: config.blocks.filter(block => block.id !== blockId) }); }
-export function reorderBlock(config: PageConfig, from: number, to: number): PageConfig { return normalizeOrders({ ...config, blocks: reorder(allBlocks(config), from, to) }); }
+export function reorderBlock(config: PageConfig, from: number, to: number): PageConfig {
+  const nextConfig = normalizeOrders({ ...config, blocks: reorder(allBlocks(config), from, to) });
+  
+  if (nextConfig.version === 6 && (nextConfig as any).composition?.children) {
+    const v6 = nextConfig as any;
+    const blockOrder = nextConfig.blocks.map(b => b.id);
+    
+    const newChildren = [...v6.composition.children].sort((a, b) => {
+       if (a.kind === "block" && b.kind === "block") {
+           const idxA = blockOrder.indexOf(a.blockId);
+           const idxB = blockOrder.indexOf(b.blockId);
+           if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+       }
+       return 0;
+    });
+    
+    return { ...v6, composition: { ...v6.composition, children: newChildren } };
+  }
+  
+  return nextConfig;
+}
 export function bringBlockToFront(config: PageConfig, blockId: string) { const index = allBlocks(config).findIndex(block => block.id === blockId); return index < 0 ? config : reorderBlock(config, index, config.blocks.length - 1); }
 export function sendBlockToBack(config: PageConfig, blockId: string) { const index = allBlocks(config).findIndex(block => block.id === blockId); return index < 0 ? config : reorderBlock(config, index, 0); }
 export function setGroup(config: PageConfig, ids: string[], groupId?: string) { return { ...config, blocks: config.blocks.map(block => ids.includes(block.id) ? { ...block, groupId } : block) }; }

@@ -132,6 +132,26 @@
   pointer-events: none;
 }
 
+.ep-decoration.ep-pos-top-left {
+  top: 10px;
+  left: 10px;
+}
+
+.ep-decoration.ep-pos-top-right {
+  top: 10px;
+  right: 10px;
+}
+
+.ep-decoration.ep-pos-bottom-left {
+  bottom: 10px;
+  left: 10px;
+}
+
+.ep-decoration.ep-pos-bottom-right {
+  right: 10px;
+  bottom: 10px;
+}
+
 .ep-context-toolbar > button:nth-last-child(3) {
   color: #9197a0;
   cursor: pointer;

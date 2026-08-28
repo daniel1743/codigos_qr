@@ -41,7 +41,7 @@ const navItems = [
   { id: "home", label: "Inicio", to: "/", active: (pathname: string) => pathname === "/" },
   { id: "qrs", label: "Mis QR", to: "/editor", active: (pathname: string) => pathname === "/editor" },
   { id: "templates", label: "Biblioteca", to: "/template-bank", active: (pathname: string) => pathname === "/template-bank" },
-  { id: "create", label: "Editor", to: "/template-builder", active: (pathname: string) => pathname === "/template-builder", emphasized: true },
+  { id: "create", label: "Editor", to: "/editor", active: (pathname: string) => pathname === "/template-builder", emphasized: true },
   { id: "security", label: "Documentos Seguros", to: "/encrypted-documents", active: (pathname: string) => pathname === "/encrypted-documents" },
 ];
 
@@ -376,3 +376,5 @@ export function DesktopNavbar() {
     </header>
   );
 }
+
+

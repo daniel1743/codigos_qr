@@ -26,27 +26,41 @@ describe("power editor template factory", () => {
     expect(audit.missingBlockTypes).toEqual([]);
   });
 
-  it("incluye composiciones con y sin banner, avatares con imagen y monograma, y CTAs de una/dos columnas", () => {
+  it("crea doce heroes premium con banner activo, avatar real y CTAs de una/dos columnas", () => {
     const pages = pack.templates.map((template) => template.page_config);
     expect(
-      pages.some((page) => page.blocks.find((block) => block.type === "banner")?.enabled),
+      pages.every((page) => {
+        const banner = page.blocks.find((block) => block.type === "banner");
+        return Boolean(banner?.enabled && banner.props.imageUrl?.startsWith("/power-editor-samples/banner-"));
+      }),
     ).toBe(true);
     expect(
-      pages.some((page) => !page.blocks.find((block) => block.type === "banner")?.enabled),
-    ).toBe(true);
-    expect(
-      pages.some((page) =>
-        Boolean(page.blocks.find((block) => block.type === "profile")?.props.avatarUrl),
-      ),
-    ).toBe(true);
-    expect(
-      pages.some((page) => !page.blocks.find((block) => block.type === "profile")?.props.avatarUrl),
+      pages.every((page) => {
+        const profile = page.blocks.find((block) => block.type === "profile");
+        return Boolean(profile?.props.avatarUrl?.startsWith("/power-editor-samples/avatar-"));
+      }),
     ).toBe(true);
     expect(
       pages.some((page) => page.blocks.find((block) => block.type === "links")?.props.layout === 1),
     ).toBe(true);
     expect(
       pages.some((page) => page.blocks.find((block) => block.type === "links")?.props.layout === 2),
+    ).toBe(true);
+  });
+
+  it("rechaza recetas premium visualmente pobres", () => {
+    const audit = auditTemplates(pack.templates);
+    expect(audit.weakPremiumTemplates).toEqual([]);
+    expect(
+      audit.quality.every((item) =>
+        item.hasHeroBanner &&
+        item.hasAvatarImage &&
+        item.firstBlockType === "banner" &&
+        item.buttonVariants >= 2 &&
+        item.premiumBlocks >= 4 &&
+        item.visualAssets >= 3 &&
+        item.styleSignals >= 2,
+      ),
     ).toBe(true);
   });
 

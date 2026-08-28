@@ -106,7 +106,7 @@ export function PremiumMobileNavDrawer({ children }: PremiumMobileNavDrawerProps
       pathname !== "/profile" &&
       pathname !== "/encrypted-documents" &&
       pathname !== "/admin" &&
-      pathname !== "/template-builder" &&
+      pathname !== "/editor" &&
       pathname !== "/template-bank");
 
   const displayName =
@@ -870,3 +870,4 @@ function SidebarItem({
     </a>
   );
 }
+

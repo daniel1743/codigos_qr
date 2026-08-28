@@ -16,7 +16,13 @@ import type { Session } from "@supabase/supabase-js";
 import { PowerEditorMainEntry } from "../power-editor/client/src/components/PowerEditorMainEntry";
 
 export const Route = createFileRoute("/editor")({
-  component: PowerEditorMainEntry,
+  component: function EditorRouteComponent() {
+    const isQrTab = typeof window !== 'undefined' && window.location.search.includes('tab=qr');
+    if (isQrTab) {
+      return <LegacyEditorPage />;
+    }
+    return <PowerEditorMainEntry />;
+  },
 });
 
 function EditorQRPreview({
@@ -241,3 +247,5 @@ export function LegacyEditorPage() {
   );
 }
 export type EditorTarget = { type: "profile.photo" | "profile.name" | "profile.bio" | "profile.alias" | "profile.cover" | "profile.footer" } | { type: "links.manage" } | { type: "link"; linkId: string } | { type: "appearance.templates" | "appearance.typography" | "appearance.colors" | "appearance.buttons" | "appearance.spacing" | "appearance.decoration" } | { type: "social_cover" | "hero_social" } | { type: "qr" };
+
+

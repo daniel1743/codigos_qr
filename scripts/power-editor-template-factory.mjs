@@ -1158,3 +1158,4 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   writeFileSync(output, `${JSON.stringify(pack, null, 2)}\n`);
   console.log(JSON.stringify(pack.audit, null, 2));
 }
+

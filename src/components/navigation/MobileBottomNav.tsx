@@ -15,7 +15,7 @@ type MobileSearch = Record<string, unknown>;
 type MobileNavItem = {
   id: "template" | "qr" | "editor" | "secure-documents" | "profile";
   label: string;
-  to: "/editor" | "/template-builder" | "/template-bank" | "/encrypted-documents" | "/profile";
+  to: "/editor" | "/editor" | "/template-bank" | "/encrypted-documents" | "/profile";
   search?: MobileSearch;
   icon: IconSvgElement;
   active: (pathname: string, search: MobileSearch) => boolean;
@@ -40,9 +40,9 @@ const items: MobileNavItem[] = [
   {
     id: "editor",
     label: "Editor",
-    to: "/template-builder",
+    to: "/editor",
     icon: Add01Icon,
-    active: (pathname) => pathname === "/template-builder",
+    active: (pathname, search) => pathname === "/editor" && search.tab !== "qr",
   },
   {
     id: "secure-documents",
@@ -86,7 +86,7 @@ export function MobileBottomNav() {
       pathname !== "/editor" &&
       pathname !== "/profile" &&
       pathname !== "/encrypted-documents" &&
-      pathname !== "/template-builder" &&
+      pathname !== "/editor" &&
       pathname !== "/template-bank");
 
   useLayoutEffect(() => {
@@ -189,3 +189,5 @@ export function MobileBottomNav() {
     </div>
   );
 }
+
+
