@@ -1,0 +1,84 @@
+# Project TODO
+
+- [x] Registrar que la autorización autónoma más reciente habilita los incrementos V6 en este worktree aislado y sustituye el gate documental anterior de Fase 1.
+- [x] Investigar diez competidores profesionales y conservar las fuentes oficiales aplicables al Power Editor.
+- [x] Auditar el estado local previo para preservar la integración temporal de borradores y los cambios no publicados.
+- [x] Implementar el modelo V6 de composición, hidratación compatible y validación inmutable.
+- [x] Implementar renderer jerárquico y delegación mínima que conserve renderers de bloques V5.
+- [x] Implementar controles acotados de composición con historial compatible de Undo/Redo.
+- [x] Mejorar el generador offline con macrofamilias V6 y una auditoría de diversidad perceptual.
+- [x] Adaptar de forma segura la ruta interna de borradores para aceptar PageConfig V6 sin tocar campos protegidos.
+- [x] Ejecutar pruebas unitarias, tipos, build, auditorías de scripts y QA visual con tres o cuatro capturas distintas.
+- [x] Preparar informe final, promoción segura y SQL manual pendiente sin aplicar cambios en Supabase.
+- [x] Confirmar semánticamente la política UPDATE V6 aplicada manualmente y registrar su verificación RLS.
+- [x] Auditar requisitos de entorno para validar localmente borradores y sincronizador sin exponer secretos ni publicar.
+- [x] Ejecutar sólo validaciones locales o dry-run autorizados y documentar los pasos manuales restantes.
+- [x] Iniciar y comprobar el preview temporal aislado del Power Editor V6 en el puerto local 4174 para revisión del usuario.
+- [x] Exponer el preview temporal aislado mediante un enlace externo de corta duración para revisión desde el navegador del usuario.
+- [x] Retirar del template candidato el logotipo CRIPQER superior y su contenedor visual, sin eliminar una futura marca de agua configurable.
+- [x] Exponer controles de color y estilo al seleccionar enlaces dentro del editor.
+- [x] Reparar la salida de vista previa y documentar acciones no conectadas a publicación o compartir real.
+- [x] Consolidar controles existentes de marcos, partículas, color y animación dentro del panel Efectos.
+- [ ] Ejecutar QA final de interacción y reintentar el empaquetado completo cuando el servidor temporal no esté activo, tras la interrupción de memoria de Nitro.
+- [ ] Auditar archivo por archivo el estado local actualizado y proponer grupos de commits futuros sin crear commits ni modificar archivos funcionales.
+- [x] Añadir en Color de enlaces controles de familia, tamaño, peso, espaciado, estilo y contorno tipográfico con actualizaciones inmutables.
+- [x] Añadir en Color de enlaces controles de familia, tamaño, peso, espaciado, estilo y contorno tipográfico con actualizaciones inmutables.
+- [x] Añadir interruptor y medidor de grosor de borde para botones, junto con orientación contextual de la variante de color.
+- [x] Añadir interruptor y medidor de grosor de borde para botones, junto con orientación contextual de la variante de color.
+- [x] Corregir la aplicación visual de color de texto y grosor de borde para enlaces seleccionados en el preview aislado.
+- [x] Corregir la aplicación visual de color de texto y grosor de borde para enlaces seleccionados en el preview aislado.
+- [x] Añadir paleta rápida de colores debajo del grosor de borde para enlaces seleccionados.
+- [x] Añadir un inspector unificado para título y texto con color, fuente, peso/negrita, cursiva, contorno, sombra, ancho, espaciado y altura de línea.
+- [x] Diseñar roles semánticos y catálogo extensible de 24 Paletas Premium con contraste validable.
+- [x] Añadir la herramienta lateral Paletas Premium y su inspector funcional al Power Editor aislado.
+- [x] Implementar aplicación completa y parcial reversible de paletas mediante el historial existente.
+- [x] Validar visualmente, con pruebas y sin escritura remota las Paletas Premium.
+- [x] Congelar la línea base actual y auditar el bloque de tarjetas sin modificar sus comportamientos existentes.
+- [x] Añadir a tarjetas tipografía completa, colores, contorno, bordes, alineación y textos secundarios editables.
+- [x] Añadir imagen opcional 75/25 en tarjeta, seleccionable desde biblioteca o subida, con posición sólo izquierda o derecha.
+- [x] Corregir el scroll independiente de herramientas e inspector sin afectar el canvas ni la barra superior.
+- [x] Ejecutar pruebas y QA visual de la tarjeta enriquecida y del scroll antes de evaluar la refactorización externa.
+- [x] Auditar las diecinueve mejoras propuestas, clasificarlas y recomendar una única siguiente capa de bajo riesgo sin aplicar la refactorización general.
+- [x] Corregir el zoom para que transforme sólo el template dentro del canvas y mantenga fijos header, herramientas e inspector.
+- [x] Añadir alineación izquierda, centro y derecha independiente para título, descripción y CTA de las tarjetas.
+- [x] Añadir tarjeta clicable y botón CTA opcional con URL, preservando selección de edición y navegación sólo en vista previa.
+- [x] Comparar la especificación maestra de edición contextual con el estado aislado actual y entregar un resumen sin implementar cambios.
+- [x] Establecer un protocolo de entrega: pruebas automáticas, evidencia visual y prueba de aceptación del usuario antes de cada incremento posterior.
+- [ ] Incremento 1: seleccionar una tarjeta y sus subelementos de forma contextual, sin abrir editores repetidos ni tocar otros módulos.
+- [x] Corregir y verificar el scroll vertical independiente del inspector general para paneles largos, igualando el comportamiento de Paletas Premium.
+- [x] Corregir la aplicación visible de Paletas Premium para que roles aplicados cambien el template y no sólo el badge.
+- [x] Eliminar solapamientos de controles de texto e imagen en el inspector sin cambiar su funcionalidad.
+- [x] Garantizar que el inspector de Paletas Premium permite recorrer sus 24 opciones sin superposición ni recorte.
+- [x] Corregir el layout del panel Imagen/Media para eliminar solapamientos en inspectores estrechos sin alterar sus controles.
+- [x] Conectar de forma aislada la carga y el guardado de borrador del Power Editor a un proyecto autenticado, preservando campos protegidos y sin sustituir el editor heredado.
+- [x] Validar con una sesión y un proyecto propios la recuperación del borrador y la ausencia de cambios en la página publicada.
+- [x] Preparar SQL mínimo y reversible para que el usuario cree manualmente un único borrador privado de prueba.
+- [x] Resolver mediante preflight de sólo lectura la referencia real de la clave foránea `power_editor_projects.owner_user_id` antes de reintentar cualquier inserción.
+- [x] Verificar de sólo lectura el UUID de `auth.users` que corresponde al perfil de prueba antes de crear el borrador.
+- [x] Reconciliar la discrepancia visual del cuarto grupo del UUID antes de reintentar el INSERT del borrador privado.
+- [x] Permitir exclusivamente el host temporal del preview privado para validar la ruta interna autenticada sin afectar hosts de producción.
+- [x] Obtener una clave anónima de Supabase válida para completar la prueba privada de carga y guardado del borrador.
+- [x] Reutilizar el componente de inicio de sesión existente cuando la ruta privada de borrador no tenga sesión autenticada.
+- [x] Documentar la validación autenticada completada con la sesión real del propietario antes de promover cualquier integración.
+- [x] Completar la fusión funcional aislada del generador de recetas con el modelo del editor, sin merge Git, publicación ni sincronización remota.
+- [x] Generar un catálogo cliente de sólo lectura desde las 12 recetas V6 actuales, sin usar el artefacto V5 desfasado ni realizar peticiones de red.
+- [x] Permitir aplicar una receta local desde el Power Editor sin guardar, publicar, sincronizar ni alterar campos remotos.
+- [x] Mostrar un selector local y explícito de las 12 recetas V6 dentro del Power Editor sin modificar rutas públicas ni el editor heredado.
+- [x] Obtener aceptación del catálogo local de recetas V6; el pulido visual queda diferido para una fase posterior.
+- [x] Ejecutar con la sesión real del propietario la prueba aislada de carga, guardado y recarga del borrador privado.
+- [x] Sustituir únicamente el `page_config` vacío del borrador de prueba por una receta V6 completa y editable, sin tocar publicación ni campos protegidos.
+- [x] Aplicar una receta V6 local y persistirla usando el botón Guardar autenticado del propio borrador de prueba, antes de comprobar la recarga.
+- [x] Auditar y conectar el generador local de las 12 recetas al modelo del Power Editor, sin sincronización remota, publicación ni uso de service_role en el cliente.
+- [ ] Auditar el estado local actualizado y preparar grupos de commits futuros, sin crear commits, push, merge ni despliegue.
+- [x] Inventariar el estado local y documentar grupos de respaldo e integración futura sin ejecutar operaciones Git.
+- [x] Auditar y promover el Power Editor V6 como entrada principal, preservando el editor heredado exclusivamente para administración.
+- [x] Verificar rutas, navegación, accesos administrativos, QR y rutas públicas antes de crear un respaldo de revisión.
+- [x] Verificar visualmente `/editor` con sesión propia y `/admin/template-studio` protegido tras la promoción del editor principal.
+- [x] Verificar el contenido del commit remoto indicado y la presencia declarada de variables de despliegue sin publicar ni modificar secretos.
+- [ ] Resolver la divergencia entre el commit remoto externo `3cf5670` y la rama aislada del Power Editor V6 antes de cualquier push, merge o despliegue.
+- [ ] Confirmar que `VITE_APP_URL` de Vercel usa el dominio HTTPS final y no `localhost` antes de desplegar el Power Editor V6.
+- [ ] Respaldar en una rama remota dedicada los cambios locales del Power Editor V6 antes de desplegarlo en Vercel.
+- [ ] Crear commits ordenados y hacer push de los cambios validados del Power Editor V6 desde el worktree aislado, sin merge ni despliegue.
+- [x] Crear cuatro commits ordenados y hacer push de los cambios validados del Power Editor V6 a `chore/power-editor-isolated-copy`, sin merge ni despliegue.
+- [ ] Abrir una Pull Request de revisión desde `chore/power-editor-isolated-copy` hacia `main`, sin fusionar ni desplegar.
+- [x] Abrir la Pull Request #2 de revisión desde `chore/power-editor-isolated-copy` hacia `main`, sin fusionar ni desplegar.

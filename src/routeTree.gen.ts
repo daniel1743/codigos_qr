@@ -14,9 +14,14 @@ import { Route as AliasRouteImport } from './routes/$alias'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as EditorRouteImport } from './routes/editor'
 import { Route as EncryptedDocumentsRouteImport } from './routes/encrypted-documents'
+import { Route as PowerEditorPreviewRouteImport } from './routes/power-editor-preview'
+import { Route as PowerEditorPreviewMobileRouteImport } from './routes/power-editor-preview-mobile'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AdminTemplateStudioRouteImport } from './routes/admin/template-studio'
 import { Route as DShortUrlRouteImport } from './routes/d.$shortUrl'
 import { Route as PPublicIdRouteImport } from './routes/p.$publicId'
+import { Route as InternalPowerEditorDraftProjectIdRouteImport } from './routes/internal/power-editor-draft/$projectId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -43,10 +48,31 @@ const EncryptedDocumentsRoute = EncryptedDocumentsRouteImport.update({
   path: '/encrypted-documents',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PowerEditorPreviewRoute = PowerEditorPreviewRouteImport.update({
+  id: '/power-editor-preview',
+  path: '/power-editor-preview',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PowerEditorPreviewMobileRoute =
+  PowerEditorPreviewMobileRouteImport.update({
+    id: '/power-editor-preview-mobile',
+    path: '/power-editor-preview-mobile',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminTemplateStudioRoute = AdminTemplateStudioRouteImport.update({
+  id: '/template-studio',
+  path: '/template-studio',
+  getParentRoute: () => AdminRoute,
 } as any)
 const DShortUrlRoute = DShortUrlRouteImport.update({
   id: '/d/$shortUrl',
@@ -58,37 +84,57 @@ const PPublicIdRoute = PPublicIdRouteImport.update({
   path: '/p/$publicId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const InternalPowerEditorDraftProjectIdRoute =
+  InternalPowerEditorDraftProjectIdRouteImport.update({
+    id: '/internal/power-editor-draft/$projectId',
+    path: '/internal/power-editor-draft/$projectId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$alias': typeof AliasRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/editor': typeof EditorRoute
   '/encrypted-documents': typeof EncryptedDocumentsRoute
+  '/power-editor-preview': typeof PowerEditorPreviewRoute
+  '/power-editor-preview-mobile': typeof PowerEditorPreviewMobileRoute
   '/profile': typeof ProfileRoute
+  '/admin/template-studio': typeof AdminTemplateStudioRoute
   '/d/$shortUrl': typeof DShortUrlRoute
   '/p/$publicId': typeof PPublicIdRoute
+  '/admin/': typeof AdminIndexRoute
+  '/internal/power-editor-draft/$projectId': typeof InternalPowerEditorDraftProjectIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$alias': typeof AliasRoute
-  '/admin': typeof AdminRoute
   '/editor': typeof EditorRoute
   '/encrypted-documents': typeof EncryptedDocumentsRoute
+  '/power-editor-preview': typeof PowerEditorPreviewRoute
+  '/power-editor-preview-mobile': typeof PowerEditorPreviewMobileRoute
   '/profile': typeof ProfileRoute
+  '/admin/template-studio': typeof AdminTemplateStudioRoute
   '/d/$shortUrl': typeof DShortUrlRoute
   '/p/$publicId': typeof PPublicIdRoute
+  '/admin': typeof AdminIndexRoute
+  '/internal/power-editor-draft/$projectId': typeof InternalPowerEditorDraftProjectIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$alias': typeof AliasRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/editor': typeof EditorRoute
   '/encrypted-documents': typeof EncryptedDocumentsRoute
+  '/power-editor-preview': typeof PowerEditorPreviewRoute
+  '/power-editor-preview-mobile': typeof PowerEditorPreviewMobileRoute
   '/profile': typeof ProfileRoute
+  '/admin/template-studio': typeof AdminTemplateStudioRoute
   '/d/$shortUrl': typeof DShortUrlRoute
   '/p/$publicId': typeof PPublicIdRoute
+  '/admin/': typeof AdminIndexRoute
+  '/internal/power-editor-draft/$projectId': typeof InternalPowerEditorDraftProjectIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -98,19 +144,28 @@ export interface FileRouteTypes {
     | '/admin'
     | '/editor'
     | '/encrypted-documents'
+    | '/power-editor-preview'
+    | '/power-editor-preview-mobile'
     | '/profile'
+    | '/admin/template-studio'
     | '/d/$shortUrl'
     | '/p/$publicId'
+    | '/admin/'
+    | '/internal/power-editor-draft/$projectId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/$alias'
-    | '/admin'
     | '/editor'
     | '/encrypted-documents'
+    | '/power-editor-preview'
+    | '/power-editor-preview-mobile'
     | '/profile'
+    | '/admin/template-studio'
     | '/d/$shortUrl'
     | '/p/$publicId'
+    | '/admin'
+    | '/internal/power-editor-draft/$projectId'
   id:
     | '__root__'
     | '/'
@@ -118,20 +173,28 @@ export interface FileRouteTypes {
     | '/admin'
     | '/editor'
     | '/encrypted-documents'
+    | '/power-editor-preview'
+    | '/power-editor-preview-mobile'
     | '/profile'
+    | '/admin/template-studio'
     | '/d/$shortUrl'
     | '/p/$publicId'
+    | '/admin/'
+    | '/internal/power-editor-draft/$projectId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AliasRoute: typeof AliasRoute
-  AdminRoute: typeof AdminRoute
+  AdminRoute: typeof AdminRouteWithChildren
   EditorRoute: typeof EditorRoute
   EncryptedDocumentsRoute: typeof EncryptedDocumentsRoute
+  PowerEditorPreviewRoute: typeof PowerEditorPreviewRoute
+  PowerEditorPreviewMobileRoute: typeof PowerEditorPreviewMobileRoute
   ProfileRoute: typeof ProfileRoute
   DShortUrlRoute: typeof DShortUrlRoute
   PPublicIdRoute: typeof PPublicIdRoute
+  InternalPowerEditorDraftProjectIdRoute: typeof InternalPowerEditorDraftProjectIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -171,12 +234,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EncryptedDocumentsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/power-editor-preview': {
+      id: '/power-editor-preview'
+      path: '/power-editor-preview'
+      fullPath: '/power-editor-preview'
+      preLoaderRoute: typeof PowerEditorPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/power-editor-preview-mobile': {
+      id: '/power-editor-preview-mobile'
+      path: '/power-editor-preview-mobile'
+      fullPath: '/power-editor-preview-mobile'
+      preLoaderRoute: typeof PowerEditorPreviewMobileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profile': {
       id: '/profile'
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/template-studio': {
+      id: '/admin/template-studio'
+      path: '/template-studio'
+      fullPath: '/admin/template-studio'
+      preLoaderRoute: typeof AdminTemplateStudioRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/d/$shortUrl': {
       id: '/d/$shortUrl'
@@ -192,18 +283,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PPublicIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/internal/power-editor-draft/$projectId': {
+      id: '/internal/power-editor-draft/$projectId'
+      path: '/internal/power-editor-draft/$projectId'
+      fullPath: '/internal/power-editor-draft/$projectId'
+      preLoaderRoute: typeof InternalPowerEditorDraftProjectIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
+
+interface AdminRouteChildren {
+  AdminTemplateStudioRoute: typeof AdminTemplateStudioRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminTemplateStudioRoute: AdminTemplateStudioRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AliasRoute: AliasRoute,
-  AdminRoute: AdminRoute,
+  AdminRoute: AdminRouteWithChildren,
   EditorRoute: EditorRoute,
   EncryptedDocumentsRoute: EncryptedDocumentsRoute,
+  PowerEditorPreviewRoute: PowerEditorPreviewRoute,
+  PowerEditorPreviewMobileRoute: PowerEditorPreviewMobileRoute,
   ProfileRoute: ProfileRoute,
   DShortUrlRoute: DShortUrlRoute,
   PPublicIdRoute: PPublicIdRoute,
+  InternalPowerEditorDraftProjectIdRoute:
+    InternalPowerEditorDraftProjectIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

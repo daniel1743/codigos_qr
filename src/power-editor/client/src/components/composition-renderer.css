@@ -1,0 +1,27 @@
+.ep-composition-root { position: relative; display: flex; min-height: 100%; flex-direction: column; box-sizing: border-box; }
+.ep-composition-node { position: relative; box-sizing: border-box; min-width: 0; }
+.ep-composition-root > .ep-composition-node { flex: 0 0 auto; }
+.ep-composition-section, .ep-composition-container, .ep-composition-stack, .ep-composition-column { display: flex; flex-direction: column; }
+.ep-composition-section { width: 100%; }
+.ep-composition-row, .ep-composition-grid { display: grid; align-items: stretch; }
+.ep-composition-row > .ep-composition-column { min-width: 0; }
+.ep-composition-overlay { position: relative; display: block; min-height: 1px; }
+.ep-composition-overlay > .ep-composition-node { position: relative; }
+.ep-composition-overlay > .ep-composition-node[style*="position: absolute"] { position: absolute !important; }
+.ep-composition-fixed { display: flex; flex-direction: column; box-sizing: border-box; }
+.ep-composition-block { min-width: 0; }
+.ep-composition-root .ep-profile-block.ep-avatar-transition { margin-top: 0 !important; }
+.ep-composition-canvas-action { position: absolute; z-index: 24; top: 12px; left: 12px; padding: 5px 7px; border: 1px solid rgba(196,154,104,.45); border-radius: 6px; color: #e8c38f; background: rgba(16,18,22,.82); font-family: "DM Mono", monospace; font-size: 7px; letter-spacing: .25px; cursor: pointer; }
+.ep-composition-canvas-action:hover { background: rgba(196,154,104,.22); }
+.ep-composition-panel { display: grid; align-content: start; gap: 2px; }
+.ep-composition-presets { display: grid; gap: 7px; margin: 2px 0 14px; }
+.ep-composition-presets button { display: flex; align-items: center; gap: 9px; min-height: 48px; padding: 8px; border: 1px solid rgba(255,255,255,.09); border-radius: 9px; color: #dfe1e5; background: #20242a; text-align: left; cursor: pointer; }
+.ep-composition-presets button:hover { border-color: rgba(196,154,104,.55); background: rgba(196,154,104,.1); }
+.ep-composition-presets button > svg { flex: 0 0 auto; color: #e8c38f; }
+.ep-composition-presets button span { display: grid; gap: 2px; }
+.ep-composition-presets button b { font-size: 10px; }
+.ep-composition-presets button small { color: #9298a2; font-size: 8px; }
+.ep-composition-controls { border-top: 1px solid rgba(255,255,255,.08); padding-top: 12px; }
+.ep-global-actions .ep-composition-action { width: auto; padding: 0 9px; gap: 5px; font-size: 10px; font-weight: 800; }
+.ep-global-actions .ep-composition-action.is-active { color: #e8c38f; background: rgba(196,154,104,.14); }
+@media (max-width: 760px) { .ep-global-actions .ep-composition-action { display: none; } }

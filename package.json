@@ -9,7 +9,14 @@
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "templates:power:generate": "node scripts/power-editor-template-factory.mjs artifacts/power-editor-template-pack.json",
+    "templates:power:catalog": "node scripts/build-power-editor-client-catalog.mjs",
+    "templates:power:audit": "node scripts/audit-power-editor-template-pack.mjs artifacts/power-editor-template-pack.json",
+    "templates:power:verify": "node scripts/power-editor-template-factory.mjs artifacts/power-editor-template-pack.json && node scripts/audit-power-editor-template-pack.mjs artifacts/power-editor-template-pack.json",
+    "test:power-templates": "vitest run scripts/power-editor-template-factory.test.mjs scripts/sync-power-editor-template-pack.test.mjs src/services/power-editor-project.service.test.ts",
+    "templates:power:sync:dry-run": "node scripts/sync-power-editor-template-pack.mjs",
+    "templates:power:sync:verify": "node scripts/sync-power-editor-template-pack.mjs > artifacts/power-editor-template-sync-dry-run.json && node scripts/verify-power-editor-template-sync-dry-run.mjs artifacts/power-editor-template-sync-dry-run.json"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -92,6 +99,7 @@
     "prettier": "^3.7.3",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.56.1",
-    "vite": "^8.2.0"
+    "vite": "^8.2.0",
+    "vitest": "^4.1.11"
   }
 }
