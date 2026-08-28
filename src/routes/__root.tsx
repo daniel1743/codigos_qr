@@ -15,7 +15,6 @@ import { PremiumMobileNavDrawer } from "../components/navigation/PremiumMobileNa
 import { MobileBottomNav } from "../components/navigation/MobileBottomNav";
 import { DesktopNavbar } from "../components/navigation/DesktopNavbar";
 import { getBrowserSupabaseClient } from "../lib/supabase/client";
-import { DebugConsole } from "../components/DebugConsole";
 
 import appCss from "../styles.css?url";
 
@@ -147,7 +146,6 @@ function RootShell({ children }: { children: ReactNode }) {
       </head>
       <body>
         {children}
-        <DebugConsole />
         <Scripts />
       </body>
     </html>
