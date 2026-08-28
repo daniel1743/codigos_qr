@@ -15,6 +15,7 @@ import { PremiumMobileNavDrawer } from "../components/navigation/PremiumMobileNa
 import { MobileBottomNav } from "../components/navigation/MobileBottomNav";
 import { DesktopNavbar } from "../components/navigation/DesktopNavbar";
 import { getBrowserSupabaseClient } from "../lib/supabase/client";
+import { DebugConsole } from "../components/DebugConsole";
 
 import appCss from "../styles.css?url";
 
@@ -41,6 +42,8 @@ function NotFoundComponent() {
 }
 
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
+  console.error("[PROD ERROR] CRITICAL FATAL ERROR DETAILS: ", error);
+  if (error && error.message) { console.error("Mensaje exacto del error: ", error.message); }
   console.error(error);
   const router = useRouter();
 
@@ -51,7 +54,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
           This page didn't load
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Something went wrong on our end. You can try refreshing or head back home.
+          Something went wrong on our end. You can try refreshing or head back home.<br/><br/><strong style={{color: "red"}}>{error.message || String(error)}</strong>
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
@@ -144,6 +147,7 @@ function RootShell({ children }: { children: ReactNode }) {
       </head>
       <body>
         {children}
+        <DebugConsole />
         <Scripts />
       </body>
     </html>
@@ -243,3 +247,4 @@ function PrivateMobileNavigationShell({ children }: { children: ReactNode }) {
     </PremiumMobileNavDrawer>
   );
 }
+
