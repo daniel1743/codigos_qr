@@ -80,3 +80,4 @@
 - [ ] Respaldar en una rama remota dedicada los cambios locales del Power Editor V6 antes de desplegarlo en Vercel.
 - [ ] Crear commits ordenados y hacer push de los cambios validados del Power Editor V6 desde el worktree aislado, sin merge ni despliegue.
 - [x] Crear cuatro commits ordenados y hacer push de los cambios validados del Power Editor V6 a `chore/power-editor-isolated-copy`, sin merge ni despliegue.
+- [ ] Abrir una Pull Request de revisión desde `chore/power-editor-isolated-copy` hacia `main`, sin fusionar ni desplegar.
