@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import type { Session } from "@supabase/supabase-js";
 import { Auth } from "../../../../components/Auth";
 import { getBrowserSupabaseClient } from "../../../../lib/supabase/client";
@@ -32,6 +32,12 @@ export function createInitialMainPowerEditorConfig(): PageConfig {
 
 export function PowerEditorMainEntry() {
   const supabase = getBrowserSupabaseClient();
+  const requestedProjectId = useRouterState({
+    select: (state) => {
+      const value = (state.location.search as Record<string, unknown> | undefined)?.projectId;
+      return typeof value === "string" && value.trim() ? value.trim() : null;
+    },
+  });
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [project, setProject] = useState<PowerEditorProject | null>(null);
@@ -52,8 +58,15 @@ export function PowerEditorMainEntry() {
           return;
         }
 
-        const projects = await powerEditorProjectService.listProjects(supabase, activeSession.user.id);
-        const selected = selectPrimaryPowerEditorProject(projects);
+        const selected = requestedProjectId
+          ? await powerEditorProjectService.getOwnedEditableProject(
+              supabase,
+              requestedProjectId,
+              activeSession.user.id,
+            )
+          : selectPrimaryPowerEditorProject(
+              await powerEditorProjectService.listProjects(supabase, activeSession.user.id),
+            );
         setProfile(currentProfile);
         setProject(selected);
         setStatus(selected ? "ready" : "needs_project");
@@ -63,7 +76,7 @@ export function PowerEditorMainEntry() {
         setStatus("error");
       }
     },
-    [supabase],
+    [requestedProjectId, supabase],
   );
 
   useEffect(() => {

@@ -18,11 +18,13 @@ import { getBrowserSupabaseClient } from "@/lib/supabase/client";
 import { getPremiumOverrideByEmail, getUserEntitlements } from "@/lib/entitlements";
 import { CleanTemplatePreview } from "../admin/CleanTemplatePreview";
 import {
-  createTemplate,
   getPublicTemplates,
   incrementTemplateUsage,
   type PublicTemplateViewModel,
 } from "@/services/template.service";
+import { profileService } from "@/services/profile.service";
+import { powerEditorProjectService } from "@/services/power-editor-project.service";
+import { templateBankConfigToPowerEditorConfig } from "@/power-editor/client/src/lib/templateBankAdapter";
 
 const ADVANCED_TAGS = [
   "WhatsApp",
@@ -222,36 +224,28 @@ export function TemplateBankGallery() {
 
       await incrementTemplateUsage(template.id);
 
-      // TF-F10: Create an editable user-owned instance from a published master template.
-      const clonedConfig = {
-        ...structuredClone(template.config || {}),
-        origin_metadata: {
-          source_template_id: template.id,
-          source_template_version: template.config?.schema_version || 1
-        }
-      };
+      const profile = await profileService.getProfileByUserId(supabase, user.id);
+      if (!profile) {
+        toast.error("Primero crea tu perfil para editar plantillas");
+        return;
+      }
 
-      const userClone = await createTemplate({
+      const pageConfig = templateBankConfigToPowerEditorConfig(template.config);
+      const project = await powerEditorProjectService.createProject(supabase, {
+        ownerUserId: user.id,
+        profileId: profile.id,
+        templateId: null,
         name: `Copia de ${template.name}`,
-        config_json: clonedConfig,
-        template_type: "private",
-        is_public: false,
-        publication_status: "GENERATED_PRIVATE",
-        industry: template.industry,
-        category: template.category,
-        style: template.style,
-        theme: template.themeMode === "dark" || template.themeMode === "light" ? template.themeMode : undefined,
-        generation_source: "CLONED_FROM_PUBLIC",
+        pageConfig,
       });
 
-      // Pass the clone to the main template editor.
-      window.localStorage.setItem("selected-template-config", JSON.stringify(userClone.config_json));
-      window.localStorage.setItem("selected-source-template-id", userClone.id);
+      window.localStorage.removeItem("selected-template-config");
+      window.localStorage.removeItem("selected-source-template-id");
       
       toast.success("Plantilla preparada", {
-        description: `"${template.name}" lista para el editor.`,
+        description: `"${template.name}" lista para el Power Editor.`,
       });
-      navigate({ to: "/template-builder", search: { source: "template-bank" } });
+      navigate({ to: "/editor", search: { projectId: project.id, source: "template-bank" } });
     } catch (error) {
       console.error("[Cripqer] Error using template:", error);
       toast.error("No se pudo preparar la plantilla");
