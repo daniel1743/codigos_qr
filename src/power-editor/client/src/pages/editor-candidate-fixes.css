@@ -1,0 +1,116 @@
+.ep-preview-exit { z-index: 50; pointer-events: auto; touch-action: manipulation; }
+
+.ep-link {
+  color: var(--ep-button-text-color, #17120e);
+  border-color: var(--ep-button-border-color, transparent);
+  box-shadow: var(--ep-button-shadow, none);
+}
+
+.ep-editor .ep-link {
+  color: var(--ep-button-text-color, #17120e) !important;
+  border-width: var(--ep-button-border-width, 0px);
+  border-style: var(--ep-button-border-style, none);
+  border-color: var(--ep-button-border-color, transparent);
+}
+
+.ep-link.ep-glass { color: var(--ep-button-text-color, #fff); }
+.ep-link.ep-outline { color: var(--ep-button-text-color, #f4e3cd); border-color: var(--ep-button-border-color, rgba(230,197,157,.6)); }
+.ep-link.ep-soft { color: var(--ep-button-text-color, #ead0af); }
+.ep-link.ep-premium { color: var(--ep-button-text-color, #16110e); }
+.ep-link.ep-minimal { color: var(--ep-button-text-color, #f3f3f2); }
+.ep-link.ep-neon { color: var(--ep-button-text-color, #e9f8ff); background: var(--ep-button-color, #367bff); box-shadow: 0 0 10px var(--ep-button-color, #367bff), 0 0 26px color-mix(in srgb, var(--ep-button-color, #367bff) 65%, transparent); }
+.ep-link.ep-gradient { color: var(--ep-button-text-color, #17120e); background: linear-gradient(135deg, var(--ep-button-color, #f2d4aa), color-mix(in srgb, var(--ep-button-color, #c49a68) 55%, #ffffff)); }
+.ep-link.ep-image { background-position: center; background-size: cover; }
+
+.ep-effects-panel details { margin: 10px 0; padding: 9px; border: 1px solid rgba(196,154,104,.18); border-radius: 9px; background: rgba(255,255,255,.025); }
+.ep-effects-panel summary { color: #e6c28d; font-size: 10px; font-weight: 800; cursor: pointer; }
+.ep-effects-panel details > :not(summary) { margin-top: 10px; }
+.ep-effect-library { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 7px; }
+.ep-effect-library button { display: flex; min-height: 34px; align-items: center; justify-content: center; gap: 5px; border: 1px solid rgba(196,154,104,.24); border-radius: 7px; color: #edc995; background: rgba(196,154,104,.09); font-size: 9px; font-weight: 700; cursor: pointer; }
+
+.ep-link-typography { margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(196,154,104,.18); }
+.ep-link-typography summary { color: #e6c28d; font-size: 10px; font-weight: 800; cursor: pointer; }
+.ep-link-typography > :not(summary) { margin-top: 10px; }
+.ep-link-type-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.ep-link-type-grid .ep-precision { min-width: 0; }
+
+.ep-link-border { margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(196,154,104,.18); }
+.ep-link-border summary { color: #e6c28d; font-size: 10px; font-weight: 800; cursor: pointer; }
+.ep-link-border > :not(summary) { margin-top: 10px; }
+.ep-link-border-palette > span { display: block; margin-bottom: 7px; color: #aeb3bb; font-size: 10px; font-weight: 700; }
+.ep-link-border-palette .ep-swatches { gap: 8px; padding-top: 0; }
+.ep-link-border-palette .ep-swatches button { width: 26px; height: 26px; border-color: rgba(255,255,255,.38); box-shadow: inset 0 0 0 1px rgba(0,0,0,.14); }
+.ep-link-border-palette .ep-swatches button.is-selected { outline: 2px solid #f2d09a; outline-offset: 2px; }
+.ep-text-typography details { margin: 0 0 12px; padding: 10px; border: 1px solid rgba(196,154,104,.18); border-radius: 9px; background: rgba(255,255,255,.025); }
+.ep-text-typography summary { color: #e6c28d; font-size: 10px; font-weight: 800; cursor: pointer; }
+.ep-text-typography details > :not(summary) { margin-top: 10px; }
+.ep-text-color-palette > span { display: block; margin-bottom: 7px; color: #aeb3bb; font-size: 10px; font-weight: 700; }
+.ep-text-color-palette .ep-swatches { gap: 8px; padding-top: 0; }
+.ep-text-color-palette .ep-swatches button { width: 26px; height: 26px; border-color: rgba(255,255,255,.38); box-shadow: inset 0 0 0 1px rgba(0,0,0,.16); }
+.ep-text-color-palette .ep-swatches button.is-selected { outline: 2px solid #f2d09a; outline-offset: 2px; }
+.ep-variant-guide { margin: 9px 0; color: #d8c1a2; font-size: 10px; line-height: 1.45; }
+.ep-variant-help { width: 100%; border: 1px dashed rgba(196,154,104,.42); border-radius: 7px; padding: 7px; color: #e8c996; background: rgba(196,154,104,.08); font-size: 10px; text-align: left; cursor: help; }
+
+/* Scroll independiente: las herramientas y el inspector nunca desplazan el canvas. */
+.ep-desktop .ep-rail { min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: #4a4e55 transparent; }
+.ep-desktop .ep-inspector { display: grid; height: 100%; min-height: 0; grid-template-rows: 53px minmax(0, 1fr); }
+.ep-desktop .ep-inspector > .ep-panel { min-height: 0; height: 100%; max-height: 100%; align-self: stretch; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; }
+
+/* Los controles de precisión nunca pueden exceder el ancho del inspector.
+   En 312 px se apilan; en inspectores mayores vuelven a dos columnas. */
+.ep-inspector .ep-link-type-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+.ep-inspector .ep-precision { min-width: 0; }
+.ep-inspector .ep-precision-line { grid-template-columns: 30px minmax(0, 1fr) 30px; gap: 5px; }
+.ep-inspector .ep-precision-line input { width: 100%; min-width: 0; }
+.ep-inspector .ep-precision-line button { min-width: 0; }
+.ep-inspector .ep-color-row { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
+.ep-inspector .ep-field, .ep-inspector .ep-color-row > label { min-width: 0; }
+.ep-inspector select, .ep-inspector input { max-width: 100%; min-width: 0; }
+.ep-banner-media-panel { display: grid; gap: 13px; }
+.ep-banner-media-panel > .ep-banner-fusion-panel, .ep-banner-media-panel > .ep-media-panel { min-width: 0; }
+
+/* Paletas mantiene una barra propia, visible y siempre alcanzable, sin
+   depender del scroll de la página ni del canvas. */
+.ep-desktop .ep-inspector > .ep-palette-panel { display: block; overflow-y: scroll; overscroll-behavior: contain; scrollbar-gutter: stable both-edges; padding-bottom: 52px; }
+.ep-palette-panel > * { min-width: 0; }
+.ep-palette-catalog { display: block; padding-bottom: 8px; }
+.ep-palette-category { margin-bottom: 16px; }
+.ep-palette-panel::-webkit-scrollbar { width: 10px; }
+.ep-palette-panel::-webkit-scrollbar-track { background: rgba(255,255,255,.035); }
+.ep-palette-panel::-webkit-scrollbar-thumb { border: 2px solid #121419; border-radius: 999px; background: #6f6559; }
+.ep-palette-panel::-webkit-scrollbar-thumb:hover { background: #c49a68; }
+
+/* Zoom de viewport: el transform vive exclusivamente en .ep-canvas-scale.
+   El shell se mantiene fijo y no participa en la escala ni en el desplazamiento. */
+.ep-editor { height: 100dvh; min-height: 0; overflow: hidden; }
+.ep-editor > .ep-header,
+.ep-editor > .ep-layout > .ep-rail,
+.ep-editor > .ep-layout > .ep-inspector,
+.ep-editor > .ep-layout > .ep-context-toolbar,
+.ep-editor > .ep-layout > .ep-sheet { flex: 0 0 auto; transform: none; zoom: 1; }
+.ep-editor > .ep-layout { min-height: 0; overflow: hidden; }
+.ep-workspace,
+.ep-canvas-stage { min-width: 0; min-height: 0; isolation: isolate; overflow: hidden; }
+.ep-canvas-scale { flex: 0 0 390px; will-change: transform; }
+
+/* Catálogo local de recetas V6: sólo ocupa el inspector/sheet y no afecta canvas ni persistencia. */
+.ep-recipe-catalog-action { align-items: center; display: inline-flex; gap: .4rem; }
+.ep-generated-recipes-panel { min-width: 0; }
+.ep-generated-recipes-intro { display: grid; gap: .4rem; margin-bottom: .9rem; }
+.ep-generated-recipes-intro span { align-items: center; display: inline-flex; font-size: .8rem; font-weight: 800; gap: .4rem; }
+.ep-generated-recipes-intro p { color: var(--ep-muted, #748094); font-size: .76rem; line-height: 1.45; margin: 0; }
+.ep-generated-recipes-grid { display: grid; gap: .65rem; }
+.ep-generated-recipe-card { align-items: center; background: rgba(255,255,255,.045); border: 1px solid rgba(255,255,255,.1); border-radius: .85rem; display: grid; gap: .45rem .65rem; grid-template-columns: 1.8rem minmax(0,1fr); min-width: 0; padding: .65rem; }
+.ep-generated-recipe-card strong, .ep-generated-recipe-card small { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ep-generated-recipe-card strong { font-size: .8rem; }
+.ep-generated-recipe-card small { color: var(--ep-muted, #748094); font-size: .67rem; margin-top: .16rem; }
+.ep-generated-recipe-card button { align-items: center; display: inline-flex; gap: .38rem; grid-column: 1 / -1; justify-content: center; min-width: 0; }
+.ep-generated-recipe-swatch { border-radius: .55rem; height: 1.8rem; width: 1.8rem; }
+.ep-generated-recipe-swatch.is-gold { background: linear-gradient(135deg, #17130f, #e6bd72); }
+.ep-generated-recipe-swatch.is-platinum { background: linear-gradient(135deg, #18222d, #dbe8ef); }
+.ep-generated-recipe-swatch.is-obsidian { background: linear-gradient(135deg, #101114, #e7b8f0); }
+.ep-generated-recipe-swatch.is-emerald { background: linear-gradient(135deg, #102d29, #e2c27d); }
+.ep-generated-recipe-swatch.is-cobalt { background: linear-gradient(135deg, #101a40, #9cc7ff); }
+.ep-generated-recipe-swatch.is-rose { background: linear-gradient(135deg, #3d1d30, #ffd6dd); }
+.ep-generated-recipe-swatch.is-terracotta { background: linear-gradient(135deg, #392117, #f7d6b4); }
+.ep-generated-recipe-swatch.is-ivory { background: linear-gradient(135deg, #e8dec8, #422f22); }
