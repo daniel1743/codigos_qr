@@ -170,6 +170,35 @@
   cursor: not-allowed;
 }
 
+html.ep-editor-active,
+body.ep-editor-active {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+body.ep-editor-active .ep-editor {
+  height: calc(100dvh - var(--ep-external-top-offset, 0px));
+  min-height: 0;
+  overflow: hidden;
+}
+
+body.ep-editor-active .ep-editor > .ep-layout {
+  height: calc(100dvh - var(--ep-external-top-offset, 0px) - 58px - env(safe-area-inset-top));
+  min-height: 0;
+  overflow: hidden;
+}
+
+body.ep-editor-active .ep-workspace,
+body.ep-editor-active .ep-canvas-stage {
+  overflow: hidden;
+  overscroll-behavior: contain;
+}
+
+body.ep-editor-active .ep-template {
+  overscroll-behavior: contain;
+}
+
 /* Header UX: agrupa herramientas sin cambiar handlers ni persistencia. */
 .ep-header {
   gap: 16px;

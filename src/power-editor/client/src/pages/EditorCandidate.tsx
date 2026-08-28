@@ -71,6 +71,35 @@ function EditorCandidate({ mode, draftBridge }: { mode: CandidateMode; draftBrid
   const { ref: workspaceRef, scale } = useWorkspaceScale(); const isDesktop = mode === "desktop"; const remoteProjectRef = useRef<string | null>(null);
   const selectedBlock = getBlock(page, selectedBlockId); const tools = [...toolsetForBlock(selectedBlock).filter(tool => tool !== "advanced"), "advanced"] as CandidateTool[]; const sheetSize = compositionOpen ? "expanded" : toolMeta[activeTool].size;
 
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const root = document.documentElement;
+    const body = document.body;
+    const updateExternalOffset = () => {
+      const topOffset = Array.from(document.querySelectorAll<HTMLElement>("header"))
+        .filter((element) => !element.closest(".ep-editor"))
+        .reduce((offset, element) => {
+          const style = window.getComputedStyle(element);
+          const rect = element.getBoundingClientRect();
+          if (style.display === "none" || style.visibility === "hidden" || rect.height <= 0 || rect.bottom <= 0) return offset;
+          return Math.max(offset, rect.bottom);
+        }, 0);
+      root.style.setProperty("--ep-external-top-offset", `${Math.round(topOffset)}px`);
+    };
+    root.classList.add("ep-editor-active");
+    body.classList.add("ep-editor-active");
+    updateExternalOffset();
+    const frame = window.requestAnimationFrame(updateExternalOffset);
+    window.addEventListener("resize", updateExternalOffset);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("resize", updateExternalOffset);
+      root.classList.remove("ep-editor-active");
+      body.classList.remove("ep-editor-active");
+      root.style.removeProperty("--ep-external-top-offset");
+    };
+  }, []);
+
   useEffect(() => { if (draftBridge) { if (remoteProjectRef.current === draftBridge.projectId) return; remoteProjectRef.current = draftBridge.projectId; setPage(hydrateCompositionPageConfig(draftBridge.initialPageConfig)); setPast([]); setFuture([]); setHydrated(true); return; } remoteProjectRef.current = null; try { const raw = window.localStorage.getItem(STORAGE_KEY) || window.localStorage.getItem("cripqer.editor-candidate.v2"); if (raw) { const parsed = JSON.parse(raw) as PageConfig; if (Array.isArray(parsed.blocks)) setPage(hydrateCompositionPageConfig(parsed)); } } finally { setHydrated(true); } }, [draftBridge?.projectId]);
   useEffect(() => { if (!draftBridge && hydrated) window.localStorage.setItem(STORAGE_KEY, JSON.stringify(page)); }, [draftBridge, hydrated, page]);
   useEffect(() => { if (!draftBridge) return; const interceptSave = (event: MouseEvent) => { const button = (event.target as HTMLElement | null)?.closest<HTMLButtonElement>("button"); const isPrimarySave = button?.classList.contains("ep-save"); const isMobileSave = Boolean(button?.closest(".ep-global-menu")) && button?.textContent?.trim() === "Guardar"; if (!button || (!isPrimarySave && !isMobileSave) || draftBridge.saving) return; event.preventDefault(); event.stopPropagation(); event.stopImmediatePropagation(); setGlobalMenuOpen(false); void draftBridge.onSaveDraft(clonePageConfig(page)); }; document.addEventListener("click", interceptSave, true); return () => document.removeEventListener("click", interceptSave, true); }, [draftBridge, page]);
