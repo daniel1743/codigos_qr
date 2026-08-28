@@ -210,13 +210,13 @@ function PrivateMobileNavigationShell({ children }: { children: ReactNode }) {
   }, [supabase]);
 
   const isPrivateMobileRoute =
-    (pathname === "/" && Boolean(session)) ||
-    pathname === "/editor" ||
-    pathname === "/profile" ||
-    pathname === "/encrypted-documents" ||
-    pathname === "/admin" ||
-    pathname === "/template-builder" ||
-    pathname === "/template-bank";
+    Boolean(session) &&
+    (pathname === "/editor" ||
+      pathname === "/profile" ||
+      pathname === "/encrypted-documents" ||
+      pathname === "/admin" ||
+      pathname === "/template-builder" ||
+      pathname === "/template-bank");
 
   if (!isPrivateMobileRoute) return <>{children}</>;
 

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { getBrowserSupabaseClient } from "../../lib/supabase/client";
+import { Auth } from "../Auth";
 import {
   User,
   Crown,
@@ -251,7 +252,11 @@ export function MyProfilePage() {
     );
   }
 
-  if (!user || !profile) {
+  if (!user) {
+    return <Auth />;
+  }
+
+  if (!profile) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <p className="text-muted-foreground">No se pudo cargar tu perfil</p>

@@ -123,6 +123,7 @@
             flex-direction: column;
             align-items: center;
             flex: 1;
+            min-height: min-content;
         }
 
         .social-icon-link {
@@ -199,11 +200,17 @@
 
         #phone-container {
             transform-origin: center center;
-            touch-action: pan-y pinch-zoom;
+            touch-action: pan-x pan-y pinch-zoom;
         }
 
         #render-canvas {
             -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+            cursor: grab;
+        }
+
+        #render-canvas:active {
+            cursor: grabbing;
         }
 
         @media (max-width: 1180px) {
@@ -283,9 +290,9 @@
 
             body > .flex-1.flex > aside {
                 width: 100% !important;
-                height: 52dvh !important;
-                min-height: 360px;
-                max-height: 560px;
+                height: 58dvh !important;
+                min-height: 340px;
+                max-height: 620px;
                 border-right: 0 !important;
                 border-bottom: 1px solid rgb(30 41 59);
                 overflow: hidden !important;
@@ -297,15 +304,18 @@
             }
 
             body > .flex-1.flex > main {
-                min-height: 48dvh;
-                padding: 1rem !important;
+                min-height: 42dvh;
+                padding: 0.75rem !important;
                 overflow: hidden !important;
                 justify-content: flex-start !important;
             }
 
             #phone-container:not(.desktop-view) {
                 width: min(390px, calc(100vw - 2rem)) !important;
-                height: min(780px, calc(48dvh - 2rem)) !important;
+                height: min(780px, calc(42dvh - 1.25rem)) !important;
+                min-height: 300px;
+                border-width: 3px !important;
+                box-shadow: 0 16px 36px -16px rgba(0, 0, 0, 0.9), 0 0 0 7px #1e293b, 0 0 0 8px #334155;
             }
             #phone-container.desktop-view {
                 width: 100% !important;
@@ -313,9 +323,9 @@
                 aspect-ratio: 85 / 78;
                 margin-block: 0 !important;
                 border-radius: 20px !important;
-                min-height: 430px;
+                min-height: 300px;
                 margin-block: 0 !important;
-                border-radius: 34px !important;
+                border-radius: 24px !important;
                 border-width: 3px !important;
                 box-shadow: 0 18px 42px -16px rgba(0, 0, 0, 0.85), 0 0 0 7px #1e293b, 0 0 0 8px #334155;
             }
@@ -349,17 +359,17 @@
             }
 
             body > .flex-1.flex > aside {
-                height: 55dvh !important;
-                min-height: 380px;
+                height: 60dvh !important;
+                min-height: 350px;
             }
 
             body > .flex-1.flex > main {
-                min-height: 45dvh;
+                min-height: 40dvh;
             }
 
             #phone-container:not(.desktop-view) {
-                height: min(780px, calc(45dvh - 1.25rem)) !important;
-                min-height: 360px;
+                height: min(780px, calc(40dvh - 1rem)) !important;
+                min-height: 290px;
             }
 
             .render-logo {
@@ -412,8 +422,8 @@
             <button onclick="resetTemplate()" class="px-3 py-2 text-xs font-medium text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-xl transition flex items-center gap-2">
                 <i class="fa-solid fa-rotate-left"></i> Restablecer
             </button>
-            <button onclick="openExportModal()" class="px-4 py-2 text-xs font-bold text-white bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 rounded-xl shadow-lg shadow-pink-500/25 transition flex items-center gap-2">
-                <i class="fa-solid fa-code"></i> Exportar HTML/CSS
+            <button onclick="openPreviewModal()" class="px-4 py-2 text-xs font-bold text-white bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 rounded-xl shadow-lg shadow-pink-500/25 transition flex items-center gap-2">
+                <i class="fa-solid fa-eye"></i> Vista previa
             </button>
         </div>
     </header>
@@ -943,27 +953,59 @@
         </main>
     </div>
 
-    <!-- EXPORT HTML CODE MODAL -->
-    <div id="export-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-6 hidden">
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-3xl w-full flex flex-col max-h-[85vh] shadow-2xl overflow-hidden">
+    <!-- PREVIEW / SAVE MODAL -->
+    <div id="export-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 md:p-6 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-5xl w-full flex flex-col h-[88vh] shadow-2xl overflow-hidden">
             <div class="p-5 border-b border-slate-800 flex items-center justify-between">
                 <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-code text-pink-500 text-lg"></i>
-                    <h3 class="font-bold text-white text-base">C�digo HTML Exportable</h3>
+                    <i class="fa-solid fa-eye text-pink-500 text-lg"></i>
+                    <h3 class="font-bold text-white text-base">Vista previa</h3>
                 </div>
                 <button onclick="closeExportModal()" class="text-slate-400 hover:text-white p-2">
                     <i class="fa-solid fa-xmark text-xl"></i>
                 </button>
             </div>
-            <div class="p-5 flex-1 overflow-y-auto bg-slate-950 font-mono text-xs text-pink-300">
-                <pre id="export-code-content" class="whitespace-pre-wrap break-all"></pre>
+            <div class="flex-1 overflow-hidden bg-slate-950">
+                <iframe id="preview-frame" title="Vista previa de plantilla" class="h-full w-full border-0 bg-white"></iframe>
+                <pre id="export-code-content" class="hidden"></pre>
             </div>
-            <div class="p-4 border-t border-slate-800 flex justify-end gap-3 bg-slate-900">
-                <button onclick="closeExportModal()" class="px-4 py-2 text-xs font-medium text-slate-400 hover:text-white">Cerrar</button>
-                <button onclick="copyToClipboard()" class="px-5 py-2 text-xs font-bold bg-pink-600 hover:bg-pink-500 text-white rounded-xl shadow-lg transition flex items-center gap-2">
-                    <i class="fa-solid fa-copy"></i> Copiar C�digo
+            <div class="p-4 border-t border-slate-800 flex flex-col sm:flex-row sm:justify-end gap-3 bg-slate-900">
+                <button onclick="closeExportModal()" class="px-4 py-2 text-xs font-medium text-slate-400 hover:text-white">Volver y seguir editando</button>
+                <button onclick="openDefaultTemplateConfirm()" class="px-5 py-2 text-xs font-bold bg-pink-600 hover:bg-pink-500 text-white rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-bookmark"></i> Guardar como plantilla predefinida
                 </button>
             </div>
+        </div>
+    </div>
+
+    <div id="default-template-confirm-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[60] flex items-center justify-center p-6 hidden">
+        <div class="w-full max-w-md rounded-3xl border border-slate-800 bg-slate-900 p-6 shadow-2xl">
+            <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-pink-500/15 text-pink-400">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 class="text-lg font-bold text-white">Definir plantilla predefinida</h3>
+            <p class="mt-3 text-sm leading-6 text-slate-300">Estás a punto de definir esta plantilla como predefinida. Todos los que tengan tu QR o enlace la verán.</p>
+            <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                <button onclick="closeDefaultTemplateConfirm()" class="rounded-xl px-4 py-2 text-xs font-medium text-slate-400 hover:text-white">Volver y corregir</button>
+                <button onclick="confirmDefaultTemplateSave()" class="rounded-xl bg-pink-600 px-5 py-2 text-xs font-bold text-white shadow-lg shadow-pink-500/20 transition hover:bg-pink-500">Aceptar y guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="default-template-status-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[70] flex items-center justify-center p-6 hidden">
+        <div class="w-full max-w-sm rounded-3xl border border-slate-800 bg-slate-900 p-7 text-center shadow-2xl">
+            <div id="default-template-loading-icon" class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-pink-500/15 text-pink-400">
+                <i class="fa-solid fa-circle-notch animate-spin text-2xl"></i>
+            </div>
+            <div id="default-template-success-icon" class="mx-auto mb-5 hidden h-14 w-14 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400">
+                <i class="fa-solid fa-check text-2xl"></i>
+            </div>
+            <div id="default-template-error-icon" class="mx-auto mb-5 hidden h-14 w-14 items-center justify-center rounded-full bg-red-500/15 text-red-400">
+                <i class="fa-solid fa-xmark text-2xl"></i>
+            </div>
+            <h3 id="default-template-status-title" class="text-base font-bold text-white">Añadiendo plantilla a tu QR dinámico</h3>
+            <p id="default-template-status-copy" class="mt-2 text-sm leading-6 text-slate-400">Estamos guardando tu diseño y aplicándolo a tu enlace público.</p>
+            <button id="default-template-status-close" onclick="closeDefaultTemplateStatus()" class="mt-6 hidden w-full rounded-xl bg-slate-800 px-5 py-2.5 text-xs font-bold text-white transition hover:bg-slate-700">Volver al editor</button>
         </div>
     </div>
 
@@ -1279,6 +1321,26 @@
             renderControlsList();
             setDeviceView(appState.layout.devicePreview);
         };
+
+        function consumeSelectedTemplateConfig() {
+            const storageKey = 'selected-template-config';
+            const selected = window.localStorage.getItem(storageKey);
+            if (!selected) return false;
+
+            try {
+                const parsed = JSON.parse(selected);
+                if (parsed && parsed.schema_version && !parsed.schemaVersion) {
+                    parsed.schemaVersion = parsed.schema_version;
+                }
+                window.loadTemplateConfig(parsed);
+                window.localStorage.removeItem(storageKey);
+                return true;
+            } catch (error) {
+                console.error('Unable to load selected template config:', error);
+                window.localStorage.removeItem(storageKey);
+                return false;
+            }
+        }
 
         function hexToRgba(hex, alpha) {
             let r = 0, g = 0, b = 0;
@@ -1702,11 +1764,15 @@
         }
 
           document.addEventListener('DOMContentLoaded', () => {
-            renderControlsList();
-            renderCanvas();
+            const loadedSelectedTemplate = consumeSelectedTemplateConfig();
+            if (!loadedSelectedTemplate) {
+                renderControlsList();
+                renderCanvas();
+            }
             setupSortable();
             applyResponsiveDeviceView();
-            window.addEventListener('resize', applyResponsiveDeviceView);        });
+            window.addEventListener('resize', applyResponsiveDeviceView);
+        });
 
         // Tab Switching Engine
         function switchTab(tab) {
@@ -2165,7 +2231,7 @@
         }
 
         // EXPORT ENGINE: Build dynamic standalone HTML Code
-        function openExportModal() {
+        function openPreviewModal() {
             const root = getComputedStyle(document.documentElement);
             
             const generatedHtml = `<!DOCTYPE html>
@@ -2364,12 +2430,81 @@
 </html>`;
 
             document.getElementById('export-code-content').textContent = generatedHtml;
+            document.getElementById('preview-frame').srcdoc = generatedHtml;
             document.getElementById('export-modal').classList.remove('hidden');
+        }
+
+        function openExportModal() {
+            openPreviewModal();
         }
 
         function closeExportModal() {
             document.getElementById('export-modal').classList.add('hidden');
         }
+
+        function openDefaultTemplateConfirm() {
+            document.getElementById('default-template-confirm-modal').classList.remove('hidden');
+        }
+
+        function closeDefaultTemplateConfirm() {
+            document.getElementById('default-template-confirm-modal').classList.add('hidden');
+        }
+
+        function setDefaultTemplateStatus(state, message) {
+            const loadingIcon = document.getElementById('default-template-loading-icon');
+            const successIcon = document.getElementById('default-template-success-icon');
+            const errorIcon = document.getElementById('default-template-error-icon');
+            const title = document.getElementById('default-template-status-title');
+            const copy = document.getElementById('default-template-status-copy');
+            const closeButton = document.getElementById('default-template-status-close');
+
+            loadingIcon.classList.toggle('hidden', state !== 'loading');
+            successIcon.classList.toggle('hidden', state !== 'success');
+            successIcon.classList.toggle('flex', state === 'success');
+            errorIcon.classList.toggle('hidden', state !== 'error');
+            errorIcon.classList.toggle('flex', state === 'error');
+            closeButton.classList.toggle('hidden', state === 'loading');
+
+            if (state === 'loading') {
+                title.textContent = 'Añadiendo plantilla a tu QR dinámico';
+                copy.textContent = 'Estamos guardando tu diseño y aplicándolo a tu enlace público.';
+            } else if (state === 'success') {
+                title.textContent = 'Éxito: tu plantilla se ha guardado como predefinida';
+                copy.textContent = 'Podrás verla en tu perfil y editarla nuevamente.';
+            } else {
+                title.textContent = 'No se pudo guardar la plantilla';
+                copy.textContent = message || 'Revisa tu sesión e intenta nuevamente.';
+            }
+        }
+
+        function confirmDefaultTemplateSave() {
+            closeDefaultTemplateConfirm();
+            setDefaultTemplateStatus('loading');
+            document.getElementById('default-template-status-modal').classList.remove('hidden');
+            window.parent.postMessage({
+                type: 'cripqer-template-builder:save-default-template',
+                templateId: window.localStorage.getItem('selected-source-template-id'),
+                config: window.getTemplateConfig()
+            }, window.location.origin);
+        }
+
+        function closeDefaultTemplateStatus() {
+            document.getElementById('default-template-status-modal').classList.add('hidden');
+            closeExportModal();
+        }
+
+        window.addEventListener('message', (event) => {
+            if (event.origin !== window.location.origin) return;
+            if (!event.data || event.data.type !== 'cripqer-template-builder:save-default-template-result') return;
+            if (event.data.ok) {
+                if (event.data.templateId) {
+                    window.localStorage.setItem('selected-source-template-id', event.data.templateId);
+                }
+                setDefaultTemplateStatus('success');
+            } else {
+                setDefaultTemplateStatus('error', event.data.error);
+            }
+        });
 
         function copyToClipboard() {
             const code = document.getElementById('export-code-content').textContent;

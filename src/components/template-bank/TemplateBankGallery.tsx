@@ -7,6 +7,8 @@ import {
   Search,
   SlidersHorizontal,
   Sparkles,
+  Monitor,
+  Smartphone,
   Wand2,
   X,
   AlertTriangle,
@@ -16,13 +18,11 @@ import { getBrowserSupabaseClient } from "@/lib/supabase/client";
 import { getPremiumOverrideByEmail, getUserEntitlements } from "@/lib/entitlements";
 import { CleanTemplatePreview } from "../admin/CleanTemplatePreview";
 import {
+  createTemplate,
   getPublicTemplates,
   incrementTemplateUsage,
   type PublicTemplateViewModel,
 } from "@/services/template.service";
-
-const FALLBACK_IMG =
-  "https://placehold.co/720x1280/1E1E1E/9CA3AF?text=Vista+previa+no+disponible";
 
 const ADVANCED_TAGS = [
   "WhatsApp",
@@ -50,19 +50,6 @@ interface Filters {
   sort: SortFilter;
 }
 
-function validatePreviewUrl(url: string): string {
-  if (!url) return FALLBACK_IMG;
-
-  try {
-    if (url.startsWith("/")) return url;
-    const parsed = new URL(url);
-    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return FALLBACK_IMG;
-    return parsed.href;
-  } catch {
-    return FALLBACK_IMG;
-  }
-}
-
 function getFavoriteStorageKey(userId?: string) {
   return `cripqer-template-favorites:${userId || "anonymous"}`;
 }
@@ -87,6 +74,7 @@ export function TemplateBankGallery() {
   const [hasError, setHasError] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [modalTemplate, setModalTemplate] = useState<PublicTemplateViewModel | null>(null);
+  const [modalDeviceMode, setModalDeviceMode] = useState<"mobile" | "desktop">("mobile");
   const [currentUserId, setCurrentUserId] = useState<string | undefined>();
   const [useInFlightId, setUseInFlightId] = useState<string | null>(null);
   const lastFocusedRef = useRef<HTMLElement | null>(null);
@@ -119,6 +107,7 @@ export function TemplateBankGallery() {
   useEffect(() => {
     if (!modalTemplate) return;
     lastFocusedRef.current = document.activeElement as HTMLElement | null;
+    setModalDeviceMode(window.innerWidth >= 900 ? "desktop" : "mobile");
     document.body.style.overflow = "hidden";
     const timer = window.setTimeout(() => closeButtonRef.current?.focus(), 50);
 
@@ -234,8 +223,6 @@ export function TemplateBankGallery() {
       await incrementTemplateUsage(template.id);
 
       // TF-F10: Create an editable user-owned instance from a published master template.
-      const { createTemplate } = await import("@/services/template.service");
-      
       const clonedConfig = {
         ...structuredClone(template.config || {}),
         origin_metadata: {
@@ -257,14 +244,14 @@ export function TemplateBankGallery() {
         generation_source: "CLONED_FROM_PUBLIC",
       });
 
-      // Pass the clone to the builder so it saves to the user's private copy (Editor Básico flow)
+      // Pass the clone to the main template editor.
       window.localStorage.setItem("selected-template-config", JSON.stringify(userClone.config_json));
       window.localStorage.setItem("selected-source-template-id", userClone.id);
       
       toast.success("Plantilla preparada", {
         description: `"${template.name}" lista para el editor.`,
       });
-      navigate({ to: "/template-builder" });
+      navigate({ to: "/template-builder", search: { source: "template-bank" } });
     } catch (error) {
       console.error("[Cripqer] Error using template:", error);
       toast.error("No se pudo preparar la plantilla");
@@ -575,16 +562,9 @@ export function TemplateBankGallery() {
                       </span>
                     </div>
                   )}
-                  <img
-                    className="h-full w-full bg-[#1E1E1E] object-cover"
-                    src={validatePreviewUrl(template.previewUrl)}
-                    alt={`Vista previa de ${template.name}`}
-                    loading="lazy"
-                    onError={(event) => {
-                      event.currentTarget.onerror = null;
-                      event.currentTarget.src = FALLBACK_IMG;
-                    }}
-                  />
+                  <div className="h-full w-full bg-[#1E1E1E] overflow-hidden relative">
+                    <CleanTemplatePreview config={template.config} deviceMode="thumbnail" />
+                  </div>
 
                   <div className="absolute inset-0 z-10 hidden items-center justify-center gap-4 bg-[#121212]/60 backdrop-blur-sm group-hover:flex group-focus-within:flex">
                     <button
@@ -702,6 +682,30 @@ export function TemplateBankGallery() {
                   {modalTemplate.plan === "premium" ? "Premium" : "Gratis"}
                 </span>
               </div>
+              <div className="mx-3 hidden items-center gap-1 rounded-full border border-[#2A2A2A] bg-[#1E1E1E] p-1 sm:flex">
+                <button
+                  type="button"
+                  onClick={() => setModalDeviceMode("mobile")}
+                  className={`rounded-full p-2 transition-colors ${
+                    modalDeviceMode === "mobile" ? "bg-[#FF3366] text-white" : "text-gray-400 hover:text-white"
+                  }`}
+                  aria-label="Vista móvil"
+                  title="Vista móvil"
+                >
+                  <Smartphone className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setModalDeviceMode("desktop")}
+                  className={`rounded-full p-2 transition-colors ${
+                    modalDeviceMode === "desktop" ? "bg-[#FF3366] text-white" : "text-gray-400 hover:text-white"
+                  }`}
+                  aria-label="Vista desktop"
+                  title="Vista desktop"
+                >
+                  <Monitor className="h-4 w-4" />
+                </button>
+              </div>
               <button
                 ref={closeButtonRef}
                 type="button"
@@ -713,9 +717,9 @@ export function TemplateBankGallery() {
               </button>
             </div>
 
-            <div className="flex flex-1 justify-center overflow-y-auto bg-[#0a0a0a] p-4 md:p-8">
-              <div className="relative overflow-hidden rounded-xl border border-[#2A2A2A] bg-[#1E1E1E] shadow-[0_0_50px_rgba(0,0,0,0.5)]">
-                <CleanTemplatePreview config={modalTemplate.config} deviceMode="mobile" />
+            <div className="flex min-h-0 flex-1 justify-center overflow-hidden bg-[#0a0a0a] p-3 md:p-5">
+              <div className="relative h-[62vh] w-full max-w-[900px] overflow-hidden rounded-xl border border-[#2A2A2A] bg-[#1E1E1E] shadow-[0_0_50px_rgba(0,0,0,0.5)] md:h-[68vh]">
+                <CleanTemplatePreview config={modalTemplate.config} deviceMode={modalDeviceMode} />
               </div>
             </div>
 

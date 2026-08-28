@@ -236,10 +236,10 @@ function Home() {
           </button>
           <nav className={`site-nav ${menuOpen ? "is-open" : ""}`} aria-label="Navegación principal">
             <button onClick={() => navigateTo("#inicio")}>Inicio</button>
-            <a href="/editor" onClick={() => setMenuOpen(false)}>QR</a>
+            <a href="/profile" onClick={() => setMenuOpen(false)}>QR</a>
             <a href="/template-bank" onClick={() => setMenuOpen(false)}>Plantillas</a>
-            <a href="/template-builder" onClick={() => setMenuOpen(false)}>Editor</a>
-            <a href="/encrypted-documents" onClick={() => setMenuOpen(false)}>Seguridad</a>
+            <a href="/profile" onClick={() => setMenuOpen(false)}>Editor</a>
+            <a href="/profile" onClick={() => setMenuOpen(false)}>Seguridad</a>
           </nav>
           <div className="nav-actions">
             <a className="nav-login" href="/profile">Iniciar sesión</a>
@@ -256,7 +256,7 @@ function Home() {
             <div className="eyebrow"><span className="signal-dot" /> TODO CONECTADO. TODO TUYO.</div>
             <h1>Tu identidad digital,<br /><em>conectada</em> con un QR.</h1>
             <p>Crea códigos QR personalizados, páginas de perfil, experiencias digitales y documentos seguros desde una sola plataforma.</p>
-            <div className="hero-actions"><a className="button-primary" href="/editor">Crear mi QR <ArrowRight size={17} /></a><button className="button-ghost" onClick={() => navigateTo("#features")}>Explorar Cripqer <ArrowDown size={16} /></button></div>
+            <div className="hero-actions"><a className="button-primary" href="/profile">Crear mi QR <ArrowRight size={17} /></a><button className="button-ghost" onClick={() => navigateTo("#features")}>Explorar Cripqer <ArrowDown size={16} /></button></div>
             <div className="hero-meta"><span><i /> Sin código</span><span><i /> Publica en segundos</span></div>
             <div className="hero-mark-code"><CripqerMark /><span>OPEN MODULE / IDENTITY SYSTEM</span></div>
           </div>
@@ -282,7 +282,7 @@ function Home() {
                   <h3>{service.title}</h3>
                   <p>{service.description}</p>
                   <ul>{service.items.map((item) => <li key={item}><Check size={13} /> {item}</li>)}</ul>
-                  <a className="text-link" href={service.type === "qr" ? "/editor" : service.type === "profile" ? "/template-builder" : service.type === "templates" ? "/template-bank" : "/encrypted-documents"}>Inspeccionar herramienta <ArrowRight size={15} /></a>
+                  <a className="text-link" href={service.type === "templates" ? "/template-bank" : "/profile"}>Inspeccionar herramienta <ArrowRight size={15} /></a>
                 </div>
                 <ServiceVisual type={service.type} />
               </article>;
@@ -296,7 +296,7 @@ function Home() {
         <div className="section-frame editor-wrap inspection-frame" data-register="CHAPTER / 03">
           <SectionLead eyebrow="EDITOR VISUAL" number="03" title={<>Diseña visualmente.<br />Publica en segundos.</>} copy="Una experiencia de edición para modificar contenido, estilo y disposición mientras observas el resultado." />
           <div className="editor-window reveal">
-            <aside className="editor-sidebar"><div className="editor-brand"><CripqerMark /> <span>editor</span></div><div className="editor-tabs"><button className="active"><UserRound /> Contenido</button><button><UserRound /> Avatar</button><button><LayoutTemplate /> Bio</button><button><ChevronRight /> Botones</button><button><Instagram /> Redes</button><button><Sparkles /> Apariencia</button></div><div className="editor-save"><span><i /> Cambios guardados</span><a href="/template-builder">Publicar <ArrowRight size={14} /></a></div></aside>
+            <aside className="editor-sidebar"><div className="editor-brand"><CripqerMark /> <span>editor</span></div><div className="editor-tabs"><button className="active"><UserRound /> Contenido</button><button><UserRound /> Avatar</button><button><LayoutTemplate /> Bio</button><button><ChevronRight /> Botones</button><button><Instagram /> Redes</button><button><Sparkles /> Apariencia</button></div><div className="editor-save"><span><i /> Cambios guardados</span><a href="/profile">Publicar <ArrowRight size={14} /></a></div></aside>
             <div className="editor-workspace"><div className="workspace-bar"><span>PREVIEW MÓVIL</span><div><i /><i /><i /></div></div><div className="workspace-canvas"><div className="selection-note"><span /><b>Botón seleccionado</b><small>Arrastra para mover</small></div><PhonePreview selected /></div></div>
           </div>
         </div>
@@ -306,7 +306,7 @@ function Home() {
         <div className="section-frame actions-wrap inspection-frame" data-register="CHAPTER / 04">
           <SectionLead eyebrow="MÁS QUE SIMPLES ENLACES" number="04" title={<>Convierte cada botón en una <em>acción.</em></>} copy="Los botones pueden dirigir a cada persona directamente hacia diferentes acciones digitales." />
           <div className="action-stack reveal">
-            {actionData.map((action, index) => { const Icon = action.icon; return <a className="action-item" style={{ "--delay": `${index * 45}ms` } as CSSProperties} key={action.label} href="/template-builder"><span className="action-icon"><Icon size={18} /></span><span><b>{action.label}</b><small>{action.example}</small></span><ChevronRight size={17} /></a>; })}
+            {actionData.map((action, index) => { const Icon = action.icon; return <a className="action-item" style={{ "--delay": `${index * 45}ms` } as CSSProperties} key={action.label} href="/profile"><span className="action-icon"><Icon size={18} /></span><span><b>{action.label}</b><small>{action.example}</small></span><ChevronRight size={17} /></a>; })}
           </div>
         </div>
       </section>
@@ -314,7 +314,7 @@ function Home() {
       <section id="seguridad" className="security-section">
         <div className="technical-grid" />
         <div className="section-frame security-wrap inspection-frame" data-register="CHAPTER / 05">
-          <div className="security-copy reveal"><div className="eyebrow"><span className="signal-dot" /> CRIPQER SECURITY</div><h2>Cuando compartir también necesita <em>protección.</em></h2><p>Documentos Seguros añade una capa especializada para el envío de archivos mediante enlaces y QR.</p><div className="security-badges">{["Cifrado", "Contraseña", "Expiración", "Control de descargas"].map((badge) => <span key={badge}><ShieldCheck size={14} /> {badge}</span>)}</div><a className="button-primary" href="/encrypted-documents">Abrir Documentos Seguros <ArrowRight size={17} /></a></div>
+          <div className="security-copy reveal"><div className="eyebrow"><span className="signal-dot" /> CRIPQER SECURITY</div><h2>Cuando compartir también necesita <em>protección.</em></h2><p>Documentos Seguros añade una capa especializada para el envío de archivos mediante enlaces y QR.</p><div className="security-badges">{["Cifrado", "Contraseña", "Expiración", "Control de descargas"].map((badge) => <span key={badge}><ShieldCheck size={14} /> {badge}</span>)}</div><a className="button-primary" href="/profile">Abrir Documentos Seguros <ArrowRight size={17} /></a></div>
           <div className="security-object reveal"><img src={assets.securityVault} alt="Objeto visual de un archivo protegido" onError={hideMissingAsset} /><div className="security-ring"><ShieldCheck size={30} /></div><div className="security-status"><span><i /> ENCRIPTADO</span><b>Acceso protegido</b><small>Política activa · 18 días</small></div></div>
         </div>
       </section>
@@ -331,13 +331,13 @@ function Home() {
 
       <section className="use-cases-section">
         <div className="section-frame inspection-frame" data-register="CHAPTER / 07"><SectionLead eyebrow="PARA PERSONAS Y NEGOCIOS" number="07" title={<>Una identidad digital que <em>viaja contigo.</em></>} />
-          <div className="use-case-grid reveal">{[["01", "Profesionales", "Comparte perfil, contacto, servicios y redes.", UserRound], ["02", "Creadores", "Centraliza contenido, redes y llamadas a la acción.", Sparkles], ["03", "Negocios", "Conecta clientes con información, productos y canales.", QrCode], ["04", "Equipos", "Comparte recursos y experiencias digitales consistentes.", Globe2]].map(([number, title, description, Icon]) => { const Mark = Icon as typeof Globe2; return <article key={title as string}><div><span>{number as string}</span><Mark size={20} /></div><h3>{title as string}</h3><p>{description as string}</p><a href="/template-builder" aria-label={`Explorar ${title as string}`}><ArrowRight size={17} /></a></article>; })}</div>
+          <div className="use-case-grid reveal">{[["01", "Profesionales", "Comparte perfil, contacto, servicios y redes.", UserRound], ["02", "Creadores", "Centraliza contenido, redes y llamadas a la acción.", Sparkles], ["03", "Negocios", "Conecta clientes con información, productos y canales.", QrCode], ["04", "Equipos", "Comparte recursos y experiencias digitales consistentes.", Globe2]].map(([number, title, description, Icon]) => { const Mark = Icon as typeof Globe2; return <article key={title as string}><div><span>{number as string}</span><Mark size={20} /></div><h3>{title as string}</h3><p>{description as string}</p><a href="/profile" aria-label={`Explorar ${title as string}`}><ArrowRight size={17} /></a></article>; })}</div>
         </div>
       </section>
 
       <section className="final-cta-section"><div className="cta-orbit cta-orbit-one" /><div className="cta-orbit cta-orbit-two" /><div className="final-cta-card reveal"><div className="final-mark"><CripqerMark /></div><div className="eyebrow"><span className="signal-dot" /> TU PRESENCIA, CONECTADA</div><h2>Tu próximo QR puede<br />hacer mucho más.</h2><p>Construye tu identidad digital y conecta todo desde Cripqer.</p><div><a className="button-primary" href="/profile">Crear gratis <ArrowRight size={17} /></a><a className="button-ghost" href="/template-bank">Ver plantillas</a></div></div></section>
 
-      <footer className="site-footer"><div className="footer-main"><div className="footer-brand"><div className="brand-lockup"><span className="brand-mark-shell"><CripqerMark className="brand-mark-fallback" /></span><Wordmark light /></div><p>Identidad digital conectada mediante QR, perfiles, plantillas y documentos seguros.</p></div><div className="footer-links"><div><h3>Producto</h3>{[["QR", "/editor"], ["Editor", "/template-builder"], ["Plantillas", "/template-bank"], ["Documentos Seguros", "/encrypted-documents"]].map(([link, route]) => <a href={route} key={link}>{link}</a>)}</div><div><h3>Recursos</h3>{["Ayuda", "Privacidad", "Términos"].map((link) => <button onClick={() => navigateTo("#inicio")} key={link}>{link}</button>)}</div><div><h3>Cuenta</h3>{[["Iniciar sesión", "/profile"], ["Crear cuenta", "/profile"]].map(([link, route]) => <a href={route} key={link}>{link}</a>)}</div></div></div><div className="footer-bottom"><span>© 2026 Cripqer</span><span>Diseñado para conectar con precisión.</span></div></footer>
+      <footer className="site-footer"><div className="footer-main"><div className="footer-brand"><div className="brand-lockup"><span className="brand-mark-shell"><CripqerMark className="brand-mark-fallback" /></span><Wordmark light /></div><p>Identidad digital conectada mediante QR, perfiles, plantillas y documentos seguros.</p></div><div className="footer-links"><div><h3>Producto</h3>{[["QR", "/profile"], ["Editor", "/profile"], ["Plantillas", "/template-bank"], ["Documentos Seguros", "/profile"]].map(([link, route]) => <a href={route} key={link}>{link}</a>)}</div><div><h3>Recursos</h3>{["Ayuda", "Privacidad", "Términos"].map((link) => <button onClick={() => navigateTo("#inicio")} key={link}>{link}</button>)}</div><div><h3>Cuenta</h3>{[["Iniciar sesión", "/profile"], ["Crear cuenta", "/profile"]].map(([link, route]) => <a href={route} key={link}>{link}</a>)}</div></div></div><div className="footer-bottom"><span>© 2026 Cripqer</span><span>Diseñado para conectar con precisión.</span></div></footer>
     </main>
   );
 }

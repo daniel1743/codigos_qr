@@ -86,10 +86,11 @@ export function DesktopNavbar() {
     pathname === "/template-bank";
 
   const hiddenForRoute =
+    pathname === "/" ||
     pathname.startsWith("/p/") ||
     pathname.startsWith("/d/") ||
     !canRenderPrivateNav ||
-    (pathname === "/" && !session);
+    !session;
 
   useEffect(() => {
     if (!canRenderPrivateNav || pathname.startsWith("/p/") || pathname.startsWith("/d/")) return;

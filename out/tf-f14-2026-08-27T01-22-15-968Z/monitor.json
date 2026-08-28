@@ -1,0 +1,59 @@
+{
+  "duplicateRate": 0,
+  "failureRate": 0,
+  "rendererCrashes": 0,
+  "qaDistribution": {
+    "0.95-1.00": 500,
+    "0.90-0.94": 0,
+    "0.85-0.89": 0,
+    "below-0.85": 0
+  },
+  "averageQaScore": 1,
+  "mostUsedIndustries": [
+    {
+      "industry": "medical",
+      "count": 50
+    },
+    {
+      "industry": "legal",
+      "count": 50
+    },
+    {
+      "industry": "restaurant",
+      "count": 50
+    },
+    {
+      "industry": "barber",
+      "count": 50
+    },
+    {
+      "industry": "dental",
+      "count": 50
+    },
+    {
+      "industry": "veterinary",
+      "count": 50
+    },
+    {
+      "industry": "beauty",
+      "count": 50
+    },
+    {
+      "industry": "spa",
+      "count": 50
+    },
+    {
+      "industry": "hair_salon",
+      "count": 50
+    },
+    {
+      "industry": "tattoo",
+      "count": 50
+    }
+  ],
+  "userTemplateAdoption": {
+    "status": "not_measured_in_local_generation",
+    "reason": "requires live usage_count / user clone telemetry after ingestion"
+  },
+  "accidentalPublication": 0
+}
