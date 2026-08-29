@@ -4,8 +4,15 @@
  * Graphite Atelier: landing editorial en grafito, cobre y objetos de producto asimétricos.
  * Toda interacción de producto es demostrativa; no se simulan servicios ni datos reales.
  */
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { getBrowserSupabaseClient } from "@/lib/supabase/client";
 import { CripqerMark } from "@/components/CripqerMark";
+import {
+  PremiumAuthModal,
+  type PremiumAuthCredentials,
+  type PremiumAuthMode,
+  type PremiumRegistrationDetails,
+} from "@/components/PremiumAuthModal";
 import "../landing-graphite.css";
 import {
   ArrowDown,
@@ -201,7 +208,7 @@ function SecurePanel() {
 function HeroScene() {
   return (
     <div className="hero-scene" aria-label="Escena de producto Cripqer">
-      <img className="hero-art" src={assets.hero} alt="Composición abstracta de objetos digitales Cripqer" onError={hideMissingAsset} />
+      <img className="hero-art" src={assets.hero} alt="Composición abstracta de objetos digitales Cripqer" onError={hideMissingAsset} fetchPriority="high" decoding="async" />
       <div className="scene-halo" />
       <div className="scene-phone"><PhonePreview /></div>
       <div className="scene-qr"><div className="scene-card-label"><ScanLine size={12} /> QR ACTIVO</div><div className="scene-qr-core"><QrVisual copper /></div><span>CRIPQER / 09.26</span></div>
@@ -213,17 +220,94 @@ function HeroScene() {
 }
 
 function ServiceVisual({ type }: { type: string }) {
-  if (type === "qr") return <div className="product-visual qr-showcase" data-state="CUSTOMIZE / 01"><img src={assets.qr} alt="Estudio visual de un QR personalizado" onError={hideMissingAsset} /><QrCustomizer /></div>;
+  if (type === "qr") return <div className="product-visual qr-showcase" data-state="CUSTOMIZE / 01"><img src={assets.qr} alt="Estudio visual de un QR personalizado" onError={hideMissingAsset} loading="lazy" decoding="async" /><QrCustomizer /></div>;
   if (type === "profile") return <div className="product-visual profile-showcase" data-state="PROFILE / LIVE"><div className="soft-light" /><PhonePreview selected /><div className="profile-badge"><Eye size={14} /><span><b>Vista en vivo</b> Cada cambio es inmediato</span></div></div>;
-  if (type === "templates") return <div className="product-visual template-showcase" data-state="THEMES / 12"><img src={assets.templates} alt="Composición de plantillas premium" onError={hideMissingAsset} /><TemplateStack /><div className="template-caption"><LayoutTemplate size={14} /> 12 temas listos para personalizar</div></div>;
-  return <div className="product-visual security-showcase" data-state="ACCESS / LOCKED"><img src={assets.securePanel} alt="Visual de seguridad para documentos" onError={hideMissingAsset} /><SecurePanel /></div>;
+  if (type === "templates") return <div className="product-visual template-showcase" data-state="THEMES / 12"><img src={assets.templates} alt="Composición de plantillas premium" onError={hideMissingAsset} loading="lazy" decoding="async" /><TemplateStack /><div className="template-caption"><LayoutTemplate size={14} /> 12 temas listos para personalizar</div></div>;
+  return <div className="product-visual security-showcase" data-state="ACCESS / LOCKED"><img src={assets.securePanel} alt="Visual de seguridad para documentos" onError={hideMissingAsset} loading="lazy" decoding="async" /><SecurePanel /></div>;
 }
 
 function Home() {
+  const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [authOpen, setAuthOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<PremiumAuthMode>("login");
+  const [authLoading, setAuthLoading] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [authSuccessMessage, setAuthSuccessMessage] = useState<string | null>(null);
+
   const navigateTo = (id: string) => {
     setMenuOpen(false);
     document.querySelector(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const clearAuthStatus = () => {
+    setAuthError(null);
+    setAuthSuccessMessage(null);
+  };
+
+  const openAuth = (mode: PremiumAuthMode) => {
+    setMenuOpen(false);
+    clearAuthStatus();
+    setAuthMode(mode);
+    setAuthOpen(true);
+  };
+
+  const handleProtectedAction = async (target: "/editor" | "/encrypted-documents", mode: PremiumAuthMode = "login") => {
+    const supabase = getBrowserSupabaseClient();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (session) {
+      navigate({ to: target });
+      return;
+    }
+
+    openAuth(mode);
+  };
+
+  const handleLogin = async ({ email, password }: PremiumAuthCredentials) => {
+    setAuthLoading(true);
+    setAuthError(null);
+    setAuthSuccessMessage(null);
+
+    try {
+      const supabase = getBrowserSupabaseClient();
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      setAuthOpen(false);
+      navigate({ to: "/editor" });
+    } catch (error) {
+      setAuthError(error instanceof Error ? error.message || "Ha ocurrido un error durante la autenticación." : "Ha ocurrido un error durante la autenticación.");
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleRegister = async ({ name, email, password }: PremiumRegistrationDetails) => {
+    setAuthLoading(true);
+    setAuthError(null);
+    setAuthSuccessMessage(null);
+
+    try {
+      if (!name.trim()) throw new Error("Por favor, ingresa tu nombre.");
+      const supabase = getBrowserSupabaseClient();
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: name,
+          },
+        },
+      });
+      if (error) throw error;
+      setAuthSuccessMessage("Revisa tu correo para confirmar la cuenta (o ingresa si el auto-confirm está activado).");
+    } catch (error) {
+      setAuthError(error instanceof Error ? error.message || "Ha ocurrido un error durante la autenticación." : "Ha ocurrido un error durante la autenticación.");
+    } finally {
+      setAuthLoading(false);
+    }
   };
 
   return (
@@ -236,14 +320,14 @@ function Home() {
           </button>
           <nav className={`site-nav ${menuOpen ? "is-open" : ""}`} aria-label="Navegación principal">
             <button onClick={() => navigateTo("#inicio")}>Inicio</button>
-            <a href="/profile" onClick={() => setMenuOpen(false)}>QR</a>
+            <button onClick={() => void handleProtectedAction("/editor")}>Crear QR</button>
             <a href="/template-bank" onClick={() => setMenuOpen(false)}>Plantillas</a>
-            <a href="/profile" onClick={() => setMenuOpen(false)}>Editor</a>
-            <a href="/profile" onClick={() => setMenuOpen(false)}>Seguridad</a>
+            <button onClick={() => void handleProtectedAction("/editor")}>Editor</button>
+            <button onClick={() => void handleProtectedAction("/encrypted-documents")}>Seguridad</button>
           </nav>
           <div className="nav-actions">
-            <a className="nav-login" href="/profile">Iniciar sesión</a>
-            <a className="nav-primary" href="/profile">Crear gratis <ArrowRight size={15} /></a>
+            <button className="nav-login" onClick={() => openAuth("login")}>Iniciar sesión</button>
+            <button className="nav-primary" onClick={() => void handleProtectedAction("/editor", "register")}>Crear gratis <ArrowRight size={15} /></button>
           </div>
           <button className="menu-toggle" aria-label={menuOpen ? "Cerrar menú" : "Abrir menú"} onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? <X /> : <Menu />}</button>
         </div>
@@ -256,7 +340,7 @@ function Home() {
             <div className="eyebrow"><span className="signal-dot" /> TODO CONECTADO. TODO TUYO.</div>
             <h1>Tu identidad digital,<br /><em>conectada</em> con un QR.</h1>
             <p>Crea códigos QR personalizados, páginas de perfil, experiencias digitales y documentos seguros desde una sola plataforma.</p>
-            <div className="hero-actions"><a className="button-primary" href="/profile">Crear mi QR <ArrowRight size={17} /></a><button className="button-ghost" onClick={() => navigateTo("#features")}>Explorar Cripqer <ArrowDown size={16} /></button></div>
+            <div className="hero-actions"><button className="button-primary" onClick={() => void handleProtectedAction("/editor", "register")}>Crear mi QR <ArrowRight size={17} /></button><button className="button-ghost" onClick={() => navigateTo("#features")}>Explorar Cripqer <ArrowDown size={16} /></button></div>
             <div className="hero-meta"><span><i /> Sin código</span><span><i /> Publica en segundos</span></div>
             <div className="hero-mark-code"><CripqerMark /><span>OPEN MODULE / IDENTITY SYSTEM</span></div>
           </div>
@@ -282,7 +366,21 @@ function Home() {
                   <h3>{service.title}</h3>
                   <p>{service.description}</p>
                   <ul>{service.items.map((item) => <li key={item}><Check size={13} /> {item}</li>)}</ul>
-                  <a className="text-link" href={service.type === "templates" ? "/template-bank" : "/profile"}>Inspeccionar herramienta <ArrowRight size={15} /></a>
+                  {service.type === "templates" ? (
+                    <a className="text-link" href="/template-bank">Inspeccionar herramienta <ArrowRight size={15} /></a>
+                  ) : (
+                    <button
+                      className="text-link"
+                      onClick={() =>
+                        void handleProtectedAction(
+                          service.type === "secure" ? "/encrypted-documents" : "/editor",
+                          "login",
+                        )
+                      }
+                    >
+                      Iniciar para usarla <ArrowRight size={15} />
+                    </button>
+                  )}
                 </div>
                 <ServiceVisual type={service.type} />
               </article>;
@@ -296,7 +394,7 @@ function Home() {
         <div className="section-frame editor-wrap inspection-frame" data-register="CHAPTER / 03">
           <SectionLead eyebrow="EDITOR VISUAL" number="03" title={<>Diseña visualmente.<br />Publica en segundos.</>} copy="Una experiencia de edición para modificar contenido, estilo y disposición mientras observas el resultado." />
           <div className="editor-window reveal">
-            <aside className="editor-sidebar"><div className="editor-brand"><CripqerMark /> <span>editor</span></div><div className="editor-tabs"><button className="active"><UserRound /> Contenido</button><button><UserRound /> Avatar</button><button><LayoutTemplate /> Bio</button><button><ChevronRight /> Botones</button><button><Instagram /> Redes</button><button><Sparkles /> Apariencia</button></div><div className="editor-save"><span><i /> Cambios guardados</span><a href="/profile">Publicar <ArrowRight size={14} /></a></div></aside>
+            <aside className="editor-sidebar"><div className="editor-brand"><CripqerMark /> <span>editor</span></div><div className="editor-tabs"><button className="active"><UserRound /> Contenido</button><button><UserRound /> Avatar</button><button><LayoutTemplate /> Bio</button><button><ChevronRight /> Botones</button><button><Instagram /> Redes</button><button><Sparkles /> Apariencia</button></div><div className="editor-save"><span><i /> Cambios guardados</span><button onClick={() => void handleProtectedAction("/editor", "login")}>Publicar <ArrowRight size={14} /></button></div></aside>
             <div className="editor-workspace"><div className="workspace-bar"><span>PREVIEW MÓVIL</span><div><i /><i /><i /></div></div><div className="workspace-canvas"><div className="selection-note"><span /><b>Botón seleccionado</b><small>Arrastra para mover</small></div><PhonePreview selected /></div></div>
           </div>
         </div>
@@ -306,7 +404,7 @@ function Home() {
         <div className="section-frame actions-wrap inspection-frame" data-register="CHAPTER / 04">
           <SectionLead eyebrow="MÁS QUE SIMPLES ENLACES" number="04" title={<>Convierte cada botón en una <em>acción.</em></>} copy="Los botones pueden dirigir a cada persona directamente hacia diferentes acciones digitales." />
           <div className="action-stack reveal">
-            {actionData.map((action, index) => { const Icon = action.icon; return <a className="action-item" style={{ "--delay": `${index * 45}ms` } as CSSProperties} key={action.label} href="/profile"><span className="action-icon"><Icon size={18} /></span><span><b>{action.label}</b><small>{action.example}</small></span><ChevronRight size={17} /></a>; })}
+            {actionData.map((action, index) => { const Icon = action.icon; return <button className="action-item" style={{ "--delay": `${index * 45}ms` } as CSSProperties} key={action.label} onClick={() => void handleProtectedAction("/editor", "login")}><span className="action-icon"><Icon size={18} /></span><span><b>{action.label}</b><small>{action.example}</small></span><ChevronRight size={17} /></button>; })}
           </div>
         </div>
       </section>
@@ -314,8 +412,8 @@ function Home() {
       <section id="seguridad" className="security-section">
         <div className="technical-grid" />
         <div className="section-frame security-wrap inspection-frame" data-register="CHAPTER / 05">
-          <div className="security-copy reveal"><div className="eyebrow"><span className="signal-dot" /> CRIPQER SECURITY</div><h2>Cuando compartir también necesita <em>protección.</em></h2><p>Documentos Seguros añade una capa especializada para el envío de archivos mediante enlaces y QR.</p><div className="security-badges">{["Cifrado", "Contraseña", "Expiración", "Control de descargas"].map((badge) => <span key={badge}><ShieldCheck size={14} /> {badge}</span>)}</div><a className="button-primary" href="/profile">Abrir Documentos Seguros <ArrowRight size={17} /></a></div>
-          <div className="security-object reveal"><img src={assets.securityVault} alt="Objeto visual de un archivo protegido" onError={hideMissingAsset} /><div className="security-ring"><ShieldCheck size={30} /></div><div className="security-status"><span><i /> ENCRIPTADO</span><b>Acceso protegido</b><small>Política activa · 18 días</small></div></div>
+          <div className="security-copy reveal"><div className="eyebrow"><span className="signal-dot" /> CRIPQER SECURITY</div><h2>Cuando compartir también necesita <em>protección.</em></h2><p>Documentos Seguros añade una capa especializada para el envío de archivos mediante enlaces y QR.</p><div className="security-badges">{["Cifrado", "Contraseña", "Expiración", "Control de descargas"].map((badge) => <span key={badge}><ShieldCheck size={14} /> {badge}</span>)}</div><button className="button-primary" onClick={() => void handleProtectedAction("/encrypted-documents", "login")}>Abrir Documentos Seguros <ArrowRight size={17} /></button></div>
+          <div className="security-object reveal"><img src={assets.securityVault} alt="Objeto visual de un archivo protegido" onError={hideMissingAsset} loading="lazy" decoding="async" /><div className="security-ring"><ShieldCheck size={30} /></div><div className="security-status"><span><i /> ENCRIPTADO</span><b>Acceso protegido</b><small>Política activa · 18 días</small></div></div>
         </div>
       </section>
 
@@ -331,13 +429,24 @@ function Home() {
 
       <section className="use-cases-section">
         <div className="section-frame inspection-frame" data-register="CHAPTER / 07"><SectionLead eyebrow="PARA PERSONAS Y NEGOCIOS" number="07" title={<>Una identidad digital que <em>viaja contigo.</em></>} />
-          <div className="use-case-grid reveal">{[["01", "Profesionales", "Comparte perfil, contacto, servicios y redes.", UserRound], ["02", "Creadores", "Centraliza contenido, redes y llamadas a la acción.", Sparkles], ["03", "Negocios", "Conecta clientes con información, productos y canales.", QrCode], ["04", "Equipos", "Comparte recursos y experiencias digitales consistentes.", Globe2]].map(([number, title, description, Icon]) => { const Mark = Icon as typeof Globe2; return <article key={title as string}><div><span>{number as string}</span><Mark size={20} /></div><h3>{title as string}</h3><p>{description as string}</p><a href="/profile" aria-label={`Explorar ${title as string}`}><ArrowRight size={17} /></a></article>; })}</div>
+          <div className="use-case-grid reveal">{[["01", "Profesionales", "Comparte perfil, contacto, servicios y redes.", UserRound], ["02", "Creadores", "Centraliza contenido, redes y llamadas a la acción.", Sparkles], ["03", "Negocios", "Conecta clientes con información, productos y canales.", QrCode], ["04", "Equipos", "Comparte recursos y experiencias digitales consistentes.", Globe2]].map(([number, title, description, Icon]) => { const Mark = Icon as typeof Globe2; return <article key={title as string}><div><span>{number as string}</span><Mark size={20} /></div><h3>{title as string}</h3><p>{description as string}</p><button onClick={() => void handleProtectedAction("/editor", "login")} aria-label={`Abrir acceso para ${title as string}`}><ArrowRight size={17} /></button></article>; })}</div>
         </div>
       </section>
 
-      <section className="final-cta-section"><div className="cta-orbit cta-orbit-one" /><div className="cta-orbit cta-orbit-two" /><div className="final-cta-card reveal"><div className="final-mark"><CripqerMark /></div><div className="eyebrow"><span className="signal-dot" /> TU PRESENCIA, CONECTADA</div><h2>Tu próximo QR puede<br />hacer mucho más.</h2><p>Construye tu identidad digital y conecta todo desde Cripqer.</p><div><a className="button-primary" href="/profile">Crear gratis <ArrowRight size={17} /></a><a className="button-ghost" href="/template-bank">Ver plantillas</a></div></div></section>
+      <section className="final-cta-section"><div className="cta-orbit cta-orbit-one" /><div className="cta-orbit cta-orbit-two" /><div className="final-cta-card reveal"><div className="final-mark"><CripqerMark /></div><div className="eyebrow"><span className="signal-dot" /> TU PRESENCIA, CONECTADA</div><h2>Tu próximo QR puede<br />hacer mucho más.</h2><p>Construye tu identidad digital y conecta todo desde Cripqer.</p><div><button className="button-primary" onClick={() => void handleProtectedAction("/editor", "register")}>Crear gratis <ArrowRight size={17} /></button><a className="button-ghost" href="/template-bank">Ver plantillas</a></div></div></section>
 
-      <footer className="site-footer"><div className="footer-main"><div className="footer-brand"><div className="brand-lockup"><span className="brand-mark-shell"><CripqerMark className="brand-mark-fallback" /></span><Wordmark light /></div><p>Identidad digital conectada mediante QR, perfiles, plantillas y documentos seguros.</p></div><div className="footer-links"><div><h3>Producto</h3>{[["QR", "/profile"], ["Editor", "/profile"], ["Plantillas", "/template-bank"], ["Documentos Seguros", "/profile"]].map(([link, route]) => <a href={route} key={link}>{link}</a>)}</div><div><h3>Recursos</h3>{["Ayuda", "Privacidad", "Términos"].map((link) => <button onClick={() => navigateTo("#inicio")} key={link}>{link}</button>)}</div><div><h3>Cuenta</h3>{[["Iniciar sesión", "/profile"], ["Crear cuenta", "/profile"]].map(([link, route]) => <a href={route} key={link}>{link}</a>)}</div></div></div><div className="footer-bottom"><span>© 2026 Cripqer</span><span>Diseñado para conectar con precisión.</span></div></footer>
+      <footer className="site-footer"><div className="footer-main"><div className="footer-brand"><div className="brand-lockup"><span className="brand-mark-shell"><CripqerMark className="brand-mark-fallback" /></span><Wordmark light /></div><p>Identidad digital conectada mediante QR, perfiles, plantillas y documentos seguros.</p></div><div className="footer-links"><div><h3>Producto</h3><button onClick={() => void handleProtectedAction("/editor", "register")}>Crear QR</button><button onClick={() => void handleProtectedAction("/editor", "login")}>Editor</button><a href="/template-bank">Plantillas</a><button onClick={() => void handleProtectedAction("/encrypted-documents", "login")}>Documentos Seguros</button></div><div><h3>Recursos</h3>{["Ayuda", "Privacidad", "Términos"].map((link) => <button onClick={() => navigateTo("#inicio")} key={link}>{link}</button>)}</div><div><h3>Cuenta</h3><button onClick={() => openAuth("login")}>Iniciar sesión</button><button onClick={() => openAuth("register")}>Crear cuenta</button></div></div></div><div className="footer-bottom"><span>© 2026 Cripqer</span><span>Diseñado para conectar con precisión.</span></div></footer>
+      <PremiumAuthModal
+        open={authOpen}
+        onOpenChange={setAuthOpen}
+        defaultMode={authMode}
+        loading={authLoading}
+        error={authError}
+        successMessage={authSuccessMessage}
+        onClearStatus={clearAuthStatus}
+        onLogin={handleLogin}
+        onRegister={handleRegister}
+      />
     </main>
   );
 }

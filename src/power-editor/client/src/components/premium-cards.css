@@ -3,11 +3,19 @@
 .ep-premium-card-block > .ep-rich-card.image-right { flex-direction: row; }
 .ep-premium-card-block > .ep-rich-card.image-left { flex-direction: row-reverse; }
 .ep-rich-card-copy { display: grid; flex: 1 1 75%; min-width: 0; align-content: center; gap: 4px; }
-.ep-rich-card-copy b, .ep-rich-card-copy small, .ep-rich-card-cta { display: block; width: 100%; overflow-wrap: anywhere; }
+.ep-rich-card-title, .ep-rich-card-description, .ep-rich-card-cta { display: block; width: 100%; overflow-wrap: anywhere; text-align: inherit; }
+.ep-rich-card-title, .ep-rich-card-description, .ep-rich-card-image { padding: 0; border: 0; color: inherit; background: transparent; cursor: pointer; }
+.ep-rich-card-title { font: inherit; font-weight: inherit; }
+.ep-rich-card-description { font: inherit; }
 .ep-rich-card-cta { max-width: 100%; margin-top: 2px; padding: 3px 6px; border: 1px solid currentColor; border-radius: 999px; color: inherit; background: transparent; font-style: normal; cursor: pointer; }
 .ep-rich-card.is-clickable { cursor: pointer; }
 .ep-rich-card.is-clickable:focus-visible { outline: 2px solid var(--ep-copper, #c49a68); outline-offset: 3px; }
 .ep-rich-card-image { display: block; flex: 0 0 25%; min-width: 25%; background: #252a32 center / cover no-repeat; }
+.ep-rich-card.is-selected-target,
+.ep-rich-card-title.is-selected-target,
+.ep-rich-card-description.is-selected-target,
+.ep-rich-card-image.is-selected-target,
+.ep-rich-card-cta.is-selected-target { outline: 2px solid var(--ep-copper, #c49a68); outline-offset: 3px; box-shadow: 0 0 0 1px rgba(0,0,0,.22); }
 .ep-rich-cards-panel .ep-guidance { align-items: flex-start; }
 .ep-rich-card-editor { display: grid; gap: 9px; margin: 12px 0; padding: 11px; border: 1px solid rgba(196,154,104,.22); border-radius: 11px; background: #1c2026; }
 .ep-rich-card-editor > header { display: flex; justify-content: space-between; gap: 8px; color: #ecd1a4; font-size: 10px; }

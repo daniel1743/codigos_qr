@@ -269,6 +269,11 @@ export function PremiumMobileNavDrawer({ children }: PremiumMobileNavDrawerProps
     };
   }, []);
 
+  useEffect(() => {
+    if (!isOpenRef.current) return;
+    settleTo(false, true);
+  }, [pathname]);
+
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     if (hiddenForRoute || isGestureIgnored(event.target) || event.button !== 0) return;
     if (event.target instanceof Element && event.target.closest("[data-sidebar-trigger]")) return;
@@ -385,13 +390,17 @@ export function PremiumMobileNavDrawer({ children }: PremiumMobileNavDrawerProps
       data-mobile-sidebar-shell
       ref={appContainerRef}
       className="relative min-h-dvh max-w-[100vw] overflow-hidden bg-white overscroll-x-none lg:contents"
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerEnd}
+      onPointerCancel={handlePointerEnd}
     >
       <nav
         id="premium-mobile-nav-drawer"
         ref={menuLayerRef}
         aria-label="Navegación principal"
-        aria-hidden="true"
-        inert={true}
+        aria-hidden={progress <= 0.01}
+        inert={progress <= 0.01}
         className={cn(
           "absolute inset-y-0 left-0 z-[100] hidden max-h-dvh flex-col overflow-hidden bg-white text-slate-700 shadow-sm lg:hidden",
           "max-[1023px]:flex",
@@ -470,7 +479,8 @@ export function PremiumMobileNavDrawer({ children }: PremiumMobileNavDrawerProps
 
       <main
         ref={mainLayerRef}
-        data-state="closed"
+        data-state={isOpen ? "open" : "closed"}
+        onClickCapture={handleMainClickCapture}
         className={cn(
           "absolute left-0 top-0 z-[110] flex h-full w-full origin-right flex-col bg-slate-950 will-change-transform lg:contents lg:bg-transparent lg:transform-none",
           animating &&
@@ -486,8 +496,11 @@ export function PremiumMobileNavDrawer({ children }: PremiumMobileNavDrawerProps
         <div
           aria-hidden="true"
           data-mobile-sidebar-scrim
-          className="pointer-events-none absolute inset-0 z-[50] bg-black lg:hidden"
-          style={{ opacity: 0, borderRadius: "inherit" }}
+          className={cn(
+            "absolute inset-0 z-[50] bg-black lg:hidden",
+            progress > 0.01 ? "pointer-events-auto" : "pointer-events-none",
+          )}
+          style={{ opacity: scrimOpacity, borderRadius: "inherit" }}
         />
         <header className="sticky top-0 z-[60] flex items-center justify-between border-b border-white/5 bg-slate-950/90 px-4 py-4 pt-[max(env(safe-area-inset-top),1rem)] text-white backdrop-blur-md lg:hidden">
           <button
@@ -497,7 +510,8 @@ export function PremiumMobileNavDrawer({ children }: PremiumMobileNavDrawerProps
             data-testid="mobile-sidebar-trigger"
             aria-expanded={isOpen}
             aria-controls="premium-mobile-nav-drawer"
-            aria-label="Abrir menú"
+            aria-label={isOpen ? "Cerrar menú" : "Abrir menú"}
+            onClick={() => settleTo(!isOpenRef.current, true)}
             className="-ml-2 grid h-10 w-10 place-items-center rounded-xl text-white transition-transform active:scale-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
           >
             <HugeiconsIcon icon={Menu01Icon} size={28} strokeWidth={1.8} />
@@ -509,325 +523,6 @@ export function PremiumMobileNavDrawer({ children }: PremiumMobileNavDrawerProps
           {children}
         </div>
       </main>
-
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `
-(() => {
-  const KEY = "__cripqerMobileSidebarV6Recovery";
-  if (window[KEY]?.dispose) window[KEY].dispose();
-
-  const controller = {
-    cleanup: [],
-    dispose() {
-      for (const fn of this.cleanup.splice(0)) fn();
-    }
-  };
-  window[KEY] = controller;
-
-  const add = (target, type, handler, options) => {
-    target.addEventListener(type, handler, options);
-    controller.cleanup.push(() => target.removeEventListener(type, handler, options));
-  };
-
-  let activeContainer = null;
-  let activeCleanup = [];
-  const clearActive = () => {
-    for (const fn of activeCleanup.splice(0)) fn();
-    activeContainer = null;
-  };
-  const addActive = (target, type, handler, options) => {
-    target.addEventListener(type, handler, options);
-    activeCleanup.push(() => target.removeEventListener(type, handler, options));
-  };
-  controller.cleanup.push(clearActive);
-
-  function boot() {
-    const container = document.querySelector("[data-mobile-sidebar-shell]");
-    const menu = document.getElementById("premium-mobile-nav-drawer");
-    const main = container?.querySelector("main");
-    const trigger = container?.querySelector("[data-testid='mobile-sidebar-trigger']");
-    const scrim = container?.querySelector("[data-mobile-sidebar-scrim]");
-    if (!container || !menu || !main || !trigger || !scrim) return;
-    if (activeContainer === container) return;
-    clearActive();
-    activeContainer = container;
-
-    let isOpen = false;
-    let isDragging = false;
-    let activeTouchId = null;
-    let startX = 0;
-    let startY = 0;
-    let lastX = 0;
-    let lastTime = 0;
-    let velocity = 0;
-    let progress = 0;
-    let rafId = 0;
-    let settleTimer = 0;
-    let overlay = null;
-    let hasDeterminedIntent = false;
-    let isHorizontalSwipe = false;
-    let previousFocus = null;
-    let maxWidth = Math.min(window.innerWidth * 0.84, 340);
-
-    const clearTimer = () => {
-      if (settleTimer) window.clearTimeout(settleTimer);
-      settleTimer = 0;
-    };
-
-    const setTransitions = (animate) => {
-      const transition = animate
-        ? "transform 260ms cubic-bezier(0.32, 0.72, 0, 1), border-radius 260ms cubic-bezier(0.32, 0.72, 0, 1), box-shadow 260ms cubic-bezier(0.32, 0.72, 0, 1), opacity 260ms cubic-bezier(0.32, 0.72, 0, 1)"
-        : "none";
-      main.style.transition = transition;
-      menu.style.transition = transition;
-      scrim.style.transition = transition;
-    };
-
-    const updateUI = (nextProgress) => {
-      progress = Math.max(0, Math.min(1, nextProgress));
-      const mainX = progress * maxWidth;
-      const mainY = progress * 8;
-      const mainScale = 1 - ((1 - 0.965) * progress);
-      const radius = 38 * progress;
-      const menuScale = 0.97 + (0.03 * progress);
-      const menuX = -10 * (1 - progress);
-
-      menu.style.width = (maxWidth + 14) + "px";
-      menu.style.transform = "scale(" + menuScale + ") translateX(" + menuX + "px)";
-      menu.style.opacity = String(0.5 + 0.5 * progress);
-      menu.setAttribute("aria-hidden", progress <= 0.01 ? "true" : "false");
-      menu.inert = progress <= 0.01;
-
-      main.style.transform = "translate3d(" + mainX + "px, " + mainY + "px, 0) scale(" + mainScale + ")";
-      main.style.borderTopLeftRadius = radius + "px";
-      main.style.borderBottomLeftRadius = radius + "px";
-      main.style.boxShadow = "calc(-8px * " + progress + ") 0 calc(24px * " + progress + ") rgba(0, 0, 0, " + (0.12 * progress) + ")";
-      main.setAttribute("data-state", isOpen ? "open" : "closed");
-      main.inert = isOpen;
-
-      scrim.style.opacity = String(0.2 * progress);
-      if (overlay) overlay.style.left = mainX + "px";
-      trigger.setAttribute("aria-expanded", isOpen ? "true" : "false");
-    };
-
-    const requestUIUpdate = (nextProgress) => {
-      if (rafId) cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(() => {
-        updateUI(nextProgress);
-        rafId = 0;
-      });
-    };
-
-    const removeOverlay = () => {
-      if (!overlay) return;
-      overlay.remove();
-      overlay = null;
-    };
-
-    const ensureOverlay = () => {
-      if (overlay) return;
-      overlay = document.createElement("button");
-      overlay.type = "button";
-      overlay.setAttribute("aria-label", "Cerrar navegación");
-      overlay.className = "absolute bottom-0 right-0 top-0 z-[120] cursor-default bg-transparent lg:hidden";
-      overlay.style.left = (progress * maxWidth) + "px";
-      overlay.addEventListener("click", () => settleTo(false, true));
-      container.appendChild(overlay);
-    };
-
-    function settleTo(open, forceSettle = false) {
-      if (isOpen === open && !forceSettle) return;
-      clearTimer();
-      isOpen = open;
-      if (open) {
-        previousFocus = document.activeElement;
-        ensureOverlay();
-      }
-      setTransitions(true);
-      requestUIUpdate(open ? 1 : 0);
-      settleTimer = window.setTimeout(() => {
-        updateUI(open ? 1 : 0);
-        if (open) {
-          const focusable = menu.querySelector("a,button");
-          if (focusable) focusable.focus();
-        } else {
-          removeOverlay();
-          if (previousFocus?.focus) previousFocus.focus();
-        }
-      }, 260);
-    }
-
-    const startDrag = (event) => {
-      if (event.button !== 0) return;
-      if (event.target.closest("[data-drawer-gesture='ignore'],[data-sidebar-trigger]")) return;
-      if (isOpen && menu.contains(event.target)) return;
-      if (!isOpen && event.clientX > 32) return;
-
-      clearTimer();
-      isDragging = true;
-      hasDeterminedIntent = false;
-      isHorizontalSwipe = false;
-      startX = event.clientX;
-      startY = event.clientY;
-      lastX = event.clientX;
-      lastTime = Date.now();
-      velocity = 0;
-      setTransitions(false);
-    };
-
-    const beginDragAt = (event, point) => {
-      if (event.target.closest("[data-drawer-gesture='ignore'],[data-sidebar-trigger]")) return false;
-      if (isOpen && menu.contains(event.target)) return false;
-      if (!isOpen && point.clientX > 32) return false;
-
-      clearTimer();
-      isDragging = true;
-      hasDeterminedIntent = false;
-      isHorizontalSwipe = false;
-      startX = point.clientX;
-      startY = point.clientY;
-      lastX = point.clientX;
-      lastTime = Date.now();
-      velocity = 0;
-      setTransitions(false);
-      return true;
-    };
-
-    const moveDragAt = (event, point, capturePointer = false) => {
-      if (!isDragging) return;
-      const dx = point.clientX - startX;
-      const dy = point.clientY - startY;
-
-      if (!hasDeterminedIntent) {
-        if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
-        hasDeterminedIntent = true;
-        if (Math.abs(dx) > Math.abs(dy) * 1.2) {
-          isHorizontalSwipe = true;
-          if (capturePointer) {
-            try { container.setPointerCapture(event.pointerId); } catch (_) {}
-          }
-        } else {
-          isDragging = false;
-          activeTouchId = null;
-          return;
-        }
-      }
-
-      if (!isHorizontalSwipe) return;
-      if (event.cancelable) event.preventDefault();
-
-      const now = Date.now();
-      const dt = now - lastTime;
-      if (dt > 0) velocity = velocity * 0.4 + ((point.clientX - lastX) / dt) * 0.6;
-      lastX = point.clientX;
-      lastTime = now;
-
-      const targetProgress = Math.max(0, Math.min((isOpen ? maxWidth + dx : dx) / maxWidth, 1));
-      requestUIUpdate(targetProgress);
-    };
-
-    const moveDrag = (event) => {
-      moveDragAt(event, event, true);
-    };
-
-    const endDrag = (event) => {
-      if (!isDragging) return;
-      isDragging = false;
-      try { container.releasePointerCapture(event.pointerId); } catch (_) {}
-      if (!hasDeterminedIntent || !isHorizontalSwipe) return;
-
-      const shouldOpen = velocity > 0.45 ? true : velocity < -0.45 ? false : progress > 0.4;
-      settleTo(shouldOpen, true);
-      window.setTimeout(() => { isHorizontalSwipe = false; }, 50);
-    };
-
-    const getTouch = (touchList) => {
-      for (const touch of touchList) {
-        if (touch.identifier === activeTouchId) return touch;
-      }
-      return null;
-    };
-
-    const startTouch = (event) => {
-      const touch = event.changedTouches?.[0];
-      if (!touch) return;
-      activeTouchId = touch.identifier;
-      if (!beginDragAt(event, touch)) activeTouchId = null;
-    };
-
-    const moveTouch = (event) => {
-      if (activeTouchId === null) return;
-      const touch = getTouch(event.touches) || getTouch(event.changedTouches);
-      if (!touch) return;
-      moveDragAt(event, touch);
-    };
-
-    const endTouch = (event) => {
-      if (activeTouchId === null) return;
-      activeTouchId = null;
-      endDrag(event);
-    };
-
-    const openFromTrigger = (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      settleTo(true);
-    };
-
-    const handleResize = () => {
-      maxWidth = Math.min(window.innerWidth * 0.84, 340);
-      updateUI(progress);
-    };
-
-    const handleKeyDown = (event) => {
-      if (event.key === "Escape" && isOpen) settleTo(false, true);
-    };
-
-    const handleMenuClick = (event) => {
-      if (event.target.closest("a")) window.setTimeout(() => settleTo(false, true), 150);
-    };
-
-    addActive(trigger, "pointerdown", openFromTrigger);
-    addActive(trigger, "click", openFromTrigger);
-    addActive(container, "pointerdown", startDrag);
-    addActive(container, "pointermove", moveDrag, { passive: false });
-    addActive(container, "touchstart", startTouch, { passive: true });
-    addActive(container, "touchmove", moveTouch, { passive: false });
-    addActive(window, "pointerup", endDrag);
-    addActive(window, "pointercancel", endDrag);
-    addActive(window, "touchend", endTouch);
-    addActive(window, "touchcancel", endTouch);
-    addActive(window, "resize", handleResize);
-    addActive(document, "keydown", handleKeyDown);
-    addActive(menu, "click", handleMenuClick);
-
-    activeCleanup.push(() => {
-      if (rafId) cancelAnimationFrame(rafId);
-      clearTimer();
-      removeOverlay();
-    });
-
-    updateUI(0);
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", boot, { once: true });
-    controller.cleanup.push(() => document.removeEventListener("DOMContentLoaded", boot));
-  } else {
-    requestAnimationFrame(boot);
-  }
-  window.setTimeout(boot, 800);
-  window.setTimeout(boot, 1800);
-  const observer = new MutationObserver(boot);
-  if (document.body) observer.observe(document.body, { childList: true, subtree: true });
-  controller.cleanup.push(() => observer.disconnect());
-  const disposeOnPageHide = () => controller.dispose();
-  add(window, "pagehide", disposeOnPageHide, { once: true });
-})();
-          `,
-        }}
-      />
     </div>
   );
 }

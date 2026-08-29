@@ -56,3 +56,7 @@
 .ep-banner-fusion-panel { padding: 13px 16px 0; border-bottom: 1px solid rgba(196,154,104,.2); background: rgba(196,154,104,.035); }.ep-banner-fusion-panel .ep-guidance:last-child { margin-bottom: 13px; }.ep-inspector > .ep-banner-fusion-panel + .ep-panel { height: calc(100% - 201px); }.ep-sheet .ep-banner-fusion-panel + .ep-panel { height: calc(100% - 201px); }
  
 .ep-template-content, .ep-composition-root { padding-bottom: 48px; } 
+.ep-particles i { pointer-events: none; transition: transform 320ms ease; }
+.ep-particles-interaction-follow:hover i { transform: translateY(-6px); }
+.ep-particles-interaction-repel:hover i { transform: translateY(6px); }
+@media (prefers-reduced-motion: reduce) { .ep-particles i { animation: none !important; transition: none !important; } }
