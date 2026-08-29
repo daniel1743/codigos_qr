@@ -1,7 +1,19 @@
 // 'square' is kept strictly for safe legacy handling, the UI normalizes it to 'rounded'
 export type AvatarShape = "circle" | "rounded" | "none" | "square";
 export type ButtonRadius = "none" | "rounded" | "full";
-export type ButtonStyle = "solid" | "outline" | "soft" | "pill" | "minimal" | "line" | "card" | "premium_image_right" | "premium_image_left" | "premium_detail_arrow" | "premium_classic_card" | "premium_minimal_badge";
+export type ButtonStyle =
+  | "solid"
+  | "outline"
+  | "soft"
+  | "pill"
+  | "minimal"
+  | "line"
+  | "card"
+  | "premium_image_right"
+  | "premium_image_left"
+  | "premium_detail_arrow"
+  | "premium_classic_card"
+  | "premium_minimal_badge";
 
 export interface Profile {
   id: string; // UUID
@@ -12,6 +24,7 @@ export interface Profile {
   bio: string | null;
   avatar_url: string | null;
   banner_url: string | null;
+  banner_fusion_strength?: number | null;
   avatar_shape: AvatarShape;
   ring_enabled: boolean;
   ring_color: string;

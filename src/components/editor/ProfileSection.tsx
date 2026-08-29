@@ -1,13 +1,11 @@
-import { Label } from "../ui/label";
-import { Input } from "../ui/input";
-import { Textarea } from "../ui/textarea";
-import { Button } from "../ui/button";
-import { Switch } from "../ui/switch";
+import { useState } from "react";
+import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import type { Profile } from "../../types/database";
 import { getBrowserSupabaseClient } from "../../lib/supabase/client";
-import { useState } from "react";
-import { Loader2, Bold } from "lucide-react";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { Textarea } from "../ui/textarea";
 
 interface ProfileSectionProps {
   profile: Partial<Profile>;
@@ -15,70 +13,90 @@ interface ProfileSectionProps {
   userId: string;
 }
 
+const MAX_AVATAR_BYTES = 3 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
 export function ProfileSection({ profile, onChange, userId }: ProfileSectionProps) {
   const [uploading, setUploading] = useState(false);
   const supabase = getBrowserSupabaseClient();
 
-  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
     if (!file) return;
+
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      toast.error("Formato no válido", { description: "Usa JPG, PNG o WEBP." });
+      event.target.value = "";
+      return;
+    }
+
+    if (file.size > MAX_AVATAR_BYTES) {
+      toast.error("Imagen demasiado grande", { description: "El máximo permitido es 3 MB." });
+      event.target.value = "";
+      return;
+    }
 
     setUploading(true);
     try {
-      const fileExt = file.name.split(".").pop();
-      const fileName = `avatar-${Date.now()}.${fileExt}`;
-      const filePath = `${userId}/${fileName}`;
+      const extension = file.name.split(".").pop() || "jpg";
+      const filePath = `${userId}/avatar-${Date.now()}.${extension}`;
+      const { error } = await supabase.storage.from("avatars").upload(filePath, file, {
+        contentType: file.type,
+        upsert: true,
+      });
 
-      const { error: uploadError } = await supabase.storage.from("avatars").upload(filePath, file);
-
-      if (uploadError) throw uploadError;
+      if (error) throw error;
 
       const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
-
       onChange({ avatar_url: data.publicUrl });
+      toast.success("Avatar subido correctamente");
     } catch (error) {
       console.error(error);
       toast.error("Hubo un error subiendo la imagen.");
     } finally {
       setUploading(false);
+      event.target.value = "";
     }
   };
 
   return (
-    <div className="space-y-6">
+    <section className="space-y-6">
       <div className="space-y-2">
-        <h2 className="text-xl font-semibold tracking-tight">Información del Perfil</h2>
+        <h2 className="text-xl font-semibold tracking-tight">Información del perfil</h2>
         <p className="text-sm text-muted-foreground">Configura tu avatar y descripción.</p>
       </div>
 
       <div className="space-y-2">
-        <Label>Avatar</Label>
-        <div className="flex flex-col gap-4 min-[380px]:flex-row min-[380px]:items-center">
+        <Label htmlFor="avatar_upload">Avatar</Label>
+        <div className="flex flex-col gap-4 min-[420px]:flex-row min-[420px]:items-center">
           {profile.avatar_url ? (
             <img
               src={profile.avatar_url}
-              alt="Avatar"
-              className={`w-16 h-16 object-cover ${profile.avatar_shape === "rounded" || profile.avatar_shape === "square" ? "rounded-xl" : "rounded-full"}`}
+              alt="Avatar actual"
+              className="h-16 w-16 rounded-full object-cover"
             />
           ) : (
-            <div
-              className={`w-16 h-16 bg-muted flex items-center justify-center ${profile.avatar_shape === "rounded" || profile.avatar_shape === "square" ? "rounded-xl" : "rounded-full"}`}
-            >
-              <span className="text-xs text-muted-foreground">Vacío</span>
+            <div className="grid h-16 w-16 place-items-center rounded-full bg-muted text-xs text-muted-foreground">
+              Vacío
             </div>
           )}
           <div className="w-full flex-1">
             <Input
+              id="avatar_upload"
               type="file"
-              accept="image/png, image/jpeg, image/webp"
+              accept="image/png,image/jpeg,image/webp"
               onChange={handleAvatarUpload}
               disabled={uploading}
               className="h-11"
             />
             {uploading && (
-              <div className="text-sm text-muted-foreground mt-1 flex items-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin" /> Subiendo...
-              </div>
+              <p
+                className="mt-1 flex items-center gap-2 text-sm text-muted-foreground"
+                role="status"
+              >
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Subiendo...
+              </p>
             )}
           </div>
         </div>
@@ -89,7 +107,7 @@ export function ProfileSection({ profile, onChange, userId }: ProfileSectionProp
         <Input
           id="display_name"
           value={profile.display_name || ""}
-          onChange={(e) => onChange({ display_name: e.target.value })}
+          onChange={(event) => onChange({ display_name: event.target.value })}
           placeholder="Ej: Daniel Falcon"
           maxLength={60}
           className="h-11"
@@ -97,125 +115,39 @@ export function ProfileSection({ profile, onChange, userId }: ProfileSectionProp
         />
       </div>
 
-      <div className="space-y-2 mt-8 pt-6 border-t border-border/50">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="bio">Descripción / Biografía</Label>
-        </div>
-        <div className="border rounded-md focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 overflow-hidden bg-background">
-          <div className="flex items-center border-b px-2 py-1 bg-muted/50">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 px-2 text-muted-foreground hover:text-foreground"
-              aria-label="Negrita"
-              title="Negrita"
-              onClick={() => {
-                const textarea = document.getElementById("bio") as HTMLTextAreaElement;
-                if (!textarea) return;
-
-                const start = textarea.selectionStart;
-                const end = textarea.selectionEnd;
-                const text = profile.bio || "";
-
-                let newText = "";
-                if (start === end) {
-                  newText = text.substring(0, start) + "**texto**" + text.substring(end);
-                  onChange({ bio: newText });
-                  setTimeout(() => {
-                    textarea.focus();
-                    textarea.setSelectionRange(start + 2, start + 7);
-                  }, 0);
-                } else {
-                  newText =
-                    text.substring(0, start) +
-                    "**" +
-                    text.substring(start, end) +
-                    "**" +
-                    text.substring(end);
-                  onChange({ bio: newText });
-                  setTimeout(() => {
-                    textarea.focus();
-                    textarea.setSelectionRange(start, end + 4);
-                  }, 0);
-                }
-              }}
-            >
-              <Bold className="w-4 h-4 mr-1" />
-              <span className="text-xs">Negrita</span>
-            </Button>
-            <span className="text-xs text-muted-foreground ml-auto pr-2">
-              Selecciona texto y pulsa Negrita
-            </span>
-          </div>
-          <Textarea
-            id="bio"
-            value={profile.bio || ""}
-            onChange={(e) => onChange({ bio: e.target.value })}
-            placeholder="Un par de líneas sobre ti o tu negocio"
-            maxLength={180}
-            className="min-h-28 resize-none border-0 focus-visible:ring-0 rounded-none shadow-none"
-          />
-        </div>
+      <div className="space-y-2">
+        <Label htmlFor="bio">Biografía</Label>
+        <Textarea
+          id="bio"
+          value={profile.bio || ""}
+          onChange={(event) => onChange({ bio: event.target.value })}
+          placeholder="Un par de líneas sobre ti o tu negocio"
+          maxLength={180}
+          className="min-h-28 resize-none"
+        />
       </div>
 
-      <div className="space-y-2 mt-8 pt-6 border-t border-border/50">
-        <h3 className="font-semibold flex items-center gap-2">Enlace personalizado</h3>
-        <p className="text-sm text-muted-foreground leading-relaxed">
-          Usa un nombre corto y fácil de recordar para compartirlo en Instagram, TikTok o tarjetas.
-        </p>
-        <div className="flex rounded-md shadow-sm mt-3">
-          <span className="inline-flex items-center rounded-l-md border border-r-0 border-input bg-muted px-3 text-sm text-muted-foreground whitespace-nowrap">
+      <div className="space-y-2">
+        <Label htmlFor="public_alias">Enlace personalizado</Label>
+        <div className="flex rounded-md shadow-sm">
+          <span className="inline-flex items-center rounded-l-md border border-r-0 border-input bg-muted px-3 text-sm text-muted-foreground">
             tudominio.com/
           </span>
           <Input
             id="public_alias"
             value={profile.slug || ""}
-            onChange={(e) => {
-              const val = e.target.value
+            onChange={(event) => {
+              const value = event.target.value
                 .toLowerCase()
                 .replace(/[^a-z0-9-]/g, "")
                 .slice(0, 40);
-              onChange({ slug: val });
+              onChange({ slug: value });
             }}
-            placeholder="fusion"
-            className="rounded-l-none h-11"
-            aria-label="Enlace personalizado"
+            placeholder="mi-perfil"
+            className="h-11 rounded-l-none"
           />
         </div>
-        <p className="text-[11px] text-muted-foreground mt-2">
-          Si cambias tu enlace personalizado, el enlace anterior dejará de funcionar. Tu QR físico
-          seguirá funcionando siempre porque usa su identificador estable.
-        </p>
       </div>
-      <div className="space-y-4 mt-8 pt-6 border-t border-border/50">
-        <div className="flex flex-row items-center justify-between rounded-lg border p-3 bg-muted/20">
-          <div className="space-y-0.5">
-            <Label className="text-base font-semibold">Pie de página</Label>
-            <p className="text-[13px] text-muted-foreground">
-              Muestra un mensaje pequeño al final de tu perfil (ej: "Creado por Juan").
-            </p>
-          </div>
-          <Switch
-            checked={profile.footer_enabled || false}
-            onCheckedChange={(checked) => onChange({ footer_enabled: checked })}
-            aria-label="Activar Pie de página"
-          />
-        </div>
-
-        {profile.footer_enabled && (
-          <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
-            <Label htmlFor="footer_text">Mensaje del Pie de página</Label>
-            <Input
-              id="footer_text"
-              value={profile.footer_text || ""}
-              onChange={(e) => onChange({ footer_text: e.target.value })}
-              placeholder="Ej: Creado con amor por Fusion QR"
-              maxLength={80}
-              className="h-11"
-            />
-          </div>
-        )}
-      </div>
-    </div>
+    </section>
   );
 }
