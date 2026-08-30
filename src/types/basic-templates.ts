@@ -27,6 +27,9 @@ export interface ProfileContent {
   heroUrl: string;
   footerEnabled?: boolean;
   footerText?: string;
+  ringEnabled?: boolean;
+  ringColor?: string;
+  ringThickness?: string;
 }
 
 export interface LinkItem {

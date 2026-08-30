@@ -118,7 +118,7 @@ function CanvasWorkspace({
         } as CSSProperties
       }
     >
-      <div className="absolute right-3 top-3 z-20 flex overflow-hidden rounded-xl border border-stone-200 bg-[#fffefa]/95 shadow-sm backdrop-blur">
+      <div className="absolute right-3 top-3 z-20 hidden overflow-hidden rounded-xl border border-stone-200 bg-[#fffefa]/95 shadow-sm backdrop-blur lg:flex">
         <Button
           type="button"
           variant="ghost"

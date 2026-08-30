@@ -223,6 +223,9 @@ export function buildBasicTemplateContent(
       heroUrl: profile.banner_url || "",
       footerEnabled: profile.footer_enabled ?? false,
       footerText: profile.footer_text || "",
+      ringEnabled: profile.ring_enabled ?? false,
+      ringColor: profile.ring_color || "#000000",
+      ringThickness: profile.ring_thickness || "thin",
     },
     links: normalizedLinks,
     cards: links.map((link, index) => ({

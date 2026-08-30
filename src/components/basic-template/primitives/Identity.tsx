@@ -6,14 +6,26 @@ interface AvatarProps {
   src: string;
   name: string;
   size?: number;
+  ringEnabled?: boolean;
   ringColor?: string;
+  ringThickness?: string;
 }
 
 /**
  * Avatar layer — ALWAYS fully opaque and visually above the hero.
  * Never inherits the banner fusion mask.
+ * Ring is driven by persisted ring_enabled / ring_color / ring_thickness.
  */
-export function Avatar({ src, name, size = 96, ringColor = "rgba(255,255,255,0.9)" }: AvatarProps) {
+export function Avatar({
+  src,
+  name,
+  size = 96,
+  ringEnabled = false,
+  ringColor = "#ffffff",
+  ringThickness = "thin",
+}: AvatarProps) {
+  const ringWidth = ringThickness === "thin" ? 2 : ringThickness === "thick" ? 5 : 3;
+  const border = ringEnabled ? `${ringWidth}px solid ${ringColor}` : "none";
   return (
     <img
       src={src}
@@ -21,7 +33,7 @@ export function Avatar({ src, name, size = 96, ringColor = "rgba(255,255,255,0.9
       width={size}
       height={size}
       className="shrink-0 rounded-full object-cover shadow-lg"
-      style={{ width: size, height: size, border: `3px solid ${ringColor}`, opacity: 1 }}
+      style={{ width: size, height: size, border, opacity: 1 }}
     />
   );
 }

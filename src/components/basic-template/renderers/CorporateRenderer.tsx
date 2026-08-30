@@ -57,7 +57,14 @@ export function CorporateRenderer({
         active={highlightedTarget === EDIT_TARGETS.avatar}
         className="relative z-10 -mt-10 flex justify-center px-6"
       >
-        <Avatar src={profile.avatarUrl} name={profile.name} size={84} />
+        <Avatar
+          src={profile.avatarUrl}
+          name={profile.name}
+          size={84}
+          ringEnabled={profile.ringEnabled}
+          ringColor={profile.ringColor}
+          ringThickness={profile.ringThickness}
+        />
       </EditableTarget>
 
       <div className="flex flex-col gap-6 px-5 pb-10 pt-4">

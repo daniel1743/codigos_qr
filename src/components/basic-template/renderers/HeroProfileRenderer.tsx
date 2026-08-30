@@ -63,7 +63,14 @@ export function HeroProfileRenderer({
         active={highlightedTarget === EDIT_TARGETS.avatar}
         className="relative z-10 -mt-12 flex justify-center px-6"
       >
-        <Avatar src={profile.avatarUrl} name={profile.name} size={96} />
+        <Avatar
+          src={profile.avatarUrl}
+          name={profile.name}
+          size={96}
+          ringEnabled={profile.ringEnabled}
+          ringColor={profile.ringColor}
+          ringThickness={profile.ringThickness}
+        />
       </EditableTarget>
 
       <div className="flex flex-col items-center gap-6 px-6 pb-10 pt-4">

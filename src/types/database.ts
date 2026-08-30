@@ -28,7 +28,7 @@ export interface Profile {
   avatar_shape: AvatarShape;
   ring_enabled: boolean;
   ring_color: string;
-  ring_thickness: "thin" | "medium";
+  ring_thickness: "thin" | "medium" | "thick";
   font_family: string;
   background_color: string;
   button_color: string;

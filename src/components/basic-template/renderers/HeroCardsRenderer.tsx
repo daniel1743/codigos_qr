@@ -57,7 +57,14 @@ export function HeroCardsRenderer({
         active={highlightedTarget === EDIT_TARGETS.avatar}
         className="relative z-10 -mt-11 flex justify-center px-6"
       >
-        <Avatar src={profile.avatarUrl} name={profile.name} size={88} />
+        <Avatar
+          src={profile.avatarUrl}
+          name={profile.name}
+          size={88}
+          ringEnabled={profile.ringEnabled}
+          ringColor={profile.ringColor}
+          ringThickness={profile.ringThickness}
+        />
       </EditableTarget>
 
       <div className="flex flex-col items-center gap-5 px-5 pb-10 pt-4">
