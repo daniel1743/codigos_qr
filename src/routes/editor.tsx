@@ -5,7 +5,12 @@ import { toast } from "sonner";
 import { Auth } from "../components/Auth";
 import { DesignSection } from "../components/editor/DesignSection";
 import { LinksSection } from "../components/editor/LinksSection";
+import {
+  MobileBottomNavbar,
+  type BasicEditorSectionId,
+} from "../components/editor/MobileBottomNavbar";
 import { ProfileSection } from "../components/editor/ProfileSection";
+import { ShareSection } from "../components/editor/ShareSection";
 import { PublicProfileView } from "../components/profile/PublicProfileView";
 import { Button } from "../components/ui/button";
 import { generatePublicId, getInternalSlugFromPublicId } from "../lib/publicId";
@@ -44,6 +49,7 @@ function EditorPage() {
   const [saving, setSaving] = useState(false);
   const [savedPublicId, setSavedPublicId] = useState("");
   const [isPublished, setIsPublished] = useState(false);
+  const [activeSection, setActiveSection] = useState<BasicEditorSectionId>("profile");
 
   const loadedUserId = useRef<string | null>(null);
 
@@ -217,24 +223,49 @@ function EditorPage() {
   if (loading) return <div className="flex justify-center p-12">Cargando...</div>;
   if (!session) return <Auth />;
 
-  const publicUrl = savedPublicId ? getPublicProfileUrl(savedPublicId) : "";
+  const publicId = profile.public_id || savedPublicId || "";
+  const publicUrl = isPublished && publicId ? getPublicProfileUrl(publicId) : "";
   const isValid = validate();
+
+  const updateProfile = (updates: Partial<Profile>) =>
+    setProfile((current) => ({ ...current, ...updates }));
+
+  const renderActiveSection = () => {
+    switch (activeSection) {
+      case "links":
+        return (
+          <div className="space-y-10">
+            <LinksSection links={links} onChange={setLinks} userId={session.user.id} />
+            <ShareSection
+              publicId={publicId}
+              published={isPublished}
+              saving={saving}
+              onSave={handleSave}
+              isValid={isValid}
+              profile={profile}
+              onChange={updateProfile}
+              basicOnly
+              showSaveControls={false}
+            />
+          </div>
+        );
+      case "appearance":
+        return (
+          <DesignSection profile={profile} onChange={updateProfile} userId={session.user.id} />
+        );
+      case "profile":
+      default:
+        return (
+          <ProfileSection profile={profile} onChange={updateProfile} userId={session.user.id} />
+        );
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50/50">
       <div className="grid min-h-screen grid-cols-1 lg:grid-cols-2">
-        <main className="h-auto space-y-10 overflow-y-auto p-5 md:p-10 lg:h-screen">
-          <ProfileSection
-            profile={profile}
-            onChange={(updates) => setProfile((current) => ({ ...current, ...updates }))}
-            userId={session.user.id}
-          />
-          <DesignSection
-            profile={profile}
-            onChange={(updates) => setProfile((current) => ({ ...current, ...updates }))}
-            userId={session.user.id}
-          />
-          <LinksSection links={links} onChange={setLinks} userId={session.user.id} />
+        <main className="h-auto space-y-10 overflow-y-auto p-4 pb-[calc(7rem+env(safe-area-inset-bottom,0px))] sm:p-6 sm:pb-[calc(7rem+env(safe-area-inset-bottom,0px))] md:p-10 md:pb-10 lg:h-screen">
+          <div aria-live="polite">{renderActiveSection()}</div>
 
           <section className="space-y-4 rounded-xl border bg-card p-4 shadow-sm">
             <div>
@@ -280,12 +311,14 @@ function EditorPage() {
           </section>
         </main>
 
-        <aside className="border-l bg-muted p-5 md:p-10 lg:sticky lg:top-0 lg:flex lg:h-screen lg:items-center lg:justify-center">
+        <aside className="border-l bg-muted p-5 pb-[calc(7rem+env(safe-area-inset-bottom,0px))] md:p-10 md:pb-10 lg:sticky lg:top-0 lg:flex lg:h-screen lg:items-center lg:justify-center">
           <div className="mx-auto h-[720px] w-full max-w-[360px] overflow-hidden rounded-[2.5rem] border-[8px] border-black/10 bg-white shadow-xl">
             <PublicProfileView profile={profile} links={links} isPreview />
           </div>
         </aside>
       </div>
+
+      <MobileBottomNavbar activeSection={activeSection} onSectionChange={setActiveSection} />
     </div>
   );
 }

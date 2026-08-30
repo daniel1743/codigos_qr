@@ -79,6 +79,8 @@ interface ShareSectionProps {
   isValid: boolean;
   profile: Partial<Profile>;
   onChange: (updates: Partial<Profile>) => void;
+  basicOnly?: boolean;
+  showSaveControls?: boolean;
 }
 
 export function ShareSection({
@@ -89,6 +91,8 @@ export function ShareSection({
   isValid,
   profile,
   onChange,
+  basicOnly = false,
+  showSaveControls = true,
 }: ShareSectionProps) {
   const [publicUrl, setPublicUrl] = useState("");
   const [qrVersion, setQrVersion] = useState(0);
@@ -467,30 +471,34 @@ export function ShareSection({
         </Alert>
       )}
 
-      <div className="grid grid-cols-1 gap-2">
-        <Button
-          className="h-11 w-full rounded-xl"
-          disabled={saving || !isValid}
-          onClick={() => onSave(false)}
-          variant="secondary"
-        >
-          {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-          Guardar borrador
-        </Button>
-        <Button
-          className="h-11 w-full rounded-xl"
-          disabled={saving || !isValid}
-          onClick={() => onSave(true)}
-        >
-          {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-          {published ? "Actualizar y Publicar" : "Publicar ahora"}
-        </Button>
-      </div>
+      {showSaveControls && (
+        <>
+          <div className="grid grid-cols-1 gap-2">
+            <Button
+              className="h-11 w-full rounded-xl"
+              disabled={saving || !isValid}
+              onClick={() => onSave(false)}
+              variant="secondary"
+            >
+              {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+              Guardar borrador
+            </Button>
+            <Button
+              className="h-11 w-full rounded-xl"
+              disabled={saving || !isValid}
+              onClick={() => onSave(true)}
+            >
+              {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+              {published ? "Actualizar y Publicar" : "Publicar ahora"}
+            </Button>
+          </div>
 
-      {!isValid && (
-        <p className="text-sm text-destructive text-center">
-          Debes tener nombre y al menos 3 enlaces visibles válidos para publicar.
-        </p>
+          {!isValid && (
+            <p className="text-sm text-destructive text-center">
+              Debes tener nombre y al menos 3 enlaces visibles válidos para publicar.
+            </p>
+          )}
+        </>
       )}
 
       {published && publicId && publicUrl && (
@@ -837,132 +845,134 @@ export function ShareSection({
               </div>
 
               {/* EFECTOS AVANZADOS PREMIUM */}
-              <div className="space-y-4 rounded-2xl border bg-gradient-to-br from-amber-500/10 to-yellow-500/5 p-4 shadow-sm border-amber-200/50">
-                <h4 className="font-semibold flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-amber-500" />
-                  Efectos Premium
-                  <Crown className="w-3 h-3 text-amber-500 fill-amber-500" />
-                </h4>
-                <p className="text-xs text-muted-foreground">
-                  Selecciona degradados dinámicos o efecto neón.
-                </p>
+              {!basicOnly && (
+                <div className="space-y-4 rounded-2xl border bg-gradient-to-br from-amber-500/10 to-yellow-500/5 p-4 shadow-sm border-amber-200/50">
+                  <h4 className="font-semibold flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-amber-500" />
+                    Efectos Premium
+                    <Crown className="w-3 h-3 text-amber-500 fill-amber-500" />
+                  </h4>
+                  <p className="text-xs text-muted-foreground">
+                    Selecciona degradados dinámicos o efecto neón.
+                  </p>
 
-                <div className="grid grid-cols-2 min-[400px]:grid-cols-3 gap-2">
-                  <Button
-                    variant="outline"
-                    className={`h-16 flex flex-col gap-1 rounded-xl border-2 ${!profile.qr_gradient && !profile.qr_effect ? "border-amber-400 bg-amber-50" : "border-transparent"}`}
-                    onClick={() => onChange({ qr_gradient: null, qr_effect: null })}
-                  >
-                    <div className="w-5 h-5 rounded-full bg-black"></div>
-                    <span className="text-[10px]">Clásico</span>
-                  </Button>
+                  <div className="grid grid-cols-2 min-[400px]:grid-cols-3 gap-2">
+                    <Button
+                      variant="outline"
+                      className={`h-16 flex flex-col gap-1 rounded-xl border-2 ${!profile.qr_gradient && !profile.qr_effect ? "border-amber-400 bg-amber-50" : "border-transparent"}`}
+                      onClick={() => onChange({ qr_gradient: null, qr_effect: null })}
+                    >
+                      <div className="w-5 h-5 rounded-full bg-black"></div>
+                      <span className="text-[10px]">Clásico</span>
+                    </Button>
 
-                  <Button
-                    variant="outline"
-                    className={`h-16 flex flex-col gap-1 rounded-xl border-2 ${profile.qr_effect === "neon" && profile.qr_foreground_color === "#ec4899" ? "border-amber-400 bg-amber-50" : "border-transparent"}`}
-                    onClick={() =>
-                      onChange({
-                        qr_gradient: null,
-                        qr_effect: "neon",
-                        qr_foreground_color: "#ec4899",
-                        qr_background_color: "#000000",
-                        qr_dots_type: "classy",
-                      })
-                    }
-                  >
-                    <div className="w-5 h-5 rounded-full shadow-[0_0_8px_#ec4899] bg-[#ec4899]"></div>
-                    <span className="text-[10px]">Neón Pink</span>
-                  </Button>
+                    <Button
+                      variant="outline"
+                      className={`h-16 flex flex-col gap-1 rounded-xl border-2 ${profile.qr_effect === "neon" && profile.qr_foreground_color === "#ec4899" ? "border-amber-400 bg-amber-50" : "border-transparent"}`}
+                      onClick={() =>
+                        onChange({
+                          qr_gradient: null,
+                          qr_effect: "neon",
+                          qr_foreground_color: "#ec4899",
+                          qr_background_color: "#000000",
+                          qr_dots_type: "classy",
+                        })
+                      }
+                    >
+                      <div className="w-5 h-5 rounded-full shadow-[0_0_8px_#ec4899] bg-[#ec4899]"></div>
+                      <span className="text-[10px]">Neón Pink</span>
+                    </Button>
 
-                  <Button
-                    variant="outline"
-                    className={`h-16 flex flex-col gap-1 rounded-xl border-2 ${profile.qr_effect === "neon" && profile.qr_foreground_color === "#06b6d4" ? "border-amber-400 bg-amber-50" : "border-transparent"}`}
-                    onClick={() =>
-                      onChange({
-                        qr_gradient: null,
-                        qr_effect: "neon",
-                        qr_foreground_color: "#06b6d4",
-                        qr_background_color: "#000000",
-                        qr_dots_type: "classy",
-                      })
-                    }
-                  >
-                    <div className="w-5 h-5 rounded-full shadow-[0_0_8px_#06b6d4] bg-[#06b6d4]"></div>
-                    <span className="text-[10px]">Neón Cyan</span>
-                  </Button>
+                    <Button
+                      variant="outline"
+                      className={`h-16 flex flex-col gap-1 rounded-xl border-2 ${profile.qr_effect === "neon" && profile.qr_foreground_color === "#06b6d4" ? "border-amber-400 bg-amber-50" : "border-transparent"}`}
+                      onClick={() =>
+                        onChange({
+                          qr_gradient: null,
+                          qr_effect: "neon",
+                          qr_foreground_color: "#06b6d4",
+                          qr_background_color: "#000000",
+                          qr_dots_type: "classy",
+                        })
+                      }
+                    >
+                      <div className="w-5 h-5 rounded-full shadow-[0_0_8px_#06b6d4] bg-[#06b6d4]"></div>
+                      <span className="text-[10px]">Neón Cyan</span>
+                    </Button>
 
-                  <Button
-                    variant="outline"
-                    className={`h-16 flex flex-col gap-1 rounded-xl border-2 ${profile.qr_gradient?.colorStops?.[0]?.color === "#f59e0b" ? "border-amber-400 bg-amber-50" : "border-transparent"}`}
-                    onClick={() =>
-                      onChange({
-                        qr_effect: null,
-                        qr_foreground_color: "#f59e0b",
-                        qr_background_color: "#ffffff",
-                        qr_dots_type: "rounded",
-                        qr_gradient: {
-                          type: "linear",
-                          rotation: 45,
-                          colorStops: [
-                            { offset: 0, color: "#f59e0b" },
-                            { offset: 1, color: "#ef4444" },
-                          ],
-                        },
-                      })
-                    }
-                  >
-                    <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-amber-500 to-red-500"></div>
-                    <span className="text-[10px]">Sunset</span>
-                  </Button>
+                    <Button
+                      variant="outline"
+                      className={`h-16 flex flex-col gap-1 rounded-xl border-2 ${profile.qr_gradient?.colorStops?.[0]?.color === "#f59e0b" ? "border-amber-400 bg-amber-50" : "border-transparent"}`}
+                      onClick={() =>
+                        onChange({
+                          qr_effect: null,
+                          qr_foreground_color: "#f59e0b",
+                          qr_background_color: "#ffffff",
+                          qr_dots_type: "rounded",
+                          qr_gradient: {
+                            type: "linear",
+                            rotation: 45,
+                            colorStops: [
+                              { offset: 0, color: "#f59e0b" },
+                              { offset: 1, color: "#ef4444" },
+                            ],
+                          },
+                        })
+                      }
+                    >
+                      <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-amber-500 to-red-500"></div>
+                      <span className="text-[10px]">Sunset</span>
+                    </Button>
 
-                  <Button
-                    variant="outline"
-                    className={`h-16 flex flex-col gap-1 rounded-xl border-2 ${profile.qr_gradient?.colorStops?.[0]?.color === "#8b5cf6" ? "border-amber-400 bg-amber-50" : "border-transparent"}`}
-                    onClick={() =>
-                      onChange({
-                        qr_effect: null,
-                        qr_foreground_color: "#8b5cf6",
-                        qr_background_color: "#ffffff",
-                        qr_dots_type: "rounded",
-                        qr_gradient: {
-                          type: "linear",
-                          rotation: 135,
-                          colorStops: [
-                            { offset: 0, color: "#8b5cf6" },
-                            { offset: 1, color: "#3b82f6" },
-                          ],
-                        },
-                      })
-                    }
-                  >
-                    <div className="w-5 h-5 rounded-full bg-gradient-to-br from-violet-500 to-blue-500"></div>
-                    <span className="text-[10px]">Galaxy</span>
-                  </Button>
+                    <Button
+                      variant="outline"
+                      className={`h-16 flex flex-col gap-1 rounded-xl border-2 ${profile.qr_gradient?.colorStops?.[0]?.color === "#8b5cf6" ? "border-amber-400 bg-amber-50" : "border-transparent"}`}
+                      onClick={() =>
+                        onChange({
+                          qr_effect: null,
+                          qr_foreground_color: "#8b5cf6",
+                          qr_background_color: "#ffffff",
+                          qr_dots_type: "rounded",
+                          qr_gradient: {
+                            type: "linear",
+                            rotation: 135,
+                            colorStops: [
+                              { offset: 0, color: "#8b5cf6" },
+                              { offset: 1, color: "#3b82f6" },
+                            ],
+                          },
+                        })
+                      }
+                    >
+                      <div className="w-5 h-5 rounded-full bg-gradient-to-br from-violet-500 to-blue-500"></div>
+                      <span className="text-[10px]">Galaxy</span>
+                    </Button>
 
-                  <Button
-                    variant="outline"
-                    className={`h-16 flex flex-col gap-1 rounded-xl border-2 ${profile.qr_gradient?.type === "radial" ? "border-amber-400 bg-amber-50" : "border-transparent"}`}
-                    onClick={() =>
-                      onChange({
-                        qr_effect: null,
-                        qr_foreground_color: "#10b981",
-                        qr_background_color: "#ffffff",
-                        qr_dots_type: "dots",
-                        qr_gradient: {
-                          type: "radial",
-                          colorStops: [
-                            { offset: 0, color: "#10b981" },
-                            { offset: 1, color: "#047857" },
-                          ],
-                        },
-                      })
-                    }
-                  >
-                    <div className="w-5 h-5 rounded-full bg-[radial-gradient(circle_at_center,_#10b981_0%,_#047857_100%)]"></div>
-                    <span className="text-[10px]">Emerald</span>
-                  </Button>
+                    <Button
+                      variant="outline"
+                      className={`h-16 flex flex-col gap-1 rounded-xl border-2 ${profile.qr_gradient?.type === "radial" ? "border-amber-400 bg-amber-50" : "border-transparent"}`}
+                      onClick={() =>
+                        onChange({
+                          qr_effect: null,
+                          qr_foreground_color: "#10b981",
+                          qr_background_color: "#ffffff",
+                          qr_dots_type: "dots",
+                          qr_gradient: {
+                            type: "radial",
+                            colorStops: [
+                              { offset: 0, color: "#10b981" },
+                              { offset: 1, color: "#047857" },
+                            ],
+                          },
+                        })
+                      }
+                    >
+                      <div className="w-5 h-5 rounded-full bg-[radial-gradient(circle_at_center,_#10b981_0%,_#047857_100%)]"></div>
+                      <span className="text-[10px]">Emerald</span>
+                    </Button>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* LOGO */}
               <div className="space-y-4 rounded-2xl border bg-card p-4 shadow-sm">
@@ -1214,6 +1224,7 @@ export function ShareSection({
         profile={profile}
         onChange={onChange}
         isPremiumUser={isPremiumUser}
+        allowPremiumTemplates={!basicOnly}
         isOpen={galleryOpen}
         onClose={() => setGalleryOpen(false)}
       />

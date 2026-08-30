@@ -22,6 +22,7 @@ interface QRTemplateGalleryProps {
   profile: Partial<Profile>;
   onChange: (updates: Partial<Profile>) => void;
   isPremiumUser: boolean;
+  allowPremiumTemplates?: boolean;
   isOpen: boolean;
   onClose: () => void;
 }
@@ -30,6 +31,7 @@ export function QRTemplateGallery({
   profile,
   onChange,
   isPremiumUser,
+  allowPremiumTemplates = true,
   isOpen,
   onClose,
 }: QRTemplateGalleryProps) {
@@ -50,7 +52,9 @@ export function QRTemplateGallery({
 
   // Filtrado de plantillas
   const filteredTemplates = useMemo(() => {
-    let filtered = QR_TEMPLATES;
+    let filtered = allowPremiumTemplates
+      ? QR_TEMPLATES
+      : QR_TEMPLATES.filter((template) => template.tier === "free");
 
     if (tierFilter !== "all") {
       filtered = filtered.filter((t) => t.tier === tierFilter);
@@ -61,13 +65,13 @@ export function QRTemplateGallery({
     }
 
     return filtered;
-  }, [tierFilter, categoryFilter]);
+  }, [allowPremiumTemplates, tierFilter, categoryFilter]);
 
   const handleApplyTemplate = (template: QRTemplate) => {
     const isPremium = template.tier === "premium";
 
     // Si es Premium y el usuario no tiene acceso, mostrar preview en lugar de aplicar
-    if (isPremium && !isPremiumUser) {
+    if (isPremium && (!allowPremiumTemplates || !isPremiumUser)) {
       setPreviewTemplate(template);
       return;
     }
@@ -105,7 +109,9 @@ export function QRTemplateGallery({
   };
 
   const freeCount = QR_TEMPLATES.filter((t) => t.tier === "free").length;
-  const premiumCount = QR_TEMPLATES.filter((t) => t.tier === "premium").length;
+  const premiumCount = allowPremiumTemplates
+    ? QR_TEMPLATES.filter((t) => t.tier === "premium").length
+    : 0;
 
   return (
     <>
@@ -136,15 +142,17 @@ export function QRTemplateGallery({
                 <Layers className="h-4 w-4 mr-2" />
                 Plantillas
               </Button>
-              <Button
-                variant={activeTab === "effects" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setActiveTab("effects")}
-                className="h-9 bg-gradient-to-r from-amber-500/10 to-yellow-500/10 hover:from-amber-500/20 hover:to-yellow-500/20"
-              >
-                <Sparkles className="h-4 w-4 mr-2 text-amber-500" />
-                Efectos Opulentos
-              </Button>
+              {allowPremiumTemplates && (
+                <Button
+                  variant={activeTab === "effects" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setActiveTab("effects")}
+                  className="h-9 bg-gradient-to-r from-amber-500/10 to-yellow-500/10 hover:from-amber-500/20 hover:to-yellow-500/20"
+                >
+                  <Sparkles className="h-4 w-4 mr-2 text-amber-500" />
+                  Efectos Opulentos
+                </Button>
+              )}
             </div>
 
             {/* Stats - solo mostrar en tab templates */}
@@ -189,14 +197,16 @@ export function QRTemplateGallery({
                   >
                     Gratis
                   </Button>
-                  <Button
-                    variant={tierFilter === "premium" ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setTierFilter("premium")}
-                    className="h-8 text-xs"
-                  >
-                    Premium
-                  </Button>
+                  {allowPremiumTemplates && (
+                    <Button
+                      variant={tierFilter === "premium" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setTierFilter("premium")}
+                      className="h-8 text-xs"
+                    >
+                      Premium
+                    </Button>
+                  )}
                 </div>
 
                 {/* Category Filter */}

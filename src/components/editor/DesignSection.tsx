@@ -6,6 +6,7 @@ import type { Profile } from "../../types/database";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
+import { ColorControl } from "./ColorControl";
 
 interface DesignSectionProps {
   profile: Partial<Profile>;
@@ -16,10 +17,30 @@ interface DesignSectionProps {
 const MAX_BANNER_BYTES = 4 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
+const FONTS = [
+  "Inter", "Poppins", "Montserrat", "DM Sans", "Manrope",
+  "Raleway", "Nunito", "Lato", "Playfair Display", "Merriweather"
+];
+
 function normalizeFusionStrength(value: unknown) {
   const parsed = Number(value);
   if (!Number.isFinite(parsed)) return 60;
   return Math.min(100, Math.max(0, Math.round(parsed)));
+}
+
+function parseGradient(val: string | undefined | null) {
+  if (!val || !val.includes("linear-gradient")) return null;
+  const match = val.match(/linear-gradient\(\s*(.*?)\s*,\s*(.*?)\s*,\s*(.*?)\s*\)/);
+  if (match) return { dir: match[1], start: match[2], end: match[3] };
+  
+  const radialMatch = val.match(/radial-gradient\(\s*circle\s*,\s*(.*?)\s*,\s*(.*?)\s*\)/);
+  if (radialMatch) return { dir: "radial", start: radialMatch[1], end: radialMatch[2] };
+  return null;
+}
+
+function buildGradient(dir: string, start: string, end: string) {
+  if (dir === "radial") return `radial-gradient(circle, ${start}, ${end})`;
+  return `linear-gradient(${dir}, ${start}, ${end})`;
 }
 
 export function DesignSection({ profile, onChange, userId }: DesignSectionProps) {
@@ -66,6 +87,11 @@ export function DesignSection({ profile, onChange, userId }: DesignSectionProps)
     }
   };
 
+  const bgGradient = parseGradient(profile.background_color);
+  const isBgGradient = bgGradient !== null;
+  const btnGradient = parseGradient(profile.button_color);
+  const isBtnGradient = btnGradient !== null;
+
   return (
     <section className="space-y-6">
       <div className="space-y-2">
@@ -73,6 +99,151 @@ export function DesignSection({ profile, onChange, userId }: DesignSectionProps)
         <p className="text-sm text-muted-foreground">Personaliza colores y portada.</p>
       </div>
 
+      <div className="space-y-4 rounded-xl border bg-card p-4 shadow-sm">
+        <Label>Tipografía</Label>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 mb-2">
+          {FONTS.map(font => (
+            <Button
+              key={font}
+              variant={profile.font_family === font ? "default" : "outline"}
+              onClick={() => onChange({ font_family: font })}
+              className="h-10 text-[11px]"
+              style={{ fontFamily: font }}
+            >
+              {font}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      <div className="space-y-4 rounded-xl border bg-card p-4 shadow-sm">
+        <Label>Botones</Label>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 mb-4">
+          <Button variant={profile.button_radius === "none" && profile.button_style !== "soft" ? "default" : "outline"} onClick={() => onChange({ button_radius: "none", button_style: "solid" })} className="rounded-none h-10 text-xs">Cuadrado</Button>
+          <Button variant={profile.button_radius === "rounded" && profile.button_style !== "soft" ? "default" : "outline"} onClick={() => onChange({ button_radius: "rounded", button_style: "solid" })} className="rounded-xl h-10 text-xs">Redondeado</Button>
+          <Button variant={profile.button_radius === "full" && profile.button_style !== "soft" ? "default" : "outline"} onClick={() => onChange({ button_radius: "full", button_style: "solid" })} className="rounded-full h-10 text-xs">Píldora</Button>
+          <Button variant={profile.button_style === "soft" ? "default" : "outline"} onClick={() => onChange({ button_radius: "full", button_style: "soft" })} className="rounded-full border border-transparent shadow-sm h-10 text-xs">Premium</Button>
+        </div>
+
+        <Label>Separación</Label>
+        <div className="grid grid-cols-3 gap-2 mb-4">
+          <Button variant={profile.theme_spacing === "compact" ? "default" : "outline"} onClick={() => onChange({ theme_spacing: "compact" })} className="h-10 text-xs">Compacto</Button>
+          <Button variant={!profile.theme_spacing || profile.theme_spacing === "standard" ? "default" : "outline"} onClick={() => onChange({ theme_spacing: "standard" })} className="h-10 text-xs">Normal</Button>
+          <Button variant={profile.theme_spacing === "generous" ? "default" : "outline"} onClick={() => onChange({ theme_spacing: "generous" })} className="h-10 text-xs">Amplio</Button>
+        </div>
+
+        <Label>Grosor de borde</Label>
+        <div className="grid grid-cols-4 gap-2 mb-2">
+          <Button variant={!profile.button_border_thickness || profile.button_border_thickness === "none" ? "default" : "outline"} onClick={() => onChange({ button_border_thickness: "none" })} className="h-10 text-[10px] px-1">Ninguno</Button>
+          <Button variant={profile.button_border_thickness === "thin" ? "default" : "outline"} onClick={() => onChange({ button_border_thickness: "thin" })} className="h-10 text-[10px] px-1">Fino</Button>
+          <Button variant={profile.button_border_thickness === "medium" ? "default" : "outline"} onClick={() => onChange({ button_border_thickness: "medium" })} className="h-10 text-[10px] px-1">Medio</Button>
+          <Button variant={profile.button_border_thickness === "strong" ? "default" : "outline"} onClick={() => onChange({ button_border_thickness: "strong" })} className="h-10 text-[10px] px-1">Marcado</Button>
+        </div>
+        
+        {profile.button_border_thickness && profile.button_border_thickness !== "none" && (
+          <div className="mt-4">
+            <Label className="text-xs mb-2 block">Color del borde</Label>
+            <ColorControl value={profile.button_border_color || "#000000"} onChange={(v) => onChange({ button_border_color: v })} compact />
+          </div>
+        )}
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 rounded-xl border bg-card p-4 shadow-sm">
+        <div className="space-y-4">
+          <div>
+            <Label>Fondo</Label>
+            <div className="flex gap-2 mt-2 mb-4">
+              <Button variant={!isBgGradient ? "default" : "outline"} onClick={() => onChange({ background_color: "#ffffff" })} className="flex-1 h-9 text-xs">Sólido</Button>
+              <Button variant={isBgGradient ? "default" : "outline"} onClick={() => onChange({ background_color: buildGradient("180deg", "#ffffff", "#f0f0f0") })} className="flex-1 h-9 text-xs">Degradado</Button>
+            </div>
+          </div>
+          
+          {!isBgGradient ? (
+             <div>
+               <Label className="text-xs mb-2 block text-muted-foreground">Color de fondo</Label>
+               <ColorControl value={profile.background_color || "#ffffff"} onChange={(v) => onChange({ background_color: v })} compact />
+             </div>
+          ) : (
+             <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-xs mb-2 block text-muted-foreground">Color 1</Label>
+                    <ColorControl value={bgGradient?.start || "#ffffff"} onChange={(v) => onChange({ background_color: buildGradient(bgGradient?.dir || "180deg", v, bgGradient?.end || "#f0f0f0") })} compact />
+                  </div>
+                  <div>
+                    <Label className="text-xs mb-2 block text-muted-foreground">Color 2</Label>
+                    <ColorControl value={bgGradient?.end || "#f0f0f0"} onChange={(v) => onChange({ background_color: buildGradient(bgGradient?.dir || "180deg", bgGradient?.start || "#ffffff", v) })} compact />
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-xs mb-2 block text-muted-foreground">Dirección</Label>
+                  <select
+                    className="w-full rounded-md border p-2 text-sm"
+                    value={bgGradient?.dir || "180deg"}
+                    onChange={(e) => onChange({ background_color: buildGradient(e.target.value, bgGradient?.start || "#ffffff", bgGradient?.end || "#f0f0f0") })}
+                  >
+                    <option value="180deg">Vertical</option>
+                    <option value="90deg">Horizontal</option>
+                    <option value="135deg">Diagonal</option>
+                    <option value="45deg">Diagonal inversa</option>
+                    <option value="radial">Radial</option>
+                  </select>
+                </div>
+             </div>
+          )}
+        </div>
+
+        <div className="space-y-4 mt-4 border-t pt-4">
+           <Label>Color del botón</Label>
+           <div className="flex gap-2 mt-2 mb-4">
+              <Button variant={!isBtnGradient ? "default" : "outline"} onClick={() => onChange({ button_color: "#111111" })} className="flex-1 h-9 text-xs">Sólido</Button>
+              <Button variant={isBtnGradient ? "default" : "outline"} onClick={() => onChange({ button_color: buildGradient("180deg", "#333333", "#111111") })} className="flex-1 h-9 text-xs">Degradado</Button>
+           </div>
+
+           {!isBtnGradient ? (
+             <div>
+               <Label className="text-xs mb-2 block text-muted-foreground">Color principal</Label>
+               <ColorControl value={profile.button_color || "#111111"} onChange={(v) => onChange({ button_color: v })} compact />
+             </div>
+          ) : (
+             <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-xs mb-2 block text-muted-foreground">Color 1</Label>
+                    <ColorControl value={btnGradient?.start || "#333333"} onChange={(v) => onChange({ button_color: buildGradient(btnGradient?.dir || "180deg", v, btnGradient?.end || "#111111") })} compact />
+                  </div>
+                  <div>
+                    <Label className="text-xs mb-2 block text-muted-foreground">Color 2</Label>
+                    <ColorControl value={btnGradient?.end || "#111111"} onChange={(v) => onChange({ button_color: buildGradient(btnGradient?.dir || "180deg", btnGradient?.start || "#333333", v) })} compact />
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-xs mb-2 block text-muted-foreground">Dirección</Label>
+                  <select
+                    className="w-full rounded-md border p-2 text-sm"
+                    value={btnGradient?.dir || "180deg"}
+                    onChange={(e) => onChange({ button_color: buildGradient(e.target.value, btnGradient?.start || "#333333", btnGradient?.end || "#111111") })}
+                  >
+                    <option value="180deg">Vertical</option>
+                    <option value="90deg">Horizontal</option>
+                    <option value="135deg">Diagonal</option>
+                    <option value="45deg">Diagonal inversa</option>
+                    <option value="radial">Radial</option>
+                  </select>
+                </div>
+             </div>
+          )}
+        </div>
+        
+        <div className="space-y-2 mt-4 border-t pt-4">
+          <Label htmlFor="button_text_color">Texto del botón</Label>
+          <div className="mt-2">
+            <ColorControl value={profile.button_text_color || "#ffffff"} onChange={(v) => onChange({ button_text_color: v })} compact />
+          </div>
+        </div>
+      </div>
+      
+      {/* Portada section moved to bottom to fit logical layout of Colors > Banner */}
       <div className="space-y-4 rounded-xl border bg-card p-4 shadow-sm">
         <Label className="flex items-center gap-2">
           <ImageIcon className="h-4 w-4" />
@@ -104,70 +275,29 @@ export function DesignSection({ profile, onChange, userId }: DesignSectionProps)
               variant="outline"
               className="h-11 rounded-xl text-destructive hover:text-destructive"
               onClick={() => onChange({ banner_url: null })}
-              aria-label="Eliminar portada"
             >
               <Trash2 className="mr-2 h-4 w-4" />
               Eliminar
             </Button>
           )}
         </div>
-        {uploadingBanner && (
-          <p className="flex items-center gap-2 text-sm text-muted-foreground" role="status">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            Subiendo portada...
-          </p>
-        )}
-      </div>
-
-      <div className="space-y-4 rounded-xl border bg-card p-4 shadow-sm">
-        <div className="flex items-center justify-between gap-4">
-          <Label htmlFor="banner_fusion_strength">Difuminación del banner</Label>
-          <span className="text-sm font-medium tabular-nums">{fusionStrength}</span>
-        </div>
-        <Input
-          id="banner_fusion_strength"
-          type="range"
-          min={0}
-          max={100}
-          step={1}
-          value={fusionStrength}
-          onChange={(event) =>
-            onChange({ banner_fusion_strength: normalizeFusionStrength(event.target.value) })
-          }
-          className="h-11"
-        />
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 rounded-xl border bg-card p-4 shadow-sm min-[420px]:grid-cols-3">
-        <div className="space-y-2">
-          <Label htmlFor="background_color">Color de fondo</Label>
-          <Input
-            id="background_color"
-            type="color"
-            value={profile.background_color || "#ffffff"}
-            onChange={(event) => onChange({ background_color: event.target.value })}
-            className="h-11"
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="button_color">Color del botón</Label>
-          <Input
-            id="button_color"
-            type="color"
-            value={profile.button_color || "#111111"}
-            onChange={(event) => onChange({ button_color: event.target.value })}
-            className="h-11"
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="button_text_color">Texto del botón</Label>
-          <Input
-            id="button_text_color"
-            type="color"
-            value={profile.button_text_color || "#ffffff"}
-            onChange={(event) => onChange({ button_text_color: event.target.value })}
-            className="h-11"
-          />
+        <div className="mt-4">
+           <div className="flex items-center justify-between gap-4 mb-2">
+             <Label htmlFor="banner_fusion_strength">Difuminación</Label>
+             <span className="text-sm font-medium tabular-nums">{fusionStrength}</span>
+           </div>
+           <Input
+             id="banner_fusion_strength"
+             type="range"
+             min={0}
+             max={100}
+             step={1}
+             value={fusionStrength}
+             onChange={(event) =>
+               onChange({ banner_fusion_strength: normalizeFusionStrength(event.target.value) })
+             }
+             className="h-11"
+           />
         </div>
       </div>
     </section>

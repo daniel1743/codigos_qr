@@ -1,0 +1,1755 @@
+
+# 2026-08-22 18:46:45.128725
++y
+
+# 2026-08-22 18:48:00.600633
++n
+
+# 2026-08-22 18:49:37.971356
++AUDIT MODE ONLY FIRST. Do not modify any file until you finish the audit report and explicitly list proposed changes.```yaml
++audit:
++  id: "PROFESSIONAL-CODEBASE-AUDIT-2026"
++  project: "daniel1743/codigos_qr"
++  level: "PROFESSIONAL / EVALUATIVE / FORENSIC"
++  scope: "FULL CODEBASE"
++  objective: >
++    Realizar una auditoría técnica exhaustiva, verificable y evaluativa de toda
++    la base de código. El objetivo NO es generar una lista superficial de errores,
++    sino determinar con evidencia el estado real del producto, su calidad,
++    riesgos, coherencia arquitectónica, seguridad, rendimiento, mantenibilidad,
++    UX y preparación para producción.
++
++principles:
++  - "NO asumir que una feature funciona porque existe código."
++  - "NO asumir que una feature funciona porque existe documentación."
++  - "NO asumir que una feature funciona porque un agente anterior la marcó PASS."
++  - "NO confundir compilación con funcionalidad."
++  - "NO confundir UI visual con integración."
++  - "NO confundir mock/demo con datos reales."
++  - "NO confundir implementación parcial con producción."
++  - "NO inventar métricas."
++  - "NO usar scores subjetivos tipo 9/10 sin metodología reproducible."
++  - "Toda conclusión importante debe tener evidencia."
++
++audit_methodology:
++  each_finding_must_include:
++    - "ID único"
++    - "Severidad"
++    - "Área"
++    - "Archivo"
++    - "Función/componente"
++    - "Líneas aproximadas"
++    - "Descripción"
++    - "Evidencia"
++    - "Impacto técnico"
++    - "Impacto de usuario"
++    - "Probabilidad"
++    - "Reproducibilidad"
++    - "Root cause"
++    - "Recomendación"
++    - "Riesgo de corregir"
++    - "Prioridad"
++    - "Estado: CONFIRMED | LIKELY | NEEDS_RUNTIME_QA"
++
++  severity:
++    P0_CRITICAL:
++      definition: >
++        Seguridad, pérdida de datos, corrupción, imposibilidad de utilizar una
++        función principal, crash de producción o bypass de autorización.
++    P1_HIGH:
++      definition: >
++        Feature importante rota, regresión UX grave, persistencia incorrecta,
++        comportamiento móvil defectuoso o riesgo técnico considerable.
++    P2_MEDIUM:
++      definition: >
++        Problema funcional parcial, accesibilidad, performance o deuda técnica
++        con impacto real.
++    P3_LOW:
++      definition: >
++        Mantenibilidad, consistencia, limpieza, ergonomía interna o refinamientos.
++
++preflight:
++  mandatory:
++    - "git status"
++    - "git diff"
++    - "git rev-parse HEAD"
++    - "git branch --show-current"
++    - "git log --oneline --decorate -30"
++    - "git branch -a"
++
++  determine:
++    - "branch real auditada"
++    - "HEAD exacto"
++    - "relación con main"
++    - "cambios sin commit"
++    - "feature branches relevantes"
++    - "posibles diferencias entre código auditado y producción"
++
++  output:
++    - "AUDITED_BRANCH"
++    - "AUDITED_COMMIT"
++    - "WORKTREE_STATUS"
++    - "KNOWN_DEPLOYMENT_BRANCH"
++    - "AUDIT_LIMITATIONS"
++
++section_1_build_and_type_system:
++  title: "Compilación, TypeScript y calidad estática"
++
++  mandatory_commands:
++    - "npm run build"
++    - "npx tsc --noEmit"
++    - "lint scoped o global según configuración"
++
++  analyze:
++    - "todos los errores TS"
++    - "warnings"
++    - "implicit any"
++    - "possibly undefined"
++    - "invalid CSSProperties"
++    - "exactOptionalPropertyTypes"
++    - "unsafe casts"
++    - "as any"
++    - "non-null assertions"
++    - "@ts-ignore"
++    - "@ts-expect-error"
++    - "dead imports"
++    - "unused state"
++    - "unused handlers"
++    - "unreachable code"
++
++  required_classification:
++    - "FAIL_NEW"
++    - "PREEXISTING"
++    - "BLOCKING"
++    - "NON_BLOCKING"
++
++section_2_runtime_integrity:
++  title: "Errores de ejecución y React"
++
++  inspect:
++    - "console.error"
++    - "console.warn"
++    - "unhandled promise rejections"
++    - "React hydration mismatches"
++    - "Radix Slot errors"
++    - "asChild misuse"
++    - "multiple child Slot"
++    - "invalid DOM nesting"
++    - "controlled/uncontrolled state changes"
++    - "memory leaks"
++    - "event listener cleanup"
++    - "stale closures"
++    - "effects with incorrect dependencies"
++    - "race conditions"
++    - "duplicate network calls"
++
++  specific:
++    - "ContextualToolbar"
++    - "Popover"
++    - "Dialog"
++    - "Sheet"
++    - "Slot"
++    - "Router transitions"
++
++section_3_editor_architecture:
++  title: "Arquitectura completa del editor"
++
++  investigate:
++    - "fuente de verdad de profile"
++    - "fuente de verdad de links"
++    - "selectedEditorTarget"
++    - "selectedMobileTarget"
++    - "activeTab"
++    - "panelOpen"
++    - "bottomSheetOpen"
++    - "mobilePropertiesOpen"
++    - "showFloatingToolbar"
++    - "zoom state"
++    - "history state"
++
++  required_output:
++    state_map: >
++      Documentar claramente:
++      USER ACTION -> STATE -> COMPONENT -> SIDE EFFECT -> SAVE
++
++  detect:
++    - "estados duplicados"
++    - "estados legacy"
++    - "dos componentes para la misma función"
++    - "desktop/mobile mezclados"
++    - "handlers duplicados"
++    - "state que cambia pero ninguna UI consume"
++    - "componentes existentes pero no montados"
++
++section_4_mobile_interaction:
++  title: "UX táctil móvil"
++
++  principle:
++    statement: >
++      Mientras el dedo está en la pantalla, el dedo debe ser la fuente de verdad.
++
++  audit:
++    pinch_zoom:
++      inspect:
++        - "pointerdown"
++        - "pointermove"
++        - "pointerup"
++        - "pointercancel"
++        - "touch-action"
++        - "scale source of truth"
++        - "transform"
++        - "transformOrigin"
++        - "focal point"
++        - "render cost"
++        - "CSS transitions"
++      acceptance:
++        - "un único pinch produce cambio significativo"
++        - "seguimiento continuo"
++        - "reverse direction sin soltar"
++        - "no 5-10 gestos repetidos"
++        - "autofit sincronizado"
++
++    bottom_sheet:
++      inspect:
++        - "free drag"
++        - "snap points"
++        - "pointer tracking"
++        - "internal scroll arbitration"
++      acceptance:
++        - "se puede dejar en 37%"
++        - "se puede dejar en 54%"
++        - "se puede dejar en 63%"
++        - "se puede dejar en 78%"
++        - "no fuerza snap"
++
++    navigation_drawer:
++      inspect:
++        - "edge swipe"
++        - "progress"
++        - "translation"
++        - "overlay"
++        - "radius"
++        - "shadow"
++        - "scroll lock"
++      acceptance:
++        - "drawer sigue dedo"
++        - "se queda a mitad mientras dedo permanece"
++        - "reverse direction"
++        - "no es solo hamburger toggle"
++        - "main content congelado"
++
++    touch_selection:
++      inspect:
++        - "data-editor-target"
++        - "all template branches"
++        - "pointer-events"
++        - "tap thresholds"
++        - "floating toolbar"
++        - "z-index"
++        - "overflow clipping"
++
++section_5_desktop_editor:
++  title: "Editor Desktop"
++
++  validate:
++    - "navbar"
++    - "left navigation"
++    - "central preview"
++    - "right contextual panel"
++    - "no giant legacy form copied into right panel"
++    - "selection contextual"
++    - "close/reopen"
++    - "preview consistency"
++    - "zoom controls"
++    - "no lost functionality"
++
++section_6_persistence:
++  title: "Persistencia y coherencia de datos"
++
++  golden_test:
++    sequence:
++      - "CONTROL"
++      - "STATE"
++      - "SAVE"
++      - "DATABASE"
++      - "REFRESH"
++      - "EDITOR PREVIEW"
++      - "PUBLIC PAGE"
++
++  audit_fields:
++    - "profile name"
++    - "bio"
++    - "alias"
++    - "avatar"
++    - "cover"
++    - "colors"
++    - "font"
++    - "font size"
++    - "font weight"
++    - "alignment"
++    - "button styles"
++    - "spacing"
++    - "QR options"
++    - "social links"
++    - "link images"
++    - "theme_layout"
++    - "premium template properties"
++
++  investigate:
++    - "payload sanitization"
++    - "unknown columns"
++    - "undefined vs null"
++    - "schema mismatch"
++    - "400 responses"
++    - "silent failures"
++    - "optimistic UI with failed persistence"
++
++section_7_premium_templates:
++  title: "Auditoría dedicada de templates Premium"
++
++  templates:
++    template_A:
++      expected_identity: "light / cream / emerald / editorial"
++    template_B:
++      expected_identity: "dark / black / beige / haute couture"
++
++  validate_each:
++    - "no crash"
++    - "apply"
++    - "editor render"
++    - "public render"
++    - "save"
++    - "refresh"
++    - "responsive"
++    - "full editability"
++
++  full_editability_contract:
++    - "main photo"
++    - "name"
++    - "subtitle"
++    - "bio"
++    - "monogram"
++    - "font family"
++    - "font size"
++    - "font weight"
++    - "alignment"
++    - "semantic colors"
++    - "socials"
++    - "link title"
++    - "link description"
++    - "URL"
++    - "CTA"
++    - "visibility"
++    - "card image"
++    - "card size"
++    - "spacing"
++
++  verdict:
++    format: |
++      TEMPLATE_A_VISUAL: PASS | FAIL
++      TEMPLATE_A_EDITABLE: PASS | FAIL
++      TEMPLATE_A_SAVE: PASS | FAIL
++      TEMPLATE_A_REFRESH: PASS | FAIL
++      TEMPLATE_A_PUBLIC_PARITY: PASS | FAIL
++
++      TEMPLATE_B_NO_CRASH: PASS | FAIL
++      TEMPLATE_B_EDITABLE: PASS | FAIL
++      TEMPLATE_B_SAVE: PASS | FAIL
++      TEMPLATE_B_REFRESH: PASS | FAIL
++      TEMPLATE_B_PUBLIC_PARITY: PASS | FAIL
++
++      BOTH_TEMPLATES_APPROVED: YES | NO
++
++section_8_qr:
++  title: "QR Core"
++
++  inspect:
++    - "stable public_id"
++    - "URL generation"
++    - "production origin"
++    - "PNG export"
++    - "SVG export"
++    - "ECC H"
++    - "logo"
++    - "finder colors"
++    - "inner dots"
++    - "frames"
++    - "quiet zone"
++    - "logo size"
++    - "export sizes"
++
++  real_validation:
++    - "preview vs PNG parity"
++    - "preview vs SVG parity"
++    - "scan plain"
++    - "scan stamp"
++    - "scan badge"
++    - "scan phone"
++    - "scan bottle"
++
++section_9_secure_documents:
++  title: "Secure Documents End-to-End"
++
++  full_flow:
++    - "CREATE"
++    - "VALIDATE SIZE"
++    - "ENCRYPT"
++    - "STORE"
++    - "CREATE METADATA"
++    - "CREATE SHORT URL"
++    - "GENERATE QR"
++    - "OPEN /d/{shortUrl}"
++    - "AUTHORIZE"
++    - "SIGNED URL"
++    - "DOWNLOAD CIPHERTEXT"
++    - "DECRYPT"
++    - "OPEN ORIGINAL FILE"
++
++  security:
++    inspect:
++      - "AES-GCM"
++      - "IV handling"
++      - "key handling"
++      - "password hashing"
++      - "salt"
++      - "service role isolation"
++      - "private bucket"
++      - "RLS"
++      - "RPCs"
++      - "signed URL expiration"
++      - "direct anon download"
++      - "shortUrl entropy"
++      - "revocation"
++      - "one time download"
++      - "atomic limits"
++      - "passwordless fragment"
++
++  critical_language_rule:
++    zero_knowledge:
++      instruction: >
++        NO declarar formalmente Zero-Knowledge solamente porque la key está
++        en #fragment.
++      allowed_statement: >
++        La clave passwordless permanece en el fragmento del navegador y no se
++        transmite en peticiones HTTP al servidor, según la arquitectura revisada.
++        Esto reduce exposición, pero no constituye por sí solo una auditoría
++        formal de Zero-Knowledge.
++
++  secret_audit:
++    required:
++      - "SUPABASE_SERVICE_ROLE_KEY solo servidor"
++      - "NO VITE_SUPABASE_SERVICE_ROLE_KEY"
++      - "no secrets client bundle"
++      - "no logs"
++      - "no responses"
++
++section_10_database_and_rls:
++  title: "Supabase, esquema y políticas"
++
++  inspect:
++    - "tables"
++    - "foreign keys"
++    - "constraints"
++    - "indexes"
++    - "unique constraints"
++    - "RLS"
++    - "policies"
++    - "RPCs"
++    - "security definer"
++    - "storage policies"
++    - "ownership"
++    - "anon"
++    - "authenticated"
++    - "service role"
++
++  identify:
++    - "overly broad SELECT"
++    - "overly broad INSERT"
++    - "overly broad UPDATE"
++    - "missing ownership constraint"
++    - "race condition in download limits"
++
++section_11_metrics:
++  title: "Semántica de métricas"
++
++  definitions:
++    OPEN: "se abrió /d/{shortUrl}"
++    ATTEMPT: "se intentó autorización"
++    AUTHORIZED: "servidor autorizó"
++    DOWNLOAD: "archivo/ciphertext entregado realmente"
++    BLOCKED: "servidor denegó"
++
++  audit:
++    - "no simulated counters"
++    - "no semantic inflation"
++    - "no infer unique people from downloads"
++    - "no infer opens from downloads"
++    - "atomic increments"
++    - "concurrency"
++
++section_12_responsive:
++  title: "Responsive profesional"
++
++  widths:
++    - 320
++    - 360
++    - 375
++    - 390
++    - 412
++    - 430
++    - 768
++    - 1024
++    - 1280
++    - 1440
++
++  inspect:
++    - "horizontal overflow"
++    - "fixed width modals"
++    - "p-8 on small screens"
++    - "w-[450px]"
++    - "tables"
++    - "sheets"
++    - "dialogs"
++    - "safe areas"
++    - "100vh vs dvh"
++    - "keyboard"
++    - "sticky/fixed elements"
++
++  critical_rule: >
++    NO resolver overflow globalmente con overflow-x-hidden para ocultar el bug.
++    Encontrar el elemento hijo responsable.
++
++section_13_accessibility:
++  title: "Accesibilidad"
++
++  audit:
++    - "44x44 minimum practical touch target"
++    - "keyboard navigation"
++    - "focus visible"
++    - "focus trap"
++    - "ESC"
++    - "aria-label"
++    - "aria-expanded"
++    - "aria-current"
++    - "semantic buttons"
++    - "contrast"
++    - "reduced motion"
++    - "screen reader names"
++    - "modal labeling"
++
++section_14_performance:
++  title: "Performance"
++
++  inspect:
++    - "rerenders"
++    - "React profiler candidates"
++    - "large components"
++    - "PublicProfileView"
++    - "pointermove state updates"
++    - "QR regeneration"
++    - "expensive JSON.stringify keys"
++    - "image loading"
++    - "font loading"
++    - "network waterfalls"
++    - "Supabase repeated requests"
++    - "unnecessary effects"
++
++  mobile:
++    focus:
++      - "pinch"
++      - "drawer"
++      - "bottom sheet"
++      - "scroll"
++      - "template rendering"
++
++  rule: >
++    No declarar 60fps sin medición o prueba reproducible.
++
++section_15_code_quality:
++  title: "Mantenibilidad"
++
++  inspect:
++    - "components >500 lines"
++    - "routes >1000 lines"
++    - "duplicated business logic"
++    - "duplicated save logic"
++    - "duplicated state"
++    - "legacy commented code"
++    - "magic strings"
++    - "magic numbers"
++    - "hardcoded emails"
++    - "hardcoded URLs"
++    - "hardcoded templates"
++    - "debug console.log"
++    - "TODO/FIXME"
++    - "feature flags"
++    - "unused components"
++
++section_16_data_and_demo_content:
++  title: "Hardcodes y datos demo"
++
++  identify:
++    - "Unsplash fallback"
++    - "fake names"
++    - "fake bios"
++    - "demo links"
++    - "demo metrics"
++    - "template placeholders"
++    - "hardcoded admin emails"
++    - "production URLs"
++
++  classify:
++    - "acceptable fallback"
++    - "editor demo"
++    - "production bug"
++    - "security risk"
++
++section_17_router:
++  title: "Routing"
++
++  inspect:
++    - "all routes"
++    - "dead routes"
++    - "duplicate paths"
++    - "public routes"
++    - "protected routes"
++    - "admin route"
++    - "secure documents"
++    - "profile route"
++    - "stable aliases"
++    - "root navigation drawer exclusions"
++
++section_18_service_worker:
++  title: "PWA y Service Worker"
++
++  inspect:
++    - "registration"
++    - "production-only behavior"
++    - "cache invalidation"
++    - "stale deployments"
++    - "old JS cache"
++    - "secure docs caching"
++    - "sensitive response caching"
++    - "offline behavior"
++
++  critical:
++    - "no cache sensitive document payloads unintentionally"
++
++section_19_browser_compatibility:
++  title: "Navegadores y WebViews"
++
++  validate:
++    - "Chrome Android"
++    - "Safari iOS"
++    - "Instagram WebView"
++    - "Facebook WebView"
++    - "desktop Chrome"
++    - "desktop Safari when available"
++
++  inspect:
++    - "history.replaceState"
++    - "Pointer Events"
++    - "touch-action"
++    - "clipboard"
++    - "downloads"
++    - "blob URLs"
++
++section_20_final_evaluation:
++  required_output:
++    executive_summary:
++      include:
++        - "health of codebase"
++        - "production readiness"
++        - "top 10 risks"
++        - "top 10 improvements"
++        - "most fragile modules"
++        - "security posture"
++        - "mobile UX posture"
++        - "desktop UX posture"
++        - "data integrity posture"
++
++    risk_matrix:
++      columns:
++        - "ID"
++        - "Severity"
++        - "Area"
++        - "Probability"
++        - "Impact"
++        - "Reproducible"
++        - "Fix Complexity"
++        - "Priority"
++
++    production_verdict:
++      format: |
++        BUILD: PASS | FAIL
++        TYPESCRIPT: PASS | FAIL
++        RUNTIME_STABILITY: PASS | FAIL | NEEDS_QA
++        EDITOR_PERSISTENCE: PASS | FAIL
++        PREMIUM_TEMPLATES: PASS | FAIL
++        MOBILE_TOUCH: PASS | FAIL
++        MOBILE_RESPONSIVE: PASS | FAIL
++        DESKTOP_EDITOR: PASS | FAIL
++        QR_CORE: PASS | FAIL
++        SECURE_DOCUMENTS_E2E: PASS | FAIL
++        SECURITY: PASS | FAIL | NEEDS_EXTERNAL_REVIEW
++        RLS_STORAGE: PASS | FAIL
++        METRICS_SEMANTICS: PASS | FAIL
++        ACCESSIBILITY: PASS | FAIL
++        PERFORMANCE: PASS | FAIL | NEEDS_PROFILE
++        MAINTAINABILITY: GOOD | ACCEPTABLE | POOR
++
++        PRODUCTION_READY: YES | NO
++
++reporting_rules:
++  evidence:
++    required: true
++
++  forbidden_phrases_without_proof:
++    - "fully implemented"
++    - "production ready"
++    - "enterprise grade"
++    - "zero friction"
++    - "zero knowledge"
++    - "100% secure"
++    - "60fps"
++    - "Canva quality"
++    - "Figma quality"
++    - "all tests pass"
++
++  screenshots:
++    rule: "NO SCREENSHOT = NO VISUAL PASS"
++
++  device:
++    rule: "NO REAL TOUCH QA = NO MOBILE TOUCH PASS"
++
++  persistence:
++    rule: >
++      NO SAVE + REFRESH + PUBLIC verification = NO persistence PASS
++
++  security:
++    rule: >
++      No declarar seguridad total basándose solo en revisión superficial.
++
++final_instruction: >
++  Esta auditoría debe comportarse como si fuera realizada antes de adquirir,
++  financiar o lanzar comercialmente el producto.
++
++  No queremos complacencia.
++
++  No queremos una lista de cosas bonitas que ya existen.
++
++  Queremos saber:
++  qué funciona,
++  qué parece funcionar,
++  qué está roto,
++  qué puede romperse,
++  qué es inseguro,
++  qué está duplicado,
++  qué está mal diseñado,
++  qué deuda técnica existe,
++  y qué debe corregirse antes de considerar el producto profesionalmente listo.
++
++  Una auditoría que no encuentre problemas no es automáticamente una buena
++  auditoría. Una buena auditoría demuestra cómo buscó los problemas y aporta
++  evidencia de sus conclusiones.
++```
++
+
+# 2026-08-22 18:51:49.733517
++/exit
+
+# 2026-08-22 18:52:41.908927
++AUDIT MODE ONLY FIRST. Do not modify any file until you finish the audit report and explicitly list proposed changes.```yaml
++audit:
++  id: "PROFESSIONAL-CODEBASE-AUDIT-2026"
++  project: "daniel1743/codigos_qr"
++  level: "PROFESSIONAL / EVALUATIVE / FORENSIC"
++  scope: "FULL CODEBASE"
++  objective: >
++    Realizar una auditoría técnica exhaustiva, verificable y evaluativa de toda
++    la base de código. El objetivo NO es generar una lista superficial de errores,
++    sino determinar con evidencia el estado real del producto, su calidad,
++    riesgos, coherencia arquitectónica, seguridad, rendimiento, mantenibilidad,
++    UX y preparación para producción.
++
++principles:
++  - "NO asumir que una feature funciona porque existe código."
++  - "NO asumir que una feature funciona porque existe documentación."
++  - "NO asumir que una feature funciona porque un agente anterior la marcó PASS."
++  - "NO confundir compilación con funcionalidad."
++  - "NO confundir UI visual con integración."
++  - "NO confundir mock/demo con datos reales."
++  - "NO confundir implementación parcial con producción."
++  - "NO inventar métricas."
++  - "NO usar scores subjetivos tipo 9/10 sin metodología reproducible."
++  - "Toda conclusión importante debe tener evidencia."
++
++audit_methodology:
++  each_finding_must_include:
++    - "ID único"
++    - "Severidad"
++    - "Área"
++    - "Archivo"
++    - "Función/componente"
++    - "Líneas aproximadas"
++    - "Descripción"
++    - "Evidencia"
++    - "Impacto técnico"
++    - "Impacto de usuario"
++    - "Probabilidad"
++    - "Reproducibilidad"
++    - "Root cause"
++    - "Recomendación"
++    - "Riesgo de corregir"
++    - "Prioridad"
++    - "Estado: CONFIRMED | LIKELY | NEEDS_RUNTIME_QA"
++
++  severity:
++    P0_CRITICAL:
++      definition: >
++        Seguridad, pérdida de datos, corrupción, imposibilidad de utilizar una
++        función principal, crash de producción o bypass de autorización.
++    P1_HIGH:
++      definition: >
++        Feature importante rota, regresión UX grave, persistencia incorrecta,
++        comportamiento móvil defectuoso o riesgo técnico considerable.
++    P2_MEDIUM:
++      definition: >
++        Problema funcional parcial, accesibilidad, performance o deuda técnica
++        con impacto real.
++    P3_LOW:
++      definition: >
++        Mantenibilidad, consistencia, limpieza, ergonomía interna o refinamientos.
++
++preflight:
++  mandatory:
++    - "git status"
++    - "git diff"
++    - "git rev-parse HEAD"
++    - "git branch --show-current"
++    - "git log --oneline --decorate -30"
++    - "git branch -a"
++
++  determine:
++    - "branch real auditada"
++    - "HEAD exacto"
++    - "relación con main"
++    - "cambios sin commit"
++    - "feature branches relevantes"
++    - "posibles diferencias entre código auditado y producción"
++
++  output:
++    - "AUDITED_BRANCH"
++    - "AUDITED_COMMIT"
++    - "WORKTREE_STATUS"
++    - "KNOWN_DEPLOYMENT_BRANCH"
++    - "AUDIT_LIMITATIONS"
++
++section_1_build_and_type_system:
++  title: "Compilación, TypeScript y calidad estática"
++
++  mandatory_commands:
++    - "npm run build"
++    - "npx tsc --noEmit"
++    - "lint scoped o global según configuración"
++
++  analyze:
++    - "todos los errores TS"
++    - "warnings"
++    - "implicit any"
++    - "possibly undefined"
++    - "invalid CSSProperties"
++    - "exactOptionalPropertyTypes"
++    - "unsafe casts"
++    - "as any"
++    - "non-null assertions"
++    - "@ts-ignore"
++    - "@ts-expect-error"
++    - "dead imports"
++    - "unused state"
++    - "unused handlers"
++    - "unreachable code"
++
++  required_classification:
++    - "FAIL_NEW"
++    - "PREEXISTING"
++    - "BLOCKING"
++    - "NON_BLOCKING"
++
++section_2_runtime_integrity:
++  title: "Errores de ejecución y React"
++
++  inspect:
++    - "console.error"
++    - "console.warn"
++    - "unhandled promise rejections"
++    - "React hydration mismatches"
++    - "Radix Slot errors"
++    - "asChild misuse"
++    - "multiple child Slot"
++    - "invalid DOM nesting"
++    - "controlled/uncontrolled state changes"
++    - "memory leaks"
++    - "event listener cleanup"
++    - "stale closures"
++    - "effects with incorrect dependencies"
++    - "race conditions"
++    - "duplicate network calls"
++
++  specific:
++    - "ContextualToolbar"
++    - "Popover"
++    - "Dialog"
++    - "Sheet"
++    - "Slot"
++    - "Router transitions"
++
++section_3_editor_architecture:
++  title: "Arquitectura completa del editor"
++
++  investigate:
++    - "fuente de verdad de profile"
++    - "fuente de verdad de links"
++    - "selectedEditorTarget"
++    - "selectedMobileTarget"
++    - "activeTab"
++    - "panelOpen"
++    - "bottomSheetOpen"
++    - "mobilePropertiesOpen"
++    - "showFloatingToolbar"
++    - "zoom state"
++    - "history state"
++
++  required_output:
++    state_map: >
++      Documentar claramente:
++      USER ACTION -> STATE -> COMPONENT -> SIDE EFFECT -> SAVE
++
++  detect:
++    - "estados duplicados"
++    - "estados legacy"
++    - "dos componentes para la misma función"
++    - "desktop/mobile mezclados"
++    - "handlers duplicados"
++    - "state que cambia pero ninguna UI consume"
++    - "componentes existentes pero no montados"
++
++section_4_mobile_interaction:
++  title: "UX táctil móvil"
++
++  principle:
++    statement: >
++      Mientras el dedo está en la pantalla, el dedo debe ser la fuente de verdad.
++
++  audit:
++    pinch_zoom:
++      inspect:
++        - "pointerdown"
++        - "pointermove"
++        - "pointerup"
++        - "pointercancel"
++        - "touch-action"
++        - "scale source of truth"
++        - "transform"
++        - "transformOrigin"
++        - "focal point"
++        - "render cost"
++        - "CSS transitions"
++      acceptance:
++        - "un único pinch produce cambio significativo"
++        - "seguimiento continuo"
++        - "reverse direction sin soltar"
++        - "no 5-10 gestos repetidos"
++        - "autofit sincronizado"
++
++    bottom_sheet:
++      inspect:
++        - "free drag"
++        - "snap points"
++        - "pointer tracking"
++        - "internal scroll arbitration"
++      acceptance:
++        - "se puede dejar en 37%"
++        - "se puede dejar en 54%"
++        - "se puede dejar en 63%"
++        - "se puede dejar en 78%"
++        - "no fuerza snap"
++
++    navigation_drawer:
++      inspect:
++        - "edge swipe"
++        - "progress"
++        - "translation"
++        - "overlay"
++        - "radius"
++        - "shadow"
++        - "scroll lock"
++      acceptance:
++        - "drawer sigue dedo"
++        - "se queda a mitad mientras dedo permanece"
++        - "reverse direction"
++        - "no es solo hamburger toggle"
++        - "main content congelado"
++
++    touch_selection:
++      inspect:
++        - "data-editor-target"
++        - "all template branches"
++        - "pointer-events"
++        - "tap thresholds"
++        - "floating toolbar"
++        - "z-index"
++        - "overflow clipping"
++
++section_5_desktop_editor:
++  title: "Editor Desktop"
++
++  validate:
++    - "navbar"
++    - "left navigation"
++    - "central preview"
++    - "right contextual panel"
++    - "no giant legacy form copied into right panel"
++    - "selection contextual"
++    - "close/reopen"
++    - "preview consistency"
++    - "zoom controls"
++    - "no lost functionality"
++
++section_6_persistence:
++  title: "Persistencia y coherencia de datos"
++
++  golden_test:
++    sequence:
++      - "CONTROL"
++      - "STATE"
++      - "SAVE"
++      - "DATABASE"
++      - "REFRESH"
++      - "EDITOR PREVIEW"
++      - "PUBLIC PAGE"
++
++  audit_fields:
++    - "profile name"
++    - "bio"
++    - "alias"
++    - "avatar"
++    - "cover"
++    - "colors"
++    - "font"
++    - "font size"
++    - "font weight"
++    - "alignment"
++    - "button styles"
++    - "spacing"
++    - "QR options"
++    - "social links"
++    - "link images"
++    - "theme_layout"
++    - "premium template properties"
++
++  investigate:
++    - "payload sanitization"
++    - "unknown columns"
++    - "undefined vs null"
++    - "schema mismatch"
++    - "400 responses"
++    - "silent failures"
++    - "optimistic UI with failed persistence"
++
++section_7_premium_templates:
++  title: "Auditoría dedicada de templates Premium"
++
++  templates:
++    template_A:
++      expected_identity: "light / cream / emerald / editorial"
++    template_B:
++      expected_identity: "dark / black / beige / haute couture"
++
++  validate_each:
++    - "no crash"
++    - "apply"
++    - "editor render"
++    - "public render"
++    - "save"
++    - "refresh"
++    - "responsive"
++    - "full editability"
++
++  full_editability_contract:
++    - "main photo"
++    - "name"
++    - "subtitle"
++    - "bio"
++    - "monogram"
++    - "font family"
++    - "font size"
++    - "font weight"
++    - "alignment"
++    - "semantic colors"
++    - "socials"
++    - "link title"
++    - "link description"
++    - "URL"
++    - "CTA"
++    - "visibility"
++    - "card image"
++    - "card size"
++    - "spacing"
++
++  verdict:
++    format: |
++      TEMPLATE_A_VISUAL: PASS | FAIL
++      TEMPLATE_A_EDITABLE: PASS | FAIL
++      TEMPLATE_A_SAVE: PASS | FAIL
++      TEMPLATE_A_REFRESH: PASS | FAIL
++      TEMPLATE_A_PUBLIC_PARITY: PASS | FAIL
++
++      TEMPLATE_B_NO_CRASH: PASS | FAIL
++      TEMPLATE_B_EDITABLE: PASS | FAIL
++      TEMPLATE_B_SAVE: PASS | FAIL
++      TEMPLATE_B_REFRESH: PASS | FAIL
++      TEMPLATE_B_PUBLIC_PARITY: PASS | FAIL
++
++      BOTH_TEMPLATES_APPROVED: YES | NO
++
++section_8_qr:
++  title: "QR Core"
++
++  inspect:
++    - "stable public_id"
++    - "URL generation"
++    - "production origin"
++    - "PNG export"
++    - "SVG export"
++    - "ECC H"
++    - "logo"
++    - "finder colors"
++    - "inner dots"
++    - "frames"
++    - "quiet zone"
++    - "logo size"
++    - "export sizes"
++
++  real_validation:
++    - "preview vs PNG parity"
++    - "preview vs SVG parity"
++    - "scan plain"
++    - "scan stamp"
++    - "scan badge"
++    - "scan phone"
++    - "scan bottle"
++
++section_9_secure_documents:
++  title: "Secure Documents End-to-End"
++
++  full_flow:
++    - "CREATE"
++    - "VALIDATE SIZE"
++    - "ENCRYPT"
++    - "STORE"
++    - "CREATE METADATA"
++    - "CREATE SHORT URL"
++    - "GENERATE QR"
++    - "OPEN /d/{shortUrl}"
++    - "AUTHORIZE"
++    - "SIGNED URL"
++    - "DOWNLOAD CIPHERTEXT"
++    - "DECRYPT"
++    - "OPEN ORIGINAL FILE"
++
++  security:
++    inspect:
++      - "AES-GCM"
++      - "IV handling"
++      - "key handling"
++      - "password hashing"
++      - "salt"
++      - "service role isolation"
++      - "private bucket"
++      - "RLS"
++      - "RPCs"
++      - "signed URL expiration"
++      - "direct anon download"
++      - "shortUrl entropy"
++      - "revocation"
++      - "one time download"
++      - "atomic limits"
++      - "passwordless fragment"
++
++  critical_language_rule:
++    zero_knowledge:
++      instruction: >
++        NO declarar formalmente Zero-Knowledge solamente porque la key está
++        en #fragment.
++      allowed_statement: >
++        La clave passwordless permanece en el fragmento del navegador y no se
++        transmite en peticiones HTTP al servidor, según la arquitectura revisada.
++        Esto reduce exposición, pero no constituye por sí solo una auditoría
++        formal de Zero-Knowledge.
++
++  secret_audit:
++    required:
++      - "SUPABASE_SERVICE_ROLE_KEY solo servidor"
++      - "NO VITE_SUPABASE_SERVICE_ROLE_KEY"
++      - "no secrets client bundle"
++      - "no logs"
++      - "no responses"
++
++section_10_database_and_rls:
++  title: "Supabase, esquema y políticas"
++
++  inspect:
++    - "tables"
++    - "foreign keys"
++    - "constraints"
++    - "indexes"
++    - "unique constraints"
++    - "RLS"
++    - "policies"
++    - "RPCs"
++    - "security definer"
++    - "storage policies"
++    - "ownership"
++    - "anon"
++    - "authenticated"
++    - "service role"
++
++  identify:
++    - "overly broad SELECT"
++    - "overly broad INSERT"
++    - "overly broad UPDATE"
++    - "missing ownership constraint"
++    - "race condition in download limits"
++
++section_11_metrics:
++  title: "Semántica de métricas"
++
++  definitions:
++    OPEN: "se abrió /d/{shortUrl}"
++    ATTEMPT: "se intentó autorización"
++    AUTHORIZED: "servidor autorizó"
++    DOWNLOAD: "archivo/ciphertext entregado realmente"
++    BLOCKED: "servidor denegó"
++
++  audit:
++    - "no simulated counters"
++    - "no semantic inflation"
++    - "no infer unique people from downloads"
++    - "no infer opens from downloads"
++    - "atomic increments"
++    - "concurrency"
++
++section_12_responsive:
++  title: "Responsive profesional"
++
++  widths:
++    - 320
++    - 360
++    - 375
++    - 390
++    - 412
++    - 430
++    - 768
++    - 1024
++    - 1280
++    - 1440
++
++  inspect:
++    - "horizontal overflow"
++    - "fixed width modals"
++    - "p-8 on small screens"
++    - "w-[450px]"
++    - "tables"
++    - "sheets"
++    - "dialogs"
++    - "safe areas"
++    - "100vh vs dvh"
++    - "keyboard"
++    - "sticky/fixed elements"
++
++  critical_rule: >
++    NO resolver overflow globalmente con overflow-x-hidden para ocultar el bug.
++    Encontrar el elemento hijo responsable.
++
++section_13_accessibility:
++  title: "Accesibilidad"
++
++  audit:
++    - "44x44 minimum practical touch target"
++    - "keyboard navigation"
++    - "focus visible"
++    - "focus trap"
++    - "ESC"
++    - "aria-label"
++    - "aria-expanded"
++    - "aria-current"
++    - "semantic buttons"
++    - "contrast"
++    - "reduced motion"
++    - "screen reader names"
++    - "modal labeling"
++
++section_14_performance:
++  title: "Performance"
++
++  inspect:
++    - "rerenders"
++    - "React profiler candidates"
++    - "large components"
++    - "PublicProfileView"
++    - "pointermove state updates"
++    - "QR regeneration"
++    - "expensive JSON.stringify keys"
++    - "image loading"
++    - "font loading"
++    - "network waterfalls"
++    - "Supabase repeated requests"
++    - "unnecessary effects"
++
++  mobile:
++    focus:
++      - "pinch"
++      - "drawer"
++      - "bottom sheet"
++      - "scroll"
++      - "template rendering"
++
++  rule: >
++    No declarar 60fps sin medición o prueba reproducible.
++
++section_15_code_quality:
++  title: "Mantenibilidad"
++
++  inspect:
++    - "components >500 lines"
++    - "routes >1000 lines"
++    - "duplicated business logic"
++    - "duplicated save logic"
++    - "duplicated state"
++    - "legacy commented code"
++    - "magic strings"
++    - "magic numbers"
++    - "hardcoded emails"
++    - "hardcoded URLs"
++    - "hardcoded templates"
++    - "debug console.log"
++    - "TODO/FIXME"
++    - "feature flags"
++    - "unused components"
++
++section_16_data_and_demo_content:
++  title: "Hardcodes y datos demo"
++
++  identify:
++    - "Unsplash fallback"
++    - "fake names"
++    - "fake bios"
++    - "demo links"
++    - "demo metrics"
++    - "template placeholders"
++    - "hardcoded admin emails"
++    - "production URLs"
++
++  classify:
++    - "acceptable fallback"
++    - "editor demo"
++    - "production bug"
++    - "security risk"
++
++section_17_router:
++  title: "Routing"
++
++  inspect:
++    - "all routes"
++    - "dead routes"
++    - "duplicate paths"
++    - "public routes"
++    - "protected routes"
++    - "admin route"
++    - "secure documents"
++    - "profile route"
++    - "stable aliases"
++    - "root navigation drawer exclusions"
++
++section_18_service_worker:
++  title: "PWA y Service Worker"
++
++  inspect:
++    - "registration"
++    - "production-only behavior"
++    - "cache invalidation"
++    - "stale deployments"
++    - "old JS cache"
++    - "secure docs caching"
++    - "sensitive response caching"
++    - "offline behavior"
++
++  critical:
++    - "no cache sensitive document payloads unintentionally"
++
++section_19_browser_compatibility:
++  title: "Navegadores y WebViews"
++
++  validate:
++    - "Chrome Android"
++    - "Safari iOS"
++    - "Instagram WebView"
++    - "Facebook WebView"
++    - "desktop Chrome"
++    - "desktop Safari when available"
++
++  inspect:
++    - "history.replaceState"
++    - "Pointer Events"
++    - "touch-action"
++    - "clipboard"
++    - "downloads"
++    - "blob URLs"
++
++section_20_final_evaluation:
++  required_output:
++    executive_summary:
++      include:
++        - "health of codebase"
++        - "production readiness"
++        - "top 10 risks"
++        - "top 10 improvements"
++        - "most fragile modules"
++        - "security posture"
++        - "mobile UX posture"
++        - "desktop UX posture"
++        - "data integrity posture"
++
++    risk_matrix:
++      columns:
++        - "ID"
++        - "Severity"
++        - "Area"
++        - "Probability"
++        - "Impact"
++        - "Reproducible"
++        - "Fix Complexity"
++        - "Priority"
++
++    production_verdict:
++      format: |
++        BUILD: PASS | FAIL
++        TYPESCRIPT: PASS | FAIL
++        RUNTIME_STABILITY: PASS | FAIL | NEEDS_QA
++        EDITOR_PERSISTENCE: PASS | FAIL
++        PREMIUM_TEMPLATES: PASS | FAIL
++        MOBILE_TOUCH: PASS | FAIL
++        MOBILE_RESPONSIVE: PASS | FAIL
++        DESKTOP_EDITOR: PASS | FAIL
++        QR_CORE: PASS | FAIL
++        SECURE_DOCUMENTS_E2E: PASS | FAIL
++        SECURITY: PASS | FAIL | NEEDS_EXTERNAL_REVIEW
++        RLS_STORAGE: PASS | FAIL
++        METRICS_SEMANTICS: PASS | FAIL
++        ACCESSIBILITY: PASS | FAIL
++        PERFORMANCE: PASS | FAIL | NEEDS_PROFILE
++        MAINTAINABILITY: GOOD | ACCEPTABLE | POOR
++
++        PRODUCTION_READY: YES | NO
++
++reporting_rules:
++  evidence:
++    required: true
++
++  forbidden_phrases_without_proof:
++    - "fully implemented"
++    - "production ready"
++    - "enterprise grade"
++    - "zero friction"
++    - "zero knowledge"
++    - "100% secure"
++    - "60fps"
++    - "Canva quality"
++    - "Figma quality"
++    - "all tests pass"
++
++  screenshots:
++    rule: "NO SCREENSHOT = NO VISUAL PASS"
++
++  device:
++    rule: "NO REAL TOUCH QA = NO MOBILE TOUCH PASS"
++
++  persistence:
++    rule: >
++      NO SAVE + REFRESH + PUBLIC verification = NO persistence PASS
++
++  security:
++    rule: >
++      No declarar seguridad total basándose solo en revisión superficial.
++
++final_instruction: >
++  Esta auditoría debe comportarse como si fuera realizada antes de adquirir,
++  financiar o lanzar comercialmente el producto.
++
++  No queremos complacencia.
++
++  No queremos una lista de cosas bonitas que ya existen.
++
++  Queremos saber:
++  qué funciona,
++  qué parece funcionar,
++  qué está roto,
++  qué puede romperse,
++  qué es inseguro,
++  qué está duplicado,
++  qué está mal diseñado,
++  qué deuda técnica existe,
++  y qué debe corregirse antes de considerar el producto profesionalmente listo.
++
++  Una auditoría que no encuentre problemas no es automáticamente una buena
++  auditoría. Una buena auditoría demuestra cómo buscó los problemas y aporta
++  evidencia de sus conclusiones.
++```
++
+
+# 2026-08-22 18:58:01.210228
++y
+
+# 2026-08-22 18:58:25.137555
++a
+
+# 2026-08-22 19:02:50.064487
++/reset
+
+# 2026-08-22 19:03:52.049143
++/tokens
+
+# 2026-08-22 19:04:16.435126
++/ask
+
+# 2026-08-22 19:05:06.292999
++Professional audit, phase 1 only.
++
++Do not modify files.
++
++Start with repository state, build, TypeScript, architecture and runtime risks.
++
++Use the repository map first.
++Request only the specific files you need to inspect in full.
++Do not ask me to add entire directories unless strictly necessary.
++
++Run or request:
++git status
++git rev-parse HEAD
++git branch --show-current
++npm run build
++npx tsc --noEmit
++
++Every finding must be classified:
++CONFIRMED
++LIKELY
++NEEDS_RUNTIME_QA
++
++Do not proceed to mobile, security or secure documents yet.
++Finish phase 1 first.
+
+# 2026-08-22 19:12:38.811775
++y
+
+# 2026-08-22 19:12:58.895000
++/reset
+
+# 2026-08-22 19:13:31.725192
++/ask
+
+# 2026-08-22 19:13:44.980967
++/read package.json tsconfig.json vite.config.ts src/server.ts src/lib/env.ts
+
+# 2026-08-22 19:14:09.830977
++Audit phase 1 using the repository map and the files already loaded.
++
++Do not modify files.
++
++Do not ask me interactively for every file.
++
++If you need additional files, give me ONE consolidated list of all required file paths.
++
++Do not request files one-by-one.
++
++Classify every finding as:
++CONFIRMED
++LIKELY
++NEEDS_RUNTIME_QA
++
++Focus only on:
++repository state
++build
++TypeScript
++architecture
++runtime risks
+
+# 2026-08-22 19:20:22.851746
++d
+
+# 2026-08-22 19:22:12.244945
++Do not request any more files.
++
++Do not add any more files.
++
++Do not ask me any additional questions.
++
++The file-inspection scope is CLOSED.
++
++Now complete Phase 1 only with the current evidence.
++
++Run these commands if Aider permits command execution:
++git status --short --branch
++git rev-parse HEAD
++git branch --show-current
++npm run build
++npx tsc --noEmit
++
++Do not inspect additional files.
++
++After the commands, revise your previous findings.
++
++Remove any finding that is speculative and not supported by current evidence.
++
++For each remaining finding provide:
++- classification
++- exact evidence
++- actual impact
++- whether command output confirms or rejects it
++
++If a claim cannot be proven with current files or command output, classify it:
++NOT VERIFIED WITH CURRENT SCOPE
++
++Do not request anything else.
++
++Deliver the final Phase 1 report and STOP.
+
+# 2026-08-22 19:34:09.248518
++/reset
+
+# 2026-08-22 19:34:27.965223
++/read src/routes/editor.tsx src/components/editor/DirectBottomSheet.tsx src/components/editor/DraggableBottomSheet.tsx src/hooks/useTouchGesture.ts src/hooks/usePinchZoom.ts src/hooks/usePinchZoomDirect.ts src/components/navigation/PremiumMobileNavDrawer.tsx
+
+# 2026-08-22 19:34:45.124715
++PROFESSIONAL AUDIT — PHASE 2: MOBILE EDITOR ONLY
++
++Do not modify files.
++
++Do not request any additional files.
++
++Do not ask follow-up questions.
++
++Do not add any other file to the chat.
++
++Audit ONLY:
++- src/routes/editor.tsx
++- src/components/editor/DirectBottomSheet.tsx
++- src/components/editor/DraggableBottomSheet.tsx
++- src/hooks/useTouchGesture.ts
++- src/hooks/usePinchZoom.ts
++- src/hooks/usePinchZoomDirect.ts
++- src/components/navigation/PremiumMobileNavDrawer.tsx
++
++You may use the repository map only as supporting context.
++
++If a conclusion requires another file, classify it exactly as:
++NOT VERIFIED WITH CURRENT SCOPE
++
++Do not expand scope.
++
++Evaluate only these areas:
++
++1. BOTTOM SHEET
++- direct manipulation
++- whether it follows the finger 1:1
++- whether it forces snap points
++- whether internal controls can accidentally close the sheet
++- pointer/click propagation
++- nested popover/select/dialog risks
++- internal scroll vs sheet drag arbitration
++
++2. PINCH ZOOM
++- direct scale response
++- scale source of truth
++- sync between programmatic zoom and gesture zoom
++- pointercancel
++- touch-action
++- transition during gesture
++- transform performance
++- focal-point behavior
++
++3. PAN
++- whether translateX / translateY exist
++- whether a zoomed canvas can move horizontally and vertically
++- whether pan follows the finger directly
++- whether bounds are calculated correctly
++- whether pan resets unexpectedly
++- whether pan and pinch can coexist
++
++4. TOUCH SELECTION
++- data-editor-target flow
++- tap detection
++- movement/time thresholds
++- pointer event conflicts
++- interaction with pinch/pan
++- interaction with sheet and toolbar
++
++5. MOBILE NAV DRAWER
++- true edge drag
++- direct progress tracking
++- reverse direction without release
++- whether it is actually a gesture or only open/close state
++- scroll lock
++- interaction with editor touch gestures
++
++6. DUPLICATED SYSTEMS
++Identify whether there are overlapping implementations for:
++- bottom sheet
++- pinch zoom
++- touch selection
++- mobile state
++- drawer interaction
++
++For every finding provide:
++- ID
++- classification:
++  CONFIRMED
++  LIKELY
++  NEEDS_RUNTIME_QA
++  NOT VERIFIED WITH CURRENT SCOPE
++- exact file
++- exact function/component
++- exact evidence from code
++- root cause
++- actual UX impact
++- risk of fixing
++- recommended correction
++
++DO NOT:
++- speculate without code evidence
++- call something production-ready
++- propose redesigns
++- inspect secure documents
++- inspect desktop editor
++- inspect QR core
++- inspect templates
++- inspect security
++- inspect Supabase
++- request more files
++
++Final verdict required:
++
++BOTTOM_SHEET_DIRECT_MANIPULATION: PASS | FAIL | NEEDS_RUNTIME_QA
++BOTTOM_SHEET_INTERNAL_CONTROLS: PASS | FAIL | NEEDS_RUNTIME_QA
++PINCH_DIRECT_RESPONSE: PASS | FAIL | NEEDS_RUNTIME_QA
++PAN_AVAILABLE: PASS | FAIL
++PAN_HORIZONTAL: PASS | FAIL
++PAN_VERTICAL: PASS | FAIL
++TOUCH_SELECTION: PASS | FAIL | NEEDS_RUNTIME_QA
++DRAWER_DIRECT_GESTURE: PASS | FAIL | NEEDS_RUNTIME_QA
++DUPLICATED_MOBILE_SYSTEMS: YES | NO
++MOBILE_EDITOR_ARCHITECTURE_HEALTH: GOOD | ACCEPTABLE | POOR
++
++Then STOP.
++
++Do not ask for anything else.

@@ -35,6 +35,8 @@ export interface Profile {
   button_text_color: string;
   button_radius: ButtonRadius;
   button_style: ButtonStyle;
+  button_border_thickness?: string | null;
+  button_border_color?: string | null;
   title_color?: string | null;
   title_size?: string;
   title_weight?: string;

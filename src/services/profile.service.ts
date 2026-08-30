@@ -21,6 +21,8 @@ const PROFILE_WRITABLE_COLUMNS = [
   "button_text_color",
   "button_radius",
   "button_style",
+  "button_border_thickness",
+  "button_border_color",
   "title_color",
   "title_size",
   "title_weight",
