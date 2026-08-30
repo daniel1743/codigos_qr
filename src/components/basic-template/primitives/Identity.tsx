@@ -45,7 +45,15 @@ interface ProfileHeadingProps {
   palette: PaletteConfig;
   headingFont: string;
   bodyFont: string;
-  align?: "center" | "left";
+  titleFontFamily?: string;
+  bioFontFamily?: string;
+  titleSize?: string;
+  titleWeight?: string;
+  titleAlign?: string;
+  bioSize?: string;
+  bioWeight?: string;
+  bioAlign?: string;
+  align?: "center" | "left" | "right";
   targetRegistry?: EditTargetRegistry | undefined;
   highlightedTarget?: string | null | undefined;
 }
@@ -58,11 +66,66 @@ export function ProfileHeading({
   palette,
   headingFont,
   bodyFont,
+  titleFontFamily,
+  bioFontFamily,
+  titleSize,
+  titleWeight,
+  titleAlign,
+  bioSize,
+  bioWeight,
+  bioAlign,
   align = "center",
   targetRegistry,
   highlightedTarget,
 }: ProfileHeadingProps) {
-  const alignClass = align === "center" ? "items-center text-center" : "items-start text-left";
+  const alignClass =
+    align === "center"
+      ? "items-center text-center"
+      : align === "right"
+        ? "items-end text-right"
+        : "items-start text-left";
+  const titleSizeValue =
+    titleSize === "sm"
+      ? "1.25rem"
+      : titleSize === "md"
+        ? "1.375rem"
+        : titleSize === "lg"
+          ? "1.5rem"
+          : titleSize === "xl"
+            ? "1.875rem"
+            : undefined;
+  const bioSizeValue =
+    bioSize === "sm"
+      ? "0.75rem"
+      : bioSize === "md"
+        ? "0.875rem"
+        : bioSize === "lg"
+          ? "1rem"
+          : undefined;
+  const titleWeightValue =
+    titleWeight === "light"
+      ? 300
+      : titleWeight === "normal"
+        ? 400
+        : titleWeight === "semibold"
+          ? 600
+          : titleWeight === "bold"
+            ? 700
+            : undefined;
+  const bioWeightValue =
+    bioWeight === "light"
+      ? 300
+      : bioWeight === "normal"
+        ? 400
+        : bioWeight === "semibold"
+          ? 600
+          : bioWeight === "bold"
+            ? 700
+            : undefined;
+  const titleTextAlign = ["left", "center", "right"].includes(titleAlign || "")
+    ? titleAlign
+    : undefined;
+  const bioTextAlign = ["left", "center", "right"].includes(bioAlign || "") ? bioAlign : undefined;
   return (
     <div className={`flex w-full flex-col ${alignClass}`}>
       <EditableTarget
@@ -73,7 +136,13 @@ export function ProfileHeading({
       >
         <h1
           className="w-full break-words text-2xl font-bold leading-tight"
-          style={{ color: palette.text, fontFamily: headingFont }}
+          style={{
+            color: palette.text,
+            fontFamily: titleFontFamily || headingFont,
+            ...(titleSizeValue ? { fontSize: titleSizeValue } : {}),
+            ...(titleWeightValue ? { fontWeight: titleWeightValue } : {}),
+            ...(titleTextAlign ? { textAlign: titleTextAlign } : {}),
+          }}
         >
           {name}
         </h1>
@@ -87,7 +156,11 @@ export function ProfileHeading({
         >
           <p
             className="w-full break-words text-sm font-medium"
-            style={{ color: palette.accent, fontFamily: bodyFont }}
+            style={{
+              color: palette.accent,
+              fontFamily: bodyFont,
+              ...(bioTextAlign ? { textAlign: bioTextAlign } : {}),
+            }}
           >
             {subtitle}
           </p>
@@ -102,7 +175,13 @@ export function ProfileHeading({
         >
           <p
             className="w-full whitespace-pre-line break-words text-sm leading-relaxed"
-            style={{ color: palette.textMuted, fontFamily: bodyFont }}
+            style={{
+              color: palette.textMuted,
+              fontFamily: bioFontFamily || bodyFont,
+              ...(bioSizeValue ? { fontSize: bioSizeValue } : {}),
+              ...(bioWeightValue ? { fontWeight: bioWeightValue } : {}),
+              ...(bioTextAlign ? { textAlign: bioTextAlign } : {}),
+            }}
           >
             {bio}
           </p>

@@ -30,6 +30,14 @@ export interface ProfileContent {
   ringEnabled?: boolean;
   ringColor?: string;
   ringThickness?: string;
+  titleFontFamily?: string;
+  bioFontFamily?: string;
+  titleSize?: string;
+  titleWeight?: string;
+  titleAlign?: string;
+  bioSize?: string;
+  bioWeight?: string;
+  bioAlign?: string;
 }
 
 export interface LinkItem {

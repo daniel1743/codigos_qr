@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import type { Profile } from "../../types/database";
+import { BASIC_EDITOR_FONTS } from "../../lib/basic-templates/config";
+import { loadGoogleFont } from "../../lib/fonts";
 import { getBrowserSupabaseClient } from "../../lib/supabase/client";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
@@ -19,9 +21,75 @@ const MAX_AVATAR_BYTES = 3 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const RING_COLORS = ["#000000", "#ffffff", "#D4AF37", "#C98A7D", "#1E3A5F", "#B76E9E"];
 
+function ChoiceChips({
+  label,
+  options,
+  value,
+  onChange,
+}: {
+  label: string;
+  options: { id: string; label: string }[];
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <div className="space-y-2">
+      <Label className="text-xs font-medium text-stone-500">{label}</Label>
+      <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {options.map((option) => (
+          <button
+            key={option.id}
+            type="button"
+            aria-pressed={value === option.id}
+            onClick={() => onChange(option.id)}
+            className={`h-10 shrink-0 rounded-lg border px-3 text-xs font-medium transition-colors ${
+              value === option.id
+                ? "border-[#1d1d1b] bg-[#1d1d1b] text-[#fffefa]"
+                : "border-stone-200 bg-[#fffefa] text-stone-600 hover:bg-stone-100"
+            }`}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function FontChips({ value, onChange }: { value: string; onChange: (font: string) => void }) {
+  return (
+    <div className="space-y-2">
+      <Label className="text-xs font-medium text-stone-500">Fuente</Label>
+      <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {BASIC_EDITOR_FONTS.map((font) => (
+          <button
+            key={font}
+            type="button"
+            aria-pressed={value === font}
+            onClick={() => onChange(font)}
+            className={`h-10 shrink-0 rounded-lg border px-3 text-[11px] transition-colors ${
+              value === font
+                ? "border-[#1d1d1b] bg-[#1d1d1b] text-[#fffefa]"
+                : "border-stone-200 bg-[#fffefa] text-stone-600 hover:bg-stone-100"
+            }`}
+            style={{ fontFamily: font }}
+          >
+            {font}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function ProfileSection({ profile, onChange, userId }: ProfileSectionProps) {
   const [uploading, setUploading] = useState(false);
   const supabase = getBrowserSupabaseClient();
+
+  useEffect(() => {
+    if (profile.title_font_family) loadGoogleFont(profile.title_font_family);
+    if (profile.bio_font_family) loadGoogleFont(profile.bio_font_family);
+  }, [profile.title_font_family, profile.bio_font_family]);
 
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -176,6 +244,45 @@ export function ProfileSection({ profile, onChange, userId }: ProfileSectionProp
           className="h-11 rounded-xl border-stone-200 bg-[#fffefa]"
           required
         />
+        <div className="space-y-4 border-t border-stone-200 pt-4">
+          <FontChips
+            value={profile.title_font_family || profile.font_family || "Inter"}
+            onChange={(font) => {
+              loadGoogleFont(font);
+              onChange({ title_font_family: font });
+            }}
+          />
+          <ChoiceChips
+            label="Alineación"
+            options={[
+              { id: "left", label: "Izquierda" },
+              { id: "center", label: "Centro" },
+              { id: "right", label: "Derecha" },
+            ]}
+            value={profile.title_align || "center"}
+            onChange={(value) => onChange({ title_align: value })}
+          />
+          <ChoiceChips
+            label="Tamaño"
+            options={[
+              { id: "sm", label: "S" },
+              { id: "md", label: "M" },
+              { id: "lg", label: "L" },
+            ]}
+            value={profile.title_size || "lg"}
+            onChange={(value) => onChange({ title_size: value })}
+          />
+          <ChoiceChips
+            label="Peso"
+            options={[
+              { id: "normal", label: "Normal" },
+              { id: "semibold", label: "Semibold" },
+              { id: "bold", label: "Bold" },
+            ]}
+            value={profile.title_weight || "bold"}
+            onChange={(value) => onChange({ title_weight: value })}
+          />
+        </div>
       </div>
 
       <div className="space-y-2 rounded-2xl border border-stone-200 bg-[#fffefa] p-4 shadow-[0_8px_24px_rgba(29,29,27,0.04)]">
@@ -188,6 +295,45 @@ export function ProfileSection({ profile, onChange, userId }: ProfileSectionProp
           maxLength={180}
           className="min-h-28 resize-none rounded-xl border-stone-200 bg-[#fffefa]"
         />
+        <div className="space-y-4 border-t border-stone-200 pt-4">
+          <FontChips
+            value={profile.bio_font_family || profile.font_family || "Inter"}
+            onChange={(font) => {
+              loadGoogleFont(font);
+              onChange({ bio_font_family: font });
+            }}
+          />
+          <ChoiceChips
+            label="Alineación"
+            options={[
+              { id: "left", label: "Izquierda" },
+              { id: "center", label: "Centro" },
+              { id: "right", label: "Derecha" },
+            ]}
+            value={profile.bio_align || "center"}
+            onChange={(value) => onChange({ bio_align: value })}
+          />
+          <ChoiceChips
+            label="Tamaño"
+            options={[
+              { id: "sm", label: "S" },
+              { id: "md", label: "M" },
+              { id: "lg", label: "L" },
+            ]}
+            value={profile.bio_size || "md"}
+            onChange={(value) => onChange({ bio_size: value })}
+          />
+          <ChoiceChips
+            label="Peso"
+            options={[
+              { id: "normal", label: "Normal" },
+              { id: "semibold", label: "Semibold" },
+              { id: "bold", label: "Bold" },
+            ]}
+            value={profile.bio_weight || "normal"}
+            onChange={(value) => onChange({ bio_weight: value })}
+          />
+        </div>
       </div>
 
       <div className="space-y-2 rounded-2xl border border-stone-200 bg-[#fffefa] p-4 shadow-[0_8px_24px_rgba(29,29,27,0.04)]">

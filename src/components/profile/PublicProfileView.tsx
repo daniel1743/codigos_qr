@@ -41,10 +41,39 @@ function getBannerFusionMask(strength: unknown) {
   )`;
 }
 
+function resolveTextAlign(value: string | null | undefined) {
+  return value === "left" || value === "center" || value === "right" ? value : undefined;
+}
+
+function resolveFontWeight(value: string | null | undefined) {
+  if (value === "light") return 300;
+  if (value === "normal") return 400;
+  if (value === "semibold") return 600;
+  if (value === "bold") return 700;
+  return undefined;
+}
+
+function resolveTitleFontSize(value: string | null | undefined) {
+  if (value === "sm") return "1.5rem";
+  if (value === "md") return "1.75rem";
+  if (value === "lg") return "1.875rem";
+  if (value === "xl") return "2.25rem";
+  return undefined;
+}
+
+function resolveBioFontSize(value: string | null | undefined) {
+  if (value === "sm") return "0.875rem";
+  if (value === "md") return "1rem";
+  if (value === "lg") return "1.125rem";
+  return undefined;
+}
+
 export function PublicProfileView({ profile, links, isPreview = false }: PublicProfileViewProps) {
   useEffect(() => {
     loadGoogleFont(profile.font_family || "Inter");
-  }, [profile.font_family]);
+    if (profile.title_font_family) loadGoogleFont(profile.title_font_family);
+    if (profile.bio_font_family) loadGoogleFont(profile.bio_font_family);
+  }, [profile.font_family, profile.title_font_family, profile.bio_font_family]);
 
   const selectedTemplate = profile.template_id
     ? getTemplates().find((template) => template.id === profile.template_id)
@@ -93,6 +122,26 @@ export function PublicProfileView({ profile, links, isPreview = false }: PublicP
   // (e.g. if outline, we don't apply background color)
   const isOutline = profile.button_style === "outline";
   const isSoft = profile.button_style === "soft";
+  const titleStyle = {
+    fontFamily: profile.title_font_family || profile.font_family || "Inter, sans-serif",
+    ...(resolveTitleFontSize(profile.title_size)
+      ? { fontSize: resolveTitleFontSize(profile.title_size) }
+      : {}),
+    ...(resolveFontWeight(profile.title_weight)
+      ? { fontWeight: resolveFontWeight(profile.title_weight) }
+      : {}),
+    ...(resolveTextAlign(profile.title_align)
+      ? { textAlign: resolveTextAlign(profile.title_align) }
+      : {}),
+  };
+  const bioStyle = {
+    fontFamily: profile.bio_font_family || profile.font_family || "Inter, sans-serif",
+    ...(resolveBioFontSize(profile.bio_size) ? { fontSize: resolveBioFontSize(profile.bio_size) } : {}),
+    ...(resolveFontWeight(profile.bio_weight)
+      ? { fontWeight: resolveFontWeight(profile.bio_weight) }
+      : {}),
+    ...(resolveTextAlign(profile.bio_align) ? { textAlign: resolveTextAlign(profile.bio_align) } : {}),
+  };
 
   return (
     <div
@@ -151,12 +200,18 @@ export function PublicProfileView({ profile, links, isPreview = false }: PublicP
             </div>
           </div>
 
-          <h1 className="max-w-full break-words text-center text-3xl font-extrabold tracking-tight text-foreground">
+          <h1
+            className="max-w-full break-words text-center text-3xl font-extrabold tracking-tight text-foreground"
+            style={titleStyle}
+          >
             {profile.display_name || "Tu Nombre"}
           </h1>
 
           {profile.bio && (
-            <p className="mt-3 max-w-[320px] whitespace-pre-line break-words text-center text-base leading-relaxed text-foreground/75">
+            <p
+              className="mt-3 max-w-[320px] whitespace-pre-line break-words text-center text-base leading-relaxed text-foreground/75"
+              style={bioStyle}
+            >
               {profile.bio}
             </p>
           )}

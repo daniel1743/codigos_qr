@@ -30,6 +30,8 @@ export interface Profile {
   ring_color: string;
   ring_thickness: "thin" | "medium" | "thick";
   font_family: string;
+  title_font_family?: string | null;
+  bio_font_family?: string | null;
   background_color: string;
   button_color: string;
   button_text_color: string;

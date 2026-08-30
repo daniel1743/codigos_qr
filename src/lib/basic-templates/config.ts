@@ -59,7 +59,7 @@ const SOCIAL_PLATFORMS: ReadonlySet<SocialPlatform> = new Set([
   "website",
 ]);
 
-const SUPPORTED_EDITOR_FONTS = new Set([
+export const BASIC_EDITOR_FONTS = [
   "Inter",
   "Poppins",
   "Montserrat",
@@ -70,7 +70,14 @@ const SUPPORTED_EDITOR_FONTS = new Set([
   "Lato",
   "Playfair Display",
   "Merriweather",
-]);
+] as const;
+
+const SUPPORTED_EDITOR_FONTS = new Set<string>(BASIC_EDITOR_FONTS);
+
+function resolveSupportedFont(value: string | null | undefined) {
+  const selectedFont = value?.trim();
+  return selectedFont && SUPPORTED_EDITOR_FONTS.has(selectedFont) ? selectedFont : undefined;
+}
 
 function isHexColor(value: unknown): value is string {
   return typeof value === "string" && /^#[0-9a-f]{6}$/i.test(value);
@@ -170,8 +177,8 @@ function resolveFontPair(
   override: TemplateCustomizationOverrides | undefined,
 ): FontPairConfig {
   const fallback = requiredOption(template.customization.fontPairs[0], "font pair");
-  const selectedFont = override?.font_family?.trim();
-  if (!selectedFont || !SUPPORTED_EDITOR_FONTS.has(selectedFont)) return fallback;
+  const selectedFont = resolveSupportedFont(override?.font_family);
+  if (!selectedFont) return fallback;
   const fontStack = `${selectedFont}, system-ui, sans-serif`;
   return { id: `profile-${selectedFont}`, name: selectedFont, heading: fontStack, body: fontStack };
 }
@@ -226,6 +233,14 @@ export function buildBasicTemplateContent(
       ringEnabled: profile.ring_enabled ?? false,
       ringColor: profile.ring_color || "#000000",
       ringThickness: profile.ring_thickness || "thin",
+      titleFontFamily: resolveSupportedFont(profile.title_font_family),
+      bioFontFamily: resolveSupportedFont(profile.bio_font_family),
+      titleSize: profile.title_size,
+      titleWeight: profile.title_weight,
+      titleAlign: profile.title_align,
+      bioSize: profile.bio_size,
+      bioWeight: profile.bio_weight,
+      bioAlign: profile.bio_align,
     },
     links: normalizedLinks,
     cards: links.map((link, index) => ({

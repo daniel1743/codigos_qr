@@ -113,7 +113,9 @@ function EditorPage() {
 
   useEffect(() => {
     loadGoogleFont(profile.font_family || "Inter");
-  }, [profile.font_family]);
+    if (profile.title_font_family) loadGoogleFont(profile.title_font_family);
+    if (profile.bio_font_family) loadGoogleFont(profile.bio_font_family);
+  }, [profile.font_family, profile.title_font_family, profile.bio_font_family]);
 
   useEffect(() => {
     const supabase = getBrowserSupabaseClient();

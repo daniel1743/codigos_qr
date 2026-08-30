@@ -81,6 +81,14 @@ export function HeroProfileRenderer({
           palette={palette}
           headingFont={fontPair.heading}
           bodyFont={fontPair.body}
+          titleFontFamily={profile.titleFontFamily}
+          bioFontFamily={profile.bioFontFamily}
+          titleSize={profile.titleSize}
+          titleWeight={profile.titleWeight}
+          titleAlign={profile.titleAlign}
+          bioSize={profile.bioSize}
+          bioWeight={profile.bioWeight}
+          bioAlign={profile.bioAlign}
           align="center"
           targetRegistry={targetRegistry}
           highlightedTarget={highlightedTarget}

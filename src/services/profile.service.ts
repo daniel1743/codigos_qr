@@ -16,6 +16,8 @@ const PROFILE_WRITABLE_COLUMNS = [
   "ring_color",
   "ring_thickness",
   "font_family",
+  "title_font_family",
+  "bio_font_family",
   "background_color",
   "button_color",
   "button_text_color",
