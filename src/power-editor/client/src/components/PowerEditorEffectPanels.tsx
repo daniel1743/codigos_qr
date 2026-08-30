@@ -1,1 +1,0 @@
-par acomprender el script y su capacidad
