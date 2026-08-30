@@ -10,6 +10,7 @@ const PROFILE_WRITABLE_COLUMNS = [
   "bio",
   "avatar_url",
   "banner_url",
+  "banner_fusion_strength",
   "avatar_shape",
   "ring_enabled",
   "ring_color",

@@ -1,246 +1,91 @@
-import { Link, createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState, useRef } from "react";
-import { getBrowserSupabaseClient } from "../lib/supabase/client";
-import { profileService } from "../services/profile.service";
-import { linkService } from "../services/link.service";
-import type { Profile, ProfileLink } from "../types/database";
-import { Auth } from "../components/Auth";
-import { ProfileSection } from "../components/editor/ProfileSection";
-import { AppearanceSection } from "../components/editor/AppearanceSection";
-import { LinksSection } from "../components/editor/LinksSection";
-import { ShareSection } from "../components/editor/ShareSection";
-import { PublicProfileView } from "../components/profile/PublicProfileView";
-import { QRCodeAdvanced } from "../components/qr/QRCodeAdvanced";
-import { QRFrameShell } from "../components/qr/QRFrameShell";
+import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useRef, useState } from "react";
+import type { Session } from "@supabase/supabase-js";
 import { toast } from "sonner";
+import { Auth } from "../components/Auth";
+import { DesignSection } from "../components/editor/DesignSection";
+import { LinksSection } from "../components/editor/LinksSection";
+import { ProfileSection } from "../components/editor/ProfileSection";
+import { PublicProfileView } from "../components/profile/PublicProfileView";
+import { Button } from "../components/ui/button";
 import { generatePublicId, getInternalSlugFromPublicId } from "../lib/publicId";
+import { getBrowserSupabaseClient } from "../lib/supabase/client";
 import { getPublicProfileUrl } from "../lib/url";
 import { isValidUrl, normalizeUrl } from "../lib/validation";
-import { isUserAdmin, isAdminEmail } from "../lib/admin-check";
-import {
-  UserCircle,
-  UserRound,
-  Link as LinkIcon,
-  Palette,
-  QrCode,
-  X,
-  ChevronDown,
-  CheckCircle2,
-  ZoomIn,
-  ZoomOut,
-  Shield,
-  Maximize,
-  Lock,
-} from "lucide-react";
-import { Button } from "../components/ui/button";
-import type { CornerDotType, CornerSquareType, DotsType, QREffectType } from "../types/qr-advanced";
-
-import type { Session } from "@supabase/supabase-js";
+import { linkService } from "../services/link.service";
+import { profileService } from "../services/profile.service";
+import type { Profile, ProfileLink } from "../types/database";
 
 export const Route = createFileRoute("/editor")({
   component: EditorPage,
 });
 
-type TabId = "profile" | "links" | "appearance" | "qr";
+const DEFAULT_PROFILE: Partial<Profile> = {
+  display_name: "",
+  slug: "",
+  background_color: "#ffffff",
+  button_color: "#111111",
+  button_text_color: "#ffffff",
+  font_family: "Inter",
+  banner_fusion_strength: 60,
+};
 
-const ZOOM_STEPS = [0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.25];
-
-// Modified by Codex — QR-STUDIO-11C
-function EditorQRPreview({
-  profile,
-  publicId,
-  onDone,
-}: {
-  profile: Partial<Profile>;
-  publicId: string;
-  onDone: () => void;
-}) {
-  const fgColor = profile.qr_foreground_color || "#000000";
-  const bgColor = profile.qr_background_color || "#FFFFFF";
-  const cornerTopLeftColor =
-    profile.qr_corner_top_left_color || profile.qr_corners_square_color || fgColor;
-  const cornerTopRightColor =
-    profile.qr_corner_top_right_color || profile.qr_corners_square_color || fgColor;
-  const cornerBottomLeftColor =
-    profile.qr_corner_bottom_left_color || profile.qr_corners_square_color || fgColor;
-  const qrUrl = publicId ? getPublicProfileUrl(publicId) : "https://preview.local/qr";
-  const logoEnabled = profile.qr_logo_enabled ?? false;
-
-  return (
-    <div className="flex h-full w-full items-center justify-center px-6">
-      <div className="flex w-full max-w-[540px] flex-col items-center gap-5 rounded-3xl border bg-background/95 p-6 shadow-2xl">
-        <div className="flex w-full items-center justify-between gap-4">
-          <div>
-            <h2 className="text-lg font-semibold tracking-tight">Vista QR</h2>
-            <p className="text-sm text-muted-foreground">Cambios visuales en vivo</p>
-          </div>
-          <Button className="rounded-full px-5" onClick={onDone}>
-            Listo
-          </Button>
-        </div>
-
-        <QRFrameShell
-          frameStyle={profile.qr_frame_style || "plain"}
-          className="w-full max-w-[420px]"
-        >
-          <QRCodeAdvanced
-            key={`editor-qr-${qrUrl}-${JSON.stringify(profile.qr_gradient)}-${fgColor}-${bgColor}-${profile.qr_frame_style}-${logoEnabled}-${profile.qr_effect}`}
-            options={{
-              data: qrUrl,
-              width: 360,
-              height: 360,
-              margin: 4,
-              dotsColor: profile.qr_gradient || fgColor,
-              backgroundColor: bgColor,
-              dotsType: (profile.qr_dots_type || "square") as DotsType,
-              cornersSquareType: (profile.qr_corners_square_type ||
-                "extra-rounded") as CornerSquareType,
-              cornersDotType: (profile.qr_corners_dot_type || "dot") as CornerDotType,
-              cornersSquareColor: profile.qr_corners_square_color || fgColor,
-              cornersDotColor: profile.qr_corners_dot_color || fgColor,
-              cornerSquareColors: {
-                topLeft: cornerTopLeftColor,
-                topRight: cornerTopRightColor,
-                bottomLeft: cornerBottomLeftColor,
-              },
-              frameStyle: profile.qr_frame_style || "plain",
-              effect: (profile.qr_effect || "none") as QREffectType,
-              ...(logoEnabled && profile.qr_logo_url ? { image: profile.qr_logo_url } : {}),
-              ...(logoEnabled && profile.qr_logo_url
-                ? {
-                    imageOptions: {
-                      hideBackgroundDots: true,
-                      imageSize: 0.28,
-                      margin: 4,
-                      crossOrigin: "anonymous",
-                    },
-                  }
-                : {}),
-              qrOptions: { errorCorrectionLevel: "H" },
-            }}
-            className="flex h-full w-full items-center justify-center [&_canvas]:h-full [&_canvas]:w-full"
-          />
-        </QRFrameShell>
-      </div>
-    </div>
-  );
+function getSafeFusionStrength(value: unknown) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return 60;
+  return Math.min(100, Math.max(0, Math.round(parsed)));
 }
 
 function EditorPage() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-
-  const [profile, setProfile] = useState<Partial<Profile>>({
-    background_color: "#ffffff",
-    button_color: "#111111",
-    button_text_color: "#ffffff",
-    font_family: "Inter",
-  });
-
+  const [profile, setProfile] = useState<Partial<Profile>>(DEFAULT_PROFILE);
   const [links, setLinks] = useState<Partial<ProfileLink>[]>([]);
   const [saving, setSaving] = useState(false);
-  const [savedPublicId, setSavedPublicId] = useState<string>("");
-  const [isPublished, setIsPublished] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<TabId>("profile");
-  const [panelOpen, setPanelOpen] = useState<boolean>(true);
-  const [zoomLevel, setZoomLevel] = useState<number>(1);
-  const [isDesktop, setIsDesktop] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [savedPublicId, setSavedPublicId] = useState("");
+  const [isPublished, setIsPublished] = useState(false);
 
-  const supabase = getBrowserSupabaseClient();
   const loadedUserId = useRef<string | null>(null);
 
   useEffect(() => {
-    setIsDesktop(window.innerWidth >= 768);
-    const handleResize = () => setIsDesktop(window.innerWidth >= 768);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+    const supabase = getBrowserSupabaseClient();
 
-  const handleZoomIn = () => {
-    const nextStep = ZOOM_STEPS.find((step) => step > zoomLevel + 0.01);
-    if (nextStep !== undefined) {
-      setZoomLevel(nextStep);
-    }
-  };
-
-  const handleZoomOut = () => {
-    const prevStep = [...ZOOM_STEPS].reverse().find((step) => step < zoomLevel - 0.01);
-    if (prevStep !== undefined) {
-      setZoomLevel(prevStep);
-    }
-  };
-
-  const handleFit = () => {
-    const mainContainer = document.getElementById("preview-main-container");
-    if (!mainContainer) return;
-    const availableHeight = mainContainer.clientHeight - 64; // padding
-    const availableWidth = mainContainer.clientWidth - 64;
-
-    const phoneH = 750;
-    const phoneW = 375;
-
-    const scaleH = availableHeight / phoneH;
-    const scaleW = availableWidth / phoneW;
-    let bestScale = Math.min(scaleH, scaleW);
-
-    if (bestScale > 1.0) bestScale = 1.0;
-    if (bestScale < 0.3) bestScale = 0.3; // Allow smaller fit on very small screens
-
-    setZoomLevel(bestScale);
-  };
-
-  useEffect(() => {
     supabase.auth
       .getSession()
-      .then(({ data: { session } }: { data: { session: Session | null } }) => {
+      .then(({ data: { session } }) => {
         setSession(session);
         if (session) {
           loadData(session.user.id);
         } else {
           setLoading(false);
         }
+      })
+      .catch((error) => {
+        console.error(error);
+        setLoading(false);
       });
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event: string, session: Session | null) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
-      if (session) {
-        if (loadedUserId.current !== session.user.id) {
-          loadData(session.user.id);
-        }
+      if (session && loadedUserId.current !== session.user.id) {
+        loadData(session.user.id);
       } else if (event === "SIGNED_OUT") {
         loadedUserId.current = null;
       }
     });
 
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      e.preventDefault();
-      e.returnValue = "";
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = "";
     };
     window.addEventListener("beforeunload", handleBeforeUnload);
-
-    const handleResize = () => {
-      // Opcionalmente reajustar o limpiar algo
-    };
-    window.addEventListener("resize", handleResize);
 
     return () => {
       subscription.unsubscribe();
       window.removeEventListener("beforeunload", handleBeforeUnload);
-      window.removeEventListener("resize", handleResize);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Autofit on mount
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setTimeout(() => {
-        handleFit();
-      }, 100);
-    }
   }, []);
 
   const loadData = async (userId: string) => {
@@ -248,35 +93,27 @@ function EditorPage() {
 
     setLoading(true);
     try {
-      // Parallelize queries to Supabase to prevent network waterfalls
-      const [p, adminStatus, authUserResult] = await Promise.all([
-        profileService.getProfileByUserId(supabase, userId),
-        isUserAdmin(supabase, userId),
-        supabase.auth.getUser()
-      ]);
-
-      const userEmail = authUserResult.data.user?.email || "";
-      setIsAdmin(adminStatus || isAdminEmail(userEmail));
-
-      if (p) {
-        setProfile(p);
-        if (p.published && p.public_id) {
-          setSavedPublicId(p.public_id);
+      const supabase = getBrowserSupabaseClient();
+      const currentProfile = await profileService.getProfileByUserId(supabase, userId);
+      if (currentProfile) {
+        setProfile({
+          ...DEFAULT_PROFILE,
+          ...currentProfile,
+          banner_fusion_strength: getSafeFusionStrength(currentProfile.banner_fusion_strength),
+        });
+        if (currentProfile.published && currentProfile.public_id) {
+          setSavedPublicId(currentProfile.public_id);
           setIsPublished(true);
         }
-        const l = await linkService.getProfileLinks(supabase, p.id);
-        setLinks(l);
+        const currentLinks = await linkService.getProfileLinks(supabase, currentProfile.id);
+        setLinks(currentLinks);
       } else {
-        setProfile({
-          display_name: "",
-          background_color: "#ffffff",
-          button_color: "#111111",
-          button_text_color: "#ffffff",
-          font_family: "Inter",
-        });
+        setProfile(DEFAULT_PROFILE);
+        setLinks([]);
       }
-    } catch (e) {
-      console.error(e);
+    } catch (error) {
+      console.error(error);
+      toast.error("No se pudo cargar tu perfil.");
     } finally {
       loadedUserId.current = userId;
       setLoading(false);
@@ -285,105 +122,67 @@ function EditorPage() {
 
   const validate = () => {
     if (!profile.display_name) return false;
-    const enabledLinks = links.filter((l) => l.enabled && l.url && isValidUrl(l.url));
-    if (enabledLinks.length < 3) return false;
-    return true;
+    const enabledLinks = links.filter((link) => link.enabled && link.url && isValidUrl(link.url));
+    return enabledLinks.length >= 3;
   };
 
   const handleSave = async (publish: boolean) => {
     if (!session) return;
+
     setSaving(true);
     try {
+      const supabase = getBrowserSupabaseClient();
       let currentProfileId = profile.id;
-
-      // CRÍTICO: Proteger publicId - nunca cambiar si ya existe
       const publicId = profile.public_id || generatePublicId();
       const internalSlug = profile.slug || getInternalSlugFromPublicId(publicId);
+      const profilePayload = {
+        ...profile,
+        banner_fusion_strength: getSafeFusionStrength(profile.banner_fusion_strength),
+        slug: internalSlug,
+        public_id: publicId,
+        published: publish,
+      };
 
-      let finalProfile;
+      let finalProfile: Profile;
       if (!currentProfileId) {
-        // Primera vez: crear con publicId
         finalProfile = await profileService.createProfile(supabase, {
-          ...profile,
+          ...profilePayload,
           user_id: session.user.id,
-          slug: internalSlug,
-          public_id: publicId,
-          display_name: profile.display_name!,
-          published: publish,
+          display_name: profile.display_name || "Mi perfil",
         });
         currentProfileId = finalProfile.id;
       } else {
-        // Ya existe: NUNCA tocar public_id
-        const { public_id: _publicId, ...editableProfile } = profile;
-
-        // Solo agregar publicId si NO existe (migración legacy)
-        const identityBackfill = profile.public_id
-          ? {}
-          : {
-              public_id: publicId,
-              slug: internalSlug,
-            };
-
-        // Validar alias (slug) reservado al guardar
-        if (editableProfile.slug) {
-          const reservedRoutes = [
-            "editor",
-            "login",
-            "auth",
-            "api",
-            "qr",
-            "account",
-            "settings",
-            "p",
-            "terms",
-            "privacy",
-            "help",
-            "support",
-          ];
-          if (reservedRoutes.includes(editableProfile.slug)) {
-            toast.error("Nombre reservado", { description: "Este enlace no está disponible." });
-            setSaving(false);
-            return;
-          }
-        }
-
-        finalProfile = await profileService.updateProfile(supabase, currentProfileId, {
-          ...editableProfile,
-          ...identityBackfill,
-          published: publish,
-        });
+        const { public_id: _publicId, ...editableProfile } = profilePayload;
+        finalProfile = await profileService.updateProfile(
+          supabase,
+          currentProfileId,
+          editableProfile,
+        );
       }
 
-      setProfile((prev) => ({ ...prev, ...finalProfile }));
-      toast.success(publish ? "Página publicada correctamente" : "Cambios guardados en borrador");
-
-      if (publish) {
-        setSavedPublicId(finalProfile.public_id);
-        setIsPublished(true);
-      }
-
-      const linksToSave = links.map((l) => ({
-        ...l,
-        url: l.url ? normalizeUrl(l.url) : "",
+      const normalizedLinks = links.map((link, index) => ({
+        ...link,
+        sort_order: index,
+        url: link.url ? normalizeUrl(link.url) : "",
       }));
+      const existingLinks = await linkService.getProfileLinks(supabase, currentProfileId);
+      const keptIds = normalizedLinks
+        .filter((link) => !link.id?.startsWith("temp-"))
+        .map((link) => link.id);
 
-      const existing = await linkService.getProfileLinks(supabase, currentProfileId);
-      const toKeep = linksToSave.filter((l) => !l.id?.startsWith("temp-")).map((l) => l.id);
-
-      const toDelete = existing.filter((e) => !toKeep.includes(e.id));
-      for (const del of toDelete) {
-        await linkService.deleteProfileLink(supabase, del.id);
+      for (const link of existingLinks.filter((existing) => !keptIds.includes(existing.id))) {
+        await linkService.deleteProfileLink(supabase, link.id);
       }
 
-      for (const link of linksToSave) {
+      for (const link of normalizedLinks) {
         if (link.id?.startsWith("temp-")) {
-          const { id, ...rest } = link;
+          const { id: _id, ...newLink } = link;
           await linkService.createProfileLink(supabase, {
-            ...rest,
+            ...newLink,
             profile_id: currentProfileId,
-            platform: rest.platform || "website",
-            label: rest.label || "Enlace",
-            url: rest.url || "",
+            platform: newLink.platform || "website",
+            label: newLink.label || "Enlace",
+            url: newLink.url || "",
           });
         } else if (link.id) {
           await linkService.updateProfileLink(supabase, link.id, link);
@@ -391,32 +190,25 @@ function EditorPage() {
       }
 
       const refreshedLinks = await linkService.getProfileLinks(supabase, currentProfileId);
+      setProfile({
+        ...DEFAULT_PROFILE,
+        ...finalProfile,
+        banner_fusion_strength: getSafeFusionStrength(finalProfile.banner_fusion_strength),
+      });
       setLinks(refreshedLinks);
 
       if (publish) {
-        toast.success("¡Página publicada con éxito!");
-      } else {
-        toast.success("Borrador guardado");
+        setSavedPublicId(finalProfile.public_id);
+        setIsPublished(true);
       }
-    } catch (e: unknown) {
-      console.error("Error completo al guardar:", e);
-      const isUniqueViolation =
-        typeof e === "object" &&
-        e !== null &&
-        "code" in e &&
-        (e as { code?: string }).code === "23505";
 
-      if (isUniqueViolation) {
-        toast.error("Enlace no disponible", {
-          description: "Ese nombre ya está en uso por otra persona.",
-        });
-      } else if (e instanceof Error) {
-        toast.error("Error al guardar", { description: e.message });
-      } else {
-        toast.error("Error al guardar", {
-          description: "Revisa la consola (F12) para más detalles.",
-        });
-      }
+      toast.success(publish ? "Página publicada correctamente" : "Borrador guardado");
+    } catch (error) {
+      console.error(error);
+      toast.error("Error al guardar", {
+        description:
+          error instanceof Error ? error.message : "Revisa los datos e intenta nuevamente.",
+      });
     } finally {
       setSaving(false);
     }
@@ -425,360 +217,74 @@ function EditorPage() {
   if (loading) return <div className="flex justify-center p-12">Cargando...</div>;
   if (!session) return <Auth />;
 
-  const TABS = [
-    { id: "profile", label: "Perfil", icon: UserCircle },
-    { id: "links", label: "Enlaces", icon: LinkIcon },
-    { id: "appearance", label: "Apariencia", icon: Palette },
-    { id: "qr", label: "QR", icon: QrCode },
-  ] as const;
-
-  const renderActiveSection = () => {
-    switch (activeTab) {
-      case "profile":
-        return (
-          <ProfileSection
-            profile={profile}
-            onChange={(u) => setProfile((p) => ({ ...p, ...u }))}
-            userId={session.user.id}
-          />
-        );
-      case "links":
-        return <LinksSection links={links} onChange={setLinks} userId={session.user.id} />;
-      case "appearance":
-        return (
-          <AppearanceSection
-            profile={profile}
-            onChange={(u) => setProfile((p) => ({ ...p, ...u }))}
-            userId={session.user.id}
-            links={links}
-            onManageLinkImages={() => {
-              setActiveTab("links");
-              setPanelOpen(true);
-            }}
-          />
-        );
-      case "qr":
-        return (
-          <ShareSection
-            publicId={savedPublicId || ""}
-            published={isPublished}
-            saving={saving}
-            onSave={handleSave}
-            isValid={validate()}
-            profile={profile}
-            onChange={(u) => setProfile((p) => ({ ...p, ...u }))}
-          />
-        );
-      default:
-        return null;
-    }
-  };
-
-  const handleTabClick = (id: TabId) => {
-    setActiveTab(id);
-    setPanelOpen(true);
-  };
-
-  const handleProfilePreviewChange = (updates: Partial<Profile>) => {
-    setProfile((current) => ({ ...current, ...updates }));
-  };
-
-  const handleLinkPreviewChange = (linkId: string, updates: Partial<ProfileLink>) => {
-    setLinks((current) =>
-      current.map((link) => (link.id === linkId ? { ...link, ...updates } : link)),
-    );
-  };
-
-  const handleOpenPreviewSidebar = (tabId: string) => {
-    const nextTab = TABS.some((tab) => tab.id === tabId) ? (tabId as TabId) : "profile";
-    setActiveTab(nextTab);
-    setPanelOpen(true);
-  };
-
-  const showQrEditingPreview = activeTab === "qr" && panelOpen;
+  const publicUrl = savedPublicId ? getPublicProfileUrl(savedPublicId) : "";
+  const isValid = validate();
 
   return (
-    <div className="relative flex h-[100dvh] w-full flex-col overflow-hidden overscroll-none bg-background font-sans md:flex-row">
-      {/* SIDEBAR DESKTOP */}
-      <nav className="hidden md:flex flex-col items-center w-[88px] border-r bg-card py-6 z-20 shrink-0">
-        <div className="w-10 h-10 bg-primary text-primary-foreground rounded-xl flex items-center justify-center font-bold mb-8 shadow-sm shrink-0">
-          QR
-        </div>
+    <div className="min-h-screen bg-gray-50/50">
+      <div className="grid min-h-screen grid-cols-1 lg:grid-cols-2">
+        <main className="h-auto space-y-10 overflow-y-auto p-5 md:p-10 lg:h-screen">
+          <ProfileSection
+            profile={profile}
+            onChange={(updates) => setProfile((current) => ({ ...current, ...updates }))}
+            userId={session.user.id}
+          />
+          <DesignSection
+            profile={profile}
+            onChange={(updates) => setProfile((current) => ({ ...current, ...updates }))}
+            userId={session.user.id}
+          />
+          <LinksSection links={links} onChange={setLinks} userId={session.user.id} />
 
-        <div className="flex flex-col gap-4 w-full px-3 flex-1 overflow-y-auto pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-          <Link
-            to="/profile"
-            title="Mi perfil principal"
-            className="flex flex-col items-center justify-center p-3 w-full shrink-0 rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200"
-          >
-            <UserRound className="w-5 h-5 mb-1" />
-            <span className="text-center text-[10px] font-medium leading-tight">
-              Mi perfil principal
-            </span>
-          </Link>
-
-          <Link
-            to="/encrypted-documents"
-            title="Documentos Seguros"
-            className="flex flex-col items-center justify-center p-3 w-full shrink-0 rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200"
-          >
-            <Lock className="w-5 h-5 mb-1" />
-            <span className="text-center text-[10px] font-medium leading-tight font-semibold text-blue-600">
-              Docs Seguros
-            </span>
-          </Link>
-
-          {TABS.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id && panelOpen;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => handleTabClick(tab.id as TabId)}
-                title={tab.label}
-                className={`flex flex-col items-center justify-center p-3 rounded-xl shrink-0 transition-all duration-200 group ${
-                  isActive
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                }`}
-              >
-                <Icon
-                  className={`w-6 h-6 mb-1.5 transition-transform duration-200 ${
-                    isActive ? "scale-110" : "group-hover:scale-110"
-                  }`}
-                />
-                <span className="text-[10px] font-medium">{tab.label}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="mt-auto px-3 w-full space-y-2">
-          {/* Botón Panel Admin - solo visible para admins */}
-          {isAdmin && (
-            <Link
-              to="/admin"
-              className="flex flex-col items-center justify-center p-3 w-full rounded-xl bg-gradient-to-br from-amber-500/10 to-yellow-500/10 text-amber-600 hover:from-amber-500/20 hover:to-yellow-500/20 transition-all duration-200 border border-amber-200/50"
-            >
-              <Shield className="w-5 h-5 mb-1" />
-              <span className="text-[10px] font-medium">Panel Admin</span>
-            </Link>
-          )}
-
-          <button
-            onClick={() => supabase.auth.signOut()}
-            className="flex flex-col items-center justify-center p-3 w-full rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200"
-          >
-            <X className="w-5 h-5 mb-1" />
-            <span className="text-[10px] font-medium">Salir</span>
-          </button>
-        </div>
-      </nav>
-
-      {/* PANEL CONTEXTUAL DESKTOP */}
-      <div
-        className={`hidden md:flex flex-col border-r bg-background shrink-0 h-full overflow-hidden transition-all duration-300 ease-in-out ${
-          panelOpen ? "w-[360px] opacity-100" : "w-0 opacity-0 border-r-0"
-        }`}
-      >
-        <div className="flex items-center justify-between px-6 py-5 border-b bg-card/50 backdrop-blur-sm shrink-0">
-          <h1 className="font-semibold">{TABS.find((t) => t.id === activeTab)?.label}</h1>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 -mr-2 text-muted-foreground"
-            onClick={() => setPanelOpen(false)}
-          >
-            <X className="w-4 h-4" />
-          </Button>
-        </div>
-        <div className="flex-1 overflow-y-auto p-6 scrollbar-thin">{renderActiveSection()}</div>
-      </div>
-
-      {/* GLOBAL PUBLISH BUTTON DESKTOP (Shortcut) */}
-      <div className="hidden md:flex absolute top-4 right-4 z-30 gap-2">
-        {isPublished && (
-          <div className="flex items-center text-xs font-medium text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200 shadow-sm">
-            <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" /> Publicado
-          </div>
-        )}
-        <Button
-          onClick={() => handleSave(true)}
-          disabled={saving || !validate()}
-          className="shadow-sm rounded-full px-5"
-        >
-          {saving ? "Guardando..." : "Publicar Cambios"}
-        </Button>
-      </div>
-
-      {/* PREVIEW CONTAINER */}
-      <main
-        id="preview-main-container"
-        className="relative flex min-h-0 flex-1 flex-col items-center justify-center overflow-hidden bg-muted/30 p-0 md:h-full md:p-8"
-      >
-        {/* Toggle button to reopen panel if closed */}
-        {!panelOpen && (
-          <Button
-            variant="secondary"
-            size="icon"
-            className="hidden md:flex absolute left-4 top-4 shadow-md rounded-full z-10"
-            onClick={() => setPanelOpen(true)}
-          >
-            <ChevronDown className="w-5 h-5 rotate-90" />
-          </Button>
-        )}
-
-        {/* Zoom Controls */}
-        <div className="absolute right-4 top-4 z-40 flex items-center gap-1 rounded-full border bg-background/95 p-1.5 shadow-sm backdrop-blur-md md:top-1/2 md:-translate-y-1/2 md:flex-col">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleZoomIn}
-            disabled={zoomLevel >= 1.25}
-            className="h-11 w-11 rounded-full md:h-8 md:w-8"
-            aria-label="Acercar"
-            title="Acercar"
-          >
-            <ZoomIn className="w-4 h-4" />
-          </Button>
-          <span
-            className="min-w-10 py-1 text-center text-[10px] font-medium md:w-full"
-            aria-label="Nivel de zoom actual"
-          >
-            {Math.round(zoomLevel * 100)}%
-          </span>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleZoomOut}
-            disabled={zoomLevel <= 0.5}
-            className="h-11 w-11 rounded-full md:h-8 md:w-8"
-            aria-label="Alejar"
-            title="Alejar"
-          >
-            <ZoomOut className="w-4 h-4" />
-          </Button>
-          <div className="h-4 w-[1px] bg-border md:my-1 md:h-[1px] md:w-4" />
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleFit}
-            className="h-11 w-11 rounded-full hover:bg-muted md:h-8 md:w-8"
-            aria-label="Ajustar a pantalla"
-            title="Ajustar"
-          >
-            <Maximize className="w-4 h-4" />
-          </Button>
-        </div>
-
-        {/* Scalable Container */}
-        <div className="relative flex items-center justify-center w-full h-full">
-          {showQrEditingPreview ? (
-            <EditorQRPreview
-              profile={profile}
-              publicId={savedPublicId || profile.public_id || ""}
-              onDone={() => setPanelOpen(false)}
-            />
-          ) : (
-            // Modified by Codex — QR-STUDIO-11C
-            <div
-              className="relative h-[750px] w-[375px] shrink-0 transform-gpu overflow-hidden rounded-[3rem] border-[8px] border-black/10 bg-background shadow-2xl transition-transform duration-300"
-              style={{
-                transform: `scale(${zoomLevel})`,
-                transformOrigin: "center center",
-              }}
-            >
-              <PublicProfileView
-                profile={profile}
-                links={links}
-                isPreview={true}
-                onProfileChange={handleProfilePreviewChange}
-                onLinkChange={handleLinkPreviewChange}
-                onOpenSidebar={handleOpenPreviewSidebar}
-              />
+          <section className="space-y-4 rounded-xl border bg-card p-4 shadow-sm">
+            <div>
+              <h2 className="text-xl font-semibold tracking-tight">Guardar y publicar</h2>
+              <p className="text-sm text-muted-foreground">
+                Guarda un borrador o publica los cambios en tu página.
+              </p>
             </div>
-          )}
-        </div>
-      </main>
-
-      {/* MOBILE BOTTOM NAVIGATION */}
-      <nav className="z-30 flex shrink-0 items-center gap-1 overflow-x-auto border-t bg-card px-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] pt-2 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] md:hidden">
-        <Link
-          to="/profile"
-          title="Mi perfil principal"
-          className="flex min-h-14 min-w-[52px] flex-1 flex-col items-center justify-center rounded-lg px-1.5 py-2 transition-colors text-muted-foreground hover:text-primary"
-        >
-          <UserRound className="w-5 h-5 mb-1" />
-          <span className="max-w-full truncate text-[10px] font-medium">Mi perfil</span>
-        </Link>
-
-        <Link
-          to="/encrypted-documents"
-          title="Documentos Seguros"
-          className="flex min-h-14 min-w-[52px] flex-1 flex-col items-center justify-center rounded-lg px-1.5 py-2 transition-colors text-muted-foreground hover:text-primary"
-        >
-          <Lock className="w-5 h-5 mb-1 text-blue-500" />
-          <span className="max-w-full truncate text-[10px] font-medium text-blue-500 font-semibold">Docs Seguros</span>
-        </Link>
-
-        {TABS.map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.id && panelOpen;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => handleTabClick(tab.id as TabId)}
-              className={`flex min-h-14 min-w-[52px] flex-1 flex-col items-center justify-center rounded-lg px-1.5 py-2 transition-colors ${
-                isActive ? "text-primary" : "text-muted-foreground"
-              }`}
-            >
-              <Icon className={`w-5 h-5 mb-1 ${isActive ? "fill-primary/10" : ""}`} />
-              <span className="max-w-full truncate text-[10px] font-medium">{tab.label}</span>
-            </button>
-          );
-        })}
-      </nav>
-
-      {/* MOBILE BOTTOM SHEET (Panel Overlay) */}
-      <div
-        className={`md:hidden absolute inset-0 z-20 flex flex-col justify-end pointer-events-none transition-opacity duration-300 ${
-          panelOpen ? "opacity-100" : "opacity-0"
-        }`}
-      >
-        {/* Backdrop */}
-        <div
-          className={`absolute inset-0 bg-black/40 backdrop-blur-[2px] transition-opacity duration-300 ${panelOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
-          onClick={() => setPanelOpen(false)}
-        />
-
-        {/* Sheet Content */}
-        <div
-          className={`pointer-events-auto flex h-auto max-h-[88dvh] min-h-[52dvh] w-full flex-col rounded-t-[1.5rem] bg-background shadow-2xl transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
-            panelOpen ? "translate-y-0" : "translate-y-full"
-          }`}
-        >
-          {/* Drag Handle & Header */}
-          <div className="flex shrink-0 flex-col items-center rounded-t-[1.5rem] border-b bg-background pb-3 pt-3">
-            <div className="w-12 h-1.5 bg-muted rounded-full mb-4" />
-            <div className="flex w-full items-center justify-between px-4">
-              <h2 className="text-base font-semibold tracking-tight">
-                {TABS.find((t) => t.id === activeTab)?.label}
-              </h2>
+            {!isValid && (
+              <p className="text-sm text-destructive">
+                Debes tener nombre y al menos 3 enlaces visibles válidos para publicar.
+              </p>
+            )}
+            <div className="grid grid-cols-1 gap-2 min-[420px]:grid-cols-2">
               <Button
-                variant="ghost"
-                size="icon"
-                className="-mr-2 text-muted-foreground rounded-full"
-                onClick={() => setPanelOpen(false)}
+                type="button"
+                variant="secondary"
+                className="h-11 rounded-xl"
+                disabled={saving || !isValid}
+                onClick={() => handleSave(false)}
               >
-                <X className="w-5 h-5" />
+                {saving ? "Guardando..." : "Guardar borrador"}
+              </Button>
+              <Button
+                type="button"
+                className="h-11 rounded-xl"
+                disabled={saving || !isValid}
+                onClick={() => handleSave(true)}
+              >
+                {saving ? "Guardando..." : isPublished ? "Actualizar y publicar" : "Publicar ahora"}
               </Button>
             </div>
-          </div>
+            {isPublished && publicUrl && (
+              <a
+                href={publicUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block text-sm font-medium text-primary underline-offset-4 hover:underline"
+              >
+                Ver página publicada
+              </a>
+            )}
+          </section>
+        </main>
 
-          <div className="mb-16 flex-1 overflow-y-auto p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] scrollbar-thin sm:p-6">
-            {renderActiveSection()}
+        <aside className="border-l bg-muted p-5 md:p-10 lg:sticky lg:top-0 lg:flex lg:h-screen lg:items-center lg:justify-center">
+          <div className="mx-auto h-[720px] w-full max-w-[360px] overflow-hidden rounded-[2.5rem] border-[8px] border-black/10 bg-white shadow-xl">
+            <PublicProfileView profile={profile} links={links} isPreview />
           </div>
-        </div>
+        </aside>
       </div>
     </div>
   );
