@@ -1,7 +1,9 @@
+import { useEffect } from "react";
 import type { Profile, ProfileLink } from "../../types/database";
 import { BasicTemplateRenderer } from "../basic-template/BasicTemplateRenderer";
 import { getTemplates } from "../../lib/basic-templates/catalog";
 import { buildBasicTemplateContent, buildConfig } from "../../lib/basic-templates/config";
+import { loadGoogleFont } from "../../lib/fonts";
 
 interface PublicProfileViewProps {
   profile: Partial<Profile>;
@@ -40,6 +42,10 @@ function getBannerFusionMask(strength: unknown) {
 }
 
 export function PublicProfileView({ profile, links, isPreview = false }: PublicProfileViewProps) {
+  useEffect(() => {
+    loadGoogleFont(profile.font_family || "Inter");
+  }, [profile.font_family]);
+
   const selectedTemplate = profile.template_id
     ? getTemplates().find((template) => template.id === profile.template_id)
     : undefined;

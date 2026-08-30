@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import type { ReactNode } from "react";
-import type { KeyboardEvent, MouseEvent } from "react";
+import type { CSSProperties, KeyboardEvent, MouseEvent } from "react";
 import type { EditTargetRegistry } from "@/types/basic-templates";
 
 interface EditableTargetProps {
@@ -8,6 +8,7 @@ interface EditableTargetProps {
   registry?: EditTargetRegistry | undefined;
   active?: boolean;
   className?: string;
+  style?: CSSProperties;
   children: ReactNode;
 }
 
@@ -21,6 +22,7 @@ export function EditableTarget({
   registry,
   active = false,
   className,
+  style,
   children,
 }: EditableTargetProps) {
   const ref = useCallback(
@@ -49,16 +51,17 @@ export function EditableTarget({
       onClickCapture={select}
       onKeyDown={selectWithKeyboard}
       className={className}
-      style={
-        active
+      style={{
+        ...style,
+        ...(active
           ? {
               outline: "2px solid color-mix(in srgb, #d946ef 68%, white)",
               outlineOffset: "3px",
               borderRadius: "12px",
               transition: "outline-color 180ms ease-out",
             }
-          : undefined
-      }
+          : undefined),
+      }}
     >
       {children}
     </div>

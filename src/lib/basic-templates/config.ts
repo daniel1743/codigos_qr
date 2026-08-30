@@ -83,6 +83,69 @@ function isSupportedColorOrGradient(value: unknown): value is string {
   );
 }
 
+function normalizeHex(value: string): string {
+  return value.toLowerCase();
+}
+
+function hexToRgb(value: string): { r: number; g: number; b: number } | null {
+  if (!isHexColor(value)) return null;
+  const hex = value.slice(1);
+  return {
+    r: Number.parseInt(hex.slice(0, 2), 16),
+    g: Number.parseInt(hex.slice(2, 4), 16),
+    b: Number.parseInt(hex.slice(4, 6), 16),
+  };
+}
+
+function relativeLuminance(value: string): number | null {
+  const rgb = hexToRgb(value);
+  if (!rgb) return null;
+
+  const linear = [rgb.r, rgb.g, rgb.b].map((channel) => {
+    const normalized = channel / 255;
+    return normalized <= 0.03928
+      ? normalized / 12.92
+      : Math.pow((normalized + 0.055) / 1.055, 2.4);
+  });
+
+  const [red = 0, green = 0, blue = 0] = linear;
+  return red * 0.2126 + green * 0.7152 + blue * 0.0722;
+}
+
+function contrastRatio(first: string, second: string): number {
+  const firstLuminance = relativeLuminance(first);
+  const secondLuminance = relativeLuminance(second);
+  if (firstLuminance === null || secondLuminance === null) return 0;
+  const lighter = Math.max(firstLuminance, secondLuminance);
+  const darker = Math.min(firstLuminance, secondLuminance);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
+function resolveDefaultButtonBorderColor(
+  palette: PaletteConfig,
+  style: ButtonStyleConfig,
+  borderWidth: ButtonCustomizationConfig["borderWidth"],
+): string {
+  if (borderWidth === 0 || style.variant !== "solid") return palette.accent;
+  if (!isHexColor(palette.accent)) return isHexColor(palette.text) ? palette.text : palette.accentText;
+
+  const accent = normalizeHex(palette.accent);
+  const candidates = [
+    palette.accentText,
+    palette.text,
+    palette.background,
+    palette.surface,
+    "#111111",
+    "#ffffff",
+  ].filter((candidate) => isHexColor(candidate) && normalizeHex(candidate) !== accent);
+
+  const [bestColor] = candidates.sort(
+    (first, second) => contrastRatio(second, palette.accent) - contrastRatio(first, palette.accent),
+  );
+
+  return bestColor ?? palette.accent;
+}
+
 function resolvePalette(
   template: TemplateDefinition,
   override: TemplateCustomizationOverrides | undefined,
@@ -237,7 +300,7 @@ function resolveButtonCustomization(
     borderWidth,
     borderColor: isHexColor(override?.button_border_color)
       ? override.button_border_color
-      : palette.accent,
+      : resolveDefaultButtonBorderColor(palette, style, borderWidth),
     spacing,
   };
 }
@@ -248,7 +311,8 @@ export function buildConfig(
   content: BasicTemplateContent,
   options: BuildConfigOptions = {},
 ): BasicTemplateConfig {
-  const profileCustomization = options.profileCustomization ?? options.buttonCustomization;
+  const profileCustomization: TemplateCustomizationOverrides | undefined =
+    options.profileCustomization ?? options.buttonCustomization;
   const palette = options.palette ?? resolvePalette(template, profileCustomization);
   const fontPair = options.fontPair ?? resolveFontPair(template, profileCustomization);
   const buttonStyle = options.buttonStyle ?? resolveButtonStyle(template, profileCustomization);

@@ -17,6 +17,7 @@ import { MobileTemplateGallery } from "../components/editor/MobileTemplateGaller
 import { BasicTemplateRenderer } from "../components/basic-template/BasicTemplateRenderer";
 import { getTemplates } from "../lib/basic-templates/catalog";
 import { buildBasicTemplateContent, buildConfig } from "../lib/basic-templates/config";
+import { loadGoogleFont } from "../lib/fonts";
 import { generatePublicId, getInternalSlugFromPublicId } from "../lib/publicId";
 import { getBrowserSupabaseClient } from "../lib/supabase/client";
 import { isValidUrl, normalizeUrl } from "../lib/validation";
@@ -109,6 +110,10 @@ function EditorPage() {
       behavior: "smooth",
     });
   }, [selectedTarget]);
+
+  useEffect(() => {
+    loadGoogleFont(profile.font_family || "Inter");
+  }, [profile.font_family]);
 
   useEffect(() => {
     const supabase = getBrowserSupabaseClient();
