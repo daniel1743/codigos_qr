@@ -15,6 +15,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as EditorRouteImport } from './routes/editor'
 import { Route as EncryptedDocumentsRouteImport } from './routes/encrypted-documents'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as TemplateLabRouteImport } from './routes/template-lab'
 import { Route as DShortUrlRouteImport } from './routes/d.$shortUrl'
 import { Route as PPublicIdRouteImport } from './routes/p.$publicId'
 
@@ -48,6 +49,11 @@ const ProfileRoute = ProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TemplateLabRoute = TemplateLabRouteImport.update({
+  id: '/template-lab',
+  path: '/template-lab',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DShortUrlRoute = DShortUrlRouteImport.update({
   id: '/d/$shortUrl',
   path: '/d/$shortUrl',
@@ -66,6 +72,7 @@ export interface FileRoutesByFullPath {
   '/editor': typeof EditorRoute
   '/encrypted-documents': typeof EncryptedDocumentsRoute
   '/profile': typeof ProfileRoute
+  '/template-lab': typeof TemplateLabRoute
   '/d/$shortUrl': typeof DShortUrlRoute
   '/p/$publicId': typeof PPublicIdRoute
 }
@@ -76,6 +83,7 @@ export interface FileRoutesByTo {
   '/editor': typeof EditorRoute
   '/encrypted-documents': typeof EncryptedDocumentsRoute
   '/profile': typeof ProfileRoute
+  '/template-lab': typeof TemplateLabRoute
   '/d/$shortUrl': typeof DShortUrlRoute
   '/p/$publicId': typeof PPublicIdRoute
 }
@@ -87,6 +95,7 @@ export interface FileRoutesById {
   '/editor': typeof EditorRoute
   '/encrypted-documents': typeof EncryptedDocumentsRoute
   '/profile': typeof ProfileRoute
+  '/template-lab': typeof TemplateLabRoute
   '/d/$shortUrl': typeof DShortUrlRoute
   '/p/$publicId': typeof PPublicIdRoute
 }
@@ -99,6 +108,7 @@ export interface FileRouteTypes {
     | '/editor'
     | '/encrypted-documents'
     | '/profile'
+    | '/template-lab'
     | '/d/$shortUrl'
     | '/p/$publicId'
   fileRoutesByTo: FileRoutesByTo
@@ -109,6 +119,7 @@ export interface FileRouteTypes {
     | '/editor'
     | '/encrypted-documents'
     | '/profile'
+    | '/template-lab'
     | '/d/$shortUrl'
     | '/p/$publicId'
   id:
@@ -119,6 +130,7 @@ export interface FileRouteTypes {
     | '/editor'
     | '/encrypted-documents'
     | '/profile'
+    | '/template-lab'
     | '/d/$shortUrl'
     | '/p/$publicId'
   fileRoutesById: FileRoutesById
@@ -130,6 +142,7 @@ export interface RootRouteChildren {
   EditorRoute: typeof EditorRoute
   EncryptedDocumentsRoute: typeof EncryptedDocumentsRoute
   ProfileRoute: typeof ProfileRoute
+  TemplateLabRoute: typeof TemplateLabRoute
   DShortUrlRoute: typeof DShortUrlRoute
   PPublicIdRoute: typeof PPublicIdRoute
 }
@@ -178,6 +191,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/template-lab': {
+      id: '/template-lab'
+      path: '/template-lab'
+      fullPath: '/template-lab'
+      preLoaderRoute: typeof TemplateLabRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/d/$shortUrl': {
       id: '/d/$shortUrl'
       path: '/d/$shortUrl'
@@ -202,6 +222,7 @@ const rootRouteChildren: RootRouteChildren = {
   EditorRoute: EditorRoute,
   EncryptedDocumentsRoute: EncryptedDocumentsRoute,
   ProfileRoute: ProfileRoute,
+  TemplateLabRoute: TemplateLabRoute,
   DShortUrlRoute: DShortUrlRoute,
   PPublicIdRoute: PPublicIdRoute,
 }
