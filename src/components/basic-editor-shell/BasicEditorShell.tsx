@@ -4,7 +4,6 @@ import {
   type PointerEvent,
   type ReactNode,
   type RefObject,
-  type WheelEvent,
   useEffect,
   useRef,
   useState,
@@ -81,11 +80,19 @@ function CanvasWorkspace({
     setZoomOffset(0);
   };
 
-  const onWheel = (event: WheelEvent<HTMLDivElement>) => {
-    if (!event.ctrlKey && !event.metaKey) return;
-    event.preventDefault();
-    updateZoom(zoom - event.deltaY * 0.001);
-  };
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+
+    const onWheel = (event: WheelEvent) => {
+      if (!event.ctrlKey && !event.metaKey) return;
+      event.preventDefault();
+      updateZoom(zoom - event.deltaY * 0.001);
+    };
+
+    viewport.addEventListener("wheel", onWheel, { passive: false });
+    return () => viewport.removeEventListener("wheel", onWheel);
+  }, [fitZoom, viewportRef, zoom]);
 
   const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
     if ((event.target as HTMLElement).closest("[data-edit-target], button, input, textarea, a"))
@@ -161,7 +168,6 @@ function CanvasWorkspace({
         ref={viewportRef}
         className="h-full overflow-auto overscroll-contain px-5 pb-8 pt-14"
         style={{ touchAction: "pan-y" }}
-        onWheel={onWheel}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={stopPan}
