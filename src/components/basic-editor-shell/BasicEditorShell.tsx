@@ -56,6 +56,14 @@ function CanvasWorkspace({
   const [zoomOffset, setZoomOffset] = useState(0);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const dragStart = useRef<{ x: number; y: number; panX: number; panY: number } | null>(null);
+  const activePointers = useRef<Map<number, { x: number; y: number }>>(new Map());
+  const pinchStartRef = useRef<{
+    distance: number;
+    zoom: number;
+    midpoint: { x: number; y: number };
+    panX: number;
+    panY: number;
+  } | null>(null);
   const zoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, fitZoom + zoomOffset));
 
   useEffect(() => {
@@ -75,11 +83,34 @@ function CanvasWorkspace({
     return () => observer.disconnect();
   }, [compact, mobileSheetState]);
 
+  const getPanBounds = () => {
+    const viewport = viewportRef.current;
+    if (!viewport) return { maxX: 0, maxY: 0 };
+
+    const contentWidth = TEMPLATE_WIDTH * zoom;
+    const contentHeight = TEMPLATE_MIN_HEIGHT * zoom;
+    const maxX = Math.max(0, (contentWidth - viewport.clientWidth) / 2 + 24);
+    const maxY = Math.max(0, (contentHeight - viewport.clientHeight) / 2 + 24);
+
+    return { maxX, maxY };
+  };
+
+  const clampPan = (nextX: number, nextY: number) => {
+    const { maxX, maxY } = getPanBounds();
+    return {
+      x: Math.min(maxX, Math.max(-maxX, nextX)),
+      y: Math.min(maxY, Math.max(-maxY, nextY)),
+    };
+  };
+
   const updateZoom = (next: number) => setZoomOffset(next - fitZoom);
   const recenter = () => {
     setPan({ x: 0, y: 0 });
     setZoomOffset(0);
   };
+
+  const getPointerDistance = (a: { x: number; y: number }, b: { x: number; y: number }) =>
+    Math.hypot(b.x - a.x, b.y - a.y);
 
   const onWheel = (event: WheelEvent<HTMLDivElement>) => {
     if (!event.ctrlKey && !event.metaKey) return;
@@ -90,20 +121,93 @@ function CanvasWorkspace({
   const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
     if ((event.target as HTMLElement).closest("[data-edit-target], button, input, textarea, a"))
       return;
+
     event.currentTarget.setPointerCapture(event.pointerId);
-    dragStart.current = { x: event.clientX, y: event.clientY, panX: pan.x, panY: pan.y };
+    activePointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+
+    if (activePointers.current.size === 1) {
+      dragStart.current = { x: event.clientX, y: event.clientY, panX: pan.x, panY: pan.y };
+      pinchStartRef.current = null;
+      return;
+    }
+
+    if (activePointers.current.size >= 2) {
+      const active = Array.from(activePointers.current.values());
+      const [first, second] = active;
+      const midpoint = { x: (first.x + second.x) / 2, y: (first.y + second.y) / 2 };
+
+      pinchStartRef.current = {
+        distance: getPointerDistance(first, second),
+        zoom,
+        midpoint,
+        panX: pan.x,
+        panY: pan.y,
+      };
+      dragStart.current = null;
+    }
   };
 
   const onPointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    if (!activePointers.current.has(event.pointerId)) return;
+
+    activePointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+
+    const active = Array.from(activePointers.current.values());
+    if (active.length >= 2) {
+      const [first, second] = active;
+      const midpoint = { x: (first.x + second.x) / 2, y: (first.y + second.y) / 2 };
+
+      if (!pinchStartRef.current || pinchStartRef.current.distance <= 0) {
+        pinchStartRef.current = {
+          distance: getPointerDistance(first, second),
+          zoom,
+          midpoint,
+          panX: pan.x,
+          panY: pan.y,
+        };
+        return;
+      }
+
+      const nextDistance = getPointerDistance(first, second);
+      const zoomScale = nextDistance / pinchStartRef.current.distance;
+      const nextZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, pinchStartRef.current.zoom * zoomScale));
+      const deltaX = midpoint.x - pinchStartRef.current.midpoint.x;
+      const deltaY = midpoint.y - pinchStartRef.current.midpoint.y;
+
+      setZoomOffset(nextZoom - fitZoom);
+      setPan(
+        clampPan(
+          pinchStartRef.current.panX + deltaX * 0.35,
+          pinchStartRef.current.panY + deltaY * 0.35,
+        )
+      );
+      return;
+    }
+
     if (!dragStart.current) return;
-    setPan({
-      x: Math.max(-96, Math.min(96, dragStart.current.panX + event.clientX - dragStart.current.x)),
-      y: Math.max(-96, Math.min(96, dragStart.current.panY + event.clientY - dragStart.current.y)),
-    });
+
+    const { panX, panY, x, y } = dragStart.current;
+    setPan(clampPan(panX + event.clientX - x, panY + event.clientY - y));
   };
 
-  const stopPan = () => {
-    dragStart.current = null;
+  const stopPan = (event?: PointerEvent<HTMLDivElement>) => {
+    if (event) {
+      activePointers.current.delete(event.pointerId);
+    }
+
+    if (activePointers.current.size < 2) {
+      pinchStartRef.current = null;
+    }
+
+    if (activePointers.current.size === 0) {
+      dragStart.current = null;
+      return;
+    }
+
+    const [nextPointer] = Array.from(activePointers.current.values());
+    if (nextPointer && activePointers.current.size === 1) {
+      dragStart.current = { x: nextPointer.x, y: nextPointer.y, panX: pan.x, panY: pan.y };
+    }
   };
 
   return (
@@ -160,7 +264,7 @@ function CanvasWorkspace({
       <div
         ref={viewportRef}
         className="h-full overflow-auto overscroll-contain px-5 pb-8 pt-14"
-        style={{ touchAction: "pan-y" }}
+        style={{ touchAction: "none" }}
         onWheel={onWheel}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
