@@ -68,6 +68,9 @@ const PROFILE_WRITABLE_COLUMNS = [
   "social_cover_height",
   "social_cover_width",
   "hero_link_id",
+  "template_id",
+  "template_version",
+  "template_config",
 ] as const;
 
 type WritableProfileColumn = (typeof PROFILE_WRITABLE_COLUMNS)[number];

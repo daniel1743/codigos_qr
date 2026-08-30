@@ -1,9 +1,57 @@
 import type { Profile, ProfileLink } from "../../types/database";
+import { BasicTemplateRenderer } from "../basic-template/BasicTemplateRenderer";
+import { getTemplates } from "../../lib/basic-templates/catalog";
+import { buildConfig } from "../../lib/basic-templates/config";
+import type { BasicTemplateContent, SocialPlatform } from "../../types/basic-templates";
 
 interface PublicProfileViewProps {
   profile: Partial<Profile>;
   links: Partial<ProfileLink>[];
   isPreview?: boolean;
+}
+
+const SOCIAL_PLATFORMS: ReadonlySet<SocialPlatform> = new Set([
+  "instagram",
+  "twitter",
+  "facebook",
+  "linkedin",
+  "youtube",
+  "tiktok",
+  "whatsapp",
+  "website",
+]);
+
+function toBasicTemplateContent(
+  profile: Partial<Profile>,
+  links: Partial<ProfileLink>[],
+): BasicTemplateContent {
+  return {
+    profile: {
+      avatarUrl: profile.avatar_url || "",
+      name: profile.display_name || "",
+      subtitle: "",
+      bio: profile.bio || "",
+      heroUrl: profile.banner_url || "",
+    },
+    links: links.map((link, index) => ({
+      id: link.id || `profile-link-${index}`,
+      label: link.label || "Enlace",
+      url: link.url || "",
+      enabled: link.enabled ?? true,
+    })),
+    cards: [],
+    socials: links.flatMap((link, index) => {
+      const platform = typeof link.platform === "string" ? link.platform : "";
+      if (!SOCIAL_PLATFORMS.has(platform as SocialPlatform)) return [];
+      return [{
+        id: link.id || `profile-social-${index}`,
+        platform: platform as SocialPlatform,
+        url: link.url || "",
+        enabled: link.enabled ?? true,
+      }];
+    }),
+    contact: { phone: "", email: "", whatsapp: "" },
+  };
 }
 
 function normalizeBannerFusionStrength(value: unknown) {
@@ -37,6 +85,21 @@ function getBannerFusionMask(strength: unknown) {
 }
 
 export function PublicProfileView({ profile, links, isPreview = false }: PublicProfileViewProps) {
+  const selectedTemplate = profile.template_id
+    ? getTemplates().find((template) => template.id === profile.template_id)
+    : undefined;
+
+  if (selectedTemplate) {
+    const config = buildConfig(selectedTemplate, toBasicTemplateContent(profile, links));
+    return (
+      <BasicTemplateRenderer config={config} />
+    );
+  }
+
+  if (import.meta.env.DEV && profile.template_id) {
+    console.warn(`Unknown basic template id: ${profile.template_id}. Rendering the legacy profile.`);
+  }
+
   const backgroundColor = profile.background_color || "#ffffff";
   const buttonColor = profile.button_color || "#111111";
   const buttonTextColor = profile.button_text_color || "#ffffff";

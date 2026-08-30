@@ -1,0 +1,4 @@
+ALTER TABLE public.profiles
+  ADD COLUMN IF NOT EXISTS template_id TEXT NULL,
+  ADD COLUMN IF NOT EXISTS template_version INTEGER NOT NULL DEFAULT 1,
+  ADD COLUMN IF NOT EXISTS template_config JSONB NOT NULL DEFAULT '{}'::jsonb;

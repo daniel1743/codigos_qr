@@ -87,6 +87,9 @@ export interface Profile {
   social_cover_height?: number | null;
   social_cover_width?: number | null;
   hero_link_id?: string | null;
+  template_id?: string | null;
+  template_version?: number;
+  template_config?: any;
   created_at: string;
   updated_at: string;
 }

@@ -12,13 +12,18 @@ import {
 import { ProfileSection } from "../components/editor/ProfileSection";
 import { ShareSection } from "../components/editor/ShareSection";
 import { PublicProfileView } from "../components/profile/PublicProfileView";
+import { MobileTemplateGallery } from "../components/editor/MobileTemplateGallery";
+import { BasicTemplateRenderer } from "../components/basic-template/BasicTemplateRenderer";
 import { Button } from "../components/ui/button";
+import { getTemplates } from "../lib/basic-templates/catalog";
+import { buildConfig } from "../lib/basic-templates/config";
 import { generatePublicId, getInternalSlugFromPublicId } from "../lib/publicId";
 import { getBrowserSupabaseClient } from "../lib/supabase/client";
 import { getPublicProfileUrl } from "../lib/url";
 import { isValidUrl, normalizeUrl } from "../lib/validation";
 import { linkService } from "../services/link.service";
 import { profileService } from "../services/profile.service";
+import type { BasicTemplateContent } from "../types/basic-templates";
 import type { Profile, ProfileLink } from "../types/database";
 
 export const Route = createFileRoute("/editor")({
@@ -35,6 +40,30 @@ const DEFAULT_PROFILE: Partial<Profile> = {
   banner_fusion_strength: 60,
 };
 
+function toBasicTemplateContent(
+  profile: Partial<Profile>,
+  links: Partial<ProfileLink>[],
+): BasicTemplateContent {
+  return {
+    profile: {
+      avatarUrl: profile.avatar_url || "",
+      name: profile.display_name || "",
+      subtitle: "",
+      bio: profile.bio || "",
+      heroUrl: profile.banner_url || "",
+    },
+    links: links.map((link, index) => ({
+      id: link.id || `profile-link-${index}`,
+      label: link.label || "Enlace",
+      url: link.url || "",
+      enabled: link.enabled ?? true,
+    })),
+    cards: [],
+    socials: [],
+    contact: { phone: "", email: "", whatsapp: "" },
+  };
+}
+
 function getSafeFusionStrength(value: unknown) {
   const parsed = Number(value);
   if (!Number.isFinite(parsed)) return 60;
@@ -50,6 +79,8 @@ function EditorPage() {
   const [savedPublicId, setSavedPublicId] = useState("");
   const [isPublished, setIsPublished] = useState(false);
   const [activeSection, setActiveSection] = useState<BasicEditorSectionId>("profile");
+  
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
 
   const loadedUserId = useRef<string | null>(null);
 
@@ -226,9 +257,28 @@ function EditorPage() {
   const publicId = profile.public_id || savedPublicId || "";
   const publicUrl = isPublished && publicId ? getPublicProfileUrl(publicId) : "";
   const isValid = validate();
+  const selectedTemplate = profile.template_id
+    ? getTemplates().find((template) => template.id === profile.template_id)
+    : undefined;
+  const templateContent = toBasicTemplateContent(profile, links);
+  const templateRenderConfig = selectedTemplate
+    ? buildConfig(selectedTemplate, templateContent)
+    : null;
+
+  if (import.meta.env.DEV && profile.template_id && !selectedTemplate) {
+    console.warn(`Unknown basic template id: ${profile.template_id}. Rendering the legacy profile.`);
+  }
 
   const updateProfile = (updates: Partial<Profile>) =>
     setProfile((current) => ({ ...current, ...updates }));
+
+  const handleSectionChange = (section: BasicEditorSectionId) => {
+    if (section === "gallery") {
+      setIsGalleryOpen(true);
+    } else {
+      setActiveSection(section);
+    }
+  };
 
   const renderActiveSection = () => {
     switch (activeSection) {
@@ -312,13 +362,25 @@ function EditorPage() {
         </main>
 
         <aside className="border-l bg-muted p-5 pb-[calc(7rem+env(safe-area-inset-bottom,0px))] md:p-10 md:pb-10 lg:sticky lg:top-0 lg:flex lg:h-screen lg:items-center lg:justify-center">
-          <div className="mx-auto h-[720px] w-full max-w-[360px] overflow-hidden rounded-[2.5rem] border-[8px] border-black/10 bg-white shadow-xl">
-            <PublicProfileView profile={profile} links={links} isPreview />
+          <div className="mx-auto h-[720px] w-full max-w-[360px] overflow-hidden rounded-[2.5rem] border-[8px] border-black/10 bg-white shadow-xl relative">
+            {templateRenderConfig ? (
+              <BasicTemplateRenderer config={templateRenderConfig} />
+            ) : (
+              <PublicProfileView profile={profile} links={links} isPreview />
+            )}
           </div>
         </aside>
       </div>
 
-      <MobileBottomNavbar activeSection={activeSection} onSectionChange={setActiveSection} />
+      <MobileBottomNavbar activeSection={activeSection} onSectionChange={handleSectionChange} />
+      
+      <MobileTemplateGallery 
+        isOpen={isGalleryOpen}
+        onClose={() => setIsGalleryOpen(false)}
+        selectedTemplateId={profile.template_id ?? null}
+        onSelectTemplate={(id) => updateProfile({ template_id: id, template_version: 1 })}
+        previewProps={{ profile: profile as any, links: links as any }}
+      />
     </div>
   );
 }
