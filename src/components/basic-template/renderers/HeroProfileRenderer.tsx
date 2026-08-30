@@ -1,5 +1,5 @@
 import type { BasicTemplateRendererProps } from "@/types/basic-templates";
-import { Avatar, ProfileHeading } from "../primitives/Identity";
+import { Avatar, ProfileHeading, TemplateFooter } from "../primitives/Identity";
 import { Hero } from "../primitives/Hero";
 import { LinkButton } from "../primitives/button";
 import { SocialRow } from "../primitives/social";
@@ -21,7 +21,15 @@ export function HeroProfileRenderer({
   targetRegistry,
   highlightedTarget,
 }: BasicTemplateRendererProps) {
-  const { content, palette, fontPair, buttonStyle, template } = config;
+  const {
+    content,
+    palette,
+    fontPair,
+    buttonStyle,
+    buttonCustomization,
+    heroFusionStrength,
+    template,
+  } = config;
   const { profile, links, socials } = content;
   const visibleLinks = links.filter((l) => l.enabled);
 
@@ -29,7 +37,7 @@ export function HeroProfileRenderer({
     <div
       className="flex min-h-full w-full flex-col"
       style={{
-        backgroundColor: palette.background,
+        background: palette.background,
         color: palette.text,
         fontFamily: fontPair.body,
       }}
@@ -45,6 +53,7 @@ export function HeroProfileRenderer({
           heroStyle={template.structure.heroStyle}
           background={palette.background}
           height={260}
+          fusionStrength={heroFusionStrength}
         />
       </EditableTarget>
 
@@ -82,7 +91,8 @@ export function HeroProfileRenderer({
             id={EDIT_TARGETS.links}
             registry={targetRegistry}
             active={highlightedTarget === EDIT_TARGETS.links}
-            className="flex w-full flex-col gap-3"
+            className="flex w-full flex-col"
+            style={{ gap: buttonCustomization.spacing }}
           >
             {visibleLinks.map((link) => (
               <EditableTarget
@@ -95,12 +105,20 @@ export function HeroProfileRenderer({
                   link={link}
                   palette={palette}
                   style={buttonStyle}
+                  customization={buttonCustomization}
                   bodyFont={fontPair.body}
                 />
               </EditableTarget>
             ))}
           </EditableTarget>
         ) : null}
+
+        <TemplateFooter
+          enabled={profile.footerEnabled ?? false}
+          text={profile.footerText ?? ""}
+          palette={palette}
+          bodyFont={fontPair.body}
+        />
       </div>
     </div>
   );

@@ -99,6 +99,13 @@ export const FONT_PAIRS = {
 
 export const BUTTON_STYLES = {
   "pill-solid": { id: "pill-solid", name: "Píldora sólida", shape: "pill", variant: "solid" },
+  "square-solid": { id: "square-solid", name: "Cuadrado", shape: "sharp", variant: "solid" },
+  "rounded-solid": {
+    id: "rounded-solid",
+    name: "Redondeado",
+    shape: "rounded",
+    variant: "solid",
+  },
   "rounded-soft": {
     id: "rounded-soft",
     name: "Redondeada suave",
@@ -110,6 +117,12 @@ export const BUTTON_STYLES = {
     name: "Recta contorno",
     shape: "sharp",
     variant: "outline",
+  },
+  "premium-soft": {
+    id: "premium-soft",
+    name: "Premium",
+    shape: "premium-soft",
+    variant: "soft",
   },
 } satisfies Record<string, ButtonStyleConfig>;
 
@@ -149,7 +162,12 @@ export const TEMPLATES: TemplateDefinition[] = [
     customization: {
       palettes: [PALETTES.blush, PALETTES.rose, PALETTES.cream],
       fontPairs: [FONT_PAIRS["serif-elegant"], FONT_PAIRS["sans-modern"]],
-      buttonStyles: [BUTTON_STYLES["pill-solid"], BUTTON_STYLES["rounded-soft"]],
+      buttonStyles: [
+        BUTTON_STYLES["pill-solid"],
+        BUTTON_STYLES["square-solid"],
+        BUTTON_STYLES["rounded-solid"],
+        BUTTON_STYLES["premium-soft"],
+      ],
     },
     supportsCards: false,
     supportsContact: false,
@@ -185,7 +203,13 @@ export const TEMPLATES: TemplateDefinition[] = [
     customization: {
       palettes: [PALETTES.noir, PALETTES.ivory],
       fontPairs: [FONT_PAIRS["serif-elegant"], FONT_PAIRS["sans-modern"]],
-      buttonStyles: [BUTTON_STYLES["rounded-soft"], BUTTON_STYLES["pill-solid"]],
+      buttonStyles: [
+        BUTTON_STYLES["rounded-soft"],
+        BUTTON_STYLES["square-solid"],
+        BUTTON_STYLES["rounded-solid"],
+        BUTTON_STYLES["pill-solid"],
+        BUTTON_STYLES["premium-soft"],
+      ],
     },
     supportsCards: false,
     supportsContact: false,
@@ -222,7 +246,13 @@ export const TEMPLATES: TemplateDefinition[] = [
     customization: {
       palettes: [PALETTES.blush, PALETTES.rose],
       fontPairs: [FONT_PAIRS["sans-modern"], FONT_PAIRS["serif-elegant"]],
-      buttonStyles: [BUTTON_STYLES["rounded-soft"], BUTTON_STYLES["pill-solid"]],
+      buttonStyles: [
+        BUTTON_STYLES["rounded-soft"],
+        BUTTON_STYLES["square-solid"],
+        BUTTON_STYLES["rounded-solid"],
+        BUTTON_STYLES["pill-solid"],
+        BUTTON_STYLES["premium-soft"],
+      ],
     },
     supportsCards: true,
     supportsContact: false,
@@ -259,7 +289,13 @@ export const TEMPLATES: TemplateDefinition[] = [
     customization: {
       palettes: [PALETTES.slate, PALETTES.navy],
       fontPairs: [FONT_PAIRS["sans-modern"]],
-      buttonStyles: [BUTTON_STYLES["sharp-outline"], BUTTON_STYLES["rounded-soft"]],
+      buttonStyles: [
+        BUTTON_STYLES["sharp-outline"],
+        BUTTON_STYLES["square-solid"],
+        BUTTON_STYLES["rounded-solid"],
+        BUTTON_STYLES["pill-solid"],
+        BUTTON_STYLES["premium-soft"],
+      ],
     },
     supportsCards: false,
     supportsContact: true,

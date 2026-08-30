@@ -1,4 +1,5 @@
 import type {
+  ButtonCustomizationConfig,
   ButtonStyleConfig,
   CardItem,
   ContactContent,
@@ -10,19 +11,22 @@ interface CardProps {
   card: CardItem;
   palette: PaletteConfig;
   style: ButtonStyleConfig;
+  customization: ButtonCustomizationConfig;
   headingFont: string;
   bodyFont: string;
 }
 
-export function Card({ card, palette, style, headingFont, bodyFont }: CardProps) {
+export function Card({ card, palette, style, customization, headingFont, bodyFont }: CardProps) {
   return (
     <div
       className="flex w-full flex-col overflow-hidden rounded-2xl"
       style={{ backgroundColor: palette.surface, color: palette.text }}
     >
-      <div className="relative h-40 w-full overflow-hidden">
-        <img src={card.imageUrl} alt={card.title} className="h-full w-full object-cover" />
-      </div>
+      {card.imageUrl ? (
+        <div className="relative h-40 w-full overflow-hidden">
+          <img src={card.imageUrl} alt={card.title} className="h-full w-full object-cover" />
+        </div>
+      ) : null}
       <div className="flex flex-1 flex-col gap-2 p-4">
         <h3 className="break-words text-base font-bold" style={{ fontFamily: headingFont }}>
           {card.title}
@@ -40,7 +44,7 @@ export function Card({ card, palette, style, headingFont, bodyFont }: CardProps)
           target="_blank"
           rel="noopener noreferrer"
           className="mt-1 inline-flex min-h-10 items-center justify-center self-start px-4 py-2 text-sm font-semibold"
-          style={{ ...buttonStyles(palette, style), fontFamily: bodyFont }}
+          style={{ ...buttonStyles(palette, style, customization), fontFamily: bodyFont }}
         >
           {card.ctaLabel}
         </a>
@@ -57,10 +61,16 @@ interface ContactBlockProps {
 
 export function ContactBlock({ contact, palette, bodyFont }: ContactBlockProps) {
   const rows: { label: string; value: string; href: string }[] = [];
-  if (contact.phone) rows.push({ label: "Teléfono", value: contact.phone, href: `tel:${contact.phone}` });
-  if (contact.email) rows.push({ label: "Email", value: contact.email, href: `mailto:${contact.email}` });
+  if (contact.phone)
+    rows.push({ label: "Teléfono", value: contact.phone, href: `tel:${contact.phone}` });
+  if (contact.email)
+    rows.push({ label: "Email", value: contact.email, href: `mailto:${contact.email}` });
   if (contact.whatsapp)
-    rows.push({ label: "WhatsApp", value: contact.whatsapp, href: `https://wa.me/${contact.whatsapp.replace(/[^0-9]/g, "")}` });
+    rows.push({
+      label: "WhatsApp",
+      value: contact.whatsapp,
+      href: `https://wa.me/${contact.whatsapp.replace(/[^0-9]/g, "")}`,
+    });
 
   if (rows.length === 0) return null;
 
@@ -78,7 +88,10 @@ export function ContactBlock({ contact, palette, bodyFont }: ContactBlockProps) 
             target={external ? "_blank" : undefined}
             rel={external ? "noopener noreferrer" : undefined}
             className="flex items-center justify-between gap-4 px-4 py-3"
-            style={{ borderTop: i > 0 ? `1px solid ${palette.text}14` : undefined, fontFamily: bodyFont }}
+            style={{
+              borderTop: i > 0 ? `1px solid ${palette.text}14` : undefined,
+              fontFamily: bodyFont,
+            }}
           >
             <span className="text-sm" style={{ color: palette.textMuted }}>
               {row.label}

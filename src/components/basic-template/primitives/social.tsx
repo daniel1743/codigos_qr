@@ -62,7 +62,7 @@ export function SocialRow({ socials, palette, targetRegistry, highlightedTarget 
               rel="noopener noreferrer"
               aria-label={social.platform}
               className="grid h-10 w-10 place-items-center rounded-full transition-opacity hover:opacity-80"
-              style={{ backgroundColor: `${palette.accent}1f`, color: palette.accent }}
+              style={{ background: palette.accent, color: palette.accentText }}
             >
               <Icon className="h-5 w-5" />
             </a>

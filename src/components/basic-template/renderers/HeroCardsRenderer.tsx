@@ -1,5 +1,5 @@
 import type { BasicTemplateRendererProps } from "@/types/basic-templates";
-import { Avatar, ProfileHeading } from "../primitives/Identity";
+import { Avatar, ProfileHeading, TemplateFooter } from "../primitives/Identity";
 import { Hero } from "../primitives/Hero";
 import { Card } from "../primitives/card";
 import { SocialRow } from "../primitives/social";
@@ -15,7 +15,15 @@ export function HeroCardsRenderer({
   targetRegistry,
   highlightedTarget,
 }: BasicTemplateRendererProps) {
-  const { content, palette, fontPair, buttonStyle, template } = config;
+  const {
+    content,
+    palette,
+    fontPair,
+    buttonStyle,
+    buttonCustomization,
+    heroFusionStrength,
+    template,
+  } = config;
   const { profile, cards, socials } = content;
   const visibleCards = cards.filter((c) => c.enabled);
 
@@ -23,7 +31,7 @@ export function HeroCardsRenderer({
     <div
       className="flex min-h-full w-full flex-col"
       style={{
-        backgroundColor: palette.background,
+        background: palette.background,
         color: palette.text,
         fontFamily: fontPair.body,
       }}
@@ -39,6 +47,7 @@ export function HeroCardsRenderer({
           heroStyle={template.structure.heroStyle}
           background={palette.background}
           height={220}
+          fusionStrength={heroFusionStrength}
         />
       </EditableTarget>
 
@@ -89,6 +98,7 @@ export function HeroCardsRenderer({
                   card={card}
                   palette={palette}
                   style={buttonStyle}
+                  customization={buttonCustomization}
                   headingFont={fontPair.heading}
                   bodyFont={fontPair.body}
                 />
@@ -96,6 +106,13 @@ export function HeroCardsRenderer({
             ))}
           </EditableTarget>
         ) : null}
+
+        <TemplateFooter
+          enabled={profile.footerEnabled ?? false}
+          text={profile.footerText ?? ""}
+          palette={palette}
+          bodyFont={fontPair.body}
+        />
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
 import type {
+  ButtonCustomizationConfig,
   BasicTemplateConfig,
   BasicTemplateContent,
   ButtonStyleConfig,
@@ -6,16 +7,239 @@ import type {
   PaletteConfig,
   TemplateDefinition,
 } from "@/types/basic-templates";
+import type { Profile, ProfileLink } from "@/types/database";
+import type { SocialPlatform } from "@/types/basic-templates";
+
+export type ButtonCustomizationOverrides = Pick<
+  Partial<Profile>,
+  | "button_radius"
+  | "button_style"
+  | "button_border_thickness"
+  | "button_border_color"
+  | "theme_spacing"
+>;
+
+export type TemplateCustomizationOverrides = Pick<
+  Partial<Profile>,
+  | "background_color"
+  | "button_color"
+  | "button_text_color"
+  | "font_family"
+  | "banner_fusion_strength"
+> &
+  ButtonCustomizationOverrides;
 
 export interface BuildConfigOptions {
   palette?: PaletteConfig;
   fontPair?: FontPairConfig;
   buttonStyle?: ButtonStyleConfig;
+  buttonCustomization?: ButtonCustomizationOverrides;
+  profileCustomization?: TemplateCustomizationOverrides;
 }
 
 function requiredOption<T>(value: T | undefined, label: string): T {
   if (value === undefined) throw new Error(`Template ${label} options cannot be empty.`);
   return value;
+}
+
+const SPACING_BY_THEME = {
+  compact: "0.5rem",
+  standard: "0.75rem",
+  generous: "1.25rem",
+} as const;
+
+const SOCIAL_PLATFORMS: ReadonlySet<SocialPlatform> = new Set([
+  "instagram",
+  "twitter",
+  "facebook",
+  "linkedin",
+  "youtube",
+  "tiktok",
+  "whatsapp",
+  "website",
+]);
+
+const SUPPORTED_EDITOR_FONTS = new Set([
+  "Inter",
+  "Poppins",
+  "Montserrat",
+  "DM Sans",
+  "Manrope",
+  "Raleway",
+  "Nunito",
+  "Lato",
+  "Playfair Display",
+  "Merriweather",
+]);
+
+function isHexColor(value: unknown): value is string {
+  return typeof value === "string" && /^#[0-9a-f]{6}$/i.test(value);
+}
+
+function isSupportedColorOrGradient(value: unknown): value is string {
+  return (
+    isHexColor(value) ||
+    (typeof value === "string" && /^(linear-gradient|radial-gradient)\(/.test(value.trim()))
+  );
+}
+
+function resolvePalette(
+  template: TemplateDefinition,
+  override: TemplateCustomizationOverrides | undefined,
+): PaletteConfig {
+  const fallback = requiredOption(template.customization.palettes[0], "palette");
+  return {
+    ...fallback,
+    background: isSupportedColorOrGradient(override?.background_color)
+      ? override.background_color
+      : fallback.background,
+    accent: isSupportedColorOrGradient(override?.button_color)
+      ? override.button_color
+      : fallback.accent,
+    accentText: isHexColor(override?.button_text_color)
+      ? override.button_text_color
+      : fallback.accentText,
+  };
+}
+
+function resolveFontPair(
+  template: TemplateDefinition,
+  override: TemplateCustomizationOverrides | undefined,
+): FontPairConfig {
+  const fallback = requiredOption(template.customization.fontPairs[0], "font pair");
+  const selectedFont = override?.font_family?.trim();
+  if (!selectedFont || !SUPPORTED_EDITOR_FONTS.has(selectedFont)) return fallback;
+  const fontStack = `${selectedFont}, system-ui, sans-serif`;
+  return { id: `profile-${selectedFont}`, name: selectedFont, heading: fontStack, body: fontStack };
+}
+
+function resolveFusionStrength(value: unknown): number {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return 60;
+  return Math.min(100, Math.max(0, Math.round(parsed)));
+}
+
+function contactValue(link: Partial<ProfileLink> | undefined, prefix: string): string {
+  const value = link?.url || "";
+  return value.startsWith(prefix) ? value.slice(prefix.length) : value;
+}
+
+/** Build the same user content for editor, full preview, and public rendering. */
+export function buildBasicTemplateContent(
+  profile: Partial<Profile>,
+  links: Partial<ProfileLink>[],
+): BasicTemplateContent {
+  const normalizedLinks = links.map((link, index) => ({
+    id: link.id || `profile-link-${index}`,
+    label: link.label || "Enlace",
+    url: link.url || "",
+    enabled: link.enabled ?? true,
+  }));
+  const socialLinks = links.flatMap((link, index) => {
+    const platform = typeof link.platform === "string" ? link.platform : "";
+    if (!SOCIAL_PLATFORMS.has(platform as SocialPlatform)) return [];
+    return [
+      {
+        id: link.id || `profile-social-${index}`,
+        platform: platform as SocialPlatform,
+        url: link.url || "",
+        enabled: link.enabled ?? true,
+      },
+    ];
+  });
+  const emailLink = links.find((link) => link.platform === "email");
+  const phoneLink = links.find((link) => link.platform === "phone");
+  const whatsappLink = links.find((link) => link.platform === "whatsapp");
+
+  return {
+    profile: {
+      avatarUrl: profile.avatar_url || "",
+      name: profile.display_name || "",
+      subtitle: "",
+      bio: profile.bio || "",
+      heroUrl: profile.banner_url || "",
+      footerEnabled: profile.footer_enabled ?? false,
+      footerText: profile.footer_text || "",
+    },
+    links: normalizedLinks,
+    cards: links.map((link, index) => ({
+      id: link.id || `profile-card-${index}`,
+      imageUrl: link.social_cover_image_url || "",
+      title: link.label || "Enlace",
+      description: link.subtitle || "",
+      ctaLabel: link.label || "Abrir enlace",
+      ctaUrl: link.url || "",
+      enabled: link.enabled ?? true,
+    })),
+    socials: socialLinks,
+    contact: {
+      email: contactValue(emailLink, "mailto:"),
+      phone: contactValue(phoneLink, "tel:"),
+      whatsapp: contactValue(whatsappLink, "https://wa.me/"),
+    },
+  };
+}
+
+function resolveButtonStyle(
+  template: TemplateDefinition,
+  override: ButtonCustomizationOverrides | undefined,
+): ButtonStyleConfig {
+  const fallback = requiredOption(template.customization.buttonStyles[0], "button style");
+  if (!override) return fallback;
+
+  const desiredShape =
+    override.button_style === "soft"
+      ? "premium-soft"
+      : override.button_style === "solid" && override.button_radius === "none"
+        ? "sharp"
+        : override.button_style === "solid" && override.button_radius === "rounded"
+          ? "rounded"
+          : override.button_style === "solid" && override.button_radius === "full"
+            ? "pill"
+            : null;
+
+  if (!desiredShape) return fallback;
+
+  return (
+    template.customization.buttonStyles.find(
+      (style) =>
+        style.shape === desiredShape &&
+        (desiredShape !== "premium-soft" || style.variant === "soft"),
+    ) ?? fallback
+  );
+}
+
+function resolveButtonCustomization(
+  palette: PaletteConfig,
+  style: ButtonStyleConfig,
+  override: ButtonCustomizationOverrides | undefined,
+): ButtonCustomizationConfig {
+  const borderWidth =
+    override?.button_border_thickness === "thin"
+      ? 1
+      : override?.button_border_thickness === "medium"
+        ? 2
+        : override?.button_border_thickness === "strong"
+          ? 3
+          : override?.button_border_thickness === "none"
+            ? 0
+            : style.variant === "outline"
+              ? 1
+              : 0;
+  const spacing =
+    override?.theme_spacing === "compact" ||
+    override?.theme_spacing === "generous" ||
+    override?.theme_spacing === "standard"
+      ? SPACING_BY_THEME[override.theme_spacing]
+      : SPACING_BY_THEME.standard;
+
+  return {
+    borderWidth,
+    borderColor: isHexColor(override?.button_border_color)
+      ? override.button_border_color
+      : palette.accent,
+    spacing,
+  };
 }
 
 /** Assemble a runtime config, defaulting customization to the template's first option. */
@@ -24,10 +248,22 @@ export function buildConfig(
   content: BasicTemplateContent,
   options: BuildConfigOptions = {},
 ): BasicTemplateConfig {
-  const palette = options.palette ?? requiredOption(template.customization.palettes[0], "palette");
-  const fontPair =
-    options.fontPair ?? requiredOption(template.customization.fontPairs[0], "font pair");
-  const buttonStyle =
-    options.buttonStyle ?? requiredOption(template.customization.buttonStyles[0], "button style");
-  return { template, content, palette, fontPair, buttonStyle };
+  const profileCustomization = options.profileCustomization ?? options.buttonCustomization;
+  const palette = options.palette ?? resolvePalette(template, profileCustomization);
+  const fontPair = options.fontPair ?? resolveFontPair(template, profileCustomization);
+  const buttonStyle = options.buttonStyle ?? resolveButtonStyle(template, profileCustomization);
+  const buttonCustomization = resolveButtonCustomization(
+    palette,
+    buttonStyle,
+    profileCustomization,
+  );
+  return {
+    template,
+    content,
+    palette,
+    fontPair,
+    buttonStyle,
+    buttonCustomization,
+    heroFusionStrength: resolveFusionStrength(profileCustomization?.banner_fusion_strength),
+  };
 }

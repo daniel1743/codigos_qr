@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 import type { ReactNode } from "react";
+import type { KeyboardEvent, MouseEvent } from "react";
 import type { EditTargetRegistry } from "@/types/basic-templates";
 
 interface EditableTargetProps {
@@ -27,10 +28,26 @@ export function EditableTarget({
     [id, registry],
   );
 
+  const select = (event: MouseEvent<HTMLDivElement>) => {
+    if (!registry?.select) return;
+    event.preventDefault();
+    registry.select(id);
+  };
+
+  const selectWithKeyboard = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (!registry?.select || (event.key !== "Enter" && event.key !== " ")) return;
+    event.preventDefault();
+    registry.select(id);
+  };
+
   return (
     <div
       ref={ref}
       data-edit-target={id}
+      role={registry?.select ? "button" : undefined}
+      tabIndex={registry?.select ? 0 : undefined}
+      onClickCapture={select}
+      onKeyDown={selectWithKeyboard}
       className={className}
       style={
         active

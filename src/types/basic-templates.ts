@@ -25,6 +25,8 @@ export interface ProfileContent {
   subtitle: string;
   bio: string;
   heroUrl: string;
+  footerEnabled?: boolean;
+  footerText?: string;
 }
 
 export interface LinkItem {
@@ -90,13 +92,21 @@ export interface FontPairConfig {
   body: string;
 }
 
-export type ButtonShape = "pill" | "rounded" | "sharp";
+export type ButtonShape = "pill" | "rounded" | "sharp" | "premium-soft";
 
 export interface ButtonStyleConfig {
   id: string;
   name: string;
   shape: ButtonShape;
   variant: "solid" | "outline" | "soft";
+}
+
+/** Safe, resolved values shared by every Basic Template button primitive. */
+export interface ButtonCustomizationConfig {
+  borderWidth: 0 | 1 | 2 | 3;
+  borderColor: string;
+  /** Vertical gap between consecutive link buttons. */
+  spacing: string;
 }
 
 export interface AllowedCustomization {
@@ -158,6 +168,8 @@ export interface BasicTemplateConfig {
   palette: PaletteConfig;
   fontPair: FontPairConfig;
   buttonStyle: ButtonStyleConfig;
+  buttonCustomization: ButtonCustomizationConfig;
+  heroFusionStrength: number;
 }
 
 /**
@@ -167,6 +179,7 @@ export interface BasicTemplateConfig {
  */
 export interface EditTargetRegistry {
   register: (targetId: string, element: HTMLElement | null) => void;
+  select?: (targetId: string) => void;
 }
 
 export const EDIT_TARGETS = {

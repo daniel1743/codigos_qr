@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { toast } from "sonner";
 import { Auth } from "../components/Auth";
@@ -11,19 +11,18 @@ import {
 } from "../components/editor/MobileBottomNavbar";
 import { ProfileSection } from "../components/editor/ProfileSection";
 import { ShareSection } from "../components/editor/ShareSection";
+import { BasicEditorShell } from "../components/basic-editor-shell/BasicEditorShell";
 import { PublicProfileView } from "../components/profile/PublicProfileView";
 import { MobileTemplateGallery } from "../components/editor/MobileTemplateGallery";
 import { BasicTemplateRenderer } from "../components/basic-template/BasicTemplateRenderer";
-import { Button } from "../components/ui/button";
 import { getTemplates } from "../lib/basic-templates/catalog";
-import { buildConfig } from "../lib/basic-templates/config";
+import { buildBasicTemplateContent, buildConfig } from "../lib/basic-templates/config";
 import { generatePublicId, getInternalSlugFromPublicId } from "../lib/publicId";
 import { getBrowserSupabaseClient } from "../lib/supabase/client";
-import { getPublicProfileUrl } from "../lib/url";
 import { isValidUrl, normalizeUrl } from "../lib/validation";
 import { linkService } from "../services/link.service";
 import { profileService } from "../services/profile.service";
-import type { BasicTemplateContent } from "../types/basic-templates";
+import type { EditTargetRegistry } from "../types/basic-templates";
 import type { Profile, ProfileLink } from "../types/database";
 
 export const Route = createFileRoute("/editor")({
@@ -40,28 +39,16 @@ const DEFAULT_PROFILE: Partial<Profile> = {
   banner_fusion_strength: 60,
 };
 
-function toBasicTemplateContent(
-  profile: Partial<Profile>,
-  links: Partial<ProfileLink>[],
-): BasicTemplateContent {
-  return {
-    profile: {
-      avatarUrl: profile.avatar_url || "",
-      name: profile.display_name || "",
-      subtitle: "",
-      bio: profile.bio || "",
-      heroUrl: profile.banner_url || "",
-    },
-    links: links.map((link, index) => ({
-      id: link.id || `profile-link-${index}`,
-      label: link.label || "Enlace",
-      url: link.url || "",
-      enabled: link.enabled ?? true,
-    })),
-    cards: [],
-    socials: [],
-    contact: { phone: "", email: "", whatsapp: "" },
-  };
+function getSectionForTarget(targetId: string): BasicEditorSectionId {
+  if (targetId === "hero") return "appearance";
+  if (
+    targetId === "links-section" ||
+    targetId.startsWith("link-") ||
+    targetId === "cards-section" ||
+    targetId.startsWith("card-")
+  )
+    return "links";
+  return "profile";
 }
 
 function getSafeFusionStrength(value: unknown) {
@@ -79,10 +66,49 @@ function EditorPage() {
   const [savedPublicId, setSavedPublicId] = useState("");
   const [isPublished, setIsPublished] = useState(false);
   const [activeSection, setActiveSection] = useState<BasicEditorSectionId>("profile");
-  
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+  const [isContextPanelOpen, setIsContextPanelOpen] = useState(false);
+  const [isPreviewMode, setIsPreviewMode] = useState(false);
+  const [selectedTarget, setSelectedTarget] = useState<string | null>(null);
 
   const loadedUserId = useRef<string | null>(null);
+  const canvasViewportRef = useRef<HTMLDivElement>(null);
+  const targetsRef = useRef(new Map<string, HTMLElement>());
+
+  const handleTargetSelect = useCallback((targetId: string) => {
+    setSelectedTarget(targetId);
+    setActiveSection(getSectionForTarget(targetId));
+    setIsContextPanelOpen(true);
+  }, []);
+
+  const targetRegistry = useMemo<EditTargetRegistry>(
+    () => ({
+      register: (targetId, element) => {
+        if (element) targetsRef.current.set(targetId, element);
+        else targetsRef.current.delete(targetId);
+      },
+      select: handleTargetSelect,
+    }),
+    [handleTargetSelect],
+  );
+
+  useEffect(() => {
+    if (!selectedTarget) return;
+    const viewport = canvasViewportRef.current;
+    const target = targetsRef.current.get(selectedTarget);
+    if (!viewport || !target) return;
+    const viewportRect = viewport.getBoundingClientRect();
+    const targetRect = target.getBoundingClientRect();
+    viewport.scrollTo({
+      top:
+        viewport.scrollTop +
+        targetRect.top -
+        viewportRect.top -
+        viewport.clientHeight / 2 +
+        targetRect.height / 2,
+      behavior: "smooth",
+    });
+  }, [selectedTarget]);
 
   useEffect(() => {
     const supabase = getBrowserSupabaseClient();
@@ -255,18 +281,19 @@ function EditorPage() {
   if (!session) return <Auth />;
 
   const publicId = profile.public_id || savedPublicId || "";
-  const publicUrl = isPublished && publicId ? getPublicProfileUrl(publicId) : "";
   const isValid = validate();
   const selectedTemplate = profile.template_id
     ? getTemplates().find((template) => template.id === profile.template_id)
     : undefined;
-  const templateContent = toBasicTemplateContent(profile, links);
+  const templateContent = buildBasicTemplateContent(profile, links);
   const templateRenderConfig = selectedTemplate
-    ? buildConfig(selectedTemplate, templateContent)
+    ? buildConfig(selectedTemplate, templateContent, { profileCustomization: profile })
     : null;
 
   if (import.meta.env.DEV && profile.template_id && !selectedTemplate) {
-    console.warn(`Unknown basic template id: ${profile.template_id}. Rendering the legacy profile.`);
+    console.warn(
+      `Unknown basic template id: ${profile.template_id}. Rendering the legacy profile.`,
+    );
   }
 
   const updateProfile = (updates: Partial<Profile>) =>
@@ -274,9 +301,11 @@ function EditorPage() {
 
   const handleSectionChange = (section: BasicEditorSectionId) => {
     if (section === "gallery") {
+      setIsContextPanelOpen(false);
       setIsGalleryOpen(true);
     } else {
       setActiveSection(section);
+      setIsContextPanelOpen(true);
     }
   };
 
@@ -311,76 +340,41 @@ function EditorPage() {
     }
   };
 
+  const canvas = templateRenderConfig ? (
+    <BasicTemplateRenderer
+      config={templateRenderConfig}
+      targetRegistry={isPreviewMode ? undefined : targetRegistry}
+      highlightedTarget={isPreviewMode ? null : selectedTarget}
+    />
+  ) : (
+    <PublicProfileView profile={profile} links={links} isPreview />
+  );
+
   return (
-    <div className="min-h-screen bg-gray-50/50">
-      <div className="grid min-h-screen grid-cols-1 lg:grid-cols-2">
-        <main className="h-auto space-y-10 overflow-y-auto p-4 pb-[calc(7rem+env(safe-area-inset-bottom,0px))] sm:p-6 sm:pb-[calc(7rem+env(safe-area-inset-bottom,0px))] md:p-10 md:pb-10 lg:h-screen">
-          <div aria-live="polite">{renderActiveSection()}</div>
-
-          <section className="space-y-4 rounded-xl border bg-card p-4 shadow-sm">
-            <div>
-              <h2 className="text-xl font-semibold tracking-tight">Guardar y publicar</h2>
-              <p className="text-sm text-muted-foreground">
-                Guarda un borrador o publica los cambios en tu página.
-              </p>
-            </div>
-            {!isValid && (
-              <p className="text-sm text-destructive">
-                Debes tener nombre y al menos 3 enlaces visibles válidos para publicar.
-              </p>
-            )}
-            <div className="grid grid-cols-1 gap-2 min-[420px]:grid-cols-2">
-              <Button
-                type="button"
-                variant="secondary"
-                className="h-11 rounded-xl"
-                disabled={saving || !isValid}
-                onClick={() => handleSave(false)}
-              >
-                {saving ? "Guardando..." : "Guardar borrador"}
-              </Button>
-              <Button
-                type="button"
-                className="h-11 rounded-xl"
-                disabled={saving || !isValid}
-                onClick={() => handleSave(true)}
-              >
-                {saving ? "Guardando..." : isPublished ? "Actualizar y publicar" : "Publicar ahora"}
-              </Button>
-            </div>
-            {isPublished && publicUrl && (
-              <a
-                href={publicUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block text-sm font-medium text-primary underline-offset-4 hover:underline"
-              >
-                Ver página publicada
-              </a>
-            )}
-          </section>
-        </main>
-
-        <aside className="border-l bg-muted p-5 pb-[calc(7rem+env(safe-area-inset-bottom,0px))] md:p-10 md:pb-10 lg:sticky lg:top-0 lg:flex lg:h-screen lg:items-center lg:justify-center">
-          <div className="mx-auto h-[720px] w-full max-w-[360px] overflow-hidden rounded-[2.5rem] border-[8px] border-black/10 bg-white shadow-xl relative">
-            {templateRenderConfig ? (
-              <BasicTemplateRenderer config={templateRenderConfig} />
-            ) : (
-              <PublicProfileView profile={profile} links={links} isPreview />
-            )}
-          </div>
-        </aside>
-      </div>
-
+    <>
+      <BasicEditorShell
+        canvas={canvas}
+        canvasViewportRef={canvasViewportRef}
+        desktopPanel={<div aria-live="polite">{renderActiveSection()}</div>}
+        mobilePanel={<div aria-live="polite">{renderActiveSection()}</div>}
+        mobilePanelOpen={isContextPanelOpen}
+        onCloseMobilePanel={() => setIsContextPanelOpen(false)}
+        onPreview={() => setIsPreviewMode(true)}
+        onExitPreview={() => setIsPreviewMode(false)}
+        previewMode={isPreviewMode}
+        onSaveDraft={() => handleSave(false)}
+        onPublish={() => handleSave(true)}
+        publishing={saving}
+        publishDisabled={!isValid}
+      />
       <MobileBottomNavbar activeSection={activeSection} onSectionChange={handleSectionChange} />
-      
-      <MobileTemplateGallery 
+      <MobileTemplateGallery
         isOpen={isGalleryOpen}
         onClose={() => setIsGalleryOpen(false)}
         selectedTemplateId={profile.template_id ?? null}
         onSelectTemplate={(id) => updateProfile({ template_id: id, template_version: 1 })}
-        previewProps={{ profile: profile as any, links: links as any }}
+        previewProps={{ profile, links }}
       />
-    </div>
+    </>
   );
 }

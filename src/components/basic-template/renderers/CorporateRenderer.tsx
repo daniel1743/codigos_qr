@@ -1,5 +1,5 @@
 import type { BasicTemplateRendererProps } from "@/types/basic-templates";
-import { Avatar, ProfileHeading } from "../primitives/Identity";
+import { Avatar, ProfileHeading, TemplateFooter } from "../primitives/Identity";
 import { Hero } from "../primitives/Hero";
 import { ContactBlock } from "../primitives/card";
 import { LinkButton } from "../primitives/button";
@@ -15,7 +15,15 @@ export function CorporateRenderer({
   targetRegistry,
   highlightedTarget,
 }: BasicTemplateRendererProps) {
-  const { content, palette, fontPair, buttonStyle, template } = config;
+  const {
+    content,
+    palette,
+    fontPair,
+    buttonStyle,
+    buttonCustomization,
+    heroFusionStrength,
+    template,
+  } = config;
   const { profile, links, contact } = content;
   const visibleLinks = links.filter((l) => l.enabled);
 
@@ -23,7 +31,7 @@ export function CorporateRenderer({
     <div
       className="flex min-h-full w-full flex-col"
       style={{
-        backgroundColor: palette.background,
+        background: palette.background,
         color: palette.text,
         fontFamily: fontPair.body,
       }}
@@ -39,6 +47,7 @@ export function CorporateRenderer({
           heroStyle={template.structure.heroStyle}
           background={palette.background}
           height={200}
+          fusionStrength={heroFusionStrength}
         />
       </EditableTarget>
 
@@ -69,7 +78,8 @@ export function CorporateRenderer({
             id={EDIT_TARGETS.links}
             registry={targetRegistry}
             active={highlightedTarget === EDIT_TARGETS.links}
-            className="flex w-full flex-col gap-3"
+            className="flex w-full flex-col"
+            style={{ gap: buttonCustomization.spacing }}
           >
             {visibleLinks.map((link) => (
               <EditableTarget
@@ -82,6 +92,7 @@ export function CorporateRenderer({
                   link={link}
                   palette={palette}
                   style={buttonStyle}
+                  customization={buttonCustomization}
                   bodyFont={fontPair.body}
                 />
               </EditableTarget>
@@ -97,6 +108,13 @@ export function CorporateRenderer({
         >
           <ContactBlock contact={contact} palette={palette} bodyFont={fontPair.body} />
         </EditableTarget>
+
+        <TemplateFooter
+          enabled={profile.footerEnabled ?? false}
+          text={profile.footerText ?? ""}
+          palette={palette}
+          bodyFont={fontPair.body}
+        />
       </div>
     </div>
   );

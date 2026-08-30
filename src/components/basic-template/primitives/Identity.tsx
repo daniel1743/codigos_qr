@@ -99,3 +99,23 @@ export function ProfileHeading({
     </div>
   );
 }
+
+interface TemplateFooterProps {
+  enabled: boolean;
+  text: string;
+  palette: PaletteConfig;
+  bodyFont: string;
+}
+
+/** Existing profile footer state, shared by every Basic Template family. */
+export function TemplateFooter({ enabled, text, palette, bodyFont }: TemplateFooterProps) {
+  if (!enabled || !text.trim()) return null;
+  return (
+    <footer
+      className="mt-8 w-full border-t pt-4 text-center text-xs"
+      style={{ borderColor: `${palette.text}1f`, color: palette.textMuted, fontFamily: bodyFont }}
+    >
+      {text}
+    </footer>
+  );
+}

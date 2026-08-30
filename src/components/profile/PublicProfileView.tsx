@@ -1,57 +1,12 @@
 import type { Profile, ProfileLink } from "../../types/database";
 import { BasicTemplateRenderer } from "../basic-template/BasicTemplateRenderer";
 import { getTemplates } from "../../lib/basic-templates/catalog";
-import { buildConfig } from "../../lib/basic-templates/config";
-import type { BasicTemplateContent, SocialPlatform } from "../../types/basic-templates";
+import { buildBasicTemplateContent, buildConfig } from "../../lib/basic-templates/config";
 
 interface PublicProfileViewProps {
   profile: Partial<Profile>;
   links: Partial<ProfileLink>[];
   isPreview?: boolean;
-}
-
-const SOCIAL_PLATFORMS: ReadonlySet<SocialPlatform> = new Set([
-  "instagram",
-  "twitter",
-  "facebook",
-  "linkedin",
-  "youtube",
-  "tiktok",
-  "whatsapp",
-  "website",
-]);
-
-function toBasicTemplateContent(
-  profile: Partial<Profile>,
-  links: Partial<ProfileLink>[],
-): BasicTemplateContent {
-  return {
-    profile: {
-      avatarUrl: profile.avatar_url || "",
-      name: profile.display_name || "",
-      subtitle: "",
-      bio: profile.bio || "",
-      heroUrl: profile.banner_url || "",
-    },
-    links: links.map((link, index) => ({
-      id: link.id || `profile-link-${index}`,
-      label: link.label || "Enlace",
-      url: link.url || "",
-      enabled: link.enabled ?? true,
-    })),
-    cards: [],
-    socials: links.flatMap((link, index) => {
-      const platform = typeof link.platform === "string" ? link.platform : "";
-      if (!SOCIAL_PLATFORMS.has(platform as SocialPlatform)) return [];
-      return [{
-        id: link.id || `profile-social-${index}`,
-        platform: platform as SocialPlatform,
-        url: link.url || "",
-        enabled: link.enabled ?? true,
-      }];
-    }),
-    contact: { phone: "", email: "", whatsapp: "" },
-  };
 }
 
 function normalizeBannerFusionStrength(value: unknown) {
@@ -90,14 +45,16 @@ export function PublicProfileView({ profile, links, isPreview = false }: PublicP
     : undefined;
 
   if (selectedTemplate) {
-    const config = buildConfig(selectedTemplate, toBasicTemplateContent(profile, links));
-    return (
-      <BasicTemplateRenderer config={config} />
-    );
+    const config = buildConfig(selectedTemplate, buildBasicTemplateContent(profile, links), {
+      profileCustomization: profile,
+    });
+    return <BasicTemplateRenderer config={config} />;
   }
 
   if (import.meta.env.DEV && profile.template_id) {
-    console.warn(`Unknown basic template id: ${profile.template_id}. Rendering the legacy profile.`);
+    console.warn(
+      `Unknown basic template id: ${profile.template_id}. Rendering the legacy profile.`,
+    );
   }
 
   const backgroundColor = profile.background_color || "#ffffff";
@@ -118,10 +75,14 @@ export function PublicProfileView({ profile, links, isPreview = false }: PublicP
   // Derive border styles
   const hasBorder = profile.button_border_thickness && profile.button_border_thickness !== "none";
   const borderThicknessPx =
-    profile.button_border_thickness === "thin" ? 1 :
-    profile.button_border_thickness === "medium" ? 2 :
-    profile.button_border_thickness === "strong" ? 3 : 0;
-  
+    profile.button_border_thickness === "thin"
+      ? 1
+      : profile.button_border_thickness === "medium"
+        ? 2
+        : profile.button_border_thickness === "strong"
+          ? 3
+          : 0;
+
   // Also check if button_style implies a specific border or background
   // (e.g. if outline, we don't apply background color)
   const isOutline = profile.button_style === "outline";
@@ -134,7 +95,10 @@ export function PublicProfileView({ profile, links, isPreview = false }: PublicP
           ? "h-full w-full overflow-y-auto"
           : "flex min-h-screen w-full justify-center overflow-x-hidden"
       }
-      style={{ background: backgroundColor, fontFamily: profile.font_family || "Inter, sans-serif" }}
+      style={{
+        background: backgroundColor,
+        fontFamily: profile.font_family || "Inter, sans-serif",
+      }}
     >
       <main className="flex min-h-full w-full max-w-[520px] flex-col items-center pb-12">
         {profile.banner_url ? (
@@ -165,7 +129,10 @@ export function PublicProfileView({ profile, links, isPreview = false }: PublicP
             }
             style={{ background: backgroundColor }}
           >
-            <div className="h-full w-full overflow-hidden rounded-full" style={{ background: backgroundColor }}>
+            <div
+              className="h-full w-full overflow-hidden rounded-full"
+              style={{ background: backgroundColor }}
+            >
               {profile.avatar_url ? (
                 <img
                   src={profile.avatar_url}
@@ -197,10 +164,10 @@ export function PublicProfileView({ profile, links, isPreview = false }: PublicP
                     borderColor: profile.button_border_color || buttonColor,
                   }
                 : {};
-              
+
               let bgStyle = isOutline ? "transparent" : buttonColor;
               let txtStyle = isOutline ? buttonColor : buttonTextColor;
-              
+
               if (isSoft) {
                 // Siempre respetamos el color de texto elegido por el usuario
                 txtStyle = buttonTextColor;
@@ -209,7 +176,15 @@ export function PublicProfileView({ profile, links, isPreview = false }: PublicP
                 if (buttonColor.startsWith("#") && buttonColor.length === 7) {
                   bgStyle = buttonColor + "20";
                 } else if (buttonColor.startsWith("#") && buttonColor.length === 4) {
-                  bgStyle = "#" + buttonColor[1]+buttonColor[1] + buttonColor[2]+buttonColor[2] + buttonColor[3]+buttonColor[3] + "20";
+                  bgStyle =
+                    "#" +
+                    buttonColor[1] +
+                    buttonColor[1] +
+                    buttonColor[2] +
+                    buttonColor[2] +
+                    buttonColor[3] +
+                    buttonColor[3] +
+                    "20";
                 }
               }
 
@@ -223,7 +198,7 @@ export function PublicProfileView({ profile, links, isPreview = false }: PublicP
                     if (isPreview) event.preventDefault();
                   }}
                   className={`flex min-h-14 w-full items-center justify-center ${radiusClass} px-5 py-4 text-center font-semibold transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:scale-[0.99] ${
-                    isSoft || !hasBorder && !isOutline ? "shadow-sm" : ""
+                    isSoft || (!hasBorder && !isOutline) ? "shadow-sm" : ""
                   } ${isSoft ? "opacity-90" : ""}`}
                   style={{
                     background: bgStyle,
