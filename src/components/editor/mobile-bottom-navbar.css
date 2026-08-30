@@ -1,10 +1,8 @@
 .mobile-bottom-navbar {
-  --mobile-navbar-bg: #c44b87;
-  --mobile-navbar-surface: #fff;
-  --mobile-navbar-text: #343434;
-  --mobile-navbar-active: #bd3e7c;
-  --mobile-navbar-featured: #c44b87;
-  --mobile-navbar-shadow: 0 8px 22px rgba(58, 16, 42, 0.12);
+  --mobile-navbar-surface: #fffefa;
+  --mobile-navbar-text: #77746c;
+  --mobile-navbar-active: #1d1d1b;
+  --mobile-navbar-shadow: 0 10px 26px rgba(29, 29, 27, 0.12);
 
   position: fixed;
   z-index: 50;
@@ -27,7 +25,8 @@
   position: absolute;
   inset: 0 6px 8px;
   z-index: -1;
-  border-radius: 18px;
+  border: 1px solid #e4e1d9;
+  border-radius: 20px;
   background: var(--mobile-navbar-surface);
   box-shadow: var(--mobile-navbar-shadow);
 }
@@ -54,21 +53,21 @@
   justify-content: center;
   gap: 0.25rem;
   height: 100%;
-  color: hsl(var(--muted-foreground));
+  color: var(--mobile-navbar-text);
   font-size: 0.65rem;
-  font-weight: 500;
+  font-weight: 700;
   transition: all 0.2s;
   padding: 0;
   border-radius: 0;
 }
 
 .mobile-bottom-navbar__item:hover {
-  background-color: hsl(var(--accent) / 0.5);
-  color: hsl(var(--foreground));
+  background-color: #f1efe9;
+  color: #1d1d1b;
 }
 
 .mobile-bottom-navbar__item.is-active {
-  color: hsl(var(--primary));
+  color: var(--mobile-navbar-active);
 }
 
 .mobile-bottom-navbar__icon {

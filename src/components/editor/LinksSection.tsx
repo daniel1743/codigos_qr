@@ -54,11 +54,12 @@ export function LinksSection({ links, onChange }: LinksSectionProps) {
   };
 
   return (
-    <section className="space-y-6">
+    <section className="space-y-5">
       <div className="flex flex-col gap-3 min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-between">
         <div className="space-y-1">
-          <h2 className="text-xl font-semibold tracking-tight">Enlaces</h2>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-stone-500">Contenido</p>
+          <h2 className="text-xl font-bold tracking-[-0.04em] text-[#1d1d1b]">Enlaces</h2>
+          <p className="text-sm text-stone-500">
             {links.length} de {MAX_LINKS} agregados
           </p>
         </div>
@@ -66,7 +67,7 @@ export function LinksSection({ links, onChange }: LinksSectionProps) {
           type="button"
           onClick={handleAddLink}
           disabled={links.length >= MAX_LINKS}
-          className="h-10 w-full rounded-full min-[420px]:w-auto"
+          className="h-10 w-full rounded-full bg-[#1d1d1b] text-[#fffefa] hover:bg-[#343432] min-[420px]:w-auto"
         >
           <Plus className="mr-2 h-4 w-4" />
           Agregar
@@ -75,11 +76,11 @@ export function LinksSection({ links, onChange }: LinksSectionProps) {
 
       <div className="space-y-3">
         {links.map((link, index) => (
-          <div key={link.id || index} className="space-y-4 rounded-xl border bg-card p-4 shadow-sm">
+          <div key={link.id || index} className="space-y-4 rounded-2xl border border-stone-200 bg-[#fffefa] p-4 shadow-[0_8px_24px_rgba(29,29,27,0.04)]">
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
-                <p className="truncate text-sm font-medium">{link.label || "Enlace"}</p>
-                <p className="truncate text-xs text-muted-foreground">{link.url || "Sin URL"}</p>
+                <p className="truncate text-sm font-semibold text-[#1d1d1b]">{link.label || "Enlace"}</p>
+                <p className="truncate text-xs text-stone-500">{link.url || "Sin URL"}</p>
               </div>
               <div className="flex shrink-0 items-center gap-1">
                 <Button
@@ -123,7 +124,7 @@ export function LinksSection({ links, onChange }: LinksSectionProps) {
                   value={link.label || ""}
                   onChange={(event) => updateLink(index, { label: event.target.value })}
                   placeholder="Ej: Instagram"
-                  className="h-11"
+                  className="h-11 rounded-xl border-stone-200 bg-[#fffefa]"
                 />
               </div>
               <div className="space-y-2">
@@ -133,13 +134,13 @@ export function LinksSection({ links, onChange }: LinksSectionProps) {
                   value={link.url || ""}
                   onChange={(event) => updateLink(index, { url: event.target.value })}
                   placeholder="https://..."
-                  className="h-11"
+                  className="h-11 rounded-xl border-stone-200 bg-[#fffefa]"
                   dir="ltr"
                 />
               </div>
             </div>
 
-            <div className="flex items-center justify-between rounded-lg border bg-muted/20 p-3">
+            <div className="flex items-center justify-between rounded-xl border border-stone-200 bg-stone-50 p-3">
               <Label htmlFor={`link-enabled-${link.id || index}`}>Mostrar enlace</Label>
               <Switch
                 id={`link-enabled-${link.id || index}`}
@@ -152,9 +153,9 @@ export function LinksSection({ links, onChange }: LinksSectionProps) {
       </div>
 
       {links.length === 0 && (
-        <div className="rounded-xl border-2 border-dashed border-border p-8 text-center">
-          <p className="text-sm font-medium">No hay enlaces</p>
-          <p className="mt-1 text-xs text-muted-foreground">
+        <div className="rounded-2xl border-2 border-dashed border-stone-200 bg-[#fffefa]/70 p-8 text-center">
+          <p className="text-sm font-medium text-[#1d1d1b]">No hay enlaces</p>
+          <p className="mt-1 text-xs text-stone-500">
             Agrega al menos 3 enlaces para poder publicar tu página.
           </p>
         </div>

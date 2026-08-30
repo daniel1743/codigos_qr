@@ -93,21 +93,22 @@ export function DesignSection({ profile, onChange, userId }: DesignSectionProps)
   const isBtnGradient = btnGradient !== null;
 
   return (
-    <section className="space-y-6">
-      <div className="space-y-2">
-        <h2 className="text-xl font-semibold tracking-tight">Diseño</h2>
-        <p className="text-sm text-muted-foreground">Personaliza colores y portada.</p>
+    <section className="space-y-5">
+      <div className="space-y-1">
+        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-stone-500">Apariencia</p>
+        <h2 className="text-xl font-bold tracking-[-0.04em] text-[#1d1d1b]">Diseño</h2>
+        <p className="text-sm text-stone-500">Personaliza colores y portada.</p>
       </div>
 
-      <div className="space-y-4 rounded-xl border bg-card p-4 shadow-sm">
-        <Label>Tipografía</Label>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 mb-2">
+      <div className="space-y-3 rounded-2xl border border-stone-200 bg-[#fffefa] p-4 shadow-[0_8px_24px_rgba(29,29,27,0.04)]">
+        <Label className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500">Tipografía</Label>
+        <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {FONTS.map(font => (
             <Button
               key={font}
               variant={profile.font_family === font ? "default" : "outline"}
               onClick={() => onChange({ font_family: font })}
-              className="h-10 text-[11px]"
+              className="h-10 shrink-0 rounded-lg border-stone-200 px-3 text-[11px] data-[state=active]:bg-[#1d1d1b]"
               style={{ fontFamily: font }}
             >
               {font}
@@ -116,28 +117,28 @@ export function DesignSection({ profile, onChange, userId }: DesignSectionProps)
         </div>
       </div>
 
-      <div className="space-y-4 rounded-xl border bg-card p-4 shadow-sm">
-        <Label>Botones</Label>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 mb-4">
-          <Button variant={profile.button_radius === "none" && profile.button_style !== "soft" ? "default" : "outline"} onClick={() => onChange({ button_radius: "none", button_style: "solid" })} className="rounded-none h-10 text-xs">Cuadrado</Button>
-          <Button variant={profile.button_radius === "rounded" && profile.button_style !== "soft" ? "default" : "outline"} onClick={() => onChange({ button_radius: "rounded", button_style: "solid" })} className="rounded-xl h-10 text-xs">Redondeado</Button>
-          <Button variant={profile.button_radius === "full" && profile.button_style !== "soft" ? "default" : "outline"} onClick={() => onChange({ button_radius: "full", button_style: "solid" })} className="rounded-full h-10 text-xs">Píldora</Button>
-          <Button variant={profile.button_style === "soft" ? "default" : "outline"} onClick={() => onChange({ button_radius: "full", button_style: "soft" })} className="rounded-full border border-transparent shadow-sm h-10 text-xs">Premium</Button>
+      <div className="space-y-4 rounded-2xl border border-stone-200 bg-[#fffefa] p-4 shadow-[0_8px_24px_rgba(29,29,27,0.04)]">
+        <Label className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500">Botones</Label>
+        <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <Button variant={profile.button_radius === "none" && profile.button_style !== "soft" ? "default" : "outline"} onClick={() => onChange({ button_radius: "none", button_style: "solid" })} className="h-10 shrink-0 rounded-md border-stone-200 px-4 text-xs">Cuadrado</Button>
+          <Button variant={profile.button_radius === "rounded" && profile.button_style !== "soft" ? "default" : "outline"} onClick={() => onChange({ button_radius: "rounded", button_style: "solid" })} className="h-10 shrink-0 rounded-xl border-stone-200 px-4 text-xs">Redondeado</Button>
+          <Button variant={profile.button_radius === "full" && profile.button_style !== "soft" ? "default" : "outline"} onClick={() => onChange({ button_radius: "full", button_style: "solid" })} className="h-10 shrink-0 rounded-full border-stone-200 px-4 text-xs">Píldora</Button>
+          <Button variant={profile.button_style === "soft" ? "default" : "outline"} onClick={() => onChange({ button_radius: "full", button_style: "soft" })} className="h-10 shrink-0 rounded-full border border-transparent px-4 text-xs shadow-sm">Premium</Button>
         </div>
 
-        <Label>Separación</Label>
-        <div className="grid grid-cols-3 gap-2 mb-4">
-          <Button variant={profile.theme_spacing === "compact" ? "default" : "outline"} onClick={() => onChange({ theme_spacing: "compact" })} className="h-10 text-xs">Compacto</Button>
-          <Button variant={!profile.theme_spacing || profile.theme_spacing === "standard" ? "default" : "outline"} onClick={() => onChange({ theme_spacing: "standard" })} className="h-10 text-xs">Normal</Button>
-          <Button variant={profile.theme_spacing === "generous" ? "default" : "outline"} onClick={() => onChange({ theme_spacing: "generous" })} className="h-10 text-xs">Amplio</Button>
+        <Label className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500">Separación</Label>
+        <div className="flex gap-2 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <Button variant={profile.theme_spacing === "compact" ? "default" : "outline"} onClick={() => onChange({ theme_spacing: "compact" })} className="h-10 shrink-0 rounded-lg border-stone-200 px-4 text-xs">Compacto</Button>
+          <Button variant={!profile.theme_spacing || profile.theme_spacing === "standard" ? "default" : "outline"} onClick={() => onChange({ theme_spacing: "standard" })} className="h-10 shrink-0 rounded-lg border-stone-200 px-4 text-xs">Normal</Button>
+          <Button variant={profile.theme_spacing === "generous" ? "default" : "outline"} onClick={() => onChange({ theme_spacing: "generous" })} className="h-10 shrink-0 rounded-lg border-stone-200 px-4 text-xs">Amplio</Button>
         </div>
 
-        <Label>Grosor de borde</Label>
-        <div className="grid grid-cols-4 gap-2 mb-2">
-          <Button variant={!profile.button_border_thickness || profile.button_border_thickness === "none" ? "default" : "outline"} onClick={() => onChange({ button_border_thickness: "none" })} className="h-10 text-[10px] px-1">Ninguno</Button>
-          <Button variant={profile.button_border_thickness === "thin" ? "default" : "outline"} onClick={() => onChange({ button_border_thickness: "thin" })} className="h-10 text-[10px] px-1">Fino</Button>
-          <Button variant={profile.button_border_thickness === "medium" ? "default" : "outline"} onClick={() => onChange({ button_border_thickness: "medium" })} className="h-10 text-[10px] px-1">Medio</Button>
-          <Button variant={profile.button_border_thickness === "strong" ? "default" : "outline"} onClick={() => onChange({ button_border_thickness: "strong" })} className="h-10 text-[10px] px-1">Marcado</Button>
+        <Label className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500">Grosor de borde</Label>
+        <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <Button variant={!profile.button_border_thickness || profile.button_border_thickness === "none" ? "default" : "outline"} onClick={() => onChange({ button_border_thickness: "none" })} className="h-10 shrink-0 rounded-lg border-stone-200 px-4 text-xs">Ninguno</Button>
+          <Button variant={profile.button_border_thickness === "thin" ? "default" : "outline"} onClick={() => onChange({ button_border_thickness: "thin" })} className="h-10 shrink-0 rounded-lg border-stone-200 px-4 text-xs">Fino</Button>
+          <Button variant={profile.button_border_thickness === "medium" ? "default" : "outline"} onClick={() => onChange({ button_border_thickness: "medium" })} className="h-10 shrink-0 rounded-lg border-stone-200 px-4 text-xs">Medio</Button>
+          <Button variant={profile.button_border_thickness === "strong" ? "default" : "outline"} onClick={() => onChange({ button_border_thickness: "strong" })} className="h-10 shrink-0 rounded-lg border-stone-200 px-4 text-xs">Marcado</Button>
         </div>
         
         {profile.button_border_thickness && profile.button_border_thickness !== "none" && (
@@ -148,7 +149,7 @@ export function DesignSection({ profile, onChange, userId }: DesignSectionProps)
         )}
       </div>
 
-      <div className="grid grid-cols-1 gap-4 rounded-xl border bg-card p-4 shadow-sm">
+      <div className="grid grid-cols-1 gap-4 rounded-2xl border border-stone-200 bg-[#fffefa] p-4 shadow-[0_8px_24px_rgba(29,29,27,0.04)]">
         <div className="space-y-4">
           <div>
             <Label>Fondo</Label>
@@ -178,7 +179,7 @@ export function DesignSection({ profile, onChange, userId }: DesignSectionProps)
                 <div>
                   <Label className="text-xs mb-2 block text-muted-foreground">Dirección</Label>
                   <select
-                    className="w-full rounded-md border p-2 text-sm"
+                    className="w-full rounded-lg border border-stone-200 bg-[#fffefa] p-2 text-sm"
                     value={bgGradient?.dir || "180deg"}
                     onChange={(e) => onChange({ background_color: buildGradient(e.target.value, bgGradient?.start || "#ffffff", bgGradient?.end || "#f0f0f0") })}
                   >
@@ -220,7 +221,7 @@ export function DesignSection({ profile, onChange, userId }: DesignSectionProps)
                 <div>
                   <Label className="text-xs mb-2 block text-muted-foreground">Dirección</Label>
                   <select
-                    className="w-full rounded-md border p-2 text-sm"
+                    className="w-full rounded-lg border border-stone-200 bg-[#fffefa] p-2 text-sm"
                     value={btnGradient?.dir || "180deg"}
                     onChange={(e) => onChange({ button_color: buildGradient(e.target.value, btnGradient?.start || "#333333", btnGradient?.end || "#111111") })}
                   >
@@ -244,7 +245,7 @@ export function DesignSection({ profile, onChange, userId }: DesignSectionProps)
       </div>
       
       {/* Portada section moved to bottom to fit logical layout of Colors > Banner */}
-      <div className="space-y-4 rounded-xl border bg-card p-4 shadow-sm">
+      <div className="space-y-4 rounded-2xl border border-stone-200 bg-[#fffefa] p-4 shadow-[0_8px_24px_rgba(29,29,27,0.04)]">
         <Label className="flex items-center gap-2">
           <ImageIcon className="h-4 w-4" />
           Portada
@@ -253,10 +254,10 @@ export function DesignSection({ profile, onChange, userId }: DesignSectionProps)
           <img
             src={profile.banner_url}
             alt="Portada actual"
-            className="h-28 w-full rounded-lg object-cover"
+            className="h-28 w-full rounded-xl object-cover"
           />
         ) : (
-          <div className="grid h-28 w-full place-items-center rounded-lg bg-muted text-sm text-muted-foreground">
+          <div className="grid h-28 w-full place-items-center rounded-xl bg-stone-100 text-sm text-stone-500">
             Sin portada
           </div>
         )}
@@ -284,7 +285,7 @@ export function DesignSection({ profile, onChange, userId }: DesignSectionProps)
         <div className="mt-4">
            <div className="flex items-center justify-between gap-4 mb-2">
              <Label htmlFor="banner_fusion_strength">Difuminación</Label>
-             <span className="text-sm font-medium tabular-nums">{fusionStrength}</span>
+             <span className="text-sm font-medium tabular-nums text-[#1d1d1b]">{fusionStrength}</span>
            </div>
            <Input
              id="banner_fusion_strength"
@@ -296,7 +297,7 @@ export function DesignSection({ profile, onChange, userId }: DesignSectionProps)
              onChange={(event) =>
                onChange({ banner_fusion_strength: normalizeFusionStrength(event.target.value) })
              }
-             className="h-11"
+             className="h-8 accent-[#1d1d1b]"
            />
         </div>
       </div>

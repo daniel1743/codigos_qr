@@ -60,23 +60,24 @@ export function ProfileSection({ profile, onChange, userId }: ProfileSectionProp
   };
 
   return (
-    <section className="space-y-6">
-      <div className="space-y-2">
-        <h2 className="text-xl font-semibold tracking-tight">Información del perfil</h2>
-        <p className="text-sm text-muted-foreground">Configura tu avatar y descripción.</p>
+    <section className="space-y-5">
+      <div className="space-y-1">
+        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-stone-500">Identidad</p>
+        <h2 className="text-xl font-bold tracking-[-0.04em] text-[#1d1d1b]">Información del perfil</h2>
+        <p className="text-sm text-stone-500">Configura tu avatar y descripción.</p>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="avatar_upload">Avatar</Label>
+      <div className="space-y-3 rounded-2xl border border-stone-200 bg-[#fffefa] p-4 shadow-[0_8px_24px_rgba(29,29,27,0.04)]">
+        <Label className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500" htmlFor="avatar_upload">Avatar</Label>
         <div className="flex flex-col gap-4 min-[420px]:flex-row min-[420px]:items-center">
           {profile.avatar_url ? (
             <img
               src={profile.avatar_url}
               alt="Avatar actual"
-              className="h-16 w-16 rounded-full object-cover"
+              className="h-16 w-16 rounded-full border-2 border-[#fffefa] object-cover shadow-sm"
             />
           ) : (
-            <div className="grid h-16 w-16 place-items-center rounded-full bg-muted text-xs text-muted-foreground">
+            <div className="grid h-16 w-16 place-items-center rounded-full bg-stone-100 text-xs text-stone-500">
               Vacío
             </div>
           )}
@@ -102,35 +103,35 @@ export function ProfileSection({ profile, onChange, userId }: ProfileSectionProp
         </div>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="display_name">Nombre para mostrar</Label>
+      <div className="space-y-2 rounded-2xl border border-stone-200 bg-[#fffefa] p-4 shadow-[0_8px_24px_rgba(29,29,27,0.04)]">
+        <Label className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500" htmlFor="display_name">Nombre para mostrar</Label>
         <Input
           id="display_name"
           value={profile.display_name || ""}
           onChange={(event) => onChange({ display_name: event.target.value })}
           placeholder="Ej: Daniel Falcon"
           maxLength={60}
-          className="h-11"
+          className="h-11 rounded-xl border-stone-200 bg-[#fffefa]"
           required
         />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="bio">Biografía</Label>
+      <div className="space-y-2 rounded-2xl border border-stone-200 bg-[#fffefa] p-4 shadow-[0_8px_24px_rgba(29,29,27,0.04)]">
+        <Label className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500" htmlFor="bio">Biografía</Label>
         <Textarea
           id="bio"
           value={profile.bio || ""}
           onChange={(event) => onChange({ bio: event.target.value })}
           placeholder="Un par de líneas sobre ti o tu negocio"
           maxLength={180}
-          className="min-h-28 resize-none"
+          className="min-h-28 resize-none rounded-xl border-stone-200 bg-[#fffefa]"
         />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="public_alias">Enlace personalizado</Label>
+      <div className="space-y-2 rounded-2xl border border-stone-200 bg-[#fffefa] p-4 shadow-[0_8px_24px_rgba(29,29,27,0.04)]">
+        <Label className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500" htmlFor="public_alias">Enlace personalizado</Label>
         <div className="flex rounded-md shadow-sm">
-          <span className="inline-flex items-center rounded-l-md border border-r-0 border-input bg-muted px-3 text-sm text-muted-foreground">
+          <span className="inline-flex items-center rounded-l-xl border border-r-0 border-stone-200 bg-stone-100 px-3 text-sm text-stone-500">
             tudominio.com/
           </span>
           <Input
@@ -144,7 +145,7 @@ export function ProfileSection({ profile, onChange, userId }: ProfileSectionProp
               onChange({ slug: value });
             }}
             placeholder="mi-perfil"
-            className="h-11 rounded-l-none"
+            className="h-11 rounded-l-none rounded-r-xl border-stone-200 bg-[#fffefa]"
           />
         </div>
       </div>
