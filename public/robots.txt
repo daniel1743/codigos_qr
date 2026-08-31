@@ -4,4 +4,4 @@ Disallow: /editor
 Disallow: /profile
 Disallow: /admin
 
-Sitemap: https://www.criqper.dev/sitemap.xml
+Sitemap: https://www.cripqer.dev/sitemap.xml

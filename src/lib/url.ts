@@ -1,12 +1,12 @@
 import { env } from "./env";
 
-export const CANONICAL_PUBLIC_ORIGIN = "https://www.criqper.dev";
+export const CANONICAL_PUBLIC_ORIGIN = "https://www.cripqer.dev";
 
 /**
  * Generates the public URL for a given immutable profile public id.
  */
 export function getPublicProfileUrl(publicId: string): string {
-  // Siempre usar el origin canónico (criqper.dev) en lugar del vercel/local domain.
+  // Siempre usar el origin canónico (cripqer.dev) en lugar del vercel/local domain.
   const appUrl = CANONICAL_PUBLIC_ORIGIN;
 
   // Ensure no trailing slash on appUrl and no leading slash on publicId

@@ -116,7 +116,7 @@ function Index() {
               "@context": "https://schema.org",
               "@type": "WebApplication",
               "name": "QR Links",
-              "url": "https://www.criqper.dev/",
+              "url": "https://www.cripqer.dev/",
               "applicationCategory": "UtilityApplication",
               "operatingSystem": "All",
               "description": "Generador de códigos QR con página web personalizable para enlaces, WhatsApp y redes sociales.",
