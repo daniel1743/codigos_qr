@@ -1,4 +1,5 @@
 import React from "react";
+import type { StandaloneStyle } from "./standaloneStyle";
 
 /* Template06 — Link-in-bio plateado: banner floral, avatar con aro azul, botones píldora metálicos */
 
@@ -32,6 +33,7 @@ export interface Template06Props {
   links: Template06Link[];
   footerText?: string;
   primaryColor?: string;
+  standaloneStyle?: StandaloneStyle;
 }
 
 function Icon({ type }: { type: Template06SocialType }) {
@@ -113,15 +115,21 @@ export default function Template06({
   links,
   footerText,
   primaryColor = "#1c5fd6",
+  standaloneStyle,
 }: Template06Props) {
+  const buttonBorder =
+    standaloneStyle?.button.borderWidth && standaloneStyle.button.borderColor
+      ? `${standaloneStyle.button.borderWidth} solid ${standaloneStyle.button.borderColor}`
+      : undefined;
   return (
     <div
       style={{
+        ...standaloneStyle?.vars,
         minHeight: "100%",
         width: "100%",
-        background:
+        background: standaloneStyle?.background ??
           "linear-gradient(135deg,#c9ccd4 0%,#eceef2 25%,#b9bec7 50%,#f2f3f6 72%,#c3c7cf 100%)",
-        fontFamily: "'Segoe UI', Arial, Helvetica, sans-serif",
+        fontFamily: standaloneStyle?.globalFont ?? "'Segoe UI', Arial, Helvetica, sans-serif",
         display: "flex",
         justifyContent: "center",
         boxSizing: "border-box",
@@ -156,7 +164,9 @@ export default function Template06({
               width: 130,
               height: 130,
               borderRadius: "50%",
-              border: `4px solid ${primaryColor}`,
+              border: standaloneStyle?.avatarRing.enabled
+                ? `${standaloneStyle.avatarRing.thickness === "thin" ? 2 : standaloneStyle.avatarRing.thickness === "thick" ? 5 : 3}px solid ${standaloneStyle.avatarRing.color || primaryColor}`
+                : `4px solid ${primaryColor}`,
               boxShadow: "0 0 0 5px #ffffff",
               overflow: "hidden",
               boxSizing: "border-box",
@@ -176,11 +186,11 @@ export default function Template06({
           </div>
         </div>
 
-        <div style={{ textAlign: "center", paddingTop: 66 }}>
-          <h1 style={{ margin: 0, fontSize: 26, fontWeight: 700, color: "#111" }}>
+        <div style={{ textAlign: standaloneStyle?.title.align ?? "center", paddingTop: 66 }}>
+          <h1 style={{ margin: 0, fontFamily: standaloneStyle?.title.fontFamily, fontSize: standaloneStyle?.title.size ?? 26, fontWeight: standaloneStyle?.title.weight ?? 700, color: standaloneStyle?.title.color ?? "#111", textAlign: standaloneStyle?.title.align }}>
             {name}
           </h1>
-          <p style={{ margin: "2px 0 0", fontSize: 16, color: "#3a3a3a" }}>
+          <p style={{ margin: "2px 0 0", fontFamily: standaloneStyle?.bio.fontFamily, fontSize: standaloneStyle?.bio.size ?? 16, fontWeight: standaloneStyle?.bio.weight, color: standaloneStyle?.bio.color ?? "#3a3a3a", textAlign: standaloneStyle?.bio.align }}>
             {profession}
           </p>
 
@@ -220,7 +230,7 @@ export default function Template06({
           </div>
         </div>
 
-        <div style={{ padding: "26px 18px 0", display: "grid", gap: 16 }}>
+        <div style={{ padding: "26px 18px 0", display: "grid", gap: standaloneStyle?.button.spacing ?? 16 }}>
           {links.map((l) => (
             <a
               key={l.id}
@@ -231,13 +241,13 @@ export default function Template06({
                 display: "block",
                 textAlign: "center",
                 padding: "18px 16px",
-                borderRadius: 999,
-                background:
+                borderRadius: standaloneStyle?.button.radius ?? 999,
+                background: standaloneStyle?.button.background ??
                   "linear-gradient(180deg,#f4f5f8 0%,#d9dbe1 45%,#c2c5cd 100%)",
-                border: "1px solid rgba(255,255,255,.85)",
+                border: buttonBorder ?? "1px solid rgba(255,255,255,.85)",
                 boxShadow:
                   "0 8px 16px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.9)",
-                color: "#111",
+                color: standaloneStyle?.button.textColor ?? "#111",
                 fontWeight: 700,
                 fontSize: 17,
                 textDecoration: "none",

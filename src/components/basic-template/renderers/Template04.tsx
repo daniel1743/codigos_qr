@@ -1,4 +1,5 @@
 import React from "react";
+import type { StandaloneStyle } from "./standaloneStyle";
 
 /* Template04 — Link-in-bio claro: banner + avatar sobre curva + botones blancos + galería */
 
@@ -34,6 +35,7 @@ export interface Template04Props {
   gallery?: { id: string; imageUrl: string; url: string; alt: string }[];
   footerText?: string;
   primaryColor?: string;
+  standaloneStyle?: StandaloneStyle;
 }
 
 export function Template04Icon({
@@ -132,14 +134,20 @@ export default function Template04({
   gallery = [],
   footerText,
   primaryColor = "#111111",
+  standaloneStyle,
 }: Template04Props) {
+  const buttonBorder =
+    standaloneStyle?.button.borderWidth && standaloneStyle.button.borderColor
+      ? `${standaloneStyle.button.borderWidth} solid ${standaloneStyle.button.borderColor}`
+      : undefined;
   return (
     <div
       style={{
+        ...standaloneStyle?.vars,
         minHeight: "100%",
         width: "100%",
-        background: "#efefef",
-        fontFamily: "'Segoe UI', Arial, Helvetica, sans-serif",
+        background: standaloneStyle?.background ?? "#efefef",
+        fontFamily: standaloneStyle?.globalFont ?? "'Segoe UI', Arial, Helvetica, sans-serif",
         display: "flex",
         justifyContent: "center",
         boxSizing: "border-box",
@@ -149,7 +157,7 @@ export default function Template04({
         style={{
           width: "100%",
           maxWidth: 460,
-          background: "#efefef",
+          background: standaloneStyle?.background ?? "#efefef",
           boxSizing: "border-box",
         }}
       >
@@ -172,7 +180,7 @@ export default function Template04({
               right: "-10%",
               bottom: -30,
               height: 90,
-              background: "#f7f7f7",
+              background: standaloneStyle?.background ?? "#f7f7f7",
               borderTopLeftRadius: "50% 100%",
               borderTopRightRadius: "50% 100%",
             }}
@@ -217,9 +225,11 @@ export default function Template04({
           <h1
             style={{
               margin: 0,
-              fontSize: 34,
-              color: primaryColor,
-              fontWeight: 600,
+              fontFamily: standaloneStyle?.title.fontFamily,
+              fontSize: standaloneStyle?.title.size ?? 34,
+              color: standaloneStyle?.title.color ?? primaryColor,
+              fontWeight: standaloneStyle?.title.weight ?? 600,
+              textAlign: standaloneStyle?.title.align,
             }}
           >
             {name}
@@ -262,7 +272,7 @@ export default function Template04({
         </div>
 
         {/* Botones blancos */}
-        <div style={{ padding: "10px 14px 18px", display: "grid", gap: 14 }}>
+        <div style={{ padding: "10px 14px 18px", display: "grid", gap: standaloneStyle?.button.spacing ?? 14 }}>
           {links.map((l) => (
             <a
               key={l.id}
@@ -272,8 +282,10 @@ export default function Template04({
               style={{
                 display: "block",
                 textAlign: "center",
-                background: "#fff",
-                color: primaryColor,
+                background: standaloneStyle?.button.background ?? "#fff",
+                color: standaloneStyle?.button.textColor ?? primaryColor,
+                border: buttonBorder,
+                borderRadius: standaloneStyle?.button.radius,
                 textDecoration: "none",
                 fontSize: 19,
                 fontWeight: 600,

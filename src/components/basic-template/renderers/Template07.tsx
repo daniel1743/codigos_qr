@@ -1,4 +1,5 @@
 import React from "react";
+import type { StandaloneStyle } from "./standaloneStyle";
 
 /* Template07 — Link-in-bio fitness dark green: hero, avatar con aro, tarjetas de menú y CTA newsletter */
 
@@ -48,6 +49,7 @@ export interface Template07Props {
   newsletterButtonLabel: string;
   footerText: string;
   primaryColor?: string;
+  standaloneStyle?: StandaloneStyle;
 }
 
 function SocialIcon({ type }: { type: Template07SocialType }) {
@@ -180,14 +182,20 @@ export default function Template07({
   newsletterButtonLabel,
   footerText,
   primaryColor = "#8ed14f",
+  standaloneStyle,
 }: Template07Props) {
+  const buttonBorder =
+    standaloneStyle?.button.borderWidth && standaloneStyle.button.borderColor
+      ? `${standaloneStyle.button.borderWidth} solid ${standaloneStyle.button.borderColor}`
+      : undefined;
   return (
     <div
       style={{
+        ...standaloneStyle?.vars,
         minHeight: "100%",
         width: "100%",
-        background: "#050c05",
-        fontFamily: "'Segoe UI', Arial, Helvetica, sans-serif",
+        background: standaloneStyle?.background ?? "#050c05",
+        fontFamily: standaloneStyle?.globalFont ?? "'Segoe UI', Arial, Helvetica, sans-serif",
         color: "#fff",
         display: "flex",
         justifyContent: "center",
@@ -221,7 +229,9 @@ export default function Template07({
                 width: 130,
                 height: 130,
                 borderRadius: "50%",
-                border: `3px solid ${primaryColor}`,
+              border: standaloneStyle?.avatarRing.enabled
+                ? `${standaloneStyle.avatarRing.thickness === "thin" ? 2 : standaloneStyle.avatarRing.thickness === "thick" ? 5 : 3}px solid ${standaloneStyle.avatarRing.color || primaryColor}`
+                : `3px solid ${primaryColor}`,
                 overflow: "hidden",
                 boxSizing: "border-box",
               }}
@@ -239,12 +249,15 @@ export default function Template07({
             </div>
           </div>
 
-          <div style={{ textAlign: "center", padding: "14px 20px 0" }}>
+          <div style={{ textAlign: standaloneStyle?.title.align ?? "center", padding: "14px 20px 0" }}>
             <h1
               style={{
                 margin: 0,
-                fontSize: 28,
-                fontWeight: 700,
+                fontFamily: standaloneStyle?.title.fontFamily,
+                fontSize: standaloneStyle?.title.size ?? 28,
+                fontWeight: standaloneStyle?.title.weight ?? 700,
+                color: standaloneStyle?.title.color,
+                textAlign: standaloneStyle?.title.align,
                 display: "inline-flex",
                 alignItems: "center",
                 gap: 8,
@@ -278,9 +291,12 @@ export default function Template07({
             <p
               style={{
                 margin: "10px 0 0",
-                fontSize: 14.5,
+                fontFamily: standaloneStyle?.bio.fontFamily,
+                fontSize: standaloneStyle?.bio.size ?? 14.5,
+                fontWeight: standaloneStyle?.bio.weight,
                 lineHeight: 1.45,
-                color: "#dbe6d6",
+                color: standaloneStyle?.bio.color ?? "#dbe6d6",
+                textAlign: standaloneStyle?.bio.align,
               }}
             >
               {description}
@@ -323,7 +339,7 @@ export default function Template07({
         </div>
 
         {/* Tarjetas */}
-        <div style={{ padding: "6px 14px 0", display: "grid", gap: 12 }}>
+        <div style={{ padding: "6px 14px 0", display: "grid", gap: standaloneStyle?.button.spacing ?? 12 }}>
           {cards.map((c) => (
             <a
               key={c.id}
@@ -335,15 +351,15 @@ export default function Template07({
                 alignItems: "center",
                 gap: 12,
                 padding: "14px 14px",
-                borderRadius: 14,
+                borderRadius: standaloneStyle?.button.radius ?? 14,
                 textDecoration: "none",
-                color: c.highlight ? "#0d1a06" : "#fff",
-                background: c.highlight
+                color: standaloneStyle?.button.textColor ?? (c.highlight ? "#0d1a06" : "#fff"),
+                background: standaloneStyle?.button.background ?? (c.highlight
                   ? `linear-gradient(90deg, ${primaryColor}, #5fae2f)`
-                  : "rgba(255,255,255,.05)",
-                border: c.highlight
+                  : "rgba(255,255,255,.05)"),
+                border: buttonBorder ?? (c.highlight
                   ? "none"
-                  : "1px solid rgba(255,255,255,.09)",
+                  : "1px solid rgba(255,255,255,.09)"),
                 boxSizing: "border-box",
               }}
             >
@@ -426,9 +442,10 @@ export default function Template07({
               style={{
                 display: "inline-block",
                 padding: "12px 26px",
-                borderRadius: 10,
-                background: `linear-gradient(90deg, ${primaryColor}, #5fae2f)`,
-                color: "#0d1a06",
+                borderRadius: standaloneStyle?.button.radius ?? 10,
+                background: standaloneStyle?.button.background ?? `linear-gradient(90deg, ${primaryColor}, #5fae2f)`,
+                color: standaloneStyle?.button.textColor ?? "#0d1a06",
+                border: buttonBorder,
                 fontWeight: 700,
                 textDecoration: "none",
               }}

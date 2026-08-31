@@ -1,4 +1,5 @@
 import React from "react";
+import type { StandaloneStyle } from "./standaloneStyle";
 
 /* Template05 — Link-in-bio verde salvia: banner tropical + avatar en curva + botones blancos */
 
@@ -33,6 +34,7 @@ export interface Template05Props {
   footerText?: string;
   primaryColor?: string;
   secondaryColor?: string;
+  standaloneStyle?: StandaloneStyle;
 }
 
 function Icon({
@@ -121,14 +123,20 @@ export default function Template05({
   footerText = "MADE WITH LOVE",
   primaryColor = "#b6c6ab",
   secondaryColor = "#111111",
+  standaloneStyle,
 }: Template05Props) {
+  const buttonBorder =
+    standaloneStyle?.button.borderWidth && standaloneStyle.button.borderColor
+      ? `${standaloneStyle.button.borderWidth} solid ${standaloneStyle.button.borderColor}`
+      : undefined;
   return (
     <div
       style={{
+        ...standaloneStyle?.vars,
         minHeight: "100%",
         width: "100%",
-        background: primaryColor,
-        fontFamily: "'Segoe UI', Arial, Helvetica, sans-serif",
+        background: standaloneStyle?.background ?? primaryColor,
+        fontFamily: standaloneStyle?.globalFont ?? "'Segoe UI', Arial, Helvetica, sans-serif",
         display: "flex",
         justifyContent: "center",
         boxSizing: "border-box",
@@ -138,7 +146,7 @@ export default function Template05({
         style={{
           width: "100%",
           maxWidth: 460,
-          background: primaryColor,
+          background: standaloneStyle?.background ?? primaryColor,
           boxSizing: "border-box",
           paddingBottom: 28,
         }}
@@ -162,7 +170,7 @@ export default function Template05({
               right: "-12%",
               bottom: -34,
               height: 100,
-              background: primaryColor,
+              background: standaloneStyle?.background ?? primaryColor,
               borderTopLeftRadius: "50% 100%",
               borderTopRightRadius: "50% 100%",
             }}
@@ -176,10 +184,12 @@ export default function Template05({
               width: 138,
               height: 138,
               borderRadius: "50%",
-              border: "6px solid #ffffff",
+              border: standaloneStyle?.avatarRing.enabled
+                ? `${standaloneStyle.avatarRing.thickness === "thin" ? 2 : standaloneStyle.avatarRing.thickness === "thick" ? 5 : 3}px solid ${standaloneStyle.avatarRing.color || "#ffffff"}`
+                : "6px solid #ffffff",
               overflow: "hidden",
               boxSizing: "border-box",
-              background: primaryColor,
+              background: standaloneStyle?.background ?? primaryColor,
             }}
           >
             <img
@@ -195,13 +205,15 @@ export default function Template05({
           </div>
         </div>
 
-        <div style={{ textAlign: "center", paddingTop: 84 }}>
+          <div style={{ textAlign: standaloneStyle?.title.align ?? "center", paddingTop: 84 }}>
           <h1
             style={{
               margin: 0,
-              fontSize: 34,
-              fontWeight: 700,
-              color: secondaryColor,
+              fontFamily: standaloneStyle?.title.fontFamily,
+              fontSize: standaloneStyle?.title.size ?? 34,
+              fontWeight: standaloneStyle?.title.weight ?? 700,
+              color: standaloneStyle?.title.color ?? secondaryColor,
+              textAlign: standaloneStyle?.title.align,
             }}
           >
             {name}
@@ -243,7 +255,7 @@ export default function Template05({
           </div>
         </div>
 
-        <div style={{ padding: "18px 16px 6px", display: "grid", gap: 16 }}>
+        <div style={{ padding: "18px 16px 6px", display: "grid", gap: standaloneStyle?.button.spacing ?? 16 }}>
           {links.map((l) => (
             <a
               key={l.id}
@@ -252,8 +264,10 @@ export default function Template05({
               rel="noopener noreferrer"
               style={{
                 display: "block",
-                background: "#ffffff",
-                color: secondaryColor,
+                background: standaloneStyle?.button.background ?? "#ffffff",
+                color: standaloneStyle?.button.textColor ?? secondaryColor,
+                border: buttonBorder,
+                borderRadius: standaloneStyle?.button.radius,
                 textAlign: "center",
                 fontSize: 20,
                 fontWeight: 700,

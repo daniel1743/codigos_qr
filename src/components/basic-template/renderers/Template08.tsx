@@ -1,4 +1,5 @@
 import React from "react";
+import type { StandaloneStyle } from "./standaloneStyle";
 
 /* Template08 — Link-in-bio dark purple/neon: avatar con aro degradado, redes y tarjetas con icono de color */
 
@@ -38,6 +39,7 @@ export interface Template08Props {
   footerText: string;
   primaryColor?: string;
   secondaryColor?: string;
+  standaloneStyle?: StandaloneStyle;
 }
 
 const BRAND: Record<Template08LinkType, string> = {
@@ -138,14 +140,20 @@ export default function Template08({
   footerText,
   primaryColor = "#a13bff",
   secondaryColor = "#ff4d8d",
+  standaloneStyle,
 }: Template08Props) {
+  const buttonBorder =
+    standaloneStyle?.button.borderWidth && standaloneStyle.button.borderColor
+      ? `${standaloneStyle.button.borderWidth} solid ${standaloneStyle.button.borderColor}`
+      : undefined;
   return (
     <div
       style={{
+        ...standaloneStyle?.vars,
         minHeight: "100%",
         width: "100%",
-        background: "#0a0a16",
-        fontFamily: "'Segoe UI', Arial, Helvetica, sans-serif",
+        background: standaloneStyle?.background ?? "#0a0a16",
+        fontFamily: standaloneStyle?.globalFont ?? "'Segoe UI', Arial, Helvetica, sans-serif",
         color: "#fff",
         display: "flex",
         justifyContent: "center",
@@ -172,7 +180,9 @@ export default function Template08({
               borderRadius: "50%",
               padding: 4,
               boxSizing: "border-box",
-              background: `linear-gradient(135deg, ${secondaryColor}, ${primaryColor})`,
+              background: standaloneStyle?.avatarRing.enabled
+                ? standaloneStyle.avatarRing.color || `linear-gradient(135deg, ${secondaryColor}, ${primaryColor})`
+                : `linear-gradient(135deg, ${secondaryColor}, ${primaryColor})`,
             }}
           >
             <img
@@ -191,12 +201,15 @@ export default function Template08({
           </div>
         </div>
 
-        <div style={{ textAlign: "center", marginTop: 14 }}>
+        <div style={{ textAlign: standaloneStyle?.title.align ?? "center", marginTop: 14 }}>
           <h1
             style={{
               margin: 0,
-              fontSize: 28,
-              fontWeight: 700,
+              fontFamily: standaloneStyle?.title.fontFamily,
+              fontSize: standaloneStyle?.title.size ?? 28,
+              fontWeight: standaloneStyle?.title.weight ?? 700,
+              color: standaloneStyle?.title.color,
+              textAlign: standaloneStyle?.title.align,
               display: "inline-flex",
               alignItems: "center",
               gap: 8,
@@ -231,9 +244,12 @@ export default function Template08({
             style={{
               margin: "10px auto 0",
               maxWidth: 330,
-              fontSize: 14.5,
+              fontFamily: standaloneStyle?.bio.fontFamily,
+              fontSize: standaloneStyle?.bio.size ?? 14.5,
+              fontWeight: standaloneStyle?.bio.weight,
               lineHeight: 1.45,
-              color: "#d6d3e6",
+              color: standaloneStyle?.bio.color ?? "#d6d3e6",
+              textAlign: standaloneStyle?.bio.align,
             }}
           >
             {description}
@@ -274,7 +290,7 @@ export default function Template08({
           ))}
         </div>
 
-        <div style={{ marginTop: 20, display: "grid", gap: 12 }}>
+        <div style={{ marginTop: 20, display: "grid", gap: standaloneStyle?.button.spacing ?? 12 }}>
           {cards.map((c) => (
             <a
               key={c.id}
@@ -286,15 +302,15 @@ export default function Template08({
                 alignItems: "center",
                 gap: 12,
                 padding: "12px 14px",
-                borderRadius: 14,
+                borderRadius: standaloneStyle?.button.radius ?? 14,
                 textDecoration: "none",
-                color: "#fff",
-                background: c.highlight
+                color: standaloneStyle?.button.textColor ?? "#fff",
+                background: standaloneStyle?.button.background ?? (c.highlight
                   ? `linear-gradient(90deg, ${secondaryColor}, ${primaryColor})`
-                  : "rgba(255,255,255,.05)",
-                border: c.highlight
+                  : "rgba(255,255,255,.05)"),
+                border: buttonBorder ?? (c.highlight
                   ? "none"
-                  : "1px solid rgba(255,255,255,.09)",
+                  : "1px solid rgba(255,255,255,.09)"),
                 boxSizing: "border-box",
               }}
             >

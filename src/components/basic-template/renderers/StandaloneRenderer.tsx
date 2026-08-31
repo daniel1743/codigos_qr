@@ -9,6 +9,7 @@ import Template05, { type Template05SocialType } from "./Template05";
 import Template06, { type Template06SocialType } from "./Template06";
 import Template07, { type Template07CardIcon, type Template07SocialType } from "./Template07";
 import Template08, { type Template08LinkType } from "./Template08";
+import { buildStandaloneStyle } from "./standaloneStyle";
 
 /**
  * "standalone" family renderer.
@@ -22,6 +23,7 @@ import Template08, { type Template08LinkType } from "./Template08";
 export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }: BasicTemplateRendererProps) {
   const { template, content } = config;
   const { profile } = content;
+  const standaloneStyle = buildStandaloneStyle(config);
 
   const links = content.links
     .filter((link) => link.enabled)
@@ -86,6 +88,7 @@ export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }
       return (
         <TemplateAmanda
           {...common}
+          standaloneStyle={standaloneStyle}
           links={links}
           targetRegistry={targetRegistry}
           highlightedTarget={highlightedTarget}
@@ -95,6 +98,7 @@ export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }
       return (
         <TemplateAdriana
           {...common}
+          standaloneStyle={standaloneStyle}
           links={links}
           targetRegistry={targetRegistry}
           highlightedTarget={highlightedTarget}
@@ -104,6 +108,7 @@ export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }
       return (
         <TemplateEudora
           {...common}
+          standaloneStyle={standaloneStyle}
           links={links}
           targetRegistry={targetRegistry}
           highlightedTarget={highlightedTarget}
@@ -113,6 +118,7 @@ export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }
       return (
         <TemplateBarbara
           {...common}
+          standaloneStyle={standaloneStyle}
           services={services}
           targetRegistry={targetRegistry}
           highlightedTarget={highlightedTarget}
@@ -135,6 +141,7 @@ export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }
               label: social.platform,
             }))}
           footerText={footerText}
+          standaloneStyle={standaloneStyle}
         />
       );
     case "classic-bio":
@@ -156,6 +163,7 @@ export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }
             .filter((card) => card.enabled && Boolean(card.imageUrl))
             .map((card) => ({ id: card.id, imageUrl: card.imageUrl, url: card.ctaUrl, alt: card.title }))}
           footerText={footerText}
+          standaloneStyle={standaloneStyle}
         />
       );
     case "sage":
@@ -174,6 +182,7 @@ export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }
           ]}
           links={links}
           footerText={footerText}
+          standaloneStyle={standaloneStyle}
         />
       );
     case "silver":
@@ -192,6 +201,7 @@ export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }
           ]}
           links={links}
           footerText={footerText}
+          standaloneStyle={standaloneStyle}
         />
       );
     case "fitness":
@@ -214,6 +224,7 @@ export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }
           newsletterUrl={newsletterLink?.url || "#"}
           newsletterButtonLabel={newsletterLink?.label || "Suscríbete"}
           footerText={footerText}
+          standaloneStyle={standaloneStyle}
         />
       );
     case "neon":
@@ -235,6 +246,7 @@ export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }
           ]}
           cards={neonCards}
           footerText={footerText}
+          standaloneStyle={standaloneStyle}
         />
       );
     default:

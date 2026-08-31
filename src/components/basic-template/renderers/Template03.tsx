@@ -1,4 +1,5 @@
 import React from "react";
+import type { StandaloneStyle } from "./standaloneStyle";
 
 /* Template03 — Studio beauty nude/gold con hero lateral y tarjetas de menú */
 
@@ -37,6 +38,7 @@ export interface Template03Props {
   footerText: string;
   primaryColor?: string;
   secondaryColor?: string;
+  standaloneStyle?: StandaloneStyle;
 }
 
 function Icon({
@@ -123,15 +125,21 @@ export default function Template03({
   footerText,
   primaryColor = "#9c7b43",
   secondaryColor = "#f6efe9",
+  standaloneStyle,
 }: Template03Props) {
   const gold = primaryColor;
+  const buttonBorder =
+    standaloneStyle?.button.borderWidth && standaloneStyle.button.borderColor
+      ? `${standaloneStyle.button.borderWidth} solid ${standaloneStyle.button.borderColor}`
+      : undefined;
   return (
     <div
       style={{
+        ...standaloneStyle?.vars,
         minHeight: "100%",
         width: "100%",
-        background: `linear-gradient(180deg, ${secondaryColor}, #efe4dc)`,
-        fontFamily: "'Segoe UI', Arial, Helvetica, sans-serif",
+        background: standaloneStyle?.background ?? `linear-gradient(180deg, ${secondaryColor}, #efe4dc)`,
+        fontFamily: standaloneStyle?.globalFont ?? "'Segoe UI', Arial, Helvetica, sans-serif",
         display: "flex",
         justifyContent: "center",
         boxSizing: "border-box",
@@ -190,10 +198,11 @@ export default function Template03({
             <h1
               style={{
                 margin: "4px 0 0",
-                fontFamily: "Georgia, serif",
-                fontWeight: 400,
-                fontSize: 26,
-                color: gold,
+                fontFamily: standaloneStyle?.title.fontFamily ?? "Georgia, serif",
+                fontWeight: standaloneStyle?.title.weight ?? 400,
+                fontSize: standaloneStyle?.title.size ?? 26,
+                color: standaloneStyle?.title.color ?? gold,
+                textAlign: standaloneStyle?.title.align ?? "center",
               }}
             >
               {name}
@@ -220,9 +229,12 @@ export default function Template03({
             <p
               style={{
                 margin: 0,
-                fontSize: 13,
+                fontFamily: standaloneStyle?.bio.fontFamily,
+                fontSize: standaloneStyle?.bio.size ?? 13,
+                fontWeight: standaloneStyle?.bio.weight,
                 lineHeight: 1.5,
-                color: "#6b5a4d",
+                color: standaloneStyle?.bio.color ?? "#6b5a4d",
+                textAlign: standaloneStyle?.bio.align,
               }}
             >
               {description}
@@ -263,7 +275,7 @@ export default function Template03({
         </div>
 
         {/* Tarjetas de menú */}
-        <div style={{ padding: "16px 14px 6px", display: "grid", gap: 14 }}>
+        <div style={{ padding: "16px 14px 6px", display: "grid", gap: standaloneStyle?.button.spacing ?? 14 }}>
           {cards.map((c) => (
             <a
               key={c.id}
@@ -275,11 +287,12 @@ export default function Template03({
                 alignItems: "center",
                 gap: 14,
                 padding: "16px 14px",
-                borderRadius: 18,
-                background: "#fffaf6",
+                borderRadius: standaloneStyle?.button.radius ?? 18,
+                background: standaloneStyle?.button.background ?? "#fffaf6",
+                border: buttonBorder,
                 boxShadow: "0 6px 16px rgba(150,120,95,.18)",
                 textDecoration: "none",
-                color: "inherit",
+                color: standaloneStyle?.button.textColor ?? "inherit",
                 boxSizing: "border-box",
               }}
             >
@@ -305,7 +318,7 @@ export default function Template03({
                     fontFamily: "Georgia, serif",
                     fontSize: 17,
                     letterSpacing: 0.5,
-                    color: "#6d5636",
+                    color: standaloneStyle?.button.textColor ?? "#6d5636",
                     textTransform: "uppercase",
                   }}
                 >
@@ -316,7 +329,7 @@ export default function Template03({
                     display: "block",
                     fontSize: 12.5,
                     lineHeight: 1.4,
-                    color: "#8a7768",
+                    color: standaloneStyle?.button.textColor ?? "#8a7768",
                     marginTop: 3,
                   }}
                 >
