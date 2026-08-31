@@ -245,6 +245,14 @@ export function ProfileSection({ profile, onChange, userId }: ProfileSectionProp
           required
         />
         <div className="space-y-4 border-t border-stone-200 pt-4">
+          <div className="space-y-2">
+            <Label className="text-xs font-medium text-stone-500">Color</Label>
+            <ColorControl
+              value={profile.title_color || "#000000"}
+              onChange={(value) => onChange({ title_color: value })}
+              compact
+            />
+          </div>
           <FontChips
             value={profile.title_font_family || profile.font_family || "Inter"}
             onChange={(font) => {
@@ -296,6 +304,14 @@ export function ProfileSection({ profile, onChange, userId }: ProfileSectionProp
           className="min-h-28 resize-none rounded-xl border-stone-200 bg-[#fffefa]"
         />
         <div className="space-y-4 border-t border-stone-200 pt-4">
+          <div className="space-y-2">
+            <Label className="text-xs font-medium text-stone-500">Color</Label>
+            <ColorControl
+              value={profile.bio_color || "#000000"}
+              onChange={(value) => onChange({ bio_color: value })}
+              compact
+            />
+          </div>
           <FontChips
             value={profile.bio_font_family || profile.font_family || "Inter"}
             onChange={(font) => {
@@ -334,6 +350,32 @@ export function ProfileSection({ profile, onChange, userId }: ProfileSectionProp
             onChange={(value) => onChange({ bio_weight: value })}
           />
         </div>
+      </div>
+
+      <div className="space-y-3 rounded-2xl border border-stone-200 bg-[#fffefa] p-4 shadow-[0_8px_24px_rgba(29,29,27,0.04)]">
+        <div className="flex items-center justify-between gap-4">
+          <div className="space-y-1">
+            <Label className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500" htmlFor="footer_enabled">
+              Pie de página
+            </Label>
+            <p className="text-xs text-stone-500">Texto al final de tu perfil.</p>
+          </div>
+          <Switch
+            id="footer_enabled"
+            checked={profile.footer_enabled || false}
+            onCheckedChange={(checked) => onChange({ footer_enabled: checked })}
+          />
+        </div>
+        {profile.footer_enabled ? (
+          <Textarea
+            id="footer_text"
+            value={profile.footer_text || ""}
+            onChange={(event) => onChange({ footer_text: event.target.value })}
+            placeholder="Ej: Gracias por visitar mi perfil"
+            maxLength={255}
+            className="min-h-20 resize-none rounded-xl border-stone-200 bg-[#fffefa]"
+          />
+        ) : null}
       </div>
 
       <div className="space-y-2 rounded-2xl border border-stone-200 bg-[#fffefa] p-4 shadow-[0_8px_24px_rgba(29,29,27,0.04)]">

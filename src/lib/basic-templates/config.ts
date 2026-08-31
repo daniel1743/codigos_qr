@@ -233,6 +233,8 @@ export function buildBasicTemplateContent(
       ringEnabled: profile.ring_enabled ?? false,
       ringColor: profile.ring_color || "#000000",
       ringThickness: profile.ring_thickness || "thin",
+      titleColor: profile.title_color || undefined,
+      bioColor: profile.bio_color || undefined,
       titleFontFamily: resolveSupportedFont(profile.title_font_family),
       bioFontFamily: resolveSupportedFont(profile.bio_font_family),
       titleSize: profile.title_size,

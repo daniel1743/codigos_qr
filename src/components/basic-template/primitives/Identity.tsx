@@ -45,6 +45,8 @@ interface ProfileHeadingProps {
   palette: PaletteConfig;
   headingFont: string;
   bodyFont: string;
+  titleColor?: string;
+  bioColor?: string;
   titleFontFamily?: string;
   bioFontFamily?: string;
   titleSize?: string;
@@ -66,6 +68,8 @@ export function ProfileHeading({
   palette,
   headingFont,
   bodyFont,
+  titleColor,
+  bioColor,
   titleFontFamily,
   bioFontFamily,
   titleSize,
@@ -137,7 +141,7 @@ export function ProfileHeading({
         <h1
           className="w-full break-words text-2xl font-bold leading-tight"
           style={{
-            color: palette.text,
+            color: titleColor || palette.text,
             fontFamily: titleFontFamily || headingFont,
             ...(titleSizeValue ? { fontSize: titleSizeValue } : {}),
             ...(titleWeightValue ? { fontWeight: titleWeightValue } : {}),
@@ -176,7 +180,7 @@ export function ProfileHeading({
           <p
             className="w-full whitespace-pre-line break-words text-sm leading-relaxed"
             style={{
-              color: palette.textMuted,
+              color: bioColor || palette.textMuted,
               fontFamily: bioFontFamily || bodyFont,
               ...(bioSizeValue ? { fontSize: bioSizeValue } : {}),
               ...(bioWeightValue ? { fontWeight: bioWeightValue } : {}),

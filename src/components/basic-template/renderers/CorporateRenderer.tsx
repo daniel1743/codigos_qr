@@ -75,6 +75,8 @@ export function CorporateRenderer({
           palette={palette}
           headingFont={fontPair.heading}
           bodyFont={fontPair.body}
+          titleColor={profile.titleColor}
+          bioColor={profile.bioColor}
           titleFontFamily={profile.titleFontFamily}
           bioFontFamily={profile.bioFontFamily}
           titleSize={profile.titleSize}

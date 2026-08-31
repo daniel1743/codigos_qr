@@ -233,7 +233,7 @@ export function BasicEditorShell({
   }
 
   return (
-    <div className="min-h-screen bg-[#f1efe9] pb-[calc(6rem+env(safe-area-inset-bottom,0px))] text-[#1d1d1b] lg:pb-0">
+    <div className="min-h-screen bg-[#f1efe9] pb-[calc(6rem+env(safe-area-inset-bottom,0px))] text-[#1d1d1b] lg:h-screen lg:overflow-hidden lg:pb-0">
       <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-stone-200 bg-[#fffefa]/95 px-4 backdrop-blur lg:px-6">
         <div className="min-w-11 text-sm font-bold tracking-[-0.03em]">Editor QR</div>
         <div className="flex items-center gap-1">
@@ -270,8 +270,8 @@ export function BasicEditorShell({
         </div>
       </header>
 
-      <div className="lg:grid lg:min-h-[calc(100dvh-3.5rem)] lg:grid-cols-[minmax(0,1.55fr)_minmax(340px,0.85fr)]">
-        <main className="min-w-0 border-b border-stone-200 lg:border-b-0 lg:border-r">
+      <div className="lg:grid lg:h-[calc(100dvh-3.5rem)] lg:min-h-0 lg:grid-cols-[minmax(0,1.55fr)_minmax(340px,0.85fr)]">
+        <main className="min-w-0 border-b border-stone-200 lg:min-h-0 lg:overflow-hidden lg:border-b-0 lg:border-r">
           <CanvasWorkspace viewportRef={canvasViewportRef} mobileSheetState={mobilePanelOpen ? mobileSheetState : undefined}>{canvas}</CanvasWorkspace>
         </main>
         <aside className="hidden min-h-0 overflow-y-auto bg-[#fffefa] p-6 lg:block">

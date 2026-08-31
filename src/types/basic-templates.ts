@@ -30,6 +30,8 @@ export interface ProfileContent {
   ringEnabled?: boolean;
   ringColor?: string;
   ringThickness?: string;
+  titleColor?: string;
+  bioColor?: string;
   titleFontFamily?: string;
   bioFontFamily?: string;
   titleSize?: string;

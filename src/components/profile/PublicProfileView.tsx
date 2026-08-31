@@ -124,6 +124,7 @@ export function PublicProfileView({ profile, links, isPreview = false }: PublicP
   const isSoft = profile.button_style === "soft";
   const titleStyle = {
     fontFamily: profile.title_font_family || profile.font_family || "Inter, sans-serif",
+    ...(profile.title_color ? { color: profile.title_color } : {}),
     ...(resolveTitleFontSize(profile.title_size)
       ? { fontSize: resolveTitleFontSize(profile.title_size) }
       : {}),
@@ -136,6 +137,7 @@ export function PublicProfileView({ profile, links, isPreview = false }: PublicP
   };
   const bioStyle = {
     fontFamily: profile.bio_font_family || profile.font_family || "Inter, sans-serif",
+    ...(profile.bio_color ? { color: profile.bio_color } : {}),
     ...(resolveBioFontSize(profile.bio_size) ? { fontSize: resolveBioFontSize(profile.bio_size) } : {}),
     ...(resolveFontWeight(profile.bio_weight)
       ? { fontWeight: resolveFontWeight(profile.bio_weight) }
@@ -272,6 +274,15 @@ export function PublicProfileView({ profile, links, isPreview = false }: PublicP
               );
             })}
           </div>
+
+          {profile.footer_enabled && profile.footer_text?.trim() ? (
+            <footer
+              className="mt-8 w-full border-t pt-4 text-center text-xs text-foreground/45"
+              style={{ fontFamily: profile.font_family || "Inter, sans-serif" }}
+            >
+              {profile.footer_text}
+            </footer>
+          ) : null}
 
           <div className="mt-10 text-xs font-medium text-foreground/45">Generador de QR</div>
         </section>

@@ -65,13 +65,6 @@ export function ContactBlock({ contact, palette, bodyFont }: ContactBlockProps) 
     rows.push({ label: "Teléfono", value: contact.phone, href: `tel:${contact.phone}` });
   if (contact.email)
     rows.push({ label: "Email", value: contact.email, href: `mailto:${contact.email}` });
-  if (contact.whatsapp)
-    rows.push({
-      label: "WhatsApp",
-      value: contact.whatsapp,
-      href: `https://wa.me/${contact.whatsapp.replace(/[^0-9]/g, "")}`,
-    });
-
   if (rows.length === 0) return null;
 
   return (
