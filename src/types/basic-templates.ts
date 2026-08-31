@@ -201,6 +201,7 @@ export const EDIT_TARGETS = {
   name: "profile-name",
   subtitle: "profile-subtitle",
   bio: "profile-bio",
+  footer: "profile-footer",
   links: "links-section",
   socials: "socials-section",
   cards: "cards-section",

@@ -129,6 +129,8 @@ export function HeroCardsRenderer({
           text={profile.footerText ?? ""}
           palette={palette}
           bodyFont={fontPair.body}
+          targetRegistry={targetRegistry}
+          highlightedTarget={highlightedTarget}
         />
       </div>
     </div>

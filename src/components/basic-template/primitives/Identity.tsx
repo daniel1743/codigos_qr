@@ -200,17 +200,32 @@ interface TemplateFooterProps {
   text: string;
   palette: PaletteConfig;
   bodyFont: string;
+  targetRegistry?: EditTargetRegistry | undefined;
+  highlightedTarget?: string | null | undefined;
 }
 
 /** Existing profile footer state, shared by every Basic Template family. */
-export function TemplateFooter({ enabled, text, palette, bodyFont }: TemplateFooterProps) {
+export function TemplateFooter({
+  enabled,
+  text,
+  palette,
+  bodyFont,
+  targetRegistry,
+  highlightedTarget,
+}: TemplateFooterProps) {
   if (!enabled || !text.trim()) return null;
   return (
-    <footer
-      className="mt-8 w-full border-t pt-4 text-center text-xs"
-      style={{ borderColor: `${palette.text}1f`, color: palette.textMuted, fontFamily: bodyFont }}
+    <EditableTarget
+      id={EDIT_TARGETS.footer}
+      registry={targetRegistry}
+      active={highlightedTarget === EDIT_TARGETS.footer}
     >
-      {text}
-    </footer>
+      <footer
+        className="mt-8 w-full border-t pt-4 text-center text-xs"
+        style={{ borderColor: `${palette.text}1f`, color: palette.textMuted, fontFamily: bodyFont }}
+      >
+        {text}
+      </footer>
+    </EditableTarget>
   );
 }

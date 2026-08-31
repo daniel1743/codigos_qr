@@ -23,7 +23,7 @@ import { getBrowserSupabaseClient } from "../lib/supabase/client";
 import { isValidUrl, normalizeUrl } from "../lib/validation";
 import { linkService } from "../services/link.service";
 import { profileService } from "../services/profile.service";
-import type { EditTargetRegistry } from "../types/basic-templates";
+import { EDIT_TARGETS, linkEditTarget, type EditTargetRegistry } from "../types/basic-templates";
 import type { Profile, ProfileLink } from "../types/database";
 
 export const Route = createFileRoute("/editor")({
@@ -50,6 +50,60 @@ function getSectionForTarget(targetId: string): BasicEditorSectionId {
   )
     return "links";
   return "profile";
+}
+
+function getLinkTarget(link: Partial<ProfileLink>, index: number) {
+  return linkEditTarget(link.id || `profile-link-${index}`);
+}
+
+function getToolFocusTarget(targetId: string | null) {
+  if (!targetId) return null;
+  if (
+    targetId === EDIT_TARGETS.avatar ||
+    targetId === EDIT_TARGETS.name ||
+    targetId === EDIT_TARGETS.bio ||
+    targetId === EDIT_TARGETS.footer ||
+    targetId.startsWith("link-")
+  )
+    return targetId;
+  return null;
+}
+
+function getLinkLabelForTarget(targetId: string, links: Partial<ProfileLink>[]) {
+  const link = links.find((item, index) => getLinkTarget(item, index) === targetId);
+  return link?.label || link?.platform || "Enlace";
+}
+
+function getEditorContextSegments(
+  activeSection: BasicEditorSectionId,
+  selectedTarget: string | null,
+  isGalleryOpen: boolean,
+  links: Partial<ProfileLink>[],
+) {
+  if (isGalleryOpen) return ["Editar plantilla", "Plantillas"];
+
+  const sectionLabel =
+    activeSection === "links"
+      ? "Enlaces"
+      : activeSection === "appearance"
+        ? "Diseño"
+        : "Perfil";
+  const detail =
+    selectedTarget === EDIT_TARGETS.avatar
+      ? "Avatar"
+      : selectedTarget === EDIT_TARGETS.name
+        ? "Nombre"
+        : selectedTarget === EDIT_TARGETS.bio
+          ? "Biografía"
+          : selectedTarget === EDIT_TARGETS.footer
+            ? "Pie de página"
+            : selectedTarget === EDIT_TARGETS.hero
+              ? "Portada"
+              : selectedTarget?.startsWith("link-")
+                ? getLinkLabelForTarget(selectedTarget, links)
+                : null;
+
+  return detail ? ["Editar plantilla", sectionLabel, detail] : ["Editar plantilla", sectionLabel];
 }
 
 function getSafeFusionStrength(value: unknown) {
@@ -310,9 +364,11 @@ function EditorPage() {
 
   const handleSectionChange = (section: BasicEditorSectionId) => {
     if (section === "gallery") {
+      setSelectedTarget(null);
       setIsContextPanelOpen(false);
       setIsGalleryOpen(true);
     } else {
+      setSelectedTarget(null);
       setActiveSection(section);
       setIsContextPanelOpen(true);
     }
@@ -323,7 +379,13 @@ function EditorPage() {
       case "links":
         return (
           <div className="space-y-10">
-            <LinksSection links={links} onChange={setLinks} userId={session.user.id} />
+            <LinksSection
+              links={links}
+              onChange={setLinks}
+              userId={session.user.id}
+              selectedTarget={selectedTarget}
+              onSelectTarget={handleTargetSelect}
+            />
             <ShareSection
               publicId={publicId}
               published={isPublished}
@@ -384,6 +446,8 @@ function EditorPage() {
         onSelectTemplate={(id) => updateProfile({ template_id: id, template_version: 1 })}
         onOpenTemplateGallery={() => setIsGalleryOpen(true)}
         selectedTemplateId={profile.template_id ?? null}
+        contextSegments={getEditorContextSegments(activeSection, selectedTarget, isGalleryOpen, links)}
+        toolFocusTarget={getToolFocusTarget(selectedTarget)}
       />
       <MobileBottomNavbar activeSection={activeSection} onSectionChange={handleSectionChange} />
       <MobileTemplateGallery

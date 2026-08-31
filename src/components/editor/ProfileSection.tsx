@@ -5,6 +5,7 @@ import type { Profile } from "../../types/database";
 import { BASIC_EDITOR_FONTS } from "../../lib/basic-templates/config";
 import { loadGoogleFont } from "../../lib/fonts";
 import { getBrowserSupabaseClient } from "../../lib/supabase/client";
+import { EDIT_TARGETS } from "../../types/basic-templates";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Switch } from "../ui/switch";
@@ -138,7 +139,10 @@ export function ProfileSection({ profile, onChange, userId }: ProfileSectionProp
         <p className="text-sm text-stone-500">Configura tu avatar y descripción.</p>
       </div>
 
-      <div className="space-y-3 rounded-2xl border border-stone-200 bg-[#fffefa] p-4 shadow-[0_8px_24px_rgba(29,29,27,0.04)]">
+      <div
+        data-tool-target={EDIT_TARGETS.avatar}
+        className="space-y-3 rounded-2xl border border-stone-200 bg-[#fffefa] p-4 shadow-[0_8px_24px_rgba(29,29,27,0.04)]"
+      >
         <Label className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500" htmlFor="avatar_upload">Avatar</Label>
         <div className="flex flex-col gap-4 min-[420px]:flex-row min-[420px]:items-center">
           {profile.avatar_url ? (
@@ -233,7 +237,10 @@ export function ProfileSection({ profile, onChange, userId }: ProfileSectionProp
       </div>
 
 
-      <div className="space-y-2 rounded-2xl border border-stone-200 bg-[#fffefa] p-4 shadow-[0_8px_24px_rgba(29,29,27,0.04)]">
+      <div
+        data-tool-target={EDIT_TARGETS.name}
+        className="space-y-2 rounded-2xl border border-stone-200 bg-[#fffefa] p-4 shadow-[0_8px_24px_rgba(29,29,27,0.04)]"
+      >
         <Label className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500" htmlFor="display_name">Nombre para mostrar</Label>
         <Input
           id="display_name"
@@ -293,7 +300,10 @@ export function ProfileSection({ profile, onChange, userId }: ProfileSectionProp
         </div>
       </div>
 
-      <div className="space-y-2 rounded-2xl border border-stone-200 bg-[#fffefa] p-4 shadow-[0_8px_24px_rgba(29,29,27,0.04)]">
+      <div
+        data-tool-target={EDIT_TARGETS.bio}
+        className="space-y-2 rounded-2xl border border-stone-200 bg-[#fffefa] p-4 shadow-[0_8px_24px_rgba(29,29,27,0.04)]"
+      >
         <Label className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500" htmlFor="bio">Biografía</Label>
         <Textarea
           id="bio"
@@ -352,7 +362,10 @@ export function ProfileSection({ profile, onChange, userId }: ProfileSectionProp
         </div>
       </div>
 
-      <div className="space-y-3 rounded-2xl border border-stone-200 bg-[#fffefa] p-4 shadow-[0_8px_24px_rgba(29,29,27,0.04)]">
+      <div
+        data-tool-target={EDIT_TARGETS.footer}
+        className="space-y-3 rounded-2xl border border-stone-200 bg-[#fffefa] p-4 shadow-[0_8px_24px_rgba(29,29,27,0.04)]"
+      >
         <div className="flex items-center justify-between gap-4">
           <div className="space-y-1">
             <Label className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500" htmlFor="footer_enabled">

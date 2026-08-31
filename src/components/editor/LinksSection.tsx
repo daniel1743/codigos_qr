@@ -1,5 +1,7 @@
-import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowDown, ArrowUp, ChevronDown, Plus, Trash2 } from "lucide-react";
 import type { ProfileLink } from "../../types/database";
+import { linkEditTarget } from "../../types/basic-templates";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
@@ -9,11 +11,40 @@ interface LinksSectionProps {
   links: Partial<ProfileLink>[];
   onChange: (links: Partial<ProfileLink>[]) => void;
   userId?: string;
+  selectedTarget?: string | null;
+  onSelectTarget?: (targetId: string) => void;
 }
 
 const MAX_LINKS = 8;
 
-export function LinksSection({ links, onChange }: LinksSectionProps) {
+function getLinkTarget(link: Partial<ProfileLink>, index: number) {
+  return linkEditTarget(link.id || `profile-link-${index}`);
+}
+
+export function LinksSection({
+  links,
+  onChange,
+  selectedTarget,
+  onSelectTarget,
+}: LinksSectionProps) {
+  const [openLinkTarget, setOpenLinkTarget] = useState<string | null>(() =>
+    links[0] ? getLinkTarget(links[0], 0) : null,
+  );
+
+  useEffect(() => {
+    if (selectedTarget?.startsWith("link-")) setOpenLinkTarget(selectedTarget);
+  }, [selectedTarget]);
+
+  useEffect(() => {
+    if (links.length === 0) {
+      setOpenLinkTarget(null);
+      return;
+    }
+    if (!openLinkTarget || !links.some((link, index) => getLinkTarget(link, index) === openLinkTarget)) {
+      setOpenLinkTarget(getLinkTarget(links[0], 0));
+    }
+  }, [links, openLinkTarget]);
+
   const handleAddLink = () => {
     if (links.length >= MAX_LINKS) return;
 
@@ -53,6 +84,11 @@ export function LinksSection({ links, onChange }: LinksSectionProps) {
     onChange(nextLinks.map((link, i) => ({ ...link, sort_order: i })));
   };
 
+  const openLink = (targetId: string) => {
+    setOpenLinkTarget(targetId);
+    onSelectTarget?.(targetId);
+  };
+
   return (
     <section className="space-y-5">
       <div className="flex flex-col gap-3 min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-between">
@@ -75,13 +111,33 @@ export function LinksSection({ links, onChange }: LinksSectionProps) {
       </div>
 
       <div className="space-y-3">
-        {links.map((link, index) => (
-          <div key={link.id || index} className="space-y-4 rounded-2xl border border-stone-200 bg-[#fffefa] p-4 shadow-[0_8px_24px_rgba(29,29,27,0.04)]">
+        {links.map((link, index) => {
+          const targetId = getLinkTarget(link, index);
+          const isOpen = openLinkTarget === targetId;
+          const contentId = `link-editor-${link.id || index}`;
+
+          return (
+          <div
+            key={link.id || index}
+            data-tool-target={targetId}
+            className="space-y-4 rounded-2xl border border-stone-200 bg-[#fffefa] p-4 shadow-[0_8px_24px_rgba(29,29,27,0.04)]"
+          >
             <div className="flex items-center justify-between gap-3">
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-[#1d1d1b]">{link.label || "Enlace"}</p>
-                <p className="truncate text-xs text-stone-500">{link.url || "Sin URL"}</p>
-              </div>
+              <button
+                type="button"
+                aria-expanded={isOpen}
+                aria-controls={contentId}
+                onClick={() => openLink(targetId)}
+                className="flex min-w-0 flex-1 items-center gap-3 text-left"
+              >
+                <ChevronDown
+                  className={`h-4 w-4 shrink-0 text-stone-500 transition-transform ${isOpen ? "rotate-180" : ""}`}
+                />
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-[#1d1d1b]">{link.label || "Enlace"}</p>
+                  <p className="truncate text-xs text-stone-500">{link.url || "Sin URL"}</p>
+                </div>
+              </button>
               <div className="flex shrink-0 items-center gap-1">
                 <Button
                   type="button"
@@ -116,40 +172,45 @@ export function LinksSection({ links, onChange }: LinksSectionProps) {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor={`link-label-${link.id || index}`}>Texto</Label>
-                <Input
-                  id={`link-label-${link.id || index}`}
-                  value={link.label || ""}
-                  onChange={(event) => updateLink(index, { label: event.target.value })}
-                  placeholder="Ej: Instagram"
-                  className="h-11 rounded-xl border-stone-200 bg-[#fffefa]"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor={`link-url-${link.id || index}`}>URL</Label>
-                <Input
-                  id={`link-url-${link.id || index}`}
-                  value={link.url || ""}
-                  onChange={(event) => updateLink(index, { url: event.target.value })}
-                  placeholder="https://..."
-                  className="h-11 rounded-xl border-stone-200 bg-[#fffefa]"
-                  dir="ltr"
-                />
-              </div>
-            </div>
+            {isOpen ? (
+              <div id={contentId} className="space-y-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor={`link-label-${link.id || index}`}>Texto</Label>
+                    <Input
+                      id={`link-label-${link.id || index}`}
+                      value={link.label || ""}
+                      onChange={(event) => updateLink(index, { label: event.target.value })}
+                      placeholder="Ej: Instagram"
+                      className="h-11 rounded-xl border-stone-200 bg-[#fffefa]"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor={`link-url-${link.id || index}`}>URL</Label>
+                    <Input
+                      id={`link-url-${link.id || index}`}
+                      value={link.url || ""}
+                      onChange={(event) => updateLink(index, { url: event.target.value })}
+                      placeholder="https://..."
+                      className="h-11 rounded-xl border-stone-200 bg-[#fffefa]"
+                      dir="ltr"
+                    />
+                  </div>
+                </div>
 
-            <div className="flex items-center justify-between rounded-xl border border-stone-200 bg-stone-50 p-3">
-              <Label htmlFor={`link-enabled-${link.id || index}`}>Mostrar enlace</Label>
-              <Switch
-                id={`link-enabled-${link.id || index}`}
-                checked={!!link.enabled}
-                onCheckedChange={(checked) => updateLink(index, { enabled: checked })}
-              />
-            </div>
+                <div className="flex items-center justify-between rounded-xl border border-stone-200 bg-stone-50 p-3">
+                  <Label htmlFor={`link-enabled-${link.id || index}`}>Mostrar enlace</Label>
+                  <Switch
+                    id={`link-enabled-${link.id || index}`}
+                    checked={!!link.enabled}
+                    onCheckedChange={(checked) => updateLink(index, { enabled: checked })}
+                  />
+                </div>
+              </div>
+            ) : null}
           </div>
-        ))}
+          );
+        })}
       </div>
 
       {links.length === 0 && (

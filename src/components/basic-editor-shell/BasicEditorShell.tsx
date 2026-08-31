@@ -31,6 +31,8 @@ interface BasicEditorShellProps {
   onSelectTemplate?: (templateId: string) => void;
   onOpenTemplateGallery?: () => void;
   selectedTemplateId?: string | null;
+  contextSegments?: string[];
+  toolFocusTarget?: string | null;
 }
 
 interface TemplateSearchItem {
@@ -128,12 +130,12 @@ function CanvasWorkspace({
   return (
     <section
       ref={workspaceRef}
-      className={`relative overflow-hidden bg-[#f1efe9] ${compact ? "h-[calc(100dvh-4rem)]" : "h-[var(--mobile-canvas-height)] min-h-[220px] lg:h-[calc(100dvh-7rem)] lg:min-h-[560px]"}`}
+      className={`relative overflow-hidden bg-[#f1efe9] ${compact ? "h-[calc(100dvh-4rem)]" : "h-[var(--mobile-canvas-height)] min-h-[220px] lg:h-[calc(100dvh-9rem)] lg:min-h-[560px]"}`}
       style={
         {
           "--mobile-canvas-height": mobileSheetState
-            ? `calc(100dvh - 3.5rem - 78px - ${MOBILE_SHEET_HEIGHTS[mobileSheetState]})`
-            : "min(58dvh, 680px)",
+              ? `calc(100dvh - 3.5rem - 2rem - 78px - ${MOBILE_SHEET_HEIGHTS[mobileSheetState]})`
+              : "calc(min(58dvh, 680px) - 2rem)",
         } as CSSProperties
       }
     >
@@ -227,6 +229,8 @@ export function BasicEditorShell({
   onSelectTemplate,
   onOpenTemplateGallery,
   selectedTemplateId,
+  contextSegments,
+  toolFocusTarget,
 }: BasicEditorShellProps) {
   const location = useLocation();
   const isEditorActive = location.pathname === "/editor";
@@ -238,6 +242,8 @@ export function BasicEditorShell({
   const mobileMenuTriggerRef = useRef<HTMLButtonElement>(null);
   const plantillasRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
+  const desktopToolsRef = useRef<HTMLElement>(null);
+  const mobileToolsRef = useRef<HTMLDivElement>(null);
   const searchEnabled =
     templateSearchItems.length > 0 && Boolean(onTemplateSearchChange) && Boolean(onSelectTemplate);
   const normalizedQuery = templateSearchQuery.trim().toLocaleLowerCase();
@@ -246,6 +252,7 @@ export function BasicEditorShell({
         template.name.toLocaleLowerCase().includes(normalizedQuery),
       )
     : [];
+  const contextItems = contextSegments?.length ? contextSegments : ["Editar plantilla"];
 
   const closeAll = () => {
     setMobileMenuOpen(false);
@@ -322,6 +329,28 @@ export function BasicEditorShell({
       document.removeEventListener("keydown", onKeyDown);
     };
   }, [mobileMenuOpen, plantillasOpen, searchOpen]);
+
+  useEffect(() => {
+    if (!toolFocusTarget) return;
+
+    const findTarget = (container: HTMLElement | null) => {
+      if (!container) return null;
+      return Array.from(container.querySelectorAll<HTMLElement>("[data-tool-target]")).find(
+        (element) => element.dataset.toolTarget === toolFocusTarget,
+      );
+    };
+    const isDesktop = window.matchMedia("(min-width: 1024px)").matches;
+    const target = isDesktop
+      ? findTarget(desktopToolsRef.current)
+      : findTarget(mobileToolsRef.current) || findTarget(desktopToolsRef.current);
+    if (!target) return;
+
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    target.scrollIntoView({
+      block: "center",
+      behavior: prefersReducedMotion ? "auto" : "smooth",
+    });
+  }, [toolFocusTarget, mobilePanelOpen]);
 
   if (previewMode) {
     return (
@@ -565,11 +594,33 @@ export function BasicEditorShell({
         )}
       </header>
 
-      <div className="lg:grid lg:h-[calc(100dvh-3.5rem)] lg:min-h-0 lg:grid-cols-[minmax(0,1.55fr)_minmax(340px,0.85fr)]">
+      <nav
+        className="sticky top-14 z-30 flex h-8 items-center border-b border-stone-200 bg-[#fffefa]/85 px-3 text-[11px] font-semibold text-stone-500 backdrop-blur-xl lg:px-6"
+        aria-label="Contexto de edición"
+      >
+        <ol className="flex min-w-0 items-center gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {contextItems.map((item, index) => {
+            const isCurrent = index === contextItems.length - 1;
+            return (
+              <li key={`${item}-${index}`} className="flex min-w-0 items-center gap-1">
+                {index > 0 && <span className="text-stone-300">/</span>}
+                <span
+                  aria-current={isCurrent ? "location" : undefined}
+                  className={`truncate ${isCurrent ? "text-[#1d1d1b]" : ""}`}
+                >
+                  {item}
+                </span>
+              </li>
+            );
+          })}
+        </ol>
+      </nav>
+
+      <div className="lg:grid lg:h-[calc(100dvh-5.5rem)] lg:min-h-0 lg:grid-cols-[minmax(0,1.55fr)_minmax(340px,0.85fr)]">
         <main className="min-w-0 border-b border-stone-200 lg:min-h-0 lg:overflow-hidden lg:border-b-0 lg:border-r">
           <CanvasWorkspace viewportRef={canvasViewportRef} mobileSheetState={mobilePanelOpen ? mobileSheetState : undefined}>{canvas}</CanvasWorkspace>
         </main>
-        <aside className="hidden min-h-0 overflow-y-auto bg-[#fffefa] p-6 lg:block">
+        <aside ref={desktopToolsRef} className="hidden min-h-0 overflow-y-auto bg-[#fffefa] p-6 lg:block">
           {desktopPanel}
         </aside>
       </div>
@@ -614,7 +665,7 @@ export function BasicEditorShell({
               <X className="h-4 w-4" />
             </Button>
           </div>
-          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4">
+          <div ref={mobileToolsRef} className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4">
             {mobilePanel}
           </div>
         </section>
