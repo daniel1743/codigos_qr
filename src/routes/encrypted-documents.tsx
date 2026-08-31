@@ -43,6 +43,7 @@ import {
 } from "../lib/document-file-types";
 import type { EncryptionLevel, CreateEncryptedDocumentRequest } from "../types/encrypted-documents";
 import { QRCodeSVG } from "qrcode.react";
+import { CANONICAL_PUBLIC_ORIGIN } from "../lib/url";
 
 export const Route = createFileRoute("/encrypted-documents")({
   component: EncryptedDocumentsPage,
@@ -577,7 +578,7 @@ function DocumentsList({
                             size="sm"
                             disabled={!isLinkActive}
                             onClick={() => {
-                              const url = `${window.location.origin}/d/${doc.short_url}`;
+                              const url = `${CANONICAL_PUBLIC_ORIGIN}/d/${doc.short_url}`;
                               navigator.clipboard.writeText(url);
                               toast.success("Enlace copiado al portapapeles");
                             }}
@@ -648,7 +649,7 @@ function DocumentsList({
             <div className="bg-slate-50 p-6 rounded-xl border inline-block">
               <ThemedDocumentQr
                 id={`qr-modal-${selectedQrDoc.id}`}
-                value={`${window.location.origin}/d/${selectedQrDoc.short_url}`}
+                value={`${CANONICAL_PUBLIC_ORIGIN}/d/${selectedQrDoc.short_url}`}
                 size={180}
                 fileType={selectedQrDoc.file_type}
               />
@@ -657,7 +658,7 @@ function DocumentsList({
             <div className="space-y-2">
               <Input
                 readOnly
-                value={`${window.location.origin}/d/${selectedQrDoc.short_url}`}
+                value={`${CANONICAL_PUBLIC_ORIGIN}/d/${selectedQrDoc.short_url}`}
                 className="bg-slate-50 font-mono text-[10px] select-all text-center h-10"
               />
               {/* Modified by ChatGPT Work — ENC-DOC-SECURE-DELIVERY-02 */}
@@ -694,7 +695,7 @@ function DocumentsList({
               <Button
                 className="flex-1 text-xs"
                 onClick={() => {
-                  const url = `${window.location.origin}/d/${selectedQrDoc.short_url}`;
+                  const url = `${CANONICAL_PUBLIC_ORIGIN}/d/${selectedQrDoc.short_url}`;
                   navigator.clipboard.writeText(url);
                   toast.success("Enlace copiado");
                   setSelectedQrDoc(null);
@@ -880,7 +881,7 @@ function CreateDocument({ userId, onSuccess, onPasswordCaptured }: CreateDocumen
 
   if (createdDoc) {
     // Modified by ChatGPT Work — ENC-DOC-SECURE-DELIVERY-02
-    const downloadUrl = `${window.location.origin}/d/${createdDoc.short_url}${generatedKey ? `#key=${generatedKey}` : ""}`;
+    const downloadUrl = `${CANONICAL_PUBLIC_ORIGIN}/d/${createdDoc.short_url}${generatedKey ? `#key=${generatedKey}` : ""}`;
     // Modified by ChatGPT Work — ENC-DOC-UX-FILE-TYPES-04
     const createdTheme = getFileTypeQrTheme(normalizeDocumentCategory(createdDoc.file_type));
     

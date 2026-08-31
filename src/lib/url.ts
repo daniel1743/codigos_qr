@@ -1,15 +1,13 @@
 import { env } from "./env";
 
+export const CANONICAL_PUBLIC_ORIGIN = "https://www.criqper.dev";
+
 /**
  * Generates the public URL for a given immutable profile public id.
  */
 export function getPublicProfileUrl(publicId: string): string {
-  // En el navegador, usar la URL real de la ventana automáticamente.
-  // Esto previene que el QR apunte a localhost si la variable de entorno no se configuró bien en Vercel.
-  let appUrl = env.appUrl;
-  if (typeof window !== "undefined") {
-    appUrl = window.location.origin;
-  }
+  // Siempre usar el origin canónico (criqper.dev) en lugar del vercel/local domain.
+  const appUrl = CANONICAL_PUBLIC_ORIGIN;
 
   // Ensure no trailing slash on appUrl and no leading slash on publicId
   const baseUrl = appUrl.replace(/\/$/, "");
@@ -19,10 +17,7 @@ export function getPublicProfileUrl(publicId: string): string {
 }
 
 export function getAliasProfileUrl(slug: string): string {
-  let appUrl = env.appUrl;
-  if (typeof window !== "undefined") {
-    appUrl = window.location.origin;
-  }
+  const appUrl = CANONICAL_PUBLIC_ORIGIN;
   const baseUrl = appUrl.replace(/\/$/, "");
   const cleanSlug = slug.replace(/^\//, "");
   return `${baseUrl}/${cleanSlug}`;

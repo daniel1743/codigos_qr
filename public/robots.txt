@@ -4,4 +4,4 @@ Disallow: /editor
 Disallow: /profile
 Disallow: /admin
 
-Sitemap: https://codigos-qr.vercel.app/sitemap.xml
+Sitemap: https://www.criqper.dev/sitemap.xml
