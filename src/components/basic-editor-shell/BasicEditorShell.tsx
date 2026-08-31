@@ -1,4 +1,5 @@
-import { Eye, Minus, RotateCcw, Save, Send, X, ZoomIn } from "lucide-react";
+import { Check, Eye, LayoutTemplate, Menu, Minus, RotateCcw, Save, Search, Send, X, ZoomIn } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import {
   type CSSProperties,
   type PointerEvent,
@@ -24,6 +25,16 @@ interface BasicEditorShellProps {
   publishDisabled: boolean;
   previewMode?: boolean;
   onExitPreview?: () => void;
+  templateSearchItems?: TemplateSearchItem[];
+  templateSearchQuery?: string;
+  onTemplateSearchChange?: (value: string) => void;
+  onSelectTemplate?: (templateId: string) => void;
+  selectedTemplateId?: string | null;
+}
+
+interface TemplateSearchItem {
+  id: string;
+  name: string;
 }
 
 type MobileSheetState = "collapsed" | "medium" | "expanded";
@@ -209,8 +220,35 @@ export function BasicEditorShell({
   publishDisabled,
   previewMode = false,
   onExitPreview,
+  templateSearchItems = [],
+  templateSearchQuery = "",
+  onTemplateSearchChange,
+  onSelectTemplate,
+  selectedTemplateId,
 }: BasicEditorShellProps) {
   const [mobileSheetState, setMobileSheetState] = useState<MobileSheetState>("medium");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [templateMenuOpen, setTemplateMenuOpen] = useState(false);
+  const searchEnabled =
+    templateSearchItems.length > 0 && Boolean(onTemplateSearchChange) && Boolean(onSelectTemplate);
+  const normalizedQuery = templateSearchQuery.trim().toLocaleLowerCase();
+  const filteredTemplates = searchEnabled
+    ? templateSearchItems.filter((template) =>
+        template.name.toLocaleLowerCase().includes(normalizedQuery),
+      )
+    : [];
+
+  const openTemplateMenu = () => {
+    if (!searchEnabled) return;
+    setTemplateMenuOpen(true);
+    setMobileMenuOpen(false);
+  };
+
+  const selectTemplate = (templateId: string) => {
+    onSelectTemplate?.(templateId);
+    setTemplateMenuOpen(false);
+    setMobileMenuOpen(false);
+  };
 
   useEffect(() => {
     if (mobilePanelOpen) setMobileSheetState("medium");
@@ -234,9 +272,91 @@ export function BasicEditorShell({
 
   return (
     <div className="min-h-screen bg-[#f1efe9] pb-[calc(6rem+env(safe-area-inset-bottom,0px))] text-[#1d1d1b] lg:h-screen lg:overflow-hidden lg:pb-0">
-      <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-stone-200 bg-[#fffefa]/95 px-4 backdrop-blur lg:px-6">
-        <div className="min-w-11 text-sm font-bold tracking-[-0.03em]">Editor QR</div>
-        <div className="flex items-center gap-1">
+      <header className="sticky top-0 z-40 border-b border-stone-200 bg-[#fffefa]/90 px-3 backdrop-blur-xl lg:px-6">
+        <div className="mx-auto flex h-14 max-w-[1440px] items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <Link
+              to="/editor"
+              className="shrink-0 text-sm font-black uppercase tracking-[0.1em] text-[#1d1d1b] transition-colors hover:text-[#8a6b2f] min-[420px]:tracking-[0.14em]"
+            >
+              <span className="hidden min-[420px]:inline">Editorial Canvas</span>
+              <span className="min-[420px]:hidden">Editor QR</span>
+            </Link>
+            <nav className="hidden items-center gap-1 lg:flex" aria-label="Navegación principal">
+              <Link
+                to="/editor"
+                className="rounded-full bg-[#1d1d1b] px-3 py-1.5 text-xs font-semibold text-[#fffefa] shadow-sm"
+                aria-current="page"
+              >
+                Editor
+              </Link>
+              {searchEnabled && (
+                <button
+                  type="button"
+                  onClick={openTemplateMenu}
+                  className="rounded-full px-3 py-1.5 text-xs font-semibold text-stone-500 transition-colors hover:bg-stone-100 hover:text-[#1d1d1b]"
+                >
+                  Biblioteca
+                </button>
+              )}
+              <Link
+                to="/encrypted-documents"
+                className="rounded-full px-3 py-1.5 text-xs font-semibold text-stone-500 transition-colors hover:bg-stone-100 hover:text-[#1d1d1b]"
+              >
+                QR cifrado
+              </Link>
+            </nav>
+          </div>
+
+          {searchEnabled && (
+            <div className="relative hidden min-w-[220px] max-w-sm flex-1 justify-center lg:flex">
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
+              <input
+                type="search"
+                value={templateSearchQuery}
+                onChange={(event) => {
+                  onTemplateSearchChange?.(event.target.value);
+                  setTemplateMenuOpen(true);
+                }}
+                onFocus={openTemplateMenu}
+                placeholder="Buscar plantillas"
+                className="h-10 w-full rounded-full border border-stone-200 bg-white/70 pl-10 pr-4 text-sm text-[#1d1d1b] outline-none transition-all placeholder:text-stone-400 focus:w-[min(100%,20rem)] focus:border-[#c9a96a]/70 focus:bg-white focus:shadow-[0_0_0_3px_rgba(201,169,106,0.18)]"
+              />
+              {templateMenuOpen && (
+                <div className="absolute top-12 z-50 w-full min-w-[18rem] overflow-hidden rounded-2xl border border-stone-200 bg-[#fffefa] shadow-[0_18px_45px_rgba(29,29,27,0.16)]">
+                  <div className="flex items-center gap-2 border-b border-stone-100 px-4 py-3">
+                    <LayoutTemplate className="h-4 w-4 text-[#8a6b2f]" />
+                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-stone-500">
+                      Biblioteca
+                    </p>
+                  </div>
+                  <div className="max-h-72 overflow-y-auto p-2">
+                    {filteredTemplates.map((template) => {
+                      const isSelected = selectedTemplateId === template.id;
+                      return (
+                        <button
+                          key={template.id}
+                          type="button"
+                          onClick={() => selectTemplate(template.id)}
+                          className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-[#1d1d1b] transition-colors hover:bg-stone-100"
+                        >
+                          <span className="truncate">{template.name}</span>
+                          {isSelected && <Check className="h-4 w-4 text-[#8a6b2f]" />}
+                        </button>
+                      );
+                    })}
+                    {filteredTemplates.length === 0 && (
+                      <p className="px-3 py-5 text-center text-sm text-stone-500">
+                        No se encontraron plantillas.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="flex shrink-0 items-center gap-1">
           <Button
             type="button"
             variant="ghost"
@@ -262,12 +382,89 @@ export function BasicEditorShell({
             type="button"
             onClick={onPublish}
             disabled={publishing || publishDisabled}
-            className="h-10 rounded-xl bg-[#1d1d1b] px-3 text-xs text-[#fffefa] hover:bg-[#343432]"
+            className="h-10 w-10 rounded-xl bg-[#1d1d1b] px-0 text-xs text-[#fffefa] hover:bg-[#343432] min-[390px]:w-auto min-[390px]:px-3"
           >
-            <Send className="mr-1.5 h-4 w-4" />
-            {publishing ? "Publicando..." : "Publicar"}
+            <Send className="h-4 w-4 min-[390px]:mr-1.5" />
+            <span className="hidden min-[390px]:inline">
+              {publishing ? "Publicando..." : "Publicar"}
+            </span>
           </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            aria-label={mobileMenuOpen ? "Cerrar menú" : "Abrir menú"}
+            aria-expanded={mobileMenuOpen}
+            onClick={() => setMobileMenuOpen((open) => !open)}
+            className="h-10 w-10 rounded-xl text-[#1d1d1b] lg:hidden"
+          >
+            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </Button>
+          </div>
         </div>
+        {mobileMenuOpen && (
+          <nav className="border-t border-stone-200 py-2 lg:hidden" aria-label="Menú móvil principal">
+            <Link
+              to="/editor"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block rounded-xl bg-stone-100 px-3 py-3 text-sm font-semibold text-[#1d1d1b]"
+              aria-current="page"
+            >
+              Editor
+            </Link>
+            {searchEnabled && (
+              <button
+                type="button"
+                onClick={openTemplateMenu}
+                className="block w-full rounded-xl px-3 py-3 text-left text-sm font-semibold text-stone-600"
+              >
+                Biblioteca
+              </button>
+            )}
+            <Link
+              to="/encrypted-documents"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block rounded-xl px-3 py-3 text-sm font-semibold text-stone-600"
+            >
+              QR cifrado
+            </Link>
+          </nav>
+        )}
+        {templateMenuOpen && searchEnabled && (
+          <div className="border-t border-stone-200 py-3 lg:hidden">
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
+              <input
+                type="search"
+                value={templateSearchQuery}
+                onChange={(event) => onTemplateSearchChange?.(event.target.value)}
+                placeholder="Buscar plantillas"
+                className="h-11 w-full rounded-full border border-stone-200 bg-white/70 pl-10 pr-4 text-sm text-[#1d1d1b] outline-none placeholder:text-stone-400"
+              />
+            </div>
+            <div className="mt-2 max-h-64 overflow-y-auto rounded-2xl border border-stone-200 bg-[#fffefa] p-2 shadow-sm">
+              {filteredTemplates.map((template) => {
+                const isSelected = selectedTemplateId === template.id;
+                return (
+                  <button
+                    key={template.id}
+                    type="button"
+                    onClick={() => selectTemplate(template.id)}
+                    className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-[#1d1d1b]"
+                  >
+                    <span className="truncate">{template.name}</span>
+                    {isSelected && <Check className="h-4 w-4 text-[#8a6b2f]" />}
+                  </button>
+                );
+              })}
+              {filteredTemplates.length === 0 && (
+                <p className="px-3 py-5 text-center text-sm text-stone-500">
+                  No se encontraron plantillas.
+                </p>
+              )}
+            </div>
+          </div>
+        )}
       </header>
 
       <div className="lg:grid lg:h-[calc(100dvh-3.5rem)] lg:min-h-0 lg:grid-cols-[minmax(0,1.55fr)_minmax(340px,0.85fr)]">

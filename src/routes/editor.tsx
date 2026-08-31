@@ -71,6 +71,7 @@ function EditorPage() {
   const [isContextPanelOpen, setIsContextPanelOpen] = useState(false);
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [selectedTarget, setSelectedTarget] = useState<string | null>(null);
+  const [templateSearchQuery, setTemplateSearchQuery] = useState("");
 
   const loadedUserId = useRef<string | null>(null);
   const canvasViewportRef = useRef<HTMLDivElement>(null);
@@ -289,8 +290,9 @@ function EditorPage() {
 
   const publicId = profile.public_id || savedPublicId || "";
   const isValid = validate();
+  const templates = getTemplates();
   const selectedTemplate = profile.template_id
-    ? getTemplates().find((template) => template.id === profile.template_id)
+    ? templates.find((template) => template.id === profile.template_id)
     : undefined;
   const templateContent = buildBasicTemplateContent(profile, links);
   const templateRenderConfig = selectedTemplate
@@ -373,6 +375,14 @@ function EditorPage() {
         onPublish={() => handleSave(true)}
         publishing={saving}
         publishDisabled={!isValid}
+        templateSearchItems={templates.map((template) => ({
+          id: template.id,
+          name: template.name,
+        }))}
+        templateSearchQuery={templateSearchQuery}
+        onTemplateSearchChange={setTemplateSearchQuery}
+        onSelectTemplate={(id) => updateProfile({ template_id: id, template_version: 1 })}
+        selectedTemplateId={profile.template_id ?? null}
       />
       <MobileBottomNavbar activeSection={activeSection} onSectionChange={handleSectionChange} />
       <MobileTemplateGallery
