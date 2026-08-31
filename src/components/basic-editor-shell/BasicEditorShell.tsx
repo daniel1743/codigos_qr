@@ -2,6 +2,7 @@ import { Check, Eye, LayoutTemplate, Menu, Minus, RotateCcw, Save, Search, Send,
 import { Link, useLocation } from "@tanstack/react-router";
 import {
   type CSSProperties,
+  type MouseEvent,
   type PointerEvent,
   type ReactNode,
   type RefObject,
@@ -43,7 +44,8 @@ interface TemplateSearchItem {
 type MobileSheetState = "collapsed" | "medium" | "expanded";
 
 const MIN_ZOOM = 0.35;
-const MAX_ZOOM = 1.5;
+const MIN_USER_ZOOM = 0.6;
+const MAX_USER_ZOOM = 3;
 const TEMPLATE_WIDTH = 360;
 const TEMPLATE_MIN_HEIGHT = 620;
 
@@ -53,45 +55,126 @@ const MOBILE_SHEET_HEIGHTS: Record<MobileSheetState, string> = {
   expanded: "48dvh",
 };
 
+type CanvasPoint = { x: number; y: number };
+type ScrollPanState = {
+  pointerId: number;
+  x: number;
+  y: number;
+  scrollLeft: number;
+  scrollTop: number;
+  active: boolean;
+};
+type PinchState = {
+  startDistance: number;
+  startUserZoom: number;
+  contentX: number;
+  contentY: number;
+};
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function distance(first: CanvasPoint, second: CanvasPoint) {
+  return Math.hypot(second.x - first.x, second.y - first.y);
+}
+
+function midpoint(first: CanvasPoint, second: CanvasPoint) {
+  return { x: (first.x + second.x) / 2, y: (first.y + second.y) / 2 };
+}
+
 function CanvasWorkspace({
   children,
   viewportRef,
   compact = false,
   mobileSheetState,
+  resetKey,
 }: {
   children: ReactNode;
   viewportRef: RefObject<HTMLDivElement | null>;
   compact?: boolean;
   mobileSheetState?: MobileSheetState;
+  resetKey?: string | null;
 }) {
   const workspaceRef = useRef<HTMLElement | null>(null);
+  const templateRef = useRef<HTMLDivElement | null>(null);
+  const activePointers = useRef(new Map<number, CanvasPoint>());
+  const pinchStart = useRef<PinchState | null>(null);
+  const scrollPanStart = useRef<ScrollPanState | null>(null);
+  const suppressClick = useRef(false);
   const [fitZoom, setFitZoom] = useState(0.9);
-  const [zoomOffset, setZoomOffset] = useState(0);
-  const [pan, setPan] = useState({ x: 0, y: 0 });
-  const dragStart = useRef<{ x: number; y: number; panX: number; panY: number } | null>(null);
-  const zoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, fitZoom + zoomOffset));
+  const [userZoom, setUserZoom] = useState(1);
+  const [templateSize, setTemplateSize] = useState({
+    width: TEMPLATE_WIDTH,
+    height: TEMPLATE_MIN_HEIGHT,
+  });
+  const zoom = Math.max(MIN_ZOOM, fitZoom * userZoom);
+  const userZoomRef = useRef(userZoom);
+  const fitZoomRef = useRef(fitZoom);
+  const zoomRef = useRef(zoom);
+
+  userZoomRef.current = userZoom;
+  fitZoomRef.current = fitZoom;
+  zoomRef.current = zoom;
 
   useEffect(() => {
     const workspace = workspaceRef.current;
     if (!workspace || compact) return;
 
     const updateFit = () => {
+      const template = templateRef.current;
+      const measuredWidth = template
+        ? Math.max(TEMPLATE_WIDTH, template.scrollWidth, template.offsetWidth)
+        : templateSize.width;
+      const measuredHeight = template
+        ? Math.max(TEMPLATE_MIN_HEIGHT, template.scrollHeight, template.offsetHeight)
+        : templateSize.height;
       const availableWidth = Math.max(1, workspace.clientWidth - 40);
       const availableHeight = Math.max(1, workspace.clientHeight - 72);
-      const nextFit = Math.min(availableWidth / TEMPLATE_WIDTH, availableHeight / TEMPLATE_MIN_HEIGHT, 1);
-      setFitZoom(Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, nextFit)));
+      const nextFit = Math.min(availableWidth / measuredWidth, availableHeight / measuredHeight, 1);
+      setTemplateSize((current) =>
+        current.width === measuredWidth && current.height === measuredHeight
+          ? current
+          : { width: measuredWidth, height: measuredHeight },
+      );
+      setFitZoom(Math.max(MIN_ZOOM, nextFit));
     };
 
     updateFit();
     const observer = new ResizeObserver(updateFit);
     observer.observe(workspace);
+    if (templateRef.current) observer.observe(templateRef.current);
     return () => observer.disconnect();
   }, [compact, mobileSheetState]);
 
-  const updateZoom = (next: number) => setZoomOffset(next - fitZoom);
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    const resetGestureState = () => {
+      activePointers.current.forEach((_, pointerId) => {
+        try {
+          viewport?.releasePointerCapture(pointerId);
+        } catch {
+          // The pointer may already have been released by the browser.
+        }
+      });
+      activePointers.current.clear();
+      pinchStart.current = null;
+      scrollPanStart.current = null;
+      suppressClick.current = false;
+    };
+
+    resetGestureState();
+    setUserZoom(1);
+    viewport?.scrollTo({ left: 0, top: 0 });
+
+    return resetGestureState;
+  }, [resetKey, viewportRef]);
+
+  const updateZoom = (next: number) =>
+    setUserZoom(clamp(next / fitZoomRef.current, MIN_USER_ZOOM, MAX_USER_ZOOM));
   const recenter = () => {
-    setPan({ x: 0, y: 0 });
-    setZoomOffset(0);
+    setUserZoom(1);
+    viewportRef.current?.scrollTo({ left: 0, top: 0, behavior: "smooth" });
   };
 
   useEffect(() => {
@@ -108,23 +191,142 @@ function CanvasWorkspace({
     return () => viewport.removeEventListener("wheel", onWheel);
   }, [fitZoom, viewportRef, zoom]);
 
-  const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
-    if ((event.target as HTMLElement).closest("[data-edit-target], button, input, textarea, a"))
-      return;
-    event.currentTarget.setPointerCapture(event.pointerId);
-    dragStart.current = { x: event.clientX, y: event.clientY, panX: pan.x, panY: pan.y };
-  };
+  const applyPinchZoom = (nextUserZoom: number, contentX: number, contentY: number, focal: CanvasPoint) => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
 
-  const onPointerMove = (event: PointerEvent<HTMLDivElement>) => {
-    if (!dragStart.current) return;
-    setPan({
-      x: Math.max(-96, Math.min(96, dragStart.current.panX + event.clientX - dragStart.current.x)),
-      y: Math.max(-96, Math.min(96, dragStart.current.panY + event.clientY - dragStart.current.y)),
+    const clampedUserZoom = clamp(nextUserZoom, MIN_USER_ZOOM, MAX_USER_ZOOM);
+    const nextZoom = Math.max(MIN_ZOOM, fitZoomRef.current * clampedUserZoom);
+    setUserZoom(clampedUserZoom);
+    window.requestAnimationFrame(() => {
+      viewport.scrollTo({
+        left: contentX * nextZoom - focal.x,
+        top: contentY * nextZoom - focal.y,
+      });
     });
   };
 
-  const stopPan = () => {
-    dragStart.current = null;
+  const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    const viewport = event.currentTarget;
+    if (activePointers.current.size === 0) suppressClick.current = false;
+
+    if (event.pointerType === "touch") {
+      activePointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      try {
+        viewport.setPointerCapture(event.pointerId);
+      } catch {
+        // Some mobile browsers can reject capture during native gestures.
+      }
+
+      if (activePointers.current.size === 2) {
+        const points = Array.from(activePointers.current.values());
+        const focal = midpoint(points[0], points[1]);
+        const rect = viewport.getBoundingClientRect();
+        pinchStart.current = {
+          startDistance: Math.max(1, distance(points[0], points[1])),
+          startUserZoom: userZoomRef.current,
+          contentX: (viewport.scrollLeft + focal.x - rect.left) / zoomRef.current,
+          contentY: (viewport.scrollTop + focal.y - rect.top) / zoomRef.current,
+        };
+        scrollPanStart.current = null;
+        suppressClick.current = true;
+        event.preventDefault();
+        return;
+      }
+
+      if (userZoomRef.current > 1.01) {
+        scrollPanStart.current = {
+          pointerId: event.pointerId,
+          x: event.clientX,
+          y: event.clientY,
+          scrollLeft: viewport.scrollLeft,
+          scrollTop: viewport.scrollTop,
+          active: false,
+        };
+      }
+      return;
+    }
+
+    if ((event.target as HTMLElement).closest("[data-edit-target], button, input, textarea, a"))
+      return;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    scrollPanStart.current = {
+      pointerId: event.pointerId,
+      x: event.clientX,
+      y: event.clientY,
+      scrollLeft: viewport.scrollLeft,
+      scrollTop: viewport.scrollTop,
+      active: true,
+    };
+  };
+
+  const onPointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    const viewport = event.currentTarget;
+
+    if (event.pointerType === "touch") {
+      if (!activePointers.current.has(event.pointerId)) return;
+      activePointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+
+      if (pinchStart.current && activePointers.current.size >= 2) {
+        const points = Array.from(activePointers.current.values());
+        const focal = midpoint(points[0], points[1]);
+        const rect = viewport.getBoundingClientRect();
+        const currentDistance = Math.max(1, distance(points[0], points[1]));
+        const nextUserZoom =
+          pinchStart.current.startUserZoom *
+          (currentDistance / pinchStart.current.startDistance);
+        applyPinchZoom(
+          nextUserZoom,
+          pinchStart.current.contentX,
+          pinchStart.current.contentY,
+          { x: focal.x - rect.left, y: focal.y - rect.top },
+        );
+        suppressClick.current = true;
+        event.preventDefault();
+        return;
+      }
+    }
+
+    const start = scrollPanStart.current;
+    if (!start || start.pointerId !== event.pointerId) return;
+    const dx = event.clientX - start.x;
+    const dy = event.clientY - start.y;
+    if (!start.active && Math.hypot(dx, dy) < 6) return;
+    start.active = true;
+    suppressClick.current = event.pointerType === "touch";
+    viewport.scrollTo({
+      left: start.scrollLeft - dx,
+      top: start.scrollTop - dy,
+    });
+    event.preventDefault();
+  };
+
+  const onPointerEnd = (event: PointerEvent<HTMLDivElement>) => {
+    activePointers.current.delete(event.pointerId);
+    if (pinchStart.current && activePointers.current.size < 2) {
+      pinchStart.current = null;
+      const remaining = Array.from(activePointers.current.entries())[0];
+      scrollPanStart.current = remaining && userZoomRef.current > 1.01
+        ? {
+            pointerId: remaining[0],
+            x: remaining[1].x,
+            y: remaining[1].y,
+            scrollLeft: event.currentTarget.scrollLeft,
+            scrollTop: event.currentTarget.scrollTop,
+            active: false,
+          }
+        : null;
+      return;
+    }
+
+    if (scrollPanStart.current?.pointerId === event.pointerId) scrollPanStart.current = null;
+  };
+
+  const onClickCapture = (event: MouseEvent<HTMLDivElement>) => {
+    if (!suppressClick.current) return;
+    suppressClick.current = false;
+    event.preventDefault();
+    event.stopPropagation();
   };
 
   return (
@@ -181,23 +383,25 @@ function CanvasWorkspace({
       <div
         ref={viewportRef}
         className="h-full overflow-auto overscroll-contain px-5 pb-8 pt-14"
-        style={{ touchAction: "pan-y" }}
+        style={{ touchAction: userZoom > 1.01 ? "none" : "pan-y" }}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
-        onPointerUp={stopPan}
-        onPointerCancel={stopPan}
+        onPointerUp={onPointerEnd}
+        onPointerCancel={onPointerEnd}
+        onClickCapture={onClickCapture}
       >
         <div
           className="mx-auto transition-[width,height] duration-200 motion-reduce:transition-none"
           style={{
-            width: `${TEMPLATE_WIDTH * zoom}px`,
-            minHeight: `${TEMPLATE_MIN_HEIGHT * zoom}px`,
+            width: `${templateSize.width * zoom}px`,
+            minHeight: `${templateSize.height * zoom}px`,
           }}
         >
           <div
+            ref={templateRef}
             className="w-[360px] min-h-[620px] overflow-hidden rounded-[2rem] border-[6px] border-black/10 bg-white shadow-[0_18px_42px_rgba(29,29,27,0.15)] transition-transform duration-200 motion-reduce:transition-none"
             style={{
-              transform: `translate3d(${pan.x}px, ${pan.y}px, 0) scale(${zoom})`,
+              transform: `scale(${zoom})`,
               transformOrigin: "top left",
             }}
           >
@@ -618,7 +822,13 @@ export function BasicEditorShell({
 
       <div className="lg:grid lg:h-[calc(100dvh-5.5rem)] lg:min-h-0 lg:grid-cols-[minmax(0,1.55fr)_minmax(340px,0.85fr)]">
         <main className="min-w-0 border-b border-stone-200 lg:min-h-0 lg:overflow-hidden lg:border-b-0 lg:border-r">
-          <CanvasWorkspace viewportRef={canvasViewportRef} mobileSheetState={mobilePanelOpen ? mobileSheetState : undefined}>{canvas}</CanvasWorkspace>
+          <CanvasWorkspace
+            viewportRef={canvasViewportRef}
+            mobileSheetState={mobilePanelOpen ? mobileSheetState : undefined}
+            resetKey={selectedTemplateId}
+          >
+            {canvas}
+          </CanvasWorkspace>
         </main>
         <aside ref={desktopToolsRef} className="hidden min-h-0 overflow-y-auto bg-[#fffefa] p-6 lg:block">
           {desktopPanel}
