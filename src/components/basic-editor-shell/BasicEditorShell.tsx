@@ -46,6 +46,7 @@ type MobileSheetState = "collapsed" | "medium" | "expanded";
 const MIN_ZOOM = 0.35;
 const MIN_USER_ZOOM = 0.6;
 const MAX_USER_ZOOM = 3;
+const PINCH_SENSITIVITY = 1.6;
 const TEMPLATE_WIDTH = 360;
 const TEMPLATE_MIN_HEIGHT = 620;
 
@@ -272,9 +273,9 @@ function CanvasWorkspace({
         const focal = midpoint(points[0], points[1]);
         const rect = viewport.getBoundingClientRect();
         const currentDistance = Math.max(1, distance(points[0], points[1]));
-        const nextUserZoom =
-          pinchStart.current.startUserZoom *
-          (currentDistance / pinchStart.current.startDistance);
+        const pinchRatio = currentDistance / pinchStart.current.startDistance;
+        const adjustedRatio = Math.pow(pinchRatio, PINCH_SENSITIVITY);
+        const nextUserZoom = pinchStart.current.startUserZoom * adjustedRatio;
         applyPinchZoom(
           nextUserZoom,
           pinchStart.current.contentX,
