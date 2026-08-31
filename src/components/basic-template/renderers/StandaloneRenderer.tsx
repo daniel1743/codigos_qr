@@ -13,7 +13,7 @@ import TemplateBarbara from "./TemplateBarbara";
  * preserving each design's identity. Colors / logo / footer keep the template
  * defaults (they are part of the approved design).
  */
-export function StandaloneRenderer({ config }: BasicTemplateRendererProps) {
+export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }: BasicTemplateRendererProps) {
   const { template, content } = config;
   const { profile } = content;
 
@@ -41,13 +41,41 @@ export function StandaloneRenderer({ config }: BasicTemplateRendererProps) {
 
   switch (template.id) {
     case "amanda":
-      return <TemplateAmanda {...common} links={links} />;
+      return (
+        <TemplateAmanda
+          {...common}
+          links={links}
+          targetRegistry={targetRegistry}
+          highlightedTarget={highlightedTarget}
+        />
+      );
     case "adriana":
-      return <TemplateAdriana {...common} links={links} />;
+      return (
+        <TemplateAdriana
+          {...common}
+          links={links}
+          targetRegistry={targetRegistry}
+          highlightedTarget={highlightedTarget}
+        />
+      );
     case "eudora":
-      return <TemplateEudora {...common} links={links} />;
+      return (
+        <TemplateEudora
+          {...common}
+          links={links}
+          targetRegistry={targetRegistry}
+          highlightedTarget={highlightedTarget}
+        />
+      );
     case "barbara":
-      return <TemplateBarbara {...common} services={services} />;
+      return (
+        <TemplateBarbara
+          {...common}
+          services={services}
+          targetRegistry={targetRegistry}
+          highlightedTarget={highlightedTarget}
+        />
+      );
     default:
       return null;
   }
