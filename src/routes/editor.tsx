@@ -382,6 +382,7 @@ function EditorPage() {
         templateSearchQuery={templateSearchQuery}
         onTemplateSearchChange={setTemplateSearchQuery}
         onSelectTemplate={(id) => updateProfile({ template_id: id, template_version: 1 })}
+        onOpenTemplateGallery={() => setIsGalleryOpen(true)}
         selectedTemplateId={profile.template_id ?? null}
       />
       <MobileBottomNavbar activeSection={activeSection} onSectionChange={handleSectionChange} />
