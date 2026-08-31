@@ -214,18 +214,24 @@ export function TemplateFooter({
   highlightedTarget,
 }: TemplateFooterProps) {
   if (!enabled || !text.trim()) return null;
+  const footer = (
+    <footer
+      className="mt-8 w-full border-t pt-4 text-center text-xs"
+      style={{ borderColor: `${palette.text}1f`, color: palette.textMuted, fontFamily: bodyFont }}
+    >
+      {text}
+    </footer>
+  );
+
+  if (!targetRegistry) return footer;
+
   return (
     <EditableTarget
       id={EDIT_TARGETS.footer}
       registry={targetRegistry}
       active={highlightedTarget === EDIT_TARGETS.footer}
     >
-      <footer
-        className="mt-8 w-full border-t pt-4 text-center text-xs"
-        style={{ borderColor: `${palette.text}1f`, color: palette.textMuted, fontFamily: bodyFont }}
-      >
-        {text}
-      </footer>
+      {footer}
     </EditableTarget>
   );
 }
