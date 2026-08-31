@@ -6,6 +6,7 @@ import type {
 import { CorporateRenderer } from "./renderers/CorporateRenderer";
 import { HeroCardsRenderer } from "./renderers/HeroCardsRenderer";
 import { HeroProfileRenderer } from "./renderers/HeroProfileRenderer";
+import { StandaloneRenderer } from "./renderers/StandaloneRenderer";
 
 /**
  * Dispatcher: picks the family renderer based on the template definition.
@@ -15,6 +16,7 @@ const FAMILY_RENDERERS: Record<TemplateFamily, ComponentType<BasicTemplateRender
   hero_profile: HeroProfileRenderer,
   hero_cards: HeroCardsRenderer,
   professional_corporate: CorporateRenderer,
+  standalone: StandaloneRenderer,
 };
 
 export function BasicTemplateRenderer(props: BasicTemplateRendererProps) {
