@@ -1,5 +1,6 @@
-import { Images, Link as LinkIcon, Palette, UserCircle } from "lucide-react";
+import { Images, Link as LinkIcon, Lock, Palette, UserCircle } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { Button } from "../ui/button";
 import "./mobile-bottom-navbar.css";
 
@@ -48,6 +49,16 @@ export function MobileBottomNavbar({ activeSection, onSectionChange }: MobileBot
             </Button>
           );
         })}
+        <Link
+          to="/encrypted-documents"
+          aria-label="Cifrados"
+          className="mobile-bottom-navbar__item mobile-bottom-navbar__link"
+        >
+          <span className="mobile-bottom-navbar__icon">
+            <Lock aria-hidden="true" />
+          </span>
+          <span>Cifrados</span>
+        </Link>
       </div>
     </nav>
   );

@@ -11,6 +11,8 @@ import {
   useState,
 } from "react";
 import { Button } from "../ui/button";
+import { DesktopSectionNav } from "../editor/DesktopSectionNav";
+import type { BasicEditorSectionId } from "../editor/MobileBottomNavbar";
 
 interface BasicEditorShellProps {
   canvas: ReactNode;
@@ -34,6 +36,8 @@ interface BasicEditorShellProps {
   selectedTemplateId?: string | null;
   contextSegments?: string[];
   toolFocusTarget?: string | null;
+  activeSection?: BasicEditorSectionId;
+  onSectionChange?: (section: BasicEditorSectionId) => void;
 }
 
 interface TemplateSearchItem {
@@ -436,6 +440,8 @@ export function BasicEditorShell({
   selectedTemplateId,
   contextSegments,
   toolFocusTarget,
+  activeSection,
+  onSectionChange,
 }: BasicEditorShellProps) {
   const location = useLocation();
   const isEditorActive = location.pathname === "/editor";
@@ -831,8 +837,11 @@ export function BasicEditorShell({
             {canvas}
           </CanvasWorkspace>
         </main>
-        <aside ref={desktopToolsRef} className="hidden min-h-0 overflow-y-auto bg-[#fffefa] p-6 lg:block">
-          {desktopPanel}
+        <aside ref={desktopToolsRef} className="hidden min-h-0 overflow-y-auto bg-[#fffefa] lg:block">
+          <div className="sticky top-0 z-10 border-b border-stone-200 bg-[#fffefa]/95 px-5 py-3 backdrop-blur-xl">
+            <DesktopSectionNav activeSection={activeSection ?? "profile"} onSectionChange={onSectionChange ?? (() => {})} />
+          </div>
+          <div className="p-6">{desktopPanel}</div>
         </aside>
       </div>
 

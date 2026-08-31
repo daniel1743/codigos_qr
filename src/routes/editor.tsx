@@ -40,15 +40,24 @@ const DEFAULT_PROFILE: Partial<Profile> = {
   banner_fusion_strength: 60,
 };
 
-function getSectionForTarget(targetId: string): BasicEditorSectionId {
+function getSectionForTarget(
+  targetId: string,
+  currentSection: BasicEditorSectionId,
+): BasicEditorSectionId {
   if (targetId === "hero") return "appearance";
+  const isLinkTarget = targetId.startsWith("link-");
   if (
     targetId === "links-section" ||
-    targetId.startsWith("link-") ||
+    isLinkTarget ||
     targetId === "cards-section" ||
     targetId.startsWith("card-")
-  )
+  ) {
+    // Editing button appearance while already in Diseño keeps the visual
+    // controls (border, radius, color, typography) visible instead of
+    // throwing the user into Enlaces.
+    if (isLinkTarget && currentSection === "appearance") return "appearance";
     return "links";
+  }
   return "profile";
 }
 
@@ -56,7 +65,7 @@ function getLinkTarget(link: Partial<ProfileLink>, index: number) {
   return linkEditTarget(link.id || `profile-link-${index}`);
 }
 
-function getToolFocusTarget(targetId: string | null) {
+function getToolFocusTarget(targetId: string | null, activeSection: BasicEditorSectionId) {
   if (!targetId) return null;
   if (
     targetId === EDIT_TARGETS.avatar ||
@@ -64,8 +73,14 @@ function getToolFocusTarget(targetId: string | null) {
     targetId === EDIT_TARGETS.bio ||
     targetId === EDIT_TARGETS.footer ||
     targetId.startsWith("link-")
-  )
+  ) {
+    // When a button is selected while editing Diseño, scroll to the button
+    // style controls instead of a (non-rendered) link accordion.
+    if (activeSection === "appearance" && targetId.startsWith("link-")) {
+      return "button-style";
+    }
     return targetId;
+  }
   return null;
 }
 
@@ -130,10 +145,12 @@ function EditorPage() {
   const loadedUserId = useRef<string | null>(null);
   const canvasViewportRef = useRef<HTMLDivElement>(null);
   const targetsRef = useRef(new Map<string, HTMLElement>());
+  const activeSectionRef = useRef<BasicEditorSectionId>(activeSection);
+  activeSectionRef.current = activeSection;
 
   const handleTargetSelect = useCallback((targetId: string) => {
     setSelectedTarget(targetId);
-    setActiveSection(getSectionForTarget(targetId));
+    setActiveSection(getSectionForTarget(targetId, activeSectionRef.current));
     setIsContextPanelOpen(true);
   }, []);
 
@@ -447,7 +464,9 @@ function EditorPage() {
         onOpenTemplateGallery={() => setIsGalleryOpen(true)}
         selectedTemplateId={profile.template_id ?? null}
         contextSegments={getEditorContextSegments(activeSection, selectedTarget, isGalleryOpen, links)}
-        toolFocusTarget={getToolFocusTarget(selectedTarget)}
+        toolFocusTarget={getToolFocusTarget(selectedTarget, activeSection)}
+        activeSection={activeSection}
+        onSectionChange={handleSectionChange}
       />
       <MobileBottomNavbar activeSection={activeSection} onSectionChange={handleSectionChange} />
       <MobileTemplateGallery

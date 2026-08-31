@@ -39,7 +39,7 @@
 
 .mobile-bottom-navbar__items {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   height: 100%;
   padding: 17px 12px 8px;
   box-sizing: border-box;
@@ -59,6 +59,7 @@
   transition: all 0.2s;
   padding: 0;
   border-radius: 0;
+  text-decoration: none;
 }
 
 .mobile-bottom-navbar__item:hover {

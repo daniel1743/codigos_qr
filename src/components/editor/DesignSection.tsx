@@ -117,7 +117,7 @@ export function DesignSection({ profile, onChange, userId }: DesignSectionProps)
         </div>
       </div>
 
-      <div className="space-y-4 rounded-2xl border border-stone-200 bg-[#fffefa] p-4 shadow-[0_8px_24px_rgba(29,29,27,0.04)]">
+      <div data-tool-target="button-style" className="space-y-4 rounded-2xl border border-stone-200 bg-[#fffefa] p-4 shadow-[0_8px_24px_rgba(29,29,27,0.04)]">
         <Label className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500">Botones</Label>
         <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <Button variant={profile.button_radius === "none" && profile.button_style !== "soft" ? "default" : "outline"} onClick={() => onChange({ button_radius: "none", button_style: "solid" })} className="h-10 shrink-0 rounded-md border-stone-200 px-4 text-xs">Cuadrado</Button>
