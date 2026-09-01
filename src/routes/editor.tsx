@@ -421,7 +421,7 @@ function EditorPage() {
               onChange={setLinks}
               profile={profile}
               onProfileChange={updateProfile}
-              cardPresentationEnabled={selectedTemplate?.family !== "standalone"}
+              cardPresentationEnabled={selectedTemplate?.supportsCards === true}
               userId={session.user.id}
               selectedTarget={selectedTarget}
               onSelectTarget={handleTargetSelect}

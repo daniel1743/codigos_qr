@@ -2,7 +2,11 @@ import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import type { Profile } from "../../types/database";
-import { BASIC_EDITOR_FONTS } from "../../lib/basic-templates/config";
+import {
+  BASIC_EDITOR_FONTS,
+  isBasicProfessionalBadgeEnabled,
+  updateBasicProfessionalBadge,
+} from "../../lib/basic-templates/config";
 import { loadGoogleFont } from "../../lib/fonts";
 import { getBrowserSupabaseClient } from "../../lib/supabase/client";
 import { EDIT_TARGETS } from "../../types/basic-templates";
@@ -17,6 +21,7 @@ interface ProfileSectionProps {
   profile: Partial<Profile>;
   onChange: (updates: Partial<Profile>) => void;
   userId: string;
+  showProfessionalBadge?: boolean;
 }
 
 const MAX_AVATAR_BYTES = 3 * 1024 * 1024;
@@ -84,7 +89,12 @@ function FontChips({ value, onChange }: { value: string; onChange: (font: string
   );
 }
 
-export function ProfileSection({ profile, onChange, userId }: ProfileSectionProps) {
+export function ProfileSection({
+  profile,
+  onChange,
+  userId,
+  showProfessionalBadge = false,
+}: ProfileSectionProps) {
   const [uploading, setUploading] = useState(false);
   const supabase = getBrowserSupabaseClient();
 
@@ -337,6 +347,19 @@ export function ProfileSection({ profile, onChange, userId }: ProfileSectionProp
           maxLength={80}
           className="h-11 rounded-xl border-stone-200 bg-[#fffefa]"
         />
+        {showProfessionalBadge ? (
+          <div className="flex items-center justify-between gap-4 border-t border-stone-200 pt-3">
+            <div className="space-y-1">
+              <Label htmlFor="professional_badge">Mostrar insignia profesional</Label>
+              <p className="text-xs text-stone-500">Decorativa; aparece junto a tu profesión.</p>
+            </div>
+            <Switch
+              id="professional_badge"
+              checked={isBasicProfessionalBadgeEnabled(profile)}
+              onCheckedChange={(checked) => onChange(updateBasicProfessionalBadge(profile, checked))}
+            />
+          </div>
+        ) : null}
       </div>
 
       <div

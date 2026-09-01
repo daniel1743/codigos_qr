@@ -20,6 +20,8 @@ interface CardProps {
 export function Card({ card, palette, style, customization, headingFont, bodyFont }: CardProps) {
   const requestedMediaMode = card.mediaMode ?? (card.imageUrl ? "image" : "none");
   const mediaMode = requestedMediaMode === "image" && !card.imageUrl ? "none" : requestedMediaMode;
+  const mediaPosition = card.mediaPosition === "bottom" ? "bottom" : "right";
+  const focalY = Math.min(100, Math.max(0, Math.round(card.focalY ?? 50)));
   const hasMedia = mediaMode !== "none";
   const visual = buttonStyles(palette, style, customization);
   const isOutline = style.variant === "outline";
@@ -29,59 +31,74 @@ export function Card({ card, palette, style, customization, headingFont, bodyFon
 
   return (
     <div className="@container w-full min-w-0">
-      <div
-        className={`grid w-full min-w-0 overflow-hidden border ${
-          hasMedia ? "grid-cols-1 @min-[420px]:grid-cols-[minmax(0,3fr)_minmax(88px,1fr)]" : "grid-cols-1"
-        }`}
-        style={{
-          background: cardBackground,
-          border: visual.border,
-          borderRadius: card.cornerStyle === "square" ? "0px" : "18px",
-          color: cardColor,
-        }}
+      <a
+        href={card.ctaUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block w-full min-w-0 rounded-[18px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1d1d1b] focus-visible:ring-offset-2"
       >
-        <div className="flex min-w-0 flex-col justify-center gap-2 p-4 sm:p-5">
-          <h3
-            className="min-w-0 break-words text-base font-bold"
-            style={{ fontFamily: headingFont, fontWeight: customization.textWeight || 700 }}
-          >
-            {card.title}
-          </h3>
-          {card.description ? (
-            <p
-              className="min-w-0 break-words text-sm leading-relaxed"
-              style={{ color: isOutline ? palette.textMuted : cardColor, fontFamily: bodyFont }}
+        <div
+          className={`grid w-full min-w-0 overflow-hidden border ${
+            hasMedia && mediaPosition === "right"
+              ? "grid-cols-1 @min-[420px]:grid-cols-[minmax(0,3fr)_minmax(88px,1fr)]"
+              : "grid-cols-1"
+          }`}
+          style={{
+            background: cardBackground,
+            border: visual.border,
+            borderRadius: card.cornerStyle === "square" ? "0px" : "18px",
+            color: cardColor,
+          }}
+        >
+          <div className="flex min-w-0 flex-col justify-center gap-2 p-4 @min-[420px]:p-5">
+            <h3
+              className="min-w-0 break-words text-base font-bold"
+              style={{ fontFamily: headingFont, fontWeight: customization.textWeight || 700 }}
             >
-              {card.description}
-            </p>
-          ) : null}
-          <a
-            href={card.ctaUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-1 inline-flex min-h-10 max-w-full items-center self-start break-words px-4 py-2"
-            style={{
-              ...buttonStyles(palette, style, customization),
-              ...buttonLabelStyle(customization),
-              fontFamily: bodyFont,
-            }}
-          >
-            {card.ctaLabel}
-          </a>
-        </div>
-        {hasMedia ? (
-          <div className="relative min-h-28 min-w-0 overflow-hidden">
-            {mediaMode === "image" && card.imageUrl ? (
-              <img src={card.imageUrl} alt={card.title} className="absolute inset-0 h-full w-full object-cover" />
-            ) : mediaMode === "platform_icon" ? (
-              <PlatformIcon
-                className="absolute left-1/2 top-1/2 h-10 w-10 -translate-x-1/2 -translate-y-1/2"
-                aria-hidden="true"
-              />
+              {card.title}
+            </h3>
+            {card.description ? (
+              <p
+                className="min-w-0 break-words text-sm leading-relaxed"
+                style={{ color: isOutline ? palette.textMuted : cardColor, fontFamily: bodyFont }}
+              >
+                {card.description}
+              </p>
             ) : null}
+            <span
+              className="mt-2 inline-flex min-h-8 max-w-full items-center self-end break-words px-3 py-1.5 text-xs"
+              style={{
+                ...buttonStyles(palette, style, customization),
+                ...buttonLabelStyle(customization),
+                fontFamily: bodyFont,
+              }}
+            >
+              {card.ctaLabel}
+            </span>
           </div>
-        ) : null}
-      </div>
+          {hasMedia ? (
+            <div
+              className={`relative min-w-0 overflow-hidden ${
+                mediaPosition === "bottom" ? "min-h-40 w-full" : "min-h-28"
+              }`}
+            >
+              {mediaMode === "image" && card.imageUrl ? (
+                <img
+                  src={card.imageUrl}
+                  alt={card.title}
+                  className="absolute inset-0 h-full w-full object-cover"
+                  style={{ objectPosition: `50% ${focalY}%` }}
+                />
+              ) : mediaMode === "platform_icon" ? (
+                <PlatformIcon
+                  className="absolute left-1/2 top-1/2 h-10 w-10 -translate-x-1/2 -translate-y-1/2"
+                  aria-hidden="true"
+                />
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+      </a>
     </div>
   );
 }

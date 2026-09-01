@@ -4,6 +4,7 @@ import type {
   BasicTemplateContent,
   CardPresentation,
   CardMediaMode,
+  CardMediaPosition,
   CardCornerStyle,
   CardCtaLabel,
   LinkPresentation,
@@ -71,6 +72,9 @@ const SOCIAL_PLATFORMS: ReadonlySet<SocialPlatform> = new Set([
 ]);
 
 const BASIC_LINK_PRESENTATIONS_KEY = "basic_link_presentations";
+export const BASIC_PROFESSIONAL_BADGE_KEY = "professional_badge";
+export const BASIC_CARD_TITLE_MAX_LENGTH = 40;
+export const BASIC_CARD_DESCRIPTION_MAX_LENGTH = 120;
 
 interface StoredBasicLinkPresentation {
   presentation?: LinkPresentation;
@@ -98,12 +102,49 @@ function isCardMediaMode(value: unknown): value is CardMediaMode {
   return value === "image" || value === "platform_icon" || value === "none";
 }
 
+function isCardMediaPosition(value: unknown): value is CardMediaPosition {
+  return value === "right" || value === "bottom";
+}
+
 function isCardCornerStyle(value: unknown): value is CardCornerStyle {
   return value === "square" || value === "soft";
 }
 
 function isCardCtaLabel(value: unknown): value is CardCtaLabel {
   return BASIC_CARD_CTA_PRESETS.some((preset) => preset === value);
+}
+
+function normalizeCardText(value: unknown, fallback: string, maxLength: number): string {
+  const text = typeof value === "string" ? value.trim() : "";
+  return (text || fallback.trim()).slice(0, maxLength);
+}
+
+function normalizeCardDescription(value: unknown): string {
+  return typeof value === "string" ? value.trim().slice(0, BASIC_CARD_DESCRIPTION_MAX_LENGTH) : "";
+}
+
+function normalizeCardFocalY(value: unknown): number {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return 50;
+  return Math.min(100, Math.max(0, Math.round(parsed)));
+}
+
+export function isBasicProfessionalBadgeEnabled(profile: Partial<Profile>): boolean {
+  const templateConfig = profile.template_config;
+  return isRecord(templateConfig) && templateConfig[BASIC_PROFESSIONAL_BADGE_KEY] === true;
+}
+
+export function updateBasicProfessionalBadge(
+  profile: Partial<Profile>,
+  enabled: boolean,
+): Partial<Profile> {
+  const currentConfig = isRecord(profile.template_config) ? profile.template_config : {};
+  return {
+    template_config: {
+      ...currentConfig,
+      [BASIC_PROFESSIONAL_BADGE_KEY]: enabled,
+    },
+  };
 }
 
 /** Normalize compatibility aliases before Basic UI, storage projections and rendering. */
@@ -129,26 +170,26 @@ export function getBasicLinkPresentation(
   const fallbackMediaMode: CardMediaMode = link.social_cover_image_url ? "image" : "platform_icon";
   const imageUrl =
     hasOwn(storedCard, "imageUrl") && typeof storedCard.imageUrl === "string"
-      ? storedCard.imageUrl
-      : link.social_cover_image_url || "";
+      ? storedCard.imageUrl.trim()
+      : link.social_cover_image_url?.trim() || "";
 
   return {
     presentation: stored?.presentation === "card" ? "card" : "button",
     card: {
-      title:
-        typeof storedCard.title === "string" && storedCard.title.trim()
-          ? storedCard.title
-          : link.label || "Enlace",
-      description:
-        hasOwn(storedCard, "description") && typeof storedCard.description === "string"
-          ? storedCard.description
-          : link.subtitle || "",
+      title: normalizeCardText(storedCard.title, link.label || "Enlace", BASIC_CARD_TITLE_MAX_LENGTH),
+      description: hasOwn(storedCard, "description")
+        ? normalizeCardDescription(storedCard.description)
+        : normalizeCardDescription(link.subtitle || ""),
       ctaLabel: isCardCtaLabel(storedCard.ctaLabel)
         ? storedCard.ctaLabel
         : BASIC_CARD_CTA_PRESETS[0],
       mediaMode: isCardMediaMode(storedCard.mediaMode)
         ? storedCard.mediaMode
         : fallbackMediaMode,
+      mediaPosition: isCardMediaPosition(storedCard.mediaPosition)
+        ? storedCard.mediaPosition
+        : "right",
+      focalY: normalizeCardFocalY(storedCard.focalY),
       imageUrl,
       cornerStyle: isCardCornerStyle(storedCard.cornerStyle)
         ? storedCard.cornerStyle
@@ -327,6 +368,15 @@ function contrastRatio(first: string, second: string): number {
   return (lighter + 0.05) / (darker + 0.05);
 }
 
+/** Pick the most readable light/dark foreground for a solid action color. */
+export function resolveReadableTextColor(background: string, fallback: string): string {
+  if (!isHexColor(background)) return fallback;
+  if (isHexColor(fallback) && contrastRatio(background, fallback) >= 3) return fallback;
+  const lightRatio = contrastRatio(background, "#ffffff");
+  const darkRatio = contrastRatio(background, "#111111");
+  return lightRatio >= darkRatio ? "#ffffff" : "#111111";
+}
+
 function resolveDefaultButtonBorderColor(
   palette: PaletteConfig,
   style: ButtonStyleConfig,
@@ -437,6 +487,7 @@ export function buildBasicTemplateContent(
       heroUrl: profile.banner_url || "",
       footerEnabled: profile.footer_enabled ?? false,
       footerText: profile.footer_text || "",
+      professionalBadge: isBasicProfessionalBadgeEnabled(profile),
       ringEnabled: profile.ring_enabled ?? false,
       ringColor: profile.ring_color || "#000000",
       ringThickness: profile.ring_thickness || "thin",
@@ -465,6 +516,8 @@ export function buildBasicTemplateContent(
         enabled: link.enabled,
         ...(link.platform ? { platform: link.platform } : {}),
         mediaMode: link.card?.mediaMode,
+        mediaPosition: link.card?.mediaPosition,
+        focalY: link.card?.focalY,
         cornerStyle: link.card?.cornerStyle,
       })),
     socials: socialLinks,

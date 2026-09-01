@@ -1,4 +1,5 @@
 import type { EditTargetRegistry, PaletteConfig } from "@/types/basic-templates";
+import { BadgeCheck } from "lucide-react";
 import { EDIT_TARGETS } from "@/types/basic-templates";
 import { EditableTarget } from "../EditTarget";
 
@@ -45,6 +46,7 @@ export function Avatar({
 interface ProfileHeadingProps {
   name: string;
   subtitle: string;
+  professionalBadge?: boolean;
   bio: string;
   palette: PaletteConfig;
   headingFont: string;
@@ -68,6 +70,7 @@ interface ProfileHeadingProps {
 export function ProfileHeading({
   name,
   subtitle,
+  professionalBadge = false,
   bio,
   palette,
   headingFont,
@@ -92,6 +95,8 @@ export function ProfileHeading({
       : align === "right"
         ? "items-end text-right"
         : "items-start text-left";
+  const subtitleAlignClass =
+    align === "center" ? "justify-center" : align === "right" ? "justify-end" : "justify-start";
   const titleSizeValue =
     titleSize === "sm"
       ? "1.25rem"
@@ -162,16 +167,27 @@ export function ProfileHeading({
           active={highlightedTarget === EDIT_TARGETS.subtitle}
           className="mt-1 w-full"
         >
-          <p
-            className="w-full break-words text-sm font-medium"
-            style={{
-              color: palette.accent,
-              fontFamily: bodyFont,
-              ...(bioTextAlign ? { textAlign: bioTextAlign } : {}),
-            }}
-          >
-            {subtitle}
-          </p>
+          <div className={`flex w-full items-center gap-1.5 ${subtitleAlignClass}`}>
+            <p
+              className="min-w-0 break-words text-sm font-medium"
+              style={{
+                color: palette.accent,
+                fontFamily: bodyFont,
+                ...(bioTextAlign ? { textAlign: bioTextAlign } : {}),
+              }}
+            >
+              {subtitle}
+            </p>
+            {professionalBadge ? (
+              <span
+                className="shrink-0 text-[#D4AF37]"
+                aria-label="Insignia profesional"
+                title="Insignia profesional"
+              >
+                <BadgeCheck className="h-4 w-4" aria-hidden="true" />
+              </span>
+            ) : null}
+          </div>
         </EditableTarget>
       ) : null}
       {bio ? (

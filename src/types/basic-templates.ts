@@ -31,6 +31,7 @@ export interface ProfileContent {
   ringColor?: string;
   ringThickness?: string;
   avatarShape?: string;
+  professionalBadge?: boolean;
   titleColor?: string;
   bioColor?: string;
   titleFontFamily?: string;
@@ -55,6 +56,7 @@ export interface LinkItem {
 
 export type LinkPresentation = "button" | "card";
 export type CardMediaMode = "image" | "platform_icon" | "none";
+export type CardMediaPosition = "right" | "bottom";
 export type CardCornerStyle = "square" | "soft";
 export const BASIC_CARD_CTA_PRESETS = [
   "Visitar",
@@ -69,6 +71,8 @@ export interface CardPresentation {
   description?: string;
   ctaLabel: CardCtaLabel;
   mediaMode: CardMediaMode;
+  mediaPosition: CardMediaPosition;
+  focalY: number;
   imageUrl?: string;
   cornerStyle: CardCornerStyle;
 }
@@ -83,6 +87,8 @@ export interface CardItem {
   enabled: boolean;
   platform?: string;
   mediaMode?: CardMediaMode;
+  mediaPosition?: CardMediaPosition;
+  focalY?: number;
   cornerStyle?: CardCornerStyle;
 }
 

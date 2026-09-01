@@ -38,6 +38,8 @@ export function LinkPresentation({
           enabled: link.enabled,
           ...(link.platform ? { platform: link.platform } : {}),
           mediaMode: link.card.mediaMode,
+          mediaPosition: link.card.mediaPosition,
+          focalY: link.card.focalY,
           cornerStyle: link.card.cornerStyle,
         }}
         palette={palette}

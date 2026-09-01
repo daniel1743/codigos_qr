@@ -5,6 +5,7 @@ import type {
   LinkItem,
   PaletteConfig,
 } from "@/types/basic-templates";
+import { resolveReadableTextColor } from "@/lib/basic-templates/config";
 
 function shapeRadius(shape: ButtonStyleConfig["shape"]): string {
   if (shape === "pill") return "9999px";
@@ -31,7 +32,7 @@ export function buttonStyles(
   if (style.variant === "outline") {
     return {
       backgroundColor: "transparent",
-      color: palette.accent,
+      color: resolveReadableTextColor(palette.surface, palette.accent),
       border,
       borderRadius,
     };
@@ -39,14 +40,16 @@ export function buttonStyles(
   if (style.variant === "soft") {
     return {
       background: isGradient(palette.accent) ? palette.accent : `${palette.accent}1f`,
-      color: isGradient(palette.accent) ? palette.accentText : palette.accent,
+      color: isGradient(palette.accent)
+        ? palette.accentText
+        : resolveReadableTextColor(palette.accent, palette.accent),
       border,
       borderRadius,
     };
   }
   return {
     background: palette.accent,
-    color: palette.accentText,
+    color: resolveReadableTextColor(palette.accent, palette.accentText),
     border,
     borderRadius,
   };

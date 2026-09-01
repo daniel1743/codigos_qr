@@ -79,6 +79,7 @@ export function HeroCardsRenderer({
         <ProfileHeading
           name={profile.name}
           subtitle={profile.subtitle}
+          professionalBadge={profile.professionalBadge}
           bio={profile.bio}
           palette={palette}
           headingFont={fontPair.heading}

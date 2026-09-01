@@ -8,9 +8,12 @@ import {
   type CardCtaLabel,
   type CardCornerStyle,
   type CardMediaMode,
+  type CardMediaPosition,
   linkEditTarget,
 } from "../../types/basic-templates";
 import {
+  BASIC_CARD_DESCRIPTION_MAX_LENGTH,
+  BASIC_CARD_TITLE_MAX_LENGTH,
   detectBasicPlatformFromUrl,
   getBasicLinkPresentation,
   normalizeBasicPlatform,
@@ -371,9 +374,12 @@ export function LinksSection({
                                 })
                               }
                               placeholder="Ej: Reserva tu hora"
-                              maxLength={80}
+                              maxLength={BASIC_CARD_TITLE_MAX_LENGTH}
                               className="h-11 rounded-xl border-stone-200 bg-[#fffefa]"
                             />
+                            <p className="text-right text-xs tabular-nums text-stone-500">
+                              {card.title.length}/{BASIC_CARD_TITLE_MAX_LENGTH}
+                            </p>
                           </div>
                           <div className="space-y-2">
                             <Label htmlFor={`card-description-${link.id || index}`}>Descripción</Label>
@@ -386,9 +392,12 @@ export function LinksSection({
                                 })
                               }
                               placeholder="Una descripción breve"
-                              maxLength={160}
+                              maxLength={BASIC_CARD_DESCRIPTION_MAX_LENGTH}
                               className="h-11 rounded-xl border-stone-200 bg-[#fffefa]"
                             />
+                            <p className="text-right text-xs tabular-nums text-stone-500">
+                              {(card.description || "").length}/{BASIC_CARD_DESCRIPTION_MAX_LENGTH}
+                            </p>
                           </div>
                           <div className="grid grid-cols-1 gap-4 min-[420px]:grid-cols-2">
                             <div className="space-y-2">
@@ -444,28 +453,77 @@ export function LinksSection({
                               <option value="none">Sin media</option>
                             </select>
                           </div>
-                          {card.mediaMode === "image" ? (
+                          {card.mediaMode !== "none" ? (
                             <div className="space-y-2">
-                              <Label htmlFor={`card-image-${link.id || index}`}>Imagen</Label>
-                              <Input
-                                id={`card-image-${link.id || index}`}
-                                type="file"
-                                accept="image/png,image/jpeg,image/webp"
-                                onChange={(event) => handleCardImageUpload(index, event)}
-                                disabled={uploadingCardImage === index}
-                                className="h-11"
-                              />
-                              {uploadingCardImage === index ? (
-                                <p className="flex items-center gap-2 text-xs text-stone-500" role="status">
-                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                  Subiendo imagen...
-                                </p>
-                              ) : card.imageUrl ? (
-                                <p className="text-xs text-stone-500">Imagen lista para guardar.</p>
-                              ) : (
-                                <p className="text-xs text-amber-700">Sube una imagen para usar este modo.</p>
-                              )}
+                              <Label htmlFor={`card-media-position-${link.id || index}`}>
+                                Posición de media
+                              </Label>
+                              <select
+                                id={`card-media-position-${link.id || index}`}
+                                value={card.mediaPosition}
+                                onChange={(event) =>
+                                  updateCardPresentation(index, {
+                                    card: {
+                                      mediaPosition: event.target.value as CardMediaPosition,
+                                    },
+                                  })
+                                }
+                                className="h-11 w-full rounded-xl border border-stone-200 bg-[#fffefa] px-3 text-sm text-[#1d1d1b]"
+                              >
+                                <option value="right">Derecha</option>
+                                <option value="bottom">Abajo</option>
+                              </select>
                             </div>
+                          ) : null}
+                          {card.mediaMode === "image" ? (
+                            <>
+                              <div className="space-y-2">
+                                <Label htmlFor={`card-image-${link.id || index}`}>Imagen</Label>
+                                <Input
+                                  id={`card-image-${link.id || index}`}
+                                  type="file"
+                                  accept="image/png,image/jpeg,image/webp"
+                                  onChange={(event) => handleCardImageUpload(index, event)}
+                                  disabled={uploadingCardImage === index}
+                                  className="h-11"
+                                />
+                                {uploadingCardImage === index ? (
+                                  <p className="flex items-center gap-2 text-xs text-stone-500" role="status">
+                                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                    Subiendo imagen...
+                                  </p>
+                                ) : card.imageUrl ? (
+                                  <p className="text-xs text-stone-500">Imagen lista para guardar.</p>
+                                ) : (
+                                  <p className="text-xs text-amber-700">Sube una imagen para usar este modo.</p>
+                                )}
+                              </div>
+                              <div className="space-y-2">
+                                <div className="flex items-center justify-between gap-3">
+                                  <Label htmlFor={`card-focal-${link.id || index}`}>Encuadre de imagen</Label>
+                                  <span className="text-xs tabular-nums text-stone-500">{card.focalY}%</span>
+                                </div>
+                                <Input
+                                  id={`card-focal-${link.id || index}`}
+                                  type="range"
+                                  min={0}
+                                  max={100}
+                                  step={1}
+                                  value={card.focalY}
+                                  onChange={(event) =>
+                                    updateCardPresentation(index, {
+                                      card: { focalY: Number(event.target.value) },
+                                    })
+                                  }
+                                  className="h-8 accent-[#1d1d1b]"
+                                />
+                                <div className="flex justify-between text-[11px] text-stone-500">
+                                  <span>Arriba</span>
+                                  <span>Centro</span>
+                                  <span>Abajo</span>
+                                </div>
+                              </div>
+                            </>
                           ) : null}
                         </div>
                       ) : null}
