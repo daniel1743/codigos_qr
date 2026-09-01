@@ -240,6 +240,11 @@ export default function Template06({
             </EditableTarget>
           ) : null}
 
+          <EditableTarget
+            id={EDIT_TARGETS.socials}
+            registry={targetRegistry}
+            active={highlightedTarget === EDIT_TARGETS.socials}
+          >
           <div
             style={{
               display: "flex",
@@ -274,6 +279,7 @@ export default function Template06({
               </a>
             ))}
           </div>
+          </EditableTarget>
         </div>
 
         <div style={{ padding: "26px 18px 0", display: "grid", gap: standaloneStyle?.button.spacing ?? 16 }}>

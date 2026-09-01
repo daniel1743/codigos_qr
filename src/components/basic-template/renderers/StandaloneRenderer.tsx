@@ -28,6 +28,17 @@ const STANDALONE_CONTRACT_CSS = `
 .standalone-contract [data-edit-target="profile-avatar"] img {
   border-radius: var(--standalone-avatar-radius) !important;
 }
+.standalone-contract [data-edit-target="profile-avatar"],
+.standalone-contract [data-edit-target="profile-avatar"] img {
+  border-width: var(--standalone-avatar-ring-width) !important;
+  border-color: var(--standalone-avatar-ring-color, transparent) !important;
+}
+.standalone-contract .amanda-hero::after,
+.standalone-contract .adriana::before,
+.standalone-contract .eudora::before,
+.standalone-contract .eudora::after {
+  opacity: var(--standalone-overlay-opacity, 1) !important;
+}
 @media (max-width: 420px) {
   .standalone-contract .amanda-links,
   .standalone-contract .eudora-links {

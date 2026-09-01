@@ -246,7 +246,8 @@ export function buildStandaloneStyle(config: BasicTemplateConfig): StandaloneSty
             ? "5px"
             : avatarRing.enabled
               ? "3px"
-              : undefined,
+              : "0px",
+      "--standalone-overlay-opacity": Math.min(100, Math.max(0, config.heroFusionStrength)) / 100,
     },
   };
 }

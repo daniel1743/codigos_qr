@@ -130,7 +130,7 @@ export const BUTTON_STYLES = {
 /* Template catalog                                                    */
 /* ------------------------------------------------------------------ */
 
-export const TEMPLATES: TemplateDefinition[] = [
+const ALL_TEMPLATES: TemplateDefinition[] = [
   {
     id: "beauty-curve",
     name: "Beauty Curve",
@@ -153,7 +153,6 @@ export const TEMPLATES: TemplateDefinition[] = [
     editable: [
       { key: "avatar", label: "Avatar", type: "avatar" },
       { key: "name", label: "Nombre", type: "name" },
-      { key: "subtitle", label: "Profesión / subtítulo", type: "subtitle" },
       { key: "bio", label: "Biografía", type: "bio" },
       { key: "hero", label: "Imagen hero", type: "hero" },
       { key: "socials", label: "Redes sociales", type: "socials" },
@@ -194,7 +193,6 @@ export const TEMPLATES: TemplateDefinition[] = [
     editable: [
       { key: "avatar", label: "Avatar", type: "avatar" },
       { key: "name", label: "Nombre", type: "name" },
-      { key: "subtitle", label: "Subtítulo", type: "subtitle" },
       { key: "bio", label: "Biografía", type: "bio" },
       { key: "hero", label: "Hero", type: "hero" },
       { key: "socials", label: "Redes sociales", type: "socials" },
@@ -237,7 +235,6 @@ export const TEMPLATES: TemplateDefinition[] = [
     editable: [
       { key: "avatar", label: "Avatar", type: "avatar" },
       { key: "name", label: "Nombre", type: "name" },
-      { key: "subtitle", label: "Subtítulo", type: "subtitle" },
       { key: "bio", label: "Biografía", type: "bio" },
       { key: "hero", label: "Hero", type: "hero" },
       { key: "socials", label: "Redes sociales", type: "socials" },
@@ -280,7 +277,6 @@ export const TEMPLATES: TemplateDefinition[] = [
     editable: [
       { key: "avatar", label: "Avatar", type: "avatar" },
       { key: "name", label: "Nombre", type: "name" },
-      { key: "subtitle", label: "Cargo / subtítulo", type: "subtitle" },
       { key: "bio", label: "Biografía", type: "bio" },
       { key: "hero", label: "Hero", type: "hero" },
       { key: "links", label: "Enlaces", type: "links" },
@@ -322,7 +318,6 @@ export const TEMPLATES: TemplateDefinition[] = [
     editable: [
       { key: "avatar", label: "Avatar", type: "avatar" },
       { key: "name", label: "Nombre", type: "name" },
-      { key: "subtitle", label: "Profesión", type: "subtitle" },
       { key: "bio", label: "Descripción", type: "bio" },
       { key: "hero", label: "Imagen de fondo", type: "hero" },
       { key: "links", label: "Enlaces", type: "links" },
@@ -357,7 +352,6 @@ export const TEMPLATES: TemplateDefinition[] = [
     editable: [
       { key: "avatar", label: "Avatar", type: "avatar" },
       { key: "name", label: "Nombre", type: "name" },
-      { key: "subtitle", label: "Profesión", type: "subtitle" },
       { key: "bio", label: "Descripción", type: "bio" },
       { key: "hero", label: "Imagen de fondo", type: "hero" },
       { key: "links", label: "Enlaces", type: "links" },
@@ -393,7 +387,6 @@ export const TEMPLATES: TemplateDefinition[] = [
     editable: [
       { key: "avatar", label: "Avatar", type: "avatar" },
       { key: "name", label: "Nombre", type: "name" },
-      { key: "subtitle", label: "Profesión", type: "subtitle" },
       { key: "bio", label: "Descripción", type: "bio" },
       { key: "hero", label: "Imagen de fondo", type: "hero" },
       { key: "links", label: "Enlaces", type: "links" },
@@ -428,7 +421,6 @@ export const TEMPLATES: TemplateDefinition[] = [
     editable: [
       { key: "avatar", label: "Avatar", type: "avatar" },
       { key: "name", label: "Nombre", type: "name" },
-      { key: "subtitle", label: "Profesión", type: "subtitle" },
       { key: "bio", label: "Descripción", type: "bio" },
       { key: "hero", label: "Imagen de fondo", type: "hero" },
       { key: "cards", label: "Cards de servicios", type: "cards" },
@@ -451,7 +443,6 @@ export const TEMPLATES: TemplateDefinition[] = [
     structure: { family: "standalone", heroStyle: "straight", layout: "locked", locked: ["layout", "diseño"] },
     editable: [
       { key: "name", label: "Nombre", type: "name" },
-      { key: "subtitle", label: "Profesión", type: "subtitle" },
       { key: "bio", label: "Descripción", type: "bio" },
       { key: "hero", label: "Imagen hero", type: "hero" },
       { key: "socials", label: "Redes sociales", type: "socials" },
@@ -476,7 +467,6 @@ export const TEMPLATES: TemplateDefinition[] = [
     editable: [
       { key: "avatar", label: "Avatar", type: "avatar" },
       { key: "name", label: "Nombre", type: "name" },
-      { key: "subtitle", label: "Profesión", type: "subtitle" },
       { key: "hero", label: "Banner", type: "hero" },
       { key: "socials", label: "Redes sociales", type: "socials" },
       { key: "cards", label: "Galería", type: "cards" },
@@ -500,7 +490,6 @@ export const TEMPLATES: TemplateDefinition[] = [
     editable: [
       { key: "avatar", label: "Avatar", type: "avatar" },
       { key: "name", label: "Nombre", type: "name" },
-      { key: "subtitle", label: "Profesión", type: "subtitle" },
       { key: "hero", label: "Banner", type: "hero" },
       { key: "socials", label: "Redes sociales", type: "socials" },
       { key: "links", label: "Enlaces", type: "links" },
@@ -524,7 +513,6 @@ export const TEMPLATES: TemplateDefinition[] = [
     editable: [
       { key: "avatar", label: "Avatar", type: "avatar" },
       { key: "name", label: "Nombre", type: "name" },
-      { key: "subtitle", label: "Profesión", type: "subtitle" },
       { key: "hero", label: "Banner", type: "hero" },
       { key: "socials", label: "Redes sociales", type: "socials" },
       { key: "links", label: "Enlaces", type: "links" },
@@ -548,7 +536,6 @@ export const TEMPLATES: TemplateDefinition[] = [
     editable: [
       { key: "avatar", label: "Avatar", type: "avatar" },
       { key: "name", label: "Nombre", type: "name" },
-      { key: "subtitle", label: "Profesión", type: "subtitle" },
       { key: "bio", label: "Descripción", type: "bio" },
       { key: "hero", label: "Imagen hero", type: "hero" },
       { key: "socials", label: "Redes sociales", type: "socials" },
@@ -573,7 +560,6 @@ export const TEMPLATES: TemplateDefinition[] = [
     editable: [
       { key: "avatar", label: "Avatar", type: "avatar" },
       { key: "name", label: "Nombre", type: "name" },
-      { key: "subtitle", label: "Profesión", type: "subtitle" },
       { key: "bio", label: "Descripción", type: "bio" },
       { key: "socials", label: "Redes sociales", type: "socials" },
       { key: "cards", label: "Cards", type: "cards" },
@@ -588,6 +574,22 @@ export const TEMPLATES: TemplateDefinition[] = [
     maxCards: 6,
   },
 ];
+
+const BASIC_SURVIVOR_IDS = new Set([
+  "beauty-curve",
+  "luxury-fusion",
+  "beauty-catalog",
+  "executive-straight",
+  "amanda",
+  "adriana",
+  "eudora",
+  "sage",
+  "silver",
+]);
+
+export const TEMPLATES: TemplateDefinition[] = ALL_TEMPLATES.filter((template) =>
+  BASIC_SURVIVOR_IDS.has(template.id),
+);
 
 const TEMPLATE_BY_ID = new Map(TEMPLATES.map((t) => [t.id, t]));
 
