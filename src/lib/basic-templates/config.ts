@@ -2,6 +2,10 @@ import type {
   ButtonCustomizationConfig,
   BasicTemplateConfig,
   BasicTemplateContent,
+  CardPresentation,
+  CardMediaMode,
+  CardCornerStyle,
+  LinkPresentation,
   ButtonStyleConfig,
   FontPairConfig,
   PaletteConfig,
@@ -63,6 +67,143 @@ const SOCIAL_PLATFORMS: ReadonlySet<SocialPlatform> = new Set([
   "website",
   "email",
 ]);
+
+const BASIC_LINK_PRESENTATIONS_KEY = "basic_link_presentations";
+
+interface StoredBasicLinkPresentation {
+  presentation?: LinkPresentation;
+  card?: Partial<CardPresentation>;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function getStoredBasicLinkPresentation(profile: Partial<Profile>, linkId: string) {
+  const templateConfig = profile.template_config;
+  if (!isRecord(templateConfig)) return undefined;
+  const presentations = templateConfig[BASIC_LINK_PRESENTATIONS_KEY];
+  if (!isRecord(presentations)) return undefined;
+  const stored = presentations[linkId];
+  return isRecord(stored) ? (stored as StoredBasicLinkPresentation) : undefined;
+}
+
+function isCardMediaMode(value: unknown): value is CardMediaMode {
+  return value === "image" || value === "platform_icon" || value === "none";
+}
+
+function isCardCornerStyle(value: unknown): value is CardCornerStyle {
+  return value === "square" || value === "soft";
+}
+
+/** Resolve persisted Basic presentation metadata without changing link identity. */
+export function getBasicLinkPresentation(
+  profile: Partial<Profile>,
+  link: Partial<ProfileLink>,
+): { presentation: LinkPresentation; card: CardPresentation } {
+  const linkId = link.id || "";
+  const stored = linkId ? getStoredBasicLinkPresentation(profile, linkId) : undefined;
+  const storedCard = isRecord(stored?.card) ? stored.card : {};
+  const fallbackMediaMode: CardMediaMode = link.social_cover_image_url ? "image" : "platform_icon";
+
+  return {
+    presentation: stored?.presentation === "card" ? "card" : "button",
+    card: {
+      title:
+        typeof storedCard.title === "string" && storedCard.title.trim()
+          ? storedCard.title
+          : link.label || "Enlace",
+      description:
+        typeof storedCard.description === "string"
+          ? storedCard.description
+          : link.subtitle || "",
+      ctaLabel:
+        typeof storedCard.ctaLabel === "string" && storedCard.ctaLabel.trim()
+          ? storedCard.ctaLabel
+          : "Visitar",
+      mediaMode: isCardMediaMode(storedCard.mediaMode)
+        ? storedCard.mediaMode
+        : fallbackMediaMode,
+      imageUrl: link.social_cover_image_url || "",
+      cornerStyle: isCardCornerStyle(storedCard.cornerStyle)
+        ? storedCard.cornerStyle
+        : "soft",
+    },
+  };
+}
+
+/** Update only the namespaced Basic presentation JSON already stored on profiles. */
+export function updateBasicLinkPresentation(
+  profile: Partial<Profile>,
+  linkId: string,
+  updates: StoredBasicLinkPresentation,
+): Partial<Profile> {
+  const currentConfig = isRecord(profile.template_config) ? profile.template_config : {};
+  const currentPresentations = isRecord(currentConfig[BASIC_LINK_PRESENTATIONS_KEY])
+    ? currentConfig[BASIC_LINK_PRESENTATIONS_KEY]
+    : {};
+  const current = isRecord(currentPresentations[linkId])
+    ? (currentPresentations[linkId] as StoredBasicLinkPresentation)
+    : {};
+
+  return {
+    template_config: {
+      ...currentConfig,
+      [BASIC_LINK_PRESENTATIONS_KEY]: {
+        ...currentPresentations,
+        [linkId]: {
+          ...current,
+          ...updates,
+          ...(updates.card
+            ? { card: { ...(current.card || {}), ...updates.card } }
+            : {}),
+        },
+      },
+    },
+  };
+}
+
+/** Remap unsaved temporary link keys after the database assigns real link IDs. */
+export function remapBasicLinkPresentationIds(
+  templateConfig: unknown,
+  idMap: Record<string, string>,
+): unknown {
+  if (!isRecord(templateConfig)) return templateConfig;
+  const presentations = templateConfig[BASIC_LINK_PRESENTATIONS_KEY];
+  if (!isRecord(presentations)) return templateConfig;
+
+  const remapped = { ...presentations };
+  for (const [temporaryId, persistedId] of Object.entries(idMap)) {
+    if (temporaryId in remapped) {
+      remapped[persistedId] = remapped[temporaryId];
+      delete remapped[temporaryId];
+    }
+  }
+
+  return { ...templateConfig, [BASIC_LINK_PRESENTATIONS_KEY]: remapped };
+}
+
+/** Return the existing platform IDs used by PlatformPicker/icon mapping. */
+export function detectBasicPlatformFromUrl(value: string): SocialPlatform | null {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+
+  try {
+    const url = new URL(/^[a-z][a-z\d+.-]*:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`);
+    const host = url.hostname.toLowerCase().replace(/^www\./, "");
+    if (host === "instagram.com" || host.endsWith(".instagram.com")) return "instagram";
+    if (host === "tiktok.com" || host.endsWith(".tiktok.com")) return "tiktok";
+    if (host === "youtube.com" || host.endsWith(".youtube.com") || host === "youtu.be") return "youtube";
+    if (host === "wa.me" || host === "whatsapp.com" || host.endsWith(".whatsapp.com")) return "whatsapp";
+    if (host === "facebook.com" || host.endsWith(".facebook.com")) return "facebook";
+    if (host === "linkedin.com" || host.endsWith(".linkedin.com")) return "linkedin";
+    if (host === "x.com" || host.endsWith(".x.com") || host === "twitter.com" || host.endsWith(".twitter.com")) return "twitter";
+  } catch {
+    return null;
+  }
+
+  return null;
+}
 
 export const BASIC_EDITOR_FONTS = [
   "Inter",
@@ -232,12 +373,19 @@ export function buildBasicTemplateContent(
   profile: Partial<Profile>,
   links: Partial<ProfileLink>[],
 ): BasicTemplateContent {
-  const normalizedLinks = links.map((link, index) => ({
-    id: link.id || `profile-link-${index}`,
-    label: link.label || "Enlace",
-    url: link.url || "",
-    enabled: link.enabled ?? true,
-  }));
+  const normalizedLinks = links.map((link, index) => {
+    const linkId = link.id || `profile-link-${index}`;
+    const presentation = getBasicLinkPresentation(profile, { ...link, id: linkId });
+    return {
+      id: linkId,
+      label: link.label || "Enlace",
+      url: link.url || "",
+      enabled: link.enabled ?? true,
+      platform: typeof link.platform === "string" ? link.platform : undefined,
+      presentation: presentation.presentation,
+      card: presentation.card,
+    };
+  });
   const socialLinks = links.flatMap((link, index) => {
     const platform = typeof link.platform === "string" ? link.platform : "";
     if (!SOCIAL_PLATFORMS.has(platform as SocialPlatform)) return [];
@@ -279,15 +427,20 @@ export function buildBasicTemplateContent(
       bioAlign: profile.bio_align,
     },
     links: normalizedLinks,
-    cards: links.map((link, index) => ({
-      id: link.id || `profile-card-${index}`,
-      imageUrl: link.social_cover_image_url || "",
-      title: link.label || "Enlace",
-      description: link.subtitle || "",
-      ctaLabel: link.label || "Abrir enlace",
-      ctaUrl: link.url || "",
-      enabled: link.enabled ?? true,
-    })),
+    cards: normalizedLinks
+      .filter((link) => link.presentation === "card")
+      .map((link) => ({
+        id: link.id,
+        imageUrl: link.card?.imageUrl || "",
+        title: link.card?.title || link.label,
+        description: link.card?.description || "",
+        ctaLabel: link.card?.ctaLabel || "Visitar",
+        ctaUrl: link.url,
+        enabled: link.enabled,
+        platform: link.platform,
+        mediaMode: link.card?.mediaMode,
+        cornerStyle: link.card?.cornerStyle,
+      })),
     socials: socialLinks,
     contact: {
       email: contactValue(emailLink, "mailto:"),

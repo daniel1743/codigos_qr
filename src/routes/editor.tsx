@@ -16,7 +16,11 @@ import { PublicProfileView } from "../components/profile/PublicProfileView";
 import { MobileTemplateGallery } from "../components/editor/MobileTemplateGallery";
 import { BasicTemplateRenderer } from "../components/basic-template/BasicTemplateRenderer";
 import { getTemplates } from "../lib/basic-templates/catalog";
-import { buildBasicTemplateContent, buildConfig } from "../lib/basic-templates/config";
+import {
+  buildBasicTemplateContent,
+  buildConfig,
+  remapBasicLinkPresentationIds,
+} from "../lib/basic-templates/config";
 import { loadGoogleFont } from "../lib/fonts";
 import { generatePublicId, getInternalSlugFromPublicId } from "../lib/publicId";
 import { getBrowserSupabaseClient } from "../lib/supabase/client";
@@ -316,19 +320,31 @@ function EditorPage() {
         await linkService.deleteProfileLink(supabase, link.id);
       }
 
+      const createdLinkIds: Record<string, string> = {};
       for (const link of normalizedLinks) {
         if (link.id?.startsWith("temp-")) {
           const { id: _id, ...newLink } = link;
-          await linkService.createProfileLink(supabase, {
+          const createdLink = await linkService.createProfileLink(supabase, {
             ...newLink,
             profile_id: currentProfileId,
             platform: newLink.platform || "website",
             label: newLink.label || "Enlace",
             url: newLink.url || "",
           });
+          createdLinkIds[link.id] = createdLink.id;
         } else if (link.id) {
           await linkService.updateProfileLink(supabase, link.id, link);
         }
+      }
+
+      if (Object.keys(createdLinkIds).length > 0) {
+        const templateConfig = remapBasicLinkPresentationIds(
+          profilePayload.template_config,
+          createdLinkIds,
+        );
+        finalProfile = await profileService.updateProfile(supabase, currentProfileId, {
+          template_config: templateConfig,
+        });
       }
 
       const refreshedLinks = await linkService.getProfileLinks(supabase, currentProfileId);
@@ -399,6 +415,9 @@ function EditorPage() {
             <LinksSection
               links={links}
               onChange={setLinks}
+              profile={profile}
+              onProfileChange={updateProfile}
+              cardPresentationEnabled={selectedTemplate?.family !== "standalone"}
               userId={session.user.id}
               selectedTarget={selectedTarget}
               onSelectTarget={handleTargetSelect}

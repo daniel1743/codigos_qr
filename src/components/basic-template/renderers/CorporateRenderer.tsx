@@ -2,7 +2,7 @@ import type { BasicTemplateRendererProps } from "@/types/basic-templates";
 import { Avatar, ProfileHeading, TemplateFooter } from "../primitives/Identity";
 import { Hero } from "../primitives/Hero";
 import { ContactBlock } from "../primitives/card";
-import { LinkButton } from "../primitives/button";
+import { LinkPresentation } from "../primitives/LinkPresentation";
 import { EditableTarget } from "../EditTarget";
 import { EDIT_TARGETS, linkEditTarget } from "@/types/basic-templates";
 
@@ -108,11 +108,12 @@ export function CorporateRenderer({
                 registry={targetRegistry}
                 active={highlightedTarget === linkEditTarget(link.id)}
               >
-                <LinkButton
+                <LinkPresentation
                   link={link}
                   palette={palette}
                   style={buttonStyle}
                   customization={buttonCustomization}
+                  headingFont={fontPair.heading}
                   bodyFont={fontPair.body}
                 />
               </EditableTarget>

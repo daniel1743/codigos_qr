@@ -31,6 +31,11 @@ const SOCIAL_ICONS: Record<SocialPlatform, LucideIcon> = {
   email: Mail,
 };
 
+export function getSocialIcon(platform: string): LucideIcon {
+  const normalized = platform === "x" ? "twitter" : platform;
+  return SOCIAL_ICONS[normalized as SocialPlatform] || Globe;
+}
+
 interface SocialRowProps {
   socials: SocialItem[];
   palette: PaletteConfig;
@@ -50,7 +55,7 @@ export function SocialRow({ socials, palette, targetRegistry, highlightedTarget 
       className="flex w-full flex-wrap items-center justify-center gap-3"
     >
       {visible.map((social) => {
-        const Icon = SOCIAL_ICONS[social.platform];
+        const Icon = getSocialIcon(social.platform);
         return (
           <EditableTarget
             key={social.id}

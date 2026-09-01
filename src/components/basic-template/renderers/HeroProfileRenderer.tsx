@@ -1,7 +1,7 @@
 import type { BasicTemplateRendererProps } from "@/types/basic-templates";
 import { Avatar, ProfileHeading, TemplateFooter } from "../primitives/Identity";
 import { Hero } from "../primitives/Hero";
-import { LinkButton } from "../primitives/button";
+import { LinkPresentation } from "../primitives/LinkPresentation";
 import { SocialRow } from "../primitives/social";
 import { EditableTarget } from "../EditTarget";
 import { EDIT_TARGETS, linkEditTarget } from "@/types/basic-templates";
@@ -121,11 +121,12 @@ export function HeroProfileRenderer({
                 registry={targetRegistry}
                 active={highlightedTarget === linkEditTarget(link.id)}
               >
-                <LinkButton
+                <LinkPresentation
                   link={link}
                   palette={palette}
                   style={buttonStyle}
                   customization={buttonCustomization}
+                  headingFont={fontPair.heading}
                   bodyFont={fontPair.body}
                 />
               </EditableTarget>

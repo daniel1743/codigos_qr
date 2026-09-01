@@ -2,9 +2,10 @@ import type { BasicTemplateRendererProps } from "@/types/basic-templates";
 import { Avatar, ProfileHeading, TemplateFooter } from "../primitives/Identity";
 import { Hero } from "../primitives/Hero";
 import { Card } from "../primitives/card";
+import { LinkPresentation } from "../primitives/LinkPresentation";
 import { SocialRow } from "../primitives/social";
 import { EditableTarget } from "../EditTarget";
-import { cardEditTarget, EDIT_TARGETS } from "@/types/basic-templates";
+import { cardEditTarget, EDIT_TARGETS, linkEditTarget } from "@/types/basic-templates";
 
 /**
  * hero_cards family renderer — used by Beauty Catalog.
@@ -24,8 +25,12 @@ export function HeroCardsRenderer({
     heroFusionStrength,
     template,
   } = config;
-  const { profile, cards, socials } = content;
-  const visibleCards = cards.filter((c) => c.enabled);
+  const { profile, links, cards, socials } = content;
+  const hasPresentationAwareLinks = links.some((link) => link.presentation !== undefined);
+  const visibleLinks = hasPresentationAwareLinks ? links.filter((link) => link.enabled) : [];
+  const visibleCards = cards.filter(
+    (card) => card.enabled && !links.some((link) => link.id === card.id),
+  );
 
   return (
     <div
@@ -99,6 +104,34 @@ export function HeroCardsRenderer({
           targetRegistry={targetRegistry}
           highlightedTarget={highlightedTarget}
         />
+
+        {visibleLinks.length > 0 ? (
+          <EditableTarget
+            id={EDIT_TARGETS.links}
+            registry={targetRegistry}
+            active={highlightedTarget === EDIT_TARGETS.links}
+            className="flex w-full flex-col"
+            style={{ gap: buttonCustomization.spacing }}
+          >
+            {visibleLinks.map((link) => (
+              <EditableTarget
+                key={link.id}
+                id={linkEditTarget(link.id)}
+                registry={targetRegistry}
+                active={highlightedTarget === linkEditTarget(link.id)}
+              >
+                <LinkPresentation
+                  link={link}
+                  palette={palette}
+                  style={buttonStyle}
+                  customization={buttonCustomization}
+                  headingFont={fontPair.heading}
+                  bodyFont={fontPair.body}
+                />
+              </EditableTarget>
+            ))}
+          </EditableTarget>
+        ) : null}
 
         {visibleCards.length > 0 ? (
           <EditableTarget
