@@ -28,6 +28,7 @@ export interface Template04Link {
 export interface Template04Props {
   name: string;
   profession: string;
+  description?: string;
   avatarUrl: string;
   bannerUrl: string;
   socials: Template04Social[];
@@ -127,6 +128,7 @@ export function Template04Icon({
 export default function Template04({
   name,
   profession,
+  description,
   avatarUrl,
   bannerUrl,
   socials,
@@ -196,6 +198,9 @@ export default function Template04({
               borderRadius: "50%",
               background: "#fff",
               padding: 8,
+              border: standaloneStyle?.avatarRing.enabled
+                ? `${standaloneStyle.avatarRing.thickness === "thin" ? 2 : standaloneStyle.avatarRing.thickness === "thick" ? 5 : 3}px solid ${standaloneStyle.avatarRing.color || primaryColor}`
+                : undefined,
               boxSizing: "border-box",
               boxShadow: "0 8px 20px rgba(0,0,0,.15)",
             }}
@@ -246,6 +251,22 @@ export default function Template04({
           >
             {profession}
           </p>
+          {description ? (
+            <p
+              style={{
+                margin: "12px auto 0",
+                maxWidth: 330,
+                fontFamily: standaloneStyle?.bio.fontFamily,
+                fontSize: standaloneStyle?.bio.size ?? 14,
+                fontWeight: standaloneStyle?.bio.weight,
+                textAlign: standaloneStyle?.bio.align ?? "center",
+                color: standaloneStyle?.bio.color ?? "#6f6f6f",
+                lineHeight: 1.45,
+              }}
+            >
+              {description}
+            </p>
+          ) : null}
 
           <div
             style={{

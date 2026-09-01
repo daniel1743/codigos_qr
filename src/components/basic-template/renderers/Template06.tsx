@@ -27,6 +27,7 @@ export interface Template06Link {
 export interface Template06Props {
   name: string;
   profession: string;
+  description?: string;
   avatarUrl: string;
   bannerUrl: string;
   socials: Template06Social[];
@@ -109,6 +110,7 @@ function Icon({ type }: { type: Template06SocialType }) {
 export default function Template06({
   name,
   profession,
+  description,
   avatarUrl,
   bannerUrl,
   socials,
@@ -193,6 +195,22 @@ export default function Template06({
           <p style={{ margin: "2px 0 0", fontFamily: standaloneStyle?.bio.fontFamily, fontSize: standaloneStyle?.bio.size ?? 16, fontWeight: standaloneStyle?.bio.weight, color: standaloneStyle?.bio.color ?? "#3a3a3a", textAlign: standaloneStyle?.bio.align }}>
             {profession}
           </p>
+          {description ? (
+            <p
+              style={{
+                margin: "10px auto 0",
+                maxWidth: 330,
+                fontFamily: standaloneStyle?.bio.fontFamily,
+                fontSize: standaloneStyle?.bio.size ?? 14,
+                fontWeight: standaloneStyle?.bio.weight,
+                color: standaloneStyle?.bio.color ?? "#4f4f4f",
+                textAlign: standaloneStyle?.bio.align ?? "center",
+                lineHeight: 1.45,
+              }}
+            >
+              {description}
+            </p>
+          ) : null}
 
           <div
             style={{
