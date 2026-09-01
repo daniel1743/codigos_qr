@@ -66,7 +66,7 @@ export function Card({ card, palette, style, customization, headingFont, bodyFon
               </p>
             ) : null}
             <span
-              className="mt-2 inline-flex min-h-8 max-w-full items-center self-end break-words px-3 py-1.5 text-xs"
+              className="mt-2 inline-flex w-fit min-h-8 max-w-full items-center self-end break-words px-3 py-1.5 text-xs"
               style={{
                 ...buttonStyles(palette, style, customization),
                 ...buttonLabelStyle(customization),
@@ -79,7 +79,7 @@ export function Card({ card, palette, style, customization, headingFont, bodyFon
           {hasMedia ? (
             <div
               className={`relative min-w-0 overflow-hidden ${
-                mediaPosition === "bottom" ? "min-h-40 w-full" : "min-h-28"
+                mediaPosition === "bottom" ? "h-40 w-full" : "min-h-28"
               }`}
             >
               {mediaMode === "image" && card.imageUrl ? (

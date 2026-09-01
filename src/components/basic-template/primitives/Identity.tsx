@@ -171,7 +171,7 @@ export function ProfileHeading({
             <p
               className="min-w-0 break-words text-sm font-medium"
               style={{
-                color: palette.accent,
+                color: bioColor || palette.textMuted,
                 fontFamily: bodyFont,
                 ...(bioTextAlign ? { textAlign: bioTextAlign } : {}),
               }}
