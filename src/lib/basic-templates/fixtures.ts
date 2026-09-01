@@ -1,3 +1,4 @@
+import { BASIC_CARD_CTA_PRESETS } from "@/types/basic-templates";
 import type { BasicTemplateContent } from "@/types/basic-templates";
 import { getTemplate } from "./catalog";
 import { gradientImage, portraitImage } from "./placeholder";
@@ -27,7 +28,7 @@ function beautyContent(): BasicTemplateContent {
         imageUrl: gradientImage({ from: "#E9C6C0", to: "#C98A7D", label: "Novias", decoration: "product", width: 600, height: 400 }),
         title: "Maquillaje de novia",
         description: "Look duradero y natural para tu gran día, con prueba previa incluida.",
-        ctaLabel: "Ver detalles",
+        ctaLabel: BASIC_CARD_CTA_PRESETS[3],
         ctaUrl: "https://example.com/novias",
         enabled: true,
       },
@@ -36,7 +37,7 @@ function beautyContent(): BasicTemplateContent {
         imageUrl: gradientImage({ from: "#EAD4C8", to: "#B98A70", label: "Editorial", decoration: "product", width: 600, height: 400 }),
         title: "Editorial & moda",
         description: "Maquillaje de alto impacto para sesiones fotográficas y pasarelas.",
-        ctaLabel: "Ver trabajos",
+        ctaLabel: BASIC_CARD_CTA_PRESETS[1],
         ctaUrl: "https://example.com/editorial",
         enabled: true,
       },
@@ -45,7 +46,7 @@ function beautyContent(): BasicTemplateContent {
         imageUrl: gradientImage({ from: "#EFE0D2", to: "#C9A98A", label: "Social", decoration: "product", width: 600, height: 400 }),
         title: "Looks para redes",
         description: "Asesoría de imagen y looks para tus contenidos y marca personal.",
-        ctaLabel: "Agendar asesoría",
+        ctaLabel: BASIC_CARD_CTA_PRESETS[2],
         ctaUrl: "https://example.com/asesoria",
         enabled: true,
       },

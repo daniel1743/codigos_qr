@@ -19,6 +19,8 @@ import { getTemplates } from "../lib/basic-templates/catalog";
 import {
   buildBasicTemplateContent,
   buildConfig,
+  normalizeBasicButtonStyle,
+  normalizeBasicPlatform,
   remapBasicLinkPresentationIds,
 } from "../lib/basic-templates/config";
 import { loadGoogleFont } from "../lib/fonts";
@@ -283,6 +285,7 @@ function EditorPage() {
       const internalSlug = profile.slug || getInternalSlugFromPublicId(publicId);
       const profilePayload = {
         ...profile,
+        button_style: normalizeBasicButtonStyle(profile.button_style),
         banner_fusion_strength: getSafeFusionStrength(profile.banner_fusion_strength),
         slug: internalSlug,
         public_id: publicId,
@@ -308,6 +311,7 @@ function EditorPage() {
 
       const normalizedLinks = links.map((link, index) => ({
         ...link,
+        ...(link.platform ? { platform: normalizeBasicPlatform(link.platform) } : {}),
         sort_order: index,
         url: link.url ? normalizeUrl(link.url) : "",
       }));

@@ -2,8 +2,17 @@ import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { cardEditTarget, socialEditTarget } from "@/types/basic-templates";
-import type { CardItem, SocialItem, SocialPlatform } from "@/types/basic-templates";
+import {
+  BASIC_CARD_CTA_PRESETS,
+  cardEditTarget,
+  socialEditTarget,
+} from "@/types/basic-templates";
+import type {
+  CardCtaLabel,
+  CardItem,
+  SocialItem,
+  SocialPlatform,
+} from "@/types/basic-templates";
 import { ImageInput } from "./controls";
 
 /* ------------------------------------------------------------------ */
@@ -92,7 +101,7 @@ export function CardsEditor({ cards, onChange, maxCards, onFocusTarget }: CardsE
         imageUrl: "",
         title: "",
         description: "",
-        ctaLabel: "",
+        ctaLabel: BASIC_CARD_CTA_PRESETS[0],
         ctaUrl: "",
         enabled: true,
       },
@@ -146,13 +155,18 @@ export function CardsEditor({ cards, onChange, maxCards, onFocusTarget }: CardsE
             className="min-h-16"
           />
           <div className="grid grid-cols-2 gap-2">
-            <Input
+            <select
               value={card.ctaLabel}
-              onChange={(e) => update(card.id, { ctaLabel: e.target.value })}
+              onChange={(e) => update(card.id, { ctaLabel: e.target.value as CardCtaLabel })}
               onFocus={() => onFocusTarget?.(cardEditTarget(card.id))}
-              placeholder="Texto CTA"
-              className="h-9"
-            />
+              className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+            >
+              {BASIC_CARD_CTA_PRESETS.map((cta) => (
+                <option key={cta} value={cta}>
+                  {cta}
+                </option>
+              ))}
+            </select>
             <Input
               value={card.ctaUrl}
               onChange={(e) => update(card.id, { ctaUrl: e.target.value })}

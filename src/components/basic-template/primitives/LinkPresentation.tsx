@@ -36,7 +36,7 @@ export function LinkPresentation({
           ctaLabel: link.card.ctaLabel,
           ctaUrl: link.url,
           enabled: link.enabled,
-          platform: link.platform,
+          ...(link.platform ? { platform: link.platform } : {}),
           mediaMode: link.card.mediaMode,
           cornerStyle: link.card.cornerStyle,
         }}

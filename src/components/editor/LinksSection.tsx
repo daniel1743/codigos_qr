@@ -5,6 +5,7 @@ import type { ProfileLink } from "../../types/database";
 import type { Profile } from "../../types/database";
 import {
   BASIC_CARD_CTA_PRESETS,
+  type CardCtaLabel,
   type CardCornerStyle,
   type CardMediaMode,
   linkEditTarget,
@@ -12,6 +13,7 @@ import {
 import {
   detectBasicPlatformFromUrl,
   getBasicLinkPresentation,
+  normalizeBasicPlatform,
   updateBasicLinkPresentation,
 } from "../../lib/basic-templates/config";
 import { Button } from "../ui/button";
@@ -59,6 +61,20 @@ export function LinksSection({
   useEffect(() => {
     if (selectedTarget?.startsWith("link-")) setOpenLinkTarget(selectedTarget);
   }, [selectedTarget]);
+
+  useEffect(() => {
+    const hasCompatibilityAlias = links.some(
+      (link) => normalizeBasicPlatform(link.platform) !== (link.platform || ""),
+    );
+    if (!hasCompatibilityAlias) return;
+
+    onChange(
+      links.map((link) => ({
+        ...link,
+        platform: normalizeBasicPlatform(link.platform),
+      })),
+    );
+  }, [links, onChange]);
 
   useEffect(() => {
     if (links.length === 0) {
@@ -127,7 +143,7 @@ export function LinksSection({
     const linkId = links[index].id || `profile-link-${index}`;
     manualPlatformOverrides.current.add(linkId);
     autoDetectedPlatforms.current.delete(linkId);
-    updateLink(index, { platform });
+    updateLink(index, { platform: normalizeBasicPlatform(platform) });
   };
 
   const handleCardImageUpload = async (index: number, event: ChangeEvent<HTMLInputElement>) => {
@@ -158,11 +174,9 @@ export function LinksSection({
       if (error) throw error;
 
       const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
-      updateLink(index, {
-        social_cover_image_mode: "custom_image",
-        social_cover_image_url: data.publicUrl,
+      updateCardPresentation(index, {
+        card: { imageUrl: data.publicUrl, mediaMode: "image" },
       });
-      updateCardPresentation(index, { card: { mediaMode: "image" } });
       toast.success("Imagen de tarjeta subida correctamente.");
     } catch (error) {
       console.error(error);
@@ -281,8 +295,8 @@ export function LinksSection({
                <div id={contentId} className="space-y-4">
                  <div className="space-y-2">
                    <Label htmlFor={`link-platform-${link.id || index}`}>Red o tipo de enlace</Label>
-                   <PlatformPicker
-                     value={link.platform || "website"}
+                    <PlatformPicker
+                      value={normalizeBasicPlatform(link.platform) || "website"}
                      onChange={(platform) => handlePlatformChange(index, platform)}
                    />
                  </div>
@@ -366,11 +380,11 @@ export function LinksSection({
                             <Input
                               id={`card-description-${link.id || index}`}
                               value={card.description || ""}
-                              onChange={(event) => {
-                                const description = event.target.value;
-                                updateLink(index, { subtitle: description });
-                                updateCardPresentation(index, { card: { description } });
-                              }}
+                              onChange={(event) =>
+                                updateCardPresentation(index, {
+                                  card: { description: event.target.value },
+                                })
+                              }
                               placeholder="Una descripción breve"
                               maxLength={160}
                               className="h-11 rounded-xl border-stone-200 bg-[#fffefa]"
@@ -384,7 +398,7 @@ export function LinksSection({
                                 value={card.ctaLabel}
                                 onChange={(event) =>
                                   updateCardPresentation(index, {
-                                    card: { ctaLabel: event.target.value },
+                                    card: { ctaLabel: event.target.value as CardCtaLabel },
                                   })
                                 }
                                 className="h-11 w-full rounded-xl border border-stone-200 bg-[#fffefa] px-3 text-sm text-[#1d1d1b]"

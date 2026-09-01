@@ -5,12 +5,14 @@ import type {
   CardPresentation,
   CardMediaMode,
   CardCornerStyle,
+  CardCtaLabel,
   LinkPresentation,
   ButtonStyleConfig,
   FontPairConfig,
   PaletteConfig,
   TemplateDefinition,
 } from "@/types/basic-templates";
+import { BASIC_CARD_CTA_PRESETS } from "@/types/basic-templates";
 import type { Profile, ProfileLink } from "@/types/database";
 import type { SocialPlatform } from "@/types/basic-templates";
 
@@ -79,6 +81,10 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+function hasOwn(value: Record<string, unknown>, key: string): boolean {
+  return Object.prototype.hasOwnProperty.call(value, key);
+}
+
 function getStoredBasicLinkPresentation(profile: Partial<Profile>, linkId: string) {
   const templateConfig = profile.template_config;
   if (!isRecord(templateConfig)) return undefined;
@@ -96,6 +102,22 @@ function isCardCornerStyle(value: unknown): value is CardCornerStyle {
   return value === "square" || value === "soft";
 }
 
+function isCardCtaLabel(value: unknown): value is CardCtaLabel {
+  return BASIC_CARD_CTA_PRESETS.some((preset) => preset === value);
+}
+
+/** Normalize compatibility aliases before Basic UI, storage projections and rendering. */
+export function normalizeBasicPlatform(value: unknown): string {
+  if (typeof value !== "string") return "";
+  const platform = value.trim().toLowerCase();
+  return platform === "x" ? "twitter" : platform;
+}
+
+/** `card` is a legacy button style, never the Basic professional-card mode. */
+export function normalizeBasicButtonStyle(value: Profile["button_style"] | null | undefined) {
+  return value === "card" || !value ? "solid" : value;
+}
+
 /** Resolve persisted Basic presentation metadata without changing link identity. */
 export function getBasicLinkPresentation(
   profile: Partial<Profile>,
@@ -105,6 +127,10 @@ export function getBasicLinkPresentation(
   const stored = linkId ? getStoredBasicLinkPresentation(profile, linkId) : undefined;
   const storedCard = isRecord(stored?.card) ? stored.card : {};
   const fallbackMediaMode: CardMediaMode = link.social_cover_image_url ? "image" : "platform_icon";
+  const imageUrl =
+    hasOwn(storedCard, "imageUrl") && typeof storedCard.imageUrl === "string"
+      ? storedCard.imageUrl
+      : link.social_cover_image_url || "";
 
   return {
     presentation: stored?.presentation === "card" ? "card" : "button",
@@ -114,17 +140,16 @@ export function getBasicLinkPresentation(
           ? storedCard.title
           : link.label || "Enlace",
       description:
-        typeof storedCard.description === "string"
+        hasOwn(storedCard, "description") && typeof storedCard.description === "string"
           ? storedCard.description
           : link.subtitle || "",
-      ctaLabel:
-        typeof storedCard.ctaLabel === "string" && storedCard.ctaLabel.trim()
-          ? storedCard.ctaLabel
-          : "Visitar",
+      ctaLabel: isCardCtaLabel(storedCard.ctaLabel)
+        ? storedCard.ctaLabel
+        : BASIC_CARD_CTA_PRESETS[0],
       mediaMode: isCardMediaMode(storedCard.mediaMode)
         ? storedCard.mediaMode
         : fallbackMediaMode,
-      imageUrl: link.social_cover_image_url || "",
+      imageUrl,
       cornerStyle: isCardCornerStyle(storedCard.cornerStyle)
         ? storedCard.cornerStyle
         : "soft",
@@ -376,18 +401,19 @@ export function buildBasicTemplateContent(
   const normalizedLinks = links.map((link, index) => {
     const linkId = link.id || `profile-link-${index}`;
     const presentation = getBasicLinkPresentation(profile, { ...link, id: linkId });
+    const platform = normalizeBasicPlatform(link.platform);
     return {
       id: linkId,
       label: link.label || "Enlace",
       url: link.url || "",
       enabled: link.enabled ?? true,
-      platform: typeof link.platform === "string" ? link.platform : undefined,
+      ...(platform ? { platform } : {}),
       presentation: presentation.presentation,
       card: presentation.card,
     };
   });
   const socialLinks = links.flatMap((link, index) => {
-    const platform = typeof link.platform === "string" ? link.platform : "";
+    const platform = normalizeBasicPlatform(link.platform);
     if (!SOCIAL_PLATFORMS.has(platform as SocialPlatform)) return [];
     return [
       {
@@ -434,10 +460,10 @@ export function buildBasicTemplateContent(
         imageUrl: link.card?.imageUrl || "",
         title: link.card?.title || link.label,
         description: link.card?.description || "",
-        ctaLabel: link.card?.ctaLabel || "Visitar",
+        ctaLabel: link.card?.ctaLabel || BASIC_CARD_CTA_PRESETS[0],
         ctaUrl: link.url,
         enabled: link.enabled,
-        platform: link.platform,
+        ...(link.platform ? { platform: link.platform } : {}),
         mediaMode: link.card?.mediaMode,
         cornerStyle: link.card?.cornerStyle,
       })),
@@ -456,17 +482,18 @@ function resolveButtonStyle(
 ): ButtonStyleConfig {
   const fallback = requiredOption(template.customization.buttonStyles[0], "button style");
   if (!override) return fallback;
+  const buttonStyle = normalizeBasicButtonStyle(override.button_style);
 
   const desiredShape =
-    override.button_style === "outline"
+    buttonStyle === "outline"
       ? "sharp"
-      : override.button_style === "soft"
+      : buttonStyle === "soft"
       ? "premium-soft"
-      : override.button_style === "solid" && override.button_radius === "none"
+      : buttonStyle === "solid" && override.button_radius === "none"
         ? "sharp"
-        : override.button_style === "solid" && override.button_radius === "rounded"
+        : buttonStyle === "solid" && override.button_radius === "rounded"
           ? "rounded"
-          : override.button_style === "solid" && override.button_radius === "full"
+          : buttonStyle === "solid" && override.button_radius === "full"
             ? "pill"
             : null;
 
@@ -477,7 +504,7 @@ function resolveButtonStyle(
       (style) =>
         style.shape === desiredShape &&
         (desiredShape !== "premium-soft" || style.variant === "soft") &&
-        (override.button_style !== "outline" || style.variant === "outline"),
+        (buttonStyle !== "outline" || style.variant === "outline"),
     ) ?? fallback
   );
 }

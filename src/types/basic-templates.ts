@@ -56,19 +56,18 @@ export interface LinkItem {
 export type LinkPresentation = "button" | "card";
 export type CardMediaMode = "image" | "platform_icon" | "none";
 export type CardCornerStyle = "square" | "soft";
-export type CardCtaLabel = "Visitar" | "Ver mi trabajo" | "Reservar" | "Más información";
-
-export const BASIC_CARD_CTA_PRESETS: CardCtaLabel[] = [
+export const BASIC_CARD_CTA_PRESETS = [
   "Visitar",
   "Ver mi trabajo",
   "Reservar",
   "Más información",
-];
+] as const;
+export type CardCtaLabel = (typeof BASIC_CARD_CTA_PRESETS)[number];
 
 export interface CardPresentation {
   title: string;
   description?: string;
-  ctaLabel: string;
+  ctaLabel: CardCtaLabel;
   mediaMode: CardMediaMode;
   imageUrl?: string;
   cornerStyle: CardCornerStyle;
@@ -79,7 +78,7 @@ export interface CardItem {
   imageUrl: string;
   title: string;
   description: string;
-  ctaLabel: string;
+  ctaLabel: CardCtaLabel;
   ctaUrl: string;
   enabled: boolean;
   platform?: string;

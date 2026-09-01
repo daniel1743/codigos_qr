@@ -7,7 +7,10 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { ColorControl } from "./ColorControl";
-import { BASIC_EDITOR_FONTS } from "../../lib/basic-templates/config";
+import {
+  BASIC_EDITOR_FONTS,
+  normalizeBasicButtonStyle,
+} from "../../lib/basic-templates/config";
 
 interface DesignSectionProps {
   profile: Partial<Profile>;
@@ -101,6 +104,7 @@ export function DesignSection({ profile, onChange, userId }: DesignSectionProps)
   const isBgGradient = bgGradient !== null;
   const btnGradient = parseGradient(profile.button_color);
   const isBtnGradient = btnGradient !== null;
+  const basicButtonStyle = normalizeBasicButtonStyle(profile.button_style);
   const hasTemplateIcons = ICON_BUTTON_TEMPLATES.has(profile.template_id || "");
   const hasPremiumStyle = PREMIUM_BUTTON_TEMPLATES.has(profile.template_id || "");
   const hasOutlineStyle = OUTLINE_BUTTON_TEMPLATES.has(profile.template_id || "");
@@ -134,14 +138,14 @@ export function DesignSection({ profile, onChange, userId }: DesignSectionProps)
       <div data-tool-target="button-style" className="space-y-4 rounded-2xl border border-stone-200 bg-[#fffefa] p-4 shadow-[0_8px_24px_rgba(29,29,27,0.04)]">
         <Label className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500">Botones</Label>
         <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <Button variant={profile.button_radius === "none" && profile.button_style !== "soft" && profile.button_style !== "outline" ? "default" : "outline"} onClick={() => onChange({ button_radius: "none", button_style: "solid" })} className="h-10 shrink-0 rounded-md border-stone-200 px-4 text-xs">Cuadrado</Button>
-          <Button variant={profile.button_radius === "rounded" && profile.button_style !== "soft" && profile.button_style !== "outline" ? "default" : "outline"} onClick={() => onChange({ button_radius: "rounded", button_style: "solid" })} className="h-10 shrink-0 rounded-xl border-stone-200 px-4 text-xs">Redondeado</Button>
-          <Button variant={profile.button_radius === "full" && profile.button_style !== "soft" && profile.button_style !== "outline" ? "default" : "outline"} onClick={() => onChange({ button_radius: "full", button_style: "solid" })} className="h-10 shrink-0 rounded-full border-stone-200 px-4 text-xs">Píldora</Button>
+          <Button variant={profile.button_radius === "none" && basicButtonStyle !== "soft" && basicButtonStyle !== "outline" ? "default" : "outline"} onClick={() => onChange({ button_radius: "none", button_style: "solid" })} className="h-10 shrink-0 rounded-md border-stone-200 px-4 text-xs">Cuadrado</Button>
+          <Button variant={profile.button_radius === "rounded" && basicButtonStyle !== "soft" && basicButtonStyle !== "outline" ? "default" : "outline"} onClick={() => onChange({ button_radius: "rounded", button_style: "solid" })} className="h-10 shrink-0 rounded-xl border-stone-200 px-4 text-xs">Redondeado</Button>
+          <Button variant={profile.button_radius === "full" && basicButtonStyle !== "soft" && basicButtonStyle !== "outline" ? "default" : "outline"} onClick={() => onChange({ button_radius: "full", button_style: "solid" })} className="h-10 shrink-0 rounded-full border-stone-200 px-4 text-xs">Píldora</Button>
           {hasOutlineStyle ? (
-            <Button variant={profile.button_style === "outline" ? "default" : "outline"} onClick={() => onChange({ button_radius: "none", button_style: "outline" })} className="h-10 shrink-0 rounded-md border-stone-200 px-4 text-xs">Contorno</Button>
+            <Button variant={basicButtonStyle === "outline" ? "default" : "outline"} onClick={() => onChange({ button_radius: "none", button_style: "outline" })} className="h-10 shrink-0 rounded-md border-stone-200 px-4 text-xs">Contorno</Button>
           ) : null}
           {hasPremiumStyle ? (
-            <Button variant={profile.button_style === "soft" ? "default" : "outline"} onClick={() => onChange({ button_radius: "full", button_style: "soft" })} className="h-10 shrink-0 rounded-full border border-transparent px-4 text-xs shadow-sm">Premium</Button>
+            <Button variant={basicButtonStyle === "soft" ? "default" : "outline"} onClick={() => onChange({ button_radius: "full", button_style: "soft" })} className="h-10 shrink-0 rounded-full border border-transparent px-4 text-xs shadow-sm">Premium</Button>
           ) : null}
         </div>
 
