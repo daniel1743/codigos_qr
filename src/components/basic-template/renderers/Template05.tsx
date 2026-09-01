@@ -1,4 +1,6 @@
 import React from "react";
+import { EditableTarget } from "../EditTarget";
+import { EDIT_TARGETS, linkEditTarget, type EditTargetRegistry } from "@/types/basic-templates";
 import type { StandaloneStyle } from "./standaloneStyle";
 
 /* Template05 — Link-in-bio verde salvia: banner tropical + avatar en curva + botones blancos */
@@ -35,6 +37,8 @@ export interface Template05Props {
   footerText?: string;
   primaryColor?: string;
   secondaryColor?: string;
+  targetRegistry?: EditTargetRegistry | undefined;
+  highlightedTarget?: string | null | undefined;
   standaloneStyle?: StandaloneStyle;
 }
 
@@ -122,9 +126,11 @@ export default function Template05({
   bannerUrl,
   socials,
   links,
-  footerText = "MADE WITH LOVE",
+  footerText,
   primaryColor = "#b6c6ab",
   secondaryColor = "#111111",
+  targetRegistry,
+  highlightedTarget,
   standaloneStyle,
 }: Template05Props) {
   const buttonBorder =
@@ -177,7 +183,10 @@ export default function Template05({
               borderTopRightRadius: "50% 100%",
             }}
           />
-          <div
+          <EditableTarget
+            id={EDIT_TARGETS.avatar}
+            registry={targetRegistry}
+            active={highlightedTarget === EDIT_TARGETS.avatar}
             style={{
               position: "absolute",
               left: "50%",
@@ -185,15 +194,21 @@ export default function Template05({
               transform: "translateX(-50%)",
               width: 138,
               height: 138,
-              borderRadius: "50%",
-              border: standaloneStyle?.avatarRing.enabled
-                ? `${standaloneStyle.avatarRing.thickness === "thin" ? 2 : standaloneStyle.avatarRing.thickness === "thick" ? 5 : 3}px solid ${standaloneStyle.avatarRing.color || "#ffffff"}`
-                : "6px solid #ffffff",
-              overflow: "hidden",
-              boxSizing: "border-box",
-              background: standaloneStyle?.background ?? primaryColor,
             }}
           >
+            <div
+              style={{
+                width: 138,
+                height: 138,
+                borderRadius: "50%",
+                border: standaloneStyle?.avatarRing.enabled
+                  ? `${standaloneStyle.avatarRing.thickness === "thin" ? 2 : standaloneStyle.avatarRing.thickness === "thick" ? 5 : 3}px solid ${standaloneStyle.avatarRing.color || "#ffffff"}`
+                  : "6px solid #ffffff",
+                overflow: "hidden",
+                boxSizing: "border-box",
+                background: standaloneStyle?.background ?? primaryColor,
+              }}
+            >
             <img
               src={avatarUrl}
               alt={name}
@@ -204,22 +219,29 @@ export default function Template05({
                 display: "block",
               }}
             />
-          </div>
+            </div>
+          </EditableTarget>
         </div>
 
           <div style={{ textAlign: standaloneStyle?.title.align ?? "center", paddingTop: 84 }}>
-          <h1
-            style={{
-              margin: 0,
-              fontFamily: standaloneStyle?.title.fontFamily,
-              fontSize: standaloneStyle?.title.size ?? 34,
-              fontWeight: standaloneStyle?.title.weight ?? 700,
-              color: standaloneStyle?.title.color ?? secondaryColor,
-              textAlign: standaloneStyle?.title.align,
-            }}
+          <EditableTarget
+            id={EDIT_TARGETS.name}
+            registry={targetRegistry}
+            active={highlightedTarget === EDIT_TARGETS.name}
           >
-            {name}
-          </h1>
+            <h1
+              style={{
+                margin: 0,
+                fontFamily: standaloneStyle?.title.fontFamily,
+                fontSize: standaloneStyle?.title.size ?? 34,
+                fontWeight: standaloneStyle?.title.weight ?? 700,
+                color: standaloneStyle?.title.color ?? secondaryColor,
+                textAlign: standaloneStyle?.title.align,
+              }}
+            >
+              {name}
+            </h1>
+          </EditableTarget>
           <p
             style={{
               margin: "6px 0 0",
@@ -233,20 +255,26 @@ export default function Template05({
             {profession}
           </p>
           {description ? (
-            <p
-              style={{
-                margin: "12px auto 0",
-                maxWidth: 330,
-                fontFamily: standaloneStyle?.bio.fontFamily,
-                fontSize: standaloneStyle?.bio.size ?? 14,
-                fontWeight: standaloneStyle?.bio.weight,
-                textAlign: standaloneStyle?.bio.align ?? "center",
-                color: standaloneStyle?.bio.color ?? secondaryColor,
-                lineHeight: 1.45,
-              }}
+            <EditableTarget
+              id={EDIT_TARGETS.bio}
+              registry={targetRegistry}
+              active={highlightedTarget === EDIT_TARGETS.bio}
             >
-              {description}
-            </p>
+              <p
+                style={{
+                  margin: "12px auto 0",
+                  maxWidth: 330,
+                  fontFamily: standaloneStyle?.bio.fontFamily,
+                  fontSize: standaloneStyle?.bio.size ?? 14,
+                  fontWeight: standaloneStyle?.bio.weight,
+                  textAlign: standaloneStyle?.bio.align ?? "center",
+                  color: standaloneStyle?.bio.color ?? secondaryColor,
+                  lineHeight: 1.45,
+                }}
+              >
+                {description}
+              </p>
+            </EditableTarget>
           ) : null}
 
           <div
@@ -275,12 +303,17 @@ export default function Template05({
 
         <div style={{ padding: "18px 16px 6px", display: "grid", gap: standaloneStyle?.button.spacing ?? 16 }}>
           {links.map((l) => (
-            <a
+            <EditableTarget
               key={l.id}
-              href={l.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
+              id={linkEditTarget(l.id)}
+              registry={targetRegistry}
+              active={highlightedTarget === linkEditTarget(l.id)}
+            >
+              <a
+                href={l.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
                 display: "block",
                 background: standaloneStyle?.button.background ?? "#ffffff",
                 color: standaloneStyle?.button.textColor ?? secondaryColor,
@@ -292,25 +325,34 @@ export default function Template05({
                 padding: "22px 14px",
                 textDecoration: "none",
                 boxSizing: "border-box",
-              }}
-            >
-              {l.label}
-            </a>
+                }}
+              >
+                {l.label}
+              </a>
+            </EditableTarget>
           ))}
         </div>
 
-        <p
-          style={{
-            margin: "22px 0 0",
-            textAlign: "center",
-            fontSize: 12,
-            letterSpacing: 2,
-            color: "rgba(17,17,17,.45)",
-            textTransform: "uppercase",
-          }}
-        >
-          {footerText}
-        </p>
+        {footerText ? (
+          <EditableTarget
+            id={EDIT_TARGETS.footer}
+            registry={targetRegistry}
+            active={highlightedTarget === EDIT_TARGETS.footer}
+          >
+            <p
+              style={{
+                margin: "22px 0 0",
+                textAlign: "center",
+                fontSize: 12,
+                letterSpacing: 2,
+                color: "rgba(17,17,17,.45)",
+                textTransform: "uppercase",
+              }}
+            >
+              {footerText}
+            </p>
+          </EditableTarget>
+        ) : null}
       </div>
     </div>
   );

@@ -1,4 +1,6 @@
 import React from "react";
+import { EditableTarget } from "../EditTarget";
+import { EDIT_TARGETS, linkEditTarget, type EditTargetRegistry } from "@/types/basic-templates";
 import type { StandaloneStyle } from "./standaloneStyle";
 
 /* Template08 — Link-in-bio dark purple/neon: avatar con aro degradado, redes y tarjetas con icono de color */
@@ -39,6 +41,8 @@ export interface Template08Props {
   footerText: string;
   primaryColor?: string;
   secondaryColor?: string;
+  targetRegistry?: EditTargetRegistry | undefined;
+  highlightedTarget?: string | null | undefined;
   standaloneStyle?: StandaloneStyle;
 }
 
@@ -140,6 +144,8 @@ export default function Template08({
   footerText,
   primaryColor = "#a13bff",
   secondaryColor = "#ff4d8d",
+  targetRegistry,
+  highlightedTarget,
   standaloneStyle,
 }: Template08Props) {
   const buttonBorder =
@@ -173,18 +179,23 @@ export default function Template08({
       >
         {/* Avatar con aro degradado */}
         <div style={{ display: "flex", justifyContent: "center" }}>
-          <div
-            style={{
-              width: 140,
-              height: 140,
-              borderRadius: "50%",
-              padding: 4,
-              boxSizing: "border-box",
-              background: standaloneStyle?.avatarRing.enabled
-                ? standaloneStyle.avatarRing.color || `linear-gradient(135deg, ${secondaryColor}, ${primaryColor})`
-                : `linear-gradient(135deg, ${secondaryColor}, ${primaryColor})`,
-            }}
+          <EditableTarget
+            id={EDIT_TARGETS.avatar}
+            registry={targetRegistry}
+            active={highlightedTarget === EDIT_TARGETS.avatar}
           >
+            <div
+              style={{
+                width: 140,
+                height: 140,
+                borderRadius: "50%",
+                padding: 4,
+                boxSizing: "border-box",
+                background: standaloneStyle?.avatarRing.enabled
+                  ? standaloneStyle.avatarRing.color || `linear-gradient(135deg, ${secondaryColor}, ${primaryColor})`
+                  : `linear-gradient(135deg, ${secondaryColor}, ${primaryColor})`,
+              }}
+            >
             <img
               src={avatarUrl}
               alt={name}
@@ -198,38 +209,45 @@ export default function Template08({
                 boxSizing: "border-box",
               }}
             />
-          </div>
+            </div>
+          </EditableTarget>
         </div>
 
         <div style={{ textAlign: standaloneStyle?.title.align ?? "center", marginTop: 14 }}>
-          <h1
-            style={{
-              margin: 0,
-              fontFamily: standaloneStyle?.title.fontFamily,
-              fontSize: standaloneStyle?.title.size ?? 28,
-              fontWeight: standaloneStyle?.title.weight ?? 700,
-              color: standaloneStyle?.title.color,
-              textAlign: standaloneStyle?.title.align,
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 8,
-            }}
+          <EditableTarget
+            id={EDIT_TARGETS.name}
+            registry={targetRegistry}
+            active={highlightedTarget === EDIT_TARGETS.name}
           >
-            {name}
-            {verified ? (
-              <svg viewBox="0 0 24 24" width="20" height="20" aria-label="verificado">
-                <circle cx="12" cy="12" r="10" fill="#1d9bf0" />
-                <path
-                  d="M7.5 12.5l3 3 6-6.5"
-                  fill="none"
-                  stroke="#fff"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            ) : null}
-          </h1>
+            <h1
+              style={{
+                margin: 0,
+                fontFamily: standaloneStyle?.title.fontFamily,
+                fontSize: standaloneStyle?.title.size ?? 28,
+                fontWeight: standaloneStyle?.title.weight ?? 700,
+                color: standaloneStyle?.title.color,
+                textAlign: standaloneStyle?.title.align,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+              }}
+            >
+              {name}
+              {verified ? (
+                <svg viewBox="0 0 24 24" width="20" height="20" aria-label="verificado">
+                  <circle cx="12" cy="12" r="10" fill="#1d9bf0" />
+                  <path
+                    d="M7.5 12.5l3 3 6-6.5"
+                    fill="none"
+                    stroke="#fff"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              ) : null}
+            </h1>
+          </EditableTarget>
           <p
             style={{
               margin: "4px 0 0",
@@ -240,20 +258,26 @@ export default function Template08({
           >
             {profession}
           </p>
-          <p
-            style={{
-              margin: "10px auto 0",
-              maxWidth: 330,
-              fontFamily: standaloneStyle?.bio.fontFamily,
-              fontSize: standaloneStyle?.bio.size ?? 14.5,
-              fontWeight: standaloneStyle?.bio.weight,
-              lineHeight: 1.45,
-              color: standaloneStyle?.bio.color ?? "#d6d3e6",
-              textAlign: standaloneStyle?.bio.align,
-            }}
+          <EditableTarget
+            id={EDIT_TARGETS.bio}
+            registry={targetRegistry}
+            active={highlightedTarget === EDIT_TARGETS.bio}
           >
-            {description}
-          </p>
+            <p
+              style={{
+                margin: "10px auto 0",
+                maxWidth: 330,
+                fontFamily: standaloneStyle?.bio.fontFamily,
+                fontSize: standaloneStyle?.bio.size ?? 14.5,
+                fontWeight: standaloneStyle?.bio.weight,
+                lineHeight: 1.45,
+                color: standaloneStyle?.bio.color ?? "#d6d3e6",
+                textAlign: standaloneStyle?.bio.align,
+              }}
+            >
+              {description}
+            </p>
+          </EditableTarget>
         </div>
 
         <div
@@ -292,12 +316,17 @@ export default function Template08({
 
         <div style={{ marginTop: 20, display: "grid", gap: standaloneStyle?.button.spacing ?? 12 }}>
           {cards.map((c) => (
-            <a
+            <EditableTarget
               key={c.id}
-              href={c.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
+              id={linkEditTarget(c.id)}
+              registry={targetRegistry}
+              active={highlightedTarget === linkEditTarget(c.id)}
+            >
+              <a
+                href={c.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
                 display: "flex",
                 alignItems: "center",
                 gap: 12,
@@ -312,8 +341,8 @@ export default function Template08({
                   ? "none"
                   : "1px solid rgba(255,255,255,.09)"),
                 boxSizing: "border-box",
-              }}
-            >
+                }}
+              >
               <span
                 style={{
                   width: 42,
@@ -356,20 +385,29 @@ export default function Template08({
                   strokeLinejoin="round"
                 />
               </svg>
-            </a>
+              </a>
+            </EditableTarget>
           ))}
         </div>
 
-        <p
-          style={{
-            margin: "22px 0 0",
-            textAlign: "center",
-            fontSize: 12,
-            color: "#8f8aa8",
-          }}
-        >
-          {footerText}
-        </p>
+        {footerText ? (
+          <EditableTarget
+            id={EDIT_TARGETS.footer}
+            registry={targetRegistry}
+            active={highlightedTarget === EDIT_TARGETS.footer}
+          >
+            <p
+              style={{
+                margin: "22px 0 0",
+                textAlign: "center",
+                fontSize: 12,
+                color: "#8f8aa8",
+              }}
+            >
+              {footerText}
+            </p>
+          </EditableTarget>
+        ) : null}
       </div>
     </div>
   );

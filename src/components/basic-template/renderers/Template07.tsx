@@ -1,4 +1,6 @@
 import React from "react";
+import { EditableTarget } from "../EditTarget";
+import { EDIT_TARGETS, linkEditTarget, type EditTargetRegistry } from "@/types/basic-templates";
 import type { StandaloneStyle } from "./standaloneStyle";
 
 /* Template07 — Link-in-bio fitness dark green: hero, avatar con aro, tarjetas de menú y CTA newsletter */
@@ -49,6 +51,8 @@ export interface Template07Props {
   newsletterButtonLabel: string;
   footerText: string;
   primaryColor?: string;
+  targetRegistry?: EditTargetRegistry | undefined;
+  highlightedTarget?: string | null | undefined;
   standaloneStyle?: StandaloneStyle;
 }
 
@@ -182,6 +186,8 @@ export default function Template07({
   newsletterButtonLabel,
   footerText,
   primaryColor = "#8ed14f",
+  targetRegistry,
+  highlightedTarget,
   standaloneStyle,
 }: Template07Props) {
   const buttonBorder =
@@ -224,18 +230,23 @@ export default function Template07({
           }}
         >
           <div style={{ display: "flex", justifyContent: "center" }}>
-            <div
-              style={{
-                width: 130,
-                height: 130,
-                borderRadius: "50%",
-              border: standaloneStyle?.avatarRing.enabled
-                ? `${standaloneStyle.avatarRing.thickness === "thin" ? 2 : standaloneStyle.avatarRing.thickness === "thick" ? 5 : 3}px solid ${standaloneStyle.avatarRing.color || primaryColor}`
-                : `3px solid ${primaryColor}`,
-                overflow: "hidden",
-                boxSizing: "border-box",
-              }}
+            <EditableTarget
+              id={EDIT_TARGETS.avatar}
+              registry={targetRegistry}
+              active={highlightedTarget === EDIT_TARGETS.avatar}
             >
+              <div
+                style={{
+                  width: 130,
+                  height: 130,
+                  borderRadius: "50%",
+                  border: standaloneStyle?.avatarRing.enabled
+                    ? `${standaloneStyle.avatarRing.thickness === "thin" ? 2 : standaloneStyle.avatarRing.thickness === "thick" ? 5 : 3}px solid ${standaloneStyle.avatarRing.color || primaryColor}`
+                    : `3px solid ${primaryColor}`,
+                  overflow: "hidden",
+                  boxSizing: "border-box",
+                }}
+              >
               <img
                 src={avatarUrl}
                 alt={name}
@@ -246,38 +257,45 @@ export default function Template07({
                   display: "block",
                 }}
               />
-            </div>
+              </div>
+            </EditableTarget>
           </div>
 
           <div style={{ textAlign: standaloneStyle?.title.align ?? "center", padding: "14px 20px 0" }}>
-            <h1
-              style={{
-                margin: 0,
-                fontFamily: standaloneStyle?.title.fontFamily,
-                fontSize: standaloneStyle?.title.size ?? 28,
-                fontWeight: standaloneStyle?.title.weight ?? 700,
-                color: standaloneStyle?.title.color,
-                textAlign: standaloneStyle?.title.align,
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 8,
-              }}
+            <EditableTarget
+              id={EDIT_TARGETS.name}
+              registry={targetRegistry}
+              active={highlightedTarget === EDIT_TARGETS.name}
             >
-              {name}
-              {verified ? (
-                <svg viewBox="0 0 24 24" width="20" height="20" aria-label="verificado">
-                  <circle cx="12" cy="12" r="10" fill={primaryColor} />
-                  <path
-                    d="M7.5 12.5l3 3 6-6.5"
-                    fill="none"
-                    stroke="#0b1a06"
-                    strokeWidth="2.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              ) : null}
-            </h1>
+              <h1
+                style={{
+                  margin: 0,
+                  fontFamily: standaloneStyle?.title.fontFamily,
+                  fontSize: standaloneStyle?.title.size ?? 28,
+                  fontWeight: standaloneStyle?.title.weight ?? 700,
+                  color: standaloneStyle?.title.color,
+                  textAlign: standaloneStyle?.title.align,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 8,
+                }}
+              >
+                {name}
+                {verified ? (
+                  <svg viewBox="0 0 24 24" width="20" height="20" aria-label="verificado">
+                    <circle cx="12" cy="12" r="10" fill={primaryColor} />
+                    <path
+                      d="M7.5 12.5l3 3 6-6.5"
+                      fill="none"
+                      stroke="#0b1a06"
+                      strokeWidth="2.2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                ) : null}
+              </h1>
+            </EditableTarget>
             <p
               style={{
                 margin: "4px 0 0",
@@ -288,19 +306,25 @@ export default function Template07({
             >
               {profession}
             </p>
-            <p
-              style={{
-                margin: "10px 0 0",
-                fontFamily: standaloneStyle?.bio.fontFamily,
-                fontSize: standaloneStyle?.bio.size ?? 14.5,
-                fontWeight: standaloneStyle?.bio.weight,
-                lineHeight: 1.45,
-                color: standaloneStyle?.bio.color ?? "#dbe6d6",
-                textAlign: standaloneStyle?.bio.align,
-              }}
+            <EditableTarget
+              id={EDIT_TARGETS.bio}
+              registry={targetRegistry}
+              active={highlightedTarget === EDIT_TARGETS.bio}
             >
-              {description}
-            </p>
+              <p
+                style={{
+                  margin: "10px 0 0",
+                  fontFamily: standaloneStyle?.bio.fontFamily,
+                  fontSize: standaloneStyle?.bio.size ?? 14.5,
+                  fontWeight: standaloneStyle?.bio.weight,
+                  lineHeight: 1.45,
+                  color: standaloneStyle?.bio.color ?? "#dbe6d6",
+                  textAlign: standaloneStyle?.bio.align,
+                }}
+              >
+                {description}
+              </p>
+            </EditableTarget>
           </div>
 
           <div
@@ -341,12 +365,17 @@ export default function Template07({
         {/* Tarjetas */}
         <div style={{ padding: "6px 14px 0", display: "grid", gap: standaloneStyle?.button.spacing ?? 12 }}>
           {cards.map((c) => (
-            <a
+            <EditableTarget
               key={c.id}
-              href={c.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
+              id={linkEditTarget(c.id)}
+              registry={targetRegistry}
+              active={highlightedTarget === linkEditTarget(c.id)}
+            >
+              <a
+                href={c.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
                 display: "flex",
                 alignItems: "center",
                 gap: 12,
@@ -361,8 +390,8 @@ export default function Template07({
                   ? "none"
                   : "1px solid rgba(255,255,255,.09)"),
                 boxSizing: "border-box",
-              }}
-            >
+                }}
+              >
               <span
                 style={{
                   width: 40,
@@ -407,7 +436,8 @@ export default function Template07({
                   strokeLinejoin="round"
                 />
               </svg>
-            </a>
+              </a>
+            </EditableTarget>
           ))}
         </div>
 
@@ -455,16 +485,24 @@ export default function Template07({
           </div>
         </div>
 
-        <p
-          style={{
-            margin: "20px 0 0",
-            textAlign: "center",
-            fontSize: 12,
-            color: "#8ba184",
-          }}
-        >
-          {footerText}
-        </p>
+        {footerText ? (
+          <EditableTarget
+            id={EDIT_TARGETS.footer}
+            registry={targetRegistry}
+            active={highlightedTarget === EDIT_TARGETS.footer}
+          >
+            <p
+              style={{
+                margin: "20px 0 0",
+                textAlign: "center",
+                fontSize: 12,
+                color: "#8ba184",
+              }}
+            >
+              {footerText}
+            </p>
+          </EditableTarget>
+        ) : null}
       </div>
     </div>
   );

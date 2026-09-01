@@ -142,6 +142,8 @@ export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }
             }))}
           footerText={footerText}
           standaloneStyle={standaloneStyle}
+          targetRegistry={targetRegistry}
+          highlightedTarget={highlightedTarget}
         />
       );
     case "classic-bio":
@@ -164,6 +166,8 @@ export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }
             .map((card) => ({ id: card.id, imageUrl: card.imageUrl, url: card.ctaUrl, alt: card.title }))}
           footerText={footerText}
           standaloneStyle={standaloneStyle}
+          targetRegistry={targetRegistry}
+          highlightedTarget={highlightedTarget}
         />
       );
     case "sage":
@@ -183,6 +187,8 @@ export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }
           links={links}
           footerText={footerText}
           standaloneStyle={standaloneStyle}
+          targetRegistry={targetRegistry}
+          highlightedTarget={highlightedTarget}
         />
       );
     case "silver":
@@ -202,6 +208,8 @@ export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }
           links={links}
           footerText={footerText}
           standaloneStyle={standaloneStyle}
+          targetRegistry={targetRegistry}
+          highlightedTarget={highlightedTarget}
         />
       );
     case "fitness":
@@ -225,6 +233,8 @@ export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }
           newsletterButtonLabel={newsletterLink?.label || "Suscríbete"}
           footerText={footerText}
           standaloneStyle={standaloneStyle}
+          targetRegistry={targetRegistry}
+          highlightedTarget={highlightedTarget}
         />
       );
     case "neon":
@@ -247,6 +257,8 @@ export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }
           cards={neonCards}
           footerText={footerText}
           standaloneStyle={standaloneStyle}
+          targetRegistry={targetRegistry}
+          highlightedTarget={highlightedTarget}
         />
       );
     default:

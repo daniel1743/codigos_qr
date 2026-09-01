@@ -1,4 +1,6 @@
 import React from "react";
+import { EditableTarget } from "../EditTarget";
+import { EDIT_TARGETS, linkEditTarget, type EditTargetRegistry } from "@/types/basic-templates";
 import type { StandaloneStyle } from "./standaloneStyle";
 
 /* Template03 — Studio beauty nude/gold con hero lateral y tarjetas de menú */
@@ -38,6 +40,8 @@ export interface Template03Props {
   footerText: string;
   primaryColor?: string;
   secondaryColor?: string;
+  targetRegistry?: EditTargetRegistry | undefined;
+  highlightedTarget?: string | null | undefined;
   standaloneStyle?: StandaloneStyle;
 }
 
@@ -125,6 +129,8 @@ export default function Template03({
   footerText,
   primaryColor = "#9c7b43",
   secondaryColor = "#f6efe9",
+  targetRegistry,
+  highlightedTarget,
   standaloneStyle,
 }: Template03Props) {
   const gold = primaryColor;
@@ -195,18 +201,24 @@ export default function Template03({
             >
               {studioLabel}
             </p>
-            <h1
-              style={{
-                margin: "4px 0 0",
-                fontFamily: standaloneStyle?.title.fontFamily ?? "Georgia, serif",
-                fontWeight: standaloneStyle?.title.weight ?? 400,
-                fontSize: standaloneStyle?.title.size ?? 26,
-                color: standaloneStyle?.title.color ?? gold,
-                textAlign: standaloneStyle?.title.align ?? "center",
-              }}
+            <EditableTarget
+              id={EDIT_TARGETS.name}
+              registry={targetRegistry}
+              active={highlightedTarget === EDIT_TARGETS.name}
             >
-              {name}
-            </h1>
+              <h1
+                style={{
+                  margin: "4px 0 0",
+                  fontFamily: standaloneStyle?.title.fontFamily ?? "Georgia, serif",
+                  fontWeight: standaloneStyle?.title.weight ?? 400,
+                  fontSize: standaloneStyle?.title.size ?? 26,
+                  color: standaloneStyle?.title.color ?? gold,
+                  textAlign: standaloneStyle?.title.align ?? "center",
+                }}
+              >
+                {name}
+              </h1>
+            </EditableTarget>
             <p
               style={{
                 margin: "4px 0 0",
@@ -226,19 +238,25 @@ export default function Template03({
                 background: `linear-gradient(90deg, transparent, ${gold}, transparent)`,
               }}
             />
-            <p
-              style={{
-                margin: 0,
-                fontFamily: standaloneStyle?.bio.fontFamily,
-                fontSize: standaloneStyle?.bio.size ?? 13,
-                fontWeight: standaloneStyle?.bio.weight,
-                lineHeight: 1.5,
-                color: standaloneStyle?.bio.color ?? "#6b5a4d",
-                textAlign: standaloneStyle?.bio.align,
-              }}
+            <EditableTarget
+              id={EDIT_TARGETS.bio}
+              registry={targetRegistry}
+              active={highlightedTarget === EDIT_TARGETS.bio}
             >
-              {description}
-            </p>
+              <p
+                style={{
+                  margin: 0,
+                  fontFamily: standaloneStyle?.bio.fontFamily,
+                  fontSize: standaloneStyle?.bio.size ?? 13,
+                  fontWeight: standaloneStyle?.bio.weight,
+                  lineHeight: 1.5,
+                  color: standaloneStyle?.bio.color ?? "#6b5a4d",
+                  textAlign: standaloneStyle?.bio.align,
+                }}
+              >
+                {description}
+              </p>
+            </EditableTarget>
             <div
               style={{
                 marginTop: 14,
@@ -277,12 +295,17 @@ export default function Template03({
         {/* Tarjetas de menú */}
         <div style={{ padding: "16px 14px 6px", display: "grid", gap: standaloneStyle?.button.spacing ?? 14 }}>
           {cards.map((c) => (
-            <a
+            <EditableTarget
               key={c.id}
-              href={c.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
+              id={linkEditTarget(c.id)}
+              registry={targetRegistry}
+              active={highlightedTarget === linkEditTarget(c.id)}
+            >
+              <a
+                href={c.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
                 display: "flex",
                 alignItems: "center",
                 gap: 14,
@@ -294,8 +317,8 @@ export default function Template03({
                 textDecoration: "none",
                 color: standaloneStyle?.button.textColor ?? "inherit",
                 boxSizing: "border-box",
-              }}
-            >
+                }}
+              >
               <span
                 style={{
                   flex: "0 0 auto",
@@ -353,11 +376,18 @@ export default function Template03({
                   strokeLinejoin="round"
                 />
               </svg>
-            </a>
+              </a>
+            </EditableTarget>
           ))}
         </div>
 
         {/* Footer conecte-se */}
+        {footerText ? (
+        <EditableTarget
+          id={EDIT_TARGETS.footer}
+          registry={targetRegistry}
+          active={highlightedTarget === EDIT_TARGETS.footer}
+        >
         <div style={{ padding: "22px 16px 28px", textAlign: "center" }}>
           <p
             style={{
@@ -397,6 +427,8 @@ export default function Template03({
             {footerText}
           </p>
         </div>
+        </EditableTarget>
+        ) : null}
       </div>
     </div>
   );
