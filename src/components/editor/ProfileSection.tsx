@@ -9,6 +9,7 @@ import {
 } from "../../lib/basic-templates/config";
 import { loadGoogleFont } from "../../lib/fonts";
 import { getBrowserSupabaseClient } from "../../lib/supabase/client";
+import { getTemplates } from "../../lib/basic-templates/catalog";
 import { EDIT_TARGETS } from "../../types/basic-templates";
 import { CANONICAL_PUBLIC_ORIGIN } from "../../lib/url";
 import { Input } from "../ui/input";
@@ -21,7 +22,6 @@ interface ProfileSectionProps {
   profile: Partial<Profile>;
   onChange: (updates: Partial<Profile>) => void;
   userId: string;
-  showProfessionalBadge?: boolean;
 }
 
 const MAX_AVATAR_BYTES = 3 * 1024 * 1024;
@@ -93,10 +93,12 @@ export function ProfileSection({
   profile,
   onChange,
   userId,
-  showProfessionalBadge = false,
 }: ProfileSectionProps) {
   const [uploading, setUploading] = useState(false);
   const supabase = getBrowserSupabaseClient();
+  const showProfessionalBadge = getTemplates().find(
+    (template) => template.id === profile.template_id,
+  )?.supportsCards === true;
 
   useEffect(() => {
     if (profile.title_font_family) loadGoogleFont(profile.title_font_family);
