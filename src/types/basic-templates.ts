@@ -61,7 +61,15 @@ export interface CardItem {
 }
 
 export type SocialPlatform =
-  "instagram" | "twitter" | "facebook" | "linkedin" | "youtube" | "tiktok" | "whatsapp" | "website";
+  | "instagram"
+  | "twitter"
+  | "facebook"
+  | "linkedin"
+  | "youtube"
+  | "tiktok"
+  | "whatsapp"
+  | "website"
+  | "email";
 
 export interface SocialItem {
   id: string;

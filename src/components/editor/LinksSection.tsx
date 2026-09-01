@@ -6,6 +6,7 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Switch } from "../ui/switch";
+import { PlatformPicker } from "../profile/PlatformPicker";
 
 interface LinksSectionProps {
   links: Partial<ProfileLink>[];
@@ -172,9 +173,16 @@ export function LinksSection({
               </div>
             </div>
 
-            {isOpen ? (
-              <div id={contentId} className="space-y-4">
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+             {isOpen ? (
+               <div id={contentId} className="space-y-4">
+                 <div className="space-y-2">
+                   <Label htmlFor={`link-platform-${link.id || index}`}>Red o tipo de enlace</Label>
+                   <PlatformPicker
+                     value={link.platform || "website"}
+                     onChange={(platform) => updateLink(index, { platform })}
+                   />
+                 </div>
+                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor={`link-label-${link.id || index}`}>Texto</Label>
                     <Input

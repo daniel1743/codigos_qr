@@ -6,6 +6,7 @@ import { BASIC_EDITOR_FONTS } from "../../lib/basic-templates/config";
 import { loadGoogleFont } from "../../lib/fonts";
 import { getBrowserSupabaseClient } from "../../lib/supabase/client";
 import { EDIT_TARGETS } from "../../types/basic-templates";
+import { CANONICAL_PUBLIC_ORIGIN } from "../../lib/url";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Switch } from "../ui/switch";
@@ -416,7 +417,7 @@ export function ProfileSection({ profile, onChange, userId }: ProfileSectionProp
         <Label className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500" htmlFor="public_alias">Enlace personalizado</Label>
         <div className="flex rounded-md shadow-sm">
           <span className="inline-flex items-center rounded-l-xl border border-r-0 border-stone-200 bg-stone-100 px-3 text-sm text-stone-500">
-            tudominio.com/
+            {CANONICAL_PUBLIC_ORIGIN.replace(/^https?:\/\//, "")}/
           </span>
           <Input
             id="public_alias"

@@ -61,6 +61,7 @@ const SOCIAL_PLATFORMS: ReadonlySet<SocialPlatform> = new Set([
   "tiktok",
   "whatsapp",
   "website",
+  "email",
 ]);
 
 export const BASIC_EDITOR_FONTS = [
@@ -304,7 +305,9 @@ function resolveButtonStyle(
   if (!override) return fallback;
 
   const desiredShape =
-    override.button_style === "soft"
+    override.button_style === "outline"
+      ? "sharp"
+      : override.button_style === "soft"
       ? "premium-soft"
       : override.button_style === "solid" && override.button_radius === "none"
         ? "sharp"
@@ -320,7 +323,8 @@ function resolveButtonStyle(
     template.customization.buttonStyles.find(
       (style) =>
         style.shape === desiredShape &&
-        (desiredShape !== "premium-soft" || style.variant === "soft"),
+        (desiredShape !== "premium-soft" || style.variant === "soft") &&
+        (override.button_style !== "outline" || style.variant === "outline"),
     ) ?? fallback
   );
 }

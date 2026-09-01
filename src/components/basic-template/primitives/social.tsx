@@ -3,6 +3,7 @@ import {
   Globe,
   Instagram,
   Linkedin,
+  Mail,
   MessageCircle,
   Music2,
   Twitter,
@@ -27,6 +28,7 @@ const SOCIAL_ICONS: Record<SocialPlatform, LucideIcon> = {
   tiktok: Music2,
   whatsapp: MessageCircle,
   website: Globe,
+  email: Mail,
 };
 
 interface SocialRowProps {
