@@ -39,6 +39,25 @@ const STANDALONE_CONTRACT_CSS = `
 .standalone-contract .eudora::after {
   opacity: var(--standalone-overlay-opacity, 1) !important;
 }
+.standalone-contract .amanda-links > [data-edit-target^="link-"],
+.standalone-contract .amanda-links > [data-edit-target^="link-"] > a {
+  min-width: 0;
+}
+.standalone-contract .amanda-links > [data-edit-target^="link-"] > a {
+  width: 100%;
+}
+.standalone-contract .amanda-main {
+  margin-bottom: var(--standalone-button-gap, 17px) !important;
+}
+.standalone-contract .amanda-link span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+.standalone-contract .amanda-links {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: 100%;
+}
 @media (max-width: 420px) {
   .standalone-contract .amanda-links,
   .standalone-contract .eudora-links {

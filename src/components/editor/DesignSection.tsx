@@ -18,6 +18,12 @@ interface DesignSectionProps {
 const MAX_BANNER_BYTES = 4 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const ICON_BUTTON_TEMPLATES = new Set(["amanda", "adriana", "eudora"]);
+const INTENSITY_LABELS: Record<string, string> = {
+  "luxury-fusion": "Fusión",
+  amanda: "Intensidad de diseño",
+  adriana: "Intensidad de diseño",
+  eudora: "Intensidad de diseño",
+};
 
 function normalizeFusionStrength(value: unknown) {
   const parsed = Number(value);
@@ -89,6 +95,7 @@ export function DesignSection({ profile, onChange, userId }: DesignSectionProps)
   const btnGradient = parseGradient(profile.button_color);
   const isBtnGradient = btnGradient !== null;
   const hasTemplateIcons = ICON_BUTTON_TEMPLATES.has(profile.template_id || "");
+  const intensityLabel = INTENSITY_LABELS[profile.template_id || ""];
 
   return (
     <section className="space-y-5">
@@ -342,24 +349,26 @@ export function DesignSection({ profile, onChange, userId }: DesignSectionProps)
             </Button>
           )}
         </div>
-        <div className="mt-4">
-           <div className="flex items-center justify-between gap-4 mb-2">
-             <Label htmlFor="banner_fusion_strength">Difuminación</Label>
-             <span className="text-sm font-medium tabular-nums text-[#1d1d1b]">{fusionStrength}</span>
-           </div>
-           <Input
-             id="banner_fusion_strength"
-             type="range"
-             min={0}
-             max={100}
-             step={1}
-             value={fusionStrength}
-             onChange={(event) =>
-               onChange({ banner_fusion_strength: normalizeFusionStrength(event.target.value) })
-             }
-             className="h-8 accent-[#1d1d1b]"
-           />
-        </div>
+        {intensityLabel ? (
+          <div className="mt-4">
+            <div className="mb-2 flex items-center justify-between gap-4">
+              <Label htmlFor="banner_fusion_strength">{intensityLabel}</Label>
+              <span className="text-sm font-medium tabular-nums text-[#1d1d1b]">{fusionStrength}</span>
+            </div>
+            <Input
+              id="banner_fusion_strength"
+              type="range"
+              min={0}
+              max={100}
+              step={1}
+              value={fusionStrength}
+              onChange={(event) =>
+                onChange({ banner_fusion_strength: normalizeFusionStrength(event.target.value) })
+              }
+              className="h-8 accent-[#1d1d1b]"
+            />
+          </div>
+        ) : null}
       </div>
     </section>
   );
