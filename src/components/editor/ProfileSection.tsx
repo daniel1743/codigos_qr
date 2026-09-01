@@ -178,6 +178,27 @@ export function ProfileSection({ profile, onChange, userId }: ProfileSectionProp
         </div>
       </div>
       <div className="space-y-3 rounded-2xl border border-stone-200 bg-[#fffefa] p-4 shadow-[0_8px_24px_rgba(29,29,27,0.04)]">
+        <Label className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500">
+          Forma del avatar
+        </Label>
+        <div className="flex gap-2">
+          {(["circle", "rounded", "square", "none"] as const).map((shape) => (
+            <button
+              key={shape}
+              type="button"
+              onClick={() => onChange({ avatar_shape: shape })}
+              className={`h-9 flex-1 rounded-lg border text-xs font-medium ${
+                (profile.avatar_shape || "circle") === shape
+                  ? "border-[#1d1d1b] bg-[#1d1d1b] text-[#fffefa]"
+                  : "border-stone-200 text-stone-600"
+              }`}
+            >
+              {{ circle: "Redondo", rounded: "Suave", square: "Cuadrado", none: "Sin avatar" }[shape]}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="space-y-3 rounded-2xl border border-stone-200 bg-[#fffefa] p-4 shadow-[0_8px_24px_rgba(29,29,27,0.04)]">
         <div className="flex items-center justify-between gap-4">
           <div className="space-y-1">
             <Label className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500" htmlFor="ring_enabled">Ring del avatar</Label>

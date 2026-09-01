@@ -17,6 +17,7 @@ interface DesignSectionProps {
 
 const MAX_BANNER_BYTES = 4 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const ICON_BUTTON_TEMPLATES = new Set(["amanda", "adriana", "eudora"]);
 
 function normalizeFusionStrength(value: unknown) {
   const parsed = Number(value);
@@ -87,6 +88,7 @@ export function DesignSection({ profile, onChange, userId }: DesignSectionProps)
   const isBgGradient = bgGradient !== null;
   const btnGradient = parseGradient(profile.button_color);
   const isBtnGradient = btnGradient !== null;
+  const hasTemplateIcons = ICON_BUTTON_TEMPLATES.has(profile.template_id || "");
 
   return (
     <section className="space-y-5">
@@ -143,6 +145,68 @@ export function DesignSection({ profile, onChange, userId }: DesignSectionProps)
             <ColorControl value={profile.button_border_color || "#000000"} onChange={(v) => onChange({ button_border_color: v })} compact />
           </div>
         )}
+
+        <div className="space-y-3 border-t border-stone-200 pt-4">
+          <Label className="text-xs font-medium text-stone-500">Texto del botón</Label>
+          <div className="flex gap-2">
+            {(["sm", "md", "lg"] as const).map((size) => (
+              <Button
+                key={size}
+                variant={(profile.button_text_size || "md") === size ? "default" : "outline"}
+                onClick={() => onChange({ button_text_size: size })}
+                className="h-9 flex-1 rounded-lg border-stone-200 text-xs"
+              >
+                {{ sm: "Pequeño", md: "Medio", lg: "Grande" }[size]}
+              </Button>
+            ))}
+          </div>
+
+          <Label className="text-xs font-medium text-stone-500">Peso del texto</Label>
+          <div className="flex gap-2">
+            {(["normal", "semibold", "bold"] as const).map((weight) => (
+              <Button
+                key={weight}
+                variant={(profile.button_text_weight || "semibold") === weight ? "default" : "outline"}
+                onClick={() => onChange({ button_text_weight: weight })}
+                className="h-9 flex-1 rounded-lg border-stone-200 text-xs"
+              >
+                {{ normal: "Regular", semibold: "Semibold", bold: "Bold" }[weight]}
+              </Button>
+            ))}
+          </div>
+
+          <Label className="text-xs font-medium text-stone-500">Alineación del contenido</Label>
+          <div className="flex gap-2">
+            {(["left", "center", "right"] as const).map((align) => (
+              <Button
+                key={align}
+                variant={(profile.button_content_align || "left") === align ? "default" : "outline"}
+                onClick={() => onChange({ button_content_align: align })}
+                className="h-9 flex-1 rounded-lg border-stone-200 text-xs"
+              >
+                {{ left: "Izquierda", center: "Centro", right: "Derecha" }[align]}
+              </Button>
+            ))}
+          </div>
+
+          {hasTemplateIcons ? (
+            <>
+              <Label className="text-xs font-medium text-stone-500">Posición del icono</Label>
+              <div className="flex gap-2">
+                {(["left", "right"] as const).map((position) => (
+                  <Button
+                    key={position}
+                    variant={(profile.button_icon_position || "left") === position ? "default" : "outline"}
+                    onClick={() => onChange({ button_icon_position: position })}
+                    className="h-9 flex-1 rounded-lg border-stone-200 text-xs"
+                  >
+                    {position === "left" ? "Izquierda" : "Derecha"}
+                  </Button>
+                ))}
+              </div>
+            </>
+          ) : null}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 rounded-2xl border border-stone-200 bg-[#fffefa] p-4 shadow-[0_8px_24px_rgba(29,29,27,0.04)]">
