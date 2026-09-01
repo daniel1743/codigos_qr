@@ -27,11 +27,20 @@ export interface StandaloneStyle {
     borderWidth?: string;
     borderColor?: string;
     spacing?: string;
+    textSize?: string;
+    textWeight?: number;
+    contentAlign?: "left" | "center" | "right";
+    iconPosition?: "left" | "right";
   };
   avatarRing: {
     enabled: boolean;
     color?: string;
     thickness?: string;
+  };
+  avatar: {
+    shape: string;
+    radius: string;
+    display?: "none";
   };
   vars: CSSProperties & Record<string, string | number | undefined>;
 }
@@ -103,6 +112,18 @@ function editorButtonTextColor(config: BasicTemplateConfig) {
   return config.palette.accentText;
 }
 
+function buttonJustify(align: "left" | "center" | "right" | undefined) {
+  if (align === "center") return "center";
+  if (align === "right") return "flex-end";
+  return "flex-start";
+}
+
+function avatarRadius(shape: string | undefined) {
+  if (shape === "rounded" || shape === "square") return "18px";
+  if (shape === "none") return "0";
+  return "9999px";
+}
+
 export function buildStandaloneStyle(config: BasicTemplateConfig): StandaloneStyle {
   const fallbackPalette = config.template.customization.palettes[0];
   const fallbackFontPair = config.template.customization.fontPairs[0];
@@ -148,6 +169,10 @@ export function buildStandaloneStyle(config: BasicTemplateConfig): StandaloneSty
       config.buttonCustomization.spacing !== "0.75rem"
         ? config.buttonCustomization.spacing
         : undefined,
+    textSize: config.buttonCustomization.textSize,
+    textWeight: config.buttonCustomization.textWeight,
+    contentAlign: config.buttonCustomization.contentAlign,
+    iconPosition: config.buttonCustomization.iconPosition,
   };
   const title = {
     fontFamily: profile.titleFontFamily || globalFont,
@@ -168,6 +193,11 @@ export function buildStandaloneStyle(config: BasicTemplateConfig): StandaloneSty
     color: profile.ringColor,
     thickness: profile.ringThickness,
   };
+  const avatar = {
+    shape: profile.avatarShape || "circle",
+    radius: avatarRadius(profile.avatarShape),
+    display: profile.avatarShape === "none" ? ("none" as const) : undefined,
+  };
 
   return {
     background,
@@ -178,6 +208,7 @@ export function buildStandaloneStyle(config: BasicTemplateConfig): StandaloneSty
     bio,
     button,
     avatarRing,
+    avatar,
     vars: {
       "--standalone-bg": background,
       "--standalone-accent": accent,
@@ -199,6 +230,14 @@ export function buildStandaloneStyle(config: BasicTemplateConfig): StandaloneSty
       "--standalone-button-border-width": button.borderWidth,
       "--standalone-button-border-color": button.borderColor,
       "--standalone-button-gap": button.spacing,
+      "--standalone-button-font-size": button.textSize,
+      "--standalone-button-font-weight": button.textWeight,
+      "--standalone-button-text-align": button.contentAlign,
+      "--standalone-button-justify": buttonJustify(button.contentAlign),
+      "--standalone-button-flex-direction":
+        button.iconPosition === "right" ? "row-reverse" : "row",
+      "--standalone-avatar-radius": avatar.radius,
+      "--standalone-avatar-display": avatar.display,
       "--standalone-avatar-ring-color": avatarRing.enabled ? avatarRing.color : undefined,
       "--standalone-avatar-ring-width":
         avatarRing.enabled && avatarRing.thickness === "thin"

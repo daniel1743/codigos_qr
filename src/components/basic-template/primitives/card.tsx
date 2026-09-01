@@ -5,7 +5,7 @@ import type {
   ContactContent,
   PaletteConfig,
 } from "@/types/basic-templates";
-import { buttonStyles } from "./button";
+import { buttonLabelStyle, buttonStyles } from "./button";
 
 interface CardProps {
   card: CardItem;
@@ -43,8 +43,12 @@ export function Card({ card, palette, style, customization, headingFont, bodyFon
           href={card.ctaUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-1 inline-flex min-h-10 items-center justify-center self-start px-4 py-2 text-sm font-semibold"
-          style={{ ...buttonStyles(palette, style, customization), fontFamily: bodyFont }}
+          className="mt-1 inline-flex min-h-10 items-center self-start px-4 py-2"
+          style={{
+            ...buttonStyles(palette, style, customization),
+            ...buttonLabelStyle(customization),
+            fontFamily: bodyFont,
+          }}
         >
           {card.ctaLabel}
         </a>

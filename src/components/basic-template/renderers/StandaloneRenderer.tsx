@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { BasicTemplateRendererProps } from "@/types/basic-templates";
 import TemplateAmanda from "./TemplateAmanda";
 import TemplateAdriana from "./TemplateAdriana";
@@ -10,6 +11,34 @@ import Template06, { type Template06SocialType } from "./Template06";
 import Template07, { type Template07CardIcon, type Template07SocialType } from "./Template07";
 import Template08, { type Template08LinkType } from "./Template08";
 import { buildStandaloneStyle } from "./standaloneStyle";
+
+const STANDALONE_CONTRACT_CSS = `
+.standalone-contract [data-edit-target^="link-"] > a,
+.standalone-contract [data-edit-target^="card-"] > a {
+  flex-direction: var(--standalone-button-flex-direction) !important;
+  font-size: var(--standalone-button-font-size) !important;
+  font-weight: var(--standalone-button-font-weight) !important;
+  justify-content: var(--standalone-button-justify) !important;
+  text-align: var(--standalone-button-text-align) !important;
+}
+.standalone-contract [data-edit-target="profile-avatar"] {
+  display: var(--standalone-avatar-display);
+}
+.standalone-contract [data-edit-target="profile-avatar"],
+.standalone-contract [data-edit-target="profile-avatar"] img {
+  border-radius: var(--standalone-avatar-radius) !important;
+}
+@media (max-width: 420px) {
+  .standalone-contract .amanda-links,
+  .standalone-contract .eudora-links {
+    grid-template-columns: 1fr !important;
+  }
+  .standalone-contract .eudora-main {
+    grid-column: auto !important;
+    max-width: none !important;
+  }
+}
+`;
 
 /**
  * "standalone" family renderer.
@@ -24,6 +53,12 @@ export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }
   const { template, content } = config;
   const { profile } = content;
   const standaloneStyle = buildStandaloneStyle(config);
+  const withStandaloneContract = (children: ReactNode) => (
+    <div className="standalone-contract" style={standaloneStyle.vars}>
+      <style>{STANDALONE_CONTRACT_CSS}</style>
+      {children}
+    </div>
+  );
 
   const links = content.links
     .filter((link) => link.enabled)
@@ -85,9 +120,10 @@ export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }
 
   switch (template.id) {
     case "amanda":
-      return (
+      return withStandaloneContract(
         <TemplateAmanda
           {...common}
+          footerText={footerText}
           standaloneStyle={standaloneStyle}
           links={links}
           targetRegistry={targetRegistry}
@@ -95,9 +131,10 @@ export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }
         />
       );
     case "adriana":
-      return (
+      return withStandaloneContract(
         <TemplateAdriana
           {...common}
+          footerText={footerText}
           standaloneStyle={standaloneStyle}
           links={links}
           targetRegistry={targetRegistry}
@@ -105,9 +142,10 @@ export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }
         />
       );
     case "eudora":
-      return (
+      return withStandaloneContract(
         <TemplateEudora
           {...common}
+          footerText={footerText}
           standaloneStyle={standaloneStyle}
           links={links}
           targetRegistry={targetRegistry}
@@ -115,9 +153,10 @@ export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }
         />
       );
     case "barbara":
-      return (
+      return withStandaloneContract(
         <TemplateBarbara
           {...common}
+          footerText={footerText}
           standaloneStyle={standaloneStyle}
           services={services}
           targetRegistry={targetRegistry}
@@ -125,7 +164,7 @@ export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }
         />
       );
     case "studio":
-      return (
+      return withStandaloneContract(
         <Template03
           name={profile.name}
           profession={profile.subtitle}
@@ -147,7 +186,7 @@ export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }
         />
       );
     case "classic-bio":
-      return (
+      return withStandaloneContract(
         <Template04
           {...common}
           socials={[
@@ -171,7 +210,7 @@ export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }
         />
       );
     case "sage":
-      return (
+      return withStandaloneContract(
         <Template05
           {...common}
           socials={[
@@ -192,7 +231,7 @@ export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }
         />
       );
     case "silver":
-      return (
+      return withStandaloneContract(
         <Template06
           {...common}
           socials={[
@@ -213,7 +252,7 @@ export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }
         />
       );
     case "fitness":
-      return (
+      return withStandaloneContract(
         <Template07
           {...common}
           socials={[
@@ -238,7 +277,7 @@ export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }
         />
       );
     case "neon":
-      return (
+      return withStandaloneContract(
         <Template08
           name={profile.name}
           profession={profile.subtitle}

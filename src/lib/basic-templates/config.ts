@@ -16,6 +16,10 @@ export type ButtonCustomizationOverrides = Pick<
   | "button_style"
   | "button_border_thickness"
   | "button_border_color"
+  | "button_text_size"
+  | "button_text_weight"
+  | "button_content_align"
+  | "button_icon_position"
   | "theme_spacing"
 >;
 
@@ -233,6 +237,7 @@ export function buildBasicTemplateContent(
       ringEnabled: profile.ring_enabled ?? false,
       ringColor: profile.ring_color || "#000000",
       ringThickness: profile.ring_thickness || "thin",
+      avatarShape: profile.avatar_shape || "circle",
       titleColor: profile.title_color || undefined,
       bioColor: profile.bio_color || undefined,
       titleFontFamily: resolveSupportedFont(profile.title_font_family),
@@ -316,12 +321,36 @@ function resolveButtonCustomization(
       ? SPACING_BY_THEME[override.theme_spacing]
       : SPACING_BY_THEME.standard;
 
+  const textSize =
+    override?.button_text_size === "sm"
+      ? "0.875rem"
+      : override?.button_text_size === "lg"
+        ? "1.125rem"
+        : "1rem";
+  const textWeight =
+    override?.button_text_weight === "normal"
+      ? 400
+      : override?.button_text_weight === "bold"
+        ? 700
+        : 600;
+  const contentAlign = ["left", "center", "right"].includes(override?.button_content_align || "")
+    ? (override?.button_content_align as "left" | "center" | "right")
+    : "left";
+  const iconPosition =
+    override?.button_icon_position === "right" || override?.button_icon_position === "left"
+      ? override.button_icon_position
+      : "left";
+
   return {
     borderWidth,
     borderColor: isHexColor(override?.button_border_color)
       ? override.button_border_color
       : resolveDefaultButtonBorderColor(palette, style, borderWidth),
     spacing,
+    textSize,
+    textWeight,
+    contentAlign,
+    iconPosition,
   };
 }
 

@@ -9,6 +9,7 @@ interface AvatarProps {
   ringEnabled?: boolean;
   ringColor?: string;
   ringThickness?: string;
+  shape?: string;
 }
 
 /**
@@ -23,17 +24,20 @@ export function Avatar({
   ringEnabled = false,
   ringColor = "#ffffff",
   ringThickness = "thin",
+  shape = "circle",
 }: AvatarProps) {
+  if (shape === "none") return null;
   const ringWidth = ringThickness === "thin" ? 2 : ringThickness === "thick" ? 5 : 3;
   const border = ringEnabled ? `${ringWidth}px solid ${ringColor}` : "none";
+  const borderRadius = shape === "rounded" || shape === "square" ? 18 : 9999;
   return (
     <img
       src={src}
       alt={name}
       width={size}
       height={size}
-      className="shrink-0 rounded-full object-cover shadow-lg"
-      style={{ width: size, height: size, border, opacity: 1 }}
+      className="shrink-0 object-cover shadow-lg"
+      style={{ width: size, height: size, border, borderRadius, opacity: 1 }}
     />
   );
 }

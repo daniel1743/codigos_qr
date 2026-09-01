@@ -30,6 +30,7 @@ export interface ProfileContent {
   ringEnabled?: boolean;
   ringColor?: string;
   ringThickness?: string;
+  avatarShape?: string;
   titleColor?: string;
   bioColor?: string;
   titleFontFamily?: string;
@@ -120,6 +121,14 @@ export interface ButtonCustomizationConfig {
   borderColor: string;
   /** Vertical gap between consecutive link buttons. */
   spacing: string;
+  /** Resolved label font size (rem). */
+  textSize?: string;
+  /** Resolved label font weight (300 | 400 | 600 | 700). */
+  textWeight?: number;
+  /** Content alignment inside the button (does not move the button itself). */
+  contentAlign?: "left" | "center" | "right";
+  /** Icon placement relative to the label (only when an icon is present). */
+  iconPosition?: "left" | "right";
 }
 
 export interface AllowedCustomization {
