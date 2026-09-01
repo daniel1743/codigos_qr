@@ -404,7 +404,7 @@ function CanvasWorkspace({
         >
           <div
             ref={templateRef}
-            className="w-[360px] min-h-[620px] overflow-hidden rounded-[2rem] border-[6px] border-black/10 bg-white shadow-[0_18px_42px_rgba(29,29,27,0.15)] transition-transform duration-200 motion-reduce:transition-none"
+            className="w-[360px] min-h-[620px] overflow-hidden rounded-[2rem] border-[6px] border-black/10 bg-white shadow-[0_18px_42px_rgba(29,29,27,0.15)] transition-transform duration-200 motion-reduce:transition-none lg:w-[500px]"
             style={{
               transform: `scale(${zoom})`,
               transformOrigin: "top left",
