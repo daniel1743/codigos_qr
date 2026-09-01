@@ -7,6 +7,7 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { ColorControl } from "./ColorControl";
+import { BASIC_EDITOR_FONTS } from "../../lib/basic-templates/config";
 
 interface DesignSectionProps {
   profile: Partial<Profile>;
@@ -16,11 +17,6 @@ interface DesignSectionProps {
 
 const MAX_BANNER_BYTES = 4 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
-
-const FONTS = [
-  "Inter", "Poppins", "Montserrat", "DM Sans", "Manrope",
-  "Raleway", "Nunito", "Lato", "Playfair Display", "Merriweather"
-];
 
 function normalizeFusionStrength(value: unknown) {
   const parsed = Number(value);
@@ -103,7 +99,7 @@ export function DesignSection({ profile, onChange, userId }: DesignSectionProps)
       <div className="space-y-3 rounded-2xl border border-stone-200 bg-[#fffefa] p-4 shadow-[0_8px_24px_rgba(29,29,27,0.04)]">
         <Label className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500">Tipografía</Label>
         <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {FONTS.map(font => (
+          {BASIC_EDITOR_FONTS.map(font => (
             <Button
               key={font}
               variant={profile.font_family === font ? "default" : "outline"}
