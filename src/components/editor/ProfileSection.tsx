@@ -323,6 +323,23 @@ export function ProfileSection({ profile, onChange, userId }: ProfileSectionProp
       </div>
 
       <div
+        data-tool-target={EDIT_TARGETS.subtitle}
+        className="space-y-2 rounded-2xl border border-stone-200 bg-[#fffefa] p-4 shadow-[0_8px_24px_rgba(29,29,27,0.04)]"
+      >
+        <Label className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500" htmlFor="profession">
+          Profesión / subtítulo
+        </Label>
+        <Input
+          id="profession"
+          value={profile.profession || ""}
+          onChange={(event) => onChange({ profession: event.target.value })}
+          placeholder="Ej: Nutricionista"
+          maxLength={80}
+          className="h-11 rounded-xl border-stone-200 bg-[#fffefa]"
+        />
+      </div>
+
+      <div
         data-tool-target={EDIT_TARGETS.bio}
         className="space-y-2 rounded-2xl border border-stone-200 bg-[#fffefa] p-4 shadow-[0_8px_24px_rgba(29,29,27,0.04)]"
       >

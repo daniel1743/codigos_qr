@@ -21,6 +21,7 @@ export interface Profile {
   slug: string;
   public_id: string;
   display_name: string;
+  profession?: string | null;
   bio: string | null;
   avatar_url: string | null;
   banner_url: string | null;

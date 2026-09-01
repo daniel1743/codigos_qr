@@ -258,7 +258,7 @@ export function buildBasicTemplateContent(
     profile: {
       avatarUrl: profile.avatar_url || "",
       name: profile.display_name || "",
-      subtitle: "",
+      subtitle: profile.profession?.trim() || "",
       bio: profile.bio || "",
       heroUrl: profile.banner_url || "",
       footerEnabled: profile.footer_enabled ?? false,

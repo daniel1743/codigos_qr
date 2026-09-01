@@ -7,6 +7,7 @@ const PROFILE_WRITABLE_COLUMNS = [
   "slug",
   "public_id",
   "display_name",
+  "profession",
   "bio",
   "avatar_url",
   "banner_url",
