@@ -1,12 +1,15 @@
-const CACHE_NAME = "qr-links-cache-v2";
+const CACHE_NAME = "cripqer-brand-cache-v2";
 const ASSETS_TO_CACHE = [
   "/",
   "/manifest.json",
-  "/icon-48.png",
-  "/icon-192.png",
-  "/icon-512.png",
-  "/apple-touch-icon.png",
-  "/favicon.ico",
+  "/brand-assets/cripqer-favicon-16.png",
+  "/brand-assets/cripqer-favicon-32.png",
+  "/brand-assets/cripqer-favicon.png",
+  "/brand-assets/cripqer-apple-touch-180.png",
+  "/brand-assets/cripqer-icon-192.png",
+  "/brand-assets/cripqer-icon-512.png",
+  "/brand-assets/cripqer-maskable-192.png",
+  "/brand-assets/cripqer-maskable-512.png",
 ];
 
 self.addEventListener("install", (event) => {

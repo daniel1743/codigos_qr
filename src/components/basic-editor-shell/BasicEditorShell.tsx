@@ -13,6 +13,7 @@ import {
 import { Button } from "../ui/button";
 import { DesktopSectionNav } from "../editor/DesktopSectionNav";
 import type { BasicEditorSectionId } from "../editor/MobileBottomNavbar";
+import PlatformNavbar from "../brand/PlatformNavbar";
 
 interface BasicEditorShellProps {
   canvas: ReactNode;
@@ -496,15 +497,15 @@ export function BasicEditorShell({
             key={template.id}
             type="button"
             onClick={() => selectTemplate(template.id)}
-            className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-[#1d1d1b] transition-colors hover:bg-stone-100"
+            className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm font-medium text-white/80 transition-colors hover:bg-white/5"
           >
             <span className="truncate">{template.name}</span>
-            {isSelected && <Check className="h-4 w-4 text-[#8a6b2f]" />}
+            {isSelected && <Check className="h-4 w-4 text-[#D4AF37]" />}
           </button>
         );
       })}
       {items.length === 0 && (
-        <p className="px-3 py-5 text-center text-sm text-stone-500">
+        <p className="px-3 py-5 text-center text-sm text-white/45">
           No se encontraron plantillas.
         </p>
       )}
@@ -581,66 +582,65 @@ export function BasicEditorShell({
 
   return (
     <div className="min-h-screen bg-[#f1efe9] pb-[calc(6rem+env(safe-area-inset-bottom,0px))] text-[#1d1d1b] lg:h-screen lg:overflow-hidden lg:pb-0">
-      <header className="sticky top-0 z-40 border-b border-stone-200 bg-[#fffefa]/90 px-3 backdrop-blur-xl lg:px-6">
-        <div className="mx-auto flex h-14 max-w-[1440px] items-center justify-between gap-3">
-          <div className="flex min-w-0 items-center gap-3">
+      <PlatformNavbar
+        variant="editor"
+        brandHref="/editor"
+        logoTheme="inverse"
+        className="sticky top-0 z-40 border-b border-white/10 bg-[#090909]/95 px-3 text-[#f5f2ea] backdrop-blur-xl lg:px-6"
+        innerClassName="mx-auto flex h-14 max-w-[1440px] items-center justify-between gap-4"
+        brandClassName="shrink-0 transition-opacity hover:opacity-80"
+        logoClassName="h-9 w-9 min-[420px]:w-[146px]"
+        navigation={
+          <nav className="hidden items-center gap-2 lg:flex" aria-label="Navegación principal">
             <Link
               to="/editor"
-              className="shrink-0 text-sm font-black uppercase tracking-[0.1em] text-[#1d1d1b] transition-colors hover:text-[#8a6b2f] min-[420px]:tracking-[0.14em]"
+              className={`rounded-lg px-2.5 py-2 text-[13px] font-medium transition-colors ${isEditorActive ? "bg-white/10 text-[#f5f2ea]" : "text-white/65 hover:bg-white/5 hover:text-white"}`}
+              aria-current={isEditorActive ? "page" : undefined}
             >
-              <span className="hidden min-[420px]:inline">Editorial Canvas</span>
-              <span className="min-[420px]:hidden">Editor QR</span>
+              Editor
             </Link>
-            <nav className="hidden items-center gap-1 lg:flex" aria-label="Navegación principal">
-              <Link
-                to="/editor"
-                className="rounded-full bg-[#1d1d1b] px-3 py-1.5 text-xs font-semibold text-[#fffefa] shadow-sm"
-                aria-current={isEditorActive ? "page" : undefined}
-              >
-                Editor
-              </Link>
-              {searchEnabled && (
-                <div ref={plantillasRef} className="relative">
-                  <button
-                    type="button"
-                    onClick={openPlantillas}
-                    aria-expanded={plantillasOpen}
-                    aria-haspopup="menu"
-                    aria-controls="plantillas-menu"
-                    className="rounded-full px-3 py-1.5 text-xs font-semibold text-stone-500 transition-colors hover:bg-stone-100 hover:text-[#1d1d1b]"
+            {searchEnabled && (
+              <div ref={plantillasRef} className="relative">
+                <button
+                  type="button"
+                  onClick={openPlantillas}
+                  aria-expanded={plantillasOpen}
+                  aria-haspopup="menu"
+                  aria-controls="plantillas-menu"
+                  className="rounded-lg px-2.5 py-2 text-[13px] font-medium text-white/65 transition-colors hover:bg-white/5 hover:text-white"
+                >
+                  Plantillas
+                </button>
+                {plantillasOpen && (
+                  <div
+                    id="plantillas-menu"
+                    className="absolute left-0 top-full z-50 mt-2 w-64 overflow-hidden rounded-2xl border border-white/10 bg-[#161616] shadow-[0_18px_45px_rgba(0,0,0,0.3)]"
                   >
-                    Plantillas
-                  </button>
-                  {plantillasOpen && (
-                    <div
-                      id="plantillas-menu"
-                      className="absolute left-0 top-full z-50 mt-2 w-64 overflow-hidden rounded-2xl border border-stone-200 bg-[#fffefa] shadow-[0_18px_45px_rgba(29,29,27,0.16)]"
-                    >
-                      <div className="flex items-center gap-2 border-b border-stone-100 px-4 py-3">
-                        <LayoutTemplate className="h-4 w-4 text-[#8a6b2f]" />
-                        <p className="text-xs font-bold uppercase tracking-[0.14em] text-stone-500">
-                          Plantillas
-                        </p>
-                      </div>
-                      <div className="max-h-72 overflow-y-auto p-2">
-                        {renderTemplateList(templateSearchItems)}
-                      </div>
+                    <div className="flex items-center gap-2 border-b border-white/10 px-4 py-3">
+                      <LayoutTemplate className="h-4 w-4 text-[#D4AF37]" />
+                      <p className="text-xs font-bold uppercase tracking-[0.14em] text-white/55">
+                        Plantillas
+                      </p>
                     </div>
-                  )}
-                </div>
-              )}
-              <Link
-                to="/encrypted-documents"
-                className="rounded-full px-3 py-1.5 text-xs font-semibold text-stone-500 transition-colors hover:bg-stone-100 hover:text-[#1d1d1b]"
-              >
-                QR cifrado
-              </Link>
-            </nav>
-          </div>
-
-          {searchEnabled && (
+                    <div className="max-h-72 overflow-y-auto p-2">
+                      {renderTemplateList(templateSearchItems)}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+            <Link
+              to="/encrypted-documents"
+              className="rounded-lg px-2.5 py-2 text-[13px] font-medium text-white/65 transition-colors hover:bg-white/5 hover:text-white"
+            >
+              QR cifrado
+            </Link>
+          </nav>
+        }
+        center={
+          searchEnabled ? (
             <div ref={searchRef} className="relative hidden min-w-[220px] max-w-sm flex-1 justify-center lg:flex">
-              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
               <input
                 type="search"
                 aria-label="Buscar plantillas"
@@ -654,14 +654,14 @@ export function BasicEditorShell({
                   setPlantillasOpen(false);
                 }}
                 placeholder="Buscar plantillas"
-                className="h-10 w-full rounded-full border border-stone-200 bg-white/70 pl-10 pr-10 text-sm text-[#1d1d1b] outline-none transition-all placeholder:text-stone-400 focus:w-[min(100%,20rem)] focus:border-[#c9a96a]/70 focus:bg-white focus:shadow-[0_0_0_3px_rgba(201,169,106,0.18)]"
+                className="h-10 w-full rounded-full border border-white/15 bg-white/10 pl-10 pr-10 text-sm text-white outline-none transition-all placeholder:text-white/40 focus:w-[min(100%,20rem)] focus:border-[#D4AF37]/70 focus:bg-white/15 focus:shadow-[0_0_0_3px_rgba(212,175,55,0.16)]"
               />
               {templateSearchQuery && (
                 <button
                   type="button"
                   aria-label="Limpiar búsqueda"
                   onClick={() => onTemplateSearchChange?.("")}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 grid h-7 w-7 place-items-center rounded-full text-stone-400 transition-colors hover:bg-stone-100 hover:text-[#1d1d1b]"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 grid h-7 w-7 place-items-center rounded-full text-white/45 transition-colors hover:bg-white/10 hover:text-white"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -669,11 +669,11 @@ export function BasicEditorShell({
               {searchOpen && (
                 <div
                   id="search-results"
-                  className="absolute top-12 z-50 w-full min-w-[18rem] overflow-hidden rounded-2xl border border-stone-200 bg-[#fffefa] shadow-[0_18px_45px_rgba(29,29,27,0.16)]"
+                  className="absolute top-12 z-50 w-full min-w-[18rem] overflow-hidden rounded-2xl border border-white/10 bg-[#161616] shadow-[0_18px_45px_rgba(0,0,0,0.3)]"
                 >
-                  <div className="flex items-center gap-2 border-b border-stone-100 px-4 py-3">
-                    <Search className="h-4 w-4 text-[#8a6b2f]" />
-                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-stone-500">
+                  <div className="flex items-center gap-2 border-b border-white/10 px-4 py-3">
+                    <Search className="h-4 w-4 text-[#D4AF37]" />
+                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-white/55">
                       Plantillas
                     </p>
                   </div>
@@ -683,57 +683,58 @@ export function BasicEditorShell({
                 </div>
               )}
             </div>
-          )}
-
-          <div className="flex shrink-0 items-center gap-1">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            aria-label="Vista previa"
-            onClick={onPreview}
-            className="h-10 w-10 text-[#1d1d1b]"
-          >
-            <Eye className="h-5 w-5" />
-          </Button>
-          <Button
-            type="button"
-            variant="secondary"
-            size="icon"
-            aria-label="Guardar borrador"
-            onClick={onSaveDraft}
-            disabled={publishing || publishDisabled}
-            className="h-10 w-10 rounded-xl border border-stone-200 bg-stone-100 text-[#1d1d1b] hover:bg-stone-200"
-          >
-            <Save className="h-4 w-4" />
-          </Button>
-          <Button
-            type="button"
-            onClick={onPublish}
-            disabled={publishing || publishDisabled}
-            className="h-10 w-10 rounded-xl bg-[#1d1d1b] px-0 text-xs text-[#fffefa] hover:bg-[#343432] min-[390px]:w-auto min-[390px]:px-3"
-          >
-            <Send className="h-4 w-4 min-[390px]:mr-1.5" />
-            <span className="hidden min-[390px]:inline">
-              {publishing ? "Publicando..." : "Publicar"}
-            </span>
-          </Button>
-          <Button
-            ref={mobileMenuTriggerRef}
-            type="button"
-            variant="ghost"
-            size="icon"
-            aria-label={mobileMenuOpen ? "Cerrar menú" : "Abrir menú"}
-            aria-expanded={mobileMenuOpen}
-            aria-controls="mobile-menu"
-            onClick={() => setMobileMenuOpen((open) => !open)}
-            className="h-10 w-10 rounded-xl text-[#1d1d1b] lg:hidden"
-          >
-            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </Button>
+          ) : null
+        }
+        actions={
+          <div className="flex shrink-0 items-center gap-2">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              aria-label="Vista previa"
+              onClick={onPreview}
+              className="h-12 w-12 text-white/75 hover:bg-white/10 hover:text-white lg:h-10 lg:w-10"
+            >
+              <Eye className="h-5 w-5" />
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              size="icon"
+              aria-label="Guardar borrador"
+              onClick={onSaveDraft}
+              disabled={publishing || publishDisabled}
+              className="h-12 w-12 rounded-xl border border-white/10 bg-white/10 text-white/85 hover:bg-white/15 lg:h-10 lg:w-10"
+            >
+              <Save className="h-4 w-4" />
+            </Button>
+            <Button
+              type="button"
+              onClick={onPublish}
+              disabled={publishing || publishDisabled}
+              className="h-12 w-12 rounded-xl bg-[#D4AF37] px-0 text-xs text-[#090909] hover:bg-[#e6c45b] min-[390px]:w-auto min-[390px]:px-3 lg:h-10"
+            >
+              <Send className="h-4 w-4 min-[390px]:mr-1.5" />
+              <span className="hidden min-[390px]:inline">
+                {publishing ? "Publicando..." : "Publicar"}
+              </span>
+            </Button>
+            <Button
+              ref={mobileMenuTriggerRef}
+              type="button"
+              variant="ghost"
+              size="icon"
+              aria-label={mobileMenuOpen ? "Cerrar menú" : "Abrir menú"}
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-menu"
+              onClick={() => setMobileMenuOpen((open) => !open)}
+              className="h-12 w-12 rounded-xl text-white/80 hover:bg-white/10 hover:text-white lg:hidden"
+            >
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </Button>
           </div>
-        </div>
-        {mobileMenuOpen && (
+        }
+        mobile={mobileMenuOpen && (
           <>
             <div
               className="fixed inset-x-0 bottom-0 top-14 z-40 bg-black/25 backdrop-blur-[1px] lg:hidden"
@@ -742,25 +743,25 @@ export function BasicEditorShell({
             <div
               ref={mobileMenuRef}
               id="mobile-menu"
-              className="fixed inset-x-3 top-[calc(3.5rem+0.5rem)] z-50 max-h-[calc(100dvh-4.5rem)] overflow-y-auto rounded-2xl border border-stone-200 bg-[#fffefa] p-3 shadow-[0_18px_45px_rgba(29,29,27,0.18)] lg:hidden"
+              className="fixed inset-x-3 top-[calc(3.5rem+0.5rem)] z-50 max-h-[calc(100dvh-4.5rem)] overflow-y-auto rounded-2xl border border-white/10 bg-[#161616] p-3 text-[#f5f2ea] shadow-[0_18px_45px_rgba(0,0,0,0.3)] lg:hidden"
             >
               {searchEnabled && (
                 <div className="relative">
-                  <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
+                  <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
                   <input
                     type="search"
                     aria-label="Buscar plantillas"
                     value={templateSearchQuery}
                     onChange={(event) => onTemplateSearchChange?.(event.target.value)}
                     placeholder="Buscar plantillas"
-                    className="h-11 w-full rounded-full border border-stone-200 bg-white/70 pl-10 pr-10 text-sm text-[#1d1d1b] outline-none placeholder:text-stone-400"
+                    className="h-11 w-full rounded-full border border-white/15 bg-white/10 pl-10 pr-10 text-sm text-white outline-none placeholder:text-white/40"
                   />
                   {templateSearchQuery && (
                     <button
                       type="button"
                       aria-label="Limpiar búsqueda"
                       onClick={() => onTemplateSearchChange?.("")}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 grid h-7 w-7 place-items-center rounded-full text-stone-400 transition-colors hover:bg-stone-100 hover:text-[#1d1d1b]"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 grid h-7 w-7 place-items-center rounded-full text-white/45 transition-colors hover:bg-white/10 hover:text-white"
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -769,7 +770,7 @@ export function BasicEditorShell({
               )}
 
               {searchEnabled && templateSearchQuery.trim() !== "" && (
-                <div className="mt-2 max-h-56 overflow-y-auto rounded-2xl border border-stone-200 bg-[#fffefa] p-2 shadow-sm">
+                <div className="mt-2 max-h-56 overflow-y-auto rounded-2xl border border-white/10 bg-[#111111] p-2 shadow-sm">
                   {renderTemplateList(filteredTemplates)}
                 </div>
               )}
@@ -778,7 +779,7 @@ export function BasicEditorShell({
                 <Link
                   to="/editor"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="block rounded-xl bg-stone-100 px-3 py-3 text-sm font-semibold text-[#1d1d1b]"
+                  className="block min-h-12 rounded-xl bg-white/10 px-3 py-3 text-sm font-medium text-[#f5f2ea]"
                   aria-current={isEditorActive ? "page" : undefined}
                 >
                   Editor
@@ -787,7 +788,7 @@ export function BasicEditorShell({
                   <button
                     type="button"
                     onClick={openMobileGallery}
-                    className="block w-full rounded-xl px-3 py-3 text-left text-sm font-semibold text-stone-600 transition-colors hover:bg-stone-100 hover:text-[#1d1d1b]"
+                    className="block min-h-12 w-full rounded-xl px-3 py-3 text-left text-sm font-medium text-white/65 transition-colors hover:bg-white/5 hover:text-white"
                   >
                     Plantillas
                   </button>
@@ -795,7 +796,7 @@ export function BasicEditorShell({
                 <Link
                   to="/encrypted-documents"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="block rounded-xl px-3 py-3 text-sm font-semibold text-stone-600 transition-colors hover:bg-stone-100 hover:text-[#1d1d1b]"
+                  className="block min-h-12 rounded-xl px-3 py-3 text-sm font-medium text-white/65 transition-colors hover:bg-white/5 hover:text-white"
                 >
                   QR cifrado
                 </Link>
@@ -803,10 +804,10 @@ export function BasicEditorShell({
             </div>
           </>
         )}
-      </header>
+      />
 
       <nav
-        className="sticky top-14 z-30 flex h-8 items-center border-b border-stone-200 bg-[#fffefa]/85 px-3 text-[11px] font-semibold text-stone-500 backdrop-blur-xl lg:px-6"
+        className="sticky top-14 z-30 flex h-8 items-center border-b border-white/10 bg-[#090909]/85 px-3 text-[11px] font-medium text-white/50 backdrop-blur-xl lg:px-6"
         aria-label="Contexto de edición"
       >
         <ol className="flex min-w-0 items-center gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -814,10 +815,10 @@ export function BasicEditorShell({
             const isCurrent = index === contextItems.length - 1;
             return (
               <li key={`${item}-${index}`} className="flex min-w-0 items-center gap-1">
-                {index > 0 && <span className="text-stone-300">/</span>}
+                {index > 0 && <span className="text-white/25">/</span>}
                 <span
                   aria-current={isCurrent ? "location" : undefined}
-                  className={`truncate ${isCurrent ? "text-[#1d1d1b]" : ""}`}
+                  className={`truncate ${isCurrent ? "text-white/85" : ""}`}
                 >
                   {item}
                 </span>

@@ -1,0 +1,5 @@
+[33m49beed8[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfeat/basic-editor-editorial-canvas-ui[m[33m)[m fix: correct canonical production domain
+[33m3893dbf[m fix: use canonical criqper.dev domain for QR links
+[33m54c8d24[m fix: tune mobile pinch zoom sensitivity
+[33m4e3b999[m[33m ([m[1;31morigin/feat/basic-editor-editorial-canvas-ui[m[33m)[m nuevas 4 templates
+[33m581cf0a[m feat: complete premium mobile canvas pinch and pan

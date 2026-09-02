@@ -15,6 +15,7 @@ import { BasicEditorShell } from "../components/basic-editor-shell/BasicEditorSh
 import { PublicProfileView } from "../components/profile/PublicProfileView";
 import { MobileTemplateGallery } from "../components/editor/MobileTemplateGallery";
 import { BasicTemplateRenderer } from "../components/basic-template/BasicTemplateRenderer";
+import { TemplateThumbnail } from "../components/template-lab/TemplateThumbnail";
 import { getTemplates } from "../lib/basic-templates/catalog";
 import {
   buildBasicTemplateContent,
@@ -23,6 +24,7 @@ import {
   normalizeBasicPlatform,
   remapBasicLinkPresentationIds,
 } from "../lib/basic-templates/config";
+import { getDefaultContent } from "../lib/basic-templates/fixtures";
 import { loadGoogleFont } from "../lib/fonts";
 import { generatePublicId, getInternalSlugFromPublicId } from "../lib/publicId";
 import { getBrowserSupabaseClient } from "../lib/supabase/client";
@@ -108,7 +110,9 @@ function getEditorContextSegments(
       ? "Enlaces"
       : activeSection === "appearance"
         ? "Diseño"
-        : "Perfil";
+        : activeSection === "gallery"
+          ? "Galería"
+          : "Perfil";
   const detail =
     selectedTarget === EDIT_TARGETS.avatar
       ? "Avatar"
@@ -411,6 +415,13 @@ function EditorPage() {
     }
   };
 
+  const handleDesktopSectionChange = (section: BasicEditorSectionId) => {
+    setSelectedTarget(null);
+    setIsGalleryOpen(false);
+    setActiveSection(section);
+    setIsContextPanelOpen(true);
+  };
+
   const renderActiveSection = () => {
     switch (activeSection) {
       case "links":
@@ -442,6 +453,55 @@ function EditorPage() {
       case "appearance":
         return (
           <DesignSection profile={profile} onChange={updateProfile} userId={session.user.id} />
+        );
+      case "gallery":
+        return (
+          <section className="space-y-5">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-stone-500">
+                Galería
+              </p>
+              <h2 className="text-xl font-bold tracking-[-0.03em] text-[#1d1d1b]">
+                Plantillas
+              </h2>
+              <p className="mt-1 text-sm text-stone-500">Elige un diseño para tu página.</p>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              {templates.map((template) => {
+                const isSelected = profile.template_id === template.id;
+
+                return (
+                  <button
+                    key={template.id}
+                    type="button"
+                    onClick={() => updateProfile({ template_id: template.id, template_version: 1 })}
+                    aria-pressed={isSelected}
+                    className={`group min-w-0 rounded-2xl border bg-white p-3 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${
+                      isSelected ? "border-[#1d1d1b]" : "border-stone-200 hover:border-stone-300"
+                    }`}
+                  >
+                    <div className="flex justify-center overflow-hidden rounded-xl bg-stone-100">
+                      <TemplateThumbnail
+                        template={template}
+                        content={getDefaultContent(template.id)}
+                        width={120}
+                      />
+                    </div>
+                    <div className="mt-3 flex items-center justify-between gap-2">
+                      <p className="min-w-0 truncate text-sm font-semibold text-[#1d1d1b]">
+                        {template.name}
+                      </p>
+                      {isSelected && (
+                        <span className="shrink-0 rounded-full bg-[#1d1d1b] px-2 py-0.5 text-[10px] font-bold text-[#fffefa]">
+                          Activa
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
         );
       case "profile":
       default:
@@ -489,7 +549,7 @@ function EditorPage() {
         contextSegments={getEditorContextSegments(activeSection, selectedTarget, isGalleryOpen, links)}
         toolFocusTarget={getToolFocusTarget(selectedTarget, activeSection)}
         activeSection={activeSection}
-        onSectionChange={handleSectionChange}
+        onSectionChange={handleDesktopSectionChange}
       />
       <MobileBottomNavbar activeSection={activeSection} onSectionChange={handleSectionChange} />
       <MobileTemplateGallery
