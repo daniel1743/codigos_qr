@@ -148,12 +148,6 @@ function CanvasWorkspace({
   const viewportSizeRef = useRef(viewportSize);
   const translateRef = useRef(translate);
   const zoomRef = useRef(MIN_ZOOM);
-  const focalCorrectionFrame = useRef<number | null>(null);
-  const pendingFocalCorrection = useRef<{
-    client: CanvasPoint;
-    world: CanvasPoint;
-    scale: number;
-  } | null>(null);
 
   const minScale = Math.max(MIN_ZOOM, fitZoom * MIN_USER_ZOOM);
   const maxScale = Math.max(minScale, fitZoom * MAX_USER_ZOOM);
@@ -285,11 +279,6 @@ function CanvasWorkspace({
       panStart.current = null;
       suppressClick.current = false;
       setIsInteracting(false);
-      if (focalCorrectionFrame.current !== null) {
-        window.cancelAnimationFrame(focalCorrectionFrame.current);
-        focalCorrectionFrame.current = null;
-      }
-      pendingFocalCorrection.current = null;
     };
 
     resetGestureState();
@@ -300,31 +289,7 @@ function CanvasWorkspace({
     return resetGestureState;
   }, [resetKey, viewportRef]);
 
-  const queueFocalCorrection = (client: CanvasPoint, world: CanvasPoint, scale: number) => {
-    pendingFocalCorrection.current = { client, world, scale };
-    if (focalCorrectionFrame.current !== null) return;
-
-    focalCorrectionFrame.current = window.requestAnimationFrame(() => {
-      focalCorrectionFrame.current = null;
-      const pending = pendingFocalCorrection.current;
-      pendingFocalCorrection.current = null;
-      const template = templateRef.current;
-      if (!pending || !template) return;
-
-      const rect = template.getBoundingClientRect();
-      const correction = {
-        x: pending.client.x - (rect.left + pending.world.x * pending.scale),
-        y: pending.client.y - (rect.top + pending.world.y * pending.scale),
-      };
-      if (Math.abs(correction.x) < 0.25 && Math.abs(correction.y) < 0.25) return;
-      setTranslate((current) => clampTranslation({
-        x: current.x + correction.x,
-        y: current.y + correction.y,
-      }, pending.scale));
-    });
-  };
-
-  const applyZoomAt = (nextScale: number, focalClient: CanvasPoint, correctAfterLayout = false) => {
+  const applyZoomAt = (nextScale: number, focalClient: CanvasPoint) => {
     const template = templateRef.current;
     if (!template) return;
 
@@ -346,7 +311,6 @@ function CanvasWorkspace({
 
     setUserZoom(clamp(clampedScale / fitZoomRef.current, MIN_USER_ZOOM, MAX_USER_ZOOM));
     setTranslate(nextTranslate);
-    if (correctAfterLayout) queueFocalCorrection(focalClient, worldPoint, clampedScale);
   };
 
   const updateZoom = (nextScale: number, focalClient?: CanvasPoint) => {
@@ -482,7 +446,6 @@ function CanvasWorkspace({
         }, nextScale);
         setUserZoom(clamp(nextScale / fitZoomRef.current, MIN_USER_ZOOM, MAX_USER_ZOOM));
         setTranslate(nextTranslate);
-        queueFocalCorrection(focal, pinchStart.current.worldPoint, nextScale);
         suppressClick.current = true;
         event.preventDefault();
         return;
