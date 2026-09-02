@@ -154,3 +154,26 @@
     transform: translateX(400%) skewX(-12deg);
   }
 }
+
+/*
+ * Editor navbar brand lockup — keep the same proportions as the landing
+ * navbar (30px symbol + 16px wordmark). The landing scopes these sizes in its
+ * own <style> block, but the editor shell relies on the shared Logo component
+ * defaults which render larger (36px symbol + responsive clamp() wordmark).
+ */
+[data-platform-navbar="editor"] .logo-horizontal-lockup {
+  gap: 7px;
+}
+
+[data-platform-navbar="editor"] .logo-horizontal-lockup img {
+  display: block;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  object-fit: contain;
+}
+
+[data-platform-navbar="editor"] .logo-wordmark {
+  font-size: 16px !important;
+  letter-spacing: 0.12em !important;
+}

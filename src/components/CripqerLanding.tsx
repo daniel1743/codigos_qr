@@ -543,6 +543,21 @@ export default function CripqerLanding() {
             <Link to="/editor" className="cq-btn cq-btn-primary cq-btn-sm" data-cta="crear-qr">Crear mi QR</Link>
           </div>
         }
+        mobileMenuContent={
+          <div className="flex flex-col h-full pt-8 pb-4">
+            <nav className="flex flex-col gap-2" aria-label="Navegación móvil principal">
+              <a href="#producto" className="block rounded-xl px-4 py-3 text-lg font-medium text-white/80 hover:bg-white/10 hover:text-white transition-colors">Producto</a>
+              <a href="#disenos" className="block rounded-xl px-4 py-3 text-lg font-medium text-white/80 hover:bg-white/10 hover:text-white transition-colors">Diseños</a>
+              <a href="#como-funciona" className="block rounded-xl px-4 py-3 text-lg font-medium text-white/80 hover:bg-white/10 hover:text-white transition-colors">Cómo funciona</a>
+              <a href="#seguridad" className="block rounded-xl px-4 py-3 text-lg font-medium text-white/80 hover:bg-white/10 hover:text-white transition-colors">Documentos</a>
+              <a href="#faq" className="block rounded-xl px-4 py-3 text-lg font-medium text-white/80 hover:bg-white/10 hover:text-white transition-colors">FAQ</a>
+            </nav>
+            <div className="mt-auto flex flex-col gap-3 pt-6 border-t border-white/10">
+              <Link to="/editor" className="block rounded-xl px-4 py-3 text-center text-lg font-medium text-white bg-white/10 hover:bg-white/20 transition-colors">Iniciar sesión</Link>
+              <Link to="/editor" className="block rounded-xl px-4 py-3 text-center text-lg font-medium text-black bg-[#D4AF37] hover:bg-[#e6c45b] transition-colors">Crear mi QR</Link>
+            </div>
+          </div>
+        }
       />
 
       {/* ============ 1. HERO ============ */}

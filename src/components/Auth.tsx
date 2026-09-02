@@ -1,5 +1,7 @@
 import { useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { getBrowserSupabaseClient } from "../lib/supabase/client";
+import PlatformNavbar from "./brand/PlatformNavbar";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -18,7 +20,7 @@ import {
 } from "lucide-react";
 import { Checkbox } from "./ui/checkbox";
 
-export function Auth() {
+export function Auth({ showPlatformMenu = false }: { showPlatformMenu?: boolean }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -80,7 +82,72 @@ export function Auth() {
   const isLogin = mode === "login";
 
   return (
-    <div className="min-h-screen overflow-hidden bg-[#0b1020] px-4 py-6 text-white sm:px-6 lg:px-8">
+    <div className="min-h-screen overflow-hidden bg-[#0b1020] text-white">
+      {showPlatformMenu && (
+        <PlatformNavbar
+          variant="editor"
+          brandHref="/"
+          logoTheme="inverse"
+          className="border-b border-white/10 bg-[#090909] px-3 text-[#f5f2ea] lg:hidden"
+          innerClassName="mx-auto flex h-14 items-center justify-between gap-4"
+          brandClassName="shrink-0 transition-opacity hover:opacity-80"
+          logoClassName="h-9 w-9 min-[420px]:w-[146px]"
+          mobileMenuContent={
+            <div className="flex flex-col pb-6">
+              <nav className="flex flex-col gap-1" aria-label="Menú móvil principal">
+                <Link
+                  to="/editor"
+                  onClick={() => setMode("login")}
+                  className="block min-h-12 rounded-xl bg-white/10 px-4 py-3 text-sm font-medium text-[#f5f2ea]"
+                >
+                  Editor
+                </Link>
+                <Link
+                  to="/editor"
+                  onClick={() => setMode("login")}
+                  className="block min-h-12 rounded-xl px-4 py-3 text-sm font-medium text-white/65 transition-colors hover:bg-white/5 hover:text-white"
+                >
+                  Plantillas
+                </Link>
+                <Link
+                  to="/encrypted-documents"
+                  className="block min-h-12 rounded-xl px-4 py-3 text-sm font-medium text-white/65 transition-colors hover:bg-white/5 hover:text-white"
+                >
+                  QR cifrado
+                </Link>
+                <Link
+                  to="/encrypted-documents"
+                  className="block min-h-12 rounded-xl px-4 py-3 text-sm font-medium text-white/65 transition-colors hover:bg-white/5 hover:text-white"
+                >
+                  Documentos cifrados
+                </Link>
+              </nav>
+              <div className="mt-5 border-t border-white/10 pt-5">
+                <p className="px-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/45">
+                  Cuenta
+                </p>
+                <div className="mt-2 flex flex-col gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setMode("login")}
+                    className="min-h-12 rounded-xl px-4 py-3 text-left text-sm font-medium text-white/75 transition-colors hover:bg-white/5 hover:text-white"
+                  >
+                    Iniciar sesión
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMode("signup")}
+                    className="min-h-12 rounded-xl bg-[#D4AF37] px-4 py-3 text-left text-sm font-semibold text-[#090909] transition-colors hover:bg-[#e6c45b]"
+                  >
+                    Crear cuenta
+                  </button>
+                </div>
+              </div>
+            </div>
+          }
+        />
+      )}
+      <div className="px-4 py-6 sm:px-6 lg:px-8">
       <div className="mx-auto flex min-h-[calc(100vh-3rem)] max-w-6xl items-center justify-center">
         <div className="relative grid w-full overflow-hidden rounded-[2rem] border border-white/10 bg-white shadow-2xl shadow-black/40 lg:min-h-[680px] lg:grid-cols-[1.05fr_0.95fr]">
           <section className="relative hidden overflow-hidden bg-[radial-gradient(circle_at_18%_15%,#5b6cff_0%,transparent_34%),linear-gradient(135deg,#28105f_0%,#4b148f_48%,#111d5e_100%)] p-10 lg:flex lg:flex-col lg:justify-between">
@@ -296,6 +363,7 @@ export function Auth() {
             </form>
           </section>
         </div>
+      </div>
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { toast } from "sonner";
@@ -12,6 +12,10 @@ import {
 import { ProfileSection } from "../components/editor/ProfileSection";
 import { ShareSection } from "../components/editor/ShareSection";
 import { BasicEditorShell } from "../components/basic-editor-shell/BasicEditorShell";
+import type {
+  BasicEditorAccount,
+  BasicEditorProfileState,
+} from "../components/basic-editor-shell/BasicEditorShell";
 import { PublicProfileView } from "../components/profile/PublicProfileView";
 import { MobileTemplateGallery } from "../components/editor/MobileTemplateGallery";
 import { BasicTemplateRenderer } from "../components/basic-template/BasicTemplateRenderer";
@@ -138,9 +142,11 @@ function getSafeFusionStrength(value: unknown) {
 }
 
 function EditorPage() {
+  const navigate = useNavigate();
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<Partial<Profile>>(DEFAULT_PROFILE);
+  const [profileState, setProfileState] = useState<BasicEditorProfileState>("missing");
   const [links, setLinks] = useState<Partial<ProfileLink>[]>([]);
   const [saving, setSaving] = useState(false);
   const [savedPublicId, setSavedPublicId] = useState("");
@@ -248,6 +254,7 @@ function EditorPage() {
       const supabase = getBrowserSupabaseClient();
       const currentProfile = await profileService.getProfileByUserId(supabase, userId);
       if (currentProfile) {
+        setProfileState("ready");
         setProfile({
           ...DEFAULT_PROFILE,
           ...currentProfile,
@@ -260,11 +267,13 @@ function EditorPage() {
         const currentLinks = await linkService.getProfileLinks(supabase, currentProfile.id);
         setLinks(currentLinks);
       } else {
+        setProfileState("missing");
         setProfile(DEFAULT_PROFILE);
         setLinks([]);
       }
     } catch (error) {
       console.error(error);
+      setProfileState("error");
       toast.error("No se pudo cargar tu perfil.");
     } finally {
       loadedUserId.current = userId;
@@ -381,7 +390,7 @@ function EditorPage() {
   };
 
   if (loading) return <div className="flex justify-center p-12">Cargando...</div>;
-  if (!session) return <Auth />;
+  if (!session) return <Auth showPlatformMenu />;
 
   const publicId = profile.public_id || savedPublicId || "";
   const isValid = validate();
@@ -413,6 +422,15 @@ function EditorPage() {
       setActiveSection(section);
       setIsContextPanelOpen(true);
     }
+  };
+
+  const handleSignOut = async () => {
+    const { error } = await getBrowserSupabaseClient().auth.signOut();
+    if (error) {
+      toast.error("No se pudo cerrar la sesión.");
+      return;
+    }
+    navigate({ to: "/" });
   };
 
   const handleDesktopSectionChange = (section: BasicEditorSectionId) => {
@@ -524,6 +542,23 @@ function EditorPage() {
   return (
     <>
       <BasicEditorShell
+        account={
+          session
+            ? ({
+                email: session.user.email ?? null,
+                fullName:
+                  typeof session.user.user_metadata?.full_name === "string"
+                    ? session.user.user_metadata.full_name
+                    : null,
+                avatarUrl:
+                  typeof session.user.user_metadata?.avatar_url === "string"
+                    ? session.user.user_metadata.avatar_url
+                    : null,
+              } satisfies BasicEditorAccount)
+            : null
+        }
+        onSignOut={handleSignOut}
+        profileState={profileState}
         canvas={canvas}
         canvasViewportRef={canvasViewportRef}
         desktopPanel={<div aria-live="polite">{renderActiveSection()}</div>}
