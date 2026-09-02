@@ -14,6 +14,7 @@ import { Route as AliasRouteImport } from './routes/$alias'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as EditorRouteImport } from './routes/editor'
 import { Route as EncryptedDocumentsRouteImport } from './routes/encrypted-documents'
+import { Route as EngineLabRouteImport } from './routes/engine-lab'
 import { Route as OnboardingPreviewRouteImport } from './routes/onboarding-preview'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as TemplateLabRouteImport } from './routes/template-lab'
@@ -43,6 +44,11 @@ const EditorRoute = EditorRouteImport.update({
 const EncryptedDocumentsRoute = EncryptedDocumentsRouteImport.update({
   id: '/encrypted-documents',
   path: '/encrypted-documents',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EngineLabRoute = EngineLabRouteImport.update({
+  id: '/engine-lab',
+  path: '/engine-lab',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OnboardingPreviewRoute = OnboardingPreviewRouteImport.update({
@@ -77,6 +83,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/editor': typeof EditorRoute
   '/encrypted-documents': typeof EncryptedDocumentsRoute
+  '/engine-lab': typeof EngineLabRoute
   '/onboarding-preview': typeof OnboardingPreviewRoute
   '/profile': typeof ProfileRoute
   '/template-lab': typeof TemplateLabRoute
@@ -89,6 +96,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/editor': typeof EditorRoute
   '/encrypted-documents': typeof EncryptedDocumentsRoute
+  '/engine-lab': typeof EngineLabRoute
   '/onboarding-preview': typeof OnboardingPreviewRoute
   '/profile': typeof ProfileRoute
   '/template-lab': typeof TemplateLabRoute
@@ -102,6 +110,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/editor': typeof EditorRoute
   '/encrypted-documents': typeof EncryptedDocumentsRoute
+  '/engine-lab': typeof EngineLabRoute
   '/onboarding-preview': typeof OnboardingPreviewRoute
   '/profile': typeof ProfileRoute
   '/template-lab': typeof TemplateLabRoute
@@ -116,6 +125,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/editor'
     | '/encrypted-documents'
+    | '/engine-lab'
     | '/onboarding-preview'
     | '/profile'
     | '/template-lab'
@@ -128,6 +138,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/editor'
     | '/encrypted-documents'
+    | '/engine-lab'
     | '/onboarding-preview'
     | '/profile'
     | '/template-lab'
@@ -140,6 +151,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/editor'
     | '/encrypted-documents'
+    | '/engine-lab'
     | '/onboarding-preview'
     | '/profile'
     | '/template-lab'
@@ -153,6 +165,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   EditorRoute: typeof EditorRoute
   EncryptedDocumentsRoute: typeof EncryptedDocumentsRoute
+  EngineLabRoute: typeof EngineLabRoute
   OnboardingPreviewRoute: typeof OnboardingPreviewRoute
   ProfileRoute: typeof ProfileRoute
   TemplateLabRoute: typeof TemplateLabRoute
@@ -195,6 +208,13 @@ declare module '@tanstack/react-router' {
       path: '/encrypted-documents'
       fullPath: '/encrypted-documents'
       preLoaderRoute: typeof EncryptedDocumentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/engine-lab': {
+      id: '/engine-lab'
+      path: '/engine-lab'
+      fullPath: '/engine-lab'
+      preLoaderRoute: typeof EngineLabRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/onboarding-preview': {
@@ -241,6 +261,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   EditorRoute: EditorRoute,
   EncryptedDocumentsRoute: EncryptedDocumentsRoute,
+  EngineLabRoute: EngineLabRoute,
   OnboardingPreviewRoute: OnboardingPreviewRoute,
   ProfileRoute: ProfileRoute,
   TemplateLabRoute: TemplateLabRoute,
