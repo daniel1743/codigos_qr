@@ -729,7 +729,7 @@ export function BasicEditorShell({
     const findTarget = (container: HTMLElement | null) => {
       if (!container) return null;
       return Array.from(container.querySelectorAll<HTMLElement>("[data-tool-target]")).find(
-        (element) => element.dataset.toolTarget === toolFocusTarget,
+          (element) => element.dataset["toolTarget"] === toolFocusTarget,
       );
     };
     const isDesktop = window.matchMedia("(min-width: 1024px)").matches;
@@ -762,7 +762,53 @@ export function BasicEditorShell({
   }
 
   return (
-    <div className="min-h-screen bg-[#f1efe9] pb-[calc(6rem+env(safe-area-inset-bottom,0px))] text-[#1d1d1b] lg:h-screen lg:overflow-hidden lg:pb-0">
+    <div className="basic-editor-shell min-h-screen bg-[#f1efe9] pb-[calc(6rem+env(safe-area-inset-bottom,0px))] text-[#1d1d1b] lg:h-screen lg:overflow-hidden lg:pb-0">
+      <style>{`
+        [data-radix-dialog-content] > div > div.min-h-0.flex-1.overflow-y-auto:has(> .basic-editor-shell-drawer-content) {
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+
+        [data-radix-dialog-content] > div > div.min-h-0.flex-1.overflow-y-auto:has(> .basic-editor-shell-drawer-content)::-webkit-scrollbar {
+          display: none;
+          width: 0;
+          height: 0;
+        }
+
+        .basic-editor-shell .select-none.overflow-auto.overscroll-contain {
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+
+        .basic-editor-shell .select-none.overflow-auto.overscroll-contain::-webkit-scrollbar {
+          display: none;
+          width: 0;
+          height: 0;
+        }
+
+        .basic-editor-shell__inspector-scroll {
+          scrollbar-width: thin;
+          scrollbar-color: rgba(29, 29, 27, 0.22) transparent;
+        }
+
+        .basic-editor-shell__inspector-scroll::-webkit-scrollbar {
+          width: 5px;
+          height: 5px;
+        }
+
+        .basic-editor-shell__inspector-scroll::-webkit-scrollbar-track {
+          background: transparent;
+        }
+
+        .basic-editor-shell__inspector-scroll::-webkit-scrollbar-thumb {
+          border-radius: 999px;
+          background: rgba(29, 29, 27, 0.22);
+        }
+
+        .basic-editor-shell__inspector-scroll::-webkit-scrollbar-thumb:hover {
+          background: rgba(29, 29, 27, 0.38);
+        }
+      `}</style>
       <PlatformNavbar
         variant="editor"
         brandHref="/editor"
@@ -905,118 +951,118 @@ export function BasicEditorShell({
         mobileMenuOpen={mobileMenuOpen}
         onMobileMenuChange={setMobileMenuOpen}
         mobileMenuContent={
-          <div className="flex flex-col pb-6">
-            {searchEnabled && (
-              <div className="relative mb-4">
-                <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
-                <input
-                  type="search"
-                  aria-label="Buscar plantillas"
-                  value={templateSearchQuery}
-                  onChange={(event) => onTemplateSearchChange?.(event.target.value)}
-                  placeholder="Buscar plantillas"
-                  className="h-11 w-full rounded-full border border-white/15 bg-white/10 pl-10 pr-10 text-sm text-white outline-none placeholder:text-white/40 focus:border-white/30 focus:ring-1 focus:ring-white/30"
-                />
-                {templateSearchQuery && (
-                  <button
-                    type="button"
-                    aria-label="Limpiar búsqueda"
-                    onClick={() => onTemplateSearchChange?.("")}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 grid h-7 w-7 place-items-center rounded-full text-white/45 transition-colors hover:bg-white/10 hover:text-white"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
-            )}
-
-            {searchEnabled && templateSearchQuery.trim() !== "" && (
-              <div className="mb-4 max-h-56 overflow-y-auto rounded-2xl border border-white/10 bg-[#111111] p-2 shadow-sm">
-                {renderTemplateList(filteredTemplates)}
-              </div>
-            )}
-
-            <nav className="flex flex-col gap-1" aria-label="Menú móvil principal">
-              <Link
-                to="/editor"
-                onClick={() => setMobileMenuOpen(false)}
-                className="block min-h-12 rounded-xl bg-white/10 px-4 py-3 text-sm font-medium text-[#f5f2ea]"
-                aria-current={isEditorActive ? "page" : undefined}
-              >
-                Editor
-              </Link>
-              {searchEnabled && (
-                <button
-                  type="button"
-                  onClick={openMobileGallery}
-                  className="block min-h-12 w-full rounded-xl px-4 py-3 text-left text-sm font-medium text-white/65 transition-colors hover:bg-white/5 hover:text-white"
-                >
-                  Plantillas
-                </button>
-              )}
-              <Link
-                to="/encrypted-documents"
-                onClick={() => setMobileMenuOpen(false)}
-                className="block min-h-12 rounded-xl px-4 py-3 text-sm font-medium text-white/65 transition-colors hover:bg-white/5 hover:text-white"
-              >
-                QR cifrado
-              </Link>
-              <Link
-                to="/encrypted-documents"
-                onClick={() => setMobileMenuOpen(false)}
-                className="block min-h-12 rounded-xl px-4 py-3 text-sm font-medium text-white/65 transition-colors hover:bg-white/5 hover:text-white"
-              >
-                Documentos cifrados
-              </Link>
-            </nav>
-
-            <div className="mt-5 border-t border-white/10 pt-5">
-              <div className="mb-3 flex items-center gap-3 px-2">
-                <span className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-full bg-white/10 text-white/70">
+          <div className="basic-editor-shell-drawer-content flex flex-col min-h-full pb-6 relative">
+            {/* Top dark wave */}
+            <div className="absolute top-0 left-0 w-full h-[180px] bg-[#161616] overflow-hidden z-0">
+               <svg className="absolute bottom-0 w-full h-[120px] text-[#0a0a0a] translate-y-[2px]" viewBox="0 0 1440 320" preserveAspectRatio="none">
+                 <path fill="currentColor" d="M0,160L80,181.3C160,203,320,245,480,245.3C640,245,800,203,960,181.3C1120,160,1280,160,1360,160L1440,160L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"></path>
+               </svg>
+            </div>
+            
+            <div className="relative z-10 px-6 pt-[80px] mb-6">
+              {/* Profile Avatar */}
+              <div className="inline-block rounded-full bg-gradient-to-tr from-[#D4AF37] via-[#e6c45b] to-[#f8efcf] p-[3px] mb-3 shadow-lg">
+                <span className="grid h-[86px] w-[86px] shrink-0 place-items-center overflow-hidden rounded-full border-[3px] border-[#0a0a0a] bg-white/10 text-white/50">
                   {accountAvatar ? (
                     <img src={accountAvatar} alt="" className="h-full w-full object-cover" />
                   ) : (
-                    <UserCircle className="h-5 w-5" aria-hidden="true" />
+                    <UserCircle className="h-10 w-10" aria-hidden="true" />
                   )}
-                </span>
-                <span className="min-w-0">
-                  <span className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-white/45">
-                    {profileState === "ready"
-                      ? "Cuenta activa"
-                      : profileState === "missing"
-                        ? "Sin página creada"
-                        : "Problema de carga"}
-                  </span>
-                  {accountName && (
-                    <span className="mt-1 block truncate text-sm font-semibold text-white/90">
-                      {accountName}
-                    </span>
-                  )}
-                  <span className="mt-0.5 block break-all text-xs text-white/60">
-                    {account?.email || "Cuenta en proceso de carga"}
-                  </span>
                 </span>
               </div>
+              <h2 className="text-[28px] font-bold text-white leading-tight">
+                {accountName || account?.email?.split('@')[0] || "Usuario"}
+              </h2>
+              <p className="text-[15px] font-medium text-white/50">
+                {account?.email || ""}
+              </p>
               {profileState === "error" && (
-                <p className="mb-2 px-2 text-xs leading-5 text-amber-200/80" role="alert">
+                <p className="mt-3 max-w-[15rem] text-xs leading-5 text-amber-200/85" role="alert">
                   No pudimos cargar los datos guardados. Tus datos no se han eliminado.
                 </p>
               )}
-              <nav className="flex flex-col gap-1" aria-label="Cuenta">
+            </div>
+
+            <div className="px-4 flex-1 relative z-10">
+              {searchEnabled && (
+                <div className="relative mb-4">
+                  <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
+                  <input
+                    type="search"
+                    aria-label="Buscar plantillas"
+                    value={templateSearchQuery}
+                    onChange={(event) => onTemplateSearchChange?.(event.target.value)}
+                    placeholder="Buscar plantillas"
+                    className="h-11 w-full rounded-full border border-white/15 bg-white/10 pl-10 pr-10 text-sm text-white outline-none placeholder:text-white/40 focus:border-white/30 focus:ring-1 focus:ring-white/30"
+                  />
+                  {templateSearchQuery && (
+                    <button
+                      type="button"
+                      aria-label="Limpiar búsqueda"
+                      onClick={() => onTemplateSearchChange?.("")}
+                      className="absolute right-2 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full text-white/45 transition-colors hover:bg-white/10 hover:text-white"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {searchEnabled && templateSearchQuery.trim() !== "" && (
+                <div className="mb-4 max-h-56 overflow-y-auto rounded-2xl border border-white/10 bg-[#111111] p-2 shadow-sm">
+                  {renderTemplateList(filteredTemplates)}
+                </div>
+              )}
+
+              <nav className="flex flex-col gap-1" aria-label="Menú móvil principal">
+                <Link
+                  to="/editor"
+                  data-close="true"
+                  className={`flex items-center gap-3 min-h-[52px] rounded-2xl px-4 py-3 text-base font-medium transition-colors ${isEditorActive ? "bg-white/10 text-white" : "text-white/60 hover:bg-white/5 hover:text-white"}`}
+                  aria-current={isEditorActive ? "page" : undefined}
+                >
+                  <LayoutTemplate className="h-5 w-5" />
+                  Editor
+                </Link>
+
+                <hr className="my-2 border-white/5 mx-2" />
+
+                {searchEnabled && (
+                  <button
+                    type="button"
+                    onClick={openMobileGallery}
+                    className="flex items-center gap-3 min-h-[52px] w-full rounded-2xl px-4 py-3 text-left text-base font-medium text-white/60 transition-colors hover:bg-white/5 hover:text-white"
+                  >
+                    <Search className="h-5 w-5" />
+                    Biblioteca
+                  </button>
+                )}
+                <Link
+                  to="/encrypted-documents"
+                  data-close="true"
+                  className="flex items-center gap-3 min-h-[52px] rounded-2xl px-4 py-3 text-base font-medium text-white/60 transition-colors hover:bg-white/5 hover:text-white"
+                >
+                  <Check className="h-5 w-5" />
+                  QR cifrado
+                </Link>
                 <Link
                   to="/profile"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block min-h-12 rounded-xl px-4 py-3 text-sm font-medium text-white/75 transition-colors hover:bg-white/5 hover:text-white"
+                  data-close="true"
+                  className="flex items-center gap-3 min-h-[52px] rounded-2xl px-4 py-3 text-base font-medium text-white/60 transition-colors hover:bg-white/5 hover:text-white"
                 >
-                  Mi perfil
+                  <UserCircle className="h-5 w-5" />
+                  Mi Perfil
                 </Link>
+
+                <hr className="my-2 border-white/5 mx-2" />
+
                 <button
                   type="button"
                   onClick={handleSignOut}
                   disabled={signingOut || !onSignOut}
-                  className="flex min-h-12 w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-red-200 transition-colors hover:bg-red-500/10 hover:text-red-100 disabled:cursor-wait disabled:opacity-60"
+                  className="flex items-center gap-3 min-h-[52px] w-full rounded-2xl px-4 py-3 text-left text-base font-medium text-white/60 transition-colors hover:bg-white/5 hover:text-white disabled:opacity-50"
                 >
-                  <LogOut className="h-4 w-4" aria-hidden="true" />
+                  <LogOut className="h-5 w-5" />
                   {signingOut ? "Cerrando sesión..." : "Cerrar sesión"}
                 </button>
               </nav>
@@ -1049,15 +1095,21 @@ export function BasicEditorShell({
 
       <div className="lg:grid lg:h-[calc(100dvh-5.5rem)] lg:min-h-0 lg:grid-cols-[minmax(0,1.55fr)_minmax(340px,0.85fr)]">
         <main className="min-w-0 border-b border-stone-200 lg:min-h-0 lg:overflow-hidden lg:border-b-0 lg:border-r">
-          <CanvasWorkspace
-            viewportRef={canvasViewportRef}
-            mobileSheetState={mobilePanelOpen ? mobileSheetState : undefined}
-            resetKey={selectedTemplateId}
-          >
-            {canvas}
-          </CanvasWorkspace>
+          {mobilePanelOpen ? (
+            <CanvasWorkspace
+              viewportRef={canvasViewportRef}
+              mobileSheetState={mobileSheetState}
+              resetKey={selectedTemplateId ?? null}
+            >
+              {canvas}
+            </CanvasWorkspace>
+          ) : (
+            <CanvasWorkspace viewportRef={canvasViewportRef} resetKey={selectedTemplateId ?? null}>
+              {canvas}
+            </CanvasWorkspace>
+          )}
         </main>
-        <aside ref={desktopToolsRef} className="hidden min-h-0 overflow-y-auto bg-[#fffefa] lg:block">
+        <aside ref={desktopToolsRef} className="basic-editor-shell__inspector-scroll hidden min-h-0 overflow-y-auto bg-[#fffefa] lg:block">
           <div className="sticky top-0 z-10 border-b border-stone-200 bg-[#fffefa]/95 px-5 py-3 backdrop-blur-xl">
             <DesktopSectionNav activeSection={activeSection ?? "profile"} onSectionChange={onSectionChange ?? (() => {})} />
           </div>
@@ -1105,7 +1157,7 @@ export function BasicEditorShell({
               <X className="h-4 w-4" />
             </Button>
           </div>
-          <div ref={mobileToolsRef} className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4">
+          <div ref={mobileToolsRef} className="basic-editor-shell__inspector-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain p-4">
             {mobilePanel}
           </div>
         </section>
