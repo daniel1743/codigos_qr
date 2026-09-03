@@ -76,7 +76,7 @@ export function PlatformNavbar({
               className={logoClassName}
             />
           </Link>
-          {desktopNavigation}
+          {desktopNavigation && <div className="hidden lg:flex">{desktopNavigation}</div>}
         </div>
         {center}
 

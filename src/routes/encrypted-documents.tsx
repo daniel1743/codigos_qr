@@ -1,6 +1,8 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { Auth } from "../components/Auth";
+import PlatformNavbar from "../components/brand/PlatformNavbar";
+import { PLATFORM_NAV_ITEMS } from "../components/platform/platform-navigation";
 import { getBrowserSupabaseClient } from "../lib/supabase/client";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -30,6 +32,7 @@ import {
   ShieldCheck,
   Key,
   X,
+  ChevronDown,
 } from "lucide-react";
 import { toast } from "sonner";
 import { EncryptionService } from "../lib/encryption";
@@ -48,6 +51,8 @@ import { CANONICAL_PUBLIC_ORIGIN } from "../lib/url";
 export const Route = createFileRoute("/encrypted-documents")({
   component: EncryptedDocumentsPage,
 });
+
+const DOCUMENTS_NAV_ITEMS = PLATFORM_NAV_ITEMS.filter((item) => item.scope !== "admin");
 
 function EncryptedDocumentsPage() {
   const supabase = getBrowserSupabaseClient();
@@ -257,41 +262,47 @@ function EncryptedDocumentsApp({ userId }: { userId: string }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50">
-      {/* Header */}
-      <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
+      <PlatformNavbar
+        variant="editor"
+        brandHref="/editor"
+        logoTheme="inverse"
+        className="sticky top-0 z-40 border-b border-white/10 bg-[#090909]/95 px-3 text-[#f5f2ea] backdrop-blur-xl lg:px-6"
+        innerClassName="mx-auto flex h-14 max-w-[1440px] items-center justify-between gap-4"
+        brandClassName="shrink-0 transition-opacity hover:opacity-80"
+        logoClassName="h-[34px] w-[34px] min-[420px]:w-[146px]"
+        navItems={DOCUMENTS_NAV_ITEMS}
+      />
+
+      <header className="border-b bg-white/80 shadow-sm backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link to="/editor" className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
-                ← Volver al editor
-              </Link>
-              <div className="h-6 w-px bg-border" />
-              <div className="flex items-center gap-2">
-                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-600 shadow-md">
-                  <Shield className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-lg font-bold tracking-tight">Documentos Encriptados</h1>
-                  <p className="text-xs text-muted-foreground">Máxima seguridad</p>
-                </div>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-cyan-600 shadow-md">
+                <Shield className="h-5 w-5 text-white" />
+              </div>
+              <div className="min-w-0">
+                <h1 className="truncate text-lg font-bold tracking-tight">Documentos Encriptados</h1>
+                <p className="text-xs text-muted-foreground">Máxima seguridad</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="grid grid-cols-1 gap-2 min-[420px]:grid-cols-2 sm:flex sm:shrink-0">
               <Button
                 variant={view === "list" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setView("list")}
+                className="w-full sm:w-auto"
               >
-                <FileText className="w-4 h-4 mr-2" />
+                <FileText className="mr-2 h-4 w-4" />
                 Mis Documentos
               </Button>
               <Button
                 variant={view === "create" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setView("create")}
+                className="w-full sm:w-auto"
               >
-                <Upload className="w-4 h-4 mr-2" />
+                <Upload className="mr-2 h-4 w-4" />
                 Crear Nuevo
               </Button>
             </div>
@@ -340,6 +351,7 @@ function DocumentsList({
   const [loading, setLoading] = useState(true);
   const [selectedQrDoc, setSelectedQrDoc] = useState<any | null>(null);
   const [failedCount, setFailedCount] = useState(0);
+  const [expandedDocumentIds, setExpandedDocumentIds] = useState<Set<string>>(new Set());
   const supabase = getBrowserSupabaseClient();
 
   useEffect(() => {
@@ -412,6 +424,18 @@ function DocumentsList({
     }
   };
 
+  const toggleDocumentExpanded = (documentId: string) => {
+    setExpandedDocumentIds((current) => {
+      const next = new Set(current);
+      if (next.has(documentId)) {
+        next.delete(documentId);
+      } else {
+        next.add(documentId);
+      }
+      return next;
+    });
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center p-12">
@@ -432,51 +456,51 @@ function DocumentsList({
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="rounded-xl border bg-white p-6 shadow-sm">
+      <div className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-2 sm:gap-4 lg:grid-cols-4">
+        <div className="rounded-xl border bg-white p-4 shadow-sm sm:p-6">
           <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-blue-100">
-              <FileText className="w-6 h-6 text-blue-600" />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-100 sm:h-12 sm:w-12">
+              <FileText className="h-5 w-5 text-blue-600 sm:h-6 sm:w-6" />
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-2xl font-bold">{activeDocs}</p>
-              <p className="text-xs text-muted-foreground">Documentos Activos</p>
+              <p className="text-xs leading-tight text-muted-foreground">Documentos Activos</p>
             </div>
           </div>
         </div>
 
-        <div className="rounded-xl border bg-white p-6 shadow-sm">
+        <div className="rounded-xl border bg-white p-4 shadow-sm sm:p-6">
           <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-green-100">
-              <Download className="w-6 h-6 text-green-600" />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-green-100 sm:h-12 sm:w-12">
+              <Download className="h-5 w-5 text-green-600 sm:h-6 sm:w-6" />
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-2xl font-bold">{totalDownloads}</p>
-              <p className="text-xs text-muted-foreground">Descargas Totales</p>
+              <p className="text-xs leading-tight text-muted-foreground">Descargas Totales</p>
             </div>
           </div>
         </div>
 
-        <div className="rounded-xl border bg-white p-6 shadow-sm">
+        <div className="rounded-xl border bg-white p-4 shadow-sm sm:p-6">
           <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-purple-100">
-              <ShieldCheck className="w-6 h-6 text-purple-600" />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-purple-100 sm:h-12 sm:w-12">
+              <ShieldCheck className="h-5 w-5 text-purple-600 sm:h-6 sm:w-6" />
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-2xl font-bold">{documents.length}</p>
-              <p className="text-xs text-muted-foreground">Accesos Seguros</p>
+              <p className="text-xs leading-tight text-muted-foreground">Accesos Seguros</p>
             </div>
           </div>
         </div>
 
-        <div className="rounded-xl border bg-white p-6 shadow-sm">
+        <div className="rounded-xl border bg-white p-4 shadow-sm sm:p-6">
           <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-red-100">
-              <AlertTriangle className="w-6 h-6 text-red-600" />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-red-100 sm:h-12 sm:w-12">
+              <AlertTriangle className="h-5 w-5 text-red-600 sm:h-6 sm:w-6" />
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-2xl font-bold">{failedCount}</p>
-              <p className="text-xs text-muted-foreground">Intentos Bloqueados</p>
+              <p className="text-xs leading-tight text-muted-foreground">Intentos Bloqueados</p>
             </div>
           </div>
         </div>
@@ -499,8 +523,189 @@ function DocumentsList({
         </div>
       ) : (
         /* Documents Grid / Table */
-        <div className="rounded-xl border bg-white overflow-hidden shadow-sm">
-          <div className="overflow-x-auto">
+        <div className="space-y-3 lg:overflow-hidden lg:rounded-xl lg:border lg:bg-white lg:shadow-sm">
+          <div className="space-y-3 lg:hidden">
+            {documents.map((doc) => {
+              const isExpired = doc.expire_at && new Date(doc.expire_at) < new Date();
+              const isLimitReached =
+                doc.max_downloads && doc.current_downloads >= doc.max_downloads;
+              const isLinkActive = !isExpired && !isLimitReached;
+              const sessionPassword = documentPasswords[doc.id];
+              const detailsId = `document-details-${doc.id}`;
+              const isExpanded = expandedDocumentIds.has(doc.id);
+
+              return (
+                <article
+                  key={doc.id}
+                  className="overflow-hidden rounded-xl border bg-white shadow-sm"
+                >
+                  <button
+                    type="button"
+                    className="flex min-h-[88px] w-full items-center gap-3 p-4 text-left transition-colors hover:bg-slate-50"
+                    aria-expanded={isExpanded}
+                    aria-controls={detailsId}
+                    onClick={() => toggleDocumentExpanded(doc.id)}
+                  >
+                    <div
+                      className="shrink-0 rounded-lg border p-2"
+                      style={{
+                        backgroundColor: getFileTypeQrTheme(
+                          normalizeDocumentCategory(doc.file_type),
+                        ).accentBackground,
+                      }}
+                    >
+                      <FileTypeIcon fileType={doc.file_type} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-semibold text-foreground">{doc.name}</p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        {doc.original_filename} •{" "}
+                        {EncryptionService.formatFileSize(doc.file_size_bytes)}
+                      </p>
+                      <div className="mt-2 flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
+                        <span
+                          className={`inline-flex items-center gap-1 font-medium ${
+                            doc.encryption_level === "maximum"
+                              ? "text-red-600"
+                              : doc.encryption_level === "high"
+                                ? "text-purple-600"
+                                : "text-blue-600"
+                          }`}
+                        >
+                          <Lock className="h-3.5 w-3.5" />
+                          {doc.encryption_level === "maximum"
+                            ? "Máximo"
+                            : doc.encryption_level === "high"
+                              ? "Alto"
+                              : "Estándar"}
+                        </span>
+                        <span>
+                          {isExpired
+                            ? "Expirado"
+                            : doc.expire_at
+                              ? `Expira ${new Date(doc.expire_at).toLocaleDateString()}`
+                              : "Nunca expira"}
+                        </span>
+                        <span>
+                          {doc.current_downloads} / {doc.max_downloads || "∞"} descargas
+                        </span>
+                      </div>
+                    </div>
+                    <ChevronDown
+                      className={`h-5 w-5 shrink-0 text-muted-foreground transition-transform ${isExpanded ? "rotate-180" : ""}`}
+                      aria-hidden="true"
+                    />
+                  </button>
+
+                  {isExpanded && (
+                    <div id={detailsId} className="border-t bg-slate-50/60 p-4">
+                      <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+                        <div>
+                          <dt className="text-xs text-muted-foreground">Seguridad</dt>
+                          <dd className="mt-1 font-medium">
+                            {doc.encryption_level === "maximum"
+                              ? "Máximo (2FA)"
+                              : doc.encryption_level === "high"
+                                ? "Alto"
+                                : "Estándar"}
+                            {doc.password_required && (
+                              <span className="ml-1 text-amber-600">· Con contraseña</span>
+                            )}
+                          </dd>
+                        </div>
+                        <div>
+                          <dt className="text-xs text-muted-foreground">Expiración</dt>
+                          <dd
+                            className={`mt-1 font-medium ${isExpired ? "text-red-500" : "text-foreground"}`}
+                          >
+                            {doc.expire_at
+                              ? `${new Date(doc.expire_at).toLocaleDateString()} · ${isExpired ? "Expirado" : new Date(doc.expire_at).toLocaleTimeString()}`
+                              : "Nunca expira"}
+                          </dd>
+                        </div>
+                        <div>
+                          <dt className="text-xs text-muted-foreground">Descargas</dt>
+                          <dd
+                            className={`mt-1 font-medium ${isLimitReached ? "text-red-500" : "text-foreground"}`}
+                          >
+                            {doc.current_downloads} / {doc.max_downloads || "∞"}
+                            {doc.one_time_download && (
+                              <span className="ml-1 text-orange-600">· Un solo uso</span>
+                            )}
+                          </dd>
+                        </div>
+                        {doc.password_required && (
+                          <div>
+                            <dt className="text-xs text-muted-foreground">Contraseña</dt>
+                            <dd className="mt-1 font-medium">
+                              {sessionPassword
+                                ? "Disponible en esta sesión"
+                                : "No disponible en esta sesión"}
+                            </dd>
+                          </div>
+                        )}
+                      </dl>
+
+                      <div className="mt-4 grid grid-cols-1 gap-2 min-[420px]:grid-cols-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="min-h-10 w-full"
+                          disabled={!isLinkActive}
+                          onClick={() => {
+                            const url = `${CANONICAL_PUBLIC_ORIGIN}/d/${doc.short_url}`;
+                            navigator.clipboard.writeText(url);
+                            toast.success("Enlace copiado al portapapeles");
+                          }}
+                        >
+                          <Copy className="mr-2 h-3.5 w-3.5" />
+                          Copiar enlace
+                        </Button>
+                        {doc.password_required && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="min-h-10 w-full"
+                            disabled={!sessionPassword}
+                            onClick={() => {
+                              if (!sessionPassword) return;
+                              navigator.clipboard.writeText(sessionPassword);
+                              toast.success("Contraseña copiada al portapapeles");
+                            }}
+                          >
+                            <Key className="mr-2 h-3.5 w-3.5" />
+                            Copiar contraseña
+                          </Button>
+                        )}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="min-h-10 w-full"
+                          disabled={!isLinkActive}
+                          onClick={() => setSelectedQrDoc(doc)}
+                        >
+                          <QrCodeIcon className="mr-2 h-3.5 w-3.5" />
+                          Ver código QR
+                        </Button>
+                      </div>
+
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="mt-3 min-h-10 w-full justify-center text-red-600 hover:bg-red-50 hover:text-red-700"
+                        onClick={() => handleDelete(doc.id, doc.encrypted_file_path)}
+                      >
+                        <Trash2 className="mr-2 h-3.5 w-3.5" />
+                        Eliminar documento
+                      </Button>
+                    </div>
+                  )}
+                </article>
+              );
+            })}
+          </div>
+
+          <div className="hidden overflow-x-auto lg:block">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50 border-b text-xs font-semibold uppercase tracking-wider text-muted-foreground">
