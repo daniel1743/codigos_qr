@@ -1,22 +1,21 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { getBrowserSupabaseClient } from "../../lib/supabase/client";
 import {
-  User,
-  Crown,
-  Settings,
-  BarChart3,
-  QrCode,
-  Shield,
-  Camera,
-  Mail,
-  Calendar,
+  ArrowRight,
   Award,
-  Sparkles,
-  Menu,
-  X,
+  BarChart3,
+  Camera,
+  Crown,
+  ExternalLink,
+  FileLock2,
   LogOut,
-  ArrowLeft,
-  Lock,
+  Mail,
+  Pencil,
+  QrCode,
+  Settings,
+  Shield,
+  Sparkles,
+  User,
 } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -24,13 +23,17 @@ import { Label } from "../ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Badge } from "../ui/badge";
-import { Tabs, TabsContent } from "../ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Separator } from "../ui/separator";
 import { toast } from "sonner";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 import { isAdminEmail } from "../../lib/admin-check";
 import { hasPremiumAccessByEmail } from "../../lib/entitlements";
+import { getPublicProfileUrl } from "../../lib/url";
 import { Link, useNavigate } from "@tanstack/react-router";
+import PlatformNavbar from "../brand/PlatformNavbar";
+import { PLATFORM_BRAND } from "../platform/platform-brand";
+import { PLATFORM_NAV_ITEMS } from "../platform/platform-navigation";
 
 interface UserProfile {
   id: string;
@@ -39,6 +42,18 @@ interface UserProfile {
   avatar_url?: string;
   bio?: string;
   created_at: string;
+}
+
+interface PageProfileSummary {
+  id: string;
+  public_id: string;
+  slug: string;
+  display_name: string;
+  profession?: string | null;
+  bio: string | null;
+  avatar_url: string | null;
+  published: boolean;
+  scan_count: number;
 }
 
 interface PremiumStatus {
@@ -57,13 +72,13 @@ interface UserStats {
 export function MyProfilePage() {
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [pageProfile, setPageProfile] = useState<PageProfileSummary | null>(null);
   const [premiumStatus, setPremiumStatus] = useState<PremiumStatus>({ isPremium: false });
   const [stats, setStats] = useState<UserStats>({ totalProfiles: 0, totalScans: 0, totalLinks: 0 });
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
-  const [menuOpen, setMenuOpen] = useState(false);
 
   const supabase = getBrowserSupabaseClient();
   const navigate = useNavigate();
@@ -75,7 +90,6 @@ export function MyProfilePage() {
   const loadUserData = async () => {
     setLoading(true);
     try {
-      // Get auth user
       const {
         data: { user: authUser },
       } = await supabase.auth.getUser();
@@ -83,10 +97,9 @@ export function MyProfilePage() {
 
       setUser(authUser);
 
-      // Get profile data from auth.users metadata or create profile
       const userProfile: UserProfile = {
         id: authUser.id,
-        email: authUser.email!,
+        email: authUser.email || "",
         full_name: authUser.user_metadata?.full_name,
         avatar_url: authUser.user_metadata?.avatar_url,
         bio: authUser.user_metadata?.bio,
@@ -95,7 +108,6 @@ export function MyProfilePage() {
       setProfile(userProfile);
       const hasPremiumOverride = hasPremiumAccessByEmail(authUser.email || "");
 
-      // Check premium status
       const { data: premiumData } = await supabase
         .from("premium_users")
         .select("*")
@@ -118,7 +130,6 @@ export function MyProfilePage() {
         });
       }
 
-      // Check admin status
       const { data: adminData } = await supabase
         .from("admin_users")
         .select("role")
@@ -127,22 +138,40 @@ export function MyProfilePage() {
 
       setIsAdmin(!!adminData || isAdminEmail(authUser.email || ""));
 
-      // Get user stats
       const { data: profilesData } = await supabase
         .from("profiles")
-        .select("id, scan_count")
+        .select(
+          "id, scan_count, public_id, slug, display_name, profession, bio, avatar_url, published",
+        )
         .eq("user_id", authUser.id);
+
+      const primaryProfile = profilesData?.[0];
+      setPageProfile(
+        primaryProfile
+          ? {
+              id: primaryProfile.id,
+              public_id: primaryProfile.public_id,
+              slug: primaryProfile.slug,
+              display_name: primaryProfile.display_name,
+              profession: primaryProfile.profession,
+              bio: primaryProfile.bio,
+              avatar_url: primaryProfile.avatar_url,
+              published: primaryProfile.published,
+              scan_count: primaryProfile.scan_count,
+            }
+          : null,
+      );
 
       const totalProfiles = profilesData?.length || 0;
       const totalScans =
         profilesData?.reduce(
-          (sum: number, p: { scan_count?: number | null }) => sum + (p.scan_count || 0),
+          (sum: number, currentProfile: { scan_count?: number | null }) =>
+            sum + (currentProfile.scan_count || 0),
           0,
         ) || 0;
 
-      // Get total links
       if (profilesData && profilesData.length > 0) {
-        const profileIds = profilesData.map((p: { id: string }) => p.id);
+        const profileIds = profilesData.map((currentProfile: { id: string }) => currentProfile.id);
         const { count } = await supabase
           .from("profile_links")
           .select("*", { count: "exact", head: true })
@@ -174,26 +203,27 @@ export function MyProfilePage() {
 
     setUploading(true);
     try {
-      // Upload to Supabase Storage
       const { error: uploadError } = await supabase.storage
         .from("avatars")
         .upload(fileName, file, { upsert: true });
 
       if (uploadError) throw uploadError;
 
-      // Get public URL
       const { data } = supabase.storage.from("avatars").getPublicUrl(fileName);
-
-      // Update user metadata
       const { error: updateError } = await supabase.auth.updateUser({
         data: { avatar_url: data.publicUrl },
       });
 
       if (updateError) throw updateError;
 
-      setProfile((prev) => (prev ? { ...prev, avatar_url: data.publicUrl } : null));
+      setProfile((previousProfile) =>
+        previousProfile ? { ...previousProfile, avatar_url: data.publicUrl } : null,
+      );
+      setPageProfile((previousProfile) =>
+        previousProfile ? { ...previousProfile, avatar_url: data.publicUrl } : null,
+      );
       toast.success("Foto actualizada");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error uploading avatar:", error);
       toast.error("Error al subir la foto");
     } finally {
@@ -216,171 +246,155 @@ export function MyProfilePage() {
 
       if (error) throw error;
 
-      setProfile((prev) => (prev ? { ...prev, ...updates } : null));
+      setProfile((previousProfile) =>
+        previousProfile ? { ...previousProfile, ...updates } : null,
+      );
       toast.success("Perfil actualizado");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error updating profile:", error);
       toast.error("Error al actualizar perfil");
     }
   };
 
+  const platformNavItems = PLATFORM_NAV_ITEMS.filter((item) => item.scope !== "admin" || isAdmin);
+
+  const platformNavbar = (
+    <>
+      <style>{`
+        .profile-user-hub-navbar [data-platform-nav-item="profile"] {
+          border-radius: 0.5rem;
+          background: rgba(255, 255, 255, 0.1);
+          color: #ffffff;
+        }
+      `}</style>
+      <PlatformNavbar
+        variant="editor"
+        brandHref="/profile"
+        logoTheme="inverse"
+        className="profile-user-hub-navbar sticky top-0 z-40 border-b border-white/10 bg-[#090909]/95 px-3 text-[#f5f2ea] backdrop-blur-xl lg:px-6"
+        innerClassName="mx-auto flex h-14 max-w-[1440px] items-center justify-between gap-4"
+        brandClassName="shrink-0 transition-opacity hover:opacity-80"
+        logoClassName="h-[34px] w-[34px] min-[420px]:w-[146px]"
+        navItems={platformNavItems}
+      />
+    </>
+  );
+
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-muted-foreground">Cargando perfil...</p>
+      <div className="min-h-screen bg-[#f6f7f9]">
+        {platformNavbar}
+        <div className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center px-4">
+          <p className="text-sm text-muted-foreground">Cargando tu espacio...</p>
+        </div>
       </div>
     );
   }
 
   if (!user || !profile) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-muted-foreground">No se pudo cargar tu perfil</p>
+      <div className="min-h-screen bg-[#f6f7f9]">
+        {platformNavbar}
+        <div className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center px-4">
+          <p className="text-sm text-muted-foreground">No se pudo cargar tu perfil</p>
+        </div>
       </div>
     );
   }
 
-  const accountAge = Math.floor(
-    (new Date().getTime() - new Date(profile.created_at).getTime()) / (1000 * 60 * 60 * 24),
+  const accountAge = Math.max(
+    0,
+    Math.floor(
+      (new Date().getTime() - new Date(profile.created_at).getTime()) / (1000 * 60 * 60 * 24),
+    ),
   );
-  const navItems = [
-    { value: "overview", label: "Datos", icon: User },
-    { value: "premium", label: "Premium", icon: Crown },
-    { value: "stats", label: "Estadísticas", icon: BarChart3 },
-    ...(isAdmin ? [{ value: "admin", label: "Admin", icon: Shield }] : []),
-  ];
-
-  const ProfileNav = ({ mobile = false }: { mobile?: boolean }) => (
-    <div className="flex h-full flex-col">
-      <div className="mb-5 flex items-center justify-between gap-3">
-        <div>
-          <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-            Cuenta
-          </p>
-          <h2 className="text-lg font-semibold tracking-tight">Mi perfil principal</h2>
-        </div>
-        {mobile && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="h-9 w-9 rounded-full"
-            onClick={() => setMenuOpen(false)}
-            aria-label="Cerrar menú"
-          >
-            <X className="h-5 w-5" />
-          </Button>
-        )}
-      </div>
-
-      <div className="space-y-1.5">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = activeTab === item.value;
-          return (
-            <button
-              key={item.value}
-              type="button"
-              onClick={() => {
-                setActiveTab(item.value);
-                setMenuOpen(false);
-              }}
-              className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-colors ${
-                isActive
-                  ? "bg-slate-950 text-white shadow-sm"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
-              }`}
-            >
-              <Icon className="h-4 w-4" strokeWidth={1.8} />
-              <span>{item.label}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      <div className="mt-auto space-y-2 pt-6">
-        <Link
-          to="/encrypted-documents"
-          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-50 font-semibold"
-        >
-          <Lock className="h-4 w-4 text-blue-500" strokeWidth={1.8} />
-          Documentos Seguros
-        </Link>
-        <Link
-          to="/editor"
-          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-        >
-          <ArrowLeft className="h-4 w-4" strokeWidth={1.8} />
-          Volver al editor
-        </Link>
-        <button
-          type="button"
-          onClick={handleSignOut}
-          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
-        >
-          <LogOut className="h-4 w-4" strokeWidth={1.8} />
-          Cerrar sesión
-        </button>
-      </div>
-    </div>
-  );
+  const pageName = pageProfile?.display_name?.trim() || profile.full_name || "Mi página";
+  const pageProfession = pageProfile?.profession?.trim();
+  const pageAvatar = pageProfile?.avatar_url || profile.avatar_url;
+  const publicUrl = pageProfile?.public_id ? getPublicProfileUrl(pageProfile.public_id) : null;
 
   return (
-    <div className="min-h-screen bg-muted/30">
-      <Button
-        type="button"
-        size="icon"
-        className="fixed left-4 top-4 z-40 h-11 w-11 rounded-full shadow-lg md:hidden"
-        onClick={() => setMenuOpen(true)}
-        aria-label="Abrir menú"
-      >
-        <Menu className="h-5 w-5" />
-      </Button>
+    <div className="min-h-screen bg-[#f6f7f9] text-slate-950">
+      {platformNavbar}
 
-      {menuOpen && (
-        <div className="fixed inset-0 z-50 md:hidden">
-          <button
-            type="button"
-            className="absolute inset-0 bg-black/35 backdrop-blur-[2px]"
-            onClick={() => setMenuOpen(false)}
-            aria-label="Cerrar menú"
-          />
-          <aside className="absolute left-0 top-0 h-full w-[82vw] max-w-[320px] bg-background p-5 shadow-2xl">
-            <ProfileNav mobile />
-          </aside>
-        </div>
-      )}
+      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+        <header className="flex flex-col gap-5 border-b border-slate-200 pb-8 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-2xl space-y-3">
+            <p
+              className="text-xs font-semibold uppercase tracking-[0.22em]"
+              style={{ color: PLATFORM_BRAND.colors.blue }}
+            >
+              User Hub / Inicio
+            </p>
+            <h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
+              Hola, {profile.full_name || "bienvenido"}
+            </h1>
+            <p className="max-w-xl text-sm leading-6 text-slate-600 sm:text-base">
+              Este es el centro de tu cuenta: gestiona tu página pública, accede a tus documentos y
+              mantén actualizada tu información.
+            </p>
+          </div>
 
-      <div className="mx-auto flex max-w-7xl gap-6 p-4 py-8 md:p-8">
-        <aside className="sticky top-8 hidden h-[calc(100vh-4rem)] w-64 shrink-0 rounded-2xl border bg-background p-5 shadow-lg md:block">
-          <ProfileNav />
-        </aside>
+          <div className="flex items-center gap-3 text-sm text-slate-600">
+            <Avatar className="h-10 w-10 border border-slate-200">
+              <AvatarImage src={profile.avatar_url} alt={profile.full_name || profile.email} />
+              <AvatarFallback>
+                {profile.full_name?.charAt(0) || profile.email.charAt(0)}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <p className="font-medium text-slate-900">Tu cuenta</p>
+              <p>{profile.email}</p>
+            </div>
+          </div>
+        </header>
 
-        <main className="min-w-0 flex-1">
-          {/* Header Section */}
-          <div className="mb-8">
-            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary/10 via-primary/5 to-background p-8">
-              <div className="relative z-10 flex flex-col items-start gap-6 md:flex-row md:items-center md:justify-between">
-                {/* Avatar and Info */}
-                <div className="flex items-center gap-6">
-                  <div className="relative">
-                    <Avatar className="h-24 w-24 border-4 border-background shadow-xl md:h-32 md:w-32">
-                      <AvatarImage
-                        src={profile.avatar_url}
-                        alt={profile.full_name || profile.email}
-                      />
-                      <AvatarFallback className="text-2xl font-bold">
-                        {profile.full_name?.charAt(0) || profile.email.charAt(0).toUpperCase()}
+        <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(260px,0.65fr)]">
+          <Card className="overflow-hidden border-slate-200 bg-white shadow-sm">
+            <div className="border-b border-slate-200 bg-slate-50 px-5 py-4 sm:px-7">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p
+                    className="text-xs font-semibold uppercase tracking-[0.18em]"
+                    style={{ color: PLATFORM_BRAND.colors.blue }}
+                  >
+                    Tu página pública
+                  </p>
+                  <h2 className="mt-1 text-xl font-semibold tracking-tight">Mi página</h2>
+                </div>
+                {pageProfile ? (
+                  <Badge
+                    variant={pageProfile.published ? "default" : "secondary"}
+                    className={pageProfile.published ? "bg-emerald-700 hover:bg-emerald-700" : ""}
+                  >
+                    {pageProfile.published ? "Publicada" : "Borrador"}
+                  </Badge>
+                ) : (
+                  <Badge variant="secondary">Sin crear</Badge>
+                )}
+              </div>
+            </div>
+
+            <CardContent className="p-5 sm:p-7">
+              {pageProfile ? (
+                <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
+                  <div className="relative shrink-0 self-start">
+                    <Avatar className="h-24 w-24 border-4 border-white shadow-md sm:h-28 sm:w-28">
+                      <AvatarImage src={pageAvatar || undefined} alt={pageName} />
+                      <AvatarFallback className="bg-slate-100 text-2xl font-semibold text-slate-700">
+                        {pageName.charAt(0).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     <label
                       htmlFor="avatar-upload"
-                      className="absolute bottom-0 right-0 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-110"
+                      className="absolute bottom-0 right-0 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-white shadow-md transition-opacity hover:opacity-90"
+                      style={{ backgroundColor: PLATFORM_BRAND.colors.blue }}
+                      title="Cambiar foto"
                     >
                       {uploading ? (
-                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
+                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
                       ) : (
-                        <Camera className="h-5 w-5" />
+                        <Camera className="h-4 w-4" />
                       )}
                     </label>
                     <input
@@ -393,80 +407,179 @@ export function MyProfilePage() {
                     />
                   </div>
 
+                  <div className="min-w-0 flex-1 space-y-3">
+                    <div>
+                      <h3 className="truncate text-2xl font-semibold tracking-tight text-slate-950">
+                        {pageName}
+                      </h3>
+                      <p className="mt-1 text-sm text-slate-600">
+                        {pageProfession ||
+                          pageProfile.bio ||
+                          "Personaliza la identidad de tu página."}
+                      </p>
+                    </div>
+
+                    {publicUrl && (
+                      <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+                        <p className="truncate text-xs text-slate-600" title={publicUrl}>
+                          {publicUrl}
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                      <Button
+                        asChild
+                        className="w-full text-white hover:opacity-90 sm:w-auto"
+                        style={{ backgroundColor: PLATFORM_BRAND.colors.blue }}
+                      >
+                        <Link to="/editor">
+                          <Pencil className="h-4 w-4" />
+                          Editar mi página
+                        </Link>
+                      </Button>
+                      {pageProfile.published && publicUrl && (
+                        <Button asChild variant="outline" className="w-full sm:w-auto">
+                          <a href={publicUrl} target="_blank" rel="noreferrer">
+                            <ExternalLink className="h-4 w-4" />
+                            Ver página
+                          </a>
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col items-start gap-5 sm:flex-row sm:items-center sm:justify-between">
                   <div className="space-y-2">
-                    <h1 className="text-3xl font-bold tracking-tight">
-                      {profile.full_name || "Mi Perfil"}
-                    </h1>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Mail className="h-4 w-4" />
-                      {profile.email}
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      {premiumStatus.isPremium ? (
-                        <Badge className="gap-1 bg-gradient-to-r from-amber-500 to-yellow-500 text-white">
-                          <Crown className="h-3 w-3 fill-white" />
-                          Premium
-                        </Badge>
-                      ) : (
-                        <Badge variant="secondary">Free</Badge>
-                      )}
-                      {isAdmin && (
-                        <Badge className="gap-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white">
-                          <Shield className="h-3 w-3" />
-                          Admin
-                        </Badge>
-                      )}
-                      <Badge variant="outline" className="gap-1">
-                        <Calendar className="h-3 w-3" />
-                        {accountAge} días
-                      </Badge>
-                    </div>
+                    <h3 className="text-xl font-semibold tracking-tight">
+                      Aún no tienes una página
+                    </h3>
+                    <p className="max-w-lg text-sm leading-6 text-slate-600">
+                      Crea tu primera página pública para compartir tu identidad y tus enlaces desde
+                      un solo lugar.
+                    </p>
                   </div>
+                  <Button
+                    asChild
+                    className="w-full shrink-0 text-white hover:opacity-90 sm:w-auto"
+                    style={{ backgroundColor: PLATFORM_BRAND.colors.blue }}
+                  >
+                    <Link to="/editor">
+                      Crear mi página
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </Button>
                 </div>
+              )}
+            </CardContent>
+          </Card>
 
-                {/* Quick Stats */}
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold">{stats.totalProfiles}</div>
-                    <div className="text-xs text-muted-foreground">QR Creados</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold">{stats.totalScans}</div>
-                    <div className="text-xs text-muted-foreground">Escaneos</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold">{stats.totalLinks}</div>
-                    <div className="text-xs text-muted-foreground">Enlaces</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Background decoration */}
-              <div className="absolute right-0 top-0 h-full w-1/3 opacity-5">
-                <QrCode className="h-full w-full" />
-              </div>
+          <section aria-labelledby="quick-actions-title" className="space-y-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                Accesos directos
+              </p>
+              <h2 id="quick-actions-title" className="mt-1 text-lg font-semibold tracking-tight">
+                Sigue trabajando
+              </h2>
             </div>
+
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+              <Link
+                to="/editor"
+                className="group rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <span className="grid h-10 w-10 place-items-center rounded-xl bg-blue-50 text-blue-700">
+                    <QrCode className="h-5 w-5" />
+                  </span>
+                  <ArrowRight className="h-4 w-4 text-slate-400 transition-transform group-hover:translate-x-1" />
+                </div>
+                <p className="mt-4 font-semibold">Editar mi página</p>
+                <p className="mt-1 text-sm leading-5 text-slate-600">
+                  Ajusta diseño, contenido y enlaces.
+                </p>
+              </Link>
+
+              <Link
+                to="/encrypted-documents"
+                className="group rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <span className="grid h-10 w-10 place-items-center rounded-xl bg-slate-100 text-slate-700">
+                    <FileLock2 className="h-5 w-5" />
+                  </span>
+                  <ArrowRight className="h-4 w-4 text-slate-400 transition-transform group-hover:translate-x-1" />
+                </div>
+                <p className="mt-4 font-semibold">Documentos</p>
+                <p className="mt-1 text-sm leading-5 text-slate-600">
+                  Accede a tus documentos seguros.
+                </p>
+              </Link>
+            </div>
+          </section>
+        </div>
+
+        <section className="mt-8" aria-labelledby="account-section-title">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                Cuenta
+              </p>
+              <h2 id="account-section-title" className="mt-1 text-xl font-semibold tracking-tight">
+                Configuración y estado
+              </h2>
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              className="w-full justify-start text-red-600 hover:bg-red-50 hover:text-red-700 sm:w-auto"
+              onClick={handleSignOut}
+            >
+              <LogOut className="h-4 w-4" />
+              Cerrar sesión
+            </Button>
           </div>
 
-          {/* Tabs Section */}
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            {/* Overview Tab */}
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-5">
+            <TabsList className="grid h-auto w-full grid-cols-2 gap-1 rounded-xl bg-slate-200/70 p-1 sm:grid-cols-4">
+              <TabsTrigger value="overview" className="min-h-10 gap-2">
+                <User className="h-4 w-4" />
+                Datos
+              </TabsTrigger>
+              <TabsTrigger value="premium" className="min-h-10 gap-2">
+                <Crown className="h-4 w-4" />
+                Premium
+              </TabsTrigger>
+              <TabsTrigger value="stats" className="min-h-10 gap-2">
+                <BarChart3 className="h-4 w-4" />
+                Estadísticas
+              </TabsTrigger>
+              {isAdmin && (
+                <TabsTrigger value="admin" className="min-h-10 gap-2">
+                  <Shield className="h-4 w-4" />
+                  Admin
+                </TabsTrigger>
+              )}
+            </TabsList>
+
             <TabsContent value="overview" className="space-y-6">
-              <Card>
+              <Card className="border-slate-200 bg-white shadow-sm">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <User className="h-5 w-5" />
-                    Información Personal
+                    Información personal
                   </CardTitle>
-                  <CardDescription>Actualiza tu información de perfil</CardDescription>
+                  <CardDescription>Actualiza la información asociada a tu cuenta.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="full_name">Nombre Completo</Label>
+                    <Label htmlFor="full_name">Nombre completo</Label>
                     <Input
                       id="full_name"
                       defaultValue={profile.full_name}
-                      onBlur={(e) => handleUpdateProfile({ full_name: e.target.value })}
+                      onBlur={(event) => handleUpdateProfile({ full_name: event.target.value })}
                       placeholder="Tu nombre"
                     />
                   </div>
@@ -475,7 +588,7 @@ export function MyProfilePage() {
                     <Input
                       id="bio"
                       defaultValue={profile.bio}
-                      onBlur={(e) => handleUpdateProfile({ bio: e.target.value })}
+                      onBlur={(event) => handleUpdateProfile({ bio: event.target.value })}
                       placeholder="Cuéntanos sobre ti"
                     />
                   </div>
@@ -484,28 +597,27 @@ export function MyProfilePage() {
                     <Label>Email</Label>
                     <Input value={profile.email} disabled className="bg-muted" />
                     <p className="text-xs text-muted-foreground">
-                      El email no puede ser cambiado desde aquí
+                      El email no puede ser cambiado desde aquí.
                     </p>
                   </div>
                 </CardContent>
               </Card>
             </TabsContent>
 
-            {/* Premium Tab */}
             <TabsContent value="premium" className="space-y-6">
-              <Card>
+              <Card className="border-slate-200 bg-white shadow-sm">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Crown className="h-5 w-5 text-amber-500" />
                     Estado Premium
                   </CardTitle>
-                  <CardDescription>Gestiona tu suscripción y beneficios Premium</CardDescription>
+                  <CardDescription>Gestiona tu suscripción y beneficios Premium.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   {premiumStatus.isPremium ? (
                     <>
                       <div className="rounded-lg bg-gradient-to-r from-amber-500/10 to-yellow-500/10 p-6">
-                        <div className="flex items-start justify-between">
+                        <div className="flex items-start justify-between gap-4">
                           <div className="space-y-2">
                             <div className="flex items-center gap-2">
                               <Sparkles className="h-5 w-5 text-amber-500" />
@@ -526,12 +638,12 @@ export function MyProfilePage() {
                               </p>
                             )}
                           </div>
-                          <Award className="h-12 w-12 text-amber-500" />
+                          <Award className="h-12 w-12 shrink-0 text-amber-500" />
                         </div>
                       </div>
 
                       <div className="space-y-3">
-                        <h4 className="font-semibold">Beneficios Activos:</h4>
+                        <h4 className="font-semibold">Beneficios activos:</h4>
                         <ul className="space-y-2 text-sm">
                           <li className="flex items-center gap-2">
                             <div className="h-1.5 w-1.5 rounded-full bg-primary" />
@@ -558,7 +670,8 @@ export function MyProfilePage() {
                         <Crown className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
                         <h3 className="mb-2 text-lg font-semibold">Desbloquea Premium</h3>
                         <p className="mb-4 text-sm text-muted-foreground">
-                          Accede a plantillas avanzadas, logos personalizados y analytics detallados
+                          Accede a plantillas avanzadas, logos personalizados y analytics
+                          detallados.
                         </p>
                         <Button className="gap-2">
                           <Sparkles className="h-4 w-4" />
@@ -578,10 +691,9 @@ export function MyProfilePage() {
               </Card>
             </TabsContent>
 
-            {/* Stats Tab */}
             <TabsContent value="stats" className="space-y-6">
-              <div className="grid gap-6 md:grid-cols-3">
-                <Card>
+              <div className="grid gap-4 sm:grid-cols-3">
+                <Card className="border-slate-200 bg-white shadow-sm">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-sm font-medium">Total QR Codes</CardTitle>
                   </CardHeader>
@@ -590,18 +702,18 @@ export function MyProfilePage() {
                     <p className="text-xs text-muted-foreground">Códigos creados</p>
                   </CardContent>
                 </Card>
-                <Card>
+                <Card className="border-slate-200 bg-white shadow-sm">
                   <CardHeader className="pb-3">
-                    <CardTitle className="text-sm font-medium">Total Escaneos</CardTitle>
+                    <CardTitle className="text-sm font-medium">Total escaneos</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="text-3xl font-bold">{stats.totalScans}</div>
                     <p className="text-xs text-muted-foreground">Vistas acumuladas</p>
                   </CardContent>
                 </Card>
-                <Card>
+                <Card className="border-slate-200 bg-white shadow-sm">
                   <CardHeader className="pb-3">
-                    <CardTitle className="text-sm font-medium">Enlaces Activos</CardTitle>
+                    <CardTitle className="text-sm font-medium">Enlaces activos</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="text-3xl font-bold">{stats.totalLinks}</div>
@@ -610,30 +722,29 @@ export function MyProfilePage() {
                 </Card>
               </div>
 
-              <Card>
+              <Card className="border-slate-200 bg-white shadow-sm">
                 <CardHeader>
-                  <CardTitle>Actividad Reciente</CardTitle>
-                  <CardDescription>Tus QR codes más activos</CardDescription>
+                  <CardTitle>Resumen de tu cuenta</CardTitle>
+                  <CardDescription>Datos reales asociados a tus perfiles actuales.</CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    Próximamente: gráficos de actividad y analytics detallados
-                  </p>
+                <CardContent className="text-sm text-muted-foreground">
+                  Tu cuenta lleva activa {accountAge} días y tiene {stats.totalProfiles} perfil
+                  {stats.totalProfiles === 1 ? "" : "es"} registrado
+                  {stats.totalProfiles === 1 ? "" : "s"}.
                 </CardContent>
               </Card>
             </TabsContent>
 
-            {/* Admin Tab (only for admins) */}
             {isAdmin && (
               <TabsContent value="admin" className="space-y-6">
-                <Card>
+                <Card className="border-slate-200 bg-white shadow-sm">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Shield className="h-5 w-5 text-purple-500" />
-                      Panel de Administración
+                      Panel de administración
                     </CardTitle>
                     <CardDescription>
-                      Gestión del sistema, usuarios y configuración global
+                      Gestión del sistema, usuarios y configuración global.
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -649,8 +760,8 @@ export function MyProfilePage() {
               </TabsContent>
             )}
           </Tabs>
-        </main>
-      </div>
+        </section>
+      </main>
     </div>
   );
 }
