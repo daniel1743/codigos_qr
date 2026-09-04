@@ -42,3 +42,11 @@ export {
   RICH_SERVICE_FIXTURE,
   SIMPLE_CONTACT_FIXTURE,
 } from "./fixtures";
+export {
+  mapOnboardingIntentV2ToEngineInput,
+  type OnboardingV2AdapterDiagnostics,
+  type OnboardingV2AdapterFailure,
+  type OnboardingV2AdapterFailureCode,
+  type OnboardingV2AdapterResult,
+  type OnboardingV2AdapterSuccess,
+} from "./engine-v2-adapter";

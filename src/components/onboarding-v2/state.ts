@@ -1,4 +1,7 @@
-import { validateOnboardingIntentV2, type OnboardingV2ValidationResult } from "@/lib/onboarding-v2";
+import {
+  validateOnboardingIntentV2,
+  type OnboardingV2ValidationResult,
+} from "@/lib/onboarding-v2/validation";
 import type {
   ActionIntentV2,
   BusinessCategoryV2,
@@ -9,7 +12,7 @@ import type {
   OnboardingIntentV2,
   PrimaryGoalV2,
   VisualDirectionV2,
-} from "@/lib/onboarding-v2";
+} from "@/lib/onboarding-v2/types";
 import { ONBOARDING_V2_STORAGE_KEY } from "@/lib/onboarding-v2/config";
 
 export interface OnboardingV2Draft {
