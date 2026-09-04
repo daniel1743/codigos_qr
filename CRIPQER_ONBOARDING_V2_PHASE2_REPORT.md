@@ -1,7 +1,7 @@
 # Cripqer — Onboarding V2 Phase 2 Report
 
-Date: 2026-09-04  
-Mode: `STRICT_INTERNAL_UI_FLOW_IMPLEMENTATION`  
+Date: 2026-09-04
+Mode: `STRICT_INTERNAL_UI_FLOW_IMPLEMENTATION`
 Status: **PHASE_2_STATUS: READY**
 
 ## Resultado
