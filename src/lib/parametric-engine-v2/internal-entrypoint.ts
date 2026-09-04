@@ -19,6 +19,8 @@ import type {
 } from "./types";
 
 export interface EngineV2HostGenerationInput extends CripqerOnboardingIntentV1 {
+  /** Specific free-form activity when profession is outside the host catalogue. */
+  businessOther?: string | null;
   userMedia?: {
     avatarUrl?: string;
     bannerUrl?: string;
@@ -125,7 +127,7 @@ function toEngineIntent(
 
   return {
     business_type: profession,
-    business_other: null,
+    business_other: input.businessOther?.trim() || null,
     primary_goal: primaryGoal(input.goal),
     visual_personality: visualPersonality(input.style),
     identity: {

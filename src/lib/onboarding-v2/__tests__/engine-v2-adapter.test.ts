@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { generateCripqerPageWithEngineV2 } from "@/lib/parametric-engine-v2/internal-entrypoint";
 import {
   FUTURE_COMMERCE_FIXTURE,
   RICH_SERVICE_FIXTURE,
@@ -49,7 +50,25 @@ describe("Onboarding V2 -> Engine V2 adapter", () => {
     expect(mapped.engineInput.primaryAction).toEqual({ type: "whatsapp", value: "+56912345678" });
     expect(mapped.engineInput.selectedFeatures).toEqual(["links", "social"]);
     expect(mapped.engineInput.content?.links).toBeUndefined();
+    expect(mapped.engineInput.businessOther).toBeUndefined();
   });
+
+  it.each(["Jardinero", "Veterinaria", "Fotógrafo"])(
+    "preserves the free-form activity %s through the host custom field",
+    (profession) => {
+      const intent = clone(SIMPLE_CONTACT_FIXTURE);
+      intent.identity.professionOrActivity = profession;
+      const mapped = mapOnboardingIntentV2ToEngineInput(intent);
+      expect(mapped.ok).toBe(true);
+      if (!mapped.ok) return;
+      expect(mapped.engineInput.profession).toBe(profession);
+      expect(mapped.engineInput.businessOther).toBe(profession);
+      expect(mapped.engineInput.profession).not.toBe("other");
+      expect(mapped.diagnostics.mappedFields).toContain(
+        "identity.professionOrActivity -> businessOther",
+      );
+    },
+  );
 
   it("maps rich service semantics and records unsupported host fields", () => {
     const intent = clone(RICH_SERVICE_FIXTURE);
@@ -144,6 +163,35 @@ describe("Onboarding V2 -> Engine V2 adapter", () => {
     expect(result.status).toBe("INVALID_DESTINATION");
   });
 
+  it("keeps recognized activities unchanged and does not add a custom value", () => {
+    const intent = clone(RICH_SERVICE_FIXTURE);
+    intent.identity.professionOrActivity = "professional";
+    const mapped = mapOnboardingIntentV2ToEngineInput(intent);
+    expect(mapped.ok).toBe(true);
+    if (!mapped.ok) return;
+    expect(mapped.engineInput.profession).toBe("professional");
+    expect(mapped.engineInput.businessOther).toBeUndefined();
+  });
+
+  it("rejects an empty custom value at the host validation boundary", () => {
+    const intent = clone(SIMPLE_CONTACT_FIXTURE);
+    intent.identity.professionOrActivity = "Jardinero";
+    const mapped = mapOnboardingIntentV2ToEngineInput(intent);
+    expect(mapped.ok).toBe(true);
+    if (!mapped.ok) return;
+    const invalidHostInput = { ...mapped.engineInput, businessOther: " " };
+    try {
+      generateCripqerPageWithEngineV2(invalidHostInput);
+      throw new Error("Expected Engine V2 to reject an empty custom activity.");
+    } catch (error) {
+      expect(error).toMatchObject({
+        issues: expect.arrayContaining([
+          expect.objectContaining({ path: "business_other", code: "required" }),
+        ]),
+      });
+    }
+  });
+
   it("generates and validates simple, rich and portfolio configs in memory", () => {
     const simple = generateFromOnboardingIntentV2(SIMPLE_CONTACT_FIXTURE, {
       now: "2026-09-04T12:00:00.000Z",
@@ -154,12 +202,13 @@ describe("Onboarding V2 -> Engine V2 adapter", () => {
     const portfolio = generateFromOnboardingIntentV2(portfolioFixture(), {
       now: "2026-09-04T12:00:00.000Z",
     });
-    expect(simple.status).toBe("BLOCKED");
-    expect(rich.status).toBe("BLOCKED");
-    expect(portfolio.status).toBe("BLOCKED");
+    expect(simple.status).toBe("GENERATED");
+    expect(rich.status).toBe("GENERATED");
+    expect(portfolio.status).toBe("GENERATED");
     for (const result of [simple, rich, portfolio]) {
-      if (result.status !== "BLOCKED") return;
-      expect(result.errors.join(" ")).toContain("business_other");
+      if (result.status !== "GENERATED") return;
+      expect(result.canonicalEnvelopePreview.schemaVersion).toBe(1);
+      expect(result.editorConfig.blocks.length).toBeGreaterThan(0);
     }
   });
 

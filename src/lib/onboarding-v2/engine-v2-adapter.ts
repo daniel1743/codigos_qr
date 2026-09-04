@@ -217,23 +217,11 @@ export function mapOnboardingIntentV2ToEngineInput(
     return { ok: false, code: primaryAction, errors: [message], diagnostics: result };
   }
 
-  // The frozen host derives business_type from profession and does not expose
-  // business_other. A specific activity unknown to its V1 taxonomy would be
-  // rejected by Engine V2, so never silently replace it with a generic label.
-  if (normalizeBusinessCategory(intent.identity.professionOrActivity) === "other") {
-    pushOnce(result.unsupportedFields, "identity.professionOrActivity -> EngineV2 business_type");
+  const profession = intent.identity.professionOrActivity.trim();
+  const isCustomActivity = normalizeBusinessCategory(profession) === "other";
+  if (isCustomActivity) {
+    pushOnce(result.mappedFields, "identity.professionOrActivity -> businessOther");
     pushOnce(result.deferredFields, "business.category/customCategory");
-    result.warnings.push(
-      "The frozen Engine V2 host requires business_other for specific activities outside its V1 taxonomy, but EngineV2HostGenerationInput does not expose that field.",
-    );
-    return {
-      ok: false,
-      code: "UNSUPPORTED_SEMANTICS",
-      errors: [
-        "Engine V2 cannot receive this specific activity without business_other; preserving it requires a host-contract or Engine change outside Phase 3.",
-      ],
-      diagnostics: result,
-    };
   }
 
   const selectedFeatures: string[] = [];
@@ -295,7 +283,8 @@ export function mapOnboardingIntentV2ToEngineInput(
   }
 
   const input: EngineV2HostGenerationInput = {
-    profession: intent.identity.professionOrActivity.trim(),
+    profession,
+    ...(isCustomActivity ? { businessOther: profession } : {}),
     goal: mapGoal(intent, result),
     ...(STYLE_MAP[intent.visualDirection.preference]
       ? { style: STYLE_MAP[intent.visualDirection.preference] }
