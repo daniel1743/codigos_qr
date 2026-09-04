@@ -129,7 +129,7 @@ No unrelated pre-existing change was staged. The working-tree entry
 
 ## Commit
 
-Implementation commit hash: **PENDING — recorded immediately after commit**.
+Implementation commit hash: **3dda44f**.
 
 ## Final status
 
