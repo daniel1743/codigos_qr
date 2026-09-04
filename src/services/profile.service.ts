@@ -1,5 +1,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Profile } from "../types/database";
+import {
+  createBasicEditorPatch,
+  hasBasicEditorTemplateConfigPatch,
+  type BasicEditorTemplateConfigPatchV1,
+} from "../lib/basic-editor-persistence";
 
 // Modified by ChatGPT Work — PROFILE-SAVE-REALITY-FIX-01
 const PROFILE_WRITABLE_COLUMNS = [
@@ -147,6 +152,61 @@ export const profileService = {
 
     if (error) throw error;
     return data;
+  },
+
+  /**
+   * Persist the current Basic Editor state without replacing unknown JSONB
+   * fields owned by a future canonical editor.
+   */
+  async updateBasicEditorProfile(
+    supabase: SupabaseClient,
+    profileId: string,
+    updates: Partial<Profile>,
+  ): Promise<Profile> {
+    const patch = createBasicEditorPatch(updates);
+    let updatedProfile: Profile | null = null;
+
+    if (Object.keys(patch.profile).length > 0) {
+      const { data, error } = await supabase
+        .from("profiles")
+        .update(patch.profile)
+        .eq("id", profileId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      updatedProfile = data;
+    }
+
+    if (hasBasicEditorTemplateConfigPatch(patch.templateConfig)) {
+      return this.patchBasicEditorTemplateConfig(supabase, profileId, patch.templateConfig);
+    }
+
+    if (!updatedProfile) {
+      throw new Error("Basic Editor produced an empty persistence patch.");
+    }
+
+    return updatedProfile;
+  },
+
+  /** Atomically merges only the existing Basic-owned JSONB namespace. */
+  async patchBasicEditorTemplateConfig(
+    supabase: SupabaseClient,
+    profileId: string,
+    patch: BasicEditorTemplateConfigPatchV1,
+  ): Promise<Profile> {
+    if (!hasBasicEditorTemplateConfigPatch(patch)) {
+      throw new Error("Basic Editor template config patch cannot be empty.");
+    }
+
+    const { data, error } = await supabase.rpc("patch_profile_basic_template_config", {
+      p_profile_id: profileId,
+      p_patch: patch,
+    });
+
+    if (error) throw error;
+    if (!data) throw new Error("Basic Editor template config patch returned no profile.");
+    return data as Profile;
   },
 
   async updateProfile(

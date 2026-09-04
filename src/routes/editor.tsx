@@ -28,6 +28,10 @@ import {
   normalizeBasicPlatform,
   remapBasicLinkPresentationIds,
 } from "../lib/basic-templates/config";
+import {
+  hasBasicEditorTemplateConfigPatch,
+  pickBasicEditorTemplateConfigPatch,
+} from "../lib/basic-editor-persistence";
 import { getDefaultContent } from "../lib/basic-templates/fixtures";
 import { loadGoogleFont } from "../lib/fonts";
 import { generatePublicId, getInternalSlugFromPublicId } from "../lib/publicId";
@@ -314,12 +318,15 @@ function EditorPage() {
         });
         currentProfileId = finalProfile.id;
       } else {
-        const { public_id: _publicId, ...editableProfile } = profilePayload;
-        finalProfile = await profileService.updateProfile(
-          supabase,
-          currentProfileId,
-          editableProfile,
-        );
+        const {
+          public_id: _publicId,
+          template_config: _templateConfig,
+          ...editableProfile
+        } = profilePayload;
+        finalProfile = await profileService.updateBasicEditorProfile(supabase, currentProfileId, {
+          ...editableProfile,
+          template_config: profilePayload.template_config,
+        });
       }
 
       const normalizedLinks = links.map((link, index) => ({
@@ -359,9 +366,14 @@ function EditorPage() {
           profilePayload.template_config,
           createdLinkIds,
         );
-        finalProfile = await profileService.updateProfile(supabase, currentProfileId, {
-          template_config: templateConfig,
-        });
+        const templateConfigPatch = pickBasicEditorTemplateConfigPatch(templateConfig);
+        if (hasBasicEditorTemplateConfigPatch(templateConfigPatch)) {
+          finalProfile = await profileService.patchBasicEditorTemplateConfig(
+            supabase,
+            currentProfileId,
+            templateConfigPatch,
+          );
+        }
       }
 
       const refreshedLinks = await linkService.getProfileLinks(supabase, currentProfileId);
@@ -479,9 +491,7 @@ function EditorPage() {
               <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-stone-500">
                 Galería
               </p>
-              <h2 className="text-xl font-bold tracking-[-0.03em] text-[#1d1d1b]">
-                Plantillas
-              </h2>
+              <h2 className="text-xl font-bold tracking-[-0.03em] text-[#1d1d1b]">Plantillas</h2>
               <p className="mt-1 text-sm text-stone-500">Elige un diseño para tu página.</p>
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -581,7 +591,12 @@ function EditorPage() {
         onSelectTemplate={(id) => updateProfile({ template_id: id, template_version: 1 })}
         onOpenTemplateGallery={() => setIsGalleryOpen(true)}
         selectedTemplateId={profile.template_id ?? null}
-        contextSegments={getEditorContextSegments(activeSection, selectedTarget, isGalleryOpen, links)}
+        contextSegments={getEditorContextSegments(
+          activeSection,
+          selectedTarget,
+          isGalleryOpen,
+          links,
+        )}
         toolFocusTarget={getToolFocusTarget(selectedTarget, activeSection)}
         activeSection={activeSection}
         onSectionChange={handleDesktopSectionChange}

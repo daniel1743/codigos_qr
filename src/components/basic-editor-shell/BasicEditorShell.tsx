@@ -1,4 +1,4 @@
-import { Check, Eye, LayoutTemplate, LogOut, Menu, Minus, RotateCcw, Save, Search, Send, UserCircle, X, ZoomIn } from "lucide-react";
+import { Check, Eye, FileLock2, Home, LayoutTemplate, LogOut, Menu, Minus, RotateCcw, Save, Search, Send, UserCircle, X, ZoomIn } from "lucide-react";
 import { Link, useLocation } from "@tanstack/react-router";
 import {
   type CSSProperties,
@@ -14,6 +14,9 @@ import { Button } from "../ui/button";
 import { DesktopSectionNav } from "../editor/DesktopSectionNav";
 import type { BasicEditorSectionId } from "../editor/MobileBottomNavbar";
 import PlatformNavbar from "../brand/PlatformNavbar";
+import { PLATFORM_NAV_ITEMS } from "../platform/platform-navigation";
+
+const GLOBAL_PLATFORM_NAV_ITEMS = PLATFORM_NAV_ITEMS.filter((item) => item.section === "primary");
 
 export type BasicEditorProfileState = "ready" | "missing" | "error";
 export type BasicEditorAccount = {
@@ -613,15 +616,12 @@ export function BasicEditorShell({
   onSectionChange,
 }: BasicEditorShellProps) {
   const location = useLocation();
-  const isEditorActive = location.pathname === "/editor";
   const [mobileSheetState, setMobileSheetState] = useState<MobileSheetState>("medium");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [plantillasOpen, setPlantillasOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const mobileMenuTriggerRef = useRef<HTMLButtonElement>(null);
-  const plantillasRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
   const desktopToolsRef = useRef<HTMLElement>(null);
   const mobileToolsRef = useRef<HTMLDivElement>(null);
@@ -639,14 +639,7 @@ export function BasicEditorShell({
 
   const closeAll = () => {
     setMobileMenuOpen(false);
-    setPlantillasOpen(false);
     setSearchOpen(false);
-  };
-
-  const openPlantillas = () => {
-    setPlantillasOpen((open) => !open);
-    setSearchOpen(false);
-    setMobileMenuOpen(false);
   };
 
   const handleSignOut = async () => {
@@ -698,7 +691,7 @@ export function BasicEditorShell({
   }, [mobilePanelOpen]);
 
   useEffect(() => {
-    if (!mobileMenuOpen && !plantillasOpen && !searchOpen) return;
+    if (!mobileMenuOpen && !searchOpen) return;
 
     const onPointerDown = (event: Event) => {
       const target = event.target as Node;
@@ -706,7 +699,6 @@ export function BasicEditorShell({
         if (mobileMenuRef.current?.contains(target)) return;
         if (mobileMenuTriggerRef.current?.contains(target)) return;
       }
-      if (plantillasOpen && plantillasRef.current?.contains(target)) return;
       if (searchOpen && searchRef.current?.contains(target)) return;
       closeAll();
     };
@@ -721,7 +713,7 @@ export function BasicEditorShell({
       document.removeEventListener("pointerdown", onPointerDown);
       document.removeEventListener("keydown", onKeyDown);
     };
-  }, [mobileMenuOpen, plantillasOpen, searchOpen]);
+  }, [mobileMenuOpen, searchOpen]);
 
   useEffect(() => {
     if (!toolFocusTarget) return;
@@ -819,49 +811,20 @@ export function BasicEditorShell({
         logoClassName="h-[34px] w-[34px] min-[420px]:w-[146px]"
         navigation={
           <nav className="hidden items-center gap-2 lg:flex" aria-label="Navegación principal">
-            <Link
-              to="/editor"
-              className={`rounded-lg px-2.5 py-2 text-[13px] font-medium transition-colors ${isEditorActive ? "bg-white/10 text-[#f5f2ea]" : "text-white/65 hover:bg-white/5 hover:text-white"}`}
-              aria-current={isEditorActive ? "page" : undefined}
-            >
-              Editor
-            </Link>
-            {searchEnabled && (
-              <div ref={plantillasRef} className="relative">
-                <button
-                  type="button"
-                  onClick={openPlantillas}
-                  aria-expanded={plantillasOpen}
-                  aria-haspopup="menu"
-                  aria-controls="plantillas-menu"
-                  className="rounded-lg px-2.5 py-2 text-[13px] font-medium text-white/65 transition-colors hover:bg-white/5 hover:text-white"
+            {GLOBAL_PLATFORM_NAV_ITEMS.map((item) => {
+              const isActive = item.href === location.pathname;
+
+              return (
+                <Link
+                  key={item.id}
+                  to={item.href}
+                  className={`rounded-lg px-2.5 py-2 text-[13px] font-medium transition-colors ${isActive ? "bg-white/10 text-[#f5f2ea]" : "text-white/65 hover:bg-white/5 hover:text-white"}`}
+                  aria-current={isActive ? "page" : undefined}
                 >
-                  Plantillas
-                </button>
-                {plantillasOpen && (
-                  <div
-                    id="plantillas-menu"
-                    className="absolute left-0 top-full z-50 mt-2 w-64 overflow-hidden rounded-2xl border border-white/10 bg-[#161616] shadow-[0_18px_45px_rgba(0,0,0,0.3)]"
-                  >
-                    <div className="flex items-center gap-2 border-b border-white/10 px-4 py-3">
-                      <LayoutTemplate className="h-4 w-4 text-[#D4AF37]" />
-                      <p className="text-xs font-bold uppercase tracking-[0.14em] text-white/55">
-                        Plantillas
-                      </p>
-                    </div>
-                    <div className="max-h-72 overflow-y-auto p-2">
-                      {renderTemplateList(templateSearchItems)}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-            <Link
-              to="/encrypted-documents"
-              className="rounded-lg px-2.5 py-2 text-[13px] font-medium text-white/65 transition-colors hover:bg-white/5 hover:text-white"
-            >
-              QR cifrado
-            </Link>
+                  {item.label}
+                </Link>
+              );
+            })}
           </nav>
         }
         center={
@@ -878,7 +841,6 @@ export function BasicEditorShell({
                 }}
                 onFocus={() => {
                   setSearchOpen(true);
-                  setPlantillasOpen(false);
                 }}
                 placeholder="Buscar plantillas"
                 className="h-10 w-full rounded-full border border-white/15 bg-white/10 pl-10 pr-10 text-sm text-white outline-none transition-all placeholder:text-white/40 focus:w-[min(100%,20rem)] focus:border-[#D4AF37]/70 focus:bg-white/15 focus:shadow-[0_0_0_3px_rgba(212,175,55,0.16)]"
@@ -1015,15 +977,23 @@ export function BasicEditorShell({
               )}
 
               <nav className="flex flex-col gap-1" aria-label="Menú móvil principal">
-                <Link
-                  to="/editor"
-                  data-close="true"
-                  className={`flex items-center gap-3 min-h-[52px] rounded-2xl px-4 py-3 text-base font-medium transition-colors ${isEditorActive ? "bg-white/10 text-white" : "text-white/60 hover:bg-white/5 hover:text-white"}`}
-                  aria-current={isEditorActive ? "page" : undefined}
-                >
-                  <LayoutTemplate className="h-5 w-5" />
-                  Editor
-                </Link>
+                {GLOBAL_PLATFORM_NAV_ITEMS.map((item) => {
+                  const Icon = item.id === "profile" ? Home : item.id === "documents" ? FileLock2 : LayoutTemplate;
+                  const isActive = item.href === location.pathname;
+
+                  return (
+                    <Link
+                      key={item.id}
+                      to={item.href}
+                      data-close="true"
+                      className={`flex items-center gap-3 min-h-[52px] rounded-2xl px-4 py-3 text-base font-medium transition-colors ${isActive ? "bg-white/10 text-white" : "text-white/60 hover:bg-white/5 hover:text-white"}`}
+                      aria-current={isActive ? "page" : undefined}
+                    >
+                      <Icon className="h-5 w-5" aria-hidden="true" />
+                      {item.label}
+                    </Link>
+                  );
+                })}
 
                 <hr className="my-2 border-white/5 mx-2" />
 
@@ -1033,26 +1003,10 @@ export function BasicEditorShell({
                     onClick={openMobileGallery}
                     className="flex items-center gap-3 min-h-[52px] w-full rounded-2xl px-4 py-3 text-left text-base font-medium text-white/60 transition-colors hover:bg-white/5 hover:text-white"
                   >
-                    <Search className="h-5 w-5" />
-                    Biblioteca
+                    <LayoutTemplate className="h-5 w-5" aria-hidden="true" />
+                    Plantillas
                   </button>
                 )}
-                <Link
-                  to="/encrypted-documents"
-                  data-close="true"
-                  className="flex items-center gap-3 min-h-[52px] rounded-2xl px-4 py-3 text-base font-medium text-white/60 transition-colors hover:bg-white/5 hover:text-white"
-                >
-                  <Check className="h-5 w-5" />
-                  QR cifrado
-                </Link>
-                <Link
-                  to="/profile"
-                  data-close="true"
-                  className="flex items-center gap-3 min-h-[52px] rounded-2xl px-4 py-3 text-base font-medium text-white/60 transition-colors hover:bg-white/5 hover:text-white"
-                >
-                  <UserCircle className="h-5 w-5" />
-                  Mi Perfil
-                </Link>
 
                 <hr className="my-2 border-white/5 mx-2" />
 

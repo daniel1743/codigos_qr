@@ -125,7 +125,7 @@ function validateAction(
         "The action destination has an invalid format.",
       );
     }
-  } else if (source === "user") {
+  } else if (source === "user" && !["book", "buy", "request_quote"].includes(String(type))) {
     issue(
       issues,
       `${path}.value`,

@@ -1,0 +1,72 @@
+# Cripqer — Power Editor V2 Source Parity
+
+Date: 2026-09-03  
+Authoritative source: `PROYECTO PARA INTEGRA A QR/src/premium-template-studio/`  
+Destination: `src/premium-template-studio/`
+
+## Parity result
+
+The pre-copy manifest was generated before the copy with relative paths and
+SHA-256 values. A post-copy comparison found **46/46 identical files**.
+Every runtime, test, and dev-only code/CSS file below is byte-identical.
+
+Classification: `RUNTIME`, `TEST`, or `DEV_ONLY`.
+
+| Class    | Relative path                           | SHA-256                                                            |
+| -------- | --------------------------------------- | ------------------------------------------------------------------ |
+| TEST     | `__tests__/h2-audit.spec.ts`            | `06E4A117A4C50E1B81CC0B4B469EBBD626C60D7D63A40DA76CA9CEB095AFF4F8` |
+| TEST     | `__tests__/presets.test.ts`             | `2519F0E35E9D1C5267B6FA984B95531AAC37CB4220FE658F156547A17DA9378D` |
+| TEST     | `__tests__/publicRenderer.test.ts`      | `795B4F876F6A09C44259DC92EC3C914D2FBFE510CC4F9E9AA12B807222E3CA69` |
+| TEST     | `__tests__/registryCounts.test.ts`      | `305F2DDF9FA17CA8CE3B6439B5BAF3AA3FFB8B665DC51E081C8233C5F417D33C` |
+| TEST     | `__tests__/savePublish.test.ts`         | `378412A509D6FC9B789442C82FEE38B1A0E1DBEA6DEBF9A207265013D2A3A331` |
+| TEST     | `__tests__/templateReducer.test.ts`     | `6110F566E01565054B90B528A853DB4C9896931EFED52FF6A92A942EA02C03FC` |
+| TEST     | `__tests__/validation.test.ts`          | `E07EE2E3441119063FE959B0090380C2CA1311CA31712F6E517DC28C18FB8D41` |
+| TEST     | `__tests__/visualContract.test.tsx`     | `4EEADFF7E39206B57DD14D76723C6491E75524A88376F78202AFA80DF2EAA6D1` |
+| RUNTIME  | `adapters/index.ts`                     | `6BD6C39BF2590D5AA88C2F602A5202F1E84D52471A4BF8D52EE543286E1D125F` |
+| RUNTIME  | `ai/index.ts`                           | `D325BD234265AE8A60F1FF441F18AA9278177D23AD4D501133A871341A0B40A5` |
+| DEV_ONLY | `ai/test_generator.ts`                  | `1C2F61CF4728658CC055B3A3FF3ED88E090183D85367B04AC0C069953724FD6F` |
+| RUNTIME  | `ai/types.ts`                           | `203E123DAC1BDA5041E695BDDB27D00D634DCE891C6542D6435A4B44FF53AD48` |
+| RUNTIME  | `components/blocks/ActionBlocks.tsx`    | `3363E2CDD75F309237186CB64C30E09A892C6997F90DCB13AFFA0986CA290F8B` |
+| RUNTIME  | `components/blocks/ContentBlocks.tsx`   | `13C8B9063F40281491F63244FC98680AB1EDF1736EEFF9EBAC15B08FE2B536FC` |
+| RUNTIME  | `components/blocks/HeroBlock.tsx`       | `3DFB2CE8426B716B404AB693E1959179BD3AAB83752F3A1E3D5D8CB5AEF2B72C` |
+| RUNTIME  | `components/blocks/MediaBlocks.tsx`     | `D712D9EC49EAE8C68608973AE6A59CACEFD52B62FCABB0DD2F623F79136F5745` |
+| RUNTIME  | `components/blocks/PremiumBlocks.tsx`   | `1DC27CAF854DF603F952CFF13FA3252CB4128270BFD04C1CEFF3A474F463ADAE` |
+| RUNTIME  | `components/blocks/PremiumBlocksII.tsx` | `552D71482C5F3DA5B9B62233D3EB3CBB2F5439D99E298EC3097BBBA7A940A244` |
+| RUNTIME  | `components/blocks/primitives.tsx`      | `51148EAE71BE2D6D0BCA9B7B52D1E5391B3F76BCE52E73881D605B23A76C8C94` |
+| RUNTIME  | `components/canvas/ProfileHeader.tsx`   | `ADDC96F56E11C671C0F52768BCF5411EC720D9D92651285D8BD063378B262AEA` |
+| RUNTIME  | `components/editor/Sidebar.tsx`         | `01E4BAB4D9E99D8C4C1ABA1EA6966351536F70F0E6B689FBB9EB9B9A54D7A492` |
+| RUNTIME  | `components/inspector/Inspector.tsx`    | `F935ED75066591D55C2212B93B0575B2DB34C504FD4BF181598855A539C010A4` |
+| RUNTIME  | `components/PremiumTemplateStudio.tsx`  | `3A7C327C00A2F41ED4EB4AD94A80D8E42702BF2303DBE8F71C41488869BBDD43` |
+| RUNTIME  | `components/ui/controls.tsx`            | `AB52DA1010719F85B010DDEB0D31EEC098A1B23B1D960396FED35D723DD6AEC7` |
+| RUNTIME  | `constants/blockDefinitions.ts`         | `5ACC0EDD3CB07942C7822F3EF09F809DDDAB7707B432A93274C2A2192670A3F6` |
+| RUNTIME  | `constants/layouts.ts`                  | `8BDB2C532A6B652FF2332F1B64BFF6E1550003BE7A965CA6F4E81E3605BA98EE` |
+| RUNTIME  | `constants/motionPresets.ts`            | `C3F96345A13745C15C4D60646DB4D878A46E7FF6F57795F9FB4CC504D81F83D0` |
+| RUNTIME  | `constants/sectionPresets.ts`           | `FA78C56FBE0E39332D05574142C02304BC53B1828BDBA376F2985618F738724D` |
+| RUNTIME  | `constants/themes.ts`                   | `A917E80B7CAB4F269BEE4C3C68B86206D44590EA8AA708022C3FA2FAA34174C0` |
+| RUNTIME  | `engine/BlockRegistry.ts`               | `DED836A316BF43002F7E19484DEB99C1D364A9D5B59741E33C8E7B5A6D22B976` |
+| RUNTIME  | `engine/PublicTemplateRenderer.tsx`     | `17A01CC57487569E02575672E2D7255D99364747897D355FDCDC8F4D69CAD7D4` |
+| RUNTIME  | `engine/RenderContext.tsx`              | `B98E33D09F8F31081E631B6A1D14BEEFEB8FA00E991478E670546345F5163466` |
+| RUNTIME  | `engine/styleEngine.ts`                 | `72AE5A235891921D5FBF0F65A70CD4EC1ECD339389AAA0BC1591F74D36DD2E7D` |
+| RUNTIME  | `engine/TemplateBuilder.ts`             | `9EFEACF19E6AA4DB3137CD2E61548AA0ED414F64A06B097D71BE8F7E78741BF8` |
+| RUNTIME  | `engine/TemplateFactory.ts`             | `3491752BEC22FDFAA579D96E30320D88640DD0B70256C66BB18E55DB4BA59663` |
+| RUNTIME  | `engine/TemplateRenderer.tsx`           | `B9198B8DED616EA9EFF9AA1D8B3F2DCCC2C80F1A8725225DC7EEB4CABA117C54` |
+| RUNTIME  | `engine/TemplateValidator.ts`           | `A234AFE26818AC8CD4F08369023E3342D37929FDF44A0C957B92FDBA91B0D2D9` |
+| RUNTIME  | `hooks/useScrollReveal.ts`              | `F71912FC75F907CDA78E8937B16B8195395F18ADCE9D8566159C39507ED47D2C` |
+| RUNTIME  | `index.ts`                              | `79FDC89D1512DF6F8E548E93BD389F707D894649238340957D1FFAA73E156B6A` |
+| RUNTIME  | `state/StudioProvider.tsx`              | `EF97F4390DB1EE4FCC8EC66DE7D0F03ACD9107DE7B5FB88FD02C62AFAE380B4A` |
+| RUNTIME  | `state/templateReducer.ts`              | `F7B061B9E09CE772FD0A95A77492E3C6C0DB4807601D01129D48AF484727F921` |
+| RUNTIME  | `styles/studio.css`                     | `CCA0CB30705F8B46468FB6562024DA1ED36E5049F92E6CC754680085C58ECC3F` |
+| RUNTIME  | `templates/definitions.ts`              | `1BF7235BDF587C01FE16800815AE81D64A43F0A752AB67D498AA13762128370E` |
+| RUNTIME  | `templates/recipeRegistry.ts`           | `4BD7EB0266006024A23A1D3D1774B1D0D44F7A9F2D9F5546704F53B81DA03FC`  |
+| RUNTIME  | `types/index.ts`                        | `6F533F82ED52A3BED8CE3207C22907D63BBE0E80545CFB023C7B7CCE96BBE631` |
+| RUNTIME  | `utils/index.ts`                        | `9423037B31E61B78760C24EAFA2E83EDC1078DF4C764933737EC4395E6A9CA27` |
+
+## Hash and whitespace checks
+
+- Source manifest generated before copy: **PASS**.
+- Post-copy SHA-256 parity: **PASS, 46/46**.
+- Destination trailing whitespace scan: **PASS, 0 findings**.
+- No `IMPORT_PATH_ONLY`, `DEPENDENCY_ADAPTER`, or runtime business-logic
+  changes were required.
+- The source's Markdown integration documents were classified `NOT_COPIED`;
+  they are documentation, not runtime module files.
