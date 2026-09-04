@@ -13,7 +13,12 @@ import type {
 import { ONBOARDING_V2_STORAGE_KEY } from "@/lib/onboarding-v2/config";
 
 export interface OnboardingV2Draft {
-  identity: { displayName: string; professionOrActivity: string; bio: string; avatarPreview: string | null };
+  identity: {
+    displayName: string;
+    professionOrActivity: string;
+    bio: string;
+    avatarPreview: string | null;
+  };
   business: { category: BusinessCategoryV2 | null; customCategory: string };
   outcome: { primaryGoal: PrimaryGoalV2 | null; customGoal: string };
   visualDirection: { preference: VisualDirectionV2 | null; customDescription: string };
@@ -56,11 +61,16 @@ export function reconcileOnboardingV2Draft(draft: OnboardingV2Draft): Onboarding
   const relevant = isCommercialRelevant(draft);
   return {
     ...draft,
-    commercial: relevant ? { ...draft.commercial, relevant: true } : { mode: null, relevant: false },
+    commercial: relevant
+      ? { ...draft.commercial, relevant: true }
+      : { mode: null, relevant: false },
   };
 }
 
-export function toPersistedDraftV2(draft: OnboardingV2Draft): Omit<OnboardingV2Draft, "identity"> & {
+export function toPersistedDraftV2(draft: OnboardingV2Draft): Omit<
+  OnboardingV2Draft,
+  "identity"
+> & {
   identity: Omit<OnboardingV2Draft["identity"], "avatarPreview">;
 } {
   const { avatarPreview: _avatarPreview, ...identity } = draft.identity;
@@ -102,7 +112,9 @@ export function fromPersistedDraftV2(raw: unknown): OnboardingV2Draft {
       customDescription: asString(visual?.["customDescription"]),
     },
     contentNeeds: {
-      items: Array.isArray(content?.["items"]) ? (content["items"] as ContentNeedSelectionV2[]) : [],
+      items: Array.isArray(content?.["items"])
+        ? (content["items"] as ContentNeedSelectionV2[])
+        : [],
       userHasNoContentYet: content?.["userHasNoContentYet"] === true,
     },
     actions: {
@@ -139,30 +151,32 @@ export function buildOnboardingIntentV2(
   draft: OnboardingV2Draft,
   completedAt = new Date().toISOString(),
 ): { intent: OnboardingIntentV2 | null; validation: OnboardingV2ValidationResult } {
+  const bio = optionalText(draft.identity.bio);
+  const customCategory = optionalText(draft.business.customCategory);
+  const customGoal = optionalText(draft.outcome.customGoal);
+  const customDescription = optionalText(draft.visualDirection.customDescription);
   const identity = {
     displayName: draft.identity.displayName.trim(),
     professionOrActivity: draft.identity.professionOrActivity.trim(),
-    ...(optionalText(draft.identity.bio) ? { bio: optionalText(draft.identity.bio) } : {}),
+    ...(bio !== undefined ? { bio } : {}),
   };
   const candidate: OnboardingIntentV2 = {
     version: "2",
     identity,
     business: {
       category: draft.business.category ?? "other",
-      ...(draft.business.category === "other" && optionalText(draft.business.customCategory)
-        ? { customCategory: optionalText(draft.business.customCategory) }
+      ...(draft.business.category === "other" && customCategory !== undefined
+        ? { customCategory }
         : {}),
     },
     outcome: {
       primaryGoal: draft.outcome.primaryGoal ?? "other",
-      ...(draft.outcome.primaryGoal === "other" && optionalText(draft.outcome.customGoal)
-        ? { customGoal: optionalText(draft.outcome.customGoal) }
-        : {}),
+      ...(draft.outcome.primaryGoal === "other" && customGoal !== undefined ? { customGoal } : {}),
     },
     visualDirection: {
       preference: draft.visualDirection.preference ?? "let_cripqer_decide",
-      ...(draft.visualDirection.preference === "other" && optionalText(draft.visualDirection.customDescription)
-        ? { customDescription: optionalText(draft.visualDirection.customDescription) }
+      ...(draft.visualDirection.preference === "other" && customDescription !== undefined
+        ? { customDescription }
         : {}),
     },
     contentNeeds: {
@@ -193,7 +207,10 @@ export function buildOnboardingIntentV2(
 
 export function persistDraftV2(draft: OnboardingV2Draft): void {
   try {
-    window.sessionStorage.setItem(ONBOARDING_V2_STORAGE_KEY, JSON.stringify(toPersistedDraftV2(draft)));
+    window.sessionStorage.setItem(
+      ONBOARDING_V2_STORAGE_KEY,
+      JSON.stringify(toPersistedDraftV2(draft)),
+    );
   } catch {
     /* Session storage is an optional convenience. */
   }

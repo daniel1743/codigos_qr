@@ -41,7 +41,11 @@ export const GOAL_OPTIONS: OnboardingChoice<PrimaryGoalV2>[] = [
 ];
 
 export const VISUAL_OPTIONS: OnboardingChoice<VisualDirectionV2>[] = [
-  { id: "let_cripqer_decide", label: "Que Cripqer decida", caption: "Crearemos una base coherente con tus respuestas." },
+  {
+    id: "let_cripqer_decide",
+    label: "Que Cripqer decida",
+    caption: "Crearemos una base coherente con tus respuestas.",
+  },
   { id: "minimal", label: "Minimalista", caption: "Claro, simple y sin ruido." },
   { id: "modern", label: "Moderna", caption: "Actual y con energía visual." },
   { id: "professional", label: "Profesional", caption: "Confiable y enfocada." },
@@ -74,7 +78,11 @@ export const ACTION_OPTIONS: OnboardingChoice<ActionTypeV2>[] = [
   { id: "call", label: "Llamar", caption: "Número con código de país." },
   { id: "book", label: "Reservar", caption: "Puedes añadir el enlace ahora o después." },
   { id: "buy", label: "Comprar", caption: "Puedes añadir el enlace ahora o después." },
-  { id: "request_quote", label: "Pedir presupuesto", caption: "Puedes añadir el enlace ahora o después." },
+  {
+    id: "request_quote",
+    label: "Pedir presupuesto",
+    caption: "Puedes añadir el enlace ahora o después.",
+  },
   { id: "website", label: "Visitar sitio web" },
   { id: "menu", label: "Ver menú" },
   { id: "follow", label: "Seguir en redes", caption: "Usuario o enlace." },
@@ -93,7 +101,11 @@ export const MEDIA_OPTIONS: OnboardingChoice<MediaPreferenceV2>[] = [
 export const DENSITY_OPTIONS: OnboardingChoice<DensityV2>[] = [
   { id: "simple", label: "Sencilla", caption: "Solo lo esencial para empezar." },
   { id: "complete", label: "Completa", caption: "Quiero mostrar más información." },
-  { id: "auto", label: "Que Cripqer decida", caption: "Usaremos tus respuestas para proponer el alcance." },
+  {
+    id: "auto",
+    label: "Que Cripqer decida",
+    caption: "Usaremos tus respuestas para proponer el alcance.",
+  },
 ];
 
 export const COMMERCIAL_OPTIONS: OnboardingChoice<CommercialModeV2>[] = [
@@ -102,7 +114,11 @@ export const COMMERCIAL_OPTIONS: OnboardingChoice<CommercialModeV2>[] = [
   { id: "booking", label: "Recibir reservas" },
   { id: "quote", label: "Recibir presupuestos" },
   { id: "sell", label: "Vender" },
-  { id: "hybrid", label: "Mostrar y vender", caption: "Señal semántica; no configura un catálogo." },
+  {
+    id: "hybrid",
+    label: "Mostrar y vender",
+    caption: "Señal semántica; no configura un catálogo.",
+  },
 ];
 
 export const SEMANTIC_ACTIONS_WITH_OPTIONAL_DESTINATION: ActionTypeV2[] = [

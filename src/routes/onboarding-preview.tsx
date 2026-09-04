@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { OnboardingShell } from "../components/onboarding";
+import { OnboardingV2Shell } from "../components/onboarding-v2";
 
 /**
  * Internal-only QA seam for the approved onboarding pack.
@@ -79,7 +79,7 @@ const onboardingTypography = `
 export const Route = createFileRoute("/onboarding-preview")({
   head: () => ({
     meta: [
-      { title: "Onboarding V1 Preview | Cripqer" },
+      { title: "Onboarding V2 Preview | Cripqer" },
       { name: "robots", content: "noindex, nofollow, noarchive" },
     ],
   }),
@@ -90,7 +90,7 @@ function OnboardingPreviewPage() {
   return (
     <div className="onboarding-brand-scope" style={onboardingBrandTokens}>
       <style>{onboardingTypography}</style>
-      <OnboardingShell debug />
+      <OnboardingV2Shell debug />
     </div>
   );
 }
