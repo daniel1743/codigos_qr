@@ -2,7 +2,7 @@ import { defineConfig } from "@playwright/test";
 
 export default defineConfig({
   testDir: ".",
-  testMatch: "phase6-local-unblock.spec.ts",
+  testMatch: /.*\.spec\.ts/,
   outputDir: "../logs/phase6-unblock/playwright",
   timeout: 180_000,
   expect: { timeout: 15_000 },

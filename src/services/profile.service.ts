@@ -194,12 +194,14 @@ export const profileService = {
       updatedProfile = data;
     }
 
-    if (hasBasicEditorTemplateConfigPatch(patch.templateConfig)) {
+    if (updates.template_config) {
       return this.patchBasicEditorTemplateConfig(supabase, profileId, patch.templateConfig);
     }
 
     if (!updatedProfile) {
-      throw new Error("Basic Editor produced an empty persistence patch.");
+      // In cases where only the basic layout is changed, if neither profile nor template_config changed,
+      // fetch the existing profile to avoid throwing.
+      return this.getProfileByIdForUser(supabase, profileId, updates.user_id || "") as Promise<Profile>;
     }
 
     return updatedProfile;
@@ -211,10 +213,6 @@ export const profileService = {
     profileId: string,
     patch: BasicEditorTemplateConfigPatchV1,
   ): Promise<Profile> {
-    if (!hasBasicEditorTemplateConfigPatch(patch)) {
-      throw new Error("Basic Editor template config patch cannot be empty.");
-    }
-
     const { data, error } = await supabase.rpc("patch_profile_basic_template_config", {
       p_profile_id: profileId,
       p_patch: patch,
