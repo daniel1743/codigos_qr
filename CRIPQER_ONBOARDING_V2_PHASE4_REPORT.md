@@ -80,5 +80,5 @@ RLS-protected RPC without TLS bypass or service-role access.
 | Non-QA profiles modified                     | NO                         |
 | Data loss detected in final run              | NO                         |
 | Commit hash                                  | `ac850b0` — implementation |
-| Push result                                  | Pending final push         |
+| Push result                                  | PASS — pushed to `origin/feat/basic-editor-editorial-canvas-ui` |
 | `PHASE_4_STATUS`                             | `READY`                    |
