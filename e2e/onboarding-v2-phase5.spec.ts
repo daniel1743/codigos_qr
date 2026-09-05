@@ -373,13 +373,30 @@ async function completeRichOnboarding(page: Page): Promise<void> {
 
 async function saveOnboardingAndExpectBasic(page: Page, profileId: string): Promise<void> {
   console.log("[Phase5] onboarding:submit");
-  await page.getByRole("button", { name: "Guardar mis respuestas", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Guardar mis respuestas", exact: true })
+    .evaluate((button) => {
+      button.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      button.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
   await expect(page.getByRole("status")).toContainText(/Generando|Guardando|Perfil persistido/, {
     timeout: 10_000,
   });
   await expect(page).toHaveURL(new RegExp(`/editor\\?profileId=${profileId}`), { timeout: 45_000 });
   console.log("[Phase5] onboarding:basic-landed");
-  await expect(page.getByLabel("Nombre para mostrar")).toBeVisible({ timeout: 30_000 });
+  await openMobileProfilePanel(page);
+  await expect(page.locator("#display_name:visible")).toBeVisible({ timeout: 30_000 });
+}
+
+async function openMobileProfilePanel(page: Page): Promise<void> {
+  if ((await page.evaluate(() => window.innerWidth)) >= 768) return;
+  await page.waitForFunction(() => Boolean(window.__TSS_START_OPTIONS__), null, {
+    timeout: 60_000,
+  });
+  await page.waitForTimeout(5_000);
+  const mobileNav = page.getByRole("navigation", { name: "Navegación móvil del editor básico" });
+  await expect(mobileNav).toBeVisible({ timeout: 30_000 });
+  await mobileNav.getByRole("button", { name: "Perfil", exact: true }).click();
 }
 
 test("executes isolated Phase 5 Onboarding V2 -> Basic Editor handoff", async ({ page }) => {
@@ -419,7 +436,8 @@ test("executes isolated Phase 5 Onboarding V2 -> Basic Editor handoff", async ({
       await page.getByLabel("Contraseña").fill(qaPassword!);
       await page.getByRole("button", { name: "Entrar al editor" }).click();
     }
-    await expect(profileNameField).toBeVisible({ timeout: 30_000 });
+    await openMobileProfilePanel(page);
+    await expect(page.locator("#display_name:visible")).toBeVisible({ timeout: 30_000 });
     const userData = await browserSupabaseRequest(page, supabase, { path: "auth/v1/user" });
     assertRecord(userData, "authenticated browser user");
     userId = String(userData.id);
@@ -468,9 +486,9 @@ test("executes isolated Phase 5 Onboarding V2 -> Basic Editor handoff", async ({
 
     await completeSimpleOnboarding(page);
     await saveOnboardingAndExpectBasic(page, profileId);
-    await expect(page.getByLabel("Nombre para mostrar")).toHaveValue("Jardinería Verde");
-    await expect(page.getByLabel("Profesión")).toHaveValue("Jardinero");
-    await expect(page.locator("#bio")).toHaveValue("Cuido jardines y espacios verdes.");
+    await expect(page.locator("#display_name:visible")).toHaveValue("Jardinería Verde");
+    await expect(page.locator("#profession:visible")).toHaveValue("Jardinero");
+    await expect(page.locator("#bio:visible")).toHaveValue("Cuido jardines y espacios verdes.");
     const simpleProfile = await readQaProfile(page, supabase, userId);
     expect(simpleProfile.id).toBe(profileId);
     expect(simpleProfile.template_config?.schemaVersion).toBe(1);
@@ -486,7 +504,7 @@ test("executes isolated Phase 5 Onboarding V2 -> Basic Editor handoff", async ({
     const basicProfilesAfterLanding = await readOwnedProfiles(page, supabase, userId);
     expect(basicProfilesAfterLanding.map((profile) => profile.id)).toEqual([profileId]);
 
-    await page.locator("#bio").fill("Cambio Basic después de Engine V2.");
+    await page.locator("#bio:visible").fill("Cambio Basic después de Engine V2.");
     await page.getByRole("button", { name: "Guardar borrador", exact: true }).first().click();
     await expect(page.getByText("Borrador guardado").last()).toBeVisible({ timeout: 15_000 });
     const simpleAfterBasic = await readQaProfile(page, supabase, userId);
@@ -495,7 +513,8 @@ test("executes isolated Phase 5 Onboarding V2 -> Basic Editor handoff", async ({
       stableJson(simpleCanonicalBeforeBasic),
     );
     await page.reload();
-    await expect(page.locator("#bio")).toHaveValue("Cambio Basic después de Engine V2.");
+    await openMobileProfilePanel(page);
+    await expect(page.locator("#bio:visible")).toHaveValue("Cambio Basic después de Engine V2.");
     const simpleAfterReload = await readQaProfile(page, supabase, userId);
     expect(stableJson(simpleAfterReload.template_config)).toEqual(
       stableJson(simpleCanonicalBeforeBasic),
@@ -508,11 +527,19 @@ test("executes isolated Phase 5 Onboarding V2 -> Basic Editor handoff", async ({
       await page.getByRole("button", { name: "Guardar mis respuestas", exact: true }).count(),
     ).toBe(0);
 
+    await page.goForward();
+    await expect(page).toHaveURL(/\/editor\?profileId=/);
+    await openMobileProfilePanel(page);
+    await expect(page.locator("#display_name:visible")).toBeVisible({ timeout: 30_000 });
+    await page.goBack();
+    await expect(page).toHaveURL(/\/onboarding-preview/);
+    await expect(page.getByText(/Onboarding V2 · Paso 1 de 8/)).toBeVisible();
+
     await completeRichOnboarding(page);
     await saveOnboardingAndExpectBasic(page, profileId);
-    await expect(page.getByLabel("Nombre para mostrar")).toHaveValue("Clínica Vet Vida");
-    await expect(page.getByLabel("Profesión")).toHaveValue("Veterinaria");
-    await expect(page.locator("#bio")).toHaveValue(
+    await expect(page.locator("#display_name:visible")).toHaveValue("Clínica Vet Vida");
+    await expect(page.locator("#profession:visible")).toHaveValue("Veterinaria");
+    await expect(page.locator("#bio:visible")).toHaveValue(
       "Atención veterinaria cercana para cada etapa de tu mascota.",
     );
     const richProfile = await readQaProfile(page, supabase, userId);
