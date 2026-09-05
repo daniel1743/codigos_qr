@@ -145,6 +145,12 @@ function getSafeFusionStrength(value: unknown) {
   return Math.min(100, Math.max(0, Math.round(parsed)));
 }
 
+function getRequestedProfileId(): string | null {
+  if (typeof window === "undefined") return null;
+  const profileId = new URLSearchParams(window.location.search).get("profileId")?.trim();
+  return profileId || null;
+}
+
 function EditorPage() {
   const navigate = useNavigate();
   const [session, setSession] = useState<Session | null>(null);
@@ -162,7 +168,7 @@ function EditorPage() {
   const [selectedTarget, setSelectedTarget] = useState<string | null>(null);
   const [templateSearchQuery, setTemplateSearchQuery] = useState("");
 
-  const loadedUserId = useRef<string | null>(null);
+  const loadedProfileKey = useRef<string | null>(null);
   const canvasViewportRef = useRef<HTMLDivElement>(null);
   const targetsRef = useRef(new Map<string, HTMLElement>());
   const activeSectionRef = useRef<BasicEditorSectionId>(activeSection);
@@ -211,13 +217,14 @@ function EditorPage() {
 
   useEffect(() => {
     const supabase = getBrowserSupabaseClient();
+    const requestedProfileId = getRequestedProfileId();
 
     supabase.auth
       .getSession()
       .then(({ data: { session } }) => {
         setSession(session);
         if (session) {
-          loadData(session.user.id);
+          loadData(session.user.id, requestedProfileId);
         } else {
           setLoading(false);
         }
@@ -231,10 +238,11 @@ function EditorPage() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
-      if (session && loadedUserId.current !== session.user.id) {
-        loadData(session.user.id);
+      const profileKey = session ? `${session.user.id}:${requestedProfileId ?? "default"}` : null;
+      if (session && loadedProfileKey.current !== profileKey) {
+        loadData(session.user.id, requestedProfileId);
       } else if (event === "SIGNED_OUT") {
-        loadedUserId.current = null;
+        loadedProfileKey.current = null;
       }
     });
 
@@ -250,13 +258,16 @@ function EditorPage() {
     };
   }, []);
 
-  const loadData = async (userId: string) => {
-    if (loadedUserId.current === userId) return;
+  const loadData = async (userId: string, requestedProfileId: string | null = null) => {
+    const profileKey = `${userId}:${requestedProfileId ?? "default"}`;
+    if (loadedProfileKey.current === profileKey) return;
 
     setLoading(true);
     try {
       const supabase = getBrowserSupabaseClient();
-      const currentProfile = await profileService.getProfileByUserId(supabase, userId);
+      const currentProfile = requestedProfileId
+        ? await profileService.getProfileByIdForUser(supabase, requestedProfileId, userId)
+        : await profileService.getProfileByUserId(supabase, userId);
       if (currentProfile) {
         setProfileState("ready");
         setProfile({
@@ -280,7 +291,7 @@ function EditorPage() {
       setProfileState("error");
       toast.error("No se pudo cargar tu perfil.");
     } finally {
-      loadedUserId.current = userId;
+      loadedProfileKey.current = profileKey;
       setLoading(false);
     }
   };

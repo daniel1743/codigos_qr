@@ -58,3 +58,13 @@ export {
   type OnboardingV2PersistenceSuccess,
   type PersistOnboardingGeneratedPageV2Input,
 } from "./canonical-persistence";
+export {
+  buildBasicEditorHandoffUrl,
+  completeOnboardingV2Handoff,
+  type CompleteOnboardingV2HandoffInput,
+  type OnboardingV2HandoffFailure,
+  type OnboardingV2HandoffFailureCode,
+  type OnboardingV2HandoffPhase,
+  type OnboardingV2HandoffResult,
+  type OnboardingV2HandoffSuccess,
+} from "./basic-editor-handoff";

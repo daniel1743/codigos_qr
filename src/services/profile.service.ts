@@ -108,6 +108,22 @@ export const profileService = {
     return data;
   },
 
+  async getProfileByIdForUser(
+    supabase: SupabaseClient,
+    profileId: string,
+    userId: string,
+  ): Promise<Profile | null> {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", profileId)
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (error) throw error;
+    return data;
+  },
+
   async getPublicProfileByPublicId(
     supabase: SupabaseClient,
     publicId: string,

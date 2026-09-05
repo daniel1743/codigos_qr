@@ -20,6 +20,12 @@ import type {
   OnboardingIntentV2,
 } from "@/lib/onboarding-v2";
 import {
+  buildBasicEditorHandoffUrl,
+  completeOnboardingV2Handoff,
+  type OnboardingV2HandoffPhase,
+} from "@/lib/onboarding-v2/basic-editor-handoff";
+import { getBrowserSupabaseClient } from "@/lib/supabase/client";
+import {
   buildOnboardingIntentV2,
   createEmptyOnboardingV2Draft,
   fromPersistedDraftV2,
@@ -43,6 +49,7 @@ const TOTAL_STEPS = 8;
 const OPTIONAL_DESTINATION_TYPES = new Set<ActionTypeV2>(
   SEMANTIC_ACTIONS_WITH_OPTIONAL_DESTINATION,
 );
+type CompletionStatus = "IDLE" | "GENERATING" | "PERSISTING" | "SUCCESS" | "FAILURE";
 
 export function OnboardingV2Shell({ debug = false }: { debug?: boolean }) {
   const [step, setStep] = useState(1);
@@ -52,9 +59,13 @@ export function OnboardingV2Shell({ debug = false }: { debug?: boolean }) {
   const [intent, setIntent] = useState<OnboardingIntentV2 | null>(null);
   const [showPayload, setShowPayload] = useState(false);
   const [stepError, setStepError] = useState<string | null>(null);
+  const [completionStatus, setCompletionStatus] = useState<CompletionStatus>("IDLE");
+  const [handoffError, setHandoffError] = useState<string | null>(null);
+  const [persistedProfileId, setPersistedProfileId] = useState<string | null>(null);
   const headingRef = useRef<HTMLDivElement>(null);
   const avatarUrlRef = useRef<string | null>(null);
   const clearedRef = useRef(false);
+  const handoffInFlightRef = useRef(false);
 
   useEffect(
     () => () => {
@@ -105,19 +116,51 @@ export function OnboardingV2Shell({ debug = false }: { debug?: boolean }) {
     setStep((current) => Math.min(TOTAL_STEPS, current + 1));
   };
 
-  const finish = () => {
+  const finish = async () => {
+    if (handoffInFlightRef.current) return;
     const built = buildOnboardingIntentV2(draft);
     if (!built.intent) {
       setStepError("Revisa las respuestas obligatorias antes de terminar.");
       return;
     }
+    handoffInFlightRef.current = true;
+    setIntent(built.intent);
     setFinishing(true);
+    setCompletionStatus("GENERATING");
+    setHandoffError(null);
+    setPersistedProfileId(null);
+
     try {
-      window.sessionStorage.removeItem(ONBOARDING_V2_STORAGE_KEY);
-    } catch {
-      /* Ignore unavailable storage. */
+      const result = await completeOnboardingV2Handoff({
+        supabase: getBrowserSupabaseClient(),
+        intent: built.intent,
+        onPhase: (phase: OnboardingV2HandoffPhase) => {
+          setCompletionStatus(phase);
+        },
+      });
+
+      if (result.status !== "SUCCESS") {
+        handoffInFlightRef.current = false;
+        setCompletionStatus("FAILURE");
+        setHandoffError(result.error);
+        return;
+      }
+
+      setPersistedProfileId(result.profileId);
+      setCompletionStatus("SUCCESS");
+      try {
+        window.sessionStorage.removeItem(ONBOARDING_V2_STORAGE_KEY);
+      } catch {
+        /* Ignore unavailable storage. */
+      }
+      window.setTimeout(() => {
+        window.location.assign(buildBasicEditorHandoffUrl(result.profileId));
+      }, 450);
+    } catch (error) {
+      handoffInFlightRef.current = false;
+      setCompletionStatus("FAILURE");
+      setHandoffError(error instanceof Error ? error.message : "No se pudo completar el handoff.");
     }
-    window.setTimeout(() => setIntent(built.intent), 350);
   };
 
   const restart = () => {
@@ -129,6 +172,10 @@ export function OnboardingV2Shell({ debug = false }: { debug?: boolean }) {
     setFinishing(false);
     setShowPayload(false);
     setStepError(null);
+    setCompletionStatus("IDLE");
+    setHandoffError(null);
+    setPersistedProfileId(null);
+    handoffInFlightRef.current = false;
     setStep(1);
     try {
       window.sessionStorage.removeItem(ONBOARDING_V2_STORAGE_KEY);
@@ -143,7 +190,17 @@ export function OnboardingV2Shell({ debug = false }: { debug?: boolean }) {
         intent={intent}
         debug={debug}
         showPayload={showPayload}
+        status={completionStatus}
+        error={handoffError}
+        persistedProfileId={persistedProfileId}
         onTogglePayload={() => setShowPayload((current) => !current)}
+        onReturnToReview={() => {
+          handoffInFlightRef.current = false;
+          setFinishing(false);
+          setCompletionStatus("IDLE");
+          setHandoffError(null);
+          setStep(8);
+        }}
         onRestart={restart}
       />
     );
@@ -797,7 +854,18 @@ function ReviewStep({ draft, setStep, update }: StepProps & { setStep: (step: nu
     <section className="grid gap-[var(--space-5)]">
       <StepHeading
         title="Revisa tus respuestas"
-        note="Aquí confirmas una intención semántica. La generación y los editores ocurren en una fase posterior."
+        note="Aquí confirmas una intención semántica. Después prepararemos tu página y la abriremos en Basic Editor."
+      />
+      <OptionGroup
+        label="Alcance inicial"
+        options={DENSITY_OPTIONS}
+        value={draft.scope.density}
+        onChange={(id) =>
+          update((current) => ({
+            ...current,
+            scope: { density: id, userSelected: true },
+          }))
+        }
       />
       <div className="grid gap-3">
         {reviewRow(
@@ -887,25 +955,60 @@ function CompletionV2({
   intent,
   debug,
   showPayload,
+  status,
+  error,
+  persistedProfileId,
   onTogglePayload,
+  onReturnToReview,
   onRestart,
 }: {
   intent: OnboardingIntentV2 | null;
   debug: boolean;
   showPayload: boolean;
+  status: CompletionStatus;
+  error: string | null;
+  persistedProfileId: string | null;
   onTogglePayload: () => void;
+  onReturnToReview: () => void;
   onRestart: () => void;
 }) {
+  const isWorking = status === "GENERATING" || status === "PERSISTING";
+  const isSuccess = status === "SUCCESS";
+  const title =
+    status === "SUCCESS"
+      ? "Tu página está lista"
+      : status === "FAILURE"
+        ? "No pudimos completar tu página"
+        : "Preparando tu página";
+  const note =
+    status === "GENERATING"
+      ? "Estamos preparando una primera versión a partir de tus respuestas."
+      : status === "PERSISTING"
+        ? "Estamos guardando tu página en tu perfil seguro."
+        : status === "SUCCESS"
+          ? "Tu página quedó guardada. Ahora puedes editarla en Basic Editor."
+          : "Revisa tus respuestas e inténtalo nuevamente.";
+
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-[680px] flex-col justify-center px-4 py-10 sm:px-6">
       <div
         className="grid gap-5 rounded-[var(--brand-radius-lg)] border p-6"
         style={{ ...surface, borderColor: "var(--border-default)" }}
       >
-        <StepHeading
-          title="Tus respuestas están listas"
-          note="La intención semántica quedó validada para la siguiente fase. Esta vista interna no genera ni publica una página."
-        />
+        <StepHeading title={title} note={note} />
+        <div
+          role="status"
+          aria-live="polite"
+          className="rounded border p-4 text-sm"
+          style={{
+            borderColor: "var(--border-default)",
+            color: status === "FAILURE" ? "var(--state-error)" : "var(--text-secondary)",
+          }}
+        >
+          {isWorking && (status === "GENERATING" ? "Generando…" : "Guardando…")}
+          {isSuccess && `Perfil persistido: ${persistedProfileId ?? "disponible"}.`}
+          {status === "FAILURE" && (error ?? "No se pudo guardar la página.")}
+        </div>
         {intent && (
           <div className="grid gap-2 text-sm" style={{ color: "var(--text-secondary)" }}>
             <p>
@@ -939,9 +1042,23 @@ function CompletionV2({
             )}
           </>
         )}
-        <BrandButton variant="ghost" onClick={onRestart}>
-          Reiniciar onboarding
-        </BrandButton>
+        {isSuccess && persistedProfileId && (
+          <BrandButton
+            onClick={() => window.location.assign(buildBasicEditorHandoffUrl(persistedProfileId))}
+          >
+            Abrir Basic Editor
+          </BrandButton>
+        )}
+        {status === "FAILURE" && (
+          <BrandButton variant="secondary" onClick={onReturnToReview}>
+            Volver a revisar
+          </BrandButton>
+        )}
+        {!isWorking && !isSuccess && (
+          <BrandButton variant="ghost" onClick={onRestart}>
+            Reiniciar onboarding
+          </BrandButton>
+        )}
       </div>
     </main>
   );

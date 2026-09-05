@@ -3,7 +3,9 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { expect, test, type Page } from "@playwright/test";
 
-const PROFILE_SLUG = "sy9whgm";
+// `sy9whgm` is the QA profile alias; its current application slug is the
+// deterministic profile used by the authenticated Phase 4/5 harness.
+const PROFILE_SLUG = "qa-dual-editor-test";
 const QA_USER_ID = "8b1f25ff-ec0a-4cf2-93e2-f67c62a5a165";
 const QA_NAME = "QA Dual Editor Test";
 
