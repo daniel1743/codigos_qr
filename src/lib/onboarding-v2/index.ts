@@ -50,3 +50,11 @@ export {
   type OnboardingV2AdapterResult,
   type OnboardingV2AdapterSuccess,
 } from "./engine-v2-adapter";
+export {
+  persistOnboardingGeneratedPageV2,
+  type OnboardingV2PersistenceFailure,
+  type OnboardingV2PersistenceFailureCode,
+  type OnboardingV2PersistenceResult,
+  type OnboardingV2PersistenceSuccess,
+  type PersistOnboardingGeneratedPageV2Input,
+} from "./canonical-persistence";
