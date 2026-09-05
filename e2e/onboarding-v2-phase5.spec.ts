@@ -3,6 +3,13 @@ import { resolve } from "node:path";
 
 import { expect, test, type Page } from "@playwright/test";
 
+import {
+  captureBaseline as capturePhase6Baseline,
+  restoreBaseline as restorePhase6Baseline,
+  snapshot as snapshotPhase6Baseline,
+  type QaSnapshot,
+} from "./helpers/phase6-qa";
+
 const QA_PROFILE_ALIAS = "sy9whgm";
 const QA_PROFILE_SLUG = "qa-dual-editor-test";
 const QA_USER_ID = "8b1f25ff-ec0a-4cf2-93e2-f67c62a5a165";
@@ -413,6 +420,7 @@ test("executes isolated Phase 5 Onboarding V2 -> Basic Editor handoff", async ({
   let profileId = "";
   let baseline: JsonRecord | null = null;
   let baselineLinks: JsonRecord[] = [];
+  let recoveryBaseline: QaSnapshot | null = null;
 
   try {
     page.on("pageerror", (error) => console.log(`[Phase5] pageerror=${error.message}`));
@@ -451,6 +459,8 @@ test("executes isolated Phase 5 Onboarding V2 -> Basic Editor handoff", async ({
     expect(baseline.bio).toBe(QA_BASELINE.bio);
     profileId = String(baseline.id);
     baselineLinks = clone(await readLinks(page, supabase, profileId));
+    recoveryBaseline = await snapshotPhase6Baseline(page);
+    capturePhase6Baseline(recoveryBaseline);
     console.log(
       `[Phase5] baseline:captured profiles=${beforeProfiles.length} links=${baselineLinks.length}`,
     );
@@ -576,6 +586,9 @@ test("executes isolated Phase 5 Onboarding V2 -> Basic Editor handoff", async ({
   } finally {
     if (baseline && profileId && userId) {
       await restoreQaProfile(page, supabase, profileId, userId, baseline, baselineLinks);
+    }
+    if (recoveryBaseline) {
+      await restorePhase6Baseline(page, recoveryBaseline);
     }
     console.log(`[Phase5] QA_PROFILE=${QA_PROFILE_ALIAS} SLUG=${QA_PROFILE_SLUG}`);
     console.log("[Phase5] service-role=NO TLS-bypass=NO non-QA-profile=NO");

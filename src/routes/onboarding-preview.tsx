@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, notFound } from "@tanstack/react-router";
 import { OnboardingV2Shell } from "../components/onboarding-v2";
+import { isOnboardingV2Enabled } from "../lib/env";
 
 /**
  * Internal-only QA seam for the approved onboarding pack.
@@ -77,6 +78,9 @@ const onboardingTypography = `
 `;
 
 export const Route = createFileRoute("/onboarding-preview")({
+  beforeLoad: () => {
+    if (!isOnboardingV2Enabled()) throw notFound();
+  },
   head: () => ({
     meta: [
       { title: "Onboarding V2 Preview | Cripqer" },

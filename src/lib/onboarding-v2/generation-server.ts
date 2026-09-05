@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 
+import { requireOnboardingV2Enabled } from "../env";
 import { validateOnboardingIntentV2 } from "./validation";
 import type { OnboardingIntentV2 } from "./types";
 import type { OnboardingV2GenerationResult } from "./engine-v2-generation";
@@ -42,6 +43,7 @@ export const generateOnboardingV2PageFn = createServerFn({
 })
   .validator(validateGenerationInput)
   .handler(async ({ data }): Promise<OnboardingV2GenerationResult> => {
+    requireOnboardingV2Enabled();
     const { generateFromOnboardingIntentV2 } = await import("./engine-v2-generation");
     return generateFromOnboardingIntentV2(data.intent, data.now ? { now: data.now } : {});
   });

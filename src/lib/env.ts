@@ -17,3 +17,20 @@ export const env = {
     return getEnv("VITE_APP_URL");
   },
 };
+
+/**
+ * Onboarding V2 remains an internal QA surface until a separately authorized
+ * release. The flag is intentionally opt-in: an absent or malformed value is
+ * disabled in every environment.
+ */
+export function isOnboardingV2Enabled(
+  environment: { readonly VITE_ENABLE_ONBOARDING_V2?: unknown } = import.meta.env,
+): boolean {
+  return environment["VITE_ENABLE_ONBOARDING_V2"] === "true";
+}
+
+export function requireOnboardingV2Enabled(): void {
+  if (!isOnboardingV2Enabled()) {
+    throw new Error("Onboarding V2 is disabled.");
+  }
+}

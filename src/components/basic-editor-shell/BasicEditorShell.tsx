@@ -913,7 +913,10 @@ export function BasicEditorShell({
         mobileMenuOpen={mobileMenuOpen}
         onMobileMenuChange={setMobileMenuOpen}
         mobileMenuContent={
-          <div className="basic-editor-shell-drawer-content flex flex-col min-h-full pb-6 relative">
+          <div
+            ref={mobileMenuRef}
+            className="basic-editor-shell-drawer-content flex flex-col min-h-full pb-6 relative"
+          >
             {/* Top dark wave */}
             <div className="absolute top-0 left-0 w-full h-[180px] bg-[#161616] overflow-hidden z-0">
                <svg className="absolute bottom-0 w-full h-[120px] text-[#0a0a0a] translate-y-[2px]" viewBox="0 0 1440 320" preserveAspectRatio="none">
