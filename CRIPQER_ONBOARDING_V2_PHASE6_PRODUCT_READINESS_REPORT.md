@@ -184,7 +184,7 @@ Mini-Site code was modified. The pre-existing dirty nested path
 | QA profile restored               | YES                                                                                                 |
 | Non-QA profiles modified          | NO                                                                                                  |
 | Data loss detected                | NO                                                                                                  |
-| Commit hash                       | `3b13709` — Phase 6 QA harness/report commit; final metadata commit recorded below.                  |
+| Commit hash                       | `3b13709` — Phase 6 QA harness/report commit; metadata finalizado en `62b2bcf`.                    |
 | Push result                       | PASS — pushed to `origin/feat/basic-editor-editorial-canvas-ui`.                                    |
 | `PHASE_6A_LOCAL`                  | BLOCKED — functional local journeys pass, mandatory logout/flag/cross-profile gates are incomplete. |
 | `PHASE_6B_STAGING`                | BLOCKED — private staging environment unavailable.                                                  |
