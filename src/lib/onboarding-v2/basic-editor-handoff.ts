@@ -10,6 +10,7 @@ import {
   isValidWhatsApp,
   normalizePhoneDigits,
 } from "@/lib/parametric-engine-v2/destinations";
+import { generatePublicId, getInternalSlugFromPublicId } from "@/lib/publicId";
 import {
   type OnboardingV2GenerationResult,
   type OnboardingV2GenerationFailure,
@@ -251,10 +252,20 @@ export async function completeOnboardingV2Handoff({
     );
   }
   if (!profile?.id) {
-    return handoffFailure(
-      "PROFILE_NOT_FOUND",
-      "No se encontró un perfil existente para completar el handoff.",
-    );
+    try {
+      const publicId = generatePublicId();
+      profile = await profileService.createProfile(supabase, {
+        user_id: userId,
+        public_id: publicId,
+        slug: getInternalSlugFromPublicId(publicId),
+        display_name: intent.identity.displayName || "Mi perfil",
+      });
+    } catch (error) {
+      return handoffFailure(
+        "PROFILE_CREATION_FAILED",
+        error instanceof Error ? error.message : "No se pudo crear el perfil base.",
+      );
+    }
   }
 
   onPhase?.("PERSISTING");

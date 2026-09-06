@@ -12,7 +12,7 @@ import { getBrowserSupabaseClient } from "@/lib/supabase/client";
 import { canonicalPageService } from "@/services/canonical-page.service";
 
 const INTERNAL_POWER_EDITOR_ENABLED =
-  import.meta.env.DEV && import.meta.env.VITE_ENABLE_INTERNAL_POWER_EDITOR !== "false";
+  (import.meta.env.DEV || import.meta.env.VITE_ENABLE_ONBOARDING_V2 === "true") && import.meta.env.VITE_ENABLE_INTERNAL_POWER_EDITOR !== "false";
 
 export const Route = createFileRoute("/internal/power-editor")({
   beforeLoad: () => {

@@ -282,6 +282,10 @@ function EditorPage() {
         const currentLinks = await linkService.getProfileLinks(supabase, currentProfile.id);
         setLinks(currentLinks);
       } else {
+        if (import.meta.env.VITE_ENABLE_ONBOARDING_V2 === "true") {
+          navigate({ to: "/onboarding-preview", replace: true });
+          return;
+        }
         setProfileState("missing");
         setProfile(DEFAULT_PROFILE);
         setLinks([]);
