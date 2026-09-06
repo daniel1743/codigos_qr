@@ -66,4 +66,22 @@ describe("OnboardingIntentV2 validation", () => {
     expect(result.valid).toBe(true);
     expect(NO_PRIMARY_CTA_FIXTURE.actions.primary).toBeUndefined();
   });
+
+  it("accepts an explicit null primary action as no-CTA (runtime UI shape)", () => {
+    const value = clone(NO_PRIMARY_CTA_FIXTURE) as unknown as Record<string, unknown>;
+    (value["actions"] as Record<string, unknown>)["primary"] = null;
+    const result = validateOnboardingIntentV2(value);
+    expect(result.valid).toBe(true);
+    expect(result.issues).toEqual([]);
+  });
+
+  it("still rejects a malformed non-null primary action object", () => {
+    const value = clone(SIMPLE_CONTACT_FIXTURE) as unknown as Record<string, unknown>;
+    (value["actions"] as Record<string, unknown>)["primary"] = "not-an-object";
+    expect(validateOnboardingIntentV2(value).issues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ path: "actions.primary", code: "invalid_type" }),
+      ]),
+    );
+  });
 });

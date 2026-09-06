@@ -117,7 +117,7 @@ function mapGoal(intent: OnboardingIntentV2, result: OnboardingV2AdapterDiagnost
 }
 
 function mapPrimaryAction(
-  action: ActionIntentV2 | undefined,
+  action: ActionIntentV2 | undefined | null,
   result: OnboardingV2AdapterDiagnostics,
 ):
   | { type: "whatsapp" | "booking" | "website" | "instagram" | "email"; value: string }

@@ -288,7 +288,7 @@ export function validateOnboardingIntentV2(value: unknown): OnboardingV2Validati
   if (!isRecord(actions) || !Array.isArray(actions["secondary"])) {
     issue(issues, "actions.secondary", "required", "Secondary actions must be an array.");
   } else {
-    if (actions["primary"] !== undefined)
+    if (actions["primary"] !== undefined && actions["primary"] !== null)
       validateAction(actions["primary"], "actions.primary", issues);
     actions["secondary"].forEach((action, index) =>
       validateAction(action, `actions.secondary[${index}]`, issues),

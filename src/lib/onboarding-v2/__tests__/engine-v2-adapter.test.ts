@@ -281,6 +281,106 @@ describe("Onboarding V2 -> Engine V2 adapter", () => {
     expect(result.editorConfig.blocks.length).toBeGreaterThan(0);
   });
 
+  it("accepts exact staging runtime fixture (actions.primary = null)", () => {
+    const intent: OnboardingIntentV2 = {
+      version: "2",
+      identity: {
+        displayName: "daniel falcon",
+        professionOrActivity: "asesor de bienestar",
+        bio: "te asesoro con profesionalismo",
+      },
+      business: { category: "beauty" },
+      outcome: { primaryGoal: "presence" },
+      visualDirection: { preference: "let_cripqer_decide" },
+      contentNeeds: {
+        items: [
+          { type: "links" },
+          { type: "products" },
+          { type: "social_networks" },
+          { type: "services" },
+        ],
+      },
+      actions: { primary: null, secondary: [] },
+      media: { preference: "own_media" },
+      scope: { density: "auto", userSelected: true },
+      meta: {
+        version: "2",
+        completedAt: "2026-09-06T12:00:00.000Z",
+        source: "onboarding_v2",
+      },
+    };
+    const mapped = mapOnboardingIntentV2ToEngineInput(intent);
+    expect(mapped.ok).toBe(true);
+    if (!mapped.ok) return;
+    expect(mapped.engineInput.primaryAction).toBeUndefined();
+    expect(mapped.diagnostics.mappedFields).toContain("actions.primary -> explicit no-CTA");
+  });
+
+  it("generates successfully for staging runtime fixture (null primary)", () => {
+    const intent: OnboardingIntentV2 = {
+      version: "2",
+      identity: {
+        displayName: "daniel falcon",
+        professionOrActivity: "asesor de bienestar",
+        bio: "te asesoro con profesionalismo",
+      },
+      business: { category: "beauty" },
+      outcome: { primaryGoal: "presence" },
+      visualDirection: { preference: "let_cripqer_decide" },
+      contentNeeds: {
+        items: [
+          { type: "links" },
+          { type: "products" },
+          { type: "social_networks" },
+          { type: "services" },
+        ],
+      },
+      actions: { primary: null, secondary: [] },
+      media: { preference: "own_media" },
+      scope: { density: "auto", userSelected: true },
+      meta: {
+        version: "2",
+        completedAt: "2026-09-06T12:00:00.000Z",
+        source: "onboarding_v2",
+      },
+    };
+    const result = generateFromOnboardingIntentV2(intent, {
+      now: "2026-09-06T12:00:00.000Z",
+    });
+    expect(result.status).toBe("GENERATED");
+    if (result.status !== "GENERATED") return;
+    expect(result.engineInput.primaryAction).toBeUndefined();
+    expect(result.editorConfig.blocks.length).toBeGreaterThan(0);
+  });
+
+  it("still rejects booking action without destination", () => {
+    const intent = clone(RICH_SERVICE_FIXTURE);
+    intent.actions.primary = { type: "book", source: "user" };
+    const mapped = mapOnboardingIntentV2ToEngineInput(intent);
+    expect(mapped.ok).toBe(false);
+    if (mapped.ok) return;
+    expect(mapped.code).toBe("INVALID_DESTINATION");
+  });
+
+  it("still rejects malformed destination URL at the validation boundary", () => {
+    const intent = clone(SIMPLE_CONTACT_FIXTURE);
+    intent.actions.primary = { type: "website", source: "user", value: "not-a-url" };
+    const mapped = mapOnboardingIntentV2ToEngineInput(intent);
+    expect(mapped.ok).toBe(false);
+    if (mapped.ok) return;
+    expect(mapped.code).toBe("INVALID_INPUT");
+    expect(mapped.errors.join(" ")).toContain("actions.primary.value");
+  });
+
+  it("still rejects malformed destination that passes schema but fails host validation", () => {
+    const intent = clone(SIMPLE_CONTACT_FIXTURE);
+    intent.actions.primary = { type: "website", source: "user", value: "https://a.b" };
+    const mapped = mapOnboardingIntentV2ToEngineInput(intent);
+    expect(mapped.ok).toBe(false);
+    if (mapped.ok) return;
+    expect(mapped.code).toBe("INVALID_DESTINATION");
+  });
+
   it("still rejects invalid primary action destinations", () => {
     const intent = clone(SIMPLE_CONTACT_FIXTURE);
     intent.actions.primary = { type: "website", source: "user", value: "https://a.b" };

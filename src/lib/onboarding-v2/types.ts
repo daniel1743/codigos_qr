@@ -162,7 +162,7 @@ export interface OnboardingIntentV2 {
     userHasNoContentYet?: boolean;
   };
   actions: {
-    primary?: ActionIntentV2;
+    primary?: ActionIntentV2 | null;
     secondary: ActionIntentV2[];
   };
   media: MediaIntentV2;
