@@ -82,11 +82,13 @@ export type BasicEditorProfileColumnsV1 = Partial<Pick<Profile, BasicEditorOwned
 export const BASIC_EDITOR_TEMPLATE_CONFIG_KEYS = [
   "basic_link_presentations",
   "professional_badge",
+  "onboarding_v2_invite_status",
 ] as const;
 
 export interface BasicEditorTemplateConfigPatchV1 {
   basic_link_presentations?: Record<string, unknown>;
   professional_badge?: boolean;
+  onboarding_v2_invite_status?: "unseen" | "accepted" | "declined";
 }
 
 export interface BasicEditorPatchV1 {
@@ -115,6 +117,13 @@ export function pickBasicEditorTemplateConfigPatch(
   }
   if (isRecord(value["basic_link_presentations"])) {
     patch.basic_link_presentations = cloneJson(value["basic_link_presentations"]);
+  }
+  if (
+    value["onboarding_v2_invite_status"] === "unseen" ||
+    value["onboarding_v2_invite_status"] === "accepted" ||
+    value["onboarding_v2_invite_status"] === "declined"
+  ) {
+    patch.onboarding_v2_invite_status = value["onboarding_v2_invite_status"];
   }
   return patch;
 }

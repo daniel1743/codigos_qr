@@ -180,11 +180,12 @@ function EditorPage() {
   const handleInviteAccept = async () => {
     setIsProcessingInvite(true);
     try {
-      const updatedConfig = {
-        ...(profile.template_config || {}),
-        onboarding_v2_invite_status: "accepted"
-      };
-      await profileService.updateProfile(supabase, profile.id as string, { template_config: updatedConfig });
+      const supabase = getBrowserSupabaseClient();
+      await profileService.patchBasicEditorTemplateConfig(
+        supabase,
+        profile.id as string,
+        { onboarding_v2_invite_status: "accepted" }
+      );
       setShowInviteModal(false);
       navigate({ to: "/onboarding-preview" });
     } catch (e) {
@@ -198,11 +199,12 @@ function EditorPage() {
   const handleInviteDecline = async () => {
     setIsProcessingInvite(true);
     try {
-      const updatedConfig = {
-        ...(profile.template_config || {}),
-        onboarding_v2_invite_status: "declined"
-      };
-      await profileService.updateProfile(supabase, profile.id as string, { template_config: updatedConfig });
+      const supabase = getBrowserSupabaseClient();
+      await profileService.patchBasicEditorTemplateConfig(
+        supabase,
+        profile.id as string,
+        { onboarding_v2_invite_status: "declined" }
+      );
       setShowInviteModal(false);
     } catch (e) {
       console.error(e);
