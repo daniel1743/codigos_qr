@@ -4,6 +4,8 @@ import { BasicTemplateRenderer } from "../basic-template/BasicTemplateRenderer";
 import { getTemplates } from "../../lib/basic-templates/catalog";
 import { buildBasicTemplateContent, buildConfig } from "../../lib/basic-templates/config";
 import { loadGoogleFont } from "../../lib/fonts";
+import { PublicTemplateRenderer } from "../../premium-template-studio/engine/PublicTemplateRenderer";
+import { resolveCanonicalEditorConfig } from "./canonicalRenderBridge";
 
 interface PublicProfileViewProps {
   profile: Partial<Profile>;
@@ -75,6 +77,12 @@ export function PublicProfileView({ profile, links, isPreview = false }: PublicP
     if (profile.bio_font_family) loadGoogleFont(profile.bio_font_family);
   }, [profile.font_family, profile.title_font_family, profile.bio_font_family]);
 
+  const canonicalConfig = resolveCanonicalEditorConfig(profile.template_config);
+
+  if (canonicalConfig) {
+    return <PublicTemplateRenderer config={canonicalConfig} />;
+  }
+
   const selectedTemplate = profile.template_id
     ? getTemplates().find((template) => template.id === profile.template_id)
     : undefined;
@@ -138,11 +146,15 @@ export function PublicProfileView({ profile, links, isPreview = false }: PublicP
   const bioStyle = {
     fontFamily: profile.bio_font_family || profile.font_family || "Inter, sans-serif",
     ...(profile.bio_color ? { color: profile.bio_color } : {}),
-    ...(resolveBioFontSize(profile.bio_size) ? { fontSize: resolveBioFontSize(profile.bio_size) } : {}),
+    ...(resolveBioFontSize(profile.bio_size)
+      ? { fontSize: resolveBioFontSize(profile.bio_size) }
+      : {}),
     ...(resolveFontWeight(profile.bio_weight)
       ? { fontWeight: resolveFontWeight(profile.bio_weight) }
       : {}),
-    ...(resolveTextAlign(profile.bio_align) ? { textAlign: resolveTextAlign(profile.bio_align) } : {}),
+    ...(resolveTextAlign(profile.bio_align)
+      ? { textAlign: resolveTextAlign(profile.bio_align) }
+      : {}),
   };
 
   return (
