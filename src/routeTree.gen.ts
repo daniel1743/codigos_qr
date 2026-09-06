@@ -16,6 +16,7 @@ import { Route as EditorRouteImport } from './routes/editor'
 import { Route as EncryptedDocumentsRouteImport } from './routes/encrypted-documents'
 import { Route as EngineLabRouteImport } from './routes/engine-lab'
 import { Route as OnboardingPreviewRouteImport } from './routes/onboarding-preview'
+import { Route as PowerEditorRouteImport } from './routes/power-editor'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as TemplateLabRouteImport } from './routes/template-lab'
 import { Route as DShortUrlRouteImport } from './routes/d.$shortUrl'
@@ -57,6 +58,11 @@ const OnboardingPreviewRoute = OnboardingPreviewRouteImport.update({
   path: '/onboarding-preview',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PowerEditorRoute = PowerEditorRouteImport.update({
+  id: '/power-editor',
+  path: '/power-editor',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -91,6 +97,7 @@ export interface FileRoutesByFullPath {
   '/encrypted-documents': typeof EncryptedDocumentsRoute
   '/engine-lab': typeof EngineLabRoute
   '/onboarding-preview': typeof OnboardingPreviewRoute
+  '/power-editor': typeof PowerEditorRoute
   '/profile': typeof ProfileRoute
   '/template-lab': typeof TemplateLabRoute
   '/d/$shortUrl': typeof DShortUrlRoute
@@ -105,6 +112,7 @@ export interface FileRoutesByTo {
   '/encrypted-documents': typeof EncryptedDocumentsRoute
   '/engine-lab': typeof EngineLabRoute
   '/onboarding-preview': typeof OnboardingPreviewRoute
+  '/power-editor': typeof PowerEditorRoute
   '/profile': typeof ProfileRoute
   '/template-lab': typeof TemplateLabRoute
   '/d/$shortUrl': typeof DShortUrlRoute
@@ -120,6 +128,7 @@ export interface FileRoutesById {
   '/encrypted-documents': typeof EncryptedDocumentsRoute
   '/engine-lab': typeof EngineLabRoute
   '/onboarding-preview': typeof OnboardingPreviewRoute
+  '/power-editor': typeof PowerEditorRoute
   '/profile': typeof ProfileRoute
   '/template-lab': typeof TemplateLabRoute
   '/d/$shortUrl': typeof DShortUrlRoute
@@ -136,6 +145,7 @@ export interface FileRouteTypes {
     | '/encrypted-documents'
     | '/engine-lab'
     | '/onboarding-preview'
+    | '/power-editor'
     | '/profile'
     | '/template-lab'
     | '/d/$shortUrl'
@@ -150,6 +160,7 @@ export interface FileRouteTypes {
     | '/encrypted-documents'
     | '/engine-lab'
     | '/onboarding-preview'
+    | '/power-editor'
     | '/profile'
     | '/template-lab'
     | '/d/$shortUrl'
@@ -164,6 +175,7 @@ export interface FileRouteTypes {
     | '/encrypted-documents'
     | '/engine-lab'
     | '/onboarding-preview'
+    | '/power-editor'
     | '/profile'
     | '/template-lab'
     | '/d/$shortUrl'
@@ -179,6 +191,7 @@ export interface RootRouteChildren {
   EncryptedDocumentsRoute: typeof EncryptedDocumentsRoute
   EngineLabRoute: typeof EngineLabRoute
   OnboardingPreviewRoute: typeof OnboardingPreviewRoute
+  PowerEditorRoute: typeof PowerEditorRoute
   ProfileRoute: typeof ProfileRoute
   TemplateLabRoute: typeof TemplateLabRoute
   DShortUrlRoute: typeof DShortUrlRoute
@@ -237,6 +250,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OnboardingPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/power-editor': {
+      id: '/power-editor'
+      path: '/power-editor'
+      fullPath: '/power-editor'
+      preLoaderRoute: typeof PowerEditorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profile': {
       id: '/profile'
       path: '/profile'
@@ -283,6 +303,7 @@ const rootRouteChildren: RootRouteChildren = {
   EncryptedDocumentsRoute: EncryptedDocumentsRoute,
   EngineLabRoute: EngineLabRoute,
   OnboardingPreviewRoute: OnboardingPreviewRoute,
+  PowerEditorRoute: PowerEditorRoute,
   ProfileRoute: ProfileRoute,
   TemplateLabRoute: TemplateLabRoute,
   DShortUrlRoute: DShortUrlRoute,

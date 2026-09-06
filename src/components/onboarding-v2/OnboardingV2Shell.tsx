@@ -20,7 +20,7 @@ import type {
   OnboardingIntentV2,
 } from "@/lib/onboarding-v2";
 import {
-  buildBasicEditorHandoffUrl,
+  buildPowerEditorHandoffUrl,
   completeOnboardingV2Handoff,
   type OnboardingV2HandoffPhase,
 } from "@/lib/onboarding-v2/basic-editor-handoff";
@@ -154,7 +154,7 @@ export function OnboardingV2Shell({ debug = false }: { debug?: boolean }) {
         /* Ignore unavailable storage. */
       }
       window.setTimeout(() => {
-        window.location.assign(buildBasicEditorHandoffUrl(result.profileId));
+        window.location.assign(buildPowerEditorHandoffUrl(result.profileId));
       }, 450);
     } catch (error) {
       handoffInFlightRef.current = false;
@@ -1044,9 +1044,9 @@ function CompletionV2({
         )}
         {isSuccess && persistedProfileId && (
           <BrandButton
-            onClick={() => window.location.assign(buildBasicEditorHandoffUrl(persistedProfileId))}
+            onClick={() => window.location.assign(buildPowerEditorHandoffUrl(persistedProfileId))}
           >
-            Abrir Basic Editor
+            Abrir Power Editor
           </BrandButton>
         )}
         {status === "FAILURE" && (

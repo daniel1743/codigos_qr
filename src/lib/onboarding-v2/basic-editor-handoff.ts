@@ -23,6 +23,7 @@ import {
   type OnboardingV2PersistenceSuccess,
 } from "./canonical-persistence";
 import type { OnboardingIntentV2 } from "./types";
+import { buildPowerEditorHandoffUrl } from "@/lib/editor-routing/resolveEditorDestination";
 
 export type OnboardingV2HandoffPhase = "GENERATING" | "PERSISTING";
 
@@ -68,6 +69,8 @@ export interface OnboardingV2BasicLanding {
 export function buildBasicEditorHandoffUrl(profileId: string): string {
   return `/editor?profileId=${encodeURIComponent(profileId)}`;
 }
+
+export { buildPowerEditorHandoffUrl };
 
 function handoffFailure(
   code: OnboardingV2HandoffFailureCode,

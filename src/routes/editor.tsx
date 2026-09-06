@@ -36,6 +36,10 @@ import { getDefaultContent } from "../lib/basic-templates/fixtures";
 import { loadGoogleFont } from "../lib/fonts";
 import { generatePublicId, getInternalSlugFromPublicId } from "../lib/publicId";
 import { getBrowserSupabaseClient } from "../lib/supabase/client";
+import {
+  buildPowerEditorHandoffUrl,
+  resolveEditorDestination,
+} from "../lib/editor-routing/resolveEditorDestination";
 import { isValidUrl, normalizeUrl } from "../lib/validation";
 import { linkService } from "../services/link.service";
 import { profileService } from "../services/profile.service";
@@ -310,13 +314,17 @@ function EditorPage() {
         ? await profileService.getProfileByIdForUser(supabase, requestedProfileId, userId)
         : await profileService.getProfileByUserId(supabase, userId);
       if (currentProfile) {
+        if (resolveEditorDestination(currentProfile.template_config) === "power") {
+          window.location.assign(buildPowerEditorHandoffUrl(currentProfile.id));
+          return;
+        }
         setProfileState("ready");
         setProfile({
           ...DEFAULT_PROFILE,
           ...currentProfile,
           banner_fusion_strength: getSafeFusionStrength(currentProfile.banner_fusion_strength),
         });
-        
+
         if (import.meta.env.VITE_ENABLE_ONBOARDING_V2 === "true" && !requestedProfileId) {
            const status = currentProfile.template_config?.onboarding_v2_invite_status || "unseen";
            if (status === "unseen") {

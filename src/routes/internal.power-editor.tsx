@@ -12,13 +12,14 @@ import { getBrowserSupabaseClient } from "@/lib/supabase/client";
 import { canonicalPageService } from "@/services/canonical-page.service";
 
 const INTERNAL_POWER_EDITOR_ENABLED =
-  (import.meta.env.DEV || import.meta.env.VITE_ENABLE_ONBOARDING_V2 === "true") && import.meta.env.VITE_ENABLE_INTERNAL_POWER_EDITOR !== "false";
+  (import.meta.env.DEV || import.meta.env.VITE_ENABLE_ONBOARDING_V2 === "true") &&
+  import.meta.env.VITE_ENABLE_INTERNAL_POWER_EDITOR !== "false";
 
 export const Route = createFileRoute("/internal/power-editor")({
   beforeLoad: () => {
     if (!INTERNAL_POWER_EDITOR_ENABLED) throw notFound();
   },
-  component: InternalPowerEditorPage,
+  component: PowerEditorHost,
 });
 
 interface OwnedProfile {
@@ -30,12 +31,16 @@ interface OwnedProfile {
   template_config: unknown;
 }
 
-function requestedProfileSlug(): string {
-  if (typeof window === "undefined") return "";
-  return new URLSearchParams(window.location.search).get("profile")?.trim() ?? "";
+function requestedProfile(): { key: "id" | "slug"; value: string } {
+  if (typeof window === "undefined") return { key: "id", value: "" };
+  const params = new URLSearchParams(window.location.search);
+  const profileId = params.get("profileId")?.trim();
+  return profileId
+    ? { key: "id", value: profileId }
+    : { key: "slug", value: params.get("profile")?.trim() ?? "" };
 }
 
-function InternalPowerEditorPage() {
+export function PowerEditorHost() {
   const [supabase, setSupabase] = useState<ReturnType<typeof getBrowserSupabaseClient> | null>(
     null,
   );
@@ -53,9 +58,9 @@ function InternalPowerEditorPage() {
 
     const load = async () => {
       try {
-        const requestedSlug = requestedProfileSlug();
-        if (!requestedSlug) {
-          throw new Error("Falta el identificador explícito del perfil (?profile=slug).");
+        const requested = requestedProfile();
+        if (!requested.value) {
+          throw new Error("Falta el identificador explícito del perfil (?profileId=id).");
         }
 
         const {
@@ -72,7 +77,7 @@ function InternalPowerEditorPage() {
         const { data, error: profileError } = await browserSupabase
           .from("profiles")
           .select("id,user_id,slug,display_name,bio,template_config")
-          .eq("slug", requestedSlug)
+          .eq(requested.key, requested.value)
           .eq("user_id", currentSession.user.id)
           .maybeSingle();
 
@@ -166,7 +171,7 @@ function InternalPowerEditorPage() {
       <main className="flex min-h-screen items-center justify-center bg-background px-6 text-foreground">
         <section className="max-w-lg rounded-2xl border border-border bg-card p-6 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-            Ruta interna de integración
+            Power Editor
           </p>
           <h1 className="mt-2 text-xl font-semibold">Power Editor no disponible</h1>
           <p className="mt-2 text-sm text-muted-foreground">
@@ -191,7 +196,7 @@ function InternalPowerEditorPage() {
       <div className="flex items-center justify-between gap-4 border-b border-border bg-card px-4 py-3">
         <div className="min-w-0">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-            Power Editor V2 · QA interno
+            Power Editor V2
           </p>
           <p data-testid="power-editor-profile" className="mt-1 truncate text-sm font-medium">
             Perfil: {profile.display_name ?? profile.slug} · /{profile.slug}
