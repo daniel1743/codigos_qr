@@ -131,7 +131,7 @@ function mapPrimaryAction(
       if (!value || !isValidWhatsApp(value)) return "INVALID_DESTINATION";
       return { type: "whatsapp", value };
     case "book":
-      if (!value || !isValidHttpUrl(value)) return "NEEDS_INPUT";
+      if (!value || !isValidHttpUrl(value)) return "INVALID_DESTINATION";
       return { type: "booking", value };
     case "website":
       if (!value || !isValidHttpUrl(value)) return "INVALID_DESTINATION";
