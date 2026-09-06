@@ -167,24 +167,26 @@ export function validateIntent(intent: unknown): ValidationIssue[] {
   }
 
   const action = i["primary_action"];
-  if (!action || typeof action !== "object" || Array.isArray(action)) {
-    push("primary_action", "required", "primary_action object is required.");
-  } else {
-    const pa = action as Record<string, unknown>;
-    if (!PRIMARY_ACTION_TYPES.includes(pa["type"] as never)) {
-      push("primary_action.type", "enum", "primary_action.type is not supported.");
-    }
-    if (typeof pa["value"] !== "string" || !pa["value"].trim()) {
-      push("primary_action.value", "required", "primary_action.value is required.");
-    } else if (
-      PRIMARY_ACTION_TYPES.includes(pa["type"] as never) &&
-      !isValidDestination(pa["type"] as never, pa["value"])
-    ) {
-      push(
-        "primary_action.value",
-        "destination_format",
-        destinationIssueMessage(pa["type"] as never),
-      );
+  if (action !== undefined) {
+    if (!action || typeof action !== "object" || Array.isArray(action)) {
+      push("primary_action", "invalid_type", "primary_action must be an object or undefined.");
+    } else {
+      const pa = action as Record<string, unknown>;
+      if (!PRIMARY_ACTION_TYPES.includes(pa["type"] as never)) {
+        push("primary_action.type", "enum", "primary_action.type is not supported.");
+      }
+      if (typeof pa["value"] !== "string" || !pa["value"].trim()) {
+        push("primary_action.value", "required", "primary_action.value is required.");
+      } else if (
+        PRIMARY_ACTION_TYPES.includes(pa["type"] as never) &&
+        !isValidDestination(pa["type"] as never, pa["value"])
+      ) {
+        push(
+          "primary_action.value",
+          "destination_format",
+          destinationIssueMessage(pa["type"] as never),
+        );
+      }
     }
   }
 
@@ -239,10 +241,12 @@ export function normalizeIntent(intent: OnboardingIntentV1): NormalizedIntent {
         isSafeAssetRef(intent.identity.banner_preview as string),
       has_card_media: intent.assets?.card_media === true,
     },
-    primary_action: {
-      type: intent.primary_action.type,
-      value: intent.primary_action.value.trim(),
-    },
+    primary_action: intent.primary_action
+      ? {
+          type: intent.primary_action.type,
+          value: intent.primary_action.value.trim(),
+        }
+      : { type: "website", value: "#" },
     source_version: "1",
   };
 }

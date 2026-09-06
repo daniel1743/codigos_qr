@@ -121,8 +121,9 @@ function mapPrimaryAction(
   result: OnboardingV2AdapterDiagnostics,
 ):
   | { type: "whatsapp" | "booking" | "website" | "instagram" | "email"; value: string }
+  | null
   | OnboardingV2AdapterFailureCode {
-  if (!action) return "NEEDS_INPUT";
+  if (!action) return null;
   const value = action.value?.trim() ?? "";
   if (action.label) pushOnce(result.deferredFields, "actions.primary.label");
   switch (action.type) {
@@ -217,6 +218,12 @@ export function mapOnboardingIntentV2ToEngineInput(
     return { ok: false, code: primaryAction, errors: [message], diagnostics: result };
   }
 
+  if (primaryAction === null) {
+    pushOnce(result.mappedFields, "actions.primary -> explicit no-CTA");
+  } else {
+    pushOnce(result.mappedFields, `actions.primary.type=${primaryAction.type}`);
+  }
+
   const profession = intent.identity.professionOrActivity.trim();
   const isCustomActivity = normalizeBusinessCategory(profession) === "other";
   if (isCustomActivity) {
@@ -295,7 +302,7 @@ export function mapOnboardingIntentV2ToEngineInput(
       ...(intent.identity.bio?.trim() ? { bio: intent.identity.bio.trim() } : {}),
       ...(secondaryLinks.length ? { links: secondaryLinks } : {}),
     },
-    primaryAction,
+    ...(primaryAction ? { primaryAction } : {}),
     ...(avatarUrl || bannerUrl
       ? { userMedia: { ...(avatarUrl ? { avatarUrl } : {}), ...(bannerUrl ? { bannerUrl } : {}) } }
       : {}),

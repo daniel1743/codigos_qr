@@ -59,7 +59,7 @@ export interface OnboardingIntentV1 {
   primary_goal: PrimaryGoal;
   visual_personality: VisualPersonality;
   identity: OnboardingIdentity;
-  primary_action: OnboardingPrimaryAction;
+  primary_action?: OnboardingPrimaryAction;
   meta: {
     version: "1";
     completed_at: string;

@@ -101,13 +101,11 @@ function contentFor(input: EngineV2HostGenerationInput): ContentSourceV2 {
 function actionFor(
   input: EngineV2HostGenerationInput,
   content: ContentSourceV2,
-): { type: PrimaryActionType; value: string } {
+): { type: PrimaryActionType; value: string } | null {
   if (input.primaryAction) return input.primaryAction;
   const firstLink = content.links?.[0];
   if (firstLink) return { type: "website", value: firstLink.url };
-  throw new Error(
-    "Engine V2 requires primaryAction or at least one valid content link; no destination was invented.",
-  );
+  return null;
 }
 
 function toEngineIntent(
@@ -138,7 +136,7 @@ function toEngineIntent(
       ...(input.userMedia?.bannerUrl ? { banner_preview: input.userMedia.bannerUrl.trim() } : {}),
     },
     ...(hasCardMedia ? { assets: { card_media: true } } : {}),
-    primary_action: action,
+    ...(action ? { primary_action: action } : {}),
     meta: { version: "1", completed_at: now },
   };
 }

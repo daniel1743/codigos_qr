@@ -149,11 +149,15 @@ describe("Onboarding V2 -> Engine V2 adapter", () => {
     expect(mapped.errors.join(" ")).toContain("Engine V2");
   });
 
-  it("requires an explicit primary CTA when the current host has no destination fallback", () => {
+  it("accepts explicit no-CTA (formerly required primary CTA)", () => {
     const intent = clone(SIMPLE_CONTACT_FIXTURE);
+    intent.outcome.primaryGoal = "presence";
     intent.actions = { secondary: intent.actions.secondary };
-    const result = generateFromOnboardingIntentV2(intent, { now: "2026-09-04T12:00:00.000Z" });
-    expect(result.status).toBe("NEEDS_INPUT");
+    const mapped = mapOnboardingIntentV2ToEngineInput(intent);
+    expect(mapped.ok).toBe(true);
+    if (!mapped.ok) return;
+    expect(mapped.engineInput.primaryAction).toBeUndefined();
+    expect(mapped.diagnostics.mappedFields).toContain("actions.primary -> explicit no-CTA");
   });
 
   it("rejects a malformed required destination before Engine V2 is called", () => {
@@ -223,5 +227,66 @@ describe("Onboarding V2 -> Engine V2 adapter", () => {
     expect(result.canonicalEnvelopePreview.schemaVersion).toBe(1);
     expect(result.editorConfig.blocks.length).toBeGreaterThan(0);
     expect(result.engineInput.goal).toBe("booking");
+  });
+
+  it("accepts explicit no-CTA for presence-oriented pages", () => {
+    const intent = clone(SIMPLE_CONTACT_FIXTURE);
+    intent.outcome.primaryGoal = "presence";
+    intent.actions = { secondary: [] };
+    const mapped = mapOnboardingIntentV2ToEngineInput(intent);
+    expect(mapped.ok).toBe(true);
+    if (!mapped.ok) return;
+    expect(mapped.engineInput.primaryAction).toBeUndefined();
+    expect(mapped.diagnostics.mappedFields).toContain("actions.primary -> explicit no-CTA");
+  });
+
+  it("generates successfully for presence + explicit no-CTA + rich content", () => {
+    const intent: OnboardingIntentV2 = {
+      version: "2",
+      identity: {
+        displayName: "Daniel falcon G E",
+        professionOrActivity: "bienstar persona",
+        bio: "bienestar",
+      },
+      business: { category: "beauty" },
+      outcome: { primaryGoal: "presence" },
+      visualDirection: { preference: "premium" },
+      contentNeeds: {
+        items: [
+          { type: "team" },
+          { type: "products" },
+          { type: "links" },
+          { type: "social_networks" },
+        ],
+      },
+      actions: { secondary: [] },
+      media: { preference: "find_media" },
+      scope: { density: "complete", userSelected: true },
+      meta: {
+        version: "2",
+        completedAt: "2026-09-06T12:00:00.000Z",
+        source: "onboarding_v2",
+        locale: "es-CL",
+      },
+    };
+    const result = generateFromOnboardingIntentV2(intent, {
+      now: "2026-09-06T12:00:00.000Z",
+    });
+    if (result.status !== "GENERATED") {
+      console.error("Generation failed:", result.errors);
+    }
+    expect(result.status).toBe("GENERATED");
+    if (result.status !== "GENERATED") return;
+    expect(result.engineInput.primaryAction).toBeUndefined();
+    expect(result.editorConfig.blocks.length).toBeGreaterThan(0);
+  });
+
+  it("still rejects invalid primary action destinations", () => {
+    const intent = clone(SIMPLE_CONTACT_FIXTURE);
+    intent.actions.primary = { type: "website", source: "user", value: "https://a.b" };
+    const mapped = mapOnboardingIntentV2ToEngineInput(intent);
+    expect(mapped.ok).toBe(false);
+    if (mapped.ok) return;
+    expect(mapped.code).toBe("INVALID_DESTINATION");
   });
 });
