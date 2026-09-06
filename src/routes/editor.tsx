@@ -41,6 +41,7 @@ import { linkService } from "../services/link.service";
 import { profileService } from "../services/profile.service";
 import { EDIT_TARGETS, linkEditTarget, type EditTargetRegistry } from "../types/basic-templates";
 import type { Profile, ProfileLink } from "../types/database";
+import { ExistingUserOnboardingInviteModal } from "../components/ExistingUserOnboardingInviteModal";
 
 export const Route = createFileRoute("/editor")({
   component: EditorPage,
@@ -167,12 +168,50 @@ function EditorPage() {
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [selectedTarget, setSelectedTarget] = useState<string | null>(null);
   const [templateSearchQuery, setTemplateSearchQuery] = useState("");
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [isProcessingInvite, setIsProcessingInvite] = useState(false);
 
   const loadedProfileKey = useRef<string | null>(null);
   const canvasViewportRef = useRef<HTMLDivElement>(null);
   const targetsRef = useRef(new Map<string, HTMLElement>());
   const activeSectionRef = useRef<BasicEditorSectionId>(activeSection);
   activeSectionRef.current = activeSection;
+
+  const handleInviteAccept = async () => {
+    setIsProcessingInvite(true);
+    try {
+      const updatedConfig = {
+        ...(profile.template_config || {}),
+        onboarding_v2_invite_status: "accepted"
+      };
+      await profileService.updateProfile(supabase, profile.id as string, { template_config: updatedConfig });
+      setShowInviteModal(false);
+      navigate({ to: "/onboarding-preview" });
+    } catch (e) {
+      console.error(e);
+      toast.error("Error al actualizar la invitación.");
+    } finally {
+      setIsProcessingInvite(false);
+    }
+  };
+
+  const handleInviteDecline = async () => {
+    setIsProcessingInvite(true);
+    try {
+      const updatedConfig = {
+        ...(profile.template_config || {}),
+        onboarding_v2_invite_status: "declined"
+      };
+      await profileService.updateProfile(supabase, profile.id as string, { template_config: updatedConfig });
+      setShowInviteModal(false);
+    } catch (e) {
+      console.error(e);
+      toast.error("Error al actualizar la invitación.");
+      setShowInviteModal(false);
+    } finally {
+      setIsProcessingInvite(false);
+    }
+  };
 
   const handleTargetSelect = useCallback((targetId: string) => {
     setSelectedTarget(targetId);
@@ -275,6 +314,14 @@ function EditorPage() {
           ...currentProfile,
           banner_fusion_strength: getSafeFusionStrength(currentProfile.banner_fusion_strength),
         });
+        
+        if (import.meta.env.VITE_ENABLE_ONBOARDING_V2 === "true" && !requestedProfileId) {
+           const status = currentProfile.template_config?.onboarding_v2_invite_status || "unseen";
+           if (status === "unseen") {
+             setShowInviteModal(true);
+           }
+        }
+
         if (currentProfile.published && currentProfile.public_id) {
           setSavedPublicId(currentProfile.public_id);
           setIsPublished(true);
@@ -566,6 +613,12 @@ function EditorPage() {
 
   return (
     <>
+      <ExistingUserOnboardingInviteModal
+        open={showInviteModal}
+        onAccept={handleInviteAccept}
+        onDecline={handleInviteDecline}
+        isProcessing={isProcessingInvite}
+      />
       <BasicEditorShell
         account={
           session
