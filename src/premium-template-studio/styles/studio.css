@@ -170,13 +170,67 @@
   border-radius: 999px;
 }
 
+/* ---- Phase 1 workspace surfaces ---- */
+.pts-desktop-panel {
+  min-width: 0;
+  flex: 0 0 auto;
+}
+.pts-desktop-panel--collapsed {
+  width: 44px;
+}
+.pts-panel-rail {
+  display: flex;
+  height: 100%;
+  width: 44px;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 0.75rem;
+}
+.pts-panel-rail--right {
+  margin-left: auto;
+}
+.pts-canvas-workspace {
+  overscroll-behavior: contain;
+}
+
+.pts-power-viewport {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklab, currentColor 25%, transparent) transparent;
+}
+.pts-power-camera-layer {
+  will-change: transform;
+}
+
+@media (max-width: 1023px) {
+  .pts-power-camera-stage {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 100%;
+  }
+  .pts-power-camera-layer {
+    position: relative !important;
+    inset: auto !important;
+    width: 100% !important;
+    transform: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pts-desktop-panel,
+  .pts-canvas-workspace {
+    scroll-behavior: auto;
+  }
+}
+
 /* ---- Hover interaction presets ---- */
 .pts-hover-lift {
-  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s ease;
+  transition:
+    transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.2s ease;
 }
 .pts-hover-lift:hover {
   transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
 }
 
 .pts-hover-scale {
@@ -218,7 +272,7 @@
 
 /* ---- Sticky / floating transition polish ---- */
 .pts-sticky-active {
-  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
   transition: box-shadow 0.3s ease;
 }
 

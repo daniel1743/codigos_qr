@@ -36,16 +36,14 @@ import { getDefaultContent } from "../lib/basic-templates/fixtures";
 import { loadGoogleFont } from "../lib/fonts";
 import { generatePublicId, getInternalSlugFromPublicId } from "../lib/publicId";
 import { getBrowserSupabaseClient } from "../lib/supabase/client";
-import {
-  buildPowerEditorHandoffUrl,
-  resolveEditorDestination,
-} from "../lib/editor-routing/resolveEditorDestination";
+import { resolveEditorDestination } from "../lib/editor-routing/resolveEditorDestination";
 import { isValidUrl, normalizeUrl } from "../lib/validation";
 import { linkService } from "../services/link.service";
 import { profileService } from "../services/profile.service";
 import { EDIT_TARGETS, linkEditTarget, type EditTargetRegistry } from "../types/basic-templates";
 import type { Profile, ProfileLink } from "../types/database";
 import { ExistingUserOnboardingInviteModal } from "../components/ExistingUserOnboardingInviteModal";
+import { PowerEditorHost } from "../components/power-editor/PowerEditorHost";
 
 export const Route = createFileRoute("/editor")({
   component: EditorPage,
@@ -174,6 +172,7 @@ function EditorPage() {
   const [templateSearchQuery, setTemplateSearchQuery] = useState("");
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [isProcessingInvite, setIsProcessingInvite] = useState(false);
+  const [canonicalProfileId, setCanonicalProfileId] = useState<string | null>(null);
 
   const loadedProfileKey = useRef<string | null>(null);
   const canvasViewportRef = useRef<HTMLDivElement>(null);
@@ -185,13 +184,13 @@ function EditorPage() {
     setIsProcessingInvite(true);
     try {
       const supabase = getBrowserSupabaseClient();
-      await profileService.patchBasicEditorTemplateConfig(
-        supabase,
-        profile.id as string,
-        { onboarding_v2_invite_status: "accepted" }
-      );
+      await profileService.patchBasicEditorTemplateConfig(supabase, profile.id as string, {
+        onboarding_v2_invite_status: "accepted",
+      });
       setShowInviteModal(false);
-      navigate({ to: "/onboarding-preview" });
+      window.location.assign(
+        `/onboarding-preview?profileId=${encodeURIComponent(profile.id as string)}`,
+      );
     } catch (e) {
       console.error(e);
       toast.error("Error al actualizar la invitación.");
@@ -204,11 +203,9 @@ function EditorPage() {
     setIsProcessingInvite(true);
     try {
       const supabase = getBrowserSupabaseClient();
-      await profileService.patchBasicEditorTemplateConfig(
-        supabase,
-        profile.id as string,
-        { onboarding_v2_invite_status: "declined" }
-      );
+      await profileService.patchBasicEditorTemplateConfig(supabase, profile.id as string, {
+        onboarding_v2_invite_status: "declined",
+      });
       setShowInviteModal(false);
     } catch (e) {
       console.error(e);
@@ -315,7 +312,7 @@ function EditorPage() {
         : await profileService.getProfileByUserId(supabase, userId);
       if (currentProfile) {
         if (resolveEditorDestination(currentProfile.template_config) === "power") {
-          window.location.assign(buildPowerEditorHandoffUrl(currentProfile.id));
+          setCanonicalProfileId(currentProfile.id);
           return;
         }
         setProfileState("ready");
@@ -325,11 +322,15 @@ function EditorPage() {
           banner_fusion_strength: getSafeFusionStrength(currentProfile.banner_fusion_strength),
         });
 
-        if (import.meta.env.VITE_ENABLE_ONBOARDING_V2 === "true" && !requestedProfileId) {
-           const status = currentProfile.template_config?.onboarding_v2_invite_status || "unseen";
-           if (status === "unseen") {
-             setShowInviteModal(true);
-           }
+        const status = currentProfile.template_config?.onboarding_v2_invite_status || "unseen";
+        if (status === "accepted") {
+          window.location.assign(
+            `/onboarding-preview?profileId=${encodeURIComponent(currentProfile.id)}`,
+          );
+          return;
+        }
+        if (status === "unseen") {
+          setShowInviteModal(true);
         }
 
         if (currentProfile.published && currentProfile.public_id) {
@@ -339,13 +340,8 @@ function EditorPage() {
         const currentLinks = await linkService.getProfileLinks(supabase, currentProfile.id);
         setLinks(currentLinks);
       } else {
-        if (import.meta.env.VITE_ENABLE_ONBOARDING_V2 === "true") {
-          navigate({ to: "/onboarding-preview", replace: true });
-          return;
-        }
-        setProfileState("missing");
-        setProfile(DEFAULT_PROFILE);
-        setLinks([]);
+        window.location.assign("/onboarding-preview");
+        return;
       }
     } catch (error) {
       console.error(error);
@@ -475,6 +471,7 @@ function EditorPage() {
 
   if (loading) return <div className="flex justify-center p-12">Cargando...</div>;
   if (!session) return <Auth showPlatformMenu />;
+  if (canonicalProfileId) return <PowerEditorHost profileId={canonicalProfileId} />;
 
   const publicId = profile.public_id || savedPublicId || "";
   const isValid = validate();

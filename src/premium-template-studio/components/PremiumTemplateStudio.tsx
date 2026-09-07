@@ -14,6 +14,10 @@ import {
   X,
   SlidersHorizontal,
   Plus,
+  PanelLeftClose,
+  PanelLeftOpen,
+  PanelRightClose,
+  PanelRightOpen,
 } from "lucide-react";
 import type { BioTemplateConfig, Breakpoint } from "../types";
 import { StudioProvider, useStudio } from "../state/StudioProvider";
@@ -25,6 +29,7 @@ import { Inspector, InspectorContent } from "./inspector/Inspector";
 import { cx } from "../utils";
 import { createDemoConfig } from "../templates/definitions";
 import { parseTemplateJson } from "../engine/TemplateValidator";
+import { PowerCanvasViewport } from "./workspace/PowerCanvasViewport";
 import "../styles/studio.css";
 
 function Toolbar({ onExport }: { onExport: () => void }) {
@@ -145,14 +150,13 @@ function Canvas() {
   const frameWidth = BREAKPOINT_WIDTHS[breakpoint];
 
   return (
-    <div
-      className="min-h-0 flex-1 overflow-y-auto bg-muted/50 p-4 sm:p-8"
-      onClick={() => dispatch({ type: "selectBlock", id: null })}
+    <PowerCanvasViewport
+      contentWidth={frameWidth}
+      onBackgroundClick={() => dispatch({ type: "selectBlock", id: null })}
     >
       <div
         className="mx-auto overflow-hidden rounded-2xl bg-background shadow-xl ring-1 ring-border transition-[max-width] duration-300"
         style={{ maxWidth: frameWidth }}
-        onClick={(event) => event.stopPropagation()}
       >
         <TemplateRenderer
           config={state.config}
@@ -189,7 +193,7 @@ function Canvas() {
           }
         />
       </div>
-    </div>
+    </PowerCanvasViewport>
   );
 }
 
@@ -351,6 +355,8 @@ function MobileDock() {
 
 function StudioShell() {
   const [exporting, setExporting] = useState(false);
+  const [toolsCollapsed, setToolsCollapsed] = useState(false);
+  const [inspectorCollapsed, setInspectorCollapsed] = useState(false);
   const { error } = useStudio();
 
   return (
@@ -365,12 +371,76 @@ function StudioShell() {
         </div>
       )}
       <div className="flex min-h-0 flex-1">
-        <div className="hidden lg:block">
-          <Sidebar />
+        <div
+          className={cx(
+            "pts-desktop-panel pts-desktop-panel--tools hidden lg:block",
+            toolsCollapsed ? "pts-desktop-panel--collapsed" : "",
+          )}
+        >
+          {toolsCollapsed ? (
+            <div className="pts-panel-rail border-r border-border bg-card">
+              <button
+                type="button"
+                title="Open tools"
+                aria-label="Open tools"
+                aria-expanded={false}
+                onClick={() => setToolsCollapsed(false)}
+                className="rounded-lg p-2 text-muted-foreground transition hover:bg-accent hover:text-foreground"
+              >
+                <PanelLeftOpen className="h-4 w-4" />
+              </button>
+            </div>
+          ) : (
+            <div className="relative h-full">
+              <Sidebar />
+              <button
+                type="button"
+                title="Collapse tools"
+                aria-label="Collapse tools"
+                aria-expanded={true}
+                onClick={() => setToolsCollapsed(true)}
+                className="absolute right-2 top-2 z-10 rounded-lg border border-border bg-card p-1.5 text-muted-foreground shadow-sm transition hover:bg-accent hover:text-foreground"
+              >
+                <PanelLeftClose className="h-4 w-4" />
+              </button>
+            </div>
+          )}
         </div>
         <Canvas />
-        <div className="hidden lg:block">
-          <Inspector />
+        <div
+          className={cx(
+            "pts-desktop-panel pts-desktop-panel--inspector hidden lg:block",
+            inspectorCollapsed ? "pts-desktop-panel--collapsed" : "",
+          )}
+        >
+          {inspectorCollapsed ? (
+            <div className="pts-panel-rail pts-panel-rail--right border-l border-border bg-card">
+              <button
+                type="button"
+                title="Open inspector"
+                aria-label="Open inspector"
+                aria-expanded={false}
+                onClick={() => setInspectorCollapsed(false)}
+                className="rounded-lg p-2 text-muted-foreground transition hover:bg-accent hover:text-foreground"
+              >
+                <PanelRightOpen className="h-4 w-4" />
+              </button>
+            </div>
+          ) : (
+            <div className="relative h-full">
+              <Inspector />
+              <button
+                type="button"
+                title="Collapse inspector"
+                aria-label="Collapse inspector"
+                aria-expanded={true}
+                onClick={() => setInspectorCollapsed(true)}
+                className="absolute left-2 top-2 z-10 rounded-lg border border-border bg-card p-1.5 text-muted-foreground shadow-sm transition hover:bg-accent hover:text-foreground"
+              >
+                <PanelRightClose className="h-4 w-4" />
+              </button>
+            </div>
+          )}
         </div>
       </div>
       <MobileDock />

@@ -20,7 +20,7 @@ import type {
   OnboardingIntentV2,
 } from "@/lib/onboarding-v2";
 import {
-  buildPowerEditorHandoffUrl,
+  buildBasicEditorHandoffUrl,
   completeOnboardingV2Handoff,
   type OnboardingV2HandoffPhase,
 } from "@/lib/onboarding-v2/basic-editor-handoff";
@@ -52,6 +52,10 @@ const OPTIONAL_DESTINATION_TYPES = new Set<ActionTypeV2>(
 type CompletionStatus = "IDLE" | "GENERATING" | "PERSISTING" | "SUCCESS" | "FAILURE";
 
 export function OnboardingV2Shell({ debug = false }: { debug?: boolean }) {
+  const migrationProfileId =
+    typeof window === "undefined"
+      ? null
+      : new URLSearchParams(window.location.search).get("profileId")?.trim() || null;
   const [step, setStep] = useState(1);
   const [draft, setDraft] = useState<OnboardingV2Draft>(createEmptyOnboardingV2Draft);
   const [hydrated, setHydrated] = useState(false);
@@ -134,6 +138,7 @@ export function OnboardingV2Shell({ debug = false }: { debug?: boolean }) {
       const result = await completeOnboardingV2Handoff({
         supabase: getBrowserSupabaseClient(),
         intent: built.intent,
+        profileId: migrationProfileId,
         onPhase: (phase: OnboardingV2HandoffPhase) => {
           setCompletionStatus(phase);
         },
@@ -154,7 +159,7 @@ export function OnboardingV2Shell({ debug = false }: { debug?: boolean }) {
         /* Ignore unavailable storage. */
       }
       window.setTimeout(() => {
-        window.location.assign(buildPowerEditorHandoffUrl(result.profileId));
+        window.location.assign(buildBasicEditorHandoffUrl(result.profileId));
       }, 450);
     } catch (error) {
       handoffInFlightRef.current = false;
@@ -986,7 +991,7 @@ function CompletionV2({
       : status === "PERSISTING"
         ? "Estamos guardando tu página en tu perfil seguro."
         : status === "SUCCESS"
-          ? "Tu página quedó guardada. Ahora puedes editarla en Basic Editor."
+          ? "Tu página quedó guardada. Ahora puedes editarla en Power Editor."
           : "Revisa tus respuestas e inténtalo nuevamente.";
 
   return (
@@ -1044,7 +1049,7 @@ function CompletionV2({
         )}
         {isSuccess && persistedProfileId && (
           <BrandButton
-            onClick={() => window.location.assign(buildPowerEditorHandoffUrl(persistedProfileId))}
+            onClick={() => window.location.assign(buildBasicEditorHandoffUrl(persistedProfileId))}
           >
             Abrir Power Editor
           </BrandButton>

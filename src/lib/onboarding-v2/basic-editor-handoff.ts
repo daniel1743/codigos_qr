@@ -23,12 +23,12 @@ import {
   type OnboardingV2PersistenceSuccess,
 } from "./canonical-persistence";
 import type { OnboardingIntentV2 } from "./types";
-import { buildPowerEditorHandoffUrl } from "@/lib/editor-routing/resolveEditorDestination";
 
 export type OnboardingV2HandoffPhase = "GENERATING" | "PERSISTING";
 
 export type OnboardingV2HandoffFailureCode =
   | "AUTH_REQUIRED"
+  | "PROFILE_CREATION_FAILED"
   | "PROFILE_NOT_FOUND"
   | "PROFILE_LOOKUP_FAILED"
   | "GENERATION_FAILED"
@@ -37,6 +37,7 @@ export type OnboardingV2HandoffFailureCode =
 export interface CompleteOnboardingV2HandoffInput {
   supabase: SupabaseClient;
   intent: OnboardingIntentV2;
+  profileId?: string | null;
   now?: string;
   onPhase?: (phase: OnboardingV2HandoffPhase) => void;
   generate?: (intent: OnboardingIntentV2, now?: string) => Promise<OnboardingV2GenerationResult>;
@@ -69,8 +70,6 @@ export interface OnboardingV2BasicLanding {
 export function buildBasicEditorHandoffUrl(profileId: string): string {
   return `/editor?profileId=${encodeURIComponent(profileId)}`;
 }
-
-export { buildPowerEditorHandoffUrl };
 
 function handoffFailure(
   code: OnboardingV2HandoffFailureCode,
@@ -214,6 +213,7 @@ async function landBasicValues(
 export async function completeOnboardingV2Handoff({
   supabase,
   intent,
+  profileId,
   now,
   onPhase,
   generate = async (nextIntent, nextNow) =>
@@ -247,7 +247,9 @@ export async function completeOnboardingV2Handoff({
 
   let profile;
   try {
-    profile = await profileService.getProfileByUserId(supabase, userId);
+    profile = profileId?.trim()
+      ? await profileService.getProfileByIdForUser(supabase, profileId.trim(), userId)
+      : await profileService.getProfileByUserId(supabase, userId);
   } catch (error) {
     return handoffFailure(
       "PROFILE_LOOKUP_FAILED",

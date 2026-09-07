@@ -123,6 +123,24 @@ export async function getBillingCustomer(
   return (data as BillingCustomerRecord | null) ?? null;
 }
 
+export async function getBillingCustomerByProviderCustomerId(
+  provider: BillingProvider,
+  providerCustomerId: string,
+  client?: BillingPersistenceClient,
+): Promise<BillingCustomerRecord | null> {
+  const { data, error } = await (
+    await resolveClient(client)
+  )
+    .from("billing_customers")
+    .select("*")
+    .eq("provider", provider)
+    .eq("provider_customer_id", requireTrustedId(providerCustomerId, "providerCustomerId"))
+    .maybeSingle();
+
+  throwIfError(error);
+  return (data as BillingCustomerRecord | null) ?? null;
+}
+
 export async function upsertBillingCustomer(
   input: BillingCustomerInput,
   client?: BillingPersistenceClient,
@@ -167,6 +185,24 @@ export async function getBillingCheckoutForUser(
     .select("*")
     .eq("id", requireTrustedId(checkoutId, "checkoutId"))
     .eq("user_id", requireTrustedId(userId, "userId"))
+    .maybeSingle();
+
+  throwIfError(error);
+  return (data as BillingCheckoutRecord | null) ?? null;
+}
+
+export async function getBillingCheckoutByProviderCheckoutId(
+  provider: BillingProvider,
+  providerCheckoutId: string,
+  client?: BillingPersistenceClient,
+): Promise<BillingCheckoutRecord | null> {
+  const { data, error } = await (
+    await resolveClient(client)
+  )
+    .from("billing_checkouts")
+    .select("*")
+    .eq("provider", provider)
+    .eq("provider_checkout_id", requireTrustedId(providerCheckoutId, "providerCheckoutId"))
     .maybeSingle();
 
   throwIfError(error);

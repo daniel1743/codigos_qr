@@ -14,10 +14,16 @@ const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
 function fakeSupabase({
   profile = true,
   rpcError,
+  profileCreationError,
 }: {
   profile?: boolean;
   rpcError?: Error;
-} = {}): { client: SupabaseClient; getRpcCalls: () => number } {
+  profileCreationError?: Error;
+} = {}): {
+  client: SupabaseClient;
+  getProfileCreateCalls: () => number;
+  getRpcCalls: () => number;
+} {
   const generated = generateFromOnboardingIntentV2(SIMPLE_CONTACT_FIXTURE, {
     now: "2026-09-04T12:00:00.000Z",
   });
@@ -30,11 +36,14 @@ function fakeSupabase({
   let profileRow = {
     id: "qa-profile",
     user_id: "qa-user",
+    public_id: "stable-public-id",
     display_name: "Antes",
     profession: "Antes",
     bio: "Bio anterior",
   };
   let links: Array<Record<string, unknown>> = [];
+  let profileExists = profile;
+  let profileCreateCalls = 0;
   let rpcCalls = 0;
 
   const client = {
@@ -57,9 +66,31 @@ function fakeSupabase({
           profileRow = { ...profileRow, ...updates };
           return chain;
         },
-        insert: (link: Record<string, unknown>) => {
+        insert: (value: Record<string, unknown>) => {
+          if (table === "profiles") {
+            profileCreateCalls += 1;
+            if (profileCreationError) {
+              return {
+                select: () => ({
+                  single: async () => ({ data: null, error: profileCreationError }),
+                }),
+              };
+            }
+            profileRow = {
+              ...profileRow,
+              ...value,
+              id: "created-profile",
+              user_id: "qa-user",
+            };
+            profileExists = true;
+            return {
+              select: () => ({
+                single: async () => ({ data: profileRow, error: null }),
+              }),
+            };
+          }
           const created = {
-            ...link,
+            ...value,
             id: `link-${links.length + 1}`,
             sort_order: links.length,
           };
@@ -73,7 +104,7 @@ function fakeSupabase({
         single: async () => ({ data: profileRow, error: null }),
         maybeSingle: async () => {
           if (filters.has("user_id")) {
-            return { data: profile ? profileRow : null, error: null };
+            return { data: profileExists ? profileRow : null, error: null };
           }
           return { data: { template_config: templateConfig }, error: null };
         },
@@ -88,7 +119,11 @@ function fakeSupabase({
     },
   } as unknown as SupabaseClient;
 
-  return { client, getRpcCalls: () => rpcCalls };
+  return {
+    client,
+    getProfileCreateCalls: () => profileCreateCalls,
+    getRpcCalls: () => rpcCalls,
+  };
 }
 
 function testGenerator(intent: OnboardingIntentV2, now?: string) {
@@ -103,6 +138,7 @@ describe("Onboarding V2 Basic Editor handoff", () => {
     const result = await completeOnboardingV2Handoff({
       supabase: fake.client,
       intent: SIMPLE_CONTACT_FIXTURE,
+      profileId: "qa-profile",
       now: "2026-09-04T12:00:00.000Z",
       generate: testGenerator,
       onPhase: (phase) => phases.push(phase),
@@ -112,6 +148,7 @@ describe("Onboarding V2 Basic Editor handoff", () => {
     if (result.status !== "SUCCESS") return;
     expect(result.profileId).toBe("qa-profile");
     expect(result.persistence.profileId).toBe("qa-profile");
+    expect(result.basic.profile.public_id).toBe("stable-public-id");
     expect(result.basic.profile.display_name).toBe(SIMPLE_CONTACT_FIXTURE.identity.displayName);
     expect(result.basic.profile.profession).toBe(
       SIMPLE_CONTACT_FIXTURE.identity.professionOrActivity,
@@ -123,10 +160,11 @@ describe("Onboarding V2 Basic Editor handoff", () => {
     ]);
     expect(result.basic.skippedActionIndexes).toEqual([]);
     expect(phases).toEqual(["GENERATING", "PERSISTING"]);
+    expect(fake.getProfileCreateCalls()).toBe(0);
     expect(fake.getRpcCalls()).toBe(1);
   });
 
-  it("does not create or persist when the authenticated user has no profile", async () => {
+  it("creates the required owned profile for a new user before canonical persistence", async () => {
     const fake = fakeSupabase({ profile: false });
     const result = await completeOnboardingV2Handoff({
       supabase: fake.client,
@@ -134,7 +172,27 @@ describe("Onboarding V2 Basic Editor handoff", () => {
       generate: testGenerator,
     });
 
-    expect(result).toMatchObject({ status: "FAILED", code: "PROFILE_NOT_FOUND" });
+    expect(result.status).toBe("SUCCESS");
+    if (result.status !== "SUCCESS") return;
+    expect(result.profileId).toBe("created-profile");
+    expect(result.persistence.profileId).toBe("created-profile");
+    expect(fake.getProfileCreateCalls()).toBe(1);
+    expect(fake.getRpcCalls()).toBe(1);
+  });
+
+  it("returns a profile creation failure without canonical persistence", async () => {
+    const fake = fakeSupabase({
+      profile: false,
+      profileCreationError: new Error("Profile creation unavailable"),
+    });
+    const result = await completeOnboardingV2Handoff({
+      supabase: fake.client,
+      intent: SIMPLE_CONTACT_FIXTURE,
+      generate: testGenerator,
+    });
+
+    expect(result).toMatchObject({ status: "FAILED", code: "PROFILE_CREATION_FAILED" });
+    expect(fake.getProfileCreateCalls()).toBe(1);
     expect(fake.getRpcCalls()).toBe(0);
   });
 
