@@ -37,4 +37,16 @@ export type {
   AuthAdapter,
 } from "./adapters";
 
+// Product entitlement enforcement surface (host injects `tier`; UI reads locks).
+export type { ProductTier, ProductCapability } from "../lib/product-entitlements/capabilities";
+export {
+  useTier,
+  useCapabilityAccess,
+  useAssetEntitlement,
+  useAssetLocked,
+  useCanMutate,
+  ProBadge,
+  Locked,
+} from "./entitlements";
+
 export * from "./types";

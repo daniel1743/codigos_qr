@@ -201,20 +201,6 @@
   will-change: transform;
 }
 
-@media (max-width: 1023px) {
-  .pts-power-camera-stage {
-    width: 100% !important;
-    height: auto !important;
-    min-height: 100%;
-  }
-  .pts-power-camera-layer {
-    position: relative !important;
-    inset: auto !important;
-    width: 100% !important;
-    transform: none !important;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .pts-desktop-panel,
   .pts-canvas-workspace {

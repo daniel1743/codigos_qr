@@ -20,6 +20,7 @@ import {
   PanelRightOpen,
 } from "lucide-react";
 import type { BioTemplateConfig, Breakpoint } from "../types";
+import type { ProductTier } from "../../lib/product-entitlements/capabilities";
 import { StudioProvider, useStudio } from "../state/StudioProvider";
 import type { StudioAdapters } from "../adapters";
 import { TemplateRenderer } from "../engine/TemplateRenderer";
@@ -457,6 +458,8 @@ export interface PremiumTemplateStudioProps {
   onChange?: ((config: BioTemplateConfig) => void) | undefined;
   onSave?: ((config: BioTemplateConfig) => void) | undefined;
   onPublish?: ((config: BioTemplateConfig) => void) | undefined;
+  /** Effective product tier from the host boundary. Missing/invalid → "free". */
+  tier?: ProductTier | undefined;
 }
 
 /** Editor entry point. Mount anywhere in the host platform. */
@@ -467,6 +470,7 @@ export function PremiumTemplateStudio({
   onChange,
   onSave,
   onPublish,
+  tier,
 }: PremiumTemplateStudioProps) {
   const initialConfig = useMemo(() => config ?? createDemoConfig(), [config]);
 
@@ -478,6 +482,7 @@ export function PremiumTemplateStudio({
       onChange={onChange}
       onSave={onSave}
       onPublish={onPublish}
+      tier={tier}
     >
       <StudioShell />
     </StudioProvider>

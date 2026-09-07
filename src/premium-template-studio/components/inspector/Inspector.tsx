@@ -1,4 +1,4 @@
-import { Monitor, Smartphone, Tablet, Trash2, Copy } from "lucide-react";
+import { Monitor, Smartphone, Tablet, Trash2, Copy, Lock } from "lucide-react";
 import { useStudio } from "../../state/StudioProvider";
 import { getBlockDefinition } from "../../constants/blockDefinitions";
 import {
@@ -23,6 +23,7 @@ import type {
 import type { StudioAdapters } from "../../adapters";
 import { ENTRANCE_OPTIONS, HOVER_OPTIONS } from "../../constants/motionPresets";
 import { useRef, useState } from "react";
+import { isCapabilityLocked, isAssetLocked, ProBadge, Locked } from "../../entitlements";
 
 /**
  * ASSET ADAPTER UI — minimal upload / replace / remove, always through
@@ -2498,7 +2499,9 @@ function BottomNavBlockInspector({ block }: { block: TemplateBlock }) {
 }
 
 function BlockInspector({ block }: { block: TemplateBlock }) {
-  const { state, dispatch, breakpoint } = useStudio();
+  const { state, dispatch, breakpoint, tier } = useStudio();
+  const motionLocked = isCapabilityLocked(tier, "advanced_motion");
+  const duplicateLocked = isAssetLocked("block", block.type, tier);
   if (block.type === "hero") {
     return <HeroBlockInspector block={block} />;
   }
@@ -2548,11 +2551,19 @@ function BlockInspector({ block }: { block: TemplateBlock }) {
           <div className="flex items-center gap-1">
             <button
               type="button"
-              title="Duplicate"
-              onClick={() => dispatch({ type: "duplicateBlock", id: block.id })}
-              className="rounded p-1 text-muted-foreground hover:text-foreground"
+              title={duplicateLocked ? "Duplicate — Disponible en Pro" : "Duplicate"}
+              aria-disabled={duplicateLocked}
+              onClick={() => {
+                if (duplicateLocked) return;
+                dispatch({ type: "duplicateBlock", id: block.id });
+              }}
+              className="rounded p-1 text-muted-foreground hover:text-foreground disabled:opacity-40"
             >
-              <Copy className="h-3.5 w-3.5" />
+              {duplicateLocked ? (
+                <Lock className="h-3.5 w-3.5" />
+              ) : (
+                <Copy className="h-3.5 w-3.5" />
+              )}
             </button>
             <button
               type="button"
@@ -2973,7 +2984,8 @@ function BlockInspector({ block }: { block: TemplateBlock }) {
       <PositioningInspectorSection block={block} />
 
       {/* ---- Local Motion Overrides ---- */}
-      <Section title="Motion">
+      <Locked locked={motionLocked}>
+      <Section title="Motion" action={motionLocked ? <ProBadge /> : undefined}>
         <Toggle
           label="Use global motion"
           checked={block.motion?.useGlobal !== false}
@@ -3009,6 +3021,7 @@ function BlockInspector({ block }: { block: TemplateBlock }) {
           </>
         )}
       </Section>
+      </Locked>
 
       <Section title="Visibility">
         <div className="grid grid-cols-3 gap-2">

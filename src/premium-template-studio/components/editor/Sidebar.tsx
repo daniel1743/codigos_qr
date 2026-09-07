@@ -25,6 +25,7 @@ import {
 } from "../ui/controls";
 import { cx, formatSlug } from "../../utils";
 import type { BlockType, MotionPresetId, EntrancePreset, HoverPreset } from "../../types";
+import { useCapabilityAccess, isAssetLocked, ProBadge, Locked } from "../../entitlements";
 
 function Icon({ name, className }: { name: string; className?: string }) {
   const Cmp = (Icons as unknown as Record<string, Icons.LucideIcon>)[name] ?? Icons.Square;
@@ -32,7 +33,7 @@ function Icon({ name, className }: { name: string; className?: string }) {
 }
 
 function BlocksPanel() {
-  const { state, dispatch } = useStudio();
+  const { state, dispatch, tier } = useStudio();
   const [query, setQuery] = useState("");
   const [viewMode, setViewMode] = useState<"presets" | "blocks">("presets");
   const groups = ["Content", "Actions", "Media", "Structure"];
@@ -83,26 +84,40 @@ function BlocksPanel() {
                   {cat}
                 </p>
                 <div className="grid grid-cols-1 gap-2">
-                  {items.map((preset) => (
-                    <button
-                      key={preset.id}
-                      type="button"
-                      onClick={() =>
-                        dispatch({ type: "insertBlocks", blocks: preset.createBlocks() })
-                      }
-                      className="group flex flex-col gap-1 rounded-xl border border-border bg-background p-3 text-left transition hover:border-foreground/30 hover:bg-accent relative overflow-hidden"
-                    >
-                      {preset.badge && (
-                        <span className="absolute top-0 right-0 bg-primary text-primary-foreground text-[8px] font-bold px-1.5 py-0.5 rounded-bl-lg uppercase tracking-wider">
-                          {preset.badge}
+                  {items.map((preset) => {
+                    const locked = isAssetLocked("section", preset.id, tier);
+                    return (
+                      <button
+                        key={preset.id}
+                        type="button"
+                        disabled={locked}
+                        aria-disabled={locked}
+                        onClick={() => {
+                          if (locked) return;
+                          dispatch({ type: "insertBlocks", blocks: preset.createBlocks() });
+                        }}
+                        className={cx(
+                          "group relative flex flex-col gap-1 overflow-hidden rounded-xl border border-border bg-background p-3 text-left transition",
+                          locked
+                            ? "cursor-not-allowed opacity-60"
+                            : "hover:border-foreground/30 hover:bg-accent",
+                        )}
+                      >
+                        {preset.badge && (
+                          <span className="absolute top-0 right-0 bg-primary text-primary-foreground text-[8px] font-bold px-1.5 py-0.5 rounded-bl-lg uppercase tracking-wider">
+                            {preset.badge}
+                          </span>
+                        )}
+                        <span className="flex items-center justify-between gap-2 text-sm font-medium text-foreground">
+                          {preset.name}
+                          {locked && <ProBadge />}
                         </span>
-                      )}
-                      <span className="text-sm font-medium text-foreground">{preset.name}</span>
-                      <span className="text-[10px] text-muted-foreground">
-                        {preset.previewType} layout
-                      </span>
-                    </button>
-                  ))}
+                        <span className="text-[10px] text-muted-foreground">
+                          {preset.previewType} layout
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             );
@@ -118,21 +133,35 @@ function BlocksPanel() {
                   {group}
                 </p>
                 <div className="grid grid-cols-2 gap-2">
-                  {items.map((definition) => (
-                    <button
-                      key={definition.type}
-                      type="button"
-                      onClick={() =>
-                        dispatch({ type: "addBlock", blockType: definition.type as BlockType })
-                      }
-                      className="group flex items-center gap-2 rounded-xl border border-border bg-background p-2.5 text-left transition hover:border-foreground/30 hover:bg-accent"
-                    >
-                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground">
-                        <Icon name={definition.icon} className="h-3.5 w-3.5" />
-                      </span>
-                      <span className="text-xs font-medium text-foreground">{definition.name}</span>
-                    </button>
-                  ))}
+                  {items.map((definition) => {
+                    const locked = isAssetLocked("block", definition.type, tier);
+                    return (
+                      <button
+                        key={definition.type}
+                        type="button"
+                        disabled={locked}
+                        aria-disabled={locked}
+                        onClick={() => {
+                          if (locked) return;
+                          dispatch({ type: "addBlock", blockType: definition.type as BlockType });
+                        }}
+                        className={cx(
+                          "group flex items-center gap-2 rounded-xl border border-border bg-background p-2.5 text-left transition",
+                          locked
+                            ? "cursor-not-allowed opacity-60"
+                            : "hover:border-foreground/30 hover:bg-accent",
+                        )}
+                      >
+                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground">
+                          <Icon name={definition.icon} className="h-3.5 w-3.5" />
+                        </span>
+                        <span className="flex min-w-0 flex-1 items-center justify-between gap-1 text-xs font-medium text-foreground">
+                          {definition.name}
+                          {locked && <ProBadge />}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             );
@@ -203,9 +232,14 @@ function BlocksPanel() {
 }
 
 function DesignPanel() {
-  const { state, dispatch } = useStudio();
+  const { state, dispatch, tier } = useStudio();
   const { theme, layout } = state.config;
   const motionConfig = getMotionConfig(state.config);
+  const typographyLocked = useCapabilityAccess("advanced_typography").state !== "ALLOW";
+  const cardsButtonsLocked =
+    useCapabilityAccess("advanced_card_button_styling").state !== "ALLOW";
+  const textureLocked = useCapabilityAccess("premium_background_effects").state !== "ALLOW";
+  const motionLocked = useCapabilityAccess("advanced_motion").state !== "ALLOW";
 
   return (
     <div>
@@ -286,7 +320,8 @@ function DesignPanel() {
         </Field>
       </Section>
 
-      <Section title="Typography">
+      <Locked locked={typographyLocked}>
+      <Section title="Typography" action={typographyLocked ? <ProBadge /> : undefined}>
         <div className="grid grid-cols-2 gap-2">
           {TYPOGRAPHY_PRESETS.map((preset) => (
             <button
@@ -362,27 +397,41 @@ function DesignPanel() {
           />
         </Field>
       </Section>
+      </Locked>
 
       <Section title="Structure">
         <div className="grid grid-cols-2 gap-2">
-          {LAYOUTS.map((preset) => (
-            <button
-              key={preset.id}
-              type="button"
-              onClick={() => dispatch({ type: "patch", path: "layout", value: preset })}
-              className={cx(
-                "rounded-lg border p-2 text-left text-xs transition",
-                layout.id === preset.id
-                  ? "border-foreground/50 bg-accent"
-                  : "border-border hover:bg-accent/60",
-              )}
-            >
-              <span className="block font-medium text-foreground">{preset.name}</span>
-              <span className="text-[10px] text-muted-foreground">
-                {preset.header} header · {preset.responsive.desktop.columns} col
-              </span>
-            </button>
-          ))}
+          {LAYOUTS.map((preset) => {
+            const layoutLocked = isAssetLocked("layout", preset.id, tier);
+            return (
+              <button
+                key={preset.id}
+                type="button"
+                disabled={layoutLocked}
+                aria-disabled={layoutLocked}
+                onClick={() => {
+                  if (layoutLocked) return;
+                  dispatch({ type: "patch", path: "layout", value: preset });
+                }}
+                className={cx(
+                  "rounded-lg border p-2 text-left text-xs transition",
+                  layoutLocked
+                    ? "cursor-not-allowed opacity-60"
+                    : layout.id === preset.id
+                      ? "border-foreground/50 bg-accent"
+                      : "border-border hover:bg-accent/60",
+                )}
+              >
+                <span className="flex items-center justify-between gap-1 font-medium text-foreground">
+                  {preset.name}
+                  {layoutLocked && <ProBadge />}
+                </span>
+                <span className="text-[10px] text-muted-foreground">
+                  {preset.header} header · {preset.responsive.desktop.columns} col
+                </span>
+              </button>
+            );
+          })}
         </div>
         <Field label="Max width">
           <NumberSlider
@@ -416,7 +465,8 @@ function DesignPanel() {
         </Field>
       </Section>
 
-      <Section title="Cards & buttons">
+      <Locked locked={cardsButtonsLocked}>
+      <Section title="Cards & buttons" action={cardsButtonsLocked ? <ProBadge /> : undefined}>
         <Field label="Card preset">
           <Segmented
             size="sm"
@@ -530,8 +580,10 @@ function DesignPanel() {
           />
         </Field>
       </Section>
+      </Locked>
 
-      <Section title="Texture">
+      <Locked locked={textureLocked}>
+      <Section title="Texture" action={textureLocked ? <ProBadge /> : undefined}>
         <Field label="Preset">
           <select
             className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground"
@@ -581,6 +633,7 @@ function DesignPanel() {
           />
         </Field>
       </Section>
+      </Locked>
 
       <Section title="Banner">
         <Toggle
@@ -682,7 +735,8 @@ function DesignPanel() {
       </Section>
 
       {/* ---- Motion ---- */}
-      <Section title="Motion">
+      <Locked locked={motionLocked}>
+      <Section title="Motion" action={motionLocked ? <ProBadge /> : undefined}>
         <Field label="Preset">
           <Segmented
             value={motionConfig.preset}
@@ -749,12 +803,13 @@ function DesignPanel() {
           />
         </Field>
       </Section>
+      </Locked>
     </div>
   );
 }
 
 function TemplatesPanel() {
-  const { state, dispatch } = useStudio();
+  const { state, dispatch, tier } = useStudio();
   const [keepContent, setKeepContent] = useState(true);
 
   return (
@@ -764,27 +819,39 @@ function TemplatesPanel() {
         <div className="grid gap-2">
           {TEMPLATE_DEFINITIONS.map((definition) => {
             const active = state.config.templateDefinitionId === definition.id;
+            const locked = isAssetLocked("template", definition.id, tier);
             return (
               <button
                 key={definition.id}
                 type="button"
-                onClick={() =>
+                disabled={locked}
+                aria-disabled={locked}
+                onClick={() => {
+                  if (locked) return;
                   dispatch({
                     type: "replaceConfig",
                     config: applyTemplateDefinition(state.config, definition.id, keepContent),
-                  })
-                }
+                  });
+                }}
                 className={cx(
                   "rounded-xl border p-3 text-left transition",
-                  active ? "border-foreground/50 bg-accent" : "border-border hover:bg-accent/60",
+                  locked
+                    ? "cursor-not-allowed opacity-60"
+                    : active
+                      ? "border-foreground/50 bg-accent"
+                      : "border-border hover:bg-accent/60",
                 )}
               >
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-foreground">{definition.name}</span>
-                  {definition.premium && (
-                    <span className="rounded-full bg-foreground px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-background">
-                      Premium
-                    </span>
+                  {locked ? (
+                    <ProBadge />
+                  ) : (
+                    definition.premium && (
+                      <span className="rounded-full bg-foreground px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-background">
+                        Premium
+                      </span>
+                    )
                   )}
                 </div>
                 <div className="mt-1 flex items-center justify-between text-[11px] text-muted-foreground">
@@ -803,6 +870,7 @@ function TemplatesPanel() {
 function SettingsPanel() {
   const { state, dispatch } = useStudio();
   const { seo, settings } = state.config;
+  const brandingLocked = useCapabilityAccess("remove_cripqer_branding").state !== "ALLOW";
 
   return (
     <div>
@@ -815,11 +883,16 @@ function SettingsPanel() {
             }
           />
         </Field>
-        <Toggle
-          label="Show branding"
-          checked={settings.showBranding}
-          onChange={(v) => dispatch({ type: "patch", path: "settings.showBranding", value: v })}
-        />
+        <Locked locked={brandingLocked}>
+          <div className="flex items-center justify-between gap-3">
+            <Toggle
+              label="Show branding"
+              checked={settings.showBranding}
+              onChange={(v) => dispatch({ type: "patch", path: "settings.showBranding", value: v })}
+            />
+            {brandingLocked && <ProBadge />}
+          </div>
+        </Locked>
         <Toggle
           label="Index in search engines"
           checked={seo.index}

@@ -184,13 +184,9 @@ function EditorPage() {
     setIsProcessingInvite(true);
     try {
       const supabase = getBrowserSupabaseClient();
-      await profileService.patchBasicEditorTemplateConfig(supabase, profile.id as string, {
-        onboarding_v2_invite_status: "accepted",
-      });
+      await profileService.patchBasicEditorTemplateConfig(supabase, profile.id as string, { onboarding_v2_invite_status: "accepted" });
       setShowInviteModal(false);
-      window.location.assign(
-        `/onboarding-preview?profileId=${encodeURIComponent(profile.id as string)}`,
-      );
+      navigate({ to: "/onboarding-preview" });
     } catch (e) {
       console.error(e);
       toast.error("Error al actualizar la invitación.");
@@ -203,9 +199,7 @@ function EditorPage() {
     setIsProcessingInvite(true);
     try {
       const supabase = getBrowserSupabaseClient();
-      await profileService.patchBasicEditorTemplateConfig(supabase, profile.id as string, {
-        onboarding_v2_invite_status: "declined",
-      });
+      await profileService.patchBasicEditorTemplateConfig(supabase, profile.id as string, { onboarding_v2_invite_status: "declined" });
       setShowInviteModal(false);
     } catch (e) {
       console.error(e);

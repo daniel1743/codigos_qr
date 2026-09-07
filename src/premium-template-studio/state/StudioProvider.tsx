@@ -15,12 +15,21 @@ import type { StudioAction, StudioState } from "./templateReducer";
 import { resolveAdapters } from "../adapters";
 import { validateTemplate } from "../engine/TemplateValidator";
 import type { StudioAdapters } from "../adapters";
+import type { ProductTier } from "../../lib/product-entitlements/capabilities";
+import { isProductTier } from "../../lib/product-entitlements/capabilities";
+import {
+  authorizeCanonicalMutation,
+  verifyMutationPreservation,
+} from "../../lib/product-entitlements/mutation-guard";
+import { mutationIntentForAction } from "../entitlements";
 
 export type StudioPanel = "blocks" | "design" | "templates" | "settings";
 
 interface StudioContextValue {
   state: StudioState;
   dispatch: React.Dispatch<StudioAction>;
+  /** Effective product tier (fail-closed "free" when missing/invalid). */
+  tier: ProductTier;
   adapters: StudioAdapters;
   breakpoint: Breakpoint;
   setBreakpoint: (b: Breakpoint) => void;
@@ -50,6 +59,8 @@ export interface StudioProviderProps {
   onChange?: ((config: BioTemplateConfig) => void) | undefined;
   onSave?: ((config: BioTemplateConfig) => void | Promise<void>) | undefined;
   onPublish?: ((config: BioTemplateConfig) => void | Promise<void>) | undefined;
+  /** Effective product tier from the host boundary. Missing/invalid → "free". */
+  tier?: ProductTier | undefined;
   children: ReactNode;
 }
 
@@ -60,10 +71,47 @@ export function StudioProvider({
   onChange,
   onSave,
   onPublish,
+  tier,
   children,
 }: StudioProviderProps) {
   const adapters = useMemo(() => resolveAdapters(adapterOverrides), [adapterOverrides]);
-  const [state, dispatch] = useReducer(templateReducer, initialConfig, createInitialState);
+  const [state, rawDispatch] = useReducer(templateReducer, initialConfig, createInitialState);
+
+  // Fail closed: a missing/invalid tier is treated no more permissively than Free.
+  const effectiveTier: ProductTier = useMemo(
+    () => (isProductTier(tier) ? tier : "free"),
+    [tier],
+  );
+
+  // GUARDED DISPATCH — the single shared mutation boundary.
+  //
+  //   construct intent → authorize → (DENY: no-op)
+  //                            → (ALLOW: compute candidate → verify preservation
+  //                              → invalid: reject | valid: apply)
+  //
+  // Full-replacement actions (replaceConfig) and non-mutations (select/undo/redo/
+  // markSaved) carry no intent and pass through untouched.
+  const dispatch = useCallback(
+    (action: StudioAction) => {
+      const intent = mutationIntentForAction(state, action);
+      if (!intent) {
+        rawDispatch(action);
+        return;
+      }
+      const authorization = authorizeCanonicalMutation(effectiveTier, intent);
+      if (authorization.decision === "DENY") return;
+      const candidate = templateReducer(state, action);
+      const preservation = verifyMutationPreservation(
+        state.config,
+        candidate.config,
+        effectiveTier,
+        intent,
+      );
+      if (!preservation.valid) return;
+      rawDispatch(action);
+    },
+    [state, effectiveTier, rawDispatch],
+  );
   const [breakpoint, setBreakpoint] = useState<Breakpoint>("desktop");
   const [panel, setPanel] = useState<StudioPanel>("blocks");
   const [previewing, setPreviewing] = useState(false);
@@ -178,6 +226,7 @@ export function StudioProvider({
     () => ({
       state,
       dispatch,
+      tier: effectiveTier,
       adapters,
       breakpoint,
       setBreakpoint,
@@ -190,7 +239,19 @@ export function StudioProvider({
       save,
       publish,
     }),
-    [state, adapters, breakpoint, panel, previewing, saveState, error, save, publish],
+    [
+      state,
+      dispatch,
+      effectiveTier,
+      adapters,
+      breakpoint,
+      panel,
+      previewing,
+      saveState,
+      error,
+      save,
+      publish,
+    ],
   );
 
   return <StudioContext.Provider value={value}>{children}</StudioContext.Provider>;

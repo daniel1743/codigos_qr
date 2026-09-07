@@ -53,16 +53,15 @@ const INITIAL_SIZE: MeasuredSize = {
 
 function measure(viewport: HTMLDivElement | null, content: HTMLDivElement | null): MeasuredSize {
   if (!viewport || !content) return INITIAL_SIZE;
-  const contentRect = content.getBoundingClientRect();
   return {
     viewportWidth: viewport.clientWidth,
     viewportHeight: viewport.clientHeight,
-    contentWidth: Math.max(content.scrollWidth, content.offsetWidth, Math.ceil(contentRect.width)),
-    contentHeight: Math.max(
-      content.scrollHeight,
-      content.offsetHeight,
-      Math.ceil(contentRect.height),
-    ),
+    // scrollWidth/scrollHeight and offsetWidth/offsetHeight are layout-space
+    // measurements. getBoundingClientRect() is intentionally excluded because
+    // it includes the camera transform and would feed scaled geometry back as
+    // intrinsic content, creating a resize/scale feedback loop.
+    contentWidth: Math.max(content.scrollWidth, content.offsetWidth),
+    contentHeight: Math.max(content.scrollHeight, content.offsetHeight),
   };
 }
 

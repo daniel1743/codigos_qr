@@ -1,0 +1,142 @@
+src/components/admin/AnalyticsGlobalPanel.tsx(73,36): error TS7006: Parameter 'e' implicitly has an 'any' type.
+src/components/admin/AnalyticsGlobalPanel.tsx(74,37): error TS7006: Parameter 'e' implicitly has an 'any' type.
+src/components/admin/AnalyticsGlobalPanel.tsx(75,50): error TS7006: Parameter 'e' implicitly has an 'any' type.
+src/components/admin/AnalyticsGlobalPanel.tsx(84,23): error TS7006: Parameter 'e' implicitly has an 'any' type.
+src/components/admin/AnalyticsGlobalPanel.tsx(93,23): error TS7006: Parameter 'e' implicitly has an 'any' type.
+src/components/admin/AnalyticsGlobalPanel.tsx(101,23): error TS7006: Parameter 'e' implicitly has an 'any' type.
+src/components/admin/LogosPanel.tsx(175,7): error TS2532: Object is possibly 'undefined'.
+src/components/admin/PremiumPanel.tsx(69,42): error TS7006: Parameter 'u' implicitly has an 'any' type.
+src/components/admin/UsersPanel.tsx(79,49): error TS7006: Parameter 'p' implicitly has an 'any' type.
+src/components/admin/UsersPanel.tsx(90,52): error TS7006: Parameter 'p' implicitly has an 'any' type.
+src/components/admin/UsersPanel.tsx(98,48): error TS7006: Parameter 'a' implicitly has an 'any' type.
+src/components/basic-template/primitives/Identity.tsx(152,11): error TS2322: Type '{ textAlign?: string; fontWeight?: number; fontSize?: string; color: string; fontFamily: string; }' is not assignable to type 'Properties<string | number, string & {}>'.
+  Types of property 'textAlign' are incompatible.
+    Type 'string' is not assignable to type 'TextAlign | undefined'.
+src/components/basic-template/primitives/Identity.tsx(173,15): error TS2322: Type '{ textAlign?: string; color: string; fontFamily: string; }' is not assignable to type 'Properties<string | number, string & {}>'.
+  Types of property 'textAlign' are incompatible.
+    Type 'string' is not assignable to type 'TextAlign | undefined'.
+src/components/basic-template/primitives/Identity.tsx(202,13): error TS2322: Type '{ textAlign?: string; fontWeight?: number; fontSize?: string; color: string; fontFamily: string; }' is not assignable to type 'Properties<string | number, string & {}>'.
+  Types of property 'textAlign' are incompatible.
+    Type 'string' is not assignable to type 'TextAlign | undefined'.
+src/components/basic-template/renderers/CorporateRenderer.tsx(61,12): error TS2375: Type '{ src: string; name: string; size: number; ringEnabled: boolean | undefined; ringColor: string | undefined; ringThickness: string | undefined; shape: string | undefined; }' is not assignable to type 'AvatarProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'ringEnabled' are incompatible.
+    Type 'boolean | undefined' is not assignable to type 'boolean'.
+      Type 'undefined' is not assignable to type 'boolean'.
+src/components/basic-template/renderers/CorporateRenderer.tsx(74,10): error TS2375: Type '{ name: string; subtitle: string; professionalBadge: boolean | undefined; bio: string; palette: PaletteConfig; headingFont: string; bodyFont: string; titleColor: string | undefined; ... 11 more ...; highlightedTarget: string | ... 1 more ... | undefined; }' is not assignable to type 'ProfileHeadingProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'professionalBadge' are incompatible.
+    Type 'boolean | undefined' is not assignable to type 'boolean'.
+      Type 'undefined' is not assignable to type 'boolean'.
+src/components/basic-template/renderers/HeroCardsRenderer.tsx(66,12): error TS2375: Type '{ src: string; name: string; size: number; ringEnabled: boolean | undefined; ringColor: string | undefined; ringThickness: string | undefined; shape: string | undefined; }' is not assignable to type 'AvatarProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'ringEnabled' are incompatible.
+    Type 'boolean | undefined' is not assignable to type 'boolean'.
+      Type 'undefined' is not assignable to type 'boolean'.
+src/components/basic-template/renderers/HeroCardsRenderer.tsx(79,10): error TS2375: Type '{ name: string; subtitle: string; professionalBadge: boolean | undefined; bio: string; palette: PaletteConfig; headingFont: string; bodyFont: string; titleColor: string | undefined; ... 11 more ...; highlightedTarget: string | ... 1 more ... | undefined; }' is not assignable to type 'ProfileHeadingProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'professionalBadge' are incompatible.
+    Type 'boolean | undefined' is not assignable to type 'boolean'.
+      Type 'undefined' is not assignable to type 'boolean'.
+src/components/basic-template/renderers/HeroProfileRenderer.tsx(67,12): error TS2375: Type '{ src: string; name: string; size: number; ringEnabled: boolean | undefined; ringColor: string | undefined; ringThickness: string | undefined; shape: string | undefined; }' is not assignable to type 'AvatarProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'ringEnabled' are incompatible.
+    Type 'boolean | undefined' is not assignable to type 'boolean'.
+      Type 'undefined' is not assignable to type 'boolean'.
+src/components/basic-template/renderers/HeroProfileRenderer.tsx(80,10): error TS2375: Type '{ name: string; subtitle: string; professionalBadge: boolean | undefined; bio: string; palette: PaletteConfig; headingFont: string; bodyFont: string; titleColor: string | undefined; ... 11 more ...; highlightedTarget: string | ... 1 more ... | undefined; }' is not assignable to type 'ProfileHeadingProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'professionalBadge' are incompatible.
+    Type 'boolean | undefined' is not assignable to type 'boolean'.
+      Type 'undefined' is not assignable to type 'boolean'.
+src/components/basic-template/renderers/StandaloneRenderer.tsx(204,11): error TS2322: Type '{ id: string; icon: "document" | "location" | "calendar" | "gallery" | undefined; title: string; description: string; url: string; }[]' is not assignable to type 'Template03Card[]'.
+  Type '{ id: string; icon: "document" | "location" | "calendar" | "gallery" | undefined; title: string; description: string; url: string; }' is not assignable to type 'Template03Card'.
+    Types of property 'icon' are incompatible.
+      Type '"document" | "location" | "calendar" | "gallery" | undefined' is not assignable to type 'Template03IconType'.
+        Type 'undefined' is not assignable to type 'Template03IconType'.
+src/components/basic-template/renderers/standaloneStyle.ts(207,5): error TS2375: Type '{ fontFamily: string | undefined; color: string | undefined; size: string | undefined; weight: number | undefined; align: "center" | "left" | "right" | undefined; }' is not assignable to type '{ fontFamily?: string; color?: string; size?: string; weight?: number; align?: "center" | "left" | "right"; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'fontFamily' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/components/basic-template/renderers/standaloneStyle.ts(208,5): error TS2375: Type '{ fontFamily: string | undefined; color: string | undefined; size: string | undefined; weight: number | undefined; align: "center" | "left" | "right" | undefined; }' is not assignable to type '{ fontFamily?: string; color?: string; size?: string; weight?: number; align?: "center" | "left" | "right"; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'fontFamily' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/components/basic-template/renderers/standaloneStyle.ts(209,5): error TS2375: Type '{ background: string | undefined; textColor: string | undefined; radius: string | undefined; borderWidth: string | undefined; borderColor: string | undefined; spacing: string | undefined; textSize: string | undefined; textWeight: number | undefined; contentAlign: "center" | ... 2 more ... | undefined; iconPosition: ...' is not assignable to type '{ background?: string; textColor?: string; radius?: string; borderWidth?: string; borderColor?: string; spacing?: string; textSize?: string; textWeight?: number; contentAlign?: "center" | "left" | "right"; iconPosition?: "left" | "right"; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'background' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/components/basic-template/renderers/standaloneStyle.ts(210,5): error TS2375: Type '{ enabled: boolean; color: string | undefined; thickness: string | undefined; }' is not assignable to type '{ enabled: boolean; color?: string; thickness?: string; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'color' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/components/basic-template/renderers/standaloneStyle.ts(211,5): error TS2375: Type '{ shape: string; radius: string; display: "none" | undefined; }' is not assignable to type '{ shape: string; radius: string; display?: "none"; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'display' are incompatible.
+    Type '"none" | undefined' is not assignable to type '"none"'.
+      Type 'undefined' is not assignable to type '"none"'.
+src/components/editor/AppearanceSection.tsx(161,16): error TS2375: Type '{ profile: Partial<Profile>; onChange: (updates: Partial<Profile>) => void; links: Partial<ProfileLink>[]; onManageLinkImages: (() => void) | undefined; }' is not assignable to type 'SocialCoversSectionProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'onManageLinkImages' are incompatible.
+    Type '(() => void) | undefined' is not assignable to type '() => void'.
+      Type 'undefined' is not assignable to type '() => void'.
+src/components/editor/LinksSection.tsx(88,39): error TS2345: Argument of type 'Partial<ProfileLink> | undefined' is not assignable to parameter of type 'Partial<ProfileLink>'.
+  Type 'undefined' is not assignable to type 'Partial<ProfileLink>'.
+src/components/editor/LinksSection.tsx(116,20): error TS18048: 'link' is possibly 'undefined'.
+src/components/editor/LinksSection.tsx(121,8): error TS18048: 'link' is possibly 'undefined'.
+src/components/editor/LinksSection.tsx(122,9): error TS18048: 'link' is possibly 'undefined'.
+src/components/editor/LinksSection.tsx(123,9): error TS18048: 'link' is possibly 'undefined'.
+src/components/editor/LinksSection.tsx(124,9): error TS18048: 'link' is possibly 'undefined'.
+src/components/editor/LinksSection.tsx(141,20): error TS2532: Object is possibly 'undefined'.
+src/components/editor/LinksSection.tsx(146,20): error TS2532: Object is possibly 'undefined'.
+src/components/editor/LinksSection.tsx(205,6): error TS2322: Type 'Partial<ProfileLink> | undefined' is not assignable to type 'Partial<ProfileLink>'.
+  Type 'undefined' is not assignable to type 'Partial<ProfileLink>'.
+src/components/editor/LinksSection.tsx(205,24): error TS2322: Type 'Partial<ProfileLink> | undefined' is not assignable to type 'Partial<ProfileLink>'.
+  Type 'undefined' is not assignable to type 'Partial<ProfileLink>'.
+src/components/editor/PremiumMaxProPicker.tsx(71,13): error TS2353: Object literal may only specify known properties, and 'ringColor' does not exist in type 'Properties<string | number, string & {}>'.
+src/components/power-editor/PowerEditorHost.tsx(100,49): error TS7006: Parameter '_event' implicitly has an 'any' type.
+src/components/power-editor/PowerEditorHost.tsx(100,57): error TS7006: Parameter 'nextSession' implicitly has an 'any' type.
+src/components/power-editor/PowerEditorHost.tsx(134,48): error TS4111: Property 'full_name' comes from an index signature, so it must be accessed with ['full_name'].
+src/components/power-editor/PowerEditorHost.tsx(135,44): error TS4111: Property 'full_name' comes from an index signature, so it must be accessed with ['full_name'].
+src/components/power-editor/PowerEditorHost.tsx(181,46): error TS2322: Type '{ storage: { load: () => Promise<BioTemplateConfig>; save: (nextConfig: BioTemplateConfig) => Promise<void>; publish?(config: BioTemplateConfig): Promise<{ url?: string; }>; }; auth: { ...; }; assets: AssetAdapter; analytics: AnalyticsAdapter; }' is not assignable to type 'Partial<StudioAdapters>'.
+  The types of 'auth.getUser().name' are incompatible between these types.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/components/profile/PublicProfileView.tsx(219,13): error TS2322: Type '{ textAlign?: string | undefined; fontWeight?: number | undefined; fontSize?: string | undefined; color?: string; fontFamily: string; }' is not assignable to type 'Properties<string | number, string & {}>'.
+  Types of property 'textAlign' are incompatible.
+    Type 'string | undefined' is not assignable to type 'TextAlign | undefined'.
+      Type 'string' is not assignable to type 'TextAlign | undefined'.
+src/components/profile/PublicProfileView.tsx(227,15): error TS2322: Type '{ textAlign?: string | undefined; fontWeight?: number | undefined; fontSize?: string | undefined; color?: string; fontFamily: string; }' is not assignable to type 'Properties<string | number, string & {}>'.
+  Types of property 'textAlign' are incompatible.
+    Type 'string | undefined' is not assignable to type 'TextAlign | undefined'.
+      Type 'string' is not assignable to type 'TextAlign | undefined'.
+src/lib/basic-editor-persistence/selfcheck.ts(53,26): error TS4111: Property 'schemaVersion' comes from an index signature, so it must be accessed with ['schemaVersion'].
+src/lib/basic-editor-persistence/selfcheck.ts(54,26): error TS4111: Property 'editorConfig' comes from an index signature, so it must be accessed with ['editorConfig'].
+src/lib/basic-editor-persistence/selfcheck.ts(55,17): error TS4111: Property 'professional_badge' comes from an index signature, so it must be accessed with ['professional_badge'].
+src/lib/basic-templates/config.ts(482,5): error TS2375: Type '{ avatarUrl: string; name: string; subtitle: string; bio: string; heroUrl: string; footerEnabled: boolean; footerText: string; professionalBadge: boolean; ringEnabled: boolean; ringColor: string; ... 11 more ...; bioAlign: string | undefined; }' is not assignable to type 'ProfileContent' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'titleColor' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/lib/env.ts(27,3): error TS2559: Type 'ImportMetaEnv' has no properties in common with type '{ readonly VITE_ENABLE_ONBOARDING_V2?: unknown; }'.
+src/lib/onboarding-v2/__tests__/canonical-persistence.live.test.ts(13,37): error TS4111: Property 'RUN_ONBOARDING_V2_LIVE_QA' comes from an index signature, so it must be accessed with ['RUN_ONBOARDING_V2_LIVE_QA'].
+src/lib/onboarding-v2/__tests__/canonical-persistence.live.test.ts(22,36): error TS2532: Object is possibly 'undefined'.
+src/lib/onboarding-v2/__tests__/canonical-persistence.test.ts(107,53): error TS2345: Argument of type 'BioTemplateConfig' is not assignable to parameter of type 'Record<string, unknown>'.
+  Index signature for type 'string' is missing in type 'BioTemplateConfig'.
+src/lib/onboarding-v2/__tests__/canonical-persistence.test.ts(136,53): error TS2345: Argument of type 'BioTemplateConfig' is not assignable to parameter of type 'Record<string, unknown>'.
+  Index signature for type 'string' is missing in type 'BioTemplateConfig'.
+src/lib/onboarding-v2/__tests__/canonical-persistence.test.ts(151,53): error TS2345: Argument of type 'BioTemplateConfig' is not assignable to parameter of type 'Record<string, unknown>'.
+  Index signature for type 'string' is missing in type 'BioTemplateConfig'.
+src/lib/onboarding-v2/__tests__/canonical-persistence.test.ts(169,53): error TS2345: Argument of type 'BioTemplateConfig' is not assignable to parameter of type 'Record<string, unknown>'.
+  Index signature for type 'string' is missing in type 'BioTemplateConfig'.
+src/lib/onboarding-v2/__tests__/canonical-persistence.test.ts(203,53): error TS2345: Argument of type 'BioTemplateConfig' is not assignable to parameter of type 'Record<string, unknown>'.
+  Index signature for type 'string' is missing in type 'BioTemplateConfig'.
+src/lib/onboarding-v2/__tests__/canonical-persistence.test.ts(225,53): error TS2345: Argument of type 'BioTemplateConfig' is not assignable to parameter of type 'Record<string, unknown>'.
+  Index signature for type 'string' is missing in type 'BioTemplateConfig'.
+src/lib/onboarding-v2/v1-adapter.ts(112,26): error TS18048: 'source.primary_action' is possibly 'undefined'.
+src/lib/onboarding-v2/v1-adapter.ts(114,27): error TS18048: 'source.primary_action' is possibly 'undefined'.
+src/lib/parametric-engine-v2/internal-entrypoint.ts(126,3): error TS2375: Type '{ meta: { version: "1"; completed_at: string; }; primary_action?: { type: PrimaryActionType; value: string; }; assets?: { card_media: true; }; business_type: string; business_other: string | null; primary_goal: "whatsapp" | ... 4 more ... | "leads"; visual_personality: "minimal" | ... 4 more ... | "energetic"; ident...' is not assignable to type 'OnboardingIntentV1' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Property 'primary_action' is optional in type '{ meta: { version: "1"; completed_at: string; }; primary_action?: { type: "website" | "email" | "instagram" | "whatsapp" | "booking"; value: string; }; assets?: { card_media: true; }; business_type: string; business_other: string | null; primary_goal: "whatsapp" | ... 4 more ... | "leads"; visual_personality: "minim...' but required in type 'OnboardingIntentV1'.
+src/routes/editor.tsx(266,24): error TS7031: Binding element 'session' implicitly has an 'any' type.
+src/routes/editor.tsx(274,15): error TS7006: Parameter 'error' implicitly has an 'any' type.
+src/routes/editor.tsx(281,42): error TS7006: Parameter 'event' implicitly has an 'any' type.
+src/routes/editor.tsx(281,49): error TS7006: Parameter 'session' implicitly has an 'any' type.
+src/routes/editor.tsx(635,54): error TS4111: Property 'full_name' comes from an index signature, so it must be accessed with ['full_name'].
+src/routes/editor.tsx(636,50): error TS4111: Property 'full_name' comes from an index signature, so it must be accessed with ['full_name'].
+src/routes/editor.tsx(639,54): error TS4111: Property 'avatar_url' comes from an index signature, so it must be accessed with ['avatar_url'].
+src/routes/editor.tsx(640,50): error TS4111: Property 'avatar_url' comes from an index signature, so it must be accessed with ['avatar_url'].
+src/routes/internal.power-editor.tsx(5,43): error TS4111: Property 'VITE_ENABLE_ONBOARDING_V2' comes from an index signature, so it must be accessed with ['VITE_ENABLE_ONBOARDING_V2'].
+src/routes/internal.power-editor.tsx(6,19): error TS4111: Property 'VITE_ENABLE_INTERNAL_POWER_EDITOR' comes from an index signature, so it must be accessed with ['VITE_ENABLE_INTERNAL_POWER_EDITOR'].
+vite.config.ts(29,5): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Object literal may only specify known properties, and 'inlineDynamicImports' does not exist in type '{ preset?: string; output?: { dir?: string; publicDir?: string; serverDir?: string; }; cloudflare?: { nodeCompat?: boolean; deployConfig?: boolean; }; }'.
