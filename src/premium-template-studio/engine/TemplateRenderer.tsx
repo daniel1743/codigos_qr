@@ -297,6 +297,7 @@ function BlockFrame({
 
   return (
     <section
+      data-block-id={block.id}
       role="button"
       tabIndex={0}
       aria-label={`${block.type} block`}

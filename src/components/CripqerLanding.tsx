@@ -564,16 +564,16 @@ export default function CripqerLanding() {
       <section className="cq-hero" id="producto">
         <div className="cq-wrap cq-hero-grid">
           <div>
-            <h1 className="cq-h1">Tu QR puede mostrar <em>mucho más</em> que un enlace.</h1>
+            <h1 className="cq-h1">La Plataforma de Conversión <em>Inteligente</em></h1>
             <p className="cq-hero-sub">
-              Crea una presencia digital diseñada para representarte, reúne lo que quieres
-              compartir y deja que las personas la descubran con un solo escaneo.
+              No solo enlaces. Construye el recorrido completo: De la atención al cliente recurrente.
+              QR + Biolink + Analytics + Gestión en una sola plataforma.
             </p>
             <div className="cq-hero-actions">
               <Link to="/editor" className="cq-btn cq-btn-accent" data-cta="crear-qr">Crear mi QR {Icon.arrow}</Link>
               <a href="#disenos" className="cq-btn cq-btn-ghost" data-cta="ver-disenos">Ver diseños</a>
             </div>
-            <p className="cq-hero-note">Sin programar. Sin construir un sitio web desde cero.</p>
+            <p className="cq-hero-note">Más que un biolink. Es tu sistema de crecimiento.</p>
           </div>
 
           {/* SLOT HERO — composición final: persona + smartphone + plantilla + QR.
@@ -729,25 +729,25 @@ export default function CripqerLanding() {
       <section className="cq-section" style={{ paddingTop: 24 }}>
         <div className="cq-wrap">
           <div className="cq-dark-section">
-            <span className="cq-eyebrow" style={{ color: "var(--cq-accent)" }}>La oportunidad</span>
-            <h2 className="cq-h2">Un QR tradicional termina demasiado pronto.</h2>
+            <span className="cq-eyebrow" style={{ color: "var(--cq-accent)" }}>La diferencia</span>
+            <h2 className="cq-h2">Linktree organiza enlaces. Cripqer construye conversión.</h2>
             <p className="cq-lead">
-              La tecnología QR es maravillosa: conecta cualquier superficie con internet al instante.
-              El problema es lo que suele haber del otro lado.
+              No se trata solo de reunir enlaces. Se trata de crear el recorrido completo:
+              desde que alguien te descubre hasta que se convierte en cliente recurrente.
             </p>
             <div className="cq-compare">
               <div className="cq-compare-card cq-compare-old">
-                <h3>Lo habitual</h3>
-                <p>Un escaneo que cae en una URL fría, una página que no representa a nadie.</p>
+                <h3>Otras plataformas</h3>
+                <p>Organizan enlaces. Te sacan de su plataforma. No miden conversión real.</p>
                 <div className="cq-flowline" style={{ color: "#8a857c" }}>
-                  <span>Escanear</span>{Icon.arrow}<span>Una URL</span><span className="cq-dot" /><span>Fin.</span>
+                  <span>Audiencia</span>{Icon.arrow}<span>Enlaces</span><span className="cq-dot" /><span>Te vas</span>
                 </div>
               </div>
               <div className="cq-compare-card cq-compare-new">
-                <h3>Con Cripqer</h3>
-                <p>Un escaneo que abre una identidad digital diseñada: quién eres, qué ofreces y cómo contactarte.</p>
+                <h3>Cripqer</h3>
+                <p>Construye el recorrido completo: atrae, convierte, gestiona, mide y optimiza tu negocio.</p>
                 <div className="cq-flowline" style={{ color: "var(--cq-accent-strong)" }}>
-                  <span>Escanear</span>{Icon.arrow}<span>Tu experiencia</span>{Icon.arrow}<span>Una conexión real</span>
+                  <span>Audiencia</span>{Icon.arrow}<span>Conversión</span>{Icon.arrow}<span>Cliente</span>{Icon.arrow}<span>Crecimiento</span>
                 </div>
               </div>
             </div>
@@ -758,16 +758,16 @@ export default function CripqerLanding() {
       {/* ============ 6. EVOLUCIÓN ============ */}
       <section className="cq-section cq-center">
         <div className="cq-wrap">
-          <span className="cq-eyebrow">Siempre vivo</span>
-          <h2 className="cq-h2">Imprime el QR una vez.<br />Haz evolucionar lo que existe detrás.</h2>
+          <span className="cq-eyebrow">El recorrido completo</span>
+          <h2 className="cq-h2">De la atención al cliente recurrente.<br />Todo en una plataforma.</h2>
           <p className="cq-lead" style={{ margin: "0 auto" }}>
-            Tu presencia digital puede cambiar cuando tú cambias. El QR sigue siendo el mismo
-            punto de acceso — lo que descubren al escanearlo, lo decides tú.
+            No solo generas un QR. Construyes el sistema completo que lleva a tu audiencia
+            desde el primer contacto hasta la conversión, gestión y crecimiento continuo.
           </p>
           <div className="cq-evolve-tags" style={{ justifyContent: "center" }}>
-            <span>Biografía</span><span>Enlaces</span><span>Redes sociales</span>
-            <span>Fotografías</span><span>Estilo visual</span><span>Plantilla</span>
-            <span>Servicios</span><span>Información de contacto</span>
+            <span>Crear</span><span>Personalizar</span><span>Publicar</span>
+            <span>Compartir</span><span>Atraer</span><span>Convertir</span>
+            <span>Gestionar</span><span>Medir</span><span>Mejorar</span>
           </div>
         </div>
       </section>

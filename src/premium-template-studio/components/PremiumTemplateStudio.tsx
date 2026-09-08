@@ -306,6 +306,7 @@ function Canvas() {
     <>
       <PowerCanvasViewport
         contentWidth={frameWidth}
+        selectedBlockId={state.selectedBlockId}
         onBackgroundClick={() => dispatch({ type: "selectBlock", id: null })}
       >
         <div

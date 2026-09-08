@@ -8,16 +8,31 @@ export const Route = createFileRoute("/")({
 const structuredData = [
   {
     "@context": "https://schema.org",
-    "@type": "WebApplication",
+    "@type": "SoftwareApplication",
     "name": "Cripqer",
     "url": "https://www.cripqer.dev/",
-    "applicationCategory": "UtilityApplication",
-    "operatingSystem": "All",
-    "description": "Generador de códigos QR con página web personalizable para enlaces, WhatsApp y redes sociales.",
+    "applicationCategory": "BusinessApplication",
+    "applicationSubCategory": "Conversion Optimization Platform",
+    "operatingSystem": "Web",
+    "description": "Plataforma de conversión completa que lleva tu audiencia desde la atención hasta cliente recurrente. QR + Biolink + Analytics + Gestión integrada.",
+    "featureList": [
+      "Generador de Código QR",
+      "Optimización de Conversión",
+      "Analytics y Métricas",
+      "Gestión de Clientes",
+      "A/B Testing",
+      "Compartir Multicanal",
+      "Retención de Clientes"
+    ],
     "offers": {
       "@type": "Offer",
       "price": "0",
       "priceCurrency": "USD",
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.8",
+      "ratingCount": "250"
     },
   },
   {

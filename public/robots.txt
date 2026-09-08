@@ -3,5 +3,30 @@ Allow: /
 Disallow: /editor
 Disallow: /profile
 Disallow: /admin
+Disallow: /power-editor
+Disallow: /engine-lab
+Disallow: /template-lab
+Disallow: /onboarding-preview
+Disallow: /internal.power-editor
 
+# Permitir assets estáticos
+Allow: /brand-assets/
+Allow: /*.css
+Allow: /*.js
+Allow: /*.png
+Allow: /*.jpg
+Allow: /*.svg
+Allow: /*.webp
+
+# Crawl delay para bots pesados
+User-agent: AhrefsBot
+Crawl-delay: 5
+
+User-agent: SemrushBot
+Crawl-delay: 5
+
+User-agent: MJ12bot
+Crawl-delay: 10
+
+# Sitemap
 Sitemap: https://www.cripqer.dev/sitemap.xml

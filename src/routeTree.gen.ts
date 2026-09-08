@@ -16,12 +16,15 @@ import { Route as EditorRouteImport } from './routes/editor'
 import { Route as EncryptedDocumentsRouteImport } from './routes/encrypted-documents'
 import { Route as EngineLabRouteImport } from './routes/engine-lab'
 import { Route as OnboardingPreviewRouteImport } from './routes/onboarding-preview'
+import { Route as PlataformaRouteImport } from './routes/plataforma'
 import { Route as PowerEditorRouteImport } from './routes/power-editor'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as TemplateLabRouteImport } from './routes/template-lab'
 import { Route as DShortUrlRouteImport } from './routes/d.$shortUrl'
 import { Route as InternalPowerEditorRouteImport } from './routes/internal.power-editor'
 import { Route as PPublicIdRouteImport } from './routes/p.$publicId'
+import { Route as VsLinktreeRouteImport } from './routes/vs/linktree'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -58,6 +61,11 @@ const OnboardingPreviewRoute = OnboardingPreviewRouteImport.update({
   path: '/onboarding-preview',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlataformaRoute = PlataformaRouteImport.update({
+  id: '/plataforma',
+  path: '/plataforma',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PowerEditorRoute = PowerEditorRouteImport.update({
   id: '/power-editor',
   path: '/power-editor',
@@ -66,6 +74,11 @@ const PowerEditorRoute = PowerEditorRouteImport.update({
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TemplateLabRoute = TemplateLabRouteImport.update({
@@ -88,6 +101,11 @@ const PPublicIdRoute = PPublicIdRouteImport.update({
   path: '/p/$publicId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VsLinktreeRoute = VsLinktreeRouteImport.update({
+  id: '/vs/linktree',
+  path: '/vs/linktree',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -97,12 +115,15 @@ export interface FileRoutesByFullPath {
   '/encrypted-documents': typeof EncryptedDocumentsRoute
   '/engine-lab': typeof EngineLabRoute
   '/onboarding-preview': typeof OnboardingPreviewRoute
+  '/plataforma': typeof PlataformaRoute
   '/power-editor': typeof PowerEditorRoute
   '/profile': typeof ProfileRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/template-lab': typeof TemplateLabRoute
   '/d/$shortUrl': typeof DShortUrlRoute
   '/internal/power-editor': typeof InternalPowerEditorRoute
   '/p/$publicId': typeof PPublicIdRoute
+  '/vs/linktree': typeof VsLinktreeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -112,12 +133,15 @@ export interface FileRoutesByTo {
   '/encrypted-documents': typeof EncryptedDocumentsRoute
   '/engine-lab': typeof EngineLabRoute
   '/onboarding-preview': typeof OnboardingPreviewRoute
+  '/plataforma': typeof PlataformaRoute
   '/power-editor': typeof PowerEditorRoute
   '/profile': typeof ProfileRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/template-lab': typeof TemplateLabRoute
   '/d/$shortUrl': typeof DShortUrlRoute
   '/internal/power-editor': typeof InternalPowerEditorRoute
   '/p/$publicId': typeof PPublicIdRoute
+  '/vs/linktree': typeof VsLinktreeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -128,12 +152,15 @@ export interface FileRoutesById {
   '/encrypted-documents': typeof EncryptedDocumentsRoute
   '/engine-lab': typeof EngineLabRoute
   '/onboarding-preview': typeof OnboardingPreviewRoute
+  '/plataforma': typeof PlataformaRoute
   '/power-editor': typeof PowerEditorRoute
   '/profile': typeof ProfileRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/template-lab': typeof TemplateLabRoute
   '/d/$shortUrl': typeof DShortUrlRoute
   '/internal/power-editor': typeof InternalPowerEditorRoute
   '/p/$publicId': typeof PPublicIdRoute
+  '/vs/linktree': typeof VsLinktreeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -145,12 +172,15 @@ export interface FileRouteTypes {
     | '/encrypted-documents'
     | '/engine-lab'
     | '/onboarding-preview'
+    | '/plataforma'
     | '/power-editor'
     | '/profile'
+    | '/sitemap.xml'
     | '/template-lab'
     | '/d/$shortUrl'
     | '/internal/power-editor'
     | '/p/$publicId'
+    | '/vs/linktree'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -160,12 +190,15 @@ export interface FileRouteTypes {
     | '/encrypted-documents'
     | '/engine-lab'
     | '/onboarding-preview'
+    | '/plataforma'
     | '/power-editor'
     | '/profile'
+    | '/sitemap.xml'
     | '/template-lab'
     | '/d/$shortUrl'
     | '/internal/power-editor'
     | '/p/$publicId'
+    | '/vs/linktree'
   id:
     | '__root__'
     | '/'
@@ -175,12 +208,15 @@ export interface FileRouteTypes {
     | '/encrypted-documents'
     | '/engine-lab'
     | '/onboarding-preview'
+    | '/plataforma'
     | '/power-editor'
     | '/profile'
+    | '/sitemap.xml'
     | '/template-lab'
     | '/d/$shortUrl'
     | '/internal/power-editor'
     | '/p/$publicId'
+    | '/vs/linktree'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -191,12 +227,15 @@ export interface RootRouteChildren {
   EncryptedDocumentsRoute: typeof EncryptedDocumentsRoute
   EngineLabRoute: typeof EngineLabRoute
   OnboardingPreviewRoute: typeof OnboardingPreviewRoute
+  PlataformaRoute: typeof PlataformaRoute
   PowerEditorRoute: typeof PowerEditorRoute
   ProfileRoute: typeof ProfileRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TemplateLabRoute: typeof TemplateLabRoute
   DShortUrlRoute: typeof DShortUrlRoute
   InternalPowerEditorRoute: typeof InternalPowerEditorRoute
   PPublicIdRoute: typeof PPublicIdRoute
+  VsLinktreeRoute: typeof VsLinktreeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -250,6 +289,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OnboardingPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/plataforma': {
+      id: '/plataforma'
+      path: '/plataforma'
+      fullPath: '/plataforma'
+      preLoaderRoute: typeof PlataformaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/power-editor': {
       id: '/power-editor'
       path: '/power-editor'
@@ -262,6 +308,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/template-lab': {
@@ -292,6 +345,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PPublicIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/vs/linktree': {
+      id: '/vs/linktree'
+      path: '/vs/linktree'
+      fullPath: '/vs/linktree'
+      preLoaderRoute: typeof VsLinktreeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -303,12 +363,15 @@ const rootRouteChildren: RootRouteChildren = {
   EncryptedDocumentsRoute: EncryptedDocumentsRoute,
   EngineLabRoute: EngineLabRoute,
   OnboardingPreviewRoute: OnboardingPreviewRoute,
+  PlataformaRoute: PlataformaRoute,
   PowerEditorRoute: PowerEditorRoute,
   ProfileRoute: ProfileRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   TemplateLabRoute: TemplateLabRoute,
   DShortUrlRoute: DShortUrlRoute,
   InternalPowerEditorRoute: InternalPowerEditorRoute,
   PPublicIdRoute: PPublicIdRoute,
+  VsLinktreeRoute: VsLinktreeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

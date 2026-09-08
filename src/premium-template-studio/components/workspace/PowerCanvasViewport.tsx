@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   type CSSProperties,
@@ -10,10 +11,12 @@ import {
 import { cx } from "../../utils";
 import { usePowerCanvasCamera } from "./usePowerCanvasCamera";
 import { calculateFitZoom } from "./powerCanvasCameraMath";
+import { computeAutofocusScrollDelta } from "./powerCanvasAutofocus";
 
 interface PowerCanvasViewportProps {
   children: ReactNode;
   contentWidth: number;
+  selectedBlockId: string | null;
   onBackgroundClick: () => void;
 }
 
@@ -179,6 +182,7 @@ function CameraDiagnostic({
 export function PowerCanvasViewport({
   children,
   contentWidth,
+  selectedBlockId,
   onBackgroundClick,
 }: PowerCanvasViewportProps) {
   const reconstructionStep =
@@ -201,6 +205,57 @@ export function PowerCanvasViewport({
     width: 0,
     height: 0,
   });
+
+  // Phase 4A — Selection → Canvas autofocus.
+  //
+  // Fires ONLY when `selectedBlockId` changes (selection intent). It never reacts
+  // to zoom, Stage resize, ResizeObserver, re-render, or text edits. The resolved
+  // element is scoped to the Canvas content layer (`contentRef`), never a global
+  // `document.querySelector`. DOM rectangles are compared in the same screen
+  // coordinate space to decide visibility, and only `scrollTop`/`scrollLeft` are
+  // written — the sole pan owner. Zoom, Stage geometry and camera math are
+  // untouched.
+  const lastAutofocusedBlockIdRef = useRef<string | null>(null);
+
+  useLayoutEffect(() => {
+    if (selectedBlockId === null) {
+      lastAutofocusedBlockIdRef.current = null;
+      return;
+    }
+    // Same block re-render/zoom/edit: no repeated autofocus.
+    if (lastAutofocusedBlockIdRef.current === selectedBlockId) return;
+    lastAutofocusedBlockIdRef.current = selectedBlockId;
+
+    const viewport = viewportRef.current;
+    const contentLayer = contentRef.current;
+    if (!viewport || !contentLayer) return;
+
+    // block ids are generated as `block_<hex>`, selector-safe. Resolve scoped to
+    // the camera layer; a stale id (e.g. after an undone block) yields null → no-op.
+    const element = contentLayer.querySelector<HTMLElement>(`[data-block-id="${selectedBlockId}"]`);
+    if (!element) return;
+
+    const viewportRect = viewport.getBoundingClientRect();
+    const elementRect = element.getBoundingClientRect();
+
+    const delta = computeAutofocusScrollDelta(
+      {
+        top: viewportRect.top,
+        bottom: viewportRect.bottom,
+        left: viewportRect.left,
+        right: viewportRect.right,
+      },
+      {
+        top: elementRect.top,
+        bottom: elementRect.bottom,
+        left: elementRect.left,
+        right: elementRect.right,
+      },
+    );
+
+    if (delta.top !== 0) viewport.scrollTop += delta.top;
+    if (delta.left !== 0) viewport.scrollLeft += delta.left;
+  }, [selectedBlockId, viewportRef, contentRef]);
 
   useEffect(() => {
     if (
@@ -261,7 +316,7 @@ export function PowerCanvasViewport({
     return () => {
       viewport.removeEventListener("wheel", handleNativeWheel);
     };
-  }, [interaction]);
+  }, [interaction, viewportRef]);
 
   if (reconstructionStep === "viewport") {
     return (
