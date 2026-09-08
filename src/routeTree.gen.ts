@@ -18,6 +18,7 @@ import { Route as EngineLabRouteImport } from './routes/engine-lab'
 import { Route as OnboardingPreviewRouteImport } from './routes/onboarding-preview'
 import { Route as PlataformaRouteImport } from './routes/plataforma'
 import { Route as PowerEditorRouteImport } from './routes/power-editor'
+import { Route as PowerEditorPhase4QaRouteImport } from './routes/power-editor-phase4-qa'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as TemplateLabRouteImport } from './routes/template-lab'
@@ -71,6 +72,11 @@ const PowerEditorRoute = PowerEditorRouteImport.update({
   path: '/power-editor',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PowerEditorPhase4QaRoute = PowerEditorPhase4QaRouteImport.update({
+  id: '/power-editor-phase4-qa',
+  path: '/power-editor-phase4-qa',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -117,6 +123,7 @@ export interface FileRoutesByFullPath {
   '/onboarding-preview': typeof OnboardingPreviewRoute
   '/plataforma': typeof PlataformaRoute
   '/power-editor': typeof PowerEditorRoute
+  '/power-editor-phase4-qa': typeof PowerEditorPhase4QaRoute
   '/profile': typeof ProfileRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/template-lab': typeof TemplateLabRoute
@@ -135,6 +142,7 @@ export interface FileRoutesByTo {
   '/onboarding-preview': typeof OnboardingPreviewRoute
   '/plataforma': typeof PlataformaRoute
   '/power-editor': typeof PowerEditorRoute
+  '/power-editor-phase4-qa': typeof PowerEditorPhase4QaRoute
   '/profile': typeof ProfileRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/template-lab': typeof TemplateLabRoute
@@ -154,6 +162,7 @@ export interface FileRoutesById {
   '/onboarding-preview': typeof OnboardingPreviewRoute
   '/plataforma': typeof PlataformaRoute
   '/power-editor': typeof PowerEditorRoute
+  '/power-editor-phase4-qa': typeof PowerEditorPhase4QaRoute
   '/profile': typeof ProfileRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/template-lab': typeof TemplateLabRoute
@@ -174,6 +183,7 @@ export interface FileRouteTypes {
     | '/onboarding-preview'
     | '/plataforma'
     | '/power-editor'
+    | '/power-editor-phase4-qa'
     | '/profile'
     | '/sitemap.xml'
     | '/template-lab'
@@ -192,6 +202,7 @@ export interface FileRouteTypes {
     | '/onboarding-preview'
     | '/plataforma'
     | '/power-editor'
+    | '/power-editor-phase4-qa'
     | '/profile'
     | '/sitemap.xml'
     | '/template-lab'
@@ -210,6 +221,7 @@ export interface FileRouteTypes {
     | '/onboarding-preview'
     | '/plataforma'
     | '/power-editor'
+    | '/power-editor-phase4-qa'
     | '/profile'
     | '/sitemap.xml'
     | '/template-lab'
@@ -229,6 +241,7 @@ export interface RootRouteChildren {
   OnboardingPreviewRoute: typeof OnboardingPreviewRoute
   PlataformaRoute: typeof PlataformaRoute
   PowerEditorRoute: typeof PowerEditorRoute
+  PowerEditorPhase4QaRoute: typeof PowerEditorPhase4QaRoute
   ProfileRoute: typeof ProfileRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TemplateLabRoute: typeof TemplateLabRoute
@@ -303,6 +316,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PowerEditorRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/power-editor-phase4-qa': {
+      id: '/power-editor-phase4-qa'
+      path: '/power-editor-phase4-qa'
+      fullPath: '/power-editor-phase4-qa'
+      preLoaderRoute: typeof PowerEditorPhase4QaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profile': {
       id: '/profile'
       path: '/profile'
@@ -365,6 +385,7 @@ const rootRouteChildren: RootRouteChildren = {
   OnboardingPreviewRoute: OnboardingPreviewRoute,
   PlataformaRoute: PlataformaRoute,
   PowerEditorRoute: PowerEditorRoute,
+  PowerEditorPhase4QaRoute: PowerEditorPhase4QaRoute,
   ProfileRoute: ProfileRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TemplateLabRoute: TemplateLabRoute,
