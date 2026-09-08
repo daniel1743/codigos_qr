@@ -2,10 +2,35 @@ import { describe, expect, it } from "vitest";
 import {
   calculateEffectiveScale,
   calculateFitZoom,
+  calculateFocalZoomScroll,
+  calculatePanScroll,
   calculateStageGeometry,
+  clampScrollPosition,
   POWER_CANVAS_MIN_USER_ZOOM,
-  POWER_CANVAS_OVERSCAN,
 } from "../powerCanvasCameraMath";
+
+function worldPointUnderAnchor({
+  scrollLeft,
+  scrollTop,
+  anchorX,
+  anchorY,
+  originX,
+  originY,
+  scale,
+}: {
+  scrollLeft: number;
+  scrollTop: number;
+  anchorX: number;
+  anchorY: number;
+  originX: number;
+  originY: number;
+  scale: number;
+}) {
+  return {
+    x: (scrollLeft + anchorX - originX) / scale,
+    y: (scrollTop + anchorY - originY) / scale,
+  };
+}
 
 describe("power canvas camera math", () => {
   it("fits content smaller than the viewport without exceeding 1", () => {
@@ -43,15 +68,17 @@ describe("power canvas camera math", () => {
     expect(calculateEffectiveScale(0.75, 1.2)).toBeCloseTo(0.9);
   });
 
-  it("represents scaled content and overscan in stage geometry", () => {
+  it("represents scaled content in stage geometry with a neutral origin", () => {
     const stage = calculateStageGeometry(
       { viewportWidth: 500, viewportHeight: 500, contentWidth: 600, contentHeight: 900 },
       0.8,
     );
-    expect(stage.stageWidth).toBe(600 * 0.8 + POWER_CANVAS_OVERSCAN * 2);
-    expect(stage.stageHeight).toBe(900 * 0.8 + POWER_CANVAS_OVERSCAN * 2);
-    expect(stage.originX).toBe(POWER_CANVAS_OVERSCAN);
-    expect(stage.originY).toBe(POWER_CANVAS_OVERSCAN);
+    expect(stage.stageWidth).toBe(600 * 0.8);
+    expect(stage.stageHeight).toBe(900 * 0.8);
+    expect(stage.scaledContentWidth).toBe(600 * 0.8);
+    expect(stage.scaledContentHeight).toBe(900 * 0.8);
+    expect(stage.originX).toBe(0);
+    expect(stage.originY).toBe(0);
   });
 
   it("always returns finite stage geometry for invalid measurements", () => {
@@ -142,6 +169,236 @@ describe("power canvas camera math", () => {
 
     expect(fitZoom).toBe(1);
     expect(Object.values(stage).every(Number.isFinite)).toBe(true);
-    expect(stage.originX).toBeGreaterThan(0);
+    expect(stage.originX).toBe(0);
+    expect(stage.originY).toBe(0);
+  });
+
+  it("regression: stage dimensions derive only from intrinsic content and scale, not the viewport", () => {
+    const content = { contentWidth: 600, contentHeight: 900 };
+    const scale = 0.8;
+    const wide = calculateStageGeometry(
+      { viewportWidth: 2000, viewportHeight: 2000, ...content },
+      scale,
+    );
+    const narrow = calculateStageGeometry(
+      { viewportWidth: 200, viewportHeight: 200, ...content },
+      scale,
+    );
+
+    expect(wide.stageWidth).toBe(600 * 0.8);
+    expect(narrow.stageWidth).toBe(600 * 0.8);
+    expect(wide.stageHeight).toBe(900 * 0.8);
+    expect(narrow.stageHeight).toBe(900 * 0.8);
+    expect(wide.originX).toBe(0);
+    expect(wide.originY).toBe(0);
+    expect(narrow.originX).toBe(0);
+    expect(narrow.originY).toBe(0);
+  });
+
+  it("keeps scroll unchanged for identity focal zoom", () => {
+    const dimensions = {
+      viewportWidth: 900,
+      viewportHeight: 700,
+      contentWidth: 1180,
+      contentHeight: 2400,
+    };
+    const stage = calculateStageGeometry(dimensions, 1);
+    const scroll = calculateFocalZoomScroll({
+      dimensions,
+      oldStage: stage,
+      newStage: stage,
+      oldScale: 1,
+      newScale: 1,
+      currentScroll: { scrollLeft: 120, scrollTop: 240 },
+      anchor: { x: 450, y: 350 },
+    });
+
+    expect(scroll.scrollLeft).toBe(120);
+    expect(scroll.scrollTop).toBe(240);
+  });
+
+  it("preserves the world point under the viewport center while zooming in and out", () => {
+    const dimensions = {
+      viewportWidth: 400,
+      viewportHeight: 300,
+      contentWidth: 2000,
+      contentHeight: 2400,
+    };
+    const anchor = { x: 200, y: 150 };
+    const currentScroll = { scrollLeft: 140, scrollTop: 260 };
+    const oldScale = 0.5;
+    const zoomedInScale = 0.8;
+    const zoomedOutScale = 0.35;
+    const oldStage = calculateStageGeometry(dimensions, oldScale);
+    const zoomedInStage = calculateStageGeometry(dimensions, zoomedInScale);
+    const zoomedOutStage = calculateStageGeometry(dimensions, zoomedOutScale);
+    const before = worldPointUnderAnchor({
+      ...currentScroll,
+      anchorX: anchor.x,
+      anchorY: anchor.y,
+      originX: oldStage.originX,
+      originY: oldStage.originY,
+      scale: oldScale,
+    });
+
+    const zoomedInScroll = calculateFocalZoomScroll({
+      dimensions,
+      oldStage,
+      newStage: zoomedInStage,
+      oldScale,
+      newScale: zoomedInScale,
+      currentScroll,
+      anchor,
+    });
+    const zoomedOutScroll = calculateFocalZoomScroll({
+      dimensions,
+      oldStage,
+      newStage: zoomedOutStage,
+      oldScale,
+      newScale: zoomedOutScale,
+      currentScroll,
+      anchor,
+    });
+
+    expect(
+      worldPointUnderAnchor({
+        ...zoomedInScroll,
+        anchorX: anchor.x,
+        anchorY: anchor.y,
+        originX: zoomedInStage.originX,
+        originY: zoomedInStage.originY,
+        scale: zoomedInScale,
+      }),
+    ).toEqual({ x: expect.closeTo(before.x, 5), y: expect.closeTo(before.y, 5) });
+    expect(
+      worldPointUnderAnchor({
+        ...zoomedOutScroll,
+        anchorX: anchor.x,
+        anchorY: anchor.y,
+        originX: zoomedOutStage.originX,
+        originY: zoomedOutStage.originY,
+        scale: zoomedOutScale,
+      }),
+    ).toEqual({ x: expect.closeTo(before.x, 5), y: expect.closeTo(before.y, 5) });
+  });
+
+  it("preserves focal anchors near the top-left and bottom-right when bounds allow it", () => {
+    const dimensions = {
+      viewportWidth: 300,
+      viewportHeight: 300,
+      contentWidth: 3000,
+      contentHeight: 4000,
+    };
+    const oldScale = 0.6;
+    const newScale = 0.9;
+    const oldStage = calculateStageGeometry(dimensions, oldScale);
+    const newStage = calculateStageGeometry(dimensions, newScale);
+    const anchors = [
+      { x: 24, y: 28, scrollLeft: 280, scrollTop: 320 },
+      { x: 276, y: 272, scrollLeft: 360, scrollTop: 680 },
+    ];
+
+    for (const sample of anchors) {
+      const before = worldPointUnderAnchor({
+        scrollLeft: sample.scrollLeft,
+        scrollTop: sample.scrollTop,
+        anchorX: sample.x,
+        anchorY: sample.y,
+        originX: oldStage.originX,
+        originY: oldStage.originY,
+        scale: oldScale,
+      });
+      const afterScroll = calculateFocalZoomScroll({
+        dimensions,
+        oldStage,
+        newStage,
+        oldScale,
+        newScale,
+        currentScroll: { scrollLeft: sample.scrollLeft, scrollTop: sample.scrollTop },
+        anchor: { x: sample.x, y: sample.y },
+      });
+      const after = worldPointUnderAnchor({
+        ...afterScroll,
+        anchorX: sample.x,
+        anchorY: sample.y,
+        originX: newStage.originX,
+        originY: newStage.originY,
+        scale: newScale,
+      });
+
+      expect(after.x).toBeCloseTo(before.x, 5);
+      expect(after.y).toBeCloseTo(before.y, 5);
+    }
+  });
+
+  it("clamps focal zoom scroll to finite stage bounds and rejects invalid values", () => {
+    const dimensions = {
+      viewportWidth: 700,
+      viewportHeight: 500,
+      contentWidth: 1000,
+      contentHeight: 1600,
+    };
+    const oldStage = calculateStageGeometry(dimensions, 0.7);
+    const newStage = calculateStageGeometry(dimensions, 1.2);
+    const scroll = calculateFocalZoomScroll({
+      dimensions,
+      oldStage,
+      newStage,
+      oldScale: Number.NaN,
+      newScale: Number.POSITIVE_INFINITY,
+      currentScroll: { scrollLeft: Number.NaN, scrollTop: Number.NEGATIVE_INFINITY },
+      anchor: { x: Number.NaN, y: Number.POSITIVE_INFINITY },
+    });
+    const clamped = clampScrollPosition(scroll, dimensions, newStage);
+
+    expect(scroll).toEqual(clamped);
+    expect(Object.values(scroll).every(Number.isFinite)).toBe(true);
+  });
+
+  it("uses viewport scroll as pan ownership and clamps finite bounds", () => {
+    const dimensions = {
+      viewportWidth: 500,
+      viewportHeight: 400,
+      contentWidth: 1200,
+      contentHeight: 1800,
+    };
+    const stage = calculateStageGeometry(dimensions, 1);
+
+    expect(
+      calculatePanScroll({
+        startScroll: { scrollLeft: 100, scrollTop: 100 },
+        deltaX: 40,
+        deltaY: 30,
+        dimensions,
+        stage,
+      }),
+    ).toEqual({ scrollLeft: 60, scrollTop: 70 });
+    expect(
+      calculatePanScroll({
+        startScroll: { scrollLeft: 100, scrollTop: 100 },
+        deltaX: -40,
+        deltaY: -30,
+        dimensions,
+        stage,
+      }),
+    ).toEqual({ scrollLeft: 140, scrollTop: 130 });
+    expect(
+      calculatePanScroll({
+        startScroll: { scrollLeft: 10, scrollTop: 10 },
+        deltaX: 99,
+        deltaY: 99,
+        dimensions,
+        stage,
+      }),
+    ).toEqual({ scrollLeft: 0, scrollTop: 0 });
+    expect(
+      calculatePanScroll({
+        startScroll: { scrollLeft: 100, scrollTop: 100 },
+        deltaX: 0,
+        deltaY: 0,
+        dimensions,
+        stage,
+      }),
+    ).toEqual({ scrollLeft: 100, scrollTop: 100 });
   });
 });

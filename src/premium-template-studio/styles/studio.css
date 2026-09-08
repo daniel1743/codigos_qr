@@ -200,6 +200,17 @@
   scrollbar-width: thin;
   scrollbar-color: color-mix(in oklab, currentColor 25%, transparent) transparent;
 }
+.pts-power-viewport--pan-ready {
+  cursor: grab;
+}
+.pts-power-viewport--pan-ready .pts-power-camera-layer,
+.pts-power-viewport--panning .pts-power-camera-layer {
+  pointer-events: none;
+}
+.pts-power-viewport--panning {
+  cursor: grabbing;
+  user-select: none;
+}
 .pts-power-camera-layer {
   will-change: transform;
 }

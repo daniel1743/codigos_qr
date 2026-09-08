@@ -22,6 +22,16 @@ export interface PowerCanvasStageGeometry {
   scaledContentHeight: number;
 }
 
+export interface PowerCanvasScrollPosition {
+  scrollLeft: number;
+  scrollTop: number;
+}
+
+export interface PowerCanvasAnchorPoint {
+  x: number;
+  y: number;
+}
+
 function finiteDimension(value: number): number {
   return Number.isFinite(value) && value > 0 ? value : 0;
 }
@@ -82,27 +92,116 @@ export function calculateStageGeometry(
   scale: number,
 ): PowerCanvasStageGeometry {
   const safeScale = Number.isFinite(scale) && scale > 0 ? scale : 1;
-  const viewportWidth = finiteDimension(dimensions.viewportWidth);
-  const viewportHeight = finiteDimension(dimensions.viewportHeight);
+  // Stage dimensions derive ONLY from intrinsic content dimensions and the
+  // effective scale. They must NOT depend on viewport clientWidth/clientHeight,
+  // because viewport size depends on scrollbar visibility, which depends on
+  // Stage size — reintroducing that dependency creates a scrollbar↔geometry
+  // feedback loop (growing scrollWidth/scrollHeight, shrinking thumb).
   const scaledContentWidth = Math.max(1, finiteDimension(dimensions.contentWidth)) * safeScale;
   const scaledContentHeight = Math.max(1, finiteDimension(dimensions.contentHeight)) * safeScale;
-  const widthFits = scaledContentWidth + POWER_CANVAS_OVERSCAN * 2 <= viewportWidth;
-  const heightFits = scaledContentHeight + POWER_CANVAS_OVERSCAN * 2 <= viewportHeight;
-  const stageWidth = Math.max(
-    1,
-    widthFits ? viewportWidth : scaledContentWidth + POWER_CANVAS_OVERSCAN * 2,
-  );
-  const stageHeight = Math.max(
-    1,
-    heightFits ? viewportHeight : scaledContentHeight + POWER_CANVAS_OVERSCAN * 2,
-  );
 
   return {
-    stageWidth,
-    stageHeight,
-    originX: widthFits ? (viewportWidth - scaledContentWidth) / 2 : POWER_CANVAS_OVERSCAN,
-    originY: heightFits ? (viewportHeight - scaledContentHeight) / 2 : POWER_CANVAS_OVERSCAN,
+    stageWidth: scaledContentWidth,
+    stageHeight: scaledContentHeight,
+    originX: 0,
+    originY: 0,
     scaledContentWidth,
     scaledContentHeight,
   };
+}
+
+export function calculateMaxScroll(
+  dimensions: Pick<PowerCanvasDimensions, "viewportWidth" | "viewportHeight">,
+  stage: Pick<PowerCanvasStageGeometry, "stageWidth" | "stageHeight">,
+): PowerCanvasScrollPosition {
+  return {
+    scrollLeft: Math.max(
+      0,
+      finiteDimension(stage.stageWidth) - finiteDimension(dimensions.viewportWidth),
+    ),
+    scrollTop: Math.max(
+      0,
+      finiteDimension(stage.stageHeight) - finiteDimension(dimensions.viewportHeight),
+    ),
+  };
+}
+
+export function clampScrollPosition(
+  scroll: PowerCanvasScrollPosition,
+  dimensions: Pick<PowerCanvasDimensions, "viewportWidth" | "viewportHeight">,
+  stage: Pick<PowerCanvasStageGeometry, "stageWidth" | "stageHeight">,
+): PowerCanvasScrollPosition {
+  const maxScroll = calculateMaxScroll(dimensions, stage);
+  return {
+    scrollLeft: clamp(
+      Number.isFinite(scroll.scrollLeft) ? scroll.scrollLeft : 0,
+      0,
+      maxScroll.scrollLeft,
+    ),
+    scrollTop: clamp(
+      Number.isFinite(scroll.scrollTop) ? scroll.scrollTop : 0,
+      0,
+      maxScroll.scrollTop,
+    ),
+  };
+}
+
+export function calculateFocalZoomScroll({
+  dimensions,
+  oldStage,
+  newStage,
+  oldScale,
+  newScale,
+  currentScroll,
+  anchor,
+}: {
+  dimensions: PowerCanvasDimensions;
+  oldStage: PowerCanvasStageGeometry;
+  newStage: PowerCanvasStageGeometry;
+  oldScale: number;
+  newScale: number;
+  currentScroll: PowerCanvasScrollPosition;
+  anchor: PowerCanvasAnchorPoint;
+}): PowerCanvasScrollPosition {
+  const safeOldScale = Number.isFinite(oldScale) && oldScale > 0 ? oldScale : 1;
+  const safeNewScale = Number.isFinite(newScale) && newScale > 0 ? newScale : safeOldScale;
+  const safeAnchor = {
+    x: Number.isFinite(anchor.x) ? anchor.x : finiteDimension(dimensions.viewportWidth) / 2,
+    y: Number.isFinite(anchor.y) ? anchor.y : finiteDimension(dimensions.viewportHeight) / 2,
+  };
+  const safeCurrentScroll = clampScrollPosition(currentScroll, dimensions, oldStage);
+  const worldX = (safeCurrentScroll.scrollLeft + safeAnchor.x - oldStage.originX) / safeOldScale;
+  const worldY = (safeCurrentScroll.scrollTop + safeAnchor.y - oldStage.originY) / safeOldScale;
+
+  return clampScrollPosition(
+    {
+      scrollLeft: newStage.originX + worldX * safeNewScale - safeAnchor.x,
+      scrollTop: newStage.originY + worldY * safeNewScale - safeAnchor.y,
+    },
+    dimensions,
+    newStage,
+  );
+}
+
+export function calculatePanScroll({
+  startScroll,
+  deltaX,
+  deltaY,
+  dimensions,
+  stage,
+}: {
+  startScroll: PowerCanvasScrollPosition;
+  deltaX: number;
+  deltaY: number;
+  dimensions: Pick<PowerCanvasDimensions, "viewportWidth" | "viewportHeight">;
+  stage: Pick<PowerCanvasStageGeometry, "stageWidth" | "stageHeight">;
+}): PowerCanvasScrollPosition {
+  return clampScrollPosition(
+    {
+      scrollLeft: startScroll.scrollLeft - (Number.isFinite(deltaX) ? deltaX : 0),
+      scrollTop: startScroll.scrollTop - (Number.isFinite(deltaY) ? deltaY : 0),
+    },
+    dimensions,
+    stage,
+  );
 }

@@ -5,6 +5,7 @@ import {
   type CSSProperties,
   type ReactNode,
   type RefObject,
+  type WheelEvent as ReactWheelEvent,
 } from "react";
 import { cx } from "../../utils";
 import { usePowerCanvasCamera } from "./usePowerCanvasCamera";
@@ -191,7 +192,7 @@ export function PowerCanvasViewport({
   const controlledScale = [0.5, 0.75, 1, 1.25].includes(requestedControlledScale)
     ? requestedControlledScale
     : 1;
-  const { viewportRef, contentRef, camera, controls } = usePowerCanvasCamera();
+  const { viewportRef, contentRef, camera, stage, controls, interaction } = usePowerCanvasCamera();
   const stageRef = useRef<HTMLDivElement | null>(null);
   const reconstructionViewportRef = useRef<HTMLDivElement | null>(null);
   const reconstructionContentRef = useRef<HTMLDivElement | null>(null);
@@ -241,6 +242,26 @@ export function PowerCanvasViewport({
     contentWidth: Math.max(1, contentWidth),
     contentHeight: reconstructionContentHeight,
   });
+
+  // React's synthetic `onWheel` is registered as a passive listener at the root,
+  // so `event.preventDefault()` inside it cannot cancel the native browser
+  // Ctrl/Cmd+wheel page zoom. Attach a native non-passive wheel listener directly
+  // to the Canvas viewport so browser zoom is cancelled locally, while the
+  // existing focal-zoom handler still performs the Canvas camera zoom. Plain wheel
+  // (no modifier) is left untouched and keeps native Canvas scroll.
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+    const handleNativeWheel = (event: WheelEvent) => {
+      if (!event.ctrlKey && !event.metaKey) return;
+      event.preventDefault();
+      interaction.onWheel(event as unknown as ReactWheelEvent<HTMLDivElement>);
+    };
+    viewport.addEventListener("wheel", handleNativeWheel, { passive: false });
+    return () => {
+      viewport.removeEventListener("wheel", handleNativeWheel);
+    };
+  }, [interaction]);
 
   if (reconstructionStep === "viewport") {
     return (
@@ -395,21 +416,10 @@ export function PowerCanvasViewport({
   }
 
   const finalIntrinsicWidth = Math.max(1, contentWidth);
-  const finalIntrinsicHeight = Math.max(1, camera.contentHeight);
-  const finalStageWidth = Math.max(1, finalIntrinsicWidth * camera.scale);
-  const finalStageHeight = Math.max(1, finalIntrinsicHeight * camera.scale);
-  const finalStage = {
-    stageWidth: finalStageWidth,
-    stageHeight: finalStageHeight,
-    originX: 0,
-    originY: 0,
-    scaledContentWidth: finalStageWidth,
-    scaledContentHeight: finalStageHeight,
-  };
   const finalStageStyle: CSSProperties = {
     position: "relative",
-    width: finalStageWidth,
-    height: finalStageHeight,
+    width: stage.stageWidth,
+    height: stage.stageHeight,
     marginInline: "auto",
   };
   const finalCameraLayerStyle: CSSProperties = {
@@ -432,7 +442,18 @@ export function PowerCanvasViewport({
     >
       <div
         ref={viewportRef}
-        className="pts-power-viewport h-full min-h-0 min-w-0 overflow-auto overscroll-contain bg-muted/50 p-4 sm:p-8"
+        className={cx(
+          "pts-power-viewport h-full min-h-0 min-w-0 overflow-auto overscroll-contain bg-muted/50 p-4 sm:p-8",
+          interaction.isPanning && "pts-power-viewport--panning",
+          interaction.isPanReady && !interaction.isPanning && "pts-power-viewport--pan-ready",
+        )}
+        onPointerEnter={interaction.onPointerEnter}
+        onPointerLeave={interaction.onPointerLeave}
+        onPointerDown={interaction.onPointerDown}
+        onPointerMove={interaction.onPointerMove}
+        onPointerUp={interaction.onPointerUp}
+        onPointerCancel={interaction.onPointerCancel}
+        onClickCapture={interaction.onClickCapture}
         onClick={onBackgroundClick}
       >
         <div ref={stageRef} className="pts-power-camera-stage" style={finalStageStyle}>
@@ -452,7 +473,7 @@ export function PowerCanvasViewport({
         stageRef={stageRef}
         contentRef={contentRef}
         camera={camera}
-        stage={finalStage}
+        stage={stage}
       />
 
       <div
