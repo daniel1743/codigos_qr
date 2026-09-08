@@ -3056,8 +3056,8 @@ export function Inspector() {
   const { state } = useStudio();
   const block = state.config.blocks.find((b) => b.id === state.selectedBlockId);
   return (
-    <aside className="flex h-full w-[320px] shrink-0 flex-col border-l border-border bg-card">
-      <div className="min-h-0 flex-1 overflow-y-auto">
+    <aside className="flex h-full min-h-0 w-[320px] shrink-0 flex-col overflow-hidden border-l border-border bg-card">
+      <div className="pts-inspector-scroll pts-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain">
         {block ? <BlockInspector block={block} /> : <ProfileInspector />}
       </div>
     </aside>

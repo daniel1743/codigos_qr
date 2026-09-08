@@ -22,6 +22,10 @@ export interface PowerCanvasStageGeometry {
   scaledContentHeight: number;
 }
 
+function finiteDimension(value: number): number {
+  return Number.isFinite(value) && value > 0 ? value : 0;
+}
+
 export function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
@@ -32,14 +36,24 @@ export function calculateFitZoom({
   contentWidth,
   contentHeight,
 }: PowerCanvasDimensions): number {
-  if (viewportWidth <= 0 || viewportHeight <= 0 || contentWidth <= 0 || contentHeight <= 0) {
+  const safeViewportWidth = finiteDimension(viewportWidth);
+  const safeViewportHeight = finiteDimension(viewportHeight);
+  const safeContentWidth = finiteDimension(contentWidth);
+  const safeContentHeight = finiteDimension(contentHeight);
+
+  if (
+    safeViewportWidth === 0 ||
+    safeViewportHeight === 0 ||
+    safeContentWidth === 0 ||
+    safeContentHeight === 0
+  ) {
     return 1;
   }
 
-  const availableWidth = Math.max(1, viewportWidth - POWER_CANVAS_HORIZONTAL_PADDING);
-  const availableHeight = Math.max(1, viewportHeight - POWER_CANVAS_VERTICAL_PADDING);
+  const availableWidth = Math.max(1, safeViewportWidth - POWER_CANVAS_HORIZONTAL_PADDING);
+  const availableHeight = Math.max(1, safeViewportHeight - POWER_CANVAS_VERTICAL_PADDING);
   return clamp(
-    Math.min(availableWidth / contentWidth, availableHeight / contentHeight, 1),
+    Math.min(availableWidth / safeContentWidth, availableHeight / safeContentHeight, 1),
     POWER_CANVAS_MIN_ZOOM,
     1,
   );
@@ -68,28 +82,26 @@ export function calculateStageGeometry(
   scale: number,
 ): PowerCanvasStageGeometry {
   const safeScale = Number.isFinite(scale) && scale > 0 ? scale : 1;
-  const scaledContentWidth = Math.max(1, dimensions.contentWidth) * safeScale;
-  const scaledContentHeight = Math.max(1, dimensions.contentHeight) * safeScale;
-  const widthFits = scaledContentWidth + POWER_CANVAS_OVERSCAN * 2 <= dimensions.viewportWidth;
-  const heightFits = scaledContentHeight + POWER_CANVAS_OVERSCAN * 2 <= dimensions.viewportHeight;
+  const viewportWidth = finiteDimension(dimensions.viewportWidth);
+  const viewportHeight = finiteDimension(dimensions.viewportHeight);
+  const scaledContentWidth = Math.max(1, finiteDimension(dimensions.contentWidth)) * safeScale;
+  const scaledContentHeight = Math.max(1, finiteDimension(dimensions.contentHeight)) * safeScale;
+  const widthFits = scaledContentWidth + POWER_CANVAS_OVERSCAN * 2 <= viewportWidth;
+  const heightFits = scaledContentHeight + POWER_CANVAS_OVERSCAN * 2 <= viewportHeight;
   const stageWidth = Math.max(
     1,
-    widthFits ? dimensions.viewportWidth : scaledContentWidth + POWER_CANVAS_OVERSCAN * 2,
+    widthFits ? viewportWidth : scaledContentWidth + POWER_CANVAS_OVERSCAN * 2,
   );
   const stageHeight = Math.max(
     1,
-    heightFits ? dimensions.viewportHeight : scaledContentHeight + POWER_CANVAS_OVERSCAN * 2,
+    heightFits ? viewportHeight : scaledContentHeight + POWER_CANVAS_OVERSCAN * 2,
   );
 
   return {
     stageWidth,
     stageHeight,
-    originX: widthFits
-      ? (dimensions.viewportWidth - scaledContentWidth) / 2
-      : POWER_CANVAS_OVERSCAN,
-    originY: heightFits
-      ? (dimensions.viewportHeight - scaledContentHeight) / 2
-      : POWER_CANVAS_OVERSCAN,
+    originX: widthFits ? (viewportWidth - scaledContentWidth) / 2 : POWER_CANVAS_OVERSCAN,
+    originY: heightFits ? (viewportHeight - scaledContentHeight) / 2 : POWER_CANVAS_OVERSCAN,
     scaledContentWidth,
     scaledContentHeight,
   };

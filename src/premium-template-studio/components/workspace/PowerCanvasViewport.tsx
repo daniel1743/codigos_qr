@@ -8,6 +8,7 @@ import {
 } from "react";
 import { cx } from "../../utils";
 import { usePowerCanvasCamera } from "./usePowerCanvasCamera";
+import { calculateFitZoom } from "./powerCanvasCameraMath";
 
 interface PowerCanvasViewportProps {
   children: ReactNode;
@@ -179,34 +180,266 @@ export function PowerCanvasViewport({
   contentWidth,
   onBackgroundClick,
 }: PowerCanvasViewportProps) {
-  const { viewportRef, contentRef, camera, stage, controls } = usePowerCanvasCamera();
+  const reconstructionStep =
+    import.meta.env.DEV && typeof window !== "undefined"
+      ? new URLSearchParams(window.location.search).get("cameraDebug")
+      : null;
+  const requestedControlledScale =
+    import.meta.env.DEV && typeof window !== "undefined"
+      ? Number(new URLSearchParams(window.location.search).get("cameraScale") ?? 1)
+      : 1;
+  const controlledScale = [0.5, 0.75, 1, 1.25].includes(requestedControlledScale)
+    ? requestedControlledScale
+    : 1;
+  const { viewportRef, contentRef, camera, controls } = usePowerCanvasCamera();
   const stageRef = useRef<HTMLDivElement | null>(null);
-  const stageStyle: CSSProperties = {
-    position: "relative",
-    width: stage.stageWidth,
-    height: stage.stageHeight,
+  const reconstructionViewportRef = useRef<HTMLDivElement | null>(null);
+  const reconstructionContentRef = useRef<HTMLDivElement | null>(null);
+  const [reconstructionContentHeight, setReconstructionContentHeight] = useState(1);
+  const [reconstructionViewportSize, setReconstructionViewportSize] = useState({
+    width: 0,
+    height: 0,
+  });
+
+  useEffect(() => {
+    if (
+      reconstructionStep !== "stage" &&
+      reconstructionStep !== "camera1" &&
+      reconstructionStep !== "scale" &&
+      reconstructionStep !== "fit"
+    )
+      return;
+
+    let cancelled = false;
+    const frameId = requestAnimationFrame(() => {
+      if (cancelled) return;
+      const content = reconstructionContentRef.current;
+      const nextHeight = Math.max(1, content?.scrollHeight ?? 0, content?.offsetHeight ?? 0);
+      setReconstructionContentHeight((previous) =>
+        previous === nextHeight ? previous : nextHeight,
+      );
+      const viewport = reconstructionViewportRef.current;
+      const nextViewportSize = {
+        width: Math.max(0, viewport?.clientWidth ?? 0),
+        height: Math.max(0, viewport?.clientHeight ?? 0),
+      };
+      setReconstructionViewportSize((previous) =>
+        previous.width === nextViewportSize.width && previous.height === nextViewportSize.height
+          ? previous
+          : nextViewportSize,
+      );
+    });
+
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(frameId);
+    };
+  }, [contentWidth, reconstructionStep]);
+  const reconstructionFitZoom = calculateFitZoom({
+    viewportWidth: reconstructionViewportSize.width,
+    viewportHeight: reconstructionViewportSize.height,
+    contentWidth: Math.max(1, contentWidth),
+    contentHeight: reconstructionContentHeight,
+  });
+
+  if (reconstructionStep === "viewport") {
+    return (
+      <div
+        ref={reconstructionViewportRef}
+        data-camera-debug-mode="CAMERA_ON"
+        data-camera-reconstruction-step="VIEWPORT_ONLY"
+        className="relative h-full max-h-full w-full min-h-0 min-w-0 flex-1 overflow-auto overscroll-contain bg-muted/50 p-4 sm:p-8"
+        onClick={onBackgroundClick}
+      >
+        <div onClick={(event) => event.stopPropagation()}>{children}</div>
+      </div>
+    );
+  }
+
+  if (reconstructionStep === "stage") {
+    return (
+      <div
+        ref={reconstructionViewportRef}
+        data-camera-debug-mode="CAMERA_ON"
+        data-camera-reconstruction-step="STAGE_NO_TRANSFORM"
+        className="relative h-full max-h-full w-full min-h-0 min-w-0 flex-1 overflow-auto overscroll-contain bg-muted/50 p-4 sm:p-8"
+        onClick={onBackgroundClick}
+      >
+        <div
+          className="pts-power-camera-stage"
+          style={{
+            position: "relative",
+            width: Math.max(1, contentWidth),
+            height: reconstructionContentHeight,
+          }}
+        >
+          <div ref={reconstructionContentRef} onClick={(event) => event.stopPropagation()}>
+            {children}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (reconstructionStep === "camera1") {
+    return (
+      <div
+        ref={reconstructionViewportRef}
+        data-camera-debug-mode="CAMERA_ON"
+        data-camera-reconstruction-step="CAMERA_SCALE_1"
+        className="relative h-full max-h-full w-full min-h-0 min-w-0 flex-1 overflow-auto overscroll-contain bg-muted/50 p-4 sm:p-8"
+        onClick={onBackgroundClick}
+      >
+        <div
+          className="pts-power-camera-stage"
+          style={{
+            position: "relative",
+            width: Math.max(1, contentWidth),
+            height: reconstructionContentHeight,
+          }}
+        >
+          <div
+            ref={reconstructionContentRef}
+            className="pts-power-camera-layer"
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: Math.max(1, contentWidth),
+              transform: "translate3d(0, 0, 0) scale(1)",
+              transformOrigin: "top left",
+            }}
+            onClick={(event) => event.stopPropagation()}
+          >
+            {children}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (reconstructionStep === "scale") {
+    return (
+      <div
+        ref={reconstructionViewportRef}
+        data-camera-debug-mode="CAMERA_ON"
+        data-camera-reconstruction-step="CONTROLLED_SCALE"
+        data-camera-controlled-scale={controlledScale}
+        className="relative h-full max-h-full w-full min-h-0 min-w-0 flex-1 overflow-auto overscroll-contain bg-muted/50 p-4 sm:p-8"
+        onClick={onBackgroundClick}
+      >
+        <div
+          className="pts-power-camera-stage"
+          style={{
+            position: "relative",
+            width: Math.max(1, contentWidth * controlledScale),
+            height: Math.max(1, reconstructionContentHeight * controlledScale),
+          }}
+        >
+          <div
+            ref={reconstructionContentRef}
+            className="pts-power-camera-layer"
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: Math.max(1, contentWidth),
+              transform: `scale(${controlledScale})`,
+              transformOrigin: "top left",
+            }}
+            onClick={(event) => event.stopPropagation()}
+          >
+            {children}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (reconstructionStep === "fit") {
+    return (
+      <div
+        ref={reconstructionViewportRef}
+        data-camera-debug-mode="CAMERA_ON"
+        data-camera-reconstruction-step="FIT_ZOOM"
+        data-camera-fit-zoom={reconstructionFitZoom}
+        className="relative h-full max-h-full w-full min-h-0 min-w-0 flex-1 overflow-auto overscroll-contain bg-muted/50 p-4 sm:p-8"
+        onClick={onBackgroundClick}
+      >
+        <div
+          className="pts-power-camera-stage"
+          style={{
+            position: "relative",
+            width: Math.max(1, contentWidth * reconstructionFitZoom),
+            height: Math.max(1, reconstructionContentHeight * reconstructionFitZoom),
+          }}
+        >
+          <div
+            ref={reconstructionContentRef}
+            className="pts-power-camera-layer"
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: Math.max(1, contentWidth),
+              transform: `scale(${reconstructionFitZoom})`,
+              transformOrigin: "top left",
+            }}
+            onClick={(event) => event.stopPropagation()}
+          >
+            {children}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const finalIntrinsicWidth = Math.max(1, contentWidth);
+  const finalIntrinsicHeight = Math.max(1, camera.contentHeight);
+  const finalStageWidth = Math.max(1, finalIntrinsicWidth * camera.scale);
+  const finalStageHeight = Math.max(1, finalIntrinsicHeight * camera.scale);
+  const finalStage = {
+    stageWidth: finalStageWidth,
+    stageHeight: finalStageHeight,
+    originX: 0,
+    originY: 0,
+    scaledContentWidth: finalStageWidth,
+    scaledContentHeight: finalStageHeight,
   };
-  const cameraLayerStyle: CSSProperties = {
+  const finalStageStyle: CSSProperties = {
+    position: "relative",
+    width: finalStageWidth,
+    height: finalStageHeight,
+    marginInline: "auto",
+  };
+  const finalCameraLayerStyle: CSSProperties = {
     position: "absolute",
-    left: stage.originX,
-    top: stage.originY,
-    width: Math.max(1, contentWidth),
-    transform: `translate3d(${camera.translateX}px, ${camera.translateY}px, 0) scale(${camera.scale})`,
+    top: 0,
+    left: 0,
+    width: finalIntrinsicWidth,
+    transform: `scale(${camera.scale})`,
     transformOrigin: "top left",
   };
 
   return (
-    <div className="pts-power-viewport-shell relative min-h-0 min-w-0 flex-1">
+    <div
+      data-camera-debug-mode="CAMERA_ON"
+      data-camera-reconstruction-step="USER_ZOOM"
+      data-camera-fit-zoom={camera.fitZoom}
+      data-camera-user-zoom={camera.userZoom}
+      data-camera-effective-scale={camera.scale}
+      className="pts-power-viewport-shell relative h-full max-h-full min-h-0 min-w-0 flex-1 overflow-hidden"
+    >
       <div
         ref={viewportRef}
         className="pts-power-viewport h-full min-h-0 min-w-0 overflow-auto overscroll-contain bg-muted/50 p-4 sm:p-8"
         onClick={onBackgroundClick}
       >
-        <div ref={stageRef} className="pts-power-camera-stage" style={stageStyle}>
+        <div ref={stageRef} className="pts-power-camera-stage" style={finalStageStyle}>
           <div
             ref={contentRef}
             className="pts-power-camera-layer"
-            style={cameraLayerStyle}
+            style={finalCameraLayerStyle}
             onClick={(event) => event.stopPropagation()}
           >
             {children}
@@ -219,7 +452,7 @@ export function PowerCanvasViewport({
         stageRef={stageRef}
         contentRef={contentRef}
         camera={camera}
-        stage={stage}
+        stage={finalStage}
       />
 
       <div

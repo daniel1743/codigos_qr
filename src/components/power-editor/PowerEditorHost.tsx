@@ -161,8 +161,11 @@ export function PowerEditorHost({ profileId }: PowerEditorHostProps) {
   }
 
   return (
-    <main data-testid="power-editor" className="min-h-screen bg-background text-foreground">
-      <div className="flex items-center justify-between gap-4 border-b border-border bg-card px-4 py-3">
+    <main
+      data-testid="power-editor"
+      className="flex h-[100dvh] min-h-0 flex-col overflow-hidden bg-background text-foreground"
+    >
+      <div className="flex shrink-0 items-center justify-between gap-4 border-b border-border bg-card px-4 py-3">
         <div className="min-w-0">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
             Power Editor V2

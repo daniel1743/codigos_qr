@@ -172,7 +172,10 @@
 
 /* ---- Phase 1 workspace surfaces ---- */
 .pts-desktop-panel {
+  height: 100%;
+  min-height: 0;
   min-width: 0;
+  overflow: hidden;
   flex: 0 0 auto;
 }
 .pts-desktop-panel--collapsed {

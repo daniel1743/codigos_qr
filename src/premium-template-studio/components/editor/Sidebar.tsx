@@ -964,9 +964,9 @@ export function SidebarTabs() {
 
 export function Sidebar() {
   return (
-    <aside className="flex h-full w-[320px] shrink-0 flex-col border-r border-border bg-card">
+    <aside className="flex h-full min-h-0 w-[320px] shrink-0 flex-col overflow-hidden border-r border-border bg-card">
       <SidebarTabs />
-      <div className="min-h-0 flex-1 overflow-y-auto">
+      <div className="pts-tools-scroll pts-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain">
         <SidebarContent />
       </div>
     </aside>

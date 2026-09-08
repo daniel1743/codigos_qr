@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Monitor,
   Tablet,
@@ -146,55 +146,177 @@ function Toolbar({ onExport }: { onExport: () => void }) {
   );
 }
 
+type BinaryIsolationMode = "CAMERA_ON" | "CAMERA_BYPASS";
+
+type BinaryIsolationEvidence = {
+  mode: BinaryIsolationMode;
+  profileId: string;
+  schemaVersion: number;
+  blockCount: number;
+  firstFiveBlockIds: string[];
+  firstFiveBlockTypes: string[];
+  breakpoint: Breakpoint;
+  renderer: Record<string, unknown>;
+  firstBlock: Record<string, unknown>;
+};
+
+function binaryElementEvidence(
+  root: HTMLElement | null,
+  selector: string,
+): Record<string, unknown> {
+  const element = root?.querySelector<HTMLElement>(selector) ?? null;
+  if (!element) return { exists: "NO" };
+
+  const rect = element.getBoundingClientRect();
+  const styles = getComputedStyle(element);
+  return {
+    exists: "YES",
+    offsetWidth: element.offsetWidth,
+    offsetHeight: element.offsetHeight,
+    rect: {
+      x: rect.x,
+      y: rect.y,
+      width: rect.width,
+      height: rect.height,
+    },
+    display: styles.display,
+    visibility: styles.visibility,
+    opacity: styles.opacity,
+  };
+}
+
+function BinaryIsolationDiagnostic({
+  config,
+  breakpoint,
+  mode,
+}: {
+  config: BioTemplateConfig;
+  breakpoint: Breakpoint;
+  mode: BinaryIsolationMode;
+}) {
+  const [evidence, setEvidence] = useState<BinaryIsolationEvidence | null>(null);
+
+  useEffect(() => {
+    if (!import.meta.env.DEV || typeof document === "undefined") return;
+
+    let cancelled = false;
+    const frameId = requestAnimationFrame(() => {
+      if (cancelled) return;
+
+      const root = document.querySelector<HTMLElement>(`[data-camera-debug-mode="${mode}"]`);
+      const nextEvidence: BinaryIsolationEvidence = {
+        mode,
+        profileId: new URLSearchParams(window.location.search).get("profileId") ?? "missing",
+        schemaVersion: config.schemaVersion,
+        blockCount: config.blocks.length,
+        firstFiveBlockIds: config.blocks.slice(0, 5).map((block) => block.id),
+        firstFiveBlockTypes: config.blocks.slice(0, 5).map((block) => block.type),
+        breakpoint,
+        renderer: binaryElementEvidence(root, ".pts-page"),
+        firstBlock: binaryElementEvidence(root, ".pts-block"),
+      };
+
+      console.info("[PowerEditor][camera-binary]", nextEvidence);
+      setEvidence(nextEvidence);
+    });
+
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(frameId);
+    };
+  }, [config, breakpoint, mode]);
+
+  if (!import.meta.env.DEV || !evidence) return null;
+  return (
+    <pre
+      aria-label="DEV camera binary diagnostics"
+      className="pointer-events-none fixed bottom-2 right-2 z-[60] max-h-48 max-w-[min(90%,42rem)] overflow-auto rounded bg-black/85 p-2 text-[9px] leading-tight text-white"
+    >
+      {JSON.stringify(evidence, null, 2)}
+    </pre>
+  );
+}
+
 function Canvas() {
   const { state, dispatch, breakpoint, previewing } = useStudio();
   const frameWidth = BREAKPOINT_WIDTHS[breakpoint];
+  const cameraBypass =
+    import.meta.env.DEV &&
+    typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).get("cameraDebug") === "bypass";
 
-  return (
-    <PowerCanvasViewport
-      contentWidth={frameWidth}
-      onBackgroundClick={() => dispatch({ type: "selectBlock", id: null })}
-    >
-      <div
-        className="mx-auto overflow-hidden rounded-2xl bg-background shadow-xl ring-1 ring-border transition-[max-width] duration-300"
-        style={{ maxWidth: frameWidth }}
-      >
-        <TemplateRenderer
+  const templateRenderer = (
+    <TemplateRenderer
+      config={state.config}
+      breakpoint={breakpoint}
+      mode={previewing ? "public" : "edit"}
+      editing={
+        previewing
+          ? undefined
+          : {
+              selectedBlockId: state.selectedBlockId,
+              onSelect: (id) => dispatch({ type: "selectBlock", id }),
+              onInlineEdit: (path, value) => {
+                // Canvas paths look like `blocks.<blockId>.content.title`.
+                // Blocks are an array, so route them through patchBlockField.
+                const match = /^blocks\.([^.]+)\.(.+)$/.exec(path);
+                if (match) {
+                  dispatch({
+                    type: "patchBlockField",
+                    id: match[1]!,
+                    path: match[2]!,
+                    value,
+                  });
+                } else {
+                  dispatch({ type: "patch", path, value });
+                }
+              },
+              onMove: (id, direction) => dispatch({ type: "moveBlock", id, direction }),
+              onDuplicate: (id) => dispatch({ type: "duplicateBlock", id }),
+              onToggleHidden: (id) => dispatch({ type: "toggleBlockHidden", id }),
+              onDelete: (id) => dispatch({ type: "deleteBlock", id }),
+              onReorder: (sourceId, targetId) =>
+                dispatch({ type: "reorderBlock", sourceId, targetId }),
+            }
+      }
+    />
+  );
+
+  if (cameraBypass) {
+    return (
+      <>
+        <div
+          data-camera-debug-mode="CAMERA_BYPASS"
+          className="h-full max-h-full min-h-0 min-w-0 w-full overflow-auto bg-muted/50 p-4 sm:p-8"
+          style={{ width: "100%", height: "100%", minWidth: 0, minHeight: 0, overflow: "auto" }}
+          onClick={() => dispatch({ type: "selectBlock", id: null })}
+        >
+          {templateRenderer}
+        </div>
+        <BinaryIsolationDiagnostic
           config={state.config}
           breakpoint={breakpoint}
-          mode={previewing ? "public" : "edit"}
-          editing={
-            previewing
-              ? undefined
-              : {
-                  selectedBlockId: state.selectedBlockId,
-                  onSelect: (id) => dispatch({ type: "selectBlock", id }),
-                  onInlineEdit: (path, value) => {
-                    // Canvas paths look like `blocks.<blockId>.content.title`.
-                    // Blocks are an array, so route them through patchBlockField.
-                    const match = /^blocks\.([^.]+)\.(.+)$/.exec(path);
-                    if (match) {
-                      dispatch({
-                        type: "patchBlockField",
-                        id: match[1]!,
-                        path: match[2]!,
-                        value,
-                      });
-                    } else {
-                      dispatch({ type: "patch", path, value });
-                    }
-                  },
-                  onMove: (id, direction) => dispatch({ type: "moveBlock", id, direction }),
-                  onDuplicate: (id) => dispatch({ type: "duplicateBlock", id }),
-                  onToggleHidden: (id) => dispatch({ type: "toggleBlockHidden", id }),
-                  onDelete: (id) => dispatch({ type: "deleteBlock", id }),
-                  onReorder: (sourceId, targetId) =>
-                    dispatch({ type: "reorderBlock", sourceId, targetId }),
-                }
-          }
+          mode="CAMERA_BYPASS"
         />
-      </div>
-    </PowerCanvasViewport>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <PowerCanvasViewport
+        contentWidth={frameWidth}
+        onBackgroundClick={() => dispatch({ type: "selectBlock", id: null })}
+      >
+        <div
+          className="mx-auto overflow-hidden rounded-2xl bg-background shadow-xl ring-1 ring-border transition-[max-width] duration-300"
+          style={{ maxWidth: frameWidth }}
+        >
+          {templateRenderer}
+        </div>
+      </PowerCanvasViewport>
+      <BinaryIsolationDiagnostic config={state.config} breakpoint={breakpoint} mode="CAMERA_ON" />
+    </>
   );
 }
 
@@ -361,7 +483,7 @@ function StudioShell() {
   const { error } = useStudio();
 
   return (
-    <div className="pts-scope flex h-full min-h-[100dvh] flex-col bg-background text-foreground">
+    <div className="pts-scope flex h-[100dvh] max-h-[100dvh] min-h-0 flex-col overflow-hidden bg-background text-foreground">
       <Toolbar onExport={() => setExporting(true)} />
       {error && (
         <div
@@ -371,7 +493,7 @@ function StudioShell() {
           {error}
         </div>
       )}
-      <div className="flex min-h-0 flex-1">
+      <div className="pts-studio-workspace flex min-h-0 flex-1 overflow-hidden">
         <div
           className={cx(
             "pts-desktop-panel pts-desktop-panel--tools hidden lg:block",
@@ -392,7 +514,7 @@ function StudioShell() {
               </button>
             </div>
           ) : (
-            <div className="relative h-full">
+            <div className="relative h-full min-h-0 overflow-hidden">
               <Sidebar />
               <button
                 type="button"
@@ -428,7 +550,7 @@ function StudioShell() {
               </button>
             </div>
           ) : (
-            <div className="relative h-full">
+            <div className="relative h-full min-h-0 overflow-hidden">
               <Inspector />
               <button
                 type="button"

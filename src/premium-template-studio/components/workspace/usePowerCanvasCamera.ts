@@ -90,11 +90,23 @@ export function usePowerCanvasCamera(): PowerCanvasCameraResult {
     const content = contentRef.current;
     if (!viewport || !content || typeof ResizeObserver === "undefined") return;
 
-    const observer = new ResizeObserver(measureNow);
+    let callbackCount = 0;
+    const observer = new ResizeObserver(() => {
+      callbackCount += 1;
+      if (import.meta.env.DEV) {
+        viewport.dataset["cameraResizeObserverCallbacks"] = String(callbackCount);
+      }
+      measureNow();
+    });
     observer.observe(viewport);
     observer.observe(content);
     measureNow();
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      if (import.meta.env.DEV) {
+        delete viewport.dataset["cameraResizeObserverCallbacks"];
+      }
+    };
   }, [measureNow]);
 
   const fitZoom = calculateFitZoom(size);
