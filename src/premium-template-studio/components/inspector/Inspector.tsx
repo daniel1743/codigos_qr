@@ -1236,42 +1236,47 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
 
       {/* Image Section */}
       <Section title="Image">
-        <AssetField
-          label="Top Banner Image"
-          accept="image/*"
-          value={bannerImage.url ?? ""}
-          onChange={(v) => field("content.bannerImage.url", v)}
-        />
-        {bannerImage.url && (
-          <>
-            <Field label="Banner Blur">
-              <NumberSlider
-                value={bannerImage.blur ?? 0}
-                min={0}
-                max={20}
-                step={1}
-                onChange={(v) => field("content.bannerImage.blur", v)}
-              />
-            </Field>
-            <Field label="Fit">
-              <Segmented
-                size="sm"
-                value={bannerImage.fit ?? "cover"}
-                options={[
-                  { value: "cover", label: "Cover" },
-                  { value: "contain", label: "Contain" },
-                ]}
-                onChange={(v) => field("content.bannerImage.fit", v)}
-              />
-            </Field>
-            <Field label="Position">
-              <PositionGrid
-                value={bannerImage.position ?? "center"}
-                onChange={(v) => field("content.bannerImage.position", v)}
-              />
-            </Field>
-          </>
-        )}
+        {/* Hero foreground/media image controls — contextual sub-target of the
+            selected Hero. Wrapped exactly (not the whole Image section) so the
+            exact hero-image group centers in the Inspector. */}
+        <div data-inspector-focus="hero-image" {...contextualFocusProps("hero-image")}>
+          <AssetField
+            label="Top Banner Image"
+            accept="image/*"
+            value={bannerImage.url ?? ""}
+            onChange={(v) => field("content.bannerImage.url", v)}
+          />
+          {bannerImage.url && (
+            <>
+              <Field label="Banner Blur">
+                <NumberSlider
+                  value={bannerImage.blur ?? 0}
+                  min={0}
+                  max={20}
+                  step={1}
+                  onChange={(v) => field("content.bannerImage.blur", v)}
+                />
+              </Field>
+              <Field label="Fit">
+                <Segmented
+                  size="sm"
+                  value={bannerImage.fit ?? "cover"}
+                  options={[
+                    { value: "cover", label: "Cover" },
+                    { value: "contain", label: "Contain" },
+                  ]}
+                  onChange={(v) => field("content.bannerImage.fit", v)}
+                />
+              </Field>
+              <Field label="Position">
+                <PositionGrid
+                  value={bannerImage.position ?? "center"}
+                  onChange={(v) => field("content.bannerImage.position", v)}
+                />
+              </Field>
+            </>
+          )}
+        </div>
 
         <AssetField
           label="Full Background Image"

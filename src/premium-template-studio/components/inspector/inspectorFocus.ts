@@ -25,7 +25,8 @@ export type ContextualTarget =
   | "hero-title"
   | "hero-subtitle"
   | "hero-description"
-  | "hero-cta";
+  | "hero-cta"
+  | "hero-image";
 
 export type InspectorFocusTarget = ContextualTarget;
 

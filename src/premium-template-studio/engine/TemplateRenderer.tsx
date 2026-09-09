@@ -48,6 +48,7 @@ export interface EditingHandlers {
   onSelectProfileTarget?: ((target: ProfileTarget) => void) | undefined;
   onSelectHeroCta?: ((blockId: string) => void) | undefined;
   onSelectHeroText?: ((blockId: string, target: HeroTextTarget) => void) | undefined;
+  onSelectHeroImage?: ((blockId: string) => void) | undefined;
   onInlineEdit?: ((path: string, value: string) => void) | undefined;
   onMove?: ((id: string, direction: -1 | 1) => void) | undefined;
   onDuplicate?: ((id: string) => void) | undefined;
@@ -473,6 +474,7 @@ function TemplateRendererImpl({
       onSelectProfileTarget: editing?.onSelectProfileTarget,
       onSelectHeroCta: editing?.onSelectHeroCta,
       onSelectHeroText: editing?.onSelectHeroText,
+      onSelectHeroImage: editing?.onSelectHeroImage,
       onInlineEdit: editing?.onInlineEdit,
       onTrack,
     }),
@@ -486,6 +488,7 @@ function TemplateRendererImpl({
       editing?.onSelectProfileTarget,
       editing?.onSelectHeroCta,
       editing?.onSelectHeroText,
+      editing?.onSelectHeroImage,
       editing?.onInlineEdit,
       onTrack,
     ],

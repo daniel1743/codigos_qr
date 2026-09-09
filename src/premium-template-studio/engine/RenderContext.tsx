@@ -25,6 +25,8 @@ export interface RenderContextValue {
   onSelectHeroCta?: ((blockId: string) => void) | undefined;
   /** Selecting a Hero text sub-target (title/subtitle/description/eyebrow). */
   onSelectHeroText?: ((blockId: string, target: HeroTextTarget) => void) | undefined;
+  /** Selecting the Hero foreground/media image (parent block id + focus). */
+  onSelectHeroImage?: ((blockId: string) => void) | undefined;
   /** inline editing hook: path is dot-notation into the config */
   onInlineEdit?: ((path: string, value: string) => void) | undefined;
   /** ANALYTICS ADAPTER hook */

@@ -40,7 +40,8 @@ function SmartIcon({ name, size = 14 }: { name?: string; size?: number }) {
 }
 
 export function HeroBlock({ block }: { block: TemplateBlock }) {
-  const { theme, mode, breakpoint, onSelectHeroCta, onSelectHeroText } = useRender();
+  const { theme, mode, breakpoint, onSelectHeroCta, onSelectHeroText, onSelectHeroImage } =
+    useRender();
 
   const content = block.content;
   const variant = block.variant ?? "centered";
@@ -123,6 +124,27 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
             onClick: (e: React.MouseEvent) => {
               e.stopPropagation();
               onSelectHeroText(block.id, target);
+            },
+          }
+        : {}),
+    };
+  };
+
+  // Edit-mode click on the Hero foreground/media image (bannerImage, i.e. the
+  // distinct media `<img>` — NOT the background surface, NOT the avatar) selects
+  // the parent Hero (via the studio handler) and requests a one-shot Inspector
+  // focus on the exact image controls. Carries `data-editor-target="hero-image"`
+  // so the Inspector → Canvas direction can reveal the exact element.
+  // Public/preview renders neither, so public output is unchanged.
+  const heroImageClickProps = () => {
+    if (mode !== "edit") return {};
+    return {
+      "data-editor-target": "hero-image",
+      ...(onSelectHeroImage
+        ? {
+            onClick: (e: React.MouseEvent) => {
+              e.stopPropagation();
+              onSelectHeroImage(block.id);
             },
           }
         : {}),
@@ -262,6 +284,7 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
         <img
           src={bannerImage.url}
           alt=""
+          {...heroImageClickProps()}
           style={{
             width: "100%",
             height: "100%",
@@ -561,6 +584,7 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
             <img
               src={bannerImage.url}
               alt=""
+              {...heroImageClickProps()}
               style={{
                 position: "absolute",
                 inset: 0,
