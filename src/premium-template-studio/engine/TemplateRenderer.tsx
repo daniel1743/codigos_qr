@@ -39,6 +39,7 @@ import { cx } from "../utils";
 export interface EditingHandlers {
   selectedBlockId?: string | null | undefined;
   onSelect?: ((id: string) => void) | undefined;
+  onSelectProfileCover?: (() => void) | undefined;
   onInlineEdit?: ((path: string, value: string) => void) | undefined;
   onMove?: ((id: string, direction: -1 | 1) => void) | undefined;
   onDuplicate?: ((id: string) => void) | undefined;
@@ -460,6 +461,7 @@ function TemplateRendererImpl({
       mode,
       selectedBlockId: editing?.selectedBlockId,
       onSelectBlock: editing?.onSelect,
+      onSelectProfileCover: editing?.onSelectProfileCover,
       onInlineEdit: editing?.onInlineEdit,
       onTrack,
     }),
@@ -469,6 +471,7 @@ function TemplateRendererImpl({
       mode,
       editing?.selectedBlockId,
       editing?.onSelect,
+      editing?.onSelectProfileCover,
       editing?.onInlineEdit,
       onTrack,
     ],

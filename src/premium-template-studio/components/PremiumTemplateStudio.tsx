@@ -27,6 +27,7 @@ import { TemplateRenderer } from "../engine/TemplateRenderer";
 import { BREAKPOINT_WIDTHS } from "../constants/layouts";
 import { Sidebar, SidebarContent, SidebarTabs } from "./editor/Sidebar";
 import { Inspector, InspectorContent } from "./inspector/Inspector";
+import { requestInspectorFocus } from "./inspector/inspectorFocus";
 import { cx } from "../utils";
 import { createDemoConfig } from "../templates/definitions";
 import { parseTemplateJson } from "../engine/TemplateValidator";
@@ -256,6 +257,14 @@ function Canvas() {
           : {
               selectedBlockId: state.selectedBlockId,
               onSelect: (id) => dispatch({ type: "selectBlock", id }),
+              onSelectProfileCover: () => {
+                // Clear any block selection so the Inspector shows the Profile
+                // panel, then request the Cover/Banner section be brought into
+                // view. Only the Inspector scroll moves — never the Canvas zoom
+                // or pan (the camera is untouched).
+                dispatch({ type: "selectBlock", id: null });
+                requestInspectorFocus("profile-cover");
+              },
               onInlineEdit: (path, value) => {
                 // Canvas paths look like `blocks.<blockId>.content.title`.
                 // Blocks are an array, so route them through patchBlockField.

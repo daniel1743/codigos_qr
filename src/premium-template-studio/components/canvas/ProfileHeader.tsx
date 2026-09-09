@@ -16,7 +16,7 @@ export function ProfileHeader({
   profile: TemplateProfile;
   layout: TemplateLayout;
 }) {
-  const { theme, breakpoint } = useRender();
+  const { theme, breakpoint, mode, onSelectProfileCover } = useRender();
   const rule = layout.responsive[breakpoint];
   const align = layout.header === "overlap" ? "center" : rule.align;
   const avatarAlign = profile.avatar.align ?? align;
@@ -139,12 +139,18 @@ export function ProfileHeader({
     <header style={{ position: "relative" }}>
       {banner.enabled ? (
         <div
+          onClick={(e) => {
+            if (mode !== "edit" || !onSelectProfileCover) return;
+            e.stopPropagation();
+            onSelectProfileCover();
+          }}
           style={{
             position: "relative",
             height: bannerHeight,
             borderRadius: banner.radius,
             overflow: "hidden",
             backgroundColor: theme.colors.surface,
+            cursor: mode === "edit" && onSelectProfileCover ? "pointer" : undefined,
           }}
         >
           {banner.imageUrl ? (
