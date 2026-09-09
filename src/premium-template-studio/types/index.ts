@@ -284,6 +284,17 @@ export interface TemplateProfile {
      * Absent ⇒ "contained" (exact legacy presentation — backward compatible).
      */
     widthMode?: "contained" | "full-bleed";
+    /**
+     * Optional lower-edge blend/fade into the page background.
+     * Absent ⇒ off (exact 5C6A presentation — backward compatible).
+     */
+    blendFade?: {
+      enabled: boolean;
+      /** vertical px of the cover that participates in the fade */
+      distance: number;
+      /** 0..1 — how strongly the bottom edge disappears */
+      strength: number;
+    };
   };
 }
 

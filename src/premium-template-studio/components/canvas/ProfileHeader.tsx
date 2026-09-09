@@ -26,6 +26,12 @@ export function ProfileBanner({
   const { theme, breakpoint, mode, onSelectProfileCover, onSelectProfileTarget } = useRender();
   const bannerHeight = breakpoint === "mobile" ? banner.mobileHeight : banner.height;
 
+  const blendFade = banner.blendFade;
+  const fadeEnabled = blendFade?.enabled === true;
+  const fadeDistance = blendFade?.distance ?? 80;
+  const fadeStrength = blendFade?.strength ?? 1;
+  const fadeAlpha = Math.round((1 - fadeStrength) * 1000) / 1000;
+
   const selectCover = () => {
     if (onSelectProfileTarget) {
       onSelectProfileTarget("profile-cover");
@@ -54,6 +60,12 @@ export function ProfileBanner({
         overflow: "hidden",
         backgroundColor: theme.colors.surface,
         cursor: mode === "edit" ? "pointer" : undefined,
+        ...(fadeEnabled
+          ? {
+              WebkitMaskImage: `linear-gradient(180deg, #000 0%, #000 calc(100% - ${fadeDistance}px), rgba(0,0,0,${fadeAlpha}) 100%)`,
+              maskImage: `linear-gradient(180deg, #000 0%, #000 calc(100% - ${fadeDistance}px), rgba(0,0,0,${fadeAlpha}) 100%)`,
+            }
+          : {}),
       }}
     >
       {banner.imageUrl ? (

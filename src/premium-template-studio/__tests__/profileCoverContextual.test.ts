@@ -165,3 +165,91 @@ describe("Profile Cover full-bleed (Phase 5C6A)", () => {
     });
   });
 });
+
+describe("Profile Cover blend/fade (Phase 5C6B)", () => {
+  describe("schema", () => {
+    it("blendFade absent is backward compatible (no fade data)", () => {
+      expect(createDemoConfig().profile.banner.blendFade).toBeUndefined();
+    });
+
+    it("accepts blendFade via canonical patch (enabled, distance, strength)", () => {
+      const state = createInitialState(createDemoConfig());
+      const next = templateReducer(state, {
+        type: "patch",
+        path: "profile.banner.blendFade",
+        value: { enabled: true, distance: 120, strength: 0.6 },
+      });
+      expect(next.config.profile.banner.blendFade).toEqual({
+        enabled: true,
+        distance: 120,
+        strength: 0.6,
+      });
+    });
+
+    it("blendFade patch preserves every other banner field", () => {
+      const cfg = createDemoConfig();
+      const next = templateReducer(createInitialState(cfg), {
+        type: "patch",
+        path: "profile.banner.blendFade",
+        value: { enabled: true, distance: 120, strength: 0.6 },
+      });
+      const b = next.config.profile.banner;
+      expect(b.enabled).toBe(cfg.profile.banner.enabled);
+      expect(b.imageUrl).toBe(cfg.profile.banner.imageUrl);
+      expect(b.height).toBe(cfg.profile.banner.height);
+      expect(b.mobileHeight).toBe(cfg.profile.banner.mobileHeight);
+      expect(b.overlay).toBe(cfg.profile.banner.overlay);
+      expect(b.blur).toBe(cfg.profile.banner.blur);
+      expect(b.gradient).toBe(cfg.profile.banner.gradient);
+      expect(b.focalX).toBe(cfg.profile.banner.focalX);
+      expect(b.focalY).toBe(cfg.profile.banner.focalY);
+      expect(b.radius).toBe(cfg.profile.banner.radius);
+      expect(b.widthMode).toBe(cfg.profile.banner.widthMode);
+    });
+  });
+
+  describe("render", () => {
+    const renderStatic = (cfg: ReturnType<typeof createDemoConfig>) =>
+      renderToStaticMarkup(
+        createElement(TemplateRenderer, {
+          config: cfg,
+          breakpoint: "desktop" as const,
+          mode: "public" as const,
+        }),
+      );
+
+    it("blend disabled produces no mask/fade effect", () => {
+      const cfg = createDemoConfig();
+      cfg.profile.banner.widthMode = "full-bleed";
+      const markup = renderStatic(cfg);
+      expect(markup).not.toContain("mask-image");
+    });
+
+    it("blend enabled produces a bottom transparency mask", () => {
+      const cfg = createDemoConfig();
+      cfg.profile.banner.blendFade = { enabled: true, distance: 80, strength: 1 };
+      const markup = renderStatic(cfg);
+      expect(markup).toContain("mask-image:linear-gradient");
+      expect(markup).toContain("-webkit-mask-image:linear-gradient");
+    });
+
+    it("full-bleed geometry is unchanged when blend is on", () => {
+      const cfg = createDemoConfig();
+      cfg.profile.banner.radius = 18;
+      cfg.profile.banner.widthMode = "full-bleed";
+      cfg.profile.banner.blendFade = { enabled: true, distance: 80, strength: 1 };
+      const markup = renderStatic(cfg);
+      expect(markup).toContain("border-radius:0 0 18px 18px");
+      expect(markup).not.toContain("100vw");
+    });
+
+    it("contained geometry is unchanged when blend is on", () => {
+      const cfg = createDemoConfig();
+      cfg.profile.banner.radius = 18;
+      cfg.profile.banner.blendFade = { enabled: true, distance: 80, strength: 1 };
+      const markup = renderStatic(cfg);
+      expect(markup).toContain("border-radius:18px");
+      expect(markup).not.toContain("border-radius:0 0");
+    });
+  });
+});

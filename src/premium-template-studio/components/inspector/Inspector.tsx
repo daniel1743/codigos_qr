@@ -436,6 +436,52 @@ function ProfileInspector() {
                   onChange={(v) => patch("profile.banner.overlay", v)}
                 />
               </Field>
+              <Toggle
+                label="Blend with Page"
+                checked={banner.blendFade?.enabled ?? false}
+                onChange={(v) =>
+                  patch("profile.banner.blendFade", {
+                    enabled: v,
+                    distance: banner.blendFade?.distance ?? 80,
+                    strength: banner.blendFade?.strength ?? 1,
+                  })
+                }
+              />
+              {banner.blendFade?.enabled ? (
+                <>
+                  <Field label="Fade Distance">
+                    <NumberSlider
+                      value={banner.blendFade?.distance ?? 80}
+                      min={24}
+                      max={300}
+                      step={8}
+                      suffix="px"
+                      onChange={(v) =>
+                        patch("profile.banner.blendFade", {
+                          enabled: true,
+                          distance: v,
+                          strength: banner.blendFade?.strength ?? 1,
+                        })
+                      }
+                    />
+                  </Field>
+                  <Field label="Fade Strength">
+                    <NumberSlider
+                      value={banner.blendFade?.strength ?? 1}
+                      min={0}
+                      max={1}
+                      step={0.05}
+                      onChange={(v) =>
+                        patch("profile.banner.blendFade", {
+                          enabled: true,
+                          distance: banner.blendFade?.distance ?? 80,
+                          strength: v,
+                        })
+                      }
+                    />
+                  </Field>
+                </>
+              ) : null}
             </>
           )}
         </Section>
