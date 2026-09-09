@@ -265,6 +265,19 @@ function Canvas() {
                 dispatch({ type: "selectBlock", id: null });
                 requestInspectorFocus("profile-cover");
               },
+              onSelectPageBackground: () => {
+                // Selecting the exposed page/template surface is the LOWEST-
+                // priority contextual selection. Clear any block selection so
+                // the Inspector switches from a block context to the page/theme
+                // context (no redundant churn if already deselected), then
+                // request the exact Page Background controls be brought into
+                // view. Only the Inspector scroll moves — never the Canvas
+                // zoom or pan (the camera is untouched).
+                if (state.selectedBlockId !== null) {
+                  dispatch({ type: "selectBlock", id: null });
+                }
+                requestInspectorFocus("page-background");
+              },
               onSelectProfileTarget: (target) => {
                 // Generalized Profile contextual selection (cover/avatar/bio).
                 // Clear any block selection so the Inspector switches from a
@@ -304,6 +317,16 @@ function Canvas() {
                   dispatch({ type: "selectBlock", id: blockId });
                 }
                 requestInspectorFocus("hero-image");
+              },
+              onSelectHeroBackground: (blockId) => {
+                // Select the parent Hero if it is not already selected (no
+                // redundant churn), then request a one-shot Inspector focus on
+                // the exact background controls. Selection is UI state — never a
+                // document mutation — and the camera is untouched.
+                if (state.selectedBlockId !== blockId) {
+                  dispatch({ type: "selectBlock", id: blockId });
+                }
+                requestInspectorFocus("hero-background");
               },
               onInlineEdit: (path, value) => {
                 // Canvas paths look like `blocks.<blockId>.content.title`.

@@ -206,8 +206,146 @@ function ProfileInspector() {
   const justifyItems =
     layout.responsive?.[breakpoint]?.justifyItems ?? layout.justifyItems ?? "stretch";
 
+  // Page Background (Phase 5C5B) — bind the EXISTING canonical fields. The
+  // renderer (`pageBackground`) already supports solid/gradient/image/pattern,
+  // but the previous Inspector only edited `theme.background.color`, which is
+  // visually overridden by `backgroundImage` whenever `type` is
+  // gradient/image/pattern. Exposing the type selector makes the chosen mode's
+  // controls authoritative without any schema or renderer change.
+  const background = state.config.theme.background;
+  const backgroundType = background.type ?? "solid";
+  const themeColors = state.config.theme.colors;
+  const gradient = background.gradient ?? {
+    kind: "linear" as const,
+    angle: 135,
+    from: themeColors.primary,
+    to: themeColors.secondary,
+  };
+
+  const selectBackgroundType = (type: string) => {
+    // Presentation choice only — never destructive. Switching modes must not
+    // delete values belonging to other modes (imageUrl, pattern, gradient,
+    // color are all preserved).
+    patch("theme.background.type", type);
+    // Initialize the minimum safe gradient values only when first entering
+    // gradient mode, derived from existing theme color conventions.
+    if (type === "gradient" && !background.gradient) {
+      patch("theme.background.gradient", {
+        kind: "linear",
+        angle: 135,
+        from: themeColors.primary,
+        to: themeColors.secondary,
+      });
+    }
+  };
+
+  const patchGradient = (partial: {
+    from?: string;
+    to?: string;
+    angle?: number;
+    kind?: "linear" | "radial";
+  }) => {
+    patch("theme.background.gradient", { ...gradient, ...partial });
+  };
+
   return (
     <div>
+      <div data-inspector-focus="page-background" {...contextualFocusProps("page-background")}>
+        <Section title="Page Background">
+          <Field label="Type">
+            <Segmented
+              size="sm"
+              value={backgroundType}
+              options={[
+                { value: "solid", label: "Solid" },
+                { value: "gradient", label: "Gradient" },
+                { value: "image", label: "Image" },
+                { value: "pattern", label: "Pattern" },
+              ]}
+              onChange={(v) => selectBackgroundType(v)}
+            />
+          </Field>
+
+          {backgroundType === "solid" && (
+            <Field label="Color">
+              <ColorInput
+                value={background.color ?? themeColors.background}
+                onChange={(v) => patch("theme.background.color", v)}
+              />
+            </Field>
+          )}
+
+          {backgroundType === "gradient" && (
+            <>
+              <Field label="Kind">
+                <Segmented
+                  size="sm"
+                  value={gradient.kind}
+                  options={[
+                    { value: "linear", label: "Linear" },
+                    { value: "radial", label: "Radial" },
+                  ]}
+                  onChange={(v) => patchGradient({ kind: v as "linear" | "radial" })}
+                />
+              </Field>
+              <Field label="From">
+                <ColorInput value={gradient.from} onChange={(v) => patchGradient({ from: v })} />
+              </Field>
+              <Field label="To">
+                <ColorInput value={gradient.to} onChange={(v) => patchGradient({ to: v })} />
+              </Field>
+              <Field label="Angle">
+                <NumberSlider
+                  value={gradient.angle}
+                  min={0}
+                  max={360}
+                  step={1}
+                  suffix="°"
+                  onChange={(v) => patchGradient({ angle: v })}
+                />
+              </Field>
+            </>
+          )}
+
+          {backgroundType === "image" && (
+            <>
+              <AssetField
+                label="Background Image"
+                accept="image/*"
+                value={background.imageUrl ?? ""}
+                onChange={(url) => patch("theme.background.imageUrl", url)}
+              />
+              <Field label="Blur">
+                <NumberSlider
+                  value={background.blur ?? 0}
+                  min={0}
+                  max={24}
+                  step={1}
+                  suffix="px"
+                  onChange={(v) => patch("theme.background.blur", v)}
+                />
+              </Field>
+            </>
+          )}
+
+          {backgroundType === "pattern" && (
+            <Field label="Pattern">
+              <Segmented
+                size="sm"
+                value={background.pattern ?? "dots"}
+                options={[
+                  { value: "dots", label: "Dots" },
+                  { value: "grid", label: "Grid" },
+                  { value: "noise", label: "Noise" },
+                  { value: "rings", label: "Rings" },
+                ]}
+                onChange={(v) => patch("theme.background.pattern", v)}
+              />
+            </Field>
+          )}
+        </Section>
+      </div>
+
       <div data-inspector-focus="profile-cover" {...contextualFocusProps("profile-cover")}>
         <Section title="Cover / Banner">
           <Toggle
@@ -217,6 +355,17 @@ function ProfileInspector() {
           />
           {banner.enabled && (
             <>
+              <Field label="Width">
+                <Segmented
+                  size="sm"
+                  value={banner.widthMode ?? "contained"}
+                  options={[
+                    { value: "contained", label: "Contained" },
+                    { value: "full-bleed", label: "Full Bleed" },
+                  ]}
+                  onChange={(v) => patch("profile.banner.widthMode", v)}
+                />
+              </Field>
               <AssetField
                 label="Cover Image"
                 accept="image/*"
@@ -1277,43 +1426,6 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
             </>
           )}
         </div>
-
-        <AssetField
-          label="Full Background Image"
-          accept="image/*"
-          value={backgroundImage.url ?? ""}
-          onChange={(v) => field("content.backgroundImage.url", v)}
-        />
-        {backgroundImage.url && (
-          <>
-            <Field label="Background Blur">
-              <NumberSlider
-                value={backgroundImage.blur ?? 0}
-                min={0}
-                max={20}
-                step={1}
-                onChange={(v) => field("content.backgroundImage.blur", v)}
-              />
-            </Field>
-            <Field label="Fit">
-              <Segmented
-                size="sm"
-                value={backgroundImage.fit ?? "cover"}
-                options={[
-                  { value: "cover", label: "Cover" },
-                  { value: "contain", label: "Contain" },
-                ]}
-                onChange={(v) => field("content.backgroundImage.fit", v)}
-              />
-            </Field>
-            <Field label="Position">
-              <PositionGrid
-                value={backgroundImage.position ?? "center"}
-                onChange={(v) => field("content.backgroundImage.position", v)}
-              />
-            </Field>
-          </>
-        )}
       </Section>
 
       {/* Layout Section */}
@@ -1373,121 +1485,161 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
         </Field>
       </Section>
 
-      {/* Background Section */}
-      <Section title="Background">
-        <Field label="Background Type">
-          <Segmented
-            size="sm"
-            value={backgroundType}
-            options={[
-              { value: "solid", label: "Solid" },
-              { value: "gradient", label: "Gradient" },
-            ]}
-            onChange={(v) => {
-              if (v === "gradient") {
-                field("style.backgroundGradient", {
-                  from: state.config.theme.colors.primary,
-                  to: state.config.theme.colors.accent,
-                  angle: 180,
-                });
-              } else {
-                field("style.backgroundGradient", undefined);
-              }
-            }}
-          />
-        </Field>
-        {backgroundType === "solid" ? (
-          <Field
-            label="Solid Color"
-            action={
-              block.style.background !== undefined && (
-                <button
-                  type="button"
-                  onClick={() => field("style.background", undefined)}
-                  className="text-[10px] text-destructive hover:underline font-semibold"
-                >
-                  Reset
-                </button>
-              )
-            }
-          >
-            <ColorInput
-              value={block.style.background ?? state.config.theme.colors.card}
-              onChange={(v) => field("style.background", v)}
-            />
-          </Field>
-        ) : (
-          <>
-            <Field label="From Color">
-              <ColorInput
-                value={backgroundGradient?.from ?? state.config.theme.colors.primary}
-                onChange={(v) => field("style.backgroundGradient.from", v)}
-              />
-            </Field>
-            <Field label="To Color">
-              <ColorInput
-                value={backgroundGradient?.to ?? state.config.theme.colors.accent}
-                onChange={(v) => field("style.backgroundGradient.to", v)}
-              />
-            </Field>
-            <Field label="Angle">
-              <NumberSlider
-                value={backgroundGradient?.angle ?? 180}
-                min={0}
-                max={360}
-                step={15}
-                suffix="°"
-                onChange={(v) => field("style.backgroundGradient.angle", v)}
-              />
-            </Field>
-          </>
-        )}
-        <Field label="Corner Radius">
-          <NumberSlider
-            value={block.style.radius ?? 24}
-            min={0}
-            max={48}
-            onChange={(v) => field("style.radius", v)}
-          />
-        </Field>
-      </Section>
-
-      {/* Overlay / Scrim Section */}
-      <Section title="Overlay">
-        <Field label="Overlay Type">
-          <Segmented
-            size="sm"
-            value={overlay.type ?? "gradient"}
-            options={[
-              { value: "solid", label: "Solid" },
-              { value: "gradient", label: "Gradient" },
-            ]}
-            onChange={(v) => field("style.overlay.type", v)}
-          />
-        </Field>
-        <Field label="Intensity" hint="0 hides the overlay, 1 fully covers the image">
-          <NumberSlider
-            value={overlay.opacity ?? 0.4}
-            min={0}
-            max={1}
-            step={0.05}
-            onChange={(v) => field("style.overlay.opacity", v)}
-          />
-        </Field>
-        {overlay.type === "gradient" && (
-          <Field label="Gradient Direction">
+      {/* Background Section — contextual sub-target of the selected Hero */}
+      <div data-inspector-focus="hero-background" {...contextualFocusProps("hero-background")}>
+        <Section title="Background">
+          <Field label="Background Type">
             <Segmented
               size="sm"
-              value={overlay.direction ?? "to-top"}
+              value={backgroundType}
               options={[
-                { value: "to-top", label: "To Top" },
-                { value: "to-bottom", label: "To Bottom" },
+                { value: "solid", label: "Solid" },
+                { value: "gradient", label: "Gradient" },
               ]}
-              onChange={(v) => field("style.overlay.direction", v)}
+              onChange={(v) => {
+                if (v === "gradient") {
+                  field("style.backgroundGradient", {
+                    from: state.config.theme.colors.primary,
+                    to: state.config.theme.colors.accent,
+                    angle: 180,
+                  });
+                } else {
+                  field("style.backgroundGradient", undefined);
+                }
+              }}
             />
           </Field>
-        )}
-      </Section>
+          {backgroundType === "solid" ? (
+            <Field
+              label="Solid Color"
+              action={
+                block.style.background !== undefined && (
+                  <button
+                    type="button"
+                    onClick={() => field("style.background", undefined)}
+                    className="text-[10px] text-destructive hover:underline font-semibold"
+                  >
+                    Reset
+                  </button>
+                )
+              }
+            >
+              <ColorInput
+                value={block.style.background ?? state.config.theme.colors.card}
+                onChange={(v) => field("style.background", v)}
+              />
+            </Field>
+          ) : (
+            <>
+              <Field label="From Color">
+                <ColorInput
+                  value={backgroundGradient?.from ?? state.config.theme.colors.primary}
+                  onChange={(v) => field("style.backgroundGradient.from", v)}
+                />
+              </Field>
+              <Field label="To Color">
+                <ColorInput
+                  value={backgroundGradient?.to ?? state.config.theme.colors.accent}
+                  onChange={(v) => field("style.backgroundGradient.to", v)}
+                />
+              </Field>
+              <Field label="Angle">
+                <NumberSlider
+                  value={backgroundGradient?.angle ?? 180}
+                  min={0}
+                  max={360}
+                  step={15}
+                  suffix="°"
+                  onChange={(v) => field("style.backgroundGradient.angle", v)}
+                />
+              </Field>
+            </>
+          )}
+          <AssetField
+            label="Full Background Image"
+            accept="image/*"
+            value={backgroundImage.url ?? ""}
+            onChange={(v) => field("content.backgroundImage.url", v)}
+          />
+          {backgroundImage.url && (
+            <>
+              <Field label="Background Blur">
+                <NumberSlider
+                  value={backgroundImage.blur ?? 0}
+                  min={0}
+                  max={20}
+                  step={1}
+                  onChange={(v) => field("content.backgroundImage.blur", v)}
+                />
+              </Field>
+              <Field label="Fit">
+                <Segmented
+                  size="sm"
+                  value={backgroundImage.fit ?? "cover"}
+                  options={[
+                    { value: "cover", label: "Cover" },
+                    { value: "contain", label: "Contain" },
+                  ]}
+                  onChange={(v) => field("content.backgroundImage.fit", v)}
+                />
+              </Field>
+              <Field label="Position">
+                <PositionGrid
+                  value={backgroundImage.position ?? "center"}
+                  onChange={(v) => field("content.backgroundImage.position", v)}
+                />
+              </Field>
+            </>
+          )}
+          <Field label="Corner Radius">
+            <NumberSlider
+              value={block.style.radius ?? 24}
+              min={0}
+              max={48}
+              onChange={(v) => field("style.radius", v)}
+            />
+          </Field>
+        </Section>
+      </div>
+
+      {/* Overlay / Scrim Section — contextual sub-target of the selected Hero */}
+      <div data-inspector-focus="hero-overlay" {...contextualFocusProps("hero-overlay")}>
+        <Section title="Overlay">
+          <Field label="Overlay Type">
+            <Segmented
+              size="sm"
+              value={overlay.type ?? "gradient"}
+              options={[
+                { value: "solid", label: "Solid" },
+                { value: "gradient", label: "Gradient" },
+              ]}
+              onChange={(v) => field("style.overlay.type", v)}
+            />
+          </Field>
+          <Field label="Intensity" hint="0 hides the overlay, 1 fully covers the image">
+            <NumberSlider
+              value={overlay.opacity ?? 0.4}
+              min={0}
+              max={1}
+              step={0.05}
+              onChange={(v) => field("style.overlay.opacity", v)}
+            />
+          </Field>
+          {overlay.type === "gradient" && (
+            <Field label="Gradient Direction">
+              <Segmented
+                size="sm"
+                value={overlay.direction ?? "to-top"}
+                options={[
+                  { value: "to-top", label: "To Top" },
+                  { value: "to-bottom", label: "To Bottom" },
+                ]}
+                onChange={(v) => field("style.overlay.direction", v)}
+              />
+            </Field>
+          )}
+        </Section>
+      </div>
 
       {/* CTA / Button — contextual sub-target of the selected Hero */}
       <div data-inspector-focus="hero-cta" {...contextualFocusProps("hero-cta")}>

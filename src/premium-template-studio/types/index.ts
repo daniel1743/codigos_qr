@@ -279,6 +279,11 @@ export interface TemplateProfile {
     focalX: number;
     focalY: number;
     radius: number;
+    /**
+     * How the cover relates to the rendered page surface.
+     * Absent ⇒ "contained" (exact legacy presentation — backward compatible).
+     */
+    widthMode?: "contained" | "full-bleed";
   };
 }
 

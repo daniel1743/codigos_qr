@@ -11,6 +11,7 @@ import {
   ALL_CAPABILITIES,
   CORE_FREE_CAPABILITIES,
   PRO_CAPABILITIES,
+  POWER_EDITOR_EARLY_ACCESS_CAPABILITIES,
   isProductCapability,
   isProductTier,
   resolveCapabilityAccess,
@@ -68,15 +69,8 @@ export function runProductCapabilitySelfcheck() {
     );
   }
 
-  /* ---- Free: advanced capabilities are LOCKED ---- */
+  /* ---- Free: advanced capabilities are LOCKED (non-early-access) ---- */
   const freeLocked = [
-    "advanced_typography",
-    "advanced_layout",
-    "manual_responsive",
-    "advanced_motion",
-    "premium_background_effects",
-    "advanced_card_button_styling",
-    "premium_blocks",
     "premium_sections",
     "premium_templates",
     "remove_cripqer_branding",
@@ -91,6 +85,15 @@ export function runProductCapabilitySelfcheck() {
     check(
       decision.reason === "UPGRADE_REQUIRED" && decision.upgradeTarget === "pro",
       `Free LOCKED capability must target upgrade to pro: ${capability}`,
+    );
+  }
+
+  /* ---- Early access: Power Editor editing capabilities are ALLOW for free ---- */
+  for (const capability of POWER_EDITOR_EARLY_ACCESS_CAPABILITIES) {
+    const decision = resolveCapabilityAccess("free", capability);
+    check(
+      decision.state === "ALLOW" && decision.editable === true && decision.visible === true,
+      `Early access must ALLOW Power Editor editing capability for free: ${capability}`,
     );
   }
 
@@ -139,14 +142,14 @@ export function runProductCapabilitySelfcheck() {
     "unknown capability must not advertise an upgrade target",
   );
 
-  /* ---- fail closed: invalid tier must not obtain Pro capability ---- */
+  /* ---- fail closed: invalid tier must not obtain non-early-access Pro capability ---- */
   const invalidTierProCap = resolveCapabilityAccess(
     "platinum" as unknown as ProductTier,
-    "advanced_motion",
+    "remove_cripqer_branding",
   );
   check(
     invalidTierProCap.state === "LOCKED",
-    "invalid tier must not obtain a Pro-only capability",
+    "invalid tier must not obtain a non-early-access Pro-only capability",
   );
   check(
     resolveCapabilityAccess("platinum" as unknown as ProductTier, "publishing").state ===

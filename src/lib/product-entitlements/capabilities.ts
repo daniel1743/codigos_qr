@@ -101,6 +101,40 @@ export type ProductCapability = (typeof ALL_CAPABILITIES)[number];
 export type CoreFreeCapability = (typeof CORE_FREE_CAPABILITIES)[number];
 export type ProCapability = (typeof PRO_CAPABILITIES)[number];
 
+/**
+ * EARLY ACCESS — POWER EDITOR EDITING UNLOCK (pre-monetization).
+ *
+ * During the current early-access / development stage the Power Editor's
+ * editing capabilities are intentionally open to ALL tiers so testers can
+ * exercise the complete editor and surface real bugs. A visible editing
+ * control must never silently DENY its canonical mutation.
+ *
+ * This set is consulted FIRST by `resolveCapabilityAccess`, so these
+ * capabilities resolve ALLOW regardless of tier. The immutable
+ * `CAPABILITY_POLICY` table below remains the single source of truth for
+ * future plan-based gating.
+ *
+ * WHEN MONETIZATION BEGINS: remove entries from this set (or delete the set)
+ * to restore normal plan-based gating from `CAPABILITY_POLICY` — this is the
+ * single obvious re-gating point.
+ *
+ * NOTE: `remove_cripqer_branding` is intentionally EXCLUDED — it is a
+ * branding/publishing monetization feature, not a Power Editor creative
+ * editing capability. `premium_sections` and `premium_templates` are also
+ * EXCLUDED because they are only reachable via the `APPLY_SECTION` /
+ * `APPLY_TEMPLATE` intents, which are not dispatched through the Power
+ * Editor's guarded dispatch (StudioAction boundary).
+ */
+export const POWER_EDITOR_EARLY_ACCESS_CAPABILITIES = [
+  "advanced_typography",
+  "advanced_layout",
+  "manual_responsive",
+  "advanced_motion",
+  "premium_background_effects",
+  "advanced_card_button_styling",
+  "premium_blocks",
+] as const satisfies readonly ProCapability[];
+
 /* ============================================================================
  * 3. IMMUTABLE DECLARATIVE POLICY TABLE
  * ========================================================================== */
@@ -124,6 +158,11 @@ const CAPABILITY_POLICY: Readonly<
   business: new Set<ProductCapability>(ALL_CAPABILITIES),
   enterprise: new Set<ProductCapability>(ALL_CAPABILITIES),
 };
+
+/** Early-access Power Editor editing capabilities (see constant above). */
+const POWER_EDITOR_EARLY_ACCESS_SET: ReadonlySet<ProductCapability> = new Set<ProductCapability>(
+  POWER_EDITOR_EARLY_ACCESS_CAPABILITIES,
+);
 
 /* ============================================================================
  * 4. DECISION CONTRACT
@@ -194,6 +233,19 @@ export function resolveCapabilityAccess(
   tier: ProductTier,
   capability: ProductCapability,
 ): CapabilityAccessDecision {
+  // EARLY ACCESS: Power Editor editing capabilities are temporarily open to
+  // ALL tiers during pre-monetization. See POWER_EDITOR_EARLY_ACCESS_CAPABILITIES
+  // for the canonical re-gating point.
+  if (POWER_EDITOR_EARLY_ACCESS_SET.has(capability)) {
+    return {
+      state: "ALLOW",
+      visible: true,
+      editable: true,
+      reason: null,
+      upgradeTarget: null,
+    };
+  }
+
   // Fail closed: an unknown/invalid runtime tier is treated no more
   // permissively than Free.
   const effectiveTier: ProductTier = isProductTier(tier) ? tier : "free";

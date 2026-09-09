@@ -10,6 +10,89 @@ import { requestInspectorFocus } from "../inspector/inspectorFocus";
  * The profile header is layout-aware: the same data composes very differently
  * depending on `layout.header` — no duplicated template components.
  */
+/**
+ * The profile cover/banner surface. Rendered either inside the profile header
+ * (contained) or as a direct child of the page surface (full-bleed). The
+ * `fullBleed` flag only changes horizontal reach + top-corner rounding; the
+ * image / blur / focal / overlay / height contract is identical in both modes.
+ */
+export function ProfileBanner({
+  banner,
+  fullBleed = false,
+}: {
+  banner: TemplateProfile["banner"];
+  fullBleed?: boolean;
+}) {
+  const { theme, breakpoint, mode, onSelectProfileCover, onSelectProfileTarget } = useRender();
+  const bannerHeight = breakpoint === "mobile" ? banner.mobileHeight : banner.height;
+
+  const selectCover = () => {
+    if (onSelectProfileTarget) {
+      onSelectProfileTarget("profile-cover");
+      return;
+    }
+    if (onSelectProfileCover) {
+      onSelectProfileCover();
+      return;
+    }
+    requestInspectorFocus("profile-cover");
+  };
+
+  return (
+    <div
+      {...(mode === "edit" ? { "data-editor-target": "profile-cover" } : {})}
+      onClick={(e) => {
+        if (mode !== "edit") return;
+        e.stopPropagation();
+        selectCover();
+      }}
+      style={{
+        position: "relative",
+        zIndex: fullBleed ? 2 : undefined,
+        height: bannerHeight,
+        borderRadius: fullBleed ? `0 0 ${banner.radius}px ${banner.radius}px` : banner.radius,
+        overflow: "hidden",
+        backgroundColor: theme.colors.surface,
+        cursor: mode === "edit" ? "pointer" : undefined,
+      }}
+    >
+      {banner.imageUrl ? (
+        <img
+          src={banner.imageUrl}
+          alt=""
+          loading="lazy"
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            objectPosition: `${banner.focalX}% ${banner.focalY}%`,
+            filter: banner.blur ? `blur(${banner.blur}px)` : undefined,
+            transform: banner.blur ? "scale(1.06)" : undefined,
+          }}
+        />
+      ) : (
+        <div
+          style={{
+            width: "100%",
+            height: "100%",
+            backgroundImage: `linear-gradient(120deg, ${theme.colors.primary}, ${theme.colors.accent})`,
+          }}
+        />
+      )}
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: banner.gradient
+            ? `linear-gradient(180deg, ${hexToRgba(theme.colors.background, 0)} 30%, ${hexToRgba(theme.colors.background, Math.max(banner.overlay, 0.35))} 100%)`
+            : hexToRgba(theme.colors.background, banner.overlay),
+        }}
+      />
+    </div>
+  );
+}
+
 export function ProfileHeader({
   profile,
   layout,
@@ -22,7 +105,7 @@ export function ProfileHeader({
   const align = layout.header === "overlap" ? "center" : rule.align;
   const avatarAlign = profile.avatar.align ?? align;
   const banner = profile.banner;
-  const bannerHeight = breakpoint === "mobile" ? banner.mobileHeight : banner.height;
+  const fullBleed = banner.enabled && banner.widthMode === "full-bleed";
   const inline = layout.header === "inline";
   const hero = layout.header === "hero";
 
@@ -163,58 +246,7 @@ export function ProfileHeader({
 
   return (
     <header style={{ position: "relative" }}>
-      {banner.enabled ? (
-        <div
-          {...(mode === "edit" ? { "data-editor-target": "profile-cover" } : {})}
-          onClick={(e) => {
-            if (mode !== "edit") return;
-            e.stopPropagation();
-            selectProfileTarget("profile-cover");
-          }}
-          style={{
-            position: "relative",
-            height: bannerHeight,
-            borderRadius: banner.radius,
-            overflow: "hidden",
-            backgroundColor: theme.colors.surface,
-            cursor: mode === "edit" ? "pointer" : undefined,
-          }}
-        >
-          {banner.imageUrl ? (
-            <img
-              src={banner.imageUrl}
-              alt=""
-              loading="lazy"
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                objectPosition: `${banner.focalX}% ${banner.focalY}%`,
-                filter: banner.blur ? `blur(${banner.blur}px)` : undefined,
-                transform: banner.blur ? "scale(1.06)" : undefined,
-              }}
-            />
-          ) : (
-            <div
-              style={{
-                width: "100%",
-                height: "100%",
-                backgroundImage: `linear-gradient(120deg, ${theme.colors.primary}, ${theme.colors.accent})`,
-              }}
-            />
-          )}
-          <div
-            aria-hidden
-            style={{
-              position: "absolute",
-              inset: 0,
-              background: banner.gradient
-                ? `linear-gradient(180deg, ${hexToRgba(theme.colors.background, 0)} 30%, ${hexToRgba(theme.colors.background, Math.max(banner.overlay, 0.35))} 100%)`
-                : hexToRgba(theme.colors.background, banner.overlay),
-            }}
-          />
-        </div>
-      ) : null}
+      {banner.enabled && !fullBleed ? <ProfileBanner banner={banner} /> : null}
 
       <div
         style={{
@@ -224,8 +256,9 @@ export function ProfileHeader({
           alignItems: inline ? "center" : "stretch",
           flexDirection: inline ? "row" : "column",
           gap: inline ? 16 : 14,
-          marginTop:
-            banner.enabled && layout.header === "overlap"
+          marginTop: fullBleed
+            ? 0
+            : banner.enabled && layout.header === "overlap"
               ? -profile.avatar.overlap
               : banner.enabled
                 ? 18

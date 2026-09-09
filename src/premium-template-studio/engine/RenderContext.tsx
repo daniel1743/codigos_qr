@@ -27,6 +27,10 @@ export interface RenderContextValue {
   onSelectHeroText?: ((blockId: string, target: HeroTextTarget) => void) | undefined;
   /** Selecting the Hero foreground/media image (parent block id + focus). */
   onSelectHeroImage?: ((blockId: string) => void) | undefined;
+  /** Selecting the Hero background surface (parent block id + focus). */
+  onSelectHeroBackground?: ((blockId: string) => void) | undefined;
+  /** Selecting the page/template background surface (contextual navigation — not a block). */
+  onSelectPageBackground?: (() => void) | undefined;
   /** inline editing hook: path is dot-notation into the config */
   onInlineEdit?: ((path: string, value: string) => void) | undefined;
   /** ANALYTICS ADAPTER hook */

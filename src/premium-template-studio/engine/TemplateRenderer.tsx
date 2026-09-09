@@ -37,7 +37,7 @@ import {
   themeToCssVars,
 } from "./styleEngine";
 import { getMotionConfig } from "../constants/motionPresets";
-import { ProfileHeader } from "../components/canvas/ProfileHeader";
+import { ProfileBanner, ProfileHeader } from "../components/canvas/ProfileHeader";
 import { useScrollReveal } from "../hooks/useScrollReveal";
 import { cx } from "../utils";
 
@@ -49,6 +49,8 @@ export interface EditingHandlers {
   onSelectHeroCta?: ((blockId: string) => void) | undefined;
   onSelectHeroText?: ((blockId: string, target: HeroTextTarget) => void) | undefined;
   onSelectHeroImage?: ((blockId: string) => void) | undefined;
+  onSelectHeroBackground?: ((blockId: string) => void) | undefined;
+  onSelectPageBackground?: (() => void) | undefined;
   onInlineEdit?: ((path: string, value: string) => void) | undefined;
   onMove?: ((id: string, direction: -1 | 1) => void) | undefined;
   onDuplicate?: ((id: string) => void) | undefined;
@@ -429,6 +431,9 @@ function TemplateRendererImpl({
 }: TemplateRendererProps) {
   const { theme, layout, profile, blocks } = config;
   const rule = layout.responsive[breakpoint];
+  const banner = profile.banner;
+  const fullBleed = banner.enabled && banner.widthMode === "full-bleed";
+  const fullBleedOverlap = fullBleed && layout.header === "overlap";
 
   const isGridOrBento = layout.type === "grid" || layout.type === "bento";
   let columns = 1;
@@ -475,6 +480,8 @@ function TemplateRendererImpl({
       onSelectHeroCta: editing?.onSelectHeroCta,
       onSelectHeroText: editing?.onSelectHeroText,
       onSelectHeroImage: editing?.onSelectHeroImage,
+      onSelectHeroBackground: editing?.onSelectHeroBackground,
+      onSelectPageBackground: editing?.onSelectPageBackground,
       onInlineEdit: editing?.onInlineEdit,
       onTrack,
     }),
@@ -489,6 +496,8 @@ function TemplateRendererImpl({
       editing?.onSelectHeroCta,
       editing?.onSelectHeroText,
       editing?.onSelectHeroImage,
+      editing?.onSelectHeroBackground,
+      editing?.onSelectPageBackground,
       editing?.onInlineEdit,
       onTrack,
     ],
@@ -505,6 +514,7 @@ function TemplateRendererImpl({
       <div
         className={cx("pts-page", className)}
         data-breakpoint={breakpoint}
+        {...(editing ? { "data-editor-target": "page-background" } : {})}
         style={{
           ...themeToCssVars(theme),
           ...pageBackground(theme),
@@ -515,17 +525,39 @@ function TemplateRendererImpl({
           overflowX: "clip",
           ...style,
         }}
-        onClick={() => editing?.onSelect?.("")}
+        onClick={(e) => {
+          if (!editing) return;
+          // Page Background is the LOWEST-priority contextual selection. A more
+          // specific rendered block (`data-block-id`) or contextual sub-target
+          // (`data-editor-target`) must always win. The page surface itself is
+          // the only `data-editor-target` that equals this element, so a click
+          // that resolves to any *other* identity is never treated as page
+          // background.
+          const target = e.target as Element | null;
+          const closest = target?.closest?.("[data-editor-target], [data-block-id]");
+          if (closest && closest !== e.currentTarget) return;
+          if (editing.onSelectPageBackground) {
+            editing.onSelectPageBackground();
+          } else {
+            // Backward-compatible fallback: a caller that never wired the page
+            // background handler still deselects on exposed-surface clicks.
+            editing.onSelect?.("");
+          }
+        }}
       >
         {backgroundLayer ? <div aria-hidden style={backgroundLayer} /> : null}
         {textureLayer ? <div aria-hidden style={textureLayer} /> : null}
+        {fullBleed ? <ProfileBanner banner={banner} fullBleed /> : null}
         <div
           style={{
             position: "relative",
             zIndex: 2,
             maxWidth: contentWidth + (columns > 1 ? 180 : 0),
             margin: "0 auto",
-            padding: `${rule.padding + 12}px ${rule.padding}px ${rule.padding + 48}px`,
+            marginTop: fullBleedOverlap ? -profile.avatar.overlap : undefined,
+            padding: fullBleedOverlap
+              ? `0 ${rule.padding}px ${rule.padding + 48}px`
+              : `${rule.padding + 12}px ${rule.padding}px ${rule.padding + 48}px`,
             display: "grid",
             gap: theme.spacing.section,
           }}

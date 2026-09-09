@@ -40,8 +40,15 @@ function SmartIcon({ name, size = 14 }: { name?: string; size?: number }) {
 }
 
 export function HeroBlock({ block }: { block: TemplateBlock }) {
-  const { theme, mode, breakpoint, onSelectHeroCta, onSelectHeroText, onSelectHeroImage } =
-    useRender();
+  const {
+    theme,
+    mode,
+    breakpoint,
+    onSelectHeroCta,
+    onSelectHeroText,
+    onSelectHeroImage,
+    onSelectHeroBackground,
+  } = useRender();
 
   const content = block.content;
   const variant = block.variant ?? "centered";
@@ -151,6 +158,44 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
     };
   };
 
+  // Edit-mode click on the exposed Hero background surface (the block's own
+  // root — NOT a foreground child) selects the parent Hero (via the studio
+  // handler) and requests a one-shot Inspector focus on the exact Background
+  // controls. Carries `data-editor-target="hero-background"` so the Inspector →
+  // Canvas direction can reveal the exact background region. Public/preview
+  // renders neither, so public output is unchanged.
+  const heroBackgroundClickProps = () => {
+    if (mode !== "edit") return {};
+    return {
+      "data-editor-target": "hero-background",
+      ...(onSelectHeroBackground
+        ? {
+            onClick: (e: React.MouseEvent<HTMLDivElement>) => {
+              // Safety: never hijack a click intended for an existing
+              // contextual child target (title/subtitle/description/eyebrow/
+              // CTA/image). Child targets carry their own `data-editor-target`
+              // and, where clickable, already `stopPropagation`; this guard
+              // covers non-clickable child wrappers (e.g. the CTA container).
+              const target = e.target as Element | null;
+              const closest = target?.closest?.("[data-editor-target]");
+              if (closest && closest !== e.currentTarget) return;
+              e.stopPropagation();
+              onSelectHeroBackground(block.id);
+            },
+          }
+        : {}),
+    };
+  };
+
+  // Editor-only identity for the overlay/scrim layer. It is a real DOM element
+  // (not a pseudo-layer), but it is decorative and must never intercept child
+  // interactions, so it is reveal-only (Inspector → Canvas) and never a direct
+  // click surface. The `pointerEvents: "none"` below keeps it non-hit-testable.
+  const heroOverlayProps = () => {
+    if (mode !== "edit") return {};
+    return { "data-editor-target": "hero-overlay" };
+  };
+
   const badgeElem =
     badge.enabled && badge.label ? (
       <span
@@ -255,12 +300,14 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
     backgroundImage.url || isFullImage ? (
       <div
         aria-hidden
+        {...heroOverlayProps()}
         style={{
           position: "absolute",
           inset: 0,
           zIndex: 1,
           borderRadius: block.style.radius ?? theme.cards.radius,
           opacity: overlay.opacity ?? 0.4,
+          pointerEvents: "none",
           background:
             overlay.type === "gradient"
               ? `linear-gradient(${overlay.direction === "to-top" ? "0deg" : "180deg"}, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%)`
@@ -300,6 +347,7 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
   if (variant === "centered") {
     return (
       <div
+        {...heroBackgroundClickProps()}
         style={{
           ...cardStyle(theme, block.style),
           ...gradientBgStyle,
@@ -391,6 +439,7 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
   if (isEditorial) {
     return (
       <div
+        {...heroBackgroundClickProps()}
         style={{
           ...cardStyle(theme, block.style),
           ...gradientBgStyle,
@@ -483,6 +532,7 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
     const isMobile = breakpoint === "mobile";
     return (
       <div
+        {...heroBackgroundClickProps()}
         style={{
           ...cardStyle(theme, block.style),
           ...gradientBgStyle,
@@ -612,6 +662,7 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
   // Render full-image variant (default fallback)
   return (
     <div
+      {...heroBackgroundClickProps()}
       style={{
         ...cardStyle(theme, block.style),
         ...gradientBgStyle,
@@ -629,16 +680,7 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
         overflow: "hidden",
       }}
     >
-      <div
-        aria-hidden
-        style={{
-          position: "absolute",
-          inset: 0,
-          zIndex: 1,
-          borderRadius: block.style.radius ?? theme.cards.radius,
-          background: `linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0.15) 100%)`,
-        }}
-      />
+      {overlayElem}
 
       <div
         style={{

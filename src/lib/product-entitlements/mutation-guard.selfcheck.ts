@@ -197,8 +197,8 @@ export function runMutationGuardSelfcheck() {
     "delete existing premium block -> ALLOW",
   );
   check(
-    authorizeCanonicalMutation("free", { kind: "DUPLICATE_BLOCK", blockType: "stats" }).decision === "DENY",
-    "duplicate existing premium block -> DENY (creates new premium instance)",
+    authorizeCanonicalMutation("free", { kind: "DUPLICATE_BLOCK", blockType: "stats" }).decision === "ALLOW",
+    "duplicate premium block -> ALLOW during Power Editor early access",
   );
   check(
     authorizeCanonicalMutation("free", { kind: "TOGGLE_BLOCK_VISIBILITY" }).decision === "ALLOW",
@@ -210,13 +210,13 @@ export function runMutationGuardSelfcheck() {
    * ========================================================== */
   const assetCases: Array<{ intent: MutationIntent; expected: "ALLOW" | "DENY" }> = [
     { intent: { kind: "ADD_BLOCK", blockType: "hero" }, expected: "ALLOW" },        // standard block
-    { intent: { kind: "ADD_BLOCK", blockType: "stats" }, expected: "DENY" },        // premium block
+    { intent: { kind: "ADD_BLOCK", blockType: "stats" }, expected: "ALLOW" },        // premium block (early access)
     { intent: { kind: "APPLY_SECTION", assetId: "services-cards" }, expected: "ALLOW" }, // standard section
-    { intent: { kind: "APPLY_SECTION", assetId: "media-bento" }, expected: "DENY" },   // premium section
+    { intent: { kind: "APPLY_SECTION", assetId: "media-bento" }, expected: "DENY" },   // premium section (not early-access)
     { intent: { kind: "APPLY_TEMPLATE", assetId: "creator-premium-001" }, expected: "ALLOW" }, // standard template
-    { intent: { kind: "APPLY_TEMPLATE", assetId: "creator-premium" }, expected: "DENY" },   // premium template
+    { intent: { kind: "APPLY_TEMPLATE", assetId: "creator-premium" }, expected: "DENY" },   // premium template (not early-access)
     { intent: { kind: "APPLY_LAYOUT", assetId: "centered" }, expected: "ALLOW" },   // standard layout
-    { intent: { kind: "APPLY_LAYOUT", assetId: "bento" }, expected: "DENY" },       // premium layout
+    { intent: { kind: "APPLY_LAYOUT", assetId: "bento" }, expected: "ALLOW" },       // premium layout (early access)
   ];
   for (const { intent, expected } of assetCases) {
     const result = authorizeCanonicalMutation("free", intent);
@@ -298,9 +298,9 @@ export function runMutationGuardSelfcheck() {
 
   const invalidTierPro = authorizeCanonicalMutation(
     "platinum" as "free",
-    { kind: "EDIT_ADVANCED_MOTION" },
+    { kind: "REMOVE_CRIPQER_BRANDING" },
   );
-  check(invalidTierPro.decision === "DENY", "invalid tier receives no Pro mutation");
+  check(invalidTierPro.decision === "DENY", "invalid tier receives no non-early-access Pro mutation");
   const invalidTierCore = authorizeCanonicalMutation(
     "platinum" as "free",
     { kind: "EDIT_CONTENT" },
