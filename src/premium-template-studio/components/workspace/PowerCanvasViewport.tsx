@@ -12,7 +12,11 @@ import { cx } from "../../utils";
 import { usePowerCanvasCamera } from "./usePowerCanvasCamera";
 import { calculateFitZoom } from "./powerCanvasCameraMath";
 import { computeAutofocusScrollDelta } from "./powerCanvasAutofocus";
-import { subscribeCanvasFocus } from "../inspector/inspectorFocus";
+import {
+  clampScrollValue,
+  computeCanvasFocusScroll,
+  subscribeCanvasFocus,
+} from "../inspector/inspectorFocus";
 
 interface PowerCanvasViewportProps {
   children: ReactNode;
@@ -280,7 +284,11 @@ export function PowerCanvasViewport({
       const viewportRect = viewport.getBoundingClientRect();
       const elementRect = element.getBoundingClientRect();
 
-      const delta = computeAutofocusScrollDelta(
+      // Exact-target centering: place the element's vertical center near the
+      // comfortable 45%–50% band and keep it comfortably visible horizontally.
+      // Only scrollTop/scrollLeft are written — zoom, Stage geometry, camera
+      // math and the pan owner are untouched.
+      const delta = computeCanvasFocusScroll(
         {
           top: viewportRect.top,
           bottom: viewportRect.bottom,
@@ -295,8 +303,18 @@ export function PowerCanvasViewport({
         },
       );
 
-      if (delta.top !== 0) viewport.scrollTop += delta.top;
-      if (delta.left !== 0) viewport.scrollLeft += delta.left;
+      if (delta.top !== 0 || delta.left !== 0) {
+        viewport.scrollTop = clampScrollValue(
+          viewport.scrollTop + delta.top,
+          viewport.scrollHeight,
+          viewport.clientHeight,
+        );
+        viewport.scrollLeft = clampScrollValue(
+          viewport.scrollLeft + delta.left,
+          viewport.scrollWidth,
+          viewport.clientWidth,
+        );
+      }
     });
   }, [viewportRef, contentRef]);
 

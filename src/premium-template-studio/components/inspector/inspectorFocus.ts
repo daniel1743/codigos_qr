@@ -20,6 +20,7 @@
 export type ContextualTarget =
   | "profile-bio"
   | "profile-cover"
+  | "profile-avatar"
   | "hero-eyebrow"
   | "hero-title"
   | "hero-subtitle"
@@ -87,27 +88,97 @@ export interface FocusRect {
 }
 
 /**
+ * Exact-target positioning constants (Phase 5C2D).
+ *
+ * The Inspector places the CENTER of the exact target at ~45% of the visible
+ * Inspector viewport height (comfortable band: 35%–55%). A target already
+ * centered in that band is never moved.
+ */
+export const INSPECTOR_FOCUS_ANCHOR_RATIO = 0.45;
+export const INSPECTOR_FOCUS_BAND_LOW = 0.35;
+export const INSPECTOR_FOCUS_BAND_HIGH = 0.55;
+
+/**
  * Pure Inspector-positioning helper (canvas → inspector direction).
  *
- * Returns the `scrollTop` delta that places the target's top edge in the
- * comfortable upper portion of the Inspector (≈ upper fifth, clamped by a
- * minimum pixel margin), while leaving breathing room above the bottom edge.
- * If the target is already comfortably visible, returns 0 — no movement.
- *
- * "Comfortable" means the target is never placed at the very top edge, never
- * left clipped at the bottom, and never moved when it is already in view.
+ * Returns the `scrollTop` DELTA that centers the target's vertical center at
+ * ~45% of the viewport height. Returns 0 when the target center already sits
+ * within the comfortable 35%–55% band — so a target that is merely "visible"
+ * near the top or bottom edge still gets re-centered, while an already-centered
+ * target is left untouched (no repeated jumping).
  */
 export function computeInspectorFocusScroll(viewport: FocusRect, element: FocusRect): number {
   const height = viewport.bottom - viewport.top;
-  const topMargin = Math.max(16, height * 0.1);
-  const bottomMargin = Math.max(16, height * 0.1);
-  const visibleTop = viewport.top + topMargin;
-  const visibleBottom = viewport.bottom - bottomMargin;
-  // Already comfortably visible → no movement.
-  if (element.top >= visibleTop && element.bottom <= visibleBottom) return 0;
+  if (height <= 0) return 0;
 
-  // Bring the target's top edge into the comfortable upper band (never the raw
-  // top edge), so it is clearly in view with room above and below.
-  const targetTop = viewport.top + Math.max(24, height * 0.18);
-  return element.top - targetTop;
+  const anchor = viewport.top + height * INSPECTOR_FOCUS_ANCHOR_RATIO;
+  const targetCenter = element.top + (element.bottom - element.top) / 2;
+
+  const bandLow = viewport.top + height * INSPECTOR_FOCUS_BAND_LOW;
+  const bandHigh = viewport.top + height * INSPECTOR_FOCUS_BAND_HIGH;
+  if (targetCenter >= bandLow && targetCenter <= bandHigh) return 0;
+
+  return targetCenter - anchor;
+}
+
+/**
+ * Pure scroll clamping: keep `value` within [0, scrollSize - clientSize].
+ * Used by both the Inspector scroll owner and the Canvas viewport scroll owner
+ * so a target near either edge never overshoots or goes negative.
+ */
+export function clampScrollValue(value: number, scrollSize: number, clientSize: number): number {
+  const max = Math.max(0, scrollSize - clientSize);
+  if (value < 0) return 0;
+  if (value > max) return max;
+  return value;
+}
+
+export interface CanvasFocusRect {
+  top: number;
+  bottom: number;
+  left: number;
+  right: number;
+}
+
+/** Canvas reveal anchor: ~47.5% of the visible viewport height (45%–50% band). */
+export const CANVAS_FOCUS_ANCHOR_RATIO = 0.475;
+
+/**
+ * Pure Canvas-positioning helper (inspector → canvas direction).
+ *
+ * Returns the `{ top, left }` scroll DELTAs that center the exact element's
+ * vertical center near the comfortable anchor band, and keep it comfortably
+ * visible horizontally (only moved if it drifts out of a comfortable margin).
+ * This only produces scroll deltas — zoom, Stage geometry, camera math and the
+ * pan owner are the caller's responsibility and are never touched here.
+ */
+export function computeCanvasFocusScroll(
+  viewport: CanvasFocusRect,
+  element: CanvasFocusRect,
+): { top: number; left: number } {
+  const height = viewport.bottom - viewport.top;
+  const width = viewport.right - viewport.left;
+
+  const anchorY = viewport.top + height * CANVAS_FOCUS_ANCHOR_RATIO;
+  const centerY = element.top + (element.bottom - element.top) / 2;
+  const centerX = element.left + (element.right - element.left) / 2;
+
+  let top = 0;
+  if (height > 0) {
+    const bandLow = viewport.top + height * INSPECTOR_FOCUS_BAND_LOW;
+    const bandHigh = viewport.top + height * INSPECTOR_FOCUS_BAND_HIGH;
+    if (centerY < bandLow || centerY > bandHigh) {
+      top = centerY - anchorY;
+    }
+  }
+
+  let left = 0;
+  if (width > 0) {
+    const hMargin = Math.max(16, width * 0.1);
+    if (element.left < viewport.left + hMargin || element.right > viewport.right - hMargin) {
+      left = centerX - (viewport.left + width / 2);
+    }
+  }
+
+  return { top, left };
 }

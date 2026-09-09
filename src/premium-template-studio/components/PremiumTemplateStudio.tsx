@@ -265,6 +265,17 @@ function Canvas() {
                 dispatch({ type: "selectBlock", id: null });
                 requestInspectorFocus("profile-cover");
               },
+              onSelectProfileTarget: (target) => {
+                // Generalized Profile contextual selection (cover/avatar/bio).
+                // Clear any block selection so the Inspector switches from a
+                // block context to the Profile panel, then request the exact
+                // sub-target be brought into view. Only the Inspector scroll
+                // moves — never the Canvas zoom or pan (the camera is untouched).
+                if (state.selectedBlockId !== null) {
+                  dispatch({ type: "selectBlock", id: null });
+                }
+                requestInspectorFocus(target);
+              },
               onSelectHeroCta: (blockId) => {
                 // Select the parent Hero if it is not already selected (no
                 // redundant selection churn), then request a one-shot Inspector

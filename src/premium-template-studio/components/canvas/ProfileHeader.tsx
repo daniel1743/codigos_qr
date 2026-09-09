@@ -1,5 +1,5 @@
 import { BadgeCheck, MapPin } from "lucide-react";
-import { useRender } from "../../engine/RenderContext";
+import { useRender, type ProfileTarget } from "../../engine/RenderContext";
 import { headingStyle } from "../../engine/styleEngine";
 import { hexToRgba } from "../../utils";
 import type { TemplateLayout, TemplateProfile } from "../../types";
@@ -17,7 +17,7 @@ export function ProfileHeader({
   profile: TemplateProfile;
   layout: TemplateLayout;
 }) {
-  const { theme, breakpoint, mode, onSelectProfileCover } = useRender();
+  const { theme, breakpoint, mode, onSelectProfileCover, onSelectProfileTarget } = useRender();
   const rule = layout.responsive[breakpoint];
   const align = layout.header === "overlap" ? "center" : rule.align;
   const avatarAlign = profile.avatar.align ?? align;
@@ -25,6 +25,22 @@ export function ProfileHeader({
   const bannerHeight = breakpoint === "mobile" ? banner.mobileHeight : banner.height;
   const inline = layout.header === "inline";
   const hero = layout.header === "hero";
+
+  // Generalized Profile contextual selection: cover, avatar, bio. Prefers the
+  // engine-provided `onSelectProfileTarget` (which performs the Profile context
+  // switch before requesting Inspector focus). Falls back to the legacy cover
+  // callback / direct Inspector focus request when the engine hook is absent.
+  const selectProfileTarget = (target: ProfileTarget) => {
+    if (onSelectProfileTarget) {
+      onSelectProfileTarget(target);
+      return;
+    }
+    if (target === "profile-cover" && onSelectProfileCover) {
+      onSelectProfileCover();
+      return;
+    }
+    requestInspectorFocus(target);
+  };
 
   const avatar = profile.avatarUrl ? (
     <img
@@ -103,7 +119,7 @@ export function ProfileHeader({
           onClick={(e) => {
             if (mode !== "edit") return;
             e.stopPropagation();
-            requestInspectorFocus("profile-bio");
+            selectProfileTarget("profile-bio");
           }}
         >
           <InlineText
@@ -151,9 +167,9 @@ export function ProfileHeader({
         <div
           {...(mode === "edit" ? { "data-editor-target": "profile-cover" } : {})}
           onClick={(e) => {
-            if (mode !== "edit" || !onSelectProfileCover) return;
+            if (mode !== "edit") return;
             e.stopPropagation();
-            onSelectProfileCover();
+            selectProfileTarget("profile-cover");
           }}
           style={{
             position: "relative",
@@ -161,7 +177,7 @@ export function ProfileHeader({
             borderRadius: banner.radius,
             overflow: "hidden",
             backgroundColor: theme.colors.surface,
-            cursor: mode === "edit" && onSelectProfileCover ? "pointer" : undefined,
+            cursor: mode === "edit" ? "pointer" : undefined,
           }}
         >
           {banner.imageUrl ? (
@@ -227,7 +243,17 @@ export function ProfileHeader({
                   : "center",
           }}
         >
-          {avatar}
+          <div
+            {...(mode === "edit" ? { "data-editor-target": "profile-avatar" } : {})}
+            onClick={(e) => {
+              if (mode !== "edit") return;
+              e.stopPropagation();
+              selectProfileTarget("profile-avatar");
+            }}
+            style={{ cursor: mode === "edit" ? "pointer" : undefined }}
+          >
+            {avatar}
+          </div>
         </div>
         {identity}
       </div>

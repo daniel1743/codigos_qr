@@ -20,7 +20,12 @@ import type { CSSProperties } from "react";
 import { EyeOff, Copy, Trash2, ChevronUp, ChevronDown, GripVertical } from "lucide-react";
 import type { BioTemplateConfig, Breakpoint, MotionConfig, TemplateBlock } from "../types";
 import { getBlockComponent } from "./BlockRegistry";
-import { RenderProvider, useRender, type HeroTextTarget } from "./RenderContext";
+import {
+  RenderProvider,
+  useRender,
+  type HeroTextTarget,
+  type ProfileTarget,
+} from "./RenderContext";
 import {
   ANIMATION_CLASS,
   HOVER_CLASS,
@@ -40,6 +45,7 @@ export interface EditingHandlers {
   selectedBlockId?: string | null | undefined;
   onSelect?: ((id: string) => void) | undefined;
   onSelectProfileCover?: (() => void) | undefined;
+  onSelectProfileTarget?: ((target: ProfileTarget) => void) | undefined;
   onSelectHeroCta?: ((blockId: string) => void) | undefined;
   onSelectHeroText?: ((blockId: string, target: HeroTextTarget) => void) | undefined;
   onInlineEdit?: ((path: string, value: string) => void) | undefined;
@@ -464,6 +470,7 @@ function TemplateRendererImpl({
       selectedBlockId: editing?.selectedBlockId,
       onSelectBlock: editing?.onSelect,
       onSelectProfileCover: editing?.onSelectProfileCover,
+      onSelectProfileTarget: editing?.onSelectProfileTarget,
       onSelectHeroCta: editing?.onSelectHeroCta,
       onSelectHeroText: editing?.onSelectHeroText,
       onInlineEdit: editing?.onInlineEdit,
@@ -476,6 +483,7 @@ function TemplateRendererImpl({
       editing?.selectedBlockId,
       editing?.onSelect,
       editing?.onSelectProfileCover,
+      editing?.onSelectProfileTarget,
       editing?.onSelectHeroCta,
       editing?.onSelectHeroText,
       editing?.onInlineEdit,

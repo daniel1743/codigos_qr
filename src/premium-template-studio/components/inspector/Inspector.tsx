@@ -42,6 +42,7 @@ import { useEffect, useRef, useState } from "react";
 import { isCapabilityLocked, isAssetLocked, ProBadge, Locked } from "../../entitlements";
 import { shouldResetInspectorScroll } from "./inspectorScroll";
 import {
+  clampScrollValue,
   computeInspectorFocusScroll,
   requestCanvasFocus,
   shouldScrollInspectorToFocus,
@@ -321,42 +322,44 @@ function ProfileInspector() {
             />
           </Field>
         </div>
-        <AssetField
-          label="Avatar"
-          accept="image/*"
-          value={profile.avatarUrl ?? ""}
-          onChange={(v) => patch("profile.avatarUrl", v)}
-        />
+        <div data-inspector-focus="profile-avatar" {...contextualFocusProps("profile-avatar")}>
+          <AssetField
+            label="Avatar"
+            accept="image/*"
+            value={profile.avatarUrl ?? ""}
+            onChange={(v) => patch("profile.avatarUrl", v)}
+          />
+          <Field label="Avatar alignment">
+            <Segmented
+              size="sm"
+              value={profile.avatar.align}
+              options={[
+                { value: "left", label: "Left" },
+                { value: "center", label: "Center" },
+                { value: "right", label: "Right" },
+              ]}
+              onChange={(v) => patch("profile.avatar.align", v)}
+            />
+          </Field>
+          <Field label="Avatar overlap">
+            <NumberSlider
+              value={profile.avatar.overlap}
+              min={0}
+              max={180}
+              suffix="px"
+              onChange={(v) => patch("profile.avatar.overlap", v)}
+            />
+          </Field>
+          <Toggle
+            label="Avatar shadow"
+            checked={profile.avatar.shadow}
+            onChange={(v) => patch("profile.avatar.shadow", v)}
+          />
+        </div>
         <Toggle
           label="Verified badge"
           checked={profile.verified ?? false}
           onChange={(v) => patch("profile.verified", v)}
-        />
-        <Field label="Avatar alignment">
-          <Segmented
-            size="sm"
-            value={profile.avatar.align}
-            options={[
-              { value: "left", label: "Left" },
-              { value: "center", label: "Center" },
-              { value: "right", label: "Right" },
-            ]}
-            onChange={(v) => patch("profile.avatar.align", v)}
-          />
-        </Field>
-        <Field label="Avatar overlap">
-          <NumberSlider
-            value={profile.avatar.overlap}
-            min={0}
-            max={180}
-            suffix="px"
-            onChange={(v) => patch("profile.avatar.overlap", v)}
-          />
-        </Field>
-        <Toggle
-          label="Avatar shadow"
-          checked={profile.avatar.shadow}
-          onChange={(v) => patch("profile.avatar.shadow", v)}
         />
       </Section>
 
@@ -3524,13 +3527,20 @@ export function Inspector() {
       defer(() => {
         const el = container.querySelector<HTMLElement>(`[data-inspector-focus="${target}"]`);
         if (!el) return;
-        // Comfortable positioning: place the target in the upper portion, with
-        // no movement when it is already comfortably visible.
+        // Exact-target centering: place the target's center at ~45% of the
+        // visible Inspector height (comfortable 35%–55% band), clamped to the
+        // scroll range so it never overshoots the top or bottom edge.
         const delta = computeInspectorFocusScroll(
           container.getBoundingClientRect(),
           el.getBoundingClientRect(),
         );
-        if (delta !== 0) container.scrollTop = container.scrollTop + delta;
+        if (delta !== 0) {
+          container.scrollTop = clampScrollValue(
+            container.scrollTop + delta,
+            container.scrollHeight,
+            container.clientHeight,
+          );
+        }
       });
     });
   }, []);
