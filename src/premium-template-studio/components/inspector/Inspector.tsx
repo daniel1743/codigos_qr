@@ -22,8 +22,9 @@ import type {
 } from "../../types";
 import type { StudioAdapters } from "../../adapters";
 import { ENTRANCE_OPTIONS, HOVER_OPTIONS } from "../../constants/motionPresets";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { isCapabilityLocked, isAssetLocked, ProBadge, Locked } from "../../entitlements";
+import { shouldResetInspectorScroll } from "./inspectorScroll";
 
 /**
  * ASSET ADAPTER UI — minimal upload / replace / remove, always through
@@ -755,6 +756,40 @@ function PositioningInspectorSection({ block }: { block: TemplateBlock }) {
   );
 }
 
+const IMAGE_POSITION_OPTIONS: { value: string; label: string }[] = [
+  { value: "top-left", label: "↖" },
+  { value: "top", label: "↑" },
+  { value: "top-right", label: "↗" },
+  { value: "left", label: "←" },
+  { value: "center", label: "•" },
+  { value: "right", label: "→" },
+  { value: "bottom-left", label: "↙" },
+  { value: "bottom", label: "↓" },
+  { value: "bottom-right", label: "↘" },
+];
+
+function PositionGrid({ value, onChange }: { value: string; onChange: (value: string) => void }) {
+  return (
+    <div className="grid grid-cols-3 gap-1">
+      {IMAGE_POSITION_OPTIONS.map((opt) => (
+        <button
+          key={opt.value}
+          type="button"
+          title={opt.value}
+          onClick={() => onChange(opt.value)}
+          className={
+            value === opt.value
+              ? "flex h-7 items-center justify-center rounded border border-foreground/40 bg-accent text-xs text-foreground"
+              : "flex h-7 items-center justify-center rounded border border-border text-xs text-muted-foreground hover:text-foreground"
+          }
+        >
+          {opt.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function HeroBlockInspector({ block }: { block: TemplateBlock }) {
   const { state, dispatch, breakpoint } = useStudio();
   const field = (path: string, value: unknown) =>
@@ -770,6 +805,8 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
   const primaryCTA = content.primaryCTA ?? {};
   const secondaryCTA = content.secondaryCTA ?? {};
   const overlay = block.style.overlay ?? {};
+  const backgroundGradient = block.style.backgroundGradient;
+  const backgroundType: "solid" | "gradient" = backgroundGradient ? "gradient" : "solid";
 
   // Responsive getters
   const currentAlign = block.responsive?.[breakpoint]?.align ?? block.layout.align ?? "center";
@@ -802,7 +839,7 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
     <div className="space-y-4">
       {/* Block Header */}
       <Section
-        title="Premium Hero"
+        title="Hero / Banner"
         action={
           <div className="flex items-center gap-1">
             <button
@@ -840,7 +877,7 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
       </Section>
 
       {/* Content Section */}
-      <Section title="Text Content">
+      <Section title="Content">
         <Field label="Eyebrow">
           <TextInput value={content.eyebrow ?? ""} onChange={(v) => field("content.eyebrow", v)} />
         </Field>
@@ -882,7 +919,7 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
       </Section>
 
       {/* Avatar Section */}
-      <Section title="Avatar Configuration">
+      <Section title="Avatar">
         <AssetField
           label="Avatar Image"
           accept="image/*"
@@ -936,8 +973,8 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
         </Field>
       </Section>
 
-      {/* Banner & Background Section */}
-      <Section title="Banner & Background">
+      {/* Image Section */}
+      <Section title="Image">
         <AssetField
           label="Top Banner Image"
           accept="image/*"
@@ -945,15 +982,34 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
           onChange={(v) => field("content.bannerImage.url", v)}
         />
         {bannerImage.url && (
-          <Field label="Banner Blur">
-            <NumberSlider
-              value={bannerImage.blur ?? 0}
-              min={0}
-              max={20}
-              step={1}
-              onChange={(v) => field("content.bannerImage.blur", v)}
-            />
-          </Field>
+          <>
+            <Field label="Banner Blur">
+              <NumberSlider
+                value={bannerImage.blur ?? 0}
+                min={0}
+                max={20}
+                step={1}
+                onChange={(v) => field("content.bannerImage.blur", v)}
+              />
+            </Field>
+            <Field label="Fit">
+              <Segmented
+                size="sm"
+                value={bannerImage.fit ?? "cover"}
+                options={[
+                  { value: "cover", label: "Cover" },
+                  { value: "contain", label: "Contain" },
+                ]}
+                onChange={(v) => field("content.bannerImage.fit", v)}
+              />
+            </Field>
+            <Field label="Position">
+              <PositionGrid
+                value={bannerImage.position ?? "center"}
+                onChange={(v) => field("content.bannerImage.position", v)}
+              />
+            </Field>
+          </>
         )}
 
         <AssetField
@@ -963,15 +1019,34 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
           onChange={(v) => field("content.backgroundImage.url", v)}
         />
         {backgroundImage.url && (
-          <Field label="Background Blur">
-            <NumberSlider
-              value={backgroundImage.blur ?? 0}
-              min={0}
-              max={20}
-              step={1}
-              onChange={(v) => field("content.backgroundImage.blur", v)}
-            />
-          </Field>
+          <>
+            <Field label="Background Blur">
+              <NumberSlider
+                value={backgroundImage.blur ?? 0}
+                min={0}
+                max={20}
+                step={1}
+                onChange={(v) => field("content.backgroundImage.blur", v)}
+              />
+            </Field>
+            <Field label="Fit">
+              <Segmented
+                size="sm"
+                value={backgroundImage.fit ?? "cover"}
+                options={[
+                  { value: "cover", label: "Cover" },
+                  { value: "contain", label: "Contain" },
+                ]}
+                onChange={(v) => field("content.backgroundImage.fit", v)}
+              />
+            </Field>
+            <Field label="Position">
+              <PositionGrid
+                value={backgroundImage.position ?? "center"}
+                onChange={(v) => field("content.backgroundImage.position", v)}
+              />
+            </Field>
+          </>
         )}
       </Section>
 
@@ -987,6 +1062,26 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
               { value: "right", label: "Right" },
             ]}
             onChange={(v) => setResponsiveField("align", v)}
+          />
+        </Field>
+        <Field label="Width">
+          <Segmented
+            size="sm"
+            value={block.layout.trueFullBleed ? "bleed" : (block.layout.width ?? "content")}
+            options={[
+              { value: "content", label: "Contained" },
+              { value: "full", label: "Full Width" },
+              { value: "bleed", label: "Full Bleed" },
+            ]}
+            onChange={(v) => {
+              if (v === "bleed") {
+                field("layout.width", "full");
+                field("layout.trueFullBleed", true);
+              } else {
+                field("layout.width", v);
+                field("layout.trueFullBleed", false);
+              }
+            }}
           />
         </Field>
         <Field label="Hero Height (Min Height)">
@@ -1012,8 +1107,75 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
         </Field>
       </Section>
 
-      {/* Style & Appearance Section */}
-      <Section title="Appearance">
+      {/* Background Section */}
+      <Section title="Background">
+        <Field label="Background Type">
+          <Segmented
+            size="sm"
+            value={backgroundType}
+            options={[
+              { value: "solid", label: "Solid" },
+              { value: "gradient", label: "Gradient" },
+            ]}
+            onChange={(v) => {
+              if (v === "gradient") {
+                field("style.backgroundGradient", {
+                  from: state.config.theme.colors.primary,
+                  to: state.config.theme.colors.accent,
+                  angle: 180,
+                });
+              } else {
+                field("style.backgroundGradient", undefined);
+              }
+            }}
+          />
+        </Field>
+        {backgroundType === "solid" ? (
+          <Field
+            label="Solid Color"
+            action={
+              block.style.background !== undefined && (
+                <button
+                  type="button"
+                  onClick={() => field("style.background", undefined)}
+                  className="text-[10px] text-destructive hover:underline font-semibold"
+                >
+                  Reset
+                </button>
+              )
+            }
+          >
+            <ColorInput
+              value={block.style.background ?? state.config.theme.colors.card}
+              onChange={(v) => field("style.background", v)}
+            />
+          </Field>
+        ) : (
+          <>
+            <Field label="From Color">
+              <ColorInput
+                value={backgroundGradient?.from ?? state.config.theme.colors.primary}
+                onChange={(v) => field("style.backgroundGradient.from", v)}
+              />
+            </Field>
+            <Field label="To Color">
+              <ColorInput
+                value={backgroundGradient?.to ?? state.config.theme.colors.accent}
+                onChange={(v) => field("style.backgroundGradient.to", v)}
+              />
+            </Field>
+            <Field label="Angle">
+              <NumberSlider
+                value={backgroundGradient?.angle ?? 180}
+                min={0}
+                max={360}
+                step={15}
+                suffix="°"
+                onChange={(v) => field("style.backgroundGradient.angle", v)}
+              />
+            </Field>
+          </>
+        )}
         <Field label="Corner Radius">
           <NumberSlider
             value={block.style.radius ?? 24}
@@ -1022,44 +1184,43 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
             onChange={(v) => field("style.radius", v)}
           />
         </Field>
+      </Section>
 
-        {/* Overlay Configuration */}
-        <div className="mt-3 space-y-2 rounded-lg border border-border p-2 bg-muted/20">
-          <span className="text-xs font-semibold">Overlay Control</span>
-          <Field label="Overlay Type">
+      {/* Overlay / Scrim Section */}
+      <Section title="Overlay">
+        <Field label="Overlay Type">
+          <Segmented
+            size="sm"
+            value={overlay.type ?? "gradient"}
+            options={[
+              { value: "solid", label: "Solid" },
+              { value: "gradient", label: "Gradient" },
+            ]}
+            onChange={(v) => field("style.overlay.type", v)}
+          />
+        </Field>
+        <Field label="Intensity" hint="0 hides the overlay, 1 fully covers the image">
+          <NumberSlider
+            value={overlay.opacity ?? 0.4}
+            min={0}
+            max={1}
+            step={0.05}
+            onChange={(v) => field("style.overlay.opacity", v)}
+          />
+        </Field>
+        {overlay.type === "gradient" && (
+          <Field label="Gradient Direction">
             <Segmented
               size="sm"
-              value={overlay.type ?? "gradient"}
+              value={overlay.direction ?? "to-top"}
               options={[
-                { value: "solid", label: "Solid" },
-                { value: "gradient", label: "Gradient" },
+                { value: "to-top", label: "To Top" },
+                { value: "to-bottom", label: "To Bottom" },
               ]}
-              onChange={(v) => field("style.overlay.type", v)}
+              onChange={(v) => field("style.overlay.direction", v)}
             />
           </Field>
-          <Field label="Opacity">
-            <NumberSlider
-              value={overlay.opacity ?? 0.4}
-              min={0}
-              max={1}
-              step={0.05}
-              onChange={(v) => field("style.overlay.opacity", v)}
-            />
-          </Field>
-          {overlay.type === "gradient" && (
-            <Field label="Gradient Direction">
-              <Segmented
-                size="sm"
-                value={overlay.direction ?? "to-top"}
-                options={[
-                  { value: "to-top", label: "To Top" },
-                  { value: "to-bottom", label: "To Bottom" },
-                ]}
-                onChange={(v) => field("style.overlay.direction", v)}
-              />
-            </Field>
-          )}
-        </div>
+        )}
       </Section>
 
       {/* Call to Actions (CTAs) */}
@@ -3055,9 +3216,29 @@ function BlockInspector({ block }: { block: TemplateBlock }) {
 export function Inspector() {
   const { state } = useStudio();
   const block = state.config.blocks.find((b) => b.id === state.selectedBlockId);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const previousSelectionRef = useRef<string | null>(state.selectedBlockId);
+
+  // Phase 5A — contextual inspector autofocus. Reset the Inspector's own scroll
+  // to the top of the relevant controls ONLY when the selection identity changes.
+  // Editing the same block keeps `selectedBlockId` stable and must never scroll,
+  // so the panel stays put while the user types or drags a slider. This touches
+  // only the Inspector scroll container — never the Canvas / camera / Stage.
+  useEffect(() => {
+    const container = scrollRef.current;
+    if (!container) return;
+    if (!shouldResetInspectorScroll(previousSelectionRef.current, state.selectedBlockId)) return;
+    previousSelectionRef.current = state.selectedBlockId;
+    if (container.scrollTop !== 0) container.scrollTop = 0;
+  }, [state.selectedBlockId]);
+
   return (
     <aside className="flex h-full min-h-0 w-[320px] shrink-0 flex-col overflow-hidden border-l border-border bg-card">
-      <div className="pts-inspector-scroll pts-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain">
+      <div
+        ref={scrollRef}
+        data-inspector-scroll-root
+        className="pts-inspector-scroll pts-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain"
+      >
         {block ? <BlockInspector block={block} /> : <ProfileInspector />}
       </div>
     </aside>

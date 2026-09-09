@@ -291,6 +291,15 @@ function BlockFrame({
     }
   }
 
+  // TRUE full-bleed: escape the renderer grid/container and span the document
+  // edge-to-edge. This is document/block layout behavior, not camera behavior.
+  if (l.trueFullBleed) {
+    baseStyle.gridColumn = "1 / -1";
+    baseStyle.width = "100vw";
+    baseStyle.marginLeft = "calc(50% - 50vw)";
+    baseStyle.marginRight = "0";
+  }
+
   if (!editing) {
     return <section style={baseStyle}>{children}</section>;
   }

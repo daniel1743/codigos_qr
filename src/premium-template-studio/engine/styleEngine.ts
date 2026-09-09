@@ -411,3 +411,51 @@ export function motionCssVars(duration: number): Record<string, string> {
     ["--pts-motion-duration" as string]: `${duration}ms`,
   };
 }
+
+/* ------------------------------------------------------------------ */
+/* Hero / Banner visual capabilities (Phase 5B1)                       */
+/* ------------------------------------------------------------------ */
+
+export type ImageFit = "cover" | "contain";
+
+/**
+ * Maps a hero image `fit` token to its CSS `background-size` / `object-fit`
+ * value. Absent → "cover" (current default).
+ */
+export function imageFitValue(fit: string | undefined): ImageFit {
+  return fit === "contain" ? "contain" : "cover";
+}
+
+const IMAGE_POSITION_MAP: Record<string, string> = {
+  center: "50% 50%",
+  top: "50% 0%",
+  bottom: "50% 100%",
+  left: "0% 50%",
+  right: "100% 50%",
+  "top-left": "0% 0%",
+  "top-right": "100% 0%",
+  "bottom-left": "0% 100%",
+  "bottom-right": "100% 100%",
+};
+
+/**
+ * Maps a hero image `position` focal token to a CSS `background-position` /
+ * `object-position` value. Absent → "center" (current default).
+ */
+export function imagePositionValue(position: string | undefined): string {
+  return IMAGE_POSITION_MAP[position ?? ""] ?? "50% 50%";
+}
+
+/**
+ * Block-level background gradient (distinct from the OVERLAY gradient).
+ * Returns an empty object when no gradient is configured, so the existing
+ * solid background behavior is preserved.
+ */
+export function blockBackgroundGradientStyle(
+  gradient: { from?: string; to?: string; angle?: number } | undefined,
+): CSSProperties {
+  if (!gradient?.from || !gradient?.to) return {};
+  return {
+    backgroundImage: `linear-gradient(${gradient.angle ?? 180}deg, ${gradient.from} 0%, ${gradient.to} 100%)`,
+  };
+}

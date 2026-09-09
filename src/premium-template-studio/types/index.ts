@@ -386,9 +386,26 @@ export interface HeroAvatarContent {
   shadow?: boolean | "none" | "soft" | "hard";
 }
 
+export type ImageFit = "cover" | "contain";
+
+export type ImagePosition =
+  | "center"
+  | "top"
+  | "bottom"
+  | "left"
+  | "right"
+  | "top-left"
+  | "top-right"
+  | "bottom-left"
+  | "bottom-right";
+
 export interface HeroMediaContent {
   url?: string;
   blur?: number;
+  /** Absent → "cover" (current default). */
+  fit?: ImageFit;
+  /** Absent → "center" (current default). */
+  position?: ImagePosition;
 }
 
 export interface HeroBadgeContent {
@@ -432,6 +449,16 @@ export interface BlockStyle {
     opacity?: number;
     direction?: "to-top" | "to-bottom";
   };
+  /**
+   * Block-level background gradient. Distinct from `overlay` (which sits above
+   * the background) — this replaces/augments the solid `background` color.
+   * Absent → existing solid background behavior.
+   */
+  backgroundGradient?: {
+    from?: string;
+    to?: string;
+    angle?: number;
+  };
   frame?: DecorativeFramePreset;
 }
 
@@ -440,6 +467,12 @@ export interface BlockLayout {
   gap?: number;
   align?: Alignment;
   width?: "content" | "wide" | "full";
+  /**
+   * TRUE full-bleed: escape the renderer grid/container and span the document
+   * edge-to-edge. Distinct from `width: "full"` (which only spans grid columns).
+   * Absent → existing contained/inset layout behavior.
+   */
+  trueFullBleed?: boolean;
   span?: number; // bento span (1..2)
   aspect?: "square" | "video" | "portrait" | "auto";
   colSpan?: number;

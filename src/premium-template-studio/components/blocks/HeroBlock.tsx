@@ -1,7 +1,13 @@
 import React from "react";
 import { BadgeCheck, Mail, ArrowRight, Globe, Calendar, ExternalLink } from "lucide-react";
 import { useRender } from "../../engine/RenderContext";
-import { cardStyle, headingStyle } from "../../engine/styleEngine";
+import {
+  blockBackgroundGradientStyle,
+  cardStyle,
+  headingStyle,
+  imageFitValue,
+  imagePositionValue,
+} from "../../engine/styleEngine";
 import { hexToRgba } from "../../utils";
 import type { BadgeContent, TemplateBlock } from "../../types";
 import type { CSSProperties } from "react";
@@ -74,9 +80,12 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
   const bgStyle: React.CSSProperties = {};
   if (backgroundImage.url) {
     bgStyle.backgroundImage = `url(${backgroundImage.url})`;
-    bgStyle.backgroundSize = "cover";
-    bgStyle.backgroundPosition = "center";
+    bgStyle.backgroundSize = imageFitValue(backgroundImage.fit);
+    bgStyle.backgroundPosition = imagePositionValue(backgroundImage.position);
   }
+
+  // Block-level background gradient (distinct from the overlay gradient).
+  const gradientBgStyle = blockBackgroundGradientStyle(block.style.backgroundGradient);
 
   const handleCTA = (url?: string) => {
     if (!url) return;
@@ -225,7 +234,8 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
           style={{
             width: "100%",
             height: "100%",
-            objectFit: "cover",
+            objectFit: imageFitValue(bannerImage.fit),
+            objectPosition: imagePositionValue(bannerImage.position),
             filter: bannerImage.blur ? `blur(${bannerImage.blur}px)` : undefined,
           }}
         />
@@ -238,6 +248,7 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
       <div
         style={{
           ...cardStyle(theme, block.style),
+          ...gradientBgStyle,
           ...bgStyle,
           position: "relative",
           minHeight,
@@ -324,6 +335,7 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
       <div
         style={{
           ...cardStyle(theme, block.style),
+          ...gradientBgStyle,
           ...bgStyle,
           position: "relative",
           minHeight,
@@ -411,6 +423,7 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
       <div
         style={{
           ...cardStyle(theme, block.style),
+          ...gradientBgStyle,
           ...bgStyle,
           position: "relative",
           minHeight,
@@ -510,7 +523,8 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
                 inset: 0,
                 width: "100%",
                 height: "100%",
-                objectFit: "cover",
+                objectFit: imageFitValue(bannerImage.fit),
+                objectPosition: imagePositionValue(bannerImage.position),
                 filter: bannerImage.blur ? `blur(${bannerImage.blur}px)` : undefined,
               }}
             />
@@ -533,9 +547,12 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
     <div
       style={{
         ...cardStyle(theme, block.style),
+        ...gradientBgStyle,
         backgroundImage: `url(${backgroundImage.url || bannerImage.url || "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=1200"})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
+        backgroundSize: imageFitValue(backgroundImage.url ? backgroundImage.fit : bannerImage.fit),
+        backgroundPosition: imagePositionValue(
+          backgroundImage.url ? backgroundImage.position : bannerImage.position,
+        ),
         position: "relative",
         minHeight,
         display: "flex",

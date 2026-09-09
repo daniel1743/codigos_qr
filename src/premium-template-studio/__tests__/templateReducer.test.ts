@@ -112,6 +112,17 @@ describe("templateReducer", () => {
     expect(state2.selectedBlockId).toBe(state1.selectedBlockId);
   });
 
+  it("selectBlock sets the selection without mutating config or history", () => {
+    const state1 = templateReducer(initialState, { type: "selectBlock", id: "block-a" });
+    expect(state1.selectedBlockId).toBe("block-a");
+    expect(state1.config).toBe(initialState.config);
+    expect(state1.past.length).toBe(0);
+    expect(state1.dirty).toBe(false);
+
+    const state2 = templateReducer(state1, { type: "selectBlock", id: null });
+    expect(state2.selectedBlockId).toBeNull();
+  });
+
   it("replaceConfig with resetHistory clears history", () => {
     let state = templateReducer(initialState, {
       type: "patch",
