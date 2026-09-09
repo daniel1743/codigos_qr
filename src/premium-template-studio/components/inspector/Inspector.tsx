@@ -13,6 +13,20 @@ import {
   Toggle,
 } from "../ui/controls";
 import { parseVideoUrl, uid } from "../../utils";
+
+/**
+ * Inspector → Canvas (source = inspector). When the user intentionally enters a
+ * contextual Inspector group (focus or pointer-down on a control inside it),
+ * request that the Canvas reveal the matching element. Fires only on explicit
+ * interaction — never on scroll/render/zoom/load. `requestCanvasFocus` is
+ * idempotent, so once the element is visible the Canvas performs no movement.
+ */
+function contextualFocusProps(target: ContextualTarget) {
+  return {
+    onFocusCapture: () => requestCanvasFocus(target),
+    onPointerDownCapture: () => requestCanvasFocus(target),
+  };
+}
 import type {
   BlockItem,
   CTAStyle,
@@ -27,7 +41,13 @@ import { ENTRANCE_OPTIONS, HOVER_OPTIONS } from "../../constants/motionPresets";
 import { useEffect, useRef, useState } from "react";
 import { isCapabilityLocked, isAssetLocked, ProBadge, Locked } from "../../entitlements";
 import { shouldResetInspectorScroll } from "./inspectorScroll";
-import { shouldScrollInspectorToFocus, subscribeInspectorFocus } from "./inspectorFocus";
+import {
+  computeInspectorFocusScroll,
+  requestCanvasFocus,
+  shouldScrollInspectorToFocus,
+  subscribeInspectorFocus,
+  type ContextualTarget,
+} from "./inspectorFocus";
 
 /**
  * ASSET ADAPTER UI — minimal upload / replace / remove, always through
@@ -187,7 +207,7 @@ function ProfileInspector() {
 
   return (
     <div>
-      <div data-inspector-focus="profile-cover">
+      <div data-inspector-focus="profile-cover" {...contextualFocusProps("profile-cover")}>
         <Section title="Cover / Banner">
           <Toggle
             label="Show cover"
@@ -293,12 +313,14 @@ function ProfileInspector() {
             onChange={(v) => patch("profile.location", v)}
           />
         </Field>
-        <Field label="Bio">
-          <TextArea
-            value={profile.description ?? ""}
-            onChange={(v) => patch("profile.description", v)}
-          />
-        </Field>
+        <div data-inspector-focus="profile-bio" {...contextualFocusProps("profile-bio")}>
+          <Field label="Bio">
+            <TextArea
+              value={profile.description ?? ""}
+              onChange={(v) => patch("profile.description", v)}
+            />
+          </Field>
+        </div>
         <AssetField
           label="Avatar"
           accept="image/*"
@@ -1103,25 +1125,36 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
 
       {/* Content Section */}
       <Section title="Content">
-        <Field label="Eyebrow">
-          <TextInput value={content.eyebrow ?? ""} onChange={(v) => field("content.eyebrow", v)} />
-        </Field>
-        <Field label="Title">
-          <TextInput value={content.title ?? ""} onChange={(v) => field("content.title", v)} />
-        </Field>
-        <Field label="Subtitle">
-          <TextInput
-            value={content.subtitle ?? ""}
-            onChange={(v) => field("content.subtitle", v)}
-          />
-        </Field>
-        <Field label="Description">
-          <TextArea
-            value={content.description ?? ""}
-            onChange={(v) => field("content.description", v)}
-            rows={3}
-          />
-        </Field>
+        <div data-inspector-focus="hero-eyebrow" {...contextualFocusProps("hero-eyebrow")}>
+          <Field label="Eyebrow">
+            <TextInput
+              value={content.eyebrow ?? ""}
+              onChange={(v) => field("content.eyebrow", v)}
+            />
+          </Field>
+        </div>
+        <div data-inspector-focus="hero-title" {...contextualFocusProps("hero-title")}>
+          <Field label="Title">
+            <TextInput value={content.title ?? ""} onChange={(v) => field("content.title", v)} />
+          </Field>
+        </div>
+        <div data-inspector-focus="hero-subtitle" {...contextualFocusProps("hero-subtitle")}>
+          <Field label="Subtitle">
+            <TextInput
+              value={content.subtitle ?? ""}
+              onChange={(v) => field("content.subtitle", v)}
+            />
+          </Field>
+        </div>
+        <div data-inspector-focus="hero-description" {...contextualFocusProps("hero-description")}>
+          <Field label="Description">
+            <TextArea
+              value={content.description ?? ""}
+              onChange={(v) => field("content.description", v)}
+              rows={3}
+            />
+          </Field>
+        </div>
 
         {/* Badge Sub-section */}
         <div className="mt-3 space-y-2 rounded-lg border border-border p-2 bg-muted/20">
@@ -1449,7 +1482,7 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
       </Section>
 
       {/* CTA / Button — contextual sub-target of the selected Hero */}
-      <div data-inspector-focus="hero-cta">
+      <div data-inspector-focus="hero-cta" {...contextualFocusProps("hero-cta")}>
         <Section title="CTA / Button">
           <Field label="Content">
             <span className="text-xs text-muted-foreground">Label, link and icon</span>
@@ -3491,8 +3524,13 @@ export function Inspector() {
       defer(() => {
         const el = container.querySelector<HTMLElement>(`[data-inspector-focus="${target}"]`);
         if (!el) return;
-        const delta = el.getBoundingClientRect().top - container.getBoundingClientRect().top;
-        container.scrollTop = container.scrollTop + delta;
+        // Comfortable positioning: place the target in the upper portion, with
+        // no movement when it is already comfortably visible.
+        const delta = computeInspectorFocusScroll(
+          container.getBoundingClientRect(),
+          el.getBoundingClientRect(),
+        );
+        if (delta !== 0) container.scrollTop = container.scrollTop + delta;
       });
     });
   }, []);

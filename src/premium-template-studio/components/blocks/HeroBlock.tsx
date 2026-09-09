@@ -1,6 +1,6 @@
 import React from "react";
 import { BadgeCheck, Mail, ArrowRight, Globe, Calendar, ExternalLink } from "lucide-react";
-import { useRender } from "../../engine/RenderContext";
+import { useRender, type HeroTextTarget } from "../../engine/RenderContext";
 import {
   blockBackgroundGradientStyle,
   cardStyle,
@@ -40,7 +40,7 @@ function SmartIcon({ name, size = 14 }: { name?: string; size?: number }) {
 }
 
 export function HeroBlock({ block }: { block: TemplateBlock }) {
-  const { theme, mode, breakpoint, onSelectHeroCta } = useRender();
+  const { theme, mode, breakpoint, onSelectHeroCta, onSelectHeroText } = useRender();
 
   const content = block.content;
   const variant = block.variant ?? "centered";
@@ -105,6 +105,30 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
     handleCTA(url);
   };
 
+  // Edit-mode click on a Hero text sub-target (title/subtitle/description/
+  // eyebrow) selects the parent Hero (via the studio handler) and requests a
+  // one-shot Inspector focus on that field. Also carries a stable editor-only
+  // DOM identity (`data-editor-target`) so the Inspector → Canvas direction can
+  // reveal the exact element. Public/preview renders neither, so public output
+  // is unchanged.
+  const heroTextClickProps = (target: HeroTextTarget) => {
+    if (mode !== "edit") return {};
+    return {
+      // The Inspector requests Canvas reveal with the `hero-` prefix
+      // (`requestCanvasFocus("hero-title")`), so the Canvas element must carry
+      // the same prefixed identity — otherwise the reveal query finds nothing.
+      "data-editor-target": `hero-${target}`,
+      ...(onSelectHeroText
+        ? {
+            onClick: (e: React.MouseEvent) => {
+              e.stopPropagation();
+              onSelectHeroText(block.id, target);
+            },
+          }
+        : {}),
+    };
+  };
+
   const badgeElem =
     badge.enabled && badge.label ? (
       <span
@@ -152,6 +176,7 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
   const ctasElem =
     primaryCTA.label || secondaryCTA.label ? (
       <div
+        {...(mode === "edit" ? { "data-editor-target": "hero-cta" } : {})}
         style={{
           display: "flex",
           flexDirection: ctaFlexDir,
@@ -281,6 +306,7 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
           {badgeElem}
           {content.eyebrow && (
             <span
+              {...heroTextClickProps("eyebrow")}
               style={{
                 fontSize: 12,
                 fontWeight: 700,
@@ -295,6 +321,7 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
           )}
           {content.title && (
             <h1
+              {...heroTextClickProps("title")}
               style={{
                 ...headingStyle(theme, 1.2),
                 color: isFullImage ? "#ffffff" : theme.colors.text,
@@ -305,6 +332,7 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
           )}
           {content.subtitle && (
             <p
+              {...heroTextClickProps("subtitle")}
               style={{
                 fontSize: 16,
                 color: isFullImage ? "rgba(255,255,255,0.85)" : theme.colors.text,
@@ -318,6 +346,7 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
           )}
           {content.description && (
             <p
+              {...heroTextClickProps("description")}
               style={{
                 fontSize: 14,
                 color: isFullImage ? "rgba(255,255,255,0.7)" : theme.colors.mutedText,
@@ -369,6 +398,7 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
           {badgeElem}
           {content.eyebrow && (
             <span
+              {...heroTextClickProps("eyebrow")}
               style={{
                 fontSize: 12,
                 fontWeight: 700,
@@ -383,6 +413,7 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
           )}
           {content.title && (
             <h1
+              {...heroTextClickProps("title")}
               style={{
                 ...headingStyle(theme, 1.3),
                 color: isFullImage ? "#ffffff" : theme.colors.text,
@@ -393,6 +424,7 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
           )}
           {content.subtitle && (
             <p
+              {...heroTextClickProps("subtitle")}
               style={{
                 fontSize: 16,
                 color: isFullImage ? "rgba(255,255,255,0.85)" : theme.colors.text,
@@ -406,6 +438,7 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
           )}
           {content.description && (
             <p
+              {...heroTextClickProps("description")}
               style={{
                 fontSize: 14,
                 color: isFullImage ? "rgba(255,255,255,0.7)" : theme.colors.mutedText,
@@ -457,6 +490,7 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
           {badgeElem}
           {content.eyebrow && (
             <span
+              {...heroTextClickProps("eyebrow")}
               style={{
                 fontSize: 12,
                 fontWeight: 700,
@@ -471,6 +505,7 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
           )}
           {content.title && (
             <h1
+              {...heroTextClickProps("title")}
               style={{
                 ...headingStyle(theme, 1.3),
                 color: isFullImage ? "#ffffff" : theme.colors.text,
@@ -481,6 +516,7 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
           )}
           {content.subtitle && (
             <p
+              {...heroTextClickProps("subtitle")}
               style={{
                 fontSize: 16,
                 color: isFullImage ? "rgba(255,255,255,0.85)" : theme.colors.text,
@@ -494,6 +530,7 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
           )}
           {content.description && (
             <p
+              {...heroTextClickProps("description")}
               style={{
                 fontSize: 14,
                 color: isFullImage ? "rgba(255,255,255,0.7)" : theme.colors.mutedText,
@@ -594,6 +631,7 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
         {badgeElem}
         {content.eyebrow && (
           <span
+            {...heroTextClickProps("eyebrow")}
             style={{
               fontSize: 12,
               fontWeight: 700,
@@ -607,10 +645,16 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
           </span>
         )}
         {content.title && (
-          <h1 style={{ ...headingStyle(theme, 1.4), color: "#ffffff" }}>{content.title}</h1>
+          <h1
+            {...heroTextClickProps("title")}
+            style={{ ...headingStyle(theme, 1.4), color: "#ffffff" }}
+          >
+            {content.title}
+          </h1>
         )}
         {content.subtitle && (
           <p
+            {...heroTextClickProps("subtitle")}
             style={{ fontSize: 16, color: "rgba(255,255,255,0.9)", marginTop: 6, fontWeight: 500 }}
           >
             {content.subtitle}
@@ -618,6 +662,7 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
         )}
         {content.description && (
           <p
+            {...heroTextClickProps("description")}
             style={{
               fontSize: 14,
               color: "rgba(255,255,255,0.75)",

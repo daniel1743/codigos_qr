@@ -20,7 +20,7 @@ import type { CSSProperties } from "react";
 import { EyeOff, Copy, Trash2, ChevronUp, ChevronDown, GripVertical } from "lucide-react";
 import type { BioTemplateConfig, Breakpoint, MotionConfig, TemplateBlock } from "../types";
 import { getBlockComponent } from "./BlockRegistry";
-import { RenderProvider, useRender } from "./RenderContext";
+import { RenderProvider, useRender, type HeroTextTarget } from "./RenderContext";
 import {
   ANIMATION_CLASS,
   HOVER_CLASS,
@@ -41,6 +41,7 @@ export interface EditingHandlers {
   onSelect?: ((id: string) => void) | undefined;
   onSelectProfileCover?: (() => void) | undefined;
   onSelectHeroCta?: ((blockId: string) => void) | undefined;
+  onSelectHeroText?: ((blockId: string, target: HeroTextTarget) => void) | undefined;
   onInlineEdit?: ((path: string, value: string) => void) | undefined;
   onMove?: ((id: string, direction: -1 | 1) => void) | undefined;
   onDuplicate?: ((id: string) => void) | undefined;
@@ -464,6 +465,7 @@ function TemplateRendererImpl({
       onSelectBlock: editing?.onSelect,
       onSelectProfileCover: editing?.onSelectProfileCover,
       onSelectHeroCta: editing?.onSelectHeroCta,
+      onSelectHeroText: editing?.onSelectHeroText,
       onInlineEdit: editing?.onInlineEdit,
       onTrack,
     }),
@@ -475,6 +477,7 @@ function TemplateRendererImpl({
       editing?.onSelect,
       editing?.onSelectProfileCover,
       editing?.onSelectHeroCta,
+      editing?.onSelectHeroText,
       editing?.onInlineEdit,
       onTrack,
     ],

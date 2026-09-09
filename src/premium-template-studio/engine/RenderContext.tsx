@@ -1,6 +1,9 @@
 import { createContext, useContext } from "react";
 import type { Breakpoint, TemplateTheme } from "../types";
 
+/** Editable Hero text sub-targets (parent block + Inspector focus, not blocks). */
+export type HeroTextTarget = "title" | "subtitle" | "description" | "eyebrow";
+
 /**
  * Render-time context shared by every block. The public renderer supplies a
  * minimal, edit-free version so no editor code ships to end users.
@@ -15,6 +18,8 @@ export interface RenderContextValue {
   onSelectProfileCover?: (() => void) | undefined;
   /** Selecting a Hero CTA sub-target (parent block id + focus, not a new block). */
   onSelectHeroCta?: ((blockId: string) => void) | undefined;
+  /** Selecting a Hero text sub-target (title/subtitle/description/eyebrow). */
+  onSelectHeroText?: ((blockId: string, target: HeroTextTarget) => void) | undefined;
   /** inline editing hook: path is dot-notation into the config */
   onInlineEdit?: ((path: string, value: string) => void) | undefined;
   /** ANALYTICS ADAPTER hook */

@@ -12,6 +12,7 @@ import { cx } from "../../utils";
 import { usePowerCanvasCamera } from "./usePowerCanvasCamera";
 import { calculateFitZoom } from "./powerCanvasCameraMath";
 import { computeAutofocusScrollDelta } from "./powerCanvasAutofocus";
+import { subscribeCanvasFocus } from "../inspector/inspectorFocus";
 
 interface PowerCanvasViewportProps {
   children: ReactNode;
@@ -256,6 +257,48 @@ export function PowerCanvasViewport({
     if (delta.top !== 0) viewport.scrollTop += delta.top;
     if (delta.left !== 0) viewport.scrollLeft += delta.left;
   }, [selectedBlockId, viewportRef, contentRef]);
+
+  // Phase 5C2B — Inspector → Canvas smart follow.
+  //
+  // Fires ONLY when the Inspector explicitly requests a Canvas reveal (source =
+  // inspector — see `requestCanvasFocus`). Resolved scoped to the Canvas content
+  // layer (`contentRef`), never a global `document.querySelector`. Reuses the
+  // frozen Phase 4 autofocus delta math so reveal shares the same
+  // visibility/margin semantics, and only `scrollTop`/`scrollLeft` are written —
+  // zoom, Stage geometry, camera math and the pan owner are untouched. The two
+  // directions are separate signals, so this can never loop back into the
+  // Inspector.
+  useEffect(() => {
+    return subscribeCanvasFocus((target) => {
+      const viewport = viewportRef.current;
+      const contentLayer = contentRef.current;
+      if (!viewport || !contentLayer) return;
+
+      const element = contentLayer.querySelector<HTMLElement>(`[data-editor-target="${target}"]`);
+      if (!element) return;
+
+      const viewportRect = viewport.getBoundingClientRect();
+      const elementRect = element.getBoundingClientRect();
+
+      const delta = computeAutofocusScrollDelta(
+        {
+          top: viewportRect.top,
+          bottom: viewportRect.bottom,
+          left: viewportRect.left,
+          right: viewportRect.right,
+        },
+        {
+          top: elementRect.top,
+          bottom: elementRect.bottom,
+          left: elementRect.left,
+          right: elementRect.right,
+        },
+      );
+
+      if (delta.top !== 0) viewport.scrollTop += delta.top;
+      if (delta.left !== 0) viewport.scrollLeft += delta.left;
+    });
+  }, [viewportRef, contentRef]);
 
   useEffect(() => {
     if (

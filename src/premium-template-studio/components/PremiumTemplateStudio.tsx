@@ -275,6 +275,15 @@ function Canvas() {
                 }
                 requestInspectorFocus("hero-cta");
               },
+              onSelectHeroText: (blockId, target) => {
+                // Select the parent Hero if it is not already selected (no
+                // redundant churn), then request a one-shot Inspector focus on
+                // the exact text field (title/subtitle/description/eyebrow).
+                if (state.selectedBlockId !== blockId) {
+                  dispatch({ type: "selectBlock", id: blockId });
+                }
+                requestInspectorFocus(`hero-${target}`);
+              },
               onInlineEdit: (path, value) => {
                 // Canvas paths look like `blocks.<blockId>.content.title`.
                 // Blocks are an array, so route them through patchBlockField.

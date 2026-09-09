@@ -4,6 +4,7 @@ import { headingStyle } from "../../engine/styleEngine";
 import { hexToRgba } from "../../utils";
 import type { TemplateLayout, TemplateProfile } from "../../types";
 import { InlineText } from "../blocks/primitives";
+import { requestInspectorFocus } from "../inspector/inspectorFocus";
 
 /**
  * The profile header is layout-aware: the same data composes very differently
@@ -97,21 +98,30 @@ export function ProfileHeader({
         </div>
       )}
       {profile.description ? (
-        <InlineText
-          as="p"
-          path="profile.description"
-          value={profile.description}
-          placeholder="Short bio"
-          style={{
-            margin: "12px auto 0",
-            maxWidth: 460,
-            marginLeft: inline || align === "left" ? 0 : undefined,
-            fontSize: theme.typography.bodySize,
-            color: theme.colors.mutedText,
-            lineHeight: theme.typography.lineHeight,
-            whiteSpace: "pre-wrap",
+        <div
+          {...(mode === "edit" ? { "data-editor-target": "profile-bio" } : {})}
+          onClick={(e) => {
+            if (mode !== "edit") return;
+            e.stopPropagation();
+            requestInspectorFocus("profile-bio");
           }}
-        />
+        >
+          <InlineText
+            as="p"
+            path="profile.description"
+            value={profile.description}
+            placeholder="Short bio"
+            style={{
+              margin: "12px auto 0",
+              maxWidth: 460,
+              marginLeft: inline || align === "left" ? 0 : undefined,
+              fontSize: theme.typography.bodySize,
+              color: theme.colors.mutedText,
+              lineHeight: theme.typography.lineHeight,
+              whiteSpace: "pre-wrap",
+            }}
+          />
+        </div>
       ) : null}
       <div
         style={{
@@ -139,6 +149,7 @@ export function ProfileHeader({
     <header style={{ position: "relative" }}>
       {banner.enabled ? (
         <div
+          {...(mode === "edit" ? { "data-editor-target": "profile-cover" } : {})}
           onClick={(e) => {
             if (mode !== "edit" || !onSelectProfileCover) return;
             e.stopPropagation();
