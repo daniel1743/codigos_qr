@@ -15,16 +15,19 @@ import {
 import { parseVideoUrl, uid } from "../../utils";
 import type {
   BlockItem,
+  CTAStyle,
   SocialItem,
   TemplateBlock,
   EntrancePreset,
   HoverPreset,
 } from "../../types";
+import { FONT_OPTIONS } from "../../constants/themes";
 import type { StudioAdapters } from "../../adapters";
 import { ENTRANCE_OPTIONS, HOVER_OPTIONS } from "../../constants/motionPresets";
 import { useEffect, useRef, useState } from "react";
 import { isCapabilityLocked, isAssetLocked, ProBadge, Locked } from "../../entitlements";
 import { shouldResetInspectorScroll } from "./inspectorScroll";
+import { shouldScrollInspectorToFocus, subscribeInspectorFocus } from "./inspectorFocus";
 
 /**
  * ASSET ADAPTER UI — minimal upload / replace / remove, always through
@@ -164,6 +167,7 @@ function AssetField({
 function ProfileInspector() {
   const { state, dispatch, breakpoint } = useStudio();
   const { profile, layout } = state.config;
+  const banner = profile.banner;
   const patch = (path: string, value: unknown) => dispatch({ type: "patch", path, value });
 
   // Safe defaults
@@ -183,6 +187,90 @@ function ProfileInspector() {
 
   return (
     <div>
+      <div data-inspector-focus="profile-cover">
+        <Section title="Cover / Banner">
+          <Toggle
+            label="Show cover"
+            checked={banner.enabled}
+            onChange={(v) => patch("profile.banner.enabled", v)}
+          />
+          {banner.enabled && (
+            <>
+              <AssetField
+                label="Cover Image"
+                accept="image/*"
+                value={banner.imageUrl ?? ""}
+                onChange={(v) => patch("profile.banner.imageUrl", v)}
+              />
+              <Field label={`Cover Height (${breakpoint})`}>
+                <NumberSlider
+                  value={breakpoint === "mobile" ? banner.mobileHeight : banner.height}
+                  min={80}
+                  max={400}
+                  step={8}
+                  suffix="px"
+                  onChange={(v) =>
+                    patch(
+                      breakpoint === "mobile"
+                        ? "profile.banner.mobileHeight"
+                        : "profile.banner.height",
+                      v,
+                    )
+                  }
+                />
+              </Field>
+              <Field label="Position">
+                <PositionGrid
+                  value={focalToToken(banner.focalX, banner.focalY)}
+                  onChange={(v) => {
+                    const point = FOCAL_POINTS[v] ?? FOCAL_POINTS.center!;
+                    patch("profile.banner.focalX", point.x);
+                    patch("profile.banner.focalY", point.y);
+                  }}
+                />
+              </Field>
+              <Field label="Blur">
+                <NumberSlider
+                  value={banner.blur}
+                  min={0}
+                  max={20}
+                  step={1}
+                  onChange={(v) => patch("profile.banner.blur", v)}
+                />
+              </Field>
+              <Field label="Corner Radius">
+                <NumberSlider
+                  value={banner.radius}
+                  min={0}
+                  max={48}
+                  onChange={(v) => patch("profile.banner.radius", v)}
+                />
+              </Field>
+              <Field label="Overlay Type">
+                <Segmented
+                  size="sm"
+                  value={banner.gradient ? "gradient" : "solid"}
+                  options={[
+                    { value: "solid", label: "Solid" },
+                    { value: "gradient", label: "Gradient" },
+                  ]}
+                  onChange={(v) => patch("profile.banner.gradient", v === "gradient")}
+                />
+              </Field>
+              <Field label="Overlay Intensity" hint="0 hides the overlay, 1 fully covers the image">
+                <NumberSlider
+                  value={banner.overlay}
+                  min={0}
+                  max={1}
+                  step={0.05}
+                  onChange={(v) => patch("profile.banner.overlay", v)}
+                />
+              </Field>
+            </>
+          )}
+        </Section>
+      </div>
+
       <Section title="Profile">
         <Field label="Name">
           <TextInput value={profile.name} onChange={(v) => patch("profile.name", v)} />
@@ -768,6 +856,26 @@ const IMAGE_POSITION_OPTIONS: { value: string; label: string }[] = [
   { value: "bottom-right", label: "↘" },
 ];
 
+/** Focal tokens → profile banner focalX/focalY percentages (canonical fields). */
+const FOCAL_POINTS: Record<string, { x: number; y: number }> = {
+  center: { x: 50, y: 50 },
+  top: { x: 50, y: 0 },
+  bottom: { x: 50, y: 100 },
+  left: { x: 0, y: 50 },
+  right: { x: 100, y: 50 },
+  "top-left": { x: 0, y: 0 },
+  "top-right": { x: 100, y: 0 },
+  "bottom-left": { x: 0, y: 100 },
+  "bottom-right": { x: 100, y: 100 },
+};
+
+function focalToToken(focalX: number, focalY: number): string {
+  const entry = Object.entries(FOCAL_POINTS).find(
+    ([, p]) => Math.abs(p.x - focalX) <= 1 && Math.abs(p.y - focalY) <= 1,
+  );
+  return entry ? entry[0] : "center";
+}
+
 function PositionGrid({ value, onChange }: { value: string; onChange: (value: string) => void }) {
   return (
     <div className="grid grid-cols-3 gap-1">
@@ -786,6 +894,123 @@ function PositionGrid({ value, onChange }: { value: string; onChange: (value: st
           {opt.label}
         </button>
       ))}
+    </div>
+  );
+}
+
+function CtaStyleControls({
+  style,
+  pathPrefix,
+  defaultRadius,
+  onField,
+}: {
+  style: CTAStyle | undefined;
+  pathPrefix: string;
+  defaultRadius: number;
+  onField: (path: string, value: unknown) => void;
+}) {
+  const s = style ?? {};
+  const set = (key: keyof CTAStyle, value: unknown) => onField(`${pathPrefix}.${key}`, value);
+
+  return (
+    <div className="space-y-2">
+      <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+        Style
+      </span>
+      <Field label="Background">
+        <ColorInput
+          value={s.backgroundColor ?? ""}
+          onChange={(v) => set("backgroundColor", v === "" ? undefined : v)}
+        />
+      </Field>
+      <Field label="Text color">
+        <ColorInput
+          value={s.textColor ?? ""}
+          onChange={(v) => set("textColor", v === "" ? undefined : v)}
+        />
+      </Field>
+      <Field label="Font family">
+        <select
+          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground"
+          value={s.fontFamily ?? ""}
+          onChange={(e) => set("fontFamily", e.target.value === "" ? undefined : e.target.value)}
+        >
+          <option value="">Theme default</option>
+          {FONT_OPTIONS.map((font) => (
+            <option key={font.value} value={font.value}>
+              {font.label}
+            </option>
+          ))}
+        </select>
+      </Field>
+      <Field label="Font size">
+        <NumberSlider
+          value={s.fontSize ?? 14}
+          min={10}
+          max={32}
+          step={1}
+          onChange={(v) => set("fontSize", v)}
+        />
+      </Field>
+      <Field label="Font weight">
+        <Segmented
+          size="sm"
+          value={String(s.fontWeight ?? 600)}
+          options={[
+            { value: "400", label: "Regular" },
+            { value: "500", label: "Medium" },
+            { value: "600", label: "Semibold" },
+            { value: "700", label: "Bold" },
+            { value: "800", label: "Extra" },
+          ]}
+          onChange={(v) => set("fontWeight", Number(v))}
+        />
+      </Field>
+      <Field label="Border color">
+        <ColorInput
+          value={s.borderColor ?? ""}
+          onChange={(v) => set("borderColor", v === "" ? undefined : v)}
+        />
+      </Field>
+      <Field label="Border width" hint="0 = theme default">
+        <NumberSlider
+          value={s.borderWidth ?? 0}
+          min={0}
+          max={8}
+          step={1}
+          onChange={(v) => set("borderWidth", v)}
+        />
+      </Field>
+      <Field label="Radius">
+        <NumberSlider
+          value={s.radius ?? defaultRadius}
+          min={0}
+          max={40}
+          step={1}
+          onChange={(v) => set("radius", v)}
+        />
+      </Field>
+      <Field label="Padding X">
+        <NumberSlider
+          value={s.paddingX ?? 20}
+          min={0}
+          max={48}
+          step={1}
+          onChange={(v) => set("paddingX", v)}
+        />
+      </Field>
+      <Field label="Padding Y">
+        <NumberSlider
+          value={s.paddingY ?? 10}
+          min={0}
+          max={32}
+          step={1}
+          onChange={(v) => set("paddingY", v)}
+        />
+      </Field>
+      <GhostButton onClick={() => onField(pathPrefix, {})} className="w-full justify-center">
+        Reset style
+      </GhostButton>
     </div>
   );
 }
@@ -1223,68 +1448,85 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
         )}
       </Section>
 
-      {/* Call to Actions (CTAs) */}
-      <Section title="Actions (CTAs)">
-        {/* Primary CTA */}
-        <div className="space-y-2 rounded-lg border border-border p-2 bg-muted/10 mb-2">
-          <span className="text-xs font-bold text-foreground">Primary CTA</span>
-          <Field label="Label">
-            <TextInput
-              value={primaryCTA.label ?? ""}
-              onChange={(v) => field("content.primaryCTA.label", v)}
-            />
+      {/* CTA / Button — contextual sub-target of the selected Hero */}
+      <div data-inspector-focus="hero-cta">
+        <Section title="CTA / Button">
+          <Field label="Content">
+            <span className="text-xs text-muted-foreground">Label, link and icon</span>
           </Field>
-          <Field label="URL">
-            <TextInput
-              value={primaryCTA.url ?? ""}
-              onChange={(v) => field("content.primaryCTA.url", v)}
+          {/* Primary CTA */}
+          <div className="space-y-2 rounded-lg border border-border p-2 bg-muted/10 mb-2">
+            <span className="text-xs font-bold text-foreground">Primary CTA</span>
+            <Field label="Label">
+              <TextInput
+                value={primaryCTA.label ?? ""}
+                onChange={(v) => field("content.primaryCTA.label", v)}
+              />
+            </Field>
+            <Field label="URL">
+              <TextInput
+                value={primaryCTA.url ?? ""}
+                onChange={(v) => field("content.primaryCTA.url", v)}
+              />
+            </Field>
+            <Field label="Icon">
+              <Segmented
+                size="sm"
+                value={primaryCTA.icon ?? "mail"}
+                options={[
+                  { value: "mail", label: "Mail" },
+                  { value: "arrow-right", label: "Arrow" },
+                  { value: "globe", label: "Globe" },
+                  { value: "calendar", label: "Calendar" },
+                ]}
+                onChange={(v) => field("content.primaryCTA.icon", v)}
+              />
+            </Field>
+            <CtaStyleControls
+              style={primaryCTA.style}
+              pathPrefix="content.primaryCTA.style"
+              defaultRadius={state.config.theme.buttons.radius}
+              onField={field}
             />
-          </Field>
-          <Field label="Icon">
-            <Segmented
-              size="sm"
-              value={primaryCTA.icon ?? "mail"}
-              options={[
-                { value: "mail", label: "Mail" },
-                { value: "arrow-right", label: "Arrow" },
-                { value: "globe", label: "Globe" },
-                { value: "calendar", label: "Calendar" },
-              ]}
-              onChange={(v) => field("content.primaryCTA.icon", v)}
-            />
-          </Field>
-        </div>
+          </div>
 
-        {/* Secondary CTA */}
-        <div className="space-y-2 rounded-lg border border-border p-2 bg-muted/10">
-          <span className="text-xs font-bold text-foreground">Secondary CTA</span>
-          <Field label="Label">
-            <TextInput
-              value={secondaryCTA.label ?? ""}
-              onChange={(v) => field("content.secondaryCTA.label", v)}
+          {/* Secondary CTA */}
+          <div className="space-y-2 rounded-lg border border-border p-2 bg-muted/10">
+            <span className="text-xs font-bold text-foreground">Secondary CTA</span>
+            <Field label="Label">
+              <TextInput
+                value={secondaryCTA.label ?? ""}
+                onChange={(v) => field("content.secondaryCTA.label", v)}
+              />
+            </Field>
+            <Field label="URL">
+              <TextInput
+                value={secondaryCTA.url ?? ""}
+                onChange={(v) => field("content.secondaryCTA.url", v)}
+              />
+            </Field>
+            <Field label="Icon">
+              <Segmented
+                size="sm"
+                value={secondaryCTA.icon ?? "arrow-right"}
+                options={[
+                  { value: "mail", label: "Mail" },
+                  { value: "arrow-right", label: "Arrow" },
+                  { value: "globe", label: "Globe" },
+                  { value: "calendar", label: "Calendar" },
+                ]}
+                onChange={(v) => field("content.secondaryCTA.icon", v)}
+              />
+            </Field>
+            <CtaStyleControls
+              style={secondaryCTA.style}
+              pathPrefix="content.secondaryCTA.style"
+              defaultRadius={state.config.theme.buttons.radius}
+              onField={field}
             />
-          </Field>
-          <Field label="URL">
-            <TextInput
-              value={secondaryCTA.url ?? ""}
-              onChange={(v) => field("content.secondaryCTA.url", v)}
-            />
-          </Field>
-          <Field label="Icon">
-            <Segmented
-              size="sm"
-              value={secondaryCTA.icon ?? "arrow-right"}
-              options={[
-                { value: "mail", label: "Mail" },
-                { value: "arrow-right", label: "Arrow" },
-                { value: "globe", label: "Globe" },
-                { value: "calendar", label: "Calendar" },
-              ]}
-              onChange={(v) => field("content.secondaryCTA.icon", v)}
-            />
-          </Field>
-        </div>
-      </Section>
+          </div>
+        </Section>
+      </div>
 
       <PositioningInspectorSection block={block} />
 
@@ -3146,42 +3388,42 @@ function BlockInspector({ block }: { block: TemplateBlock }) {
 
       {/* ---- Local Motion Overrides ---- */}
       <Locked locked={motionLocked}>
-      <Section title="Motion" action={motionLocked ? <ProBadge /> : undefined}>
-        <Toggle
-          label="Use global motion"
-          checked={block.motion?.useGlobal !== false}
-          onChange={(v) => field("motion.useGlobal", v)}
-        />
-        {block.motion?.useGlobal === false && (
-          <>
-            <Toggle
-              label="Disable motion"
-              checked={block.motion?.disableMotion === true}
-              onChange={(v) => field("motion.disableMotion", v)}
-            />
-            {!block.motion?.disableMotion && (
-              <>
-                <Field label="Entrance override">
-                  <Segmented
-                    value={(block.motion?.entrance ?? "soft-rise") as EntrancePreset}
-                    options={ENTRANCE_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
-                    onChange={(v) => field("motion.entrance", v)}
-                    size="sm"
-                  />
-                </Field>
-                <Field label="Hover override">
-                  <Segmented
-                    value={(block.motion?.hover ?? "lift") as HoverPreset}
-                    options={HOVER_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
-                    onChange={(v) => field("motion.hover", v)}
-                    size="sm"
-                  />
-                </Field>
-              </>
-            )}
-          </>
-        )}
-      </Section>
+        <Section title="Motion" action={motionLocked ? <ProBadge /> : undefined}>
+          <Toggle
+            label="Use global motion"
+            checked={block.motion?.useGlobal !== false}
+            onChange={(v) => field("motion.useGlobal", v)}
+          />
+          {block.motion?.useGlobal === false && (
+            <>
+              <Toggle
+                label="Disable motion"
+                checked={block.motion?.disableMotion === true}
+                onChange={(v) => field("motion.disableMotion", v)}
+              />
+              {!block.motion?.disableMotion && (
+                <>
+                  <Field label="Entrance override">
+                    <Segmented
+                      value={(block.motion?.entrance ?? "soft-rise") as EntrancePreset}
+                      options={ENTRANCE_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
+                      onChange={(v) => field("motion.entrance", v)}
+                      size="sm"
+                    />
+                  </Field>
+                  <Field label="Hover override">
+                    <Segmented
+                      value={(block.motion?.hover ?? "lift") as HoverPreset}
+                      options={HOVER_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
+                      onChange={(v) => field("motion.hover", v)}
+                      size="sm"
+                    />
+                  </Field>
+                </>
+              )}
+            </>
+          )}
+        </Section>
       </Locked>
 
       <Section title="Visibility">
@@ -3231,6 +3473,29 @@ export function Inspector() {
     previousSelectionRef.current = state.selectedBlockId;
     if (container.scrollTop !== 0) container.scrollTop = 0;
   }, [state.selectedBlockId]);
+
+  // Phase 5B2 — clicking the profile cover requests a one-shot Inspector scroll
+  // to the Cover/Banner section. `requestInspectorFocus` fires only on an explicit
+  // user click (never on render/edit/load/resize/zoom), so this cannot jump
+  // repeatedly. Deferred one frame so the ProfileInspector (and its Cover section)
+  // is mounted after any block selection clears.
+  useEffect(() => {
+    return subscribeInspectorFocus((target) => {
+      if (!shouldScrollInspectorToFocus(target)) return;
+      const container = scrollRef.current;
+      if (!container) return;
+      const defer = (cb: () => void) => {
+        if (typeof requestAnimationFrame === "function") requestAnimationFrame(() => cb());
+        else setTimeout(cb, 0);
+      };
+      defer(() => {
+        const el = container.querySelector<HTMLElement>(`[data-inspector-focus="${target}"]`);
+        if (!el) return;
+        const delta = el.getBoundingClientRect().top - container.getBoundingClientRect().top;
+        container.scrollTop = container.scrollTop + delta;
+      });
+    });
+  }, []);
 
   return (
     <aside className="flex h-full min-h-0 w-[320px] shrink-0 flex-col overflow-hidden border-l border-border bg-card">

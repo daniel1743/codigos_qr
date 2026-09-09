@@ -11,7 +11,7 @@
  * can never "jump" repeatedly while editing.
  */
 
-export type InspectorFocusTarget = "profile-cover";
+export type InspectorFocusTarget = "profile-cover" | "hero-cta";
 
 type Listener = (target: InspectorFocusTarget) => void;
 

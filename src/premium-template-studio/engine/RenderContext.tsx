@@ -13,6 +13,8 @@ export interface RenderContextValue {
   onSelectBlock?: ((id: string) => void) | undefined;
   /** Selecting the profile cover/banner (contextual navigation — not a block). */
   onSelectProfileCover?: (() => void) | undefined;
+  /** Selecting a Hero CTA sub-target (parent block id + focus, not a new block). */
+  onSelectHeroCta?: ((blockId: string) => void) | undefined;
   /** inline editing hook: path is dot-notation into the config */
   onInlineEdit?: ((path: string, value: string) => void) | undefined;
   /** ANALYTICS ADAPTER hook */

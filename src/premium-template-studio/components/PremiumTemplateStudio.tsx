@@ -265,6 +265,16 @@ function Canvas() {
                 dispatch({ type: "selectBlock", id: null });
                 requestInspectorFocus("profile-cover");
               },
+              onSelectHeroCta: (blockId) => {
+                // Select the parent Hero if it is not already selected (no
+                // redundant selection churn), then request a one-shot Inspector
+                // focus on the CTA controls. Selection is UI state — never a
+                // document mutation — and the camera is untouched.
+                if (state.selectedBlockId !== blockId) {
+                  dispatch({ type: "selectBlock", id: blockId });
+                }
+                requestInspectorFocus("hero-cta");
+              },
               onInlineEdit: (path, value) => {
                 // Canvas paths look like `blocks.<blockId>.content.title`.
                 // Blocks are an array, so route them through patchBlockField.

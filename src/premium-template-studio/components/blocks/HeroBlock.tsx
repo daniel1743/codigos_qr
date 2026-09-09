@@ -5,6 +5,7 @@ import {
   blockBackgroundGradientStyle,
   cardStyle,
   headingStyle,
+  heroCtaButtonStyle,
   imageFitValue,
   imagePositionValue,
 } from "../../engine/styleEngine";
@@ -39,7 +40,7 @@ function SmartIcon({ name, size = 14 }: { name?: string; size?: number }) {
 }
 
 export function HeroBlock({ block }: { block: TemplateBlock }) {
-  const { theme, mode, breakpoint } = useRender();
+  const { theme, mode, breakpoint, onSelectHeroCta } = useRender();
 
   const content = block.content;
   const variant = block.variant ?? "centered";
@@ -91,6 +92,17 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
     if (!url) return;
     if (mode === "edit") return;
     window.open(url, "_blank", "noopener,noreferrer");
+  };
+
+  // Edit-mode click on a CTA selects the parent Hero (if needed) and requests
+  // a one-shot Inspector focus on the CTA controls. Public/preview navigation
+  // is untouched.
+  const handleCTAClick = (url?: string) => {
+    if (mode === "edit" && onSelectHeroCta) {
+      onSelectHeroCta(block.id);
+      return;
+    }
+    handleCTA(url);
   };
 
   const badgeElem =
@@ -151,20 +163,17 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
       >
         {primaryCTA.label && (
           <button
-            onClick={() => handleCTA(primaryCTA.url)}
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleCTAClick(primaryCTA.url);
+            }}
             style={{
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 8,
-              padding: "10px 20px",
-              borderRadius: theme.buttons.radius,
-              fontWeight: 600,
-              fontSize: "14px",
-              backgroundColor: theme.colors.primary,
-              color: "#ffffff",
-              border: "none",
-              cursor: "pointer",
+              ...heroCtaButtonStyle(theme, {
+                cta: primaryCTA,
+                kind: "primary",
+                fullImage: isFullImage,
+              }),
               width: ctaFlexDir === "column" ? "100%" : "auto",
             }}
           >
@@ -174,20 +183,17 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
         )}
         {secondaryCTA.label && (
           <button
-            onClick={() => handleCTA(secondaryCTA.url)}
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleCTAClick(secondaryCTA.url);
+            }}
             style={{
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 8,
-              padding: "10px 20px",
-              borderRadius: theme.buttons.radius,
-              fontWeight: 600,
-              fontSize: "14px",
-              backgroundColor: "transparent",
-              color: isFullImage ? "#ffffff" : theme.colors.text,
-              border: `1px solid ${isFullImage ? "rgba(255,255,255,0.4)" : theme.colors.border}`,
-              cursor: "pointer",
+              ...heroCtaButtonStyle(theme, {
+                cta: secondaryCTA,
+                kind: "secondary",
+                fullImage: isFullImage,
+              }),
               width: ctaFlexDir === "column" ? "100%" : "auto",
             }}
           >

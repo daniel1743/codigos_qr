@@ -40,6 +40,7 @@ export interface EditingHandlers {
   selectedBlockId?: string | null | undefined;
   onSelect?: ((id: string) => void) | undefined;
   onSelectProfileCover?: (() => void) | undefined;
+  onSelectHeroCta?: ((blockId: string) => void) | undefined;
   onInlineEdit?: ((path: string, value: string) => void) | undefined;
   onMove?: ((id: string, direction: -1 | 1) => void) | undefined;
   onDuplicate?: ((id: string) => void) | undefined;
@@ -462,6 +463,7 @@ function TemplateRendererImpl({
       selectedBlockId: editing?.selectedBlockId,
       onSelectBlock: editing?.onSelect,
       onSelectProfileCover: editing?.onSelectProfileCover,
+      onSelectHeroCta: editing?.onSelectHeroCta,
       onInlineEdit: editing?.onInlineEdit,
       onTrack,
     }),
@@ -472,6 +474,7 @@ function TemplateRendererImpl({
       editing?.selectedBlockId,
       editing?.onSelect,
       editing?.onSelectProfileCover,
+      editing?.onSelectHeroCta,
       editing?.onInlineEdit,
       onTrack,
     ],

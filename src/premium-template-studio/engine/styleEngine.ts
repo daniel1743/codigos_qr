@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import type {
   BlockStyle,
+  CTAContent,
   DecorativeFramePreset,
   TemplateTheme,
   ThemeTexture,
@@ -458,4 +459,75 @@ export function blockBackgroundGradientStyle(
   return {
     backgroundImage: `linear-gradient(${gradient.angle ?? 180}deg, ${gradient.from} 0%, ${gradient.to} 100%)`,
   };
+}
+
+/* ------------------------------------------------------------------ */
+/* Hero CTA per-button style (Phase 5C1B)                              */
+/* ------------------------------------------------------------------ */
+
+export interface HeroCtaStyleContext {
+  cta: CTAContent;
+  kind: "primary" | "secondary";
+  fullImage: boolean;
+}
+
+/**
+ * Builds the complete button style for a Hero CTA.
+ *
+ * BACKWARD COMPATIBILITY: when `cta.style` (or any of its fields) is absent,
+ * this reproduces the previously hardcoded rendering exactly — primary uses
+ * the theme primary background + white text + no border, secondary uses a
+ * transparent background + themed text + a 1px themed border. Each present
+ * style field overrides only that one property.
+ */
+export function heroCtaButtonStyle(
+  theme: TemplateTheme,
+  { cta, kind, fullImage }: HeroCtaStyleContext,
+): CSSProperties {
+  const style = cta.style ?? {};
+  const isPrimary = kind === "primary";
+
+  const paddingY = style.paddingY ?? 10;
+  const paddingX = style.paddingX ?? 20;
+  const fontSize = style.fontSize ?? 14;
+  const fontWeight = style.fontWeight ?? 600;
+  const radius = style.radius ?? theme.buttons.radius;
+
+  const base: CSSProperties = {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    padding: `${paddingY}px ${paddingX}px`,
+    borderRadius: radius,
+    fontWeight,
+    fontSize: `${fontSize}px`,
+    cursor: "pointer",
+  };
+
+  if (style.fontFamily !== undefined) base.fontFamily = style.fontFamily;
+
+  if (isPrimary) {
+    base.backgroundColor = style.backgroundColor ?? theme.colors.primary;
+    base.color = style.textColor ?? "#ffffff";
+  } else {
+    base.backgroundColor = style.backgroundColor ?? "transparent";
+    base.color = style.textColor ?? (fullImage ? "#ffffff" : theme.colors.text);
+  }
+
+  // Border: preserve current semantics (primary none, secondary 1px themed),
+  // overriding color/width one property at a time. An explicit border color or
+  // width switches a borderless primary into a solid border (width defaults to 1).
+  const hasExplicitBorder = style.borderColor !== undefined || style.borderWidth !== undefined;
+  if (hasExplicitBorder) {
+    const width = style.borderWidth ?? 1;
+    const color = style.borderColor ?? (fullImage ? "rgba(255,255,255,0.4)" : theme.colors.border);
+    base.border = `${width}px solid ${color}`;
+  } else if (isPrimary) {
+    base.border = "none";
+  } else {
+    base.border = `1px solid ${fullImage ? "rgba(255,255,255,0.4)" : theme.colors.border}`;
+  }
+
+  return base;
 }

@@ -415,11 +415,30 @@ export interface HeroBadgeContent {
 
 export type BadgeContent = string | HeroBadgeContent;
 
+export interface CTAStyle {
+  backgroundColor?: string;
+  textColor?: string;
+  fontFamily?: string;
+  fontSize?: number;
+  fontWeight?: number;
+  borderColor?: string;
+  borderWidth?: number;
+  radius?: number;
+  paddingX?: number;
+  paddingY?: number;
+}
+
 export interface CTAContent {
   enabled?: boolean;
   label?: string;
   url?: string;
   icon?: string;
+  /**
+   * Per-CTA visual overrides. Absent → the current hardcoded/theme default
+   * rendering. Each present field overrides only that one property; the
+   * remaining properties keep their theme/default values.
+   */
+  style?: CTAStyle;
 }
 
 export interface MapLocation {
