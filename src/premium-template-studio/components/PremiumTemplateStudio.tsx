@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Monitor,
   Tablet,
@@ -28,7 +28,14 @@ import { TemplateRenderer } from "../engine/TemplateRenderer";
 import { BREAKPOINT_WIDTHS } from "../constants/layouts";
 import { Sidebar, SidebarContent, SidebarTabs } from "./editor/Sidebar";
 import { Inspector, InspectorContent } from "./inspector/Inspector";
-import { requestInspectorFocus } from "./inspector/inspectorFocus";
+import {
+  clampScrollValue,
+  computeInspectorFocusScroll,
+  requestInspectorFocus,
+  subscribeInspectorFocus,
+  type InspectorFocusTarget,
+} from "./inspector/inspectorFocus";
+import { shouldResetInspectorScroll } from "./inspector/inspectorScroll";
 import { cx } from "../utils";
 import { createDemoConfig } from "../templates/definitions";
 import { parseTemplateJson } from "../engine/TemplateValidator";
@@ -128,7 +135,7 @@ function Toolbar({ onExport }: { onExport: () => void }) {
           type="button"
           title={messages.toolbar.exportJson}
           onClick={onExport}
-          className="rounded-lg p-2 text-muted-foreground transition hover:text-foreground"
+          className="hidden rounded-lg p-2 text-muted-foreground transition hover:text-foreground sm:inline-flex"
         >
           <Code2 className="h-4 w-4" />
         </button>
@@ -233,9 +240,16 @@ function BinaryIsolationDiagnostic({
   mode: BinaryIsolationMode;
 }) {
   const [evidence, setEvidence] = useState<BinaryIsolationEvidence | null>(null);
+  
+  const showDiagnostic = 
+    import.meta.env.DEV && 
+    typeof window !== "undefined" && 
+    (new URLSearchParams(window.location.search).get("binaryDebug") === "1" ||
+     new URLSearchParams(window.location.search).get("binaryDebug") === "true" ||
+     new URLSearchParams(window.location.search).get("isolationDebug") === "1");
 
   useEffect(() => {
-    if (!import.meta.env.DEV || typeof document === "undefined") return;
+    if (!showDiagnostic || typeof document === "undefined") return;
 
     let cancelled = false;
     const frameId = requestAnimationFrame(() => {
@@ -262,9 +276,9 @@ function BinaryIsolationDiagnostic({
       cancelled = true;
       cancelAnimationFrame(frameId);
     };
-  }, [config, breakpoint, mode]);
+  }, [config, breakpoint, mode, showDiagnostic]);
 
-  if (!import.meta.env.DEV || !evidence) return null;
+  if (!showDiagnostic || !evidence) return null;
   return (
     <pre
       aria-label="DEV camera binary diagnostics"
@@ -536,13 +550,89 @@ function ExportSheet({ onClose }: { onClose: () => void }) {
 
 function MobileDock() {
   const { messages } = usePowerEditorLocale();
+  const { state } = useStudio();
   const [sheet, setSheet] = useState<"none" | "panels" | "inspector">("none");
+  // Internal scroll container for the mobile sheet body. Only THIS element
+  // scrolls to reveal a requested control — never window/document/editor root.
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  // One-shot pending focus target (mobile only). Non-null until the requested
+  // control is revealed, then cleared. Kept as STATE (not a ref) so every new
+  // Canvas selection re-runs the reveal effect even when `sheet` is already
+  // "inspector" and `selectedBlockId` did not change (e.g. avatar → banner).
+  const [pendingFocus, setPendingFocus] = useState<InspectorFocusTarget | null>(null);
+  const previousSelectionRef = useRef<string | null>(state.selectedBlockId);
+
+  // MOBILE ONLY — a Canvas element tap must surface the Properties sheet
+  // automatically and queue a reveal of the exact control. This reuses the same
+  // `subscribeInspectorFocus` signal the desktop Inspector already subscribes to
+  // (no second selection/focus architecture). Covers avatar/banner/title/...
+  // sub-targets, which always fire an explicit focus request.
+  useEffect(() => {
+    return subscribeInspectorFocus((target) => {
+      setPendingFocus(target);
+      setSheet("inspector");
+    });
+  }, []);
+
+  // MOBILE ONLY — plain block selection (video/card/etc.) has no focus request:
+  // tapping the block only dispatches `selectBlock`. Surface Properties and show
+  // the block controls from the top (mirrors the desktop `shouldResetInspectorScroll`
+  // behavior, scoped to the mobile sheet). Never clears an in-flight focus request —
+  // the reveal effect owns `pendingFocus` and runs after this reset.
+  useEffect(() => {
+    if (!shouldResetInspectorScroll(previousSelectionRef.current, state.selectedBlockId)) return;
+    previousSelectionRef.current = state.selectedBlockId;
+    setSheet("inspector");
+    const container = scrollRef.current;
+    if (container && container.scrollTop !== 0) container.scrollTop = 0;
+  }, [state.selectedBlockId]);
+
+  // Reveal the pending control once the Properties sheet is mounted. Re-runs on
+  // every new pendingFocus value (and when the sheet opens), deferred one frame
+  // so `InspectorContent` has committed the exact [data-inspector-focus] node.
+  // Only the internal sheet body scrolls — the Canvas camera/zoom/pan and the
+  // browser/document scroll are never touched.
+  useEffect(() => {
+    if (sheet !== "inspector" || !pendingFocus) return;
+    const container = scrollRef.current;
+    if (!container) return;
+
+    let cancelled = false;
+    const defer = (cb: () => void) => {
+      if (typeof requestAnimationFrame === "function") requestAnimationFrame(() => cb());
+      else setTimeout(cb, 0);
+    };
+    defer(() => {
+      if (cancelled) return;
+      const target = pendingFocus;
+      const el = container.querySelector<HTMLElement>(`[data-inspector-focus="${target}"]`);
+      if (!el) return;
+      // Exact-target centering: place the target's center at ~45% of the visible
+      // sheet height (comfortable 35%–55% band), clamped to the scroll range.
+      const delta = computeInspectorFocusScroll(
+        container.getBoundingClientRect(),
+        el.getBoundingClientRect(),
+      );
+      if (delta !== 0) {
+        container.scrollTop = clampScrollValue(
+          container.scrollTop + delta,
+          container.scrollHeight,
+          container.clientHeight,
+        );
+      }
+      setPendingFocus(null);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [sheet, pendingFocus]);
 
   return (
     <>
       {sheet !== "none" && (
-        <div className="fixed inset-0 z-40 flex flex-col justify-end bg-foreground/30 lg:hidden">
-          <div className="flex h-[50vh] min-h-[30vh] max-h-[65vh] flex-col overflow-hidden rounded-t-2xl border-t border-border bg-card">
+        <div className="pointer-events-none fixed inset-0 z-40 flex flex-col justify-end bg-foreground/30 lg:hidden">
+          <div className="pointer-events-auto flex h-[50vh] min-h-[30vh] max-h-[65vh] flex-col overflow-hidden rounded-t-2xl border-t border-border bg-card">
             <div className="flex shrink-0 items-center justify-between border-b border-border bg-card px-4 py-2">
               <span className="text-xs font-semibold text-foreground">
                 {sheet === "panels" ? messages.toolbar.build : messages.toolbar.properties}
@@ -555,7 +645,11 @@ function MobileDock() {
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-[calc(4rem+env(safe-area-inset-bottom,0px))]">
+            <div
+              ref={scrollRef}
+              data-inspector-scroll-root
+              className="pts-mobile-sheet-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain pb-[calc(4rem+env(safe-area-inset-bottom,0px))]"
+            >
               {sheet === "panels" ? (
                 <>
                   <SidebarTabs />

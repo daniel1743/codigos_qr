@@ -262,7 +262,7 @@ export function PowerEditorHost({ profileId }: PowerEditorHostProps) {
       data-testid="power-editor"
       className="flex h-[100dvh] min-h-0 flex-col overflow-hidden bg-background text-foreground"
     >
-      <div className="flex shrink-0 items-center justify-between gap-4 border-b border-border bg-card px-4 py-3">
+      <div className="hidden shrink-0 items-center justify-between gap-4 border-b border-border bg-card px-4 py-3 sm:flex">
         <div className="min-w-0">
           {/* Profile identity is retained as a screen-reader/test hook only —
               raw identifiers are not shown as user-facing chrome. */}

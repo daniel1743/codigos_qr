@@ -194,6 +194,10 @@ export function PowerCanvasViewport({
     import.meta.env.DEV && typeof window !== "undefined"
       ? new URLSearchParams(window.location.search).get("cameraDebug")
       : null;
+  const cameraDiagnosticsEnabled =
+    reconstructionStep === "1" ||
+    reconstructionStep === "true" ||
+    reconstructionStep === "diagnostics";
   const requestedControlledScale =
     import.meta.env.DEV && typeof window !== "undefined"
       ? Number(new URLSearchParams(window.location.search).get("cameraScale") ?? 1)
@@ -559,7 +563,7 @@ export function PowerCanvasViewport({
       <div
         ref={viewportRef}
         className={cx(
-          "pts-power-viewport h-full min-h-0 min-w-0 overflow-auto overscroll-contain bg-muted/50 p-4 sm:p-8",
+          "pts-power-viewport h-full min-h-0 min-w-0 overflow-auto overscroll-contain bg-muted/50 px-4 pt-4 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] sm:px-8 sm:pt-8 sm:pb-[calc(6rem+env(safe-area-inset-bottom,0px))] lg:p-8",
           interaction.isPanning && "pts-power-viewport--panning",
           interaction.isPanReady && !interaction.isPanning && "pts-power-viewport--pan-ready",
         )}
@@ -585,13 +589,15 @@ export function PowerCanvasViewport({
         </div>
       </div>
 
-      <CameraDiagnostic
-        viewportRef={viewportRef}
-        stageRef={stageRef}
-        contentRef={contentRef}
-        camera={camera}
-        stage={stage}
-      />
+      {cameraDiagnosticsEnabled ? (
+        <CameraDiagnostic
+          viewportRef={viewportRef}
+          stageRef={stageRef}
+          contentRef={contentRef}
+          camera={camera}
+          stage={stage}
+        />
+      ) : null}
 
       <div
         className="absolute right-3 top-1/2 z-10 hidden -translate-y-1/2 flex-col items-center gap-1 rounded-lg border border-border bg-card/95 p-1 shadow-sm backdrop-blur lg:flex"

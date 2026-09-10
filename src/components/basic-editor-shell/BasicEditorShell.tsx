@@ -1,4 +1,20 @@
-import { Check, Eye, FileLock2, Home, LayoutTemplate, LogOut, Menu, Minus, RotateCcw, Save, Search, Send, UserCircle, X, ZoomIn } from "lucide-react";
+import {
+  Check,
+  Eye,
+  FileLock2,
+  Home,
+  LayoutTemplate,
+  LogOut,
+  Menu,
+  Minus,
+  RotateCcw,
+  Save,
+  Search,
+  Send,
+  UserCircle,
+  X,
+  ZoomIn,
+} from "lucide-react";
 import { Link, useLocation } from "@tanstack/react-router";
 import {
   type CSSProperties,
@@ -177,8 +193,10 @@ function CanvasWorkspace({
     const scaledHeight = templateSizeRef.current.height * safeScale;
     const availableWidth = Math.max(1, viewportSizeRef.current.width);
     const availableHeight = Math.max(1, viewportSizeRef.current.height);
-    const stageWidth = scaledWidth > availableWidth ? scaledWidth + CANVAS_OVERSCAN * 2 : availableWidth;
-    const stageHeight = scaledHeight > availableHeight ? scaledHeight + CANVAS_OVERSCAN * 2 : availableHeight;
+    const stageWidth =
+      scaledWidth > availableWidth ? scaledWidth + CANVAS_OVERSCAN * 2 : availableWidth;
+    const stageHeight =
+      scaledHeight > availableHeight ? scaledHeight + CANVAS_OVERSCAN * 2 : availableHeight;
 
     return {
       scaledWidth,
@@ -186,7 +204,8 @@ function CanvasWorkspace({
       stageWidth,
       stageHeight,
       originX: scaledWidth > availableWidth ? CANVAS_OVERSCAN : (availableWidth - scaledWidth) / 2,
-      originY: scaledHeight > availableHeight ? CANVAS_OVERSCAN : (availableHeight - scaledHeight) / 2,
+      originY:
+        scaledHeight > availableHeight ? CANVAS_OVERSCAN : (availableHeight - scaledHeight) / 2,
     };
   };
 
@@ -216,9 +235,11 @@ function CanvasWorkspace({
 
   const canvasNeedsPan = () => {
     const geometry = getCanvasGeometry(zoomRef.current);
-    return userZoomRef.current > 1.01 ||
+    return (
+      userZoomRef.current > 1.01 ||
       geometry.scaledWidth > viewportSizeRef.current.width ||
-      geometry.scaledHeight > viewportSizeRef.current.height;
+      geometry.scaledHeight > viewportSizeRef.current.height
+    );
   };
 
   useEffect(() => {
@@ -236,17 +257,25 @@ function CanvasWorkspace({
         : templateSize.height;
       const availableWidth = Math.max(1, viewport.clientWidth - VIEWPORT_HORIZONTAL_PADDING);
       const availableHeight = Math.max(1, viewport.clientHeight - VIEWPORT_VERTICAL_PADDING);
-      const nextFit = clamp(Math.min(availableWidth / measuredWidth, availableHeight / measuredHeight, 1), MIN_ZOOM, 1);
+      const nextFit = clamp(
+        Math.min(availableWidth / measuredWidth, availableHeight / measuredHeight, 1),
+        MIN_ZOOM,
+        1,
+      );
       const nextTemplateSize = { width: measuredWidth, height: measuredHeight };
       const nextViewportSize = { width: availableWidth, height: availableHeight };
 
       templateSizeRef.current = nextTemplateSize;
       viewportSizeRef.current = nextViewportSize;
       setTemplateSize((current) =>
-        current.width === measuredWidth && current.height === measuredHeight ? current : nextTemplateSize,
+        current.width === measuredWidth && current.height === measuredHeight
+          ? current
+          : nextTemplateSize,
       );
       setViewportSize((current) =>
-        current.width === availableWidth && current.height === availableHeight ? current : nextViewportSize,
+        current.width === availableWidth && current.height === availableHeight
+          ? current
+          : nextViewportSize,
       );
       setFitZoom((current) => (current === nextFit ? current : nextFit));
 
@@ -307,10 +336,21 @@ function CanvasWorkspace({
     const clampedScale = clamp(nextScale, bounds.min, bounds.max);
     const currentGeometry = getCanvasGeometry(currentScale);
     const nextGeometry = getCanvasGeometry(clampedScale);
-    const nextTranslate = clampTranslation({
-      x: translateRef.current.x + currentGeometry.originX - nextGeometry.originX + worldPoint.x * (currentScale - clampedScale),
-      y: translateRef.current.y + currentGeometry.originY - nextGeometry.originY + worldPoint.y * (currentScale - clampedScale),
-    }, clampedScale);
+    const nextTranslate = clampTranslation(
+      {
+        x:
+          translateRef.current.x +
+          currentGeometry.originX -
+          nextGeometry.originX +
+          worldPoint.x * (currentScale - clampedScale),
+        y:
+          translateRef.current.y +
+          currentGeometry.originY -
+          nextGeometry.originY +
+          worldPoint.y * (currentScale - clampedScale),
+      },
+      clampedScale,
+    );
 
     setUserZoom(clamp(clampedScale / fitZoomRef.current, MIN_USER_ZOOM, MAX_USER_ZOOM));
     setTranslate(nextTranslate);
@@ -393,7 +433,10 @@ function CanvasWorkspace({
         return;
       }
 
-      if (!(event.target as HTMLElement).closest("[data-edit-target], button, input, textarea, a") && canvasNeedsPan()) {
+      if (
+        !(event.target as HTMLElement).closest("[data-edit-target], button, input, textarea, a") &&
+        canvasNeedsPan()
+      ) {
         panStart.current = {
           pointerId: event.pointerId,
           x: event.clientX,
@@ -439,14 +482,23 @@ function CanvasWorkspace({
         const bounds = getScaleBounds();
         const nextScale = clamp(pinchStart.current.startScale * pinchRatio, bounds.min, bounds.max);
         const nextGeometry = getCanvasGeometry(nextScale);
-        const nextTranslate = clampTranslation({
-          x: pinchStart.current.startTranslate.x + pinchStart.current.startOrigin.x - nextGeometry.originX +
-            (focal.x - pinchStart.current.startFocal.x) +
-            pinchStart.current.worldPoint.x * (pinchStart.current.startScale - nextScale),
-          y: pinchStart.current.startTranslate.y + pinchStart.current.startOrigin.y - nextGeometry.originY +
-            (focal.y - pinchStart.current.startFocal.y) +
-            pinchStart.current.worldPoint.y * (pinchStart.current.startScale - nextScale),
-        }, nextScale);
+        const nextTranslate = clampTranslation(
+          {
+            x:
+              pinchStart.current.startTranslate.x +
+              pinchStart.current.startOrigin.x -
+              nextGeometry.originX +
+              (focal.x - pinchStart.current.startFocal.x) +
+              pinchStart.current.worldPoint.x * (pinchStart.current.startScale - nextScale),
+            y:
+              pinchStart.current.startTranslate.y +
+              pinchStart.current.startOrigin.y -
+              nextGeometry.originY +
+              (focal.y - pinchStart.current.startFocal.y) +
+              pinchStart.current.worldPoint.y * (pinchStart.current.startScale - nextScale),
+          },
+          nextScale,
+        );
         setUserZoom(clamp(nextScale / fitZoomRef.current, MIN_USER_ZOOM, MAX_USER_ZOOM));
         setTranslate(nextTranslate);
         suppressClick.current = true;
@@ -462,10 +514,12 @@ function CanvasWorkspace({
     if (!start.active && Math.hypot(dx, dy) < 6) return;
     start.active = true;
     suppressClick.current = event.pointerType === "touch";
-    setTranslate(clampTranslation({
-      x: start.translateX + dx,
-      y: start.translateY + dy,
-    }));
+    setTranslate(
+      clampTranslation({
+        x: start.translateX + dx,
+        y: start.translateY + dy,
+      }),
+    );
     event.preventDefault();
   };
 
@@ -474,16 +528,17 @@ function CanvasWorkspace({
     if (pinchStart.current && activePointers.current.size < 2) {
       pinchStart.current = null;
       const remaining = Array.from(activePointers.current.entries())[0];
-      panStart.current = remaining && canvasNeedsPan()
-        ? {
-            pointerId: remaining[0],
-            x: remaining[1].x,
-            y: remaining[1].y,
-            translateX: translateRef.current.x,
-            translateY: translateRef.current.y,
-            active: false,
-          }
-        : null;
+      panStart.current =
+        remaining && canvasNeedsPan()
+          ? {
+              pointerId: remaining[0],
+              x: remaining[1].x,
+              y: remaining[1].y,
+              translateX: translateRef.current.x,
+              translateY: translateRef.current.y,
+              active: false,
+            }
+          : null;
       if (activePointers.current.size === 0) setIsInteracting(false);
       return;
     }
@@ -504,28 +559,37 @@ function CanvasWorkspace({
   return (
     <section
       ref={workspaceRef}
-      className={`relative overflow-hidden bg-[#f1efe9] ${compact ? "h-[calc(100dvh-4rem)]" : "h-[var(--mobile-canvas-height)] min-h-[220px] lg:h-[calc(100dvh-9rem)] lg:min-h-[560px]"}`}
+      className={`relative overflow-hidden bg-[var(--basic-editor-canvas)] ${compact ? "h-[calc(100dvh-4rem)]" : "h-[var(--mobile-canvas-height)] min-h-[220px] lg:h-[calc(100dvh-9rem)] lg:min-h-[560px]"}`}
       style={
         {
+          "--basic-editor-canvas": "#20201f",
+          "--basic-editor-elevated": "#2b2b29",
+          "--basic-editor-line": "rgba(255, 255, 255, 0.1)",
+          "--basic-editor-line-strong": "rgba(255, 255, 255, 0.18)",
+          "--basic-editor-muted": "rgba(248, 245, 239, 0.58)",
+          "--basic-editor-page-line": "rgba(255, 255, 255, 0.2)",
+          "--basic-editor-page-shadow": "0 26px 70px rgba(0, 0, 0, 0.42)",
+          "--basic-editor-shadow-soft": "0 18px 46px rgba(0, 0, 0, 0.28)",
+          "--basic-editor-text": "#f8f5ef",
           "--mobile-canvas-height": mobileSheetState
-              ? `calc(100dvh - 3.5rem - 2rem - 78px - env(safe-area-inset-bottom, 0px) - ${MOBILE_SHEET_HEIGHTS[mobileSheetState]})`
-              : "calc(100dvh - 3.5rem - 2rem - 78px - env(safe-area-inset-bottom, 0px))",
+            ? `calc(100dvh - 3.5rem - 2rem - 78px - env(safe-area-inset-bottom, 0px) - ${MOBILE_SHEET_HEIGHTS[mobileSheetState]})`
+            : "calc(100dvh - 3.5rem - 2rem - 78px - env(safe-area-inset-bottom, 0px))",
         } as CSSProperties
       }
     >
-      <div className="absolute right-3 top-3 z-20 hidden overflow-hidden rounded-xl border border-stone-200 bg-[#fffefa]/95 shadow-sm backdrop-blur lg:flex">
+      <div className="absolute right-4 top-4 z-20 hidden overflow-hidden rounded-lg border border-[var(--basic-editor-line-strong)] bg-[var(--basic-editor-elevated)]/95 shadow-[var(--basic-editor-shadow-soft)] backdrop-blur lg:flex">
         <Button
           type="button"
           variant="ghost"
           size="icon"
           aria-label="Reducir zoom"
           onClick={() => updateZoom(zoom / ZOOM_STEP)}
-          className="h-9 w-9 rounded-none text-[#1d1d1b]"
+          className="h-9 w-9 rounded-none text-[var(--basic-editor-text)] hover:bg-white/10 hover:text-white"
         >
           <Minus className="h-4 w-4" />
         </Button>
         <span
-          className="grid min-w-12 place-items-center border-x border-stone-200 px-2 text-xs font-semibold tabular-nums text-[#1d1d1b]"
+          className="grid min-w-12 place-items-center border-x border-[var(--basic-editor-line)] px-2 text-xs font-semibold tabular-nums text-[var(--basic-editor-text)]"
           aria-live="polite"
         >
           {Math.round(zoom * 100)}%
@@ -536,7 +600,7 @@ function CanvasWorkspace({
           size="icon"
           aria-label="Aumentar zoom"
           onClick={() => updateZoom(zoom * ZOOM_STEP)}
-          className="h-9 w-9 rounded-none text-[#1d1d1b]"
+          className="h-9 w-9 rounded-none text-[var(--basic-editor-text)] hover:bg-white/10 hover:text-white"
         >
           <ZoomIn className="h-4 w-4" />
         </Button>
@@ -546,7 +610,7 @@ function CanvasWorkspace({
           size="icon"
           aria-label="Recentrar lienzo"
           onClick={recenter}
-          className="h-9 w-9 rounded-none text-[#1d1d1b]"
+          className="h-9 w-9 rounded-none text-[var(--basic-editor-text)] hover:bg-white/10 hover:text-white"
         >
           <RotateCcw className="h-4 w-4" />
         </Button>
@@ -554,7 +618,7 @@ function CanvasWorkspace({
 
       <div
         ref={viewportRef}
-        className="h-full select-none overflow-auto overscroll-contain px-5 pb-8 pt-14"
+        className="h-full select-none overflow-auto overscroll-contain px-5 pb-8 pt-16"
         style={{ touchAction: "none" }}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
@@ -571,7 +635,7 @@ function CanvasWorkspace({
         >
           <div
             ref={templateRef}
-            className={`absolute w-[360px] min-h-[620px] overflow-hidden rounded-[2rem] border-[6px] border-black/10 bg-white shadow-[0_18px_42px_rgba(29,29,27,0.15)] ${isInteracting ? "transition-none" : "transition-transform duration-150 ease-out motion-reduce:transition-none"} lg:w-[500px]`}
+            className={`absolute w-[360px] min-h-[620px] overflow-hidden rounded-[1.35rem] border border-[var(--basic-editor-page-line)] bg-white shadow-[var(--basic-editor-page-shadow)] ring-1 ring-black/5 ${isInteracting ? "transition-none" : "transition-transform duration-150 ease-out motion-reduce:transition-none"} lg:w-[500px]`}
             style={{
               left: `${canvasGeometry.originX}px`,
               top: `${canvasGeometry.originY}px`,
@@ -679,9 +743,7 @@ export function BasicEditorShell({
         );
       })}
       {items.length === 0 && (
-        <p className="px-3 py-5 text-center text-sm text-white/45">
-          No se encontraron plantillas.
-        </p>
+        <p className="px-3 py-5 text-center text-sm text-white/45">No se encontraron plantillas.</p>
       )}
     </>
   );
@@ -721,7 +783,7 @@ export function BasicEditorShell({
     const findTarget = (container: HTMLElement | null) => {
       if (!container) return null;
       return Array.from(container.querySelectorAll<HTMLElement>("[data-tool-target]")).find(
-          (element) => element.dataset["toolTarget"] === toolFocusTarget,
+        (element) => element.dataset["toolTarget"] === toolFocusTarget,
       );
     };
     const isDesktop = window.matchMedia("(min-width: 1024px)").matches;
@@ -754,8 +816,27 @@ export function BasicEditorShell({
   }
 
   return (
-    <div className="basic-editor-shell min-h-screen bg-[#f1efe9] pb-[calc(6rem+env(safe-area-inset-bottom,0px))] text-[#1d1d1b] lg:h-screen lg:overflow-hidden lg:pb-0">
+    <div className="basic-editor-shell min-h-screen bg-[var(--basic-editor-bg)] pb-[calc(6rem+env(safe-area-inset-bottom,0px))] text-[var(--basic-editor-ink)] lg:h-screen lg:overflow-hidden lg:pb-0">
       <style>{`
+        .basic-editor-shell {
+          --basic-editor-bg: #151515;
+          --basic-editor-chrome: #111111;
+          --basic-editor-chrome-soft: #1b1b1a;
+          --basic-editor-canvas: #20201f;
+          --basic-editor-surface: #fffefa;
+          --basic-editor-surface-muted: #f6f3ec;
+          --basic-editor-ink: #1d1d1b;
+          --basic-editor-text: #f8f5ef;
+          --basic-editor-muted: rgba(248, 245, 239, 0.58);
+          --basic-editor-line: rgba(255, 255, 255, 0.1);
+          --basic-editor-line-strong: rgba(255, 255, 255, 0.18);
+          --basic-editor-page-line: rgba(255, 255, 255, 0.2);
+          --basic-editor-control-line: rgba(29, 29, 27, 0.12);
+          --basic-editor-shadow-soft: 0 18px 46px rgba(0, 0, 0, 0.28);
+          --basic-editor-page-shadow: 0 26px 70px rgba(0, 0, 0, 0.42);
+          --basic-editor-panel-shadow: 0 -14px 38px rgba(0, 0, 0, 0.22);
+        }
+
         [data-radix-dialog-content] > div > div.min-h-0.flex-1.overflow-y-auto:has(> .basic-editor-shell-drawer-content) {
           scrollbar-width: none;
           -ms-overflow-style: none;
@@ -805,7 +886,7 @@ export function BasicEditorShell({
         variant="editor"
         brandHref="/editor"
         logoTheme="inverse"
-        className="sticky top-0 z-40 border-b border-white/10 bg-[#090909]/95 px-3 text-[#f5f2ea] backdrop-blur-xl lg:px-6"
+        className="sticky top-0 z-40 border-b border-[var(--basic-editor-line)] bg-[var(--basic-editor-chrome)]/95 px-3 text-[#f5f2ea] backdrop-blur-xl lg:px-6"
         innerClassName="mx-auto flex h-14 max-w-[1440px] items-center justify-between gap-4"
         brandClassName="shrink-0 transition-opacity hover:opacity-80"
         logoClassName="h-[34px] w-[34px] min-[420px]:w-[146px]"
@@ -829,7 +910,10 @@ export function BasicEditorShell({
         }
         center={
           searchEnabled ? (
-            <div ref={searchRef} className="relative hidden min-w-[220px] max-w-sm flex-1 justify-center lg:flex">
+            <div
+              ref={searchRef}
+              className="relative hidden min-w-[220px] max-w-sm flex-1 justify-center lg:flex"
+            >
               <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
               <input
                 type="search"
@@ -919,11 +1003,18 @@ export function BasicEditorShell({
           >
             {/* Top dark wave */}
             <div className="absolute top-0 left-0 w-full h-[180px] bg-[#161616] overflow-hidden z-0">
-               <svg className="absolute bottom-0 w-full h-[120px] text-[#0a0a0a] translate-y-[2px]" viewBox="0 0 1440 320" preserveAspectRatio="none">
-                 <path fill="currentColor" d="M0,160L80,181.3C160,203,320,245,480,245.3C640,245,800,203,960,181.3C1120,160,1280,160,1360,160L1440,160L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"></path>
-               </svg>
+              <svg
+                className="absolute bottom-0 w-full h-[120px] text-[#0a0a0a] translate-y-[2px]"
+                viewBox="0 0 1440 320"
+                preserveAspectRatio="none"
+              >
+                <path
+                  fill="currentColor"
+                  d="M0,160L80,181.3C160,203,320,245,480,245.3C640,245,800,203,960,181.3C1120,160,1280,160,1360,160L1440,160L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"
+                ></path>
+              </svg>
             </div>
-            
+
             <div className="relative z-10 px-6 pt-[80px] mb-6">
               {/* Profile Avatar */}
               <div className="inline-block rounded-full bg-gradient-to-tr from-[#D4AF37] via-[#e6c45b] to-[#f8efcf] p-[3px] mb-3 shadow-lg">
@@ -936,11 +1027,9 @@ export function BasicEditorShell({
                 </span>
               </div>
               <h2 className="text-[28px] font-bold text-white leading-tight">
-                {accountName || account?.email?.split('@')[0] || "Usuario"}
+                {accountName || account?.email?.split("@")[0] || "Usuario"}
               </h2>
-              <p className="text-[15px] font-medium text-white/50">
-                {account?.email || ""}
-              </p>
+              <p className="text-[15px] font-medium text-white/50">{account?.email || ""}</p>
               {profileState === "error" && (
                 <p className="mt-3 max-w-[15rem] text-xs leading-5 text-amber-200/85" role="alert">
                   No pudimos cargar los datos guardados. Tus datos no se han eliminado.
@@ -981,7 +1070,12 @@ export function BasicEditorShell({
 
               <nav className="flex flex-col gap-1" aria-label="Menú móvil principal">
                 {GLOBAL_PLATFORM_NAV_ITEMS.map((item) => {
-                  const Icon = item.id === "profile" ? Home : item.id === "documents" ? FileLock2 : LayoutTemplate;
+                  const Icon =
+                    item.id === "profile"
+                      ? Home
+                      : item.id === "documents"
+                        ? FileLock2
+                        : LayoutTemplate;
                   const isActive = item.href === location.pathname;
 
                   return (
@@ -1029,7 +1123,7 @@ export function BasicEditorShell({
       />
 
       <nav
-        className="sticky top-14 z-30 flex h-8 items-center border-b border-white/10 bg-[#090909]/85 px-3 text-[11px] font-medium text-white/50 backdrop-blur-xl lg:px-6"
+        className="sticky top-14 z-30 flex h-8 items-center border-b border-[var(--basic-editor-line)] bg-[var(--basic-editor-chrome-soft)]/92 px-3 text-[11px] font-medium text-[var(--basic-editor-muted)] backdrop-blur-xl lg:px-6"
         aria-label="Contexto de edición"
       >
         <ol className="flex min-w-0 items-center gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -1051,7 +1145,7 @@ export function BasicEditorShell({
       </nav>
 
       <div className="lg:grid lg:h-[calc(100dvh-5.5rem)] lg:min-h-0 lg:grid-cols-[minmax(0,1.55fr)_minmax(340px,0.85fr)]">
-        <main className="min-w-0 border-b border-stone-200 lg:min-h-0 lg:overflow-hidden lg:border-b-0 lg:border-r">
+        <main className="min-w-0 border-b border-[var(--basic-editor-line)] bg-[var(--basic-editor-canvas)] lg:min-h-0 lg:overflow-hidden lg:border-b-0 lg:border-r">
           {mobilePanelOpen ? (
             <CanvasWorkspace
               viewportRef={canvasViewportRef}
@@ -1066,37 +1160,50 @@ export function BasicEditorShell({
             </CanvasWorkspace>
           )}
         </main>
-        <aside ref={desktopToolsRef} className="basic-editor-shell__inspector-scroll hidden min-h-0 overflow-y-auto bg-[#fffefa] lg:block">
-          <div className="sticky top-0 z-10 border-b border-stone-200 bg-[#fffefa]/95 px-5 py-3 backdrop-blur-xl">
-            <DesktopSectionNav activeSection={activeSection ?? "profile"} onSectionChange={onSectionChange ?? (() => {})} />
+        <aside
+          ref={desktopToolsRef}
+          className="basic-editor-shell__inspector-scroll hidden min-h-0 overflow-y-auto border-l border-[var(--basic-editor-control-line)] bg-[var(--basic-editor-surface)] lg:block"
+        >
+          <div className="sticky top-0 z-10 border-b border-[var(--basic-editor-control-line)] bg-[var(--basic-editor-surface)]/96 px-5 py-3 backdrop-blur-xl">
+            <DesktopSectionNav
+              activeSection={activeSection ?? "profile"}
+              onSectionChange={onSectionChange ?? (() => {})}
+            />
           </div>
-          <div className="p-6">{desktopPanel}</div>
+          <div className="p-5">{desktopPanel}</div>
         </aside>
       </div>
 
       {mobilePanelOpen && (
         <section
-          className="fixed inset-x-0 bottom-[calc(78px+env(safe-area-inset-bottom,0px))] z-[55] flex max-h-[50dvh] flex-col overflow-hidden rounded-t-[1.75rem] border-t border-stone-200 bg-[#fffefa] shadow-[0_-12px_32px_rgba(29,29,27,0.12)] transition-[height] duration-200 motion-reduce:transition-none lg:hidden"
+          className="fixed inset-x-0 bottom-[calc(78px+env(safe-area-inset-bottom,0px))] z-[55] flex max-h-[50dvh] flex-col overflow-hidden rounded-t-2xl border-t border-[var(--basic-editor-line-strong)] bg-[var(--basic-editor-surface)] shadow-[var(--basic-editor-panel-shadow)] transition-[height] duration-200 motion-reduce:transition-none lg:hidden"
           style={{ height: MOBILE_SHEET_HEIGHTS[mobileSheetState] }}
         >
-          <div className="relative flex h-[4.25rem] shrink-0 flex-col items-center border-b border-stone-200 px-4">
+          <div className="relative flex h-[4.25rem] shrink-0 flex-col items-center border-b border-[var(--basic-editor-control-line)] bg-[var(--basic-editor-surface-muted)]/75 px-4">
             <button
               type="button"
               aria-label="Cambiar altura del panel"
-              onClick={() => setMobileSheetState((state) => state === "expanded" ? "medium" : "expanded")}
+              onClick={() =>
+                setMobileSheetState((state) => (state === "expanded" ? "medium" : "expanded"))
+              }
               className="mt-2 grid h-6 w-14 place-items-center rounded-full"
             >
-              <span className="h-1.5 w-12 rounded-full bg-stone-300" aria-hidden="true" />
+              <span className="h-1.5 w-12 rounded-full bg-stone-300/90" aria-hidden="true" />
             </button>
             <div className="flex w-full items-center justify-between px-1">
-              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500">Herramientas</p>
-              <div className="flex rounded-full bg-stone-100 p-0.5" aria-label="Altura del panel">
+              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500">
+                Herramientas
+              </p>
+              <div
+                className="flex rounded-lg border border-[var(--basic-editor-control-line)] bg-white p-0.5"
+                aria-label="Altura del panel"
+              >
                 {(["collapsed", "medium", "expanded"] as MobileSheetState[]).map((state) => (
                   <button
                     key={state}
                     type="button"
                     onClick={() => setMobileSheetState(state)}
-                    className={`rounded-full px-2 py-1 text-[9px] font-bold ${mobileSheetState === state ? "bg-[#1d1d1b] text-[#fffefa]" : "text-stone-500"}`}
+                    className={`rounded-md px-2 py-1 text-[9px] font-bold ${mobileSheetState === state ? "bg-[#1d1d1b] text-[#fffefa]" : "text-stone-500"}`}
                   >
                     {{ collapsed: "Bajo", medium: "Medio", expanded: "Amplio" }[state]}
                   </button>
@@ -1114,7 +1221,10 @@ export function BasicEditorShell({
               <X className="h-4 w-4" />
             </Button>
           </div>
-          <div ref={mobileToolsRef} className="basic-editor-shell__inspector-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain p-4">
+          <div
+            ref={mobileToolsRef}
+            className="basic-editor-shell__inspector-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain p-4"
+          >
             {mobilePanel}
           </div>
         </section>

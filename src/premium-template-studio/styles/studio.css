@@ -170,6 +170,16 @@
   border-radius: 999px;
 }
 
+.pts-mobile-sheet-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.pts-mobile-sheet-scroll::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
 /* ---- Phase 1 workspace surfaces ---- */
 .pts-desktop-panel {
   height: 100%;
@@ -197,8 +207,20 @@
 }
 
 .pts-power-viewport {
-  scrollbar-width: thin;
-  scrollbar-color: color-mix(in oklab, currentColor 25%, transparent) transparent;
+  scrollbar-width: none;
+}
+.pts-power-viewport::-webkit-scrollbar {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .pts-power-viewport {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklab, currentColor 25%, transparent) transparent;
+  }
+  .pts-power-viewport::-webkit-scrollbar {
+    display: block;
+  }
 }
 .pts-power-viewport--pan-ready {
   cursor: grab;
@@ -361,4 +383,94 @@
     animation: none !important;
     opacity: 0 !important;
   }
+}
+
+
+/* ===================================================================== */
+/* Phase 1 — Approved Lovable visual tokens + Power Editor shell frame.   */
+/* Scoped to `.pts-scope` (Power Editor only). Does NOT touch the global   */
+/* theme, Basic Editor, or PlatformNavbar. The page surface (`.pts-page`) */
+/* re-establishes the host light theme below so the document stays bright  */
+/* while the surrounding editor chrome is dark.                            */
+/* ===================================================================== */
+
+.pts-scope {
+  /* Lovable-approved editor-local tokens (source: Visual Canvas styles.css) */
+  --ed-bg: oklch(0.19 0.012 265);
+  --ed-chrome: oklch(0.235 0.014 265);
+  --ed-chrome-2: oklch(0.275 0.016 265);
+  --ed-elevated: oklch(0.31 0.018 265);
+  --ed-line: oklch(1 0 0 / 9%);
+  --ed-line-strong: oklch(1 0 0 / 18%);
+  --ed-text: oklch(0.965 0.004 265);
+  --ed-muted: oklch(0.68 0.018 265);
+  --ed-faint: oklch(0.53 0.018 265);
+  --ed-accent: oklch(0.82 0.18 172);
+  --ed-accent-ink: oklch(0.22 0.05 172);
+  --ed-select: oklch(0.74 0.16 250);
+  --ed-warn: oklch(0.83 0.16 85);
+  --ed-canvas: oklch(0.14 0.01 265);
+  --ed-page: oklch(0.995 0.002 90);
+  --ed-page-ink: oklch(0.22 0.02 265);
+  --ed-shadow: 0 24px 60px -20px oklch(0 0 0 / 65%);
+
+  /* Re-map host Tailwind semantic tokens → dark immersive editor values.
+   * Existing utilities (bg-card, bg-background, border-border, text-foreground,
+   * text-muted-foreground, bg-muted, hover:bg-accent, …) resolve to these
+   * within the editor, so no component or className needs to move. */
+  --background: var(--ed-bg);
+  --foreground: var(--ed-text);
+  --card: var(--ed-chrome);
+  --card-foreground: var(--ed-text);
+  --popover: var(--ed-elevated);
+  --popover-foreground: var(--ed-text);
+  --primary: var(--ed-accent);
+  --primary-foreground: var(--ed-accent-ink);
+  --secondary: var(--ed-chrome-2);
+  --secondary-foreground: var(--ed-text);
+  --muted: var(--ed-chrome-2);
+  --muted-foreground: var(--ed-muted);
+  --accent: var(--ed-chrome-2);
+  --accent-foreground: var(--ed-text);
+  --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: oklch(0.984 0.003 247.858);
+  --border: var(--ed-line);
+  --input: var(--ed-line-strong);
+  --ring: var(--ed-select);
+}
+
+/* The document surface stays bright. Re-establish the host light theme on
+ * the page so TemplateRenderer / ProfileHeader / blocks / avatar are visually
+ * unchanged by the dark chrome. (Renderer is FROZEN — presentation only.) */
+.pts-scope .pts-page {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.129 0.042 264.695);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.129 0.042 264.695);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.129 0.042 264.695);
+  --primary: oklch(0.208 0.042 265.755);
+  --primary-foreground: oklch(0.984 0.003 247.858);
+  --secondary: oklch(0.968 0.007 247.896);
+  --secondary-foreground: oklch(0.208 0.042 265.755);
+  --muted: oklch(0.968 0.007 247.896);
+  --muted-foreground: oklch(0.554 0.046 257.417);
+  --accent: oklch(0.968 0.007 247.896);
+  --accent-foreground: oklch(0.208 0.042 265.755);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.984 0.003 247.858);
+  --border: oklch(0.929 0.013 255.508);
+  --input: oklch(0.929 0.013 255.508);
+  --ring: oklch(0.704 0.04 256.788);
+}
+
+/* Canvas surround — neutral dark backdrop with the approved grid. This only
+ * recolors the frozen `.pts-power-viewport` scroll surface; camera, pan, and
+ * zoom behavior are untouched. */
+.pts-scope .pts-power-viewport {
+  background-color: var(--ed-canvas);
+  background-image:
+    linear-gradient(to right, oklch(1 0 0 / 4%) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(1 0 0 / 4%) 1px, transparent 1px);
+  background-size: 32px 32px;
 }
