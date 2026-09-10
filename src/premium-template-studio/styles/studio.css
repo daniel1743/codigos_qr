@@ -308,3 +308,57 @@
     opacity: 1 !important;
   }
 }
+
+/* ------------------------------------------------------------------ */
+/* Official gold verification badge — metallic shimmer (reduced-motion  */
+/* aware). The highlight sweeps once per cycle then pauses, so it reads */
+/* as polished metal catching light rather than a flashing animation.   */
+/* ------------------------------------------------------------------ */
+.pts-official-gold {
+  border-radius: 999px;
+}
+
+.pts-gold-shimmer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: 999px;
+  background: linear-gradient(
+    115deg,
+    transparent 35%,
+    rgba(255, 255, 255, 0.7) 50%,
+    transparent 65%
+  );
+  background-size: 250% 100%;
+  background-position: 130% 0;
+  mix-blend-mode: overlay;
+  animation: pts-gold-shimmer-sweep 4500ms ease-in-out infinite;
+}
+
+@keyframes pts-gold-shimmer-sweep {
+  0% {
+    background-position: 130% 0;
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  32% {
+    background-position: -130% 0;
+    opacity: 1;
+  }
+  38% {
+    opacity: 0;
+  }
+  100% {
+    background-position: -130% 0;
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pts-gold-shimmer {
+    animation: none !important;
+    opacity: 0 !important;
+  }
+}

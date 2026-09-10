@@ -39,4 +39,58 @@ export const canonicalPageService = {
     }
     return persisted;
   },
+
+  /** Promote one exact validated editor snapshot to the public authority. */
+  async publish(
+    supabase: SupabaseClient,
+    profileId: string,
+    editorConfig: unknown,
+  ): Promise<{
+    id: string;
+    public_id: string;
+    published: boolean;
+    published_revision: number;
+    published_at: string;
+    published_template_config: CanonicalPageEnvelopeV1;
+  }> {
+    const envelope = acceptEngineGeneratedConfig(editorConfig);
+    const { data, error } = await supabase.rpc("publish_profile_canonical_snapshot", {
+      p_profile_id: profileId,
+      p_editor_config: envelope.editorConfig,
+    });
+
+    if (error) throw error;
+
+    const profile = data as
+      | {
+          id?: unknown;
+          public_id?: unknown;
+          published?: unknown;
+          published_revision?: unknown;
+          published_at?: unknown;
+          published_template_config?: unknown;
+        }
+      | null;
+    const publishedEnvelope = readCanonicalPageEnvelope(profile?.published_template_config);
+    if (
+      !profile ||
+      typeof profile.id !== "string" ||
+      typeof profile.public_id !== "string" ||
+      profile.published !== true ||
+      typeof profile.published_revision !== "number" ||
+      typeof profile.published_at !== "string" ||
+      !publishedEnvelope
+    ) {
+      throw new Error("Canonical publish returned an invalid publication result.");
+    }
+
+    return {
+      id: profile.id,
+      public_id: profile.public_id,
+      published: profile.published,
+      published_revision: profile.published_revision,
+      published_at: profile.published_at,
+      published_template_config: publishedEnvelope,
+    };
+  },
 };

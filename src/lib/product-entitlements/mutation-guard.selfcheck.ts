@@ -212,9 +212,9 @@ export function runMutationGuardSelfcheck() {
     { intent: { kind: "ADD_BLOCK", blockType: "hero" }, expected: "ALLOW" },        // standard block
     { intent: { kind: "ADD_BLOCK", blockType: "stats" }, expected: "ALLOW" },        // premium block (early access)
     { intent: { kind: "APPLY_SECTION", assetId: "services-cards" }, expected: "ALLOW" }, // standard section
-    { intent: { kind: "APPLY_SECTION", assetId: "media-bento" }, expected: "DENY" },   // premium section (not early-access)
+    { intent: { kind: "APPLY_SECTION", assetId: "media-bento" }, expected: "ALLOW" },  // premium section (early access)
     { intent: { kind: "APPLY_TEMPLATE", assetId: "creator-premium-001" }, expected: "ALLOW" }, // standard template
-    { intent: { kind: "APPLY_TEMPLATE", assetId: "creator-premium" }, expected: "DENY" },   // premium template (not early-access)
+    { intent: { kind: "APPLY_TEMPLATE", assetId: "creator-premium" }, expected: "ALLOW" },  // premium template (early access)
     { intent: { kind: "APPLY_LAYOUT", assetId: "centered" }, expected: "ALLOW" },   // standard layout
     { intent: { kind: "APPLY_LAYOUT", assetId: "bento" }, expected: "ALLOW" },       // premium layout (early access)
   ];

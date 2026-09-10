@@ -153,7 +153,7 @@ export function Segmented<T extends string>({
   size?: "sm" | "md";
 }) {
   return (
-    <div className="inline-flex w-full items-center gap-0.5 rounded-lg bg-muted p-0.5">
+    <div className="flex w-full items-center gap-0.5 overflow-x-auto rounded-lg bg-muted p-0.5">
       {options.map((option) => (
         <button
           key={option.value}
@@ -161,7 +161,7 @@ export function Segmented<T extends string>({
           title={option.title ?? ""}
           onClick={() => onChange(option.value)}
           className={cx(
-            "flex flex-1 items-center justify-center gap-1 rounded-md font-medium transition",
+            "flex min-w-max flex-1 items-center justify-center gap-1 rounded-md font-medium transition",
             size === "sm" ? "px-2 py-1 text-[11px]" : "px-2.5 py-1.5 text-xs",
             value === option.value
               ? "bg-background text-foreground shadow-sm"

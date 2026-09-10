@@ -12,13 +12,15 @@ import {
   Twitter,
   Youtube,
 } from "lucide-react";
-import type { ComponentType } from "react";
+import { useState, type ComponentType, type CSSProperties } from "react";
 import { useRender } from "../../engine/RenderContext";
 import { buttonStyle, cardStyle, headingStyle } from "../../engine/styleEngine";
 import { hexToRgba, prettyUrl, readableOn } from "../../utils";
-import type { TemplateBlock } from "../../types";
+import type { BlockItem, TemplateBlock } from "../../types";
 import { BlockTitle, EmptyBlockState, InlineText, SmartLink } from "./primitives";
 import type { BlockProps } from "./ContentBlocks";
+import { getPlatformDef } from "../../../constants/platforms";
+import { detectProviderFromUrl } from "../../../lib/smart-link-preview";
 
 export const SOCIAL_ICONS: Record<
   string,
@@ -40,6 +42,76 @@ export const SOCIAL_ICONS: Record<
 
 export const SOCIAL_PLATFORMS = Object.keys(SOCIAL_ICONS);
 
+/** Icon used to fill the Media Card media area when no usable image is available. */
+type MediaIcon = ComponentType<{ size?: number; className?: string; style?: CSSProperties }>;
+
+/**
+ * Resolve the visual fallback icon for a pasted URL. Recognized social providers
+ * reuse the existing `PLATFORMS_CATALOG` brand icons; anything else falls back to
+ * the generic Globe icon. Never fabricates an image URL.
+ */
+function resolveProviderIcon(url: string): MediaIcon {
+  const provider = detectProviderFromUrl(url);
+  if (provider === "generic-web") return Globe;
+  return getPlatformDef(provider).icon as MediaIcon;
+}
+
+interface MediaCardMediaProps {
+  item: BlockItem;
+  mediaLeft: boolean;
+  size: string;
+  textColor: string;
+}
+
+/**
+ * The Media Card media region: a real image when available, otherwise the
+ * provider/Globe icon. A remote image that fails to load immediately falls back
+ * to the icon so the card never shows broken-image UI or an empty media slot.
+ */
+function MediaCardMedia({ item, mediaLeft, size, textColor }: MediaCardMediaProps) {
+  const [failed, setFailed] = useState(false);
+  const showImage = Boolean(item.imageUrl) && !failed;
+  const provider = detectProviderFromUrl(item.url ?? "");
+  const Icon = resolveProviderIcon(item.url ?? "");
+
+  if (showImage) {
+    return (
+      <img
+        src={item.imageUrl}
+        alt=""
+        loading="lazy"
+        onError={() => setFailed(true)}
+        style={{
+          width: "100%",
+          height: "100%",
+          minHeight: size === "50" ? 120 : 96,
+          objectFit: "cover",
+          order: mediaLeft ? 0 : 1,
+        }}
+      />
+    );
+  }
+
+  return (
+    <span
+      data-media-fallback={provider}
+      style={{
+        width: "100%",
+        height: "100%",
+        minHeight: size === "50" ? 120 : 96,
+        order: mediaLeft ? 0 : 1,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: hexToRgba(textColor, 0.06),
+        color: textColor,
+      }}
+    >
+      <Icon size={size === "50" ? 40 : 32} aria-hidden style={{ opacity: 0.92 }} />
+    </span>
+  );
+}
+
 export function LinksBlock({ block }: BlockProps) {
   const { theme } = useRender();
   const items = block.content.items ?? [];
@@ -57,8 +129,148 @@ export function LinksBlock({ block }: BlockProps) {
         const presentation = item.presentation ?? (variant === "cards" ? "card" : "button");
 
         if (presentation === "media-card") {
-          const mediaLeft = item.mediaPosition !== "right";
+          const size = item.mediaSize ?? "25";
+          const position = item.mediaPosition ?? "left";
           const hasImage = Boolean(item.imageUrl);
+
+          // Text legibility: natural wrapping first, line-clamp only to cap
+          // vertical growth. `minWidth: 0` + `overflowWrap` prevents horizontal
+          // clipping inside the shared grid/flex column.
+          const titleClamp: CSSProperties = {
+            minWidth: 0,
+            display: "-webkit-box",
+            WebkitBoxOrient: "vertical",
+            WebkitLineClamp: 2,
+            overflow: "hidden",
+            overflowWrap: "break-word",
+            wordBreak: "break-word",
+            fontWeight: 650,
+            fontSize: 15,
+          };
+          const descClamp: CSSProperties = {
+            minWidth: 0,
+            display: "-webkit-box",
+            WebkitBoxOrient: "vertical",
+            WebkitLineClamp: 3,
+            overflow: "hidden",
+            overflowWrap: "break-word",
+            wordBreak: "break-word",
+            fontSize: 12.5,
+            color: theme.colors.mutedText,
+          };
+
+          if (hasImage && size === "100") {
+            return (
+              <SmartLink
+                key={item.id}
+                href={href}
+                block={block}
+                newTab={item.newTab}
+                ariaLabel={label}
+                style={{ display: "block", minWidth: 0 }}
+              >
+                <article
+                  className="pts-hoverable"
+                  data-media-size="100"
+                  data-media-position="overlay"
+                  style={{
+                    ...cardStyle(theme, block.style),
+                    padding: 0,
+                    overflow: "hidden",
+                    position: "relative",
+                    display: "block",
+                    minWidth: 0,
+                  }}
+                >
+                  <img
+                    src={item.imageUrl}
+                    alt=""
+                    loading="lazy"
+                    style={{
+                      width: "100%",
+                      aspectRatio: "16 / 10",
+                      objectFit: "cover",
+                      display: "block",
+                    }}
+                  />
+                  <span
+                    style={{
+                      position: "absolute",
+                      right: 10,
+                      bottom: 10,
+                      maxWidth: "calc(100% - 20px)",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 6,
+                      padding: "6px 10px",
+                      borderRadius: 8,
+                      background: "rgba(0,0,0,0.55)",
+                      color: "#fff",
+                      fontSize: 13,
+                      fontWeight: 600,
+                    }}
+                  >
+                    <span style={titleClamp}>{label}</span>
+                    <ArrowUpRight size={14} aria-hidden />
+                  </span>
+                </article>
+              </SmartLink>
+            );
+          }
+
+          if (hasImage && position === "bottom") {
+            return (
+              <SmartLink
+                key={item.id}
+                href={href}
+                block={block}
+                newTab={item.newTab}
+                ariaLabel={label}
+                style={{ display: "block", minWidth: 0 }}
+              >
+                <article
+                  className="pts-hoverable"
+                  data-media-size={size}
+                  data-media-position="bottom"
+                  style={{
+                    ...cardStyle(theme, block.style),
+                    padding: 0,
+                    overflow: "hidden",
+                    display: "flex",
+                    flexDirection: "column",
+                    minWidth: 0,
+                  }}
+                >
+                  <span
+                    style={{
+                      minWidth: 0,
+                      padding: theme.cards.padding,
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 3,
+                    }}
+                  >
+                    <span style={titleClamp}>{label}</span>
+                    <span style={descClamp}>{item.description || prettyUrl(href)}</span>
+                  </span>
+                  <img
+                    src={item.imageUrl}
+                    alt=""
+                    loading="lazy"
+                    style={{
+                      width: "100%",
+                      height: size === "50" ? 160 : 112,
+                      objectFit: "cover",
+                      display: "block",
+                    }}
+                  />
+                </article>
+              </SmartLink>
+            );
+          }
+
+          const mediaLeft = position === "left";
+          const mediaGrid = size === "50" ? "1fr 1fr" : mediaLeft ? "1fr 3fr" : "3fr 1fr";
           return (
             <SmartLink
               key={item.id}
@@ -70,30 +282,23 @@ export function LinksBlock({ block }: BlockProps) {
             >
               <article
                 className="pts-hoverable"
-                data-media-position={hasImage ? (mediaLeft ? "left" : "right") : "none"}
+                data-media-size={size}
+                data-media-position={mediaLeft ? "left" : "right"}
                 style={{
                   ...cardStyle(theme, block.style),
                   padding: 0,
                   overflow: "hidden",
                   display: "grid",
-                  gridTemplateColumns: hasImage ? (mediaLeft ? "3fr 1fr" : "1fr 3fr") : "1fr",
+                  gridTemplateColumns: mediaGrid,
                   minWidth: 0,
                 }}
               >
-                {hasImage ? (
-                  <img
-                    src={item.imageUrl}
-                    alt=""
-                    loading="lazy"
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      minHeight: 96,
-                      objectFit: "cover",
-                      order: mediaLeft ? 0 : 1,
-                    }}
-                  />
-                ) : null}
+                <MediaCardMedia
+                  item={item}
+                  mediaLeft={mediaLeft}
+                  size={size}
+                  textColor={theme.colors.text}
+                />
                 <span
                   style={{
                     minWidth: 0,
@@ -101,15 +306,12 @@ export function LinksBlock({ block }: BlockProps) {
                     display: "flex",
                     flexDirection: "column",
                     justifyContent: "center",
+                    gap: 3,
                     order: mediaLeft ? 1 : 0,
                   }}
                 >
-                  <span style={{ display: "block", fontWeight: 650, fontSize: 15 }}>
-                    {label}
-                  </span>
-                  <span style={{ display: "block", fontSize: 12.5, color: theme.colors.mutedText }}>
-                    {item.description || prettyUrl(href)}
-                  </span>
+                  <span style={titleClamp}>{label}</span>
+                  <span style={descClamp}>{item.description || prettyUrl(href)}</span>
                 </span>
               </article>
             </SmartLink>

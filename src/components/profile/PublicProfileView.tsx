@@ -1,16 +1,25 @@
 import { useEffect } from "react";
+import type { CSSProperties } from "react";
 import type { Profile, ProfileLink } from "../../types/database";
 import { BasicTemplateRenderer } from "../basic-template/BasicTemplateRenderer";
 import { getTemplates } from "../../lib/basic-templates/catalog";
 import { buildBasicTemplateContent, buildConfig } from "../../lib/basic-templates/config";
 import { loadGoogleFont } from "../../lib/fonts";
 import { PublicTemplateRenderer } from "../../premium-template-studio/engine/PublicTemplateRenderer";
-import { resolveCanonicalEditorConfig } from "./canonicalRenderBridge";
+import { resolveCanonicalEditorConfig, applyTrustedVerificationVariant } from "./canonicalRenderBridge";
 
 interface PublicProfileViewProps {
   profile: Partial<Profile>;
   links: Partial<ProfileLink>[];
   isPreview?: boolean;
+}
+
+export function resolvePublicProfileCanonicalConfig(profile: Partial<Profile>) {
+  const config = resolveCanonicalEditorConfig(profile.published_template_config);
+  if (!config) return null;
+  // The trusted DB `verification_variant` is the verification authority — never
+  // the published snapshot. Revoking gold in the DB takes effect immediately.
+  return applyTrustedVerificationVariant(config, profile.verification_variant);
 }
 
 function normalizeBannerFusionStrength(value: unknown) {
@@ -43,7 +52,7 @@ function getBannerFusionMask(strength: unknown) {
   )`;
 }
 
-function resolveTextAlign(value: string | null | undefined) {
+function resolveTextAlign(value: string | null | undefined): CSSProperties["textAlign"] {
   return value === "left" || value === "center" || value === "right" ? value : undefined;
 }
 
@@ -77,7 +86,7 @@ export function PublicProfileView({ profile, links, isPreview = false }: PublicP
     if (profile.bio_font_family) loadGoogleFont(profile.bio_font_family);
   }, [profile.font_family, profile.title_font_family, profile.bio_font_family]);
 
-  const canonicalConfig = resolveCanonicalEditorConfig(profile.template_config);
+  const canonicalConfig = resolvePublicProfileCanonicalConfig(profile);
 
   if (canonicalConfig) {
     return <PublicTemplateRenderer config={canonicalConfig} />;

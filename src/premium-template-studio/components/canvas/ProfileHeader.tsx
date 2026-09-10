@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { BadgeCheck, MapPin } from "lucide-react";
 import { useRender, type ProfileTarget } from "../../engine/RenderContext";
 import { headingStyle } from "../../engine/styleEngine";
@@ -5,6 +6,87 @@ import { hexToRgba } from "../../utils";
 import type { TemplateLayout, TemplateProfile } from "../../types";
 import { InlineText } from "../blocks/primitives";
 import { requestInspectorFocus } from "../inspector/inspectorFocus";
+
+/**
+ * Semantic rim thickness → pixel mapping. Kept in ONE place so the Inspector
+ * (semantic labels) and Canvas (pixels) can never drift apart.
+ */
+const RIM_THICKNESS_PX: Record<"thin" | "medium" | "thick", number> = {
+  thin: 2,
+  medium: 4,
+  thick: 8,
+};
+
+/** Trusted verification variant (mirrors `profiles.verification_variant`). */
+export type VerificationVariant = "none" | "standard" | "official-gold";
+
+/**
+ * Resolve the effective verification variant. The trusted `verificationVariant`
+ * (populated by the backend, never by the editor) takes precedence; when it is
+ * absent, the legacy `verified` boolean is mapped to `standard` so existing
+ * verified profiles keep their normal badge.
+ */
+export function resolveVerificationVariant(
+  verified: boolean | undefined,
+  variant: VerificationVariant | undefined,
+): VerificationVariant {
+  if (variant === "official-gold") return "official-gold";
+  if (variant === "standard") return "standard";
+  if (variant === "none") return "none";
+  return verified ? "standard" : "none";
+}
+
+/** Premium metallic gold badge reserved for official Cripqer profiles. */
+function OfficialGoldBadge() {
+  // Stable, unique gradient id per instance (avoids SVG id collisions).
+  const gradientId = useRef(
+    `cripqer-gold-${Math.random().toString(36).slice(2, 9)}`,
+  ).current;
+  return (
+    <span
+      role="img"
+      aria-label="Perfil oficial de Cripqer"
+      title="Perfil oficial de Cripqer"
+      className="pts-official-gold"
+      style={{ position: "relative", display: "inline-flex", lineHeight: 0 }}
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <defs>
+          <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#8a6d1f" />
+            <stop offset="32%" stopColor="#d4af37" />
+            <stop offset="50%" stopColor="#f9e7a0" />
+            <stop offset="68%" stopColor="#d4af37" />
+            <stop offset="100%" stopColor="#8a6d1f" />
+          </linearGradient>
+        </defs>
+        <path
+          d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"
+          fill={`url(#${gradientId})`}
+        />
+        <path
+          d="m9 12 2 2 4-4"
+          fill="none"
+          stroke="#5b4300"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+      <span className="pts-gold-shimmer" aria-hidden="true" />
+    </span>
+  );
+}
+
+/** Renders the appropriate verification badge for a resolved variant. */
+function VerificationBadge({ variant }: { variant: VerificationVariant }) {
+  const { theme } = useRender();
+  if (variant === "official-gold") return <OfficialGoldBadge />;
+  if (variant === "standard") {
+    return <BadgeCheck size={20} aria-label="Verificado" style={{ color: theme.colors.accent }} />;
+  }
+  return null;
+}
 
 /**
  * The profile header is layout-aware: the same data composes very differently
@@ -120,6 +202,11 @@ export function ProfileHeader({
   const fullBleed = banner.enabled && banner.widthMode === "full-bleed";
   const inline = layout.header === "inline";
   const hero = layout.header === "hero";
+  const rim = profile.avatar.rim;
+  const rimEnabled = rim?.enabled === true;
+  const rimColor = rim?.color ?? theme.colors.background;
+  const rimWidth = rim?.width ?? "medium";
+  const rimThicknessPx = RIM_THICKNESS_PX[rimWidth];
 
   // Generalized Profile contextual selection: cover, avatar, bio. Prefers the
   // engine-provided `onSelectProfileTarget` (which performs the Profile context
@@ -147,7 +234,9 @@ export function ProfileHeader({
         height: profile.avatar.size,
         borderRadius: profile.avatar.radius,
         objectFit: "cover",
-        border: `${profile.avatar.borderWidth}px solid ${theme.colors.background}`,
+        border: rimEnabled
+          ? `${rimThicknessPx}px solid ${rimColor}`
+          : `${profile.avatar.borderWidth}px solid ${theme.colors.background}`,
         boxShadow: profile.avatar.shadow ? "0 12px 30px -14px rgba(0,0,0,.55)" : "none",
         display: "block",
         flexShrink: 0,
@@ -160,6 +249,7 @@ export function ProfileHeader({
         width: profile.avatar.size,
         height: profile.avatar.size,
         borderRadius: profile.avatar.radius,
+        border: rimEnabled ? `${rimThicknessPx}px solid ${rimColor}` : undefined,
         background: `linear-gradient(140deg, ${theme.colors.primary}, ${theme.colors.accent})`,
         display: "grid",
         placeItems: "center",
@@ -191,9 +281,9 @@ export function ProfileHeader({
           placeholder="Your name"
           style={headingStyle(theme, hero ? 1 : 0.86)}
         />
-        {profile.verified ? (
-          <BadgeCheck size={20} aria-label="Verified" style={{ color: theme.colors.accent }} />
-        ) : null}
+        <VerificationBadge
+          variant={resolveVerificationVariant(profile.verified, profile.verificationVariant)}
+        />
       </div>
       {(profile.role || profile.company) && (
         <div

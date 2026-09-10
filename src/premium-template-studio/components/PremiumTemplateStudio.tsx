@@ -10,6 +10,7 @@ import {
   Check,
   Loader2,
   Rocket,
+  Save,
   Code2,
   X,
   SlidersHorizontal,
@@ -19,7 +20,7 @@ import {
   PanelRightClose,
   PanelRightOpen,
 } from "lucide-react";
-import type { BioTemplateConfig, Breakpoint } from "../types";
+import type { BioTemplateConfig, Breakpoint, SaveState } from "../types";
 import type { ProductTier } from "../../lib/product-entitlements/capabilities";
 import { StudioProvider, useStudio } from "../state/StudioProvider";
 import type { StudioAdapters } from "../adapters";
@@ -32,9 +33,13 @@ import { cx } from "../utils";
 import { createDemoConfig } from "../templates/definitions";
 import { parseTemplateJson } from "../engine/TemplateValidator";
 import { PowerCanvasViewport } from "./workspace/PowerCanvasViewport";
+import { PowerEditorLocaleProvider, usePowerEditorLocale } from "../i18n/PowerEditorLocale";
+import { formatBreakpoint } from "../i18n/messages";
+import { DiscoveryHintHost } from "../microux/DiscoveryHint";
 import "../styles/studio.css";
 
 function Toolbar({ onExport }: { onExport: () => void }) {
+  const { locale, messages } = usePowerEditorLocale();
   const {
     state,
     dispatch,
@@ -43,6 +48,7 @@ function Toolbar({ onExport }: { onExport: () => void }) {
     previewing,
     setPreviewing,
     saveState,
+    save,
     publish,
   } = useStudio();
 
@@ -68,7 +74,7 @@ function Toolbar({ onExport }: { onExport: () => void }) {
           <button
             key={device.id}
             type="button"
-            title={device.id}
+            title={formatBreakpoint(locale, device.id)}
             onClick={() => setBreakpoint(device.id)}
             className={cx(
               "rounded-md p-1.5 transition",
@@ -85,7 +91,7 @@ function Toolbar({ onExport }: { onExport: () => void }) {
       <div className="flex items-center gap-1.5">
         <button
           type="button"
-          title="Undo"
+          title={messages.toolbar.undo}
           onClick={() => dispatch({ type: "undo" })}
           disabled={!state.past.length}
           className="rounded-lg p-2 text-muted-foreground transition hover:text-foreground disabled:opacity-30"
@@ -94,7 +100,7 @@ function Toolbar({ onExport }: { onExport: () => void }) {
         </button>
         <button
           type="button"
-          title="Redo"
+          title={messages.toolbar.redo}
           onClick={() => dispatch({ type: "redo" })}
           disabled={!state.future.length}
           className="rounded-lg p-2 text-muted-foreground transition hover:text-foreground disabled:opacity-30"
@@ -104,23 +110,23 @@ function Toolbar({ onExport }: { onExport: () => void }) {
         <span className="hidden w-16 items-center gap-1 text-[11px] text-muted-foreground sm:flex">
           {saveState === "saving" ? (
             <>
-              <Loader2 className="h-3 w-3 animate-spin" /> Saving
+              <Loader2 className="h-3 w-3 animate-spin" /> {messages.toolbar.saving}
             </>
           ) : saveState === "saved" ? (
             <>
-              <Check className="h-3 w-3" /> Saved
+              <Check className="h-3 w-3" /> {messages.toolbar.saved}
             </>
           ) : saveState === "error" ? (
-            "Error"
+            messages.toolbar.error
           ) : saveState === "dirty" ? (
-            "Unsaved"
+            messages.toolbar.unsaved
           ) : (
             ""
           )}
         </span>
         <button
           type="button"
-          title="Export JSON"
+          title={messages.toolbar.exportJson}
           onClick={onExport}
           className="rounded-lg p-2 text-muted-foreground transition hover:text-foreground"
         >
@@ -128,11 +134,42 @@ function Toolbar({ onExport }: { onExport: () => void }) {
         </button>
         <button
           type="button"
+          onClick={() => void save()}
+          disabled={saveState === "saving"}
+          title={messages.toolbar.save}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-foreground transition hover:bg-accent disabled:opacity-60"
+        >
+          {saveState === "saving" ? (
+            <>
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              <span className="hidden sm:inline">{messages.toolbar.saving}</span>
+            </>
+          ) : saveState === "saved" ? (
+            <>
+              <Check className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">{messages.toolbar.saved}</span>
+            </>
+          ) : saveState === "error" ? (
+            <>
+              <Save className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">{messages.toolbar.saveFailed}</span>
+            </>
+          ) : (
+            <>
+              <Save className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">{messages.toolbar.save}</span>
+            </>
+          )}
+        </button>
+        <button
+          type="button"
           onClick={() => setPreviewing(!previewing)}
           className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-foreground transition hover:bg-accent"
         >
           {previewing ? <Pencil className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-          <span className="hidden sm:inline">{previewing ? "Edit" : "Preview"}</span>
+          <span className="hidden sm:inline">
+            {previewing ? messages.toolbar.edit : messages.toolbar.preview}
+          </span>
         </button>
         <button
           type="button"
@@ -140,7 +177,7 @@ function Toolbar({ onExport }: { onExport: () => void }) {
           className="inline-flex items-center gap-1.5 rounded-lg bg-foreground px-3 py-1.5 text-xs font-semibold text-background transition hover:opacity-90"
         >
           <Rocket className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">Publish</span>
+          <span className="hidden sm:inline">{messages.toolbar.publish}</span>
         </button>
       </div>
     </header>
@@ -394,6 +431,7 @@ function Canvas() {
 }
 
 function ExportSheet({ onClose }: { onClose: () => void }) {
+  const { messages } = usePowerEditorLocale();
   const { state, dispatch } = useStudio();
   const json = useMemo(() => JSON.stringify(state.config, null, 2), [state.config]);
   const [tab, setTab] = useState<"export" | "import">("export");
@@ -429,7 +467,7 @@ function ExportSheet({ onClose }: { onClose: () => void }) {
                     : "text-muted-foreground hover:text-foreground",
                 )}
               >
-                {id} JSON
+                {id === "export" ? messages.toolbar.exportJson : messages.toolbar.importJson}
               </button>
             ))}
           </div>
@@ -453,7 +491,7 @@ function ExportSheet({ onClose }: { onClose: () => void }) {
                 onClick={() => void navigator.clipboard?.writeText(json)}
                 className="rounded-lg bg-foreground px-3 py-1.5 text-xs font-semibold text-background"
               >
-                Copy JSON
+                {messages.toolbar.copyJson}
               </button>
             </footer>
           </>
@@ -463,14 +501,14 @@ function ExportSheet({ onClose }: { onClose: () => void }) {
               <textarea
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
-                placeholder="Paste a template configuration…"
+                placeholder={messages.toolbar.pasteTemplate}
                 className="h-full min-h-[240px] w-full resize-none rounded-xl border border-border bg-background p-3 font-mono text-[11px] text-foreground"
               />
               {importError && <p className="mt-2 text-[11px] text-destructive">{importError}</p>}
             </div>
             <footer className="flex items-center justify-between gap-2 border-t border-border px-4 py-3">
               <label className="cursor-pointer text-[11px] text-muted-foreground hover:text-foreground">
-                Upload .json
+                {messages.toolbar.uploadJson}
                 <input
                   type="file"
                   accept="application/json"
@@ -486,7 +524,7 @@ function ExportSheet({ onClose }: { onClose: () => void }) {
                 onClick={() => runImport(draft)}
                 className="rounded-lg bg-foreground px-3 py-1.5 text-xs font-semibold text-background"
               >
-                Import
+                {messages.toolbar.importJson}
               </button>
             </footer>
           </>
@@ -497,33 +535,36 @@ function ExportSheet({ onClose }: { onClose: () => void }) {
 }
 
 function MobileDock() {
+  const { messages } = usePowerEditorLocale();
   const [sheet, setSheet] = useState<"none" | "panels" | "inspector">("none");
 
   return (
     <>
       {sheet !== "none" && (
         <div className="fixed inset-0 z-40 flex flex-col justify-end bg-foreground/30 lg:hidden">
-          <div className="max-h-[75vh] overflow-y-auto rounded-t-2xl border-t border-border bg-card pb-16">
-            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-card px-4 py-2">
+          <div className="flex h-[50vh] min-h-[30vh] max-h-[65vh] flex-col overflow-hidden rounded-t-2xl border-t border-border bg-card">
+            <div className="flex shrink-0 items-center justify-between border-b border-border bg-card px-4 py-2">
               <span className="text-xs font-semibold text-foreground">
-                {sheet === "panels" ? "Build" : "Properties"}
+                {sheet === "panels" ? messages.toolbar.build : messages.toolbar.properties}
               </span>
               <button
                 type="button"
                 onClick={() => setSheet("none")}
-                className="text-muted-foreground"
+                className="flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition hover:text-foreground"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
-            {sheet === "panels" ? (
-              <>
-                <SidebarTabs />
-                <SidebarContent />
-              </>
-            ) : (
-              <InspectorContent />
-            )}
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-[calc(4rem+env(safe-area-inset-bottom,0px))]">
+              {sheet === "panels" ? (
+                <>
+                  <SidebarTabs />
+                  <SidebarContent />
+                </>
+              ) : (
+                <InspectorContent />
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -534,7 +575,7 @@ function MobileDock() {
           className="flex flex-col items-center gap-0.5 text-[10px] text-muted-foreground"
         >
           <Plus className="h-5 w-5" />
-          Build
+          {messages.toolbar.build}
         </button>
         <button
           type="button"
@@ -542,10 +583,30 @@ function MobileDock() {
           className="flex flex-col items-center gap-0.5 text-[10px] text-muted-foreground"
         >
           <SlidersHorizontal className="h-5 w-5" />
-          Properties
+          {messages.toolbar.properties}
         </button>
       </nav>
     </>
+  );
+}
+
+function PreviewHeader({ onBack }: { onBack: () => void }) {
+  const { messages } = usePowerEditorLocale();
+  return (
+    <header className="flex h-14 shrink-0 items-center justify-between gap-3 border-b border-border bg-card px-4">
+      <div className="flex items-center gap-2">
+        <Eye className="h-4 w-4 text-muted-foreground" />
+        <span className="text-sm font-semibold text-foreground">{messages.toolbar.preview}</span>
+      </div>
+      <button
+        type="button"
+        onClick={onBack}
+        className="inline-flex items-center gap-1.5 rounded-lg bg-foreground px-3 py-1.5 text-xs font-semibold text-background transition hover:opacity-90"
+      >
+        <Pencil className="h-3.5 w-3.5" />
+        {messages.toolbar.backToEdit}
+      </button>
+    </header>
   );
 }
 
@@ -553,12 +614,17 @@ function StudioShell() {
   const [exporting, setExporting] = useState(false);
   const [toolsCollapsed, setToolsCollapsed] = useState(false);
   const [inspectorCollapsed, setInspectorCollapsed] = useState(false);
-  const { error } = useStudio();
+  const { messages } = usePowerEditorLocale();
+  const { error, previewing, setPreviewing } = useStudio();
 
   return (
     <div className="pts-scope flex h-[100dvh] max-h-[100dvh] min-h-0 flex-col overflow-hidden bg-background text-foreground">
-      <Toolbar onExport={() => setExporting(true)} />
-      {error && (
+      {previewing ? (
+        <PreviewHeader onBack={() => setPreviewing(false)} />
+      ) : (
+        <Toolbar onExport={() => setExporting(true)} />
+      )}
+      {error && !previewing && (
         <div
           role="alert"
           className="border-b border-destructive/40 bg-destructive/10 px-4 py-2 text-[11px] text-destructive"
@@ -566,6 +632,11 @@ function StudioShell() {
           {error}
         </div>
       )}
+      {previewing ? (
+        <div className="min-h-0 flex-1 overflow-hidden">
+          <Canvas />
+        </div>
+      ) : (
       <div className="pts-studio-workspace flex min-h-0 flex-1 overflow-hidden">
         <div
           className={cx(
@@ -577,8 +648,8 @@ function StudioShell() {
             <div className="pts-panel-rail border-r border-border bg-card">
               <button
                 type="button"
-                title="Open tools"
-                aria-label="Open tools"
+                title={messages.toolbar.openTools}
+                aria-label={messages.toolbar.openTools}
                 aria-expanded={false}
                 onClick={() => setToolsCollapsed(false)}
                 className="rounded-lg p-2 text-muted-foreground transition hover:bg-accent hover:text-foreground"
@@ -591,8 +662,8 @@ function StudioShell() {
               <Sidebar />
               <button
                 type="button"
-                title="Collapse tools"
-                aria-label="Collapse tools"
+                title={messages.toolbar.collapseTools}
+                aria-label={messages.toolbar.collapseTools}
                 aria-expanded={true}
                 onClick={() => setToolsCollapsed(true)}
                 className="absolute right-2 top-2 z-10 rounded-lg border border-border bg-card p-1.5 text-muted-foreground shadow-sm transition hover:bg-accent hover:text-foreground"
@@ -613,8 +684,8 @@ function StudioShell() {
             <div className="pts-panel-rail pts-panel-rail--right border-l border-border bg-card">
               <button
                 type="button"
-                title="Open inspector"
-                aria-label="Open inspector"
+                title={messages.toolbar.openInspector}
+                aria-label={messages.toolbar.openInspector}
                 aria-expanded={false}
                 onClick={() => setInspectorCollapsed(false)}
                 className="rounded-lg p-2 text-muted-foreground transition hover:bg-accent hover:text-foreground"
@@ -627,8 +698,8 @@ function StudioShell() {
               <Inspector />
               <button
                 type="button"
-                title="Collapse inspector"
-                aria-label="Collapse inspector"
+                title={messages.toolbar.collapseInspector}
+                aria-label={messages.toolbar.collapseInspector}
                 aria-expanded={true}
                 onClick={() => setInspectorCollapsed(true)}
                 className="absolute left-2 top-2 z-10 rounded-lg border border-border bg-card p-1.5 text-muted-foreground shadow-sm transition hover:bg-accent hover:text-foreground"
@@ -639,8 +710,10 @@ function StudioShell() {
           )}
         </div>
       </div>
-      <MobileDock />
-      {exporting && <ExportSheet onClose={() => setExporting(false)} />}
+      )}
+      {!previewing && <MobileDock />}
+      {exporting && !previewing && <ExportSheet onClose={() => setExporting(false)} />}
+      {!previewing && <DiscoveryHintHost />}
     </div>
   );
 }
@@ -653,6 +726,10 @@ export interface PremiumTemplateStudioProps {
   onChange?: ((config: BioTemplateConfig) => void) | undefined;
   onSave?: ((config: BioTemplateConfig) => void) | undefined;
   onPublish?: ((config: BioTemplateConfig) => void) | undefined;
+  /** Stable document identity (e.g. profile id) used to isolate saves per document. */
+  documentId?: string | undefined;
+  /** Reports save-state changes (idle/saving/saved/dirty/error) to the host. */
+  onSaveStateChange?: ((state: SaveState) => void) | undefined;
   /** Effective product tier from the host boundary. Missing/invalid → "free". */
   tier?: ProductTier | undefined;
 }
@@ -665,21 +742,27 @@ export function PremiumTemplateStudio({
   onChange,
   onSave,
   onPublish,
+  documentId,
+  onSaveStateChange,
   tier,
 }: PremiumTemplateStudioProps) {
   const initialConfig = useMemo(() => config ?? createDemoConfig(), [config]);
 
   return (
-    <StudioProvider
-      initialConfig={initialConfig}
-      adapters={adapters}
-      autoSave={autoSave}
-      onChange={onChange}
-      onSave={onSave}
-      onPublish={onPublish}
-      tier={tier}
-    >
-      <StudioShell />
-    </StudioProvider>
+    <PowerEditorLocaleProvider>
+      <StudioProvider
+        initialConfig={initialConfig}
+        adapters={adapters}
+        autoSave={autoSave}
+        onChange={onChange}
+        onSave={onSave}
+        onPublish={onPublish}
+        documentId={documentId}
+        onSaveStateChange={onSaveStateChange}
+        tier={tier}
+      >
+        <StudioShell />
+      </StudioProvider>
+    </PowerEditorLocaleProvider>
   );
 }

@@ -118,12 +118,17 @@ export type ProCapability = (typeof PRO_CAPABILITIES)[number];
  * to restore normal plan-based gating from `CAPABILITY_POLICY` — this is the
  * single obvious re-gating point.
  *
+ * `premium_sections` and `premium_templates` are INCLUDED because the
+ * Templates / Sections panels derive their PRO lock badges and disabled
+ * states from `isAssetLocked` (which consults this resolver). During early
+ * access every currently implemented template and section must be selectable
+ * and free of plan-based locking. Their PREMIUM classification metadata in
+ * `asset-manifest.ts` is preserved unchanged for future monetization.
+ *
  * NOTE: `remove_cripqer_branding` is intentionally EXCLUDED — it is a
  * branding/publishing monetization feature, not a Power Editor creative
- * editing capability. `premium_sections` and `premium_templates` are also
- * EXCLUDED because they are only reachable via the `APPLY_SECTION` /
- * `APPLY_TEMPLATE` intents, which are not dispatched through the Power
- * Editor's guarded dispatch (StudioAction boundary).
+ * editing capability. It remains gated and serves as the negative control
+ * proving the early-access unlock is not global.
  */
 export const POWER_EDITOR_EARLY_ACCESS_CAPABILITIES = [
   "advanced_typography",
@@ -133,6 +138,8 @@ export const POWER_EDITOR_EARLY_ACCESS_CAPABILITIES = [
   "premium_background_effects",
   "advanced_card_button_styling",
   "premium_blocks",
+  "premium_sections",
+  "premium_templates",
 ] as const satisfies readonly ProCapability[];
 
 /* ============================================================================

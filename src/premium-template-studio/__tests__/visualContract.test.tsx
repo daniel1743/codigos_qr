@@ -113,7 +113,7 @@ describe("Power Editor visual contract", () => {
     expect(markup).not.toContain('data-media-position="plain"');
   });
 
-  it("uses a full-width content fallback when a media card has no image", () => {
+  it("renders a generic Globe icon in the 25% media area when a media card has no image", () => {
     const markup = renderBlockOnly(
       makeConfig({
         type: "links",
@@ -131,8 +131,10 @@ describe("Power Editor visual contract", () => {
       }),
     );
 
-    expect(markup).toContain('data-media-position="none"');
-    expect(markup).toContain("grid-template-columns:1fr");
+    // Never an empty media slot: a generic website without an image gets a Globe icon.
+    expect(markup).toContain('data-media-fallback="generic-web"');
+    expect(markup).toContain("lucide-globe");
+    expect(markup).toContain("grid-template-columns:1fr 3fr");
     expect(markup).not.toContain("<img");
   });
 

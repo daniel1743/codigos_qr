@@ -24,8 +24,16 @@ describe("Smart bidirectional contextual focus (Phase 5C2B)", () => {
   describe("computeInspectorFocusScroll (comfortable positioning)", () => {
     const viewport = { top: 0, bottom: 600 };
 
-    it("returns 0 when the target is already comfortably visible", () => {
-      expect(computeInspectorFocusScroll(viewport, { top: 100, bottom: 180 })).toBe(0);
+    it("re-centers a visible-but-edge target into the 35%–55% band (5C2D)", () => {
+      // 5C2D superseded the old "visible ⇒ no scroll" behavior: a target whose
+      // center sits above the 35% band (here 140/600 ≈ 23%) is re-centered
+      // toward the 45% anchor (270), producing 140 − 270 = −130 — not 0.
+      expect(computeInspectorFocusScroll(viewport, { top: 100, bottom: 180 })).toBe(-130);
+    });
+
+    it("returns 0 when the target center is already within the 35%–55% band", () => {
+      // Center at 270 (45% of the 600px viewport) is inside the comfortable band.
+      expect(computeInspectorFocusScroll(viewport, { top: 240, bottom: 300 })).toBe(0);
     });
 
     it("returns a positive delta when the target is below the visible region", () => {

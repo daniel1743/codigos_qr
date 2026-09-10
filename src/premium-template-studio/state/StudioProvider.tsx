@@ -59,6 +59,10 @@ export interface StudioProviderProps {
   onChange?: ((config: BioTemplateConfig) => void) | undefined;
   onSave?: ((config: BioTemplateConfig) => void | Promise<void>) | undefined;
   onPublish?: ((config: BioTemplateConfig) => void | Promise<void>) | undefined;
+  /** Stable document identity (e.g. profile id) used to isolate saves per document. */
+  documentId?: string | undefined;
+  /** Reports save-state changes (idle/saving/saved/dirty/error) to the host. */
+  onSaveStateChange?: ((state: SaveState) => void) | undefined;
   /** Effective product tier from the host boundary. Missing/invalid → "free". */
   tier?: ProductTier | undefined;
   children: ReactNode;
@@ -71,6 +75,8 @@ export function StudioProvider({
   onChange,
   onSave,
   onPublish,
+  documentId,
+  onSaveStateChange,
   tier,
   children,
 }: StudioProviderProps) {
@@ -119,6 +125,12 @@ export function StudioProvider({
   const [error, setError] = useState<string | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // SAVE COORDINATOR — document identity + local revision tracking so stale or
+  // cross-document responses can never acknowledge the wrong snapshot.
+  const documentIdRef = useRef(documentId);
+  const revisionRef = useRef(0);
+  const lastSavedRevisionRef = useRef(0);
+
   // CONFIG SYNC — the host may hand over a new config after mount.
   const mountedConfig = useRef(initialConfig);
   const lastEmittedConfig = useRef<BioTemplateConfig | null>(null);
@@ -147,19 +159,52 @@ export function StudioProvider({
     else if (window.innerWidth < 1024) setBreakpoint("tablet");
   }, []);
 
+  // Keep the coordinator mirrors current, and restart the saved-revision
+  // watermark whenever the document identity changes.
+  useEffect(() => {
+    documentIdRef.current = documentId;
+    lastSavedRevisionRef.current = 0;
+  }, [documentId]);
+
+  useEffect(() => {
+    revisionRef.current = state.revision;
+  }, [state.revision]);
+
+  // Surface save-state changes to the host (Saved / Saving / Unsaved / Error).
+  useEffect(() => {
+    onSaveStateChange?.(saveState);
+  }, [saveState, onSaveStateChange]);
+
   const save = useCallback(async () => {
+    // Capture an immutable snapshot tied to the exact document + revision.
+    const snapshot = state.config;
+    const snapshotRevision = state.revision;
+    const snapshotDocumentId = documentId;
     setSaveState("saving");
     setError(null);
     try {
-      await adapters.storage.save(state.config);
-      await onSave?.(state.config);
-      dispatch({ type: "markSaved" });
-      setSaveState("saved");
+      await adapters.storage.save(snapshot);
+      await onSave?.(snapshot);
+      // Acknowledge only if (a) we are still on the same document and (b) this
+      // revision is not older than the last acknowledged one (monotonic).
+      if (
+        snapshotDocumentId === documentIdRef.current &&
+        snapshotRevision >= lastSavedRevisionRef.current
+      ) {
+        lastSavedRevisionRef.current = snapshotRevision;
+        dispatch({ type: "markSaved", revision: snapshotRevision });
+      }
+      // If newer edits arrived while saving, stay "dirty" — never "saved".
+      setSaveState(
+        snapshotDocumentId === documentIdRef.current && revisionRef.current > snapshotRevision
+          ? "dirty"
+          : "saved",
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not save the template.");
       setSaveState("error");
     }
-  }, [adapters.storage, state.config, onSave]);
+  }, [adapters.storage, state.config, state.revision, documentId, onSave]);
 
   const publish = useCallback(async () => {
     // VALIDATION GATE — never publish an invalid configuration.
@@ -172,19 +217,32 @@ export function StudioProvider({
       setSaveState("error");
       return;
     }
+    const snapshot = state.config;
+    const snapshotRevision = state.revision;
+    const snapshotDocumentId = documentId;
     setSaveState("saving");
     setError(null);
     try {
-      await adapters.storage.save(state.config);
-      await adapters.storage.publish?.(state.config);
-      await onPublish?.(state.config);
-      dispatch({ type: "markSaved" });
-      setSaveState("saved");
+      await adapters.storage.save(snapshot);
+      await adapters.storage.publish?.(snapshot);
+      await onPublish?.(snapshot);
+      if (
+        snapshotDocumentId === documentIdRef.current &&
+        snapshotRevision >= lastSavedRevisionRef.current
+      ) {
+        lastSavedRevisionRef.current = snapshotRevision;
+        dispatch({ type: "markSaved", revision: snapshotRevision });
+      }
+      setSaveState(
+        snapshotDocumentId === documentIdRef.current && revisionRef.current > snapshotRevision
+          ? "dirty"
+          : "saved",
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not publish the template.");
       setSaveState("error");
     }
-  }, [adapters.storage, state.config, onPublish]);
+  }, [adapters.storage, state.config, state.revision, documentId, onPublish]);
 
   // Autosave, debounced. The host can disable it and drive saving itself.
   useEffect(() => {

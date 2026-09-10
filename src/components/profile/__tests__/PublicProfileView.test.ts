@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createCanonicalPageEnvelope } from "../../../lib/canonical-page/contract";
 import { createDemoConfig } from "../../../premium-template-studio/templates/definitions";
+import { resolvePublicProfileCanonicalConfig } from "../PublicProfileView";
 import { resolveCanonicalEditorConfig } from "../canonicalRenderBridge";
 
 describe("PublicProfileView canonical render bridge", () => {
@@ -32,6 +33,35 @@ describe("PublicProfileView canonical render bridge", () => {
     expect(resolveCanonicalEditorConfig(undefined)).toBeNull();
     expect(
       resolveCanonicalEditorConfig({ schemaVersion: 1, editorConfig: { blocks: [] } }),
+    ).toBeNull();
+  });
+
+  it("public canonical rendering uses the published snapshot instead of editable draft", () => {
+    const publishedConfig = {
+      ...createDemoConfig(),
+      metadata: { ...createDemoConfig().metadata, name: "Published A" },
+    };
+    const draftConfig = {
+      ...createDemoConfig(),
+      metadata: { ...createDemoConfig().metadata, name: "Draft B" },
+    };
+
+    expect(
+      resolvePublicProfileCanonicalConfig({
+        template_config: createCanonicalPageEnvelope(draftConfig),
+        published_template_config: createCanonicalPageEnvelope(publishedConfig),
+      }),
+    ).toBe(publishedConfig);
+  });
+
+  it("does not route public canonical profiles back to editable draft without a published snapshot", () => {
+    const draftConfig = createDemoConfig();
+
+    expect(
+      resolvePublicProfileCanonicalConfig({
+        template_config: createCanonicalPageEnvelope(draftConfig),
+        published_template_config: null,
+      }),
     ).toBeNull();
   });
 });

@@ -4,8 +4,10 @@ import {
   calculateFitZoom,
   calculateFocalZoomScroll,
   calculatePanScroll,
+  calculatePinchCamera,
   calculateStageGeometry,
   clampScrollPosition,
+  POWER_CANVAS_MAX_USER_ZOOM,
   POWER_CANVAS_MIN_USER_ZOOM,
 } from "../powerCanvasCameraMath";
 
@@ -400,5 +402,158 @@ describe("power canvas camera math", () => {
         stage,
       }),
     ).toEqual({ scrollLeft: 100, scrollTop: 100 });
+  });
+});
+
+describe("pinch camera (two-finger mobile gestures)", () => {
+  const dimensions = {
+    viewportWidth: 600,
+    viewportHeight: 800,
+    contentWidth: 1600,
+    contentHeight: 2400,
+  };
+  const fitZoom = 1;
+  const startUserZoom = 1;
+  const startScroll = { scrollLeft: 50, scrollTop: 80 };
+  const startCentroid = { x: 200, y: 300 };
+
+  function pinch(
+    gesture: Partial<{
+      startDistance: number;
+      currentDistance: number;
+      startCentroid: { x: number; y: number };
+      currentCentroid: { x: number; y: number };
+    }> = {},
+  ) {
+    return calculatePinchCamera({
+      gesture: {
+        startDistance: 100,
+        currentDistance: 100,
+        startCentroid,
+        currentCentroid: startCentroid,
+        ...gesture,
+      },
+      startUserZoom,
+      startScroll,
+      fitZoom,
+      dimensions,
+    });
+  }
+
+  it("pinch-out increases zoom", () => {
+    const result = pinch({ currentDistance: 150 });
+    expect(result.userZoom).toBeGreaterThan(startUserZoom);
+    expect(result.scale).toBeGreaterThan(calculateEffectiveScale(fitZoom, startUserZoom));
+  });
+
+  it("pinch-in decreases zoom", () => {
+    const result = pinch({ currentDistance: 60 });
+    expect(result.userZoom).toBeLessThan(startUserZoom);
+    expect(result.scale).toBeLessThan(calculateEffectiveScale(fitZoom, startUserZoom));
+  });
+
+  it("clamps zoom within the existing user-zoom limits", () => {
+    expect(pinch({ startDistance: 1, currentDistance: 1000 }).userZoom).toBe(POWER_CANVAS_MAX_USER_ZOOM);
+    expect(pinch({ startDistance: 1000, currentDistance: 1 }).userZoom).toBe(POWER_CANVAS_MIN_USER_ZOOM);
+  });
+
+  it("keeps the world point under the start centroid anchored when zooming in place", () => {
+    const result = pinch({ currentDistance: 140 });
+    const startScale = calculateEffectiveScale(fitZoom, startUserZoom);
+
+    const before = worldPointUnderAnchor({
+      scrollLeft: startScroll.scrollLeft,
+      scrollTop: startScroll.scrollTop,
+      anchorX: startCentroid.x,
+      anchorY: startCentroid.y,
+      originX: 0,
+      originY: 0,
+      scale: startScale,
+    });
+    const after = worldPointUnderAnchor({
+      scrollLeft: result.scroll.scrollLeft,
+      scrollTop: result.scroll.scrollTop,
+      anchorX: startCentroid.x,
+      anchorY: startCentroid.y,
+      originX: 0,
+      originY: 0,
+      scale: result.scale,
+    });
+
+    expect(after.x).toBeCloseTo(before.x, 5);
+    expect(after.y).toBeCloseTo(before.y, 5);
+  });
+
+  it("translates the camera when the centroid moves (two-finger pan)", () => {
+    // No distance change → pure pan. Fingers move +50x/+40y → camera follows.
+    const result = pinch({ currentCentroid: { x: 250, y: 340 } });
+    expect(result.scroll.scrollLeft).toBeCloseTo(0, 5);
+    expect(result.scroll.scrollTop).toBeCloseTo(40, 5);
+  });
+
+  it("pans diagonally when the centroid moves diagonally", () => {
+    // Fingers move +40x/-40y (up-right) → camera pans right and up.
+    const result = pinch({ currentCentroid: { x: 240, y: 260 } });
+    expect(result.scroll.scrollLeft).toBeCloseTo(10, 5);
+    expect(result.scroll.scrollTop).toBeCloseTo(120, 5);
+  });
+
+  it("maps a 10% pinch-distance increase to a proportional modest zoom", () => {
+    const result = pinch({ currentDistance: 110 }); // 100 → 110 = +10%
+    expect(result.userZoom).toBeCloseTo(startUserZoom * 1.1, 5);
+    expect(result.scale).toBeCloseTo(calculateEffectiveScale(fitZoom, startUserZoom * 1.1), 5);
+  });
+
+  it("keeps scale unchanged for a pure two-finger translation (no scale drift)", () => {
+    const result = pinch({ currentCentroid: { x: 250, y: 340 } }); // distance unchanged
+    expect(result.userZoom).toBe(startUserZoom);
+    expect(result.scale).toBe(calculateEffectiveScale(fitZoom, startUserZoom));
+    // Pan still happens, so the scroll must have moved.
+    expect(result.scroll.scrollLeft).not.toBe(startScroll.scrollLeft);
+  });
+
+  it("snaps sub-epsilon distance jitter to no zoom change", () => {
+    // +0.5% distance change is below the pinch ratio epsilon → no zoom.
+    const result = pinch({ currentDistance: 100.5 });
+    expect(result.userZoom).toBe(startUserZoom);
+    expect(result.scale).toBe(calculateEffectiveScale(fitZoom, startUserZoom));
+  });
+
+  it("produces identical output for identical input (no camera drift)", () => {
+    const input = { currentDistance: 130, currentCentroid: { x: 220, y: 310 } };
+    expect(pinch(input)).toEqual(pinch(input));
+  });
+
+  it("clamps near the left/top edge without oscillation", () => {
+    const atEdge = calculatePinchCamera({
+      gesture: {
+        startDistance: 100,
+        currentDistance: 100,
+        startCentroid: { x: 100, y: 100 },
+        currentCentroid: { x: 1000, y: 1000 },
+      },
+      startUserZoom,
+      startScroll: { scrollLeft: 0, scrollTop: 0 },
+      fitZoom,
+      dimensions,
+    });
+    expect(atEdge.scroll.scrollLeft).toBe(0);
+    expect(atEdge.scroll.scrollTop).toBe(0);
+
+    // An even larger movement stays clamped at 0 (no reversal / oscillation).
+    const further = calculatePinchCamera({
+      gesture: {
+        startDistance: 100,
+        currentDistance: 100,
+        startCentroid: { x: 100, y: 100 },
+        currentCentroid: { x: 2000, y: 2000 },
+      },
+      startUserZoom,
+      startScroll: { scrollLeft: 0, scrollTop: 0 },
+      fitZoom,
+      dimensions,
+    });
+    expect(further.scroll.scrollLeft).toBe(0);
+    expect(further.scroll.scrollTop).toBe(0);
   });
 });

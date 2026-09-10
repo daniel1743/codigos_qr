@@ -5,6 +5,10 @@ export const POWER_CANVAS_MIN_ZOOM = 0.35;
 export const POWER_CANVAS_MIN_USER_ZOOM = 0.6;
 export const POWER_CANVAS_MAX_USER_ZOOM = 3;
 export const POWER_CANVAS_ZOOM_STEP = 1.1;
+// Minimum meaningful pinch ratio change. Finger distance below this relative
+// change (sub-pixel jitter) is treated as "no zoom", so a pure two-finger
+// translation never produces spurious scale drift or re-render churn.
+export const POWER_CANVAS_PINCH_RATIO_EPSILON = 0.01;
 
 export interface PowerCanvasDimensions {
   viewportWidth: number;
@@ -181,6 +185,83 @@ export function calculateFocalZoomScroll({
     dimensions,
     newStage,
   );
+}
+
+export interface PowerCanvasPinchGesture {
+  startDistance: number;
+  currentDistance: number;
+  startCentroid: PowerCanvasAnchorPoint;
+  currentCentroid: PowerCanvasAnchorPoint;
+}
+
+export interface PowerCanvasPinchCameraInput {
+  gesture: PowerCanvasPinchGesture;
+  startUserZoom: number;
+  startScroll: PowerCanvasScrollPosition;
+  fitZoom: number;
+  dimensions: PowerCanvasDimensions;
+}
+
+export interface PowerCanvasPinchCameraResult {
+  userZoom: number;
+  scale: number;
+  scroll: PowerCanvasScrollPosition;
+}
+
+/**
+ * Compute the next camera from a two-finger pinch/pan gesture in one coherent
+ * correction. Zoom derives from the ratio of pointer distance; pan derives from
+ * centroid movement. A single world point (the one under the start centroid)
+ * is kept anchored under the moving centroid, so the element being pinched
+ * stays approximately under the fingers instead of flying away.
+ *
+ * This is the scroll-space equivalent of the stabilized Basic Editor pinch
+ * (`startScale * (distance/startDistance)` with centroid-anchored translation).
+ */
+export function calculatePinchCamera(
+  input: PowerCanvasPinchCameraInput,
+): PowerCanvasPinchCameraResult {
+  const { gesture, startUserZoom, startScroll, fitZoom, dimensions } = input;
+
+  const safeStartDistance = Number.isFinite(gesture.startDistance)
+    ? Math.max(1, gesture.startDistance)
+    : 1;
+  const safeCurrentDistance = Number.isFinite(gesture.currentDistance)
+    ? Math.max(0, gesture.currentDistance)
+    : safeStartDistance;
+  const rawRatio = safeCurrentDistance / safeStartDistance;
+
+  // Absorb sub-pixel finger jitter: a pure two-finger translation keeps the
+  // distance (nearly) constant, so snap tiny ratio deviations to 1 and avoid
+  // spurious scale drift / oscillation during pan.
+  const ratio = Math.abs(rawRatio - 1) < POWER_CANVAS_PINCH_RATIO_EPSILON ? 1 : rawRatio;
+
+  const userZoom = clamp(
+    startUserZoom * ratio,
+    POWER_CANVAS_MIN_USER_ZOOM,
+    POWER_CANVAS_MAX_USER_ZOOM,
+  );
+
+  const startScale = calculateEffectiveScale(fitZoom, startUserZoom);
+  const scale = calculateEffectiveScale(fitZoom, userZoom);
+  const scaleRatio = startScale > 0 ? scale / startScale : 1;
+
+  const nextStage = calculateStageGeometry(dimensions, scale);
+
+  // Keep the world point under the start centroid anchored under the CURRENT
+  // centroid. `(startScroll + startCentroid) / startScale` is the world point;
+  // at `scale` it should sit at `currentCentroid`, which also carries the
+  // centroid-movement (two-finger pan) contribution.
+  const scroll = clampScrollPosition(
+    {
+      scrollLeft: (startScroll.scrollLeft + gesture.startCentroid.x) * scaleRatio - gesture.currentCentroid.x,
+      scrollTop: (startScroll.scrollTop + gesture.startCentroid.y) * scaleRatio - gesture.currentCentroid.y,
+    },
+    dimensions,
+    nextStage,
+  );
+
+  return { userZoom, scale, scroll };
 }
 
 export function calculatePanScroll({

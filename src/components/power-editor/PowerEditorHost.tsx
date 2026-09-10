@@ -1,21 +1,27 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import {
   PremiumTemplateStudio,
   defaultAdapters,
   validateTemplate,
+  type AssetAdapter,
   type BioTemplateConfig,
+  type SaveState,
+  type UploadedAsset,
 } from "@/premium-template-studio";
 import { readCanonicalPageEnvelope } from "@/lib/canonical-page";
 import { getBrowserSupabaseClient } from "@/lib/supabase/client";
 import { canonicalPageService } from "@/services/canonical-page.service";
+import { applyTrustedVerificationVariant } from "@/components/profile/canonicalRenderBridge";
 
 interface OwnedProfile {
   id: string;
   user_id: string;
   slug: string;
+  public_id: string;
   display_name: string | null;
   bio: string | null;
+  verification_variant: "none" | "standard" | "official-gold" | null;
   template_config: unknown;
 }
 
@@ -33,6 +39,62 @@ function requestedProfile(profileId?: string | null): { key: "id" | "slug"; valu
     : { key: "slug", value: params.get("profile")?.trim() ?? "" };
 }
 
+/**
+ * Durable media asset adapter for the Power Editor.
+ *
+ * The studio's default asset adapter (`objectUrlAssetAdapter`) returns a
+ * `blob:` object URL, which is valid only for the current page session. If such
+ * a URL reaches the canonical config, the avatar/banner breaks after reload
+ * (`ERR_FILE_NOT_FOUND`). This adapter reuses the existing `avatars` storage
+ * bucket — the same durable authority the Basic Editor uses — so uploaded media
+ * resolves to a stable public URL that survives reload.
+ */
+const MEDIA_BUCKET = "avatars";
+
+function createDurableAssetAdapter(
+  supabase: ReturnType<typeof getBrowserSupabaseClient>,
+  userId: string,
+): AssetAdapter {
+  const extensionOf = (file: File): string => {
+    const ext = file.name.split(".").pop()?.toLowerCase();
+    return ext && /^[a-z0-9]{1,5}$/.test(ext) ? ext : "bin";
+  };
+  const safeBase = (file: File): string =>
+    (file.name.split(".").slice(0, -1).join(".") || "asset")
+      .replace(/[^a-zA-Z0-9_-]/g, "_")
+      .slice(0, 40);
+
+  const storagePathFromRef = (ref: string): string => {
+    const marker = `/storage/v1/object/public/${MEDIA_BUCKET}/`;
+    const idx = ref.indexOf(marker);
+    return idx >= 0 ? ref.slice(idx + marker.length) : ref;
+  };
+
+  return {
+    async upload(file) {
+      const path = `${userId}/power-editor/${Date.now()}-${safeBase(file)}.${extensionOf(file)}`;
+      const { error } = await supabase.storage.from(MEDIA_BUCKET).upload(path, file, {
+        contentType: file.type || "application/octet-stream",
+        upsert: false,
+      });
+      if (error) throw error;
+
+      const { data } = supabase.storage.from(MEDIA_BUCKET).getPublicUrl(path);
+      const type: UploadedAsset["type"] = file.type.startsWith("image/")
+        ? "image"
+        : file.type.startsWith("video/")
+          ? "video"
+          : "document";
+      return { id: path, url: data.publicUrl, name: file.name, size: file.size, type };
+    },
+    async remove(ref) {
+      const path = storagePathFromRef(ref);
+      if (!path) return;
+      await supabase.storage.from(MEDIA_BUCKET).remove([path]);
+    },
+  };
+}
+
 export function PowerEditorHost({ profileId }: PowerEditorHostProps) {
   const [supabase, setSupabase] = useState<ReturnType<typeof getBrowserSupabaseClient> | null>(
     null,
@@ -43,6 +105,11 @@ export function PowerEditorHost({ profileId }: PowerEditorHostProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
+  const [publishState, setPublishState] = useState<"idle" | "publishing" | "published" | "error">(
+    "idle",
+  );
+  const [saveState, setSaveState] = useState<SaveState>("idle");
+  const currentProfileIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -61,7 +128,7 @@ export function PowerEditorHost({ profileId }: PowerEditorHostProps) {
 
         const { data, error: profileError } = await browserSupabase
           .from("profiles")
-          .select("id,user_id,slug,display_name,bio,template_config")
+          .select("id,user_id,slug,public_id,display_name,bio,verification_variant,template_config")
           .eq(requested.key, requested.value)
           .eq("user_id", currentSession.user.id)
           .maybeSingle();
@@ -84,7 +151,11 @@ export function PowerEditorHost({ profileId }: PowerEditorHostProps) {
         if (!active) return;
         setSession(currentSession);
         setProfile(ownedProfile);
-        setConfig(envelope.editorConfig);
+        // Trusted DB verification_variant is authoritative; the canonical JSON
+        // can never grant official-gold on its own.
+        setConfig(
+          applyTrustedVerificationVariant(envelope.editorConfig, ownedProfile.verification_variant),
+        );
         setError(null);
       } catch (loadError) {
         if (active)
@@ -97,7 +168,7 @@ export function PowerEditorHost({ profileId }: PowerEditorHostProps) {
     void load();
     const {
       data: { subscription },
-    } = browserSupabase.auth.onAuthStateChange((_event, nextSession) => {
+    } = browserSupabase.auth.onAuthStateChange((_event: string, nextSession: Session | null) => {
       if (!nextSession && active) {
         setSession(null);
         setProfile(null);
@@ -112,28 +183,54 @@ export function PowerEditorHost({ profileId }: PowerEditorHostProps) {
     };
   }, [profileId]);
 
+  // Track the currently-active profile so a late save for a previous profile
+  // can never mutate the current document's host state.
+  useEffect(() => {
+    currentProfileIdRef.current = profile?.id ?? null;
+  }, [profile]);
+
   const adapters = useMemo(() => {
     if (!profile || !config || !session || !supabase) return undefined;
 
     return {
       ...defaultAdapters,
+      assets: createDurableAssetAdapter(supabase, session.user.id),
       storage: {
         ...defaultAdapters.storage,
         load: async () => config,
         save: async (nextConfig: BioTemplateConfig) => {
-          const persisted = await canonicalPageService.save(supabase, profile.id, nextConfig);
-          setConfig(persisted.editorConfig);
-          setLastSavedAt(new Date().toISOString());
+          const profileIdAtSave = profile.id;
+          await canonicalPageService.save(supabase, profileIdAtSave, nextConfig);
+          // Stale-response protection: a late save for a previous profile must
+          // never mutate the current document's host state.
+          if (currentProfileIdRef.current === profileIdAtSave) {
+            setLastSavedAt(new Date().toISOString());
+          }
+        },
+        publish: async (nextConfig: BioTemplateConfig) => {
+          setPublishState("publishing");
+          try {
+            const publication = await canonicalPageService.publish(supabase, profile.id, nextConfig);
+            if (currentProfileIdRef.current === profile.id) {
+              setPublishState("published");
+            }
+            return { url: `/p/${publication.public_id}` };
+          } catch (publishError) {
+            if (currentProfileIdRef.current === profile.id) {
+              setPublishState("error");
+            }
+            throw publishError;
+          }
         },
       },
       auth: {
         getUser: () => ({
           id: session.user.id,
-          email: session.user.email,
+          email: session.user.email ?? "",
           name:
-            typeof session.user.user_metadata?.full_name === "string"
-              ? session.user.user_metadata.full_name
-              : undefined,
+            typeof session.user.user_metadata?.["full_name"] === "string"
+              ? session.user.user_metadata["full_name"]
+              : session.user.email ?? "",
         }),
       },
     };
@@ -167,10 +264,9 @@ export function PowerEditorHost({ profileId }: PowerEditorHostProps) {
     >
       <div className="flex shrink-0 items-center justify-between gap-4 border-b border-border bg-card px-4 py-3">
         <div className="min-w-0">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-            Power Editor V2
-          </p>
-          <p data-testid="power-editor-profile" className="mt-1 truncate text-sm font-medium">
+          {/* Profile identity is retained as a screen-reader/test hook only —
+              raw identifiers are not shown as user-facing chrome. */}
+          <p data-testid="power-editor-profile" className="sr-only">
             Perfil: {profile.display_name ?? profile.slug} · /{profile.slug}
           </p>
           <p data-testid="power-editor-basic-bio" className="sr-only">
@@ -178,10 +274,33 @@ export function PowerEditorHost({ profileId }: PowerEditorHostProps) {
           </p>
         </div>
         <span data-testid="power-editor-save-status" className="text-xs text-muted-foreground">
-          {lastSavedAt ? "Guardado" : "Canonical cargado"}
+          {publishState === "publishing"
+            ? "Publicando…"
+            : publishState === "error"
+              ? "Error al publicar"
+              : saveState === "saving"
+                ? "Guardando…"
+                : saveState === "error"
+              ? "Error al guardar"
+              : saveState === "dirty"
+                ? "Cambios sin guardar"
+                : publishState === "published"
+                  ? "Publicado"
+                : lastSavedAt
+                  ? "Guardado"
+                  : "Canonical cargado"}
         </span>
       </div>
-      <PremiumTemplateStudio config={config} adapters={adapters} autoSave />
+      <PremiumTemplateStudio
+        config={config}
+        adapters={adapters}
+        autoSave
+        documentId={profile.id}
+        onSaveStateChange={(s) => {
+          setSaveState(s);
+          if (s === "dirty") setPublishState("idle");
+        }}
+      />
     </main>
   );
 }

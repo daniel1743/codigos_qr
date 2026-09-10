@@ -20,6 +20,8 @@ import {
 } from "../../lib/product-entitlements/capabilities";
 import type { ProductCapability } from "../../lib/product-entitlements/capabilities";
 import { authorizeCanonicalMutation } from "../../lib/product-entitlements/mutation-guard";
+import { isAssetLocked } from "../entitlements";
+import { getTemplateEntitlement } from "../../lib/product-entitlements/asset-manifest";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -429,6 +431,41 @@ describe("Page background contextual editing (Phase 5C5)", () => {
       const decision = resolveCapabilityAccess("free", unknown);
       expect(decision.state).toBe("LOCKED");
       expect(decision.reason).toBe("UNKNOWN_CAPABILITY");
+    });
+
+    it("premium_templates and premium_sections resolve ALLOW for free during early access", () => {
+      expect(resolveCapabilityAccess("free", "premium_templates").state).toBe("ALLOW");
+      expect(resolveCapabilityAccess("free", "premium_sections").state).toBe("ALLOW");
+    });
+
+    it("premium-classified templates are no longer asset-locked for free (no PRO badge / disabled state)", () => {
+      for (const id of [
+        "executive-premium-002",
+        "modern-bento-003",
+        "editorial-journal-004",
+        "luxury-noir-006",
+      ]) {
+        expect(isAssetLocked("template", id, "free"), id).toBe(false);
+      }
+    });
+
+    it("APPLY_TEMPLATE is authorized (ALLOW) for a previously premium template", () => {
+      const auth = authorizeCanonicalMutation("free", {
+        kind: "APPLY_TEMPLATE",
+        assetId: "executive-premium-002",
+      });
+      expect(auth.decision).toBe("ALLOW");
+    });
+
+    it("premium classification metadata is preserved for future monetization", () => {
+      expect(getTemplateEntitlement("executive-premium-002").classification).toBe("PREMIUM");
+      expect(getTemplateEntitlement("executive-premium-002").requiredCapability).toBe(
+        "premium_templates",
+      );
+    });
+
+    it("standard template selection remains available (not locked)", () => {
+      expect(isAssetLocked("template", "creator-premium-001", "free")).toBe(false);
     });
   });
 });

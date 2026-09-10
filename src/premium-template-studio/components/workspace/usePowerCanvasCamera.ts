@@ -4,7 +4,9 @@ import {
   calculateEffectiveScale,
   calculateFitZoom,
   calculateFocalZoomScroll,
+  calculateMaxScroll,
   calculatePanScroll,
+  calculatePinchCamera,
   calculateStageGeometry,
   clampScrollPosition,
   clamp,
@@ -134,6 +136,26 @@ export function usePowerCanvasCamera(): PowerCanvasCameraResult {
   } | null>(null);
   const suppressNextClickRef = useRef(false);
 
+  // Multi-touch gesture state. Two active touch pointers form a pinch session
+  // that handles both zoom (distance ratio) and pan (centroid movement).
+  const activePointersRef = useRef<Map<number, { x: number; y: number }>>(new Map());
+  const pinchSessionRef = useRef<{
+    startDistance: number;
+    startUserZoom: number;
+    startScrollLeft: number;
+    startScrollTop: number;
+    startCentroidX: number;
+    startCentroidY: number;
+    fitZoom: number;
+    dimensions: MeasuredSize;
+  } | null>(null);
+
+  // Latest-value refs so continuous gesture handlers read the current camera
+  // state without depending on memo closures that go stale mid-gesture.
+  const userZoomRef = useRef(1);
+  const fitZoomRef = useRef(1);
+  const sizeRef = useRef<MeasuredSize>(INITIAL_SIZE);
+
   const measureNow = useCallback(() => {
     const next = measure(viewportRef.current, contentRef.current);
     setSize((previous) => (sameSize(previous, next) ? previous : next));
@@ -173,6 +195,11 @@ export function usePowerCanvasCamera(): PowerCanvasCameraResult {
   });
   const scale = calculateEffectiveScale(fitZoom, userZoom);
   const stage = useMemo(() => calculateStageGeometry(size, scale), [size, scale]);
+
+  // Keep the latest camera values in refs for gesture handlers (see above).
+  userZoomRef.current = userZoom;
+  fitZoomRef.current = fitZoom;
+  sizeRef.current = size;
 
   useLayoutEffect(() => {
     const pendingScroll = pendingScrollRef.current;
@@ -279,6 +306,21 @@ export function usePowerCanvasCamera(): PowerCanvasCameraResult {
     if (updateState) setIsPanning(false);
   }, []);
 
+  const resetTouchGestures = useCallback(() => {
+    const viewport = viewportRef.current;
+    activePointersRef.current.forEach((_, pointerId) => {
+      try {
+        if (viewport?.hasPointerCapture(pointerId)) viewport.releasePointerCapture(pointerId);
+      } catch {
+        // Pointer may already be released by the browser.
+      }
+    });
+    activePointersRef.current.clear();
+    pinchSessionRef.current = null;
+    panSessionRef.current = null;
+    setIsPanning(false);
+  }, []);
+
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.code !== "Space" || event.repeat || isEditableTarget(event.target)) return;
@@ -304,8 +346,9 @@ export function usePowerCanvasCamera(): PowerCanvasCameraResult {
       window.removeEventListener("keyup", onKeyUp);
       window.removeEventListener("blur", onBlur);
       endPanSession(undefined, false);
+      resetTouchGestures();
     };
-  }, [endPanSession]);
+  }, [endPanSession, resetTouchGestures]);
 
   const interaction = useMemo<PowerCanvasCameraInteraction>(
     () => ({
@@ -329,6 +372,55 @@ export function usePowerCanvasCamera(): PowerCanvasCameraResult {
         pointerInsideViewportRef.current = false;
       },
       onPointerDown: (event) => {
+        if (event.pointerType === "touch") {
+          const point = { x: event.clientX, y: event.clientY };
+          activePointersRef.current.set(event.pointerId, point);
+          try {
+            event.currentTarget.setPointerCapture(event.pointerId);
+          } catch {
+            // Some mobile browsers reject capture during native gestures.
+          }
+
+          if (activePointersRef.current.size >= 2) {
+            // Second finger → begin pinch (zoom + two-finger pan).
+            panSessionRef.current = null;
+            const [a, b] = Array.from(activePointersRef.current.values());
+            const startCentroidX = (a.x + b.x) / 2;
+            const startCentroidY = (a.y + b.y) / 2;
+            pinchSessionRef.current = {
+              startDistance: Math.max(1, Math.hypot(a.x - b.x, a.y - b.y)),
+              startUserZoom: userZoomRef.current,
+              startScrollLeft: event.currentTarget.scrollLeft,
+              startScrollTop: event.currentTarget.scrollTop,
+              startCentroidX,
+              startCentroidY,
+              fitZoom: fitZoomRef.current,
+              dimensions: sizeRef.current,
+            };
+            suppressNextClickRef.current = true;
+            setIsPanning(true);
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+          }
+
+          // Single finger: pan only when zoomed (stage overflows) and not on an
+          // editable target; otherwise preserve tap/selection and text editing.
+          if (isEditableTarget(event.target)) return;
+          const maxScroll = calculateMaxScroll(size, stage);
+          if (maxScroll.scrollLeft <= 0 && maxScroll.scrollTop <= 0) return;
+          panSessionRef.current = {
+            pointerId: event.pointerId,
+            startX: event.clientX,
+            startY: event.clientY,
+            startScrollLeft: event.currentTarget.scrollLeft,
+            startScrollTop: event.currentTarget.scrollTop,
+            moved: false,
+          };
+          return;
+        }
+
+        // Desktop: Space + primary button pan (unchanged).
         if (!isPanReady || event.button !== 0) return;
         event.preventDefault();
         event.stopPropagation();
@@ -344,6 +436,45 @@ export function usePowerCanvasCamera(): PowerCanvasCameraResult {
         setIsPanning(true);
       },
       onPointerMove: (event) => {
+        const pinchSession = pinchSessionRef.current;
+        if (pinchSession && activePointersRef.current.has(event.pointerId)) {
+          activePointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+          if (activePointersRef.current.size < 2) return;
+          const [a, b] = Array.from(activePointersRef.current.values());
+          const currentDistance = Math.max(1, Math.hypot(a.x - b.x, a.y - b.y));
+          const next = calculatePinchCamera({
+            gesture: {
+              startDistance: pinchSession.startDistance,
+              currentDistance,
+              startCentroid: { x: pinchSession.startCentroidX, y: pinchSession.startCentroidY },
+              currentCentroid: { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 },
+            },
+            startUserZoom: pinchSession.startUserZoom,
+            startScroll: {
+              scrollLeft: pinchSession.startScrollLeft,
+              scrollTop: pinchSession.startScrollTop,
+            },
+            fitZoom: pinchSession.fitZoom,
+            dimensions: pinchSession.dimensions,
+          });
+          if (next.userZoom !== userZoomRef.current) {
+            // Scale is changing: defer the scroll so it is applied AFTER the
+            // stage re-sizes. Writing scrollLeft directly here would let the
+            // browser clamp it against the old (smaller) stage, producing the
+            // visible "position shift / abrupt jump" during zoom.
+            pendingScrollRef.current = next.scroll;
+            setUserZoom(next.userZoom);
+          } else {
+            // Pure two-finger pan (no scale change): apply scroll immediately,
+            // since `setUserZoom` with an unchanged value would not re-render.
+            event.currentTarget.scrollLeft = next.scroll.scrollLeft;
+            event.currentTarget.scrollTop = next.scroll.scrollTop;
+          }
+          event.preventDefault();
+          event.stopPropagation();
+          return;
+        }
+
         const panSession = panSessionRef.current;
         if (!panSession || panSession.pointerId !== event.pointerId) return;
         event.preventDefault();
@@ -367,9 +498,32 @@ export function usePowerCanvasCamera(): PowerCanvasCameraResult {
         event.currentTarget.scrollTop = nextScroll.scrollTop;
       },
       onPointerUp: (event) => {
+        if (event.pointerType === "touch") {
+          activePointersRef.current.delete(event.pointerId);
+          try {
+            if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+              event.currentTarget.releasePointerCapture(event.pointerId);
+            }
+          } catch {
+            // ignore
+          }
+          if (activePointersRef.current.size < 2) pinchSessionRef.current = null;
+          if (activePointersRef.current.size === 0) {
+            panSessionRef.current = null;
+            setIsPanning(false);
+          }
+          return;
+        }
         endPanSession(event);
       },
       onPointerCancel: (event) => {
+        if (event.pointerType === "touch") {
+          activePointersRef.current.delete(event.pointerId);
+          pinchSessionRef.current = null;
+          panSessionRef.current = null;
+          if (activePointersRef.current.size === 0) setIsPanning(false);
+          return;
+        }
         endPanSession(event);
       },
       onClickCapture: (event) => {

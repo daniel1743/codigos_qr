@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
+import { canonicalPageService } from "../../services/canonical-page.service";
 import { validateTemplate } from "../engine/TemplateValidator";
 import { createDemoConfig } from "../templates/definitions";
 import type { BioTemplateConfig } from "../types";
@@ -128,6 +129,80 @@ describe("Save and Publish Contracts", () => {
 
     await publishMock(validConfig);
     expect(publishMock).toHaveBeenCalled();
+  });
+
+  it("canonical save writes editable draft without invoking publish RPC", async () => {
+    const rpc = vi.fn(async () => ({
+      data: {
+        template_config: {
+          schemaVersion: 1,
+          editorConfig: validConfig,
+        },
+      },
+      error: null,
+    }));
+    const supabase = { rpc };
+
+    await canonicalPageService.save(supabase as never, "profile-1", validConfig);
+
+    expect(rpc).toHaveBeenCalledTimes(1);
+    expect(rpc).toHaveBeenCalledWith("set_profile_canonical_editor_config", {
+      p_profile_id: "profile-1",
+      p_editor_config: validConfig,
+    });
+    expect(rpc).not.toHaveBeenCalledWith(
+      "publish_profile_canonical_snapshot",
+      expect.anything(),
+    );
+  });
+
+  it("canonical publish promotes the exact snapshot through the publish RPC", async () => {
+    const publishedAt = "2026-09-10T00:00:00.000Z";
+    const rpc = vi.fn(async () => ({
+      data: {
+        id: "profile-1",
+        public_id: "public-1",
+        published: true,
+        published_revision: 2,
+        published_at: publishedAt,
+        published_template_config: {
+          schemaVersion: 1,
+          editorConfig: validConfig,
+        },
+      },
+      error: null,
+    }));
+    const supabase = { rpc };
+
+    const result = await canonicalPageService.publish(supabase as never, "profile-1", validConfig);
+
+    expect(rpc).toHaveBeenCalledWith("publish_profile_canonical_snapshot", {
+      p_profile_id: "profile-1",
+      p_editor_config: validConfig,
+    });
+    expect(result).toEqual({
+      id: "profile-1",
+      public_id: "public-1",
+      published: true,
+      published_revision: 2,
+      published_at: publishedAt,
+      published_template_config: {
+        schemaVersion: 1,
+        editorConfig: validConfig,
+      },
+    });
+  });
+
+  it("canonical publish failure surfaces the RPC error without fake success", async () => {
+    const rpc = vi.fn(async () => ({
+      data: null,
+      error: new Error("publish failed"),
+    }));
+    const supabase = { rpc };
+
+    await expect(
+      canonicalPageService.publish(supabase as never, "profile-1", validConfig),
+    ).rejects.toThrow("publish failed");
   });
 
   it("invalid block content in config fails validation before save", () => {

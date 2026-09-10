@@ -22,6 +22,9 @@ export interface Profile {
   public_id: string;
   display_name: string;
   profession?: string | null;
+  /** System-controlled verification variant ('none' | 'standard' | 'official-gold'). */
+  verification_variant?: "none" | "standard" | "official-gold";
+
   bio: string | null;
   avatar_url: string | null;
   banner_url: string | null;
@@ -93,6 +96,9 @@ export interface Profile {
   template_id?: string | null;
   template_version?: number;
   template_config?: any;
+  published_template_config?: any;
+  published_revision?: number | null;
+  published_at?: string | null;
   created_at: string;
   updated_at: string;
 }

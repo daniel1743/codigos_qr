@@ -1,4 +1,4 @@
-import { Monitor, Smartphone, Tablet, Trash2, Copy, Lock } from "lucide-react";
+import { Monitor, Smartphone, Tablet, Trash2, Copy, Lock, Plus } from "lucide-react";
 import { useStudio } from "../../state/StudioProvider";
 import { getBlockDefinition } from "../../constants/blockDefinitions";
 import {
@@ -34,8 +34,16 @@ import type {
   TemplateBlock,
   EntrancePreset,
   HoverPreset,
+  TrustBadge,
+  TrustSignalType,
 } from "../../types";
 import { FONT_OPTIONS } from "../../constants/themes";
+import {
+  MAX_TRUST_SIGNALS,
+  USER_SELECTABLE_SIGNALS,
+  defaultTrustSignalValue,
+  getTrustSignalDefinition,
+} from "../../constants/trustSignals";
 import type { StudioAdapters } from "../../adapters";
 import { ENTRANCE_OPTIONS, HOVER_OPTIONS } from "../../constants/motionPresets";
 import { useEffect, useRef, useState } from "react";
@@ -49,6 +57,15 @@ import {
   subscribeInspectorFocus,
   type ContextualTarget,
 } from "./inspectorFocus";
+import { usePowerEditorLocale } from "../../i18n/PowerEditorLocale";
+import { formatBreakpoint } from "../../i18n/messages";
+import { resolveSmartLinkPreviewFn } from "../../../lib/smart-link-preview/server";
+import {
+  computeCardEnrichment,
+  type SmartLinkPreview,
+  type SmartLinkPreviewStatus,
+} from "../../../lib/smart-link-preview";
+
 
 /**
  * ASSET ADAPTER UI — minimal upload / replace / remove, always through
@@ -117,6 +134,7 @@ function AssetField({
   onChange: (url: string, asset?: { name: string }) => void;
 }) {
   const { adapters } = useStudio();
+  const { messages } = usePowerEditorLocale();
   const input = useRef<HTMLInputElement | null>(null);
   const [busy, setBusy] = useState(false);
   const [assetError, setAssetError] = useState<string | null>(null);
@@ -127,7 +145,7 @@ function AssetField({
         <TextInput value={value} onChange={(v) => onChange(v)} placeholder="https://…" />
         <div className="flex items-center gap-2">
           <GhostButton onClick={() => input.current?.click()}>
-            {busy ? "Uploading…" : value ? "Replace" : "Upload"}
+            {busy ? messages.inspector.uploading : value ? messages.inspector.replace : messages.inspector.upload}
           </GhostButton>
           {value && (
             <GhostButton
@@ -141,7 +159,7 @@ function AssetField({
                 onChange("");
               }}
             >
-              Remove
+              {messages.inspector.remove}
             </GhostButton>
           )}
         </div>
@@ -187,6 +205,7 @@ function AssetField({
 
 function ProfileInspector() {
   const { state, dispatch, breakpoint } = useStudio();
+  const { locale, messages } = usePowerEditorLocale();
   const { profile, layout } = state.config;
   const banner = profile.banner;
   const patch = (path: string, value: unknown) => dispatch({ type: "patch", path, value });
@@ -251,23 +270,23 @@ function ProfileInspector() {
   return (
     <div>
       <div data-inspector-focus="page-background" {...contextualFocusProps("page-background")}>
-        <Section title="Page Background">
-          <Field label="Type">
+        <Section title={messages.inspector.pageBackground}>
+          <Field label={messages.inspector.type}>
             <Segmented
               size="sm"
               value={backgroundType}
               options={[
-                { value: "solid", label: "Solid" },
-                { value: "gradient", label: "Gradient" },
-                { value: "image", label: "Image" },
-                { value: "pattern", label: "Pattern" },
+                { value: "solid", label: messages.options.solid },
+                { value: "gradient", label: messages.options.gradient },
+                { value: "image", label: messages.options.image },
+                { value: "pattern", label: messages.options.pattern },
               ]}
               onChange={(v) => selectBackgroundType(v)}
             />
           </Field>
 
           {backgroundType === "solid" && (
-            <Field label="Color">
+            <Field label={messages.inspector.color}>
               <ColorInput
                 value={background.color ?? themeColors.background}
                 onChange={(v) => patch("theme.background.color", v)}
@@ -277,24 +296,24 @@ function ProfileInspector() {
 
           {backgroundType === "gradient" && (
             <>
-              <Field label="Kind">
+              <Field label={messages.inspector.kind}>
                 <Segmented
                   size="sm"
                   value={gradient.kind}
                   options={[
-                    { value: "linear", label: "Linear" },
-                    { value: "radial", label: "Radial" },
+                    { value: "linear", label: messages.inspector.linear },
+                    { value: "radial", label: messages.inspector.radial },
                   ]}
                   onChange={(v) => patchGradient({ kind: v as "linear" | "radial" })}
                 />
               </Field>
-              <Field label="From">
+              <Field label={messages.inspector.from}>
                 <ColorInput value={gradient.from} onChange={(v) => patchGradient({ from: v })} />
               </Field>
-              <Field label="To">
+              <Field label={messages.inspector.to}>
                 <ColorInput value={gradient.to} onChange={(v) => patchGradient({ to: v })} />
               </Field>
-              <Field label="Angle">
+              <Field label={messages.inspector.angle}>
                 <NumberSlider
                   value={gradient.angle}
                   min={0}
@@ -310,12 +329,12 @@ function ProfileInspector() {
           {backgroundType === "image" && (
             <>
               <AssetField
-                label="Background Image"
+                label={messages.inspector.backgroundImage}
                 accept="image/*"
                 value={background.imageUrl ?? ""}
                 onChange={(url) => patch("theme.background.imageUrl", url)}
               />
-              <Field label="Blur">
+              <Field label={messages.inspector.blur}>
                 <NumberSlider
                   value={background.blur ?? 0}
                   min={0}
@@ -329,15 +348,15 @@ function ProfileInspector() {
           )}
 
           {backgroundType === "pattern" && (
-            <Field label="Pattern">
+            <Field label={messages.inspector.pattern}>
               <Segmented
                 size="sm"
                 value={background.pattern ?? "dots"}
                 options={[
-                  { value: "dots", label: "Dots" },
-                  { value: "grid", label: "Grid" },
-                  { value: "noise", label: "Noise" },
-                  { value: "rings", label: "Rings" },
+                  { value: "dots", label: messages.options.dots },
+                  { value: "grid", label: messages.options.grid },
+                  { value: "noise", label: messages.options.noise },
+                  { value: "rings", label: messages.options.rings },
                 ]}
                 onChange={(v) => patch("theme.background.pattern", v)}
               />
@@ -347,32 +366,34 @@ function ProfileInspector() {
       </div>
 
       <div data-inspector-focus="profile-cover" {...contextualFocusProps("profile-cover")}>
-        <Section title="Cover / Banner">
+        <Section title={messages.inspector.coverBanner}>
           <Toggle
-            label="Show cover"
+            label={messages.inspector.showCover}
             checked={banner.enabled}
             onChange={(v) => patch("profile.banner.enabled", v)}
           />
           {banner.enabled && (
             <>
-              <Field label="Width">
+              <Field label={messages.inspector.width}>
                 <Segmented
                   size="sm"
                   value={banner.widthMode ?? "contained"}
                   options={[
-                    { value: "contained", label: "Contained" },
-                    { value: "full-bleed", label: "Full Bleed" },
+                    { value: "contained", label: messages.options.contained },
+                    { value: "full-bleed", label: messages.options.fullBleed },
                   ]}
                   onChange={(v) => patch("profile.banner.widthMode", v)}
                 />
               </Field>
               <AssetField
-                label="Cover Image"
+                label={messages.inspector.coverImage}
                 accept="image/*"
                 value={banner.imageUrl ?? ""}
                 onChange={(v) => patch("profile.banner.imageUrl", v)}
               />
-              <Field label={`Cover Height (${breakpoint})`}>
+              <Field
+                label={`${messages.inspector.coverHeight} (${formatBreakpoint(locale, breakpoint)})`}
+              >
                 <NumberSlider
                   value={breakpoint === "mobile" ? banner.mobileHeight : banner.height}
                   min={80}
@@ -389,17 +410,17 @@ function ProfileInspector() {
                   }
                 />
               </Field>
-              <Field label="Position">
+              <Field label={messages.inspector.position}>
                 <PositionGrid
                   value={focalToToken(banner.focalX, banner.focalY)}
                   onChange={(v) => {
-                    const point = FOCAL_POINTS[v] ?? FOCAL_POINTS.center!;
+                    const point = FOCAL_POINTS[v] ?? FOCAL_POINTS["center"]!;
                     patch("profile.banner.focalX", point.x);
                     patch("profile.banner.focalY", point.y);
                   }}
                 />
               </Field>
-              <Field label="Blur">
+              <Field label={messages.inspector.blur}>
                 <NumberSlider
                   value={banner.blur}
                   min={0}
@@ -408,7 +429,7 @@ function ProfileInspector() {
                   onChange={(v) => patch("profile.banner.blur", v)}
                 />
               </Field>
-              <Field label="Corner Radius">
+              <Field label={messages.inspector.cornerRadius}>
                 <NumberSlider
                   value={banner.radius}
                   min={0}
@@ -416,18 +437,21 @@ function ProfileInspector() {
                   onChange={(v) => patch("profile.banner.radius", v)}
                 />
               </Field>
-              <Field label="Overlay Type">
+              <Field label={messages.inspector.overlayType}>
                 <Segmented
                   size="sm"
                   value={banner.gradient ? "gradient" : "solid"}
                   options={[
-                    { value: "solid", label: "Solid" },
-                    { value: "gradient", label: "Gradient" },
+                    { value: "solid", label: messages.options.solid },
+                    { value: "gradient", label: messages.options.gradient },
                   ]}
                   onChange={(v) => patch("profile.banner.gradient", v === "gradient")}
                 />
               </Field>
-              <Field label="Overlay Intensity" hint="0 hides the overlay, 1 fully covers the image">
+              <Field
+                label={messages.inspector.overlayIntensity}
+                hint={messages.inspector.overlayHint}
+              >
                 <NumberSlider
                   value={banner.overlay}
                   min={0}
@@ -437,7 +461,7 @@ function ProfileInspector() {
                 />
               </Field>
               <Toggle
-                label="Blend with Page"
+                label={messages.inspector.blendWithPage}
                 checked={banner.blendFade?.enabled ?? false}
                 onChange={(v) =>
                   patch("profile.banner.blendFade", {
@@ -449,7 +473,7 @@ function ProfileInspector() {
               />
               {banner.blendFade?.enabled ? (
                 <>
-                  <Field label="Fade Distance">
+                  <Field label={messages.inspector.fadeDistance}>
                     <NumberSlider
                       value={banner.blendFade?.distance ?? 80}
                       min={24}
@@ -465,7 +489,7 @@ function ProfileInspector() {
                       }
                     />
                   </Field>
-                  <Field label="Fade Strength">
+                  <Field label={messages.inspector.fadeStrength}>
                     <NumberSlider
                       value={banner.blendFade?.strength ?? 1}
                       min={0}
@@ -487,30 +511,30 @@ function ProfileInspector() {
         </Section>
       </div>
 
-      <Section title="Profile">
-        <Field label="Name">
+      <Section title={messages.inspector.profile}>
+        <Field label={messages.inspector.name}>
           <TextInput value={profile.name} onChange={(v) => patch("profile.name", v)} />
         </Field>
-        <Field label="Username">
+        <Field label={messages.inspector.username}>
           <TextInput
             value={profile.username ?? ""}
             onChange={(v) => patch("profile.username", v)}
           />
         </Field>
-        <Field label="Role">
+        <Field label={messages.inspector.role}>
           <TextInput value={profile.role ?? ""} onChange={(v) => patch("profile.role", v)} />
         </Field>
-        <Field label="Company">
+        <Field label={messages.inspector.company}>
           <TextInput value={profile.company ?? ""} onChange={(v) => patch("profile.company", v)} />
         </Field>
-        <Field label="Location">
+        <Field label={messages.inspector.location}>
           <TextInput
             value={profile.location ?? ""}
             onChange={(v) => patch("profile.location", v)}
           />
         </Field>
         <div data-inspector-focus="profile-bio" {...contextualFocusProps("profile-bio")}>
-          <Field label="Bio">
+          <Field label={messages.inspector.bio}>
             <TextArea
               value={profile.description ?? ""}
               onChange={(v) => patch("profile.description", v)}
@@ -519,24 +543,24 @@ function ProfileInspector() {
         </div>
         <div data-inspector-focus="profile-avatar" {...contextualFocusProps("profile-avatar")}>
           <AssetField
-            label="Avatar"
+            label={messages.inspector.avatar}
             accept="image/*"
             value={profile.avatarUrl ?? ""}
             onChange={(v) => patch("profile.avatarUrl", v)}
           />
-          <Field label="Avatar alignment">
+          <Field label={messages.inspector.avatarAlignment}>
             <Segmented
               size="sm"
               value={profile.avatar.align}
               options={[
-                { value: "left", label: "Left" },
-                { value: "center", label: "Center" },
-                { value: "right", label: "Right" },
+                { value: "left", label: messages.options.left },
+                { value: "center", label: messages.options.center },
+                { value: "right", label: messages.options.right },
               ]}
               onChange={(v) => patch("profile.avatar.align", v)}
             />
           </Field>
-          <Field label="Avatar overlap">
+          <Field label={messages.inspector.avatarOverlap}>
             <NumberSlider
               value={profile.avatar.overlap}
               min={0}
@@ -546,26 +570,73 @@ function ProfileInspector() {
             />
           </Field>
           <Toggle
-            label="Avatar shadow"
+            label={messages.inspector.avatarShadow}
             checked={profile.avatar.shadow}
             onChange={(v) => patch("profile.avatar.shadow", v)}
           />
+          <Toggle
+            label={messages.inspector.rim}
+            checked={profile.avatar.rim?.enabled ?? false}
+            onChange={(v) =>
+              patch("profile.avatar.rim", {
+                enabled: v,
+                color: profile.avatar.rim?.color ?? themeColors.accent,
+                width: profile.avatar.rim?.width ?? "medium",
+              })
+            }
+          />
+          {profile.avatar.rim?.enabled ? (
+            <>
+              <Field label={messages.inspector.rimColor}>
+                <ColorInput
+                  value={profile.avatar.rim?.color ?? themeColors.accent}
+                  onChange={(v) =>
+                    patch("profile.avatar.rim", {
+                      enabled: true,
+                      color: v,
+                      width: profile.avatar.rim?.width ?? "medium",
+                    })
+                  }
+                />
+              </Field>
+              <Field label={messages.inspector.rimThickness}>
+                <Segmented
+                  size="sm"
+                  value={profile.avatar.rim?.width ?? "medium"}
+                  options={[
+                    { value: "thin", label: messages.options.thin },
+                    { value: "medium", label: messages.options.medium },
+                    { value: "thick", label: messages.options.thick },
+                  ]}
+                  onChange={(v) =>
+                    patch("profile.avatar.rim", {
+                      enabled: true,
+                      color: profile.avatar.rim?.color ?? themeColors.accent,
+                      width: v,
+                    })
+                  }
+                />
+              </Field>
+            </>
+          ) : null}
         </div>
         <Toggle
-          label="Verified badge"
+          label={messages.inspector.verifiedBadge}
           checked={profile.verified ?? false}
           onChange={(v) => patch("profile.verified", v)}
         />
       </Section>
 
-      <Section title={`Container Layout (${breakpoint})`}>
-        <Field label="Layout Type">
+      <Section
+        title={`${messages.inspector.containerLayout} (${formatBreakpoint(locale, breakpoint)})`}
+      >
+        <Field label={messages.inspector.layoutType}>
           <Segmented
             size="sm"
             value={layoutType}
             options={[
-              { value: "stack", label: "Stack" },
-              { value: "grid", label: "Grid" },
+              { value: "stack", label: messages.options.stack },
+              { value: "grid", label: messages.options.grid },
               { value: "bento", label: "Bento" },
             ]}
             onChange={(v) => {
@@ -590,7 +661,7 @@ function ProfileInspector() {
 
         {layoutType !== "stack" && (
           <>
-            <Field label="Columns">
+            <Field label={messages.inspector.columns}>
               <NumberSlider
                 value={columnsActive}
                 min={1}
@@ -601,7 +672,7 @@ function ProfileInspector() {
                 }}
               />
             </Field>
-            <Field label="Gap">
+            <Field label={messages.inspector.gap}>
               <NumberSlider
                 value={layoutGap}
                 min={4}
@@ -616,14 +687,14 @@ function ProfileInspector() {
                 }}
               />
             </Field>
-            <Field label="Align Items">
+            <Field label={messages.inspector.alignItems}>
               <Segmented
                 size="sm"
                 value={alignItems}
                 options={[
-                  { value: "start", label: "Start" },
-                  { value: "center", label: "Center" },
-                  { value: "stretch", label: "Stretch" },
+                  { value: "start", label: messages.options.start },
+                  { value: "center", label: messages.options.center },
+                  { value: "stretch", label: messages.options.stretch },
                 ]}
                 onChange={(v) => {
                   if (breakpoint === "desktop") {
@@ -634,14 +705,14 @@ function ProfileInspector() {
                 }}
               />
             </Field>
-            <Field label="Justify Items">
+            <Field label={messages.inspector.justifyItems}>
               <Segmented
                 size="sm"
                 value={justifyItems}
                 options={[
-                  { value: "start", label: "Start" },
-                  { value: "center", label: "Center" },
-                  { value: "stretch", label: "Stretch" },
+                  { value: "start", label: messages.options.start },
+                  { value: "center", label: messages.options.center },
+                  { value: "stretch", label: messages.options.stretch },
                 ]}
                 onChange={(v) => {
                   if (breakpoint === "desktop") {
@@ -656,22 +727,81 @@ function ProfileInspector() {
         )}
       </Section>
 
-      <Section title="Tip">
+      <Section title={messages.inspector.tip}>
         <p className="text-xs leading-relaxed text-muted-foreground">
-          Select any element on the canvas to edit it here, or click its text to type directly on
-          the page.
+          {messages.inspector.tipBody}
         </p>
       </Section>
     </div>
   );
 }
 
-function ItemsEditor({ block }: { block: TemplateBlock }) {
+
+const PREVIEW_STATUS_LABELS: Record<SmartLinkPreviewStatus, string> = {
+  full: "Vista previa encontrada",
+  partial: "Vista previa parcial",
+  fallback: "Enlace reconocido",
+  error: "No pudimos obtener una imagen, pero el enlace seguirá funcionando.",
+};
+
+/**
+ * Map a resolved `SmartLinkPreview` onto a Power Editor media-card item using
+ * the existing (authoritative) enrichment helper. Fills `label` (the media-card
+ * title), `description` and `imageUrl` only when empty/default — never
+ * overwriting user-authored content. Pure and deterministic for tests.
+ */
+export function computePowerMediaCardPatch(
+  item: Pick<BlockItem, "label" | "description" | "imageUrl">,
+  preview: SmartLinkPreview,
+): Partial<BlockItem> {
+  const labelIsDefault =
+    !item.label?.trim() ||
+    item.label === "New item" ||
+    item.label === "Link" ||
+    item.label === "Nuevo enlace";
+  const enrichment = computeCardEnrichment(
+    {
+      title: item.label ?? "",
+      titleIsDefault: labelIsDefault,
+      description: item.description,
+      imageUrl: item.imageUrl,
+    },
+    preview,
+  );
+
+  const patch: Partial<BlockItem> = {};
+  if (enrichment.title) patch.label = enrichment.title;
+  if (enrichment.description) patch.description = enrichment.description;
+  if (enrichment.imageUrl) patch.imageUrl = enrichment.imageUrl;
+  return patch;
+}
+
+
+export function ItemsEditor({ block }: { block: TemplateBlock }) {
   const { dispatch } = useStudio();
   const items = block.content.items ?? [];
   const update = (next: BlockItem[]) =>
     dispatch({ type: "patchBlockField", id: block.id, path: "content.items", value: next });
   const supportsMediaPresentation = block.type === "links" || block.type === "buttonGroup";
+
+  const [previewState, setPreviewState] = useState<Record<string, SmartLinkPreviewStatus | "loading">>({});
+
+  const fetchPreview = async (item: BlockItem) => {
+    const url = (item.url ?? "").trim();
+    if (!url) return;
+    setPreviewState((s) => ({ ...s, [item.id]: "loading" }));
+    try {
+      const preview = await resolveSmartLinkPreviewFn({ data: { url } });
+      const patch = computePowerMediaCardPatch(item, preview);
+      if (Object.keys(patch).length > 0) {
+        update(items.map((i) => (i.id === item.id ? { ...i, ...patch } : i)));
+      }
+      setPreviewState((s) => ({ ...s, [item.id]: preview.status }));
+    } catch {
+      setPreviewState((s) => ({ ...s, [item.id]: "error" }));
+    }
+  };
+
 
   return (
     <div className="space-y-3">
@@ -699,6 +829,27 @@ function ItemsEditor({ block }: { block: TemplateBlock }) {
             placeholder="https://…"
             onChange={(v) => update(items.map((i) => (i.id === item.id ? { ...i, url: v } : i)))}
           />
+
+          {item.presentation === "media-card" ? (
+            <div className="space-y-1">
+              <button
+                type="button"
+                onClick={() => fetchPreview(item)}
+                disabled={previewState[item.id] === "loading"}
+                className="w-full rounded-lg border border-border bg-muted/40 px-3 py-2 text-xs font-medium text-foreground transition-colors hover:bg-muted/60 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {previewState[item.id] === "loading"
+                  ? "Obteniendo vista previa…"
+                  : "Obtener vista previa"}
+              </button>
+              {previewState[item.id] && previewState[item.id] !== "loading" ? (
+                <p className="text-[10px] leading-relaxed text-muted-foreground">
+                  {PREVIEW_STATUS_LABELS[previewState[item.id] as SmartLinkPreviewStatus]}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
+
           <TextInput
             value={item.description ?? ""}
             placeholder="Description (optional)"
@@ -728,25 +879,50 @@ function ItemsEditor({ block }: { block: TemplateBlock }) {
                 </select>
               </Field>
               {item.presentation === "media-card" ? (
-                <Field label="Media position">
-                  <Segmented
-                    size="sm"
-                    value={item.mediaPosition ?? "left"}
-                    options={[
-                      { value: "left", label: "Left" },
-                      { value: "right", label: "Right" },
-                    ]}
-                    onChange={(v) =>
-                      update(
-                        items.map((i) =>
-                          i.id === item.id
-                            ? { ...i, mediaPosition: v as BlockItem["mediaPosition"] }
-                            : i,
-                        ) as BlockItem[],
-                      )
-                    }
-                  />
-                </Field>
+                <>
+                  {item.mediaSize !== "100" ? (
+                    <Field label="Posición de imagen">
+                      <Segmented
+                        size="sm"
+                        value={item.mediaPosition ?? "left"}
+                        options={[
+                          { value: "left", label: "Izquierda" },
+                          { value: "right", label: "Derecha" },
+                          { value: "bottom", label: "Abajo" },
+                        ]}
+                        onChange={(v) =>
+                          update(
+                            items.map((i) =>
+                              i.id === item.id
+                                ? { ...i, mediaPosition: v as BlockItem["mediaPosition"] }
+                                : i,
+                            ) as BlockItem[],
+                          )
+                        }
+                      />
+                    </Field>
+                  ) : null}
+                  <Field label="Tamaño de imagen">
+                    <Segmented
+                      size="sm"
+                      value={item.mediaSize ?? "25"}
+                      options={[
+                        { value: "25", label: "25%" },
+                        { value: "50", label: "50%" },
+                        { value: "100", label: "100%" },
+                      ]}
+                      onChange={(v) =>
+                        update(
+                          items.map((i) =>
+                            i.id === item.id
+                              ? { ...i, mediaSize: v as BlockItem["mediaSize"] }
+                              : i,
+                          ) as BlockItem[],
+                        )
+                      }
+                    />
+                  </Field>
+                </>
               ) : null}
               <AssetField
                 label="Item image"
@@ -840,6 +1016,7 @@ function SocialsEditor({ block }: { block: TemplateBlock }) {
 
 function PositioningInspectorSection({ block }: { block: TemplateBlock }) {
   const { state, dispatch, breakpoint } = useStudio();
+  const { locale, messages } = usePowerEditorLocale();
   const field = (path: string, value: unknown) =>
     dispatch({ type: "patchBlockField", id: block.id, path, value });
 
@@ -864,8 +1041,8 @@ function PositioningInspectorSection({ block }: { block: TemplateBlock }) {
 
   return (
     <>
-      <Section title={`Layout Constraints (${breakpoint})`}>
-        <Field label="Max Width">
+      <Section title={`${messages.inspector.layoutConstraints} (${formatBreakpoint(locale, breakpoint)})`}>
+        <Field label={messages.sidebar.maxWidth}>
           <NumberSlider
             value={Number(constraints.maxWidth) || 0}
             min={0}
@@ -875,7 +1052,7 @@ function PositioningInspectorSection({ block }: { block: TemplateBlock }) {
             onChange={(v) => setResponsiveField("constraints.maxWidth", v > 0 ? v : null)}
           />
         </Field>
-        <Field label="Min Height">
+        <Field label={messages.inspector.minHeight}>
           <NumberSlider
             value={Number(constraints.minHeight) || 0}
             min={0}
@@ -885,12 +1062,12 @@ function PositioningInspectorSection({ block }: { block: TemplateBlock }) {
             onChange={(v) => setResponsiveField("constraints.minHeight", v > 0 ? v : null)}
           />
         </Field>
-        <Field label="Aspect Ratio">
+        <Field label={messages.inspector.aspectRatio}>
           <Segmented
             size="sm"
             value={constraints.aspectRatio ?? "auto"}
             options={[
-              { value: "auto", label: "Auto" },
+              { value: "auto", label: messages.options.auto },
               { value: "1/1", label: "1:1" },
               { value: "16/9", label: "16:9" },
               { value: "9/16", label: "9:16" },
@@ -899,26 +1076,26 @@ function PositioningInspectorSection({ block }: { block: TemplateBlock }) {
             onChange={(v) => setResponsiveField("constraints.aspectRatio", v === "auto" ? null : v)}
           />
         </Field>
-        <Field label="Overflow">
+        <Field label={messages.inspector.overflow}>
           <Segmented
             size="sm"
             value={constraints.overflow ?? "visible"}
             options={[
-              { value: "visible", label: "Visible" },
-              { value: "hidden", label: "Hidden" },
-              { value: "clip", label: "Clip" },
-              { value: "auto", label: "Auto" },
+              { value: "visible", label: messages.options.visible },
+              { value: "hidden", label: messages.options.hidden },
+              { value: "clip", label: messages.options.clip },
+              { value: "auto", label: messages.options.auto },
             ]}
             onChange={(v) => setResponsiveField("constraints.overflow", v)}
           />
         </Field>
       </Section>
 
-      <Section title={`Positioning Overrides (${breakpoint})`}>
+      <Section title={`${messages.inspector.positioningOverrides} (${formatBreakpoint(locale, breakpoint)})`}>
         {/* Overlap */}
         <div className="space-y-2 rounded-lg border border-border p-2 bg-muted/10 mb-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold">Visual Overlap</span>
+            <span className="text-xs font-semibold">{messages.inspector.visualOverlap}</span>
             <Toggle
               checked={overlap.enabled ?? false}
               onChange={(v) => setResponsiveField("overlap.enabled", v)}
@@ -926,7 +1103,7 @@ function PositioningInspectorSection({ block }: { block: TemplateBlock }) {
           </div>
           {overlap.enabled && (
             <>
-              <Field label="Overlap Amount">
+              <Field label={messages.inspector.overlapAmount}>
                 <NumberSlider
                   value={overlap.amount ?? 40}
                   min={0}
@@ -936,15 +1113,15 @@ function PositioningInspectorSection({ block }: { block: TemplateBlock }) {
                   onChange={(v) => setResponsiveField("overlap.amount", v)}
                 />
               </Field>
-              <Field label="Direction">
+              <Field label={messages.inspector.direction}>
                 <Segmented
                   size="sm"
                   value={overlap.direction ?? "top"}
                   options={[
-                    { value: "top", label: "Top" },
-                    { value: "bottom", label: "Bottom" },
-                    { value: "left", label: "Left" },
-                    { value: "right", label: "Right" },
+                    { value: "top", label: messages.options.top },
+                    { value: "bottom", label: messages.options.bottom },
+                    { value: "left", label: messages.options.left },
+                    { value: "right", label: messages.options.right },
                   ]}
                   onChange={(v) => setResponsiveField("overlap.direction", v)}
                 />
@@ -955,9 +1132,9 @@ function PositioningInspectorSection({ block }: { block: TemplateBlock }) {
 
         {/* Offsets */}
         <div className="space-y-2 rounded-lg border border-border p-2 bg-muted/10 mb-3">
-          <span className="text-xs font-semibold block">Relative Offset</span>
+          <span className="text-xs font-semibold block">{messages.inspector.relativeOffset}</span>
           <div className="grid grid-cols-2 gap-2">
-            <Field label="Offset X">
+            <Field label={messages.inspector.offsetX}>
               <NumberSlider
                 value={offset.x ?? 0}
                 min={-150}
@@ -967,7 +1144,7 @@ function PositioningInspectorSection({ block }: { block: TemplateBlock }) {
                 onChange={(v) => setResponsiveField("offset.x", v)}
               />
             </Field>
-            <Field label="Offset Y">
+            <Field label={messages.inspector.offsetY}>
               <NumberSlider
                 value={offset.y ?? 0}
                 min={-150}
@@ -981,34 +1158,34 @@ function PositioningInspectorSection({ block }: { block: TemplateBlock }) {
         </div>
 
         {/* Layer order */}
-        <Field label="Z-Index Layer">
+        <Field label={messages.inspector.zIndexLayer}>
           <Segmented
             size="sm"
             value={String(zIndex)}
             options={[
-              { value: "0", label: "Base" },
+              { value: "0", label: messages.options.base },
               { value: "1", label: "L1" },
               { value: "2", label: "L2" },
               { value: "5", label: "L5" },
-              { value: "10", label: "Top" },
+              { value: "10", label: messages.options.top },
             ]}
             onChange={(v) => setResponsiveField("zIndex", Number(v))}
           />
         </Field>
       </Section>
 
-      <Section title={`Behavior Overrides (${breakpoint})`}>
+      <Section title={`${messages.inspector.behaviorOverrides} (${formatBreakpoint(locale, breakpoint)})`}>
         {/* Sticky */}
         <div className="space-y-2 rounded-lg border border-border p-2 bg-muted/10 mb-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold">Sticky Scroll</span>
+            <span className="text-xs font-semibold">{messages.inspector.stickyScroll}</span>
             <Toggle
               checked={sticky.enabled ?? false}
               onChange={(v) => setResponsiveField("sticky.enabled", v)}
             />
           </div>
           {sticky.enabled && (
-            <Field label="Top Offset">
+            <Field label={messages.inspector.topOffset}>
               <NumberSlider
                 value={sticky.top ?? 16}
                 min={0}
@@ -1024,7 +1201,7 @@ function PositioningInspectorSection({ block }: { block: TemplateBlock }) {
         {/* Floating */}
         <div className="space-y-2 rounded-lg border border-border p-2 bg-muted/10">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold">Fixed Floating Position</span>
+            <span className="text-xs font-semibold">{messages.inspector.fixedFloatingPosition}</span>
             <Toggle
               checked={floating.enabled ?? false}
               onChange={(v) => setResponsiveField("floating.enabled", v)}
@@ -1032,21 +1209,21 @@ function PositioningInspectorSection({ block }: { block: TemplateBlock }) {
           </div>
           {floating.enabled && (
             <>
-              <Field label="Anchor Corner">
+              <Field label={messages.inspector.anchorCorner}>
                 <Segmented
                   size="sm"
                   value={floating.anchor ?? "bottom-right"}
                   options={[
-                    { value: "top-left", label: "Top Left" },
-                    { value: "top-right", label: "Top Right" },
-                    { value: "bottom-left", label: "Btm Left" },
-                    { value: "bottom-right", label: "Btm Right" },
-                    { value: "bottom-center", label: "Btm Center" },
+                    { value: "top-left", label: messages.options.topLeft },
+                    { value: "top-right", label: messages.options.topRight },
+                    { value: "bottom-left", label: messages.options.bottomLeft },
+                    { value: "bottom-right", label: messages.options.bottomRight },
+                    { value: "bottom-center", label: messages.options.bottomCenter },
                   ]}
                   onChange={(v) => setResponsiveField("floating.anchor", v)}
                 />
               </Field>
-              <Field label="Edge Distance">
+              <Field label={messages.inspector.edgeDistance}>
                 <NumberSlider
                   value={floating.offset ?? 20}
                   min={0}
@@ -1129,33 +1306,34 @@ function CtaStyleControls({
   defaultRadius: number;
   onField: (path: string, value: unknown) => void;
 }) {
+  const { messages } = usePowerEditorLocale();
   const s = style ?? {};
   const set = (key: keyof CTAStyle, value: unknown) => onField(`${pathPrefix}.${key}`, value);
 
   return (
     <div className="space-y-2">
       <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-        Style
+        {messages.inspector.styleCta}
       </span>
-      <Field label="Background">
+      <Field label={messages.inspector.background}>
         <ColorInput
           value={s.backgroundColor ?? ""}
           onChange={(v) => set("backgroundColor", v === "" ? undefined : v)}
         />
       </Field>
-      <Field label="Text color">
+      <Field label={messages.inspector.textColor}>
         <ColorInput
           value={s.textColor ?? ""}
           onChange={(v) => set("textColor", v === "" ? undefined : v)}
         />
       </Field>
-      <Field label="Font family">
+      <Field label={messages.inspector.fontFamily}>
         <select
           className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground"
           value={s.fontFamily ?? ""}
           onChange={(e) => set("fontFamily", e.target.value === "" ? undefined : e.target.value)}
         >
-          <option value="">Theme default</option>
+          <option value="">{messages.options.theme}</option>
           {FONT_OPTIONS.map((font) => (
             <option key={font.value} value={font.value}>
               {font.label}
@@ -1163,7 +1341,7 @@ function CtaStyleControls({
           ))}
         </select>
       </Field>
-      <Field label="Font size">
+      <Field label={messages.inspector.fontSize}>
         <NumberSlider
           value={s.fontSize ?? 14}
           min={10}
@@ -1172,7 +1350,7 @@ function CtaStyleControls({
           onChange={(v) => set("fontSize", v)}
         />
       </Field>
-      <Field label="Font weight">
+      <Field label={messages.inspector.fontWeight}>
         <Segmented
           size="sm"
           value={String(s.fontWeight ?? 600)}
@@ -1186,13 +1364,13 @@ function CtaStyleControls({
           onChange={(v) => set("fontWeight", Number(v))}
         />
       </Field>
-      <Field label="Border color">
+      <Field label={messages.inspector.borderColor}>
         <ColorInput
           value={s.borderColor ?? ""}
           onChange={(v) => set("borderColor", v === "" ? undefined : v)}
         />
       </Field>
-      <Field label="Border width" hint="0 = theme default">
+      <Field label={messages.inspector.borderWidth} hint={`0 = ${messages.options.theme}`}>
         <NumberSlider
           value={s.borderWidth ?? 0}
           min={0}
@@ -1201,7 +1379,7 @@ function CtaStyleControls({
           onChange={(v) => set("borderWidth", v)}
         />
       </Field>
-      <Field label="Radius">
+      <Field label={messages.inspector.radius}>
         <NumberSlider
           value={s.radius ?? defaultRadius}
           min={0}
@@ -1210,7 +1388,7 @@ function CtaStyleControls({
           onChange={(v) => set("radius", v)}
         />
       </Field>
-      <Field label="Padding X">
+      <Field label={messages.inspector.paddingX}>
         <NumberSlider
           value={s.paddingX ?? 20}
           min={0}
@@ -1219,7 +1397,7 @@ function CtaStyleControls({
           onChange={(v) => set("paddingX", v)}
         />
       </Field>
-      <Field label="Padding Y">
+      <Field label={messages.inspector.paddingY}>
         <NumberSlider
           value={s.paddingY ?? 10}
           min={0}
@@ -1229,7 +1407,7 @@ function CtaStyleControls({
         />
       </Field>
       <GhostButton onClick={() => onField(pathPrefix, {})} className="w-full justify-center">
-        Reset style
+        {messages.inspector.resetStyle}
       </GhostButton>
     </div>
   );
@@ -1237,6 +1415,7 @@ function CtaStyleControls({
 
 function HeroBlockInspector({ block }: { block: TemplateBlock }) {
   const { state, dispatch, breakpoint } = useStudio();
+  const { locale, messages } = usePowerEditorLocale();
   const field = (path: string, value: unknown) =>
     dispatch({ type: "patchBlockField", id: block.id, path, value });
 
@@ -1284,12 +1463,12 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
     <div className="space-y-4">
       {/* Block Header */}
       <Section
-        title="Hero / Banner"
+        title={messages.inspector.heroBanner}
         action={
           <div className="flex items-center gap-1">
             <button
               type="button"
-              title="Duplicate"
+              title={messages.inspector.duplicate}
               onClick={() => dispatch({ type: "duplicateBlock", id: block.id })}
               className="rounded p-1 text-muted-foreground hover:text-foreground"
             >
@@ -1297,7 +1476,7 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
             </button>
             <button
               type="button"
-              title="Delete"
+              title={messages.inspector.delete}
               onClick={() => dispatch({ type: "deleteBlock", id: block.id })}
               className="rounded p-1 text-muted-foreground hover:text-destructive"
             >
@@ -1306,15 +1485,15 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
           </div>
         }
       >
-        <Field label="Hero Variant">
+        <Field label={messages.inspector.heroVariant}>
           <Segmented
             size="sm"
             value={block.variant ?? "centered"}
             options={[
-              { value: "centered", label: "Centered" },
-              { value: "split", label: "Split" },
-              { value: "editorial", label: "Editorial" },
-              { value: "full-image", label: "Full Image" },
+              { value: "centered", label: messages.inspector.centered },
+              { value: "split", label: messages.inspector.split },
+              { value: "editorial", label: messages.inspector.editorial },
+              { value: "full-image", label: messages.inspector.fullImage },
             ]}
             onChange={(v) => dispatch({ type: "updateBlock", id: block.id, patch: { variant: v } })}
           />
@@ -1322,9 +1501,9 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
       </Section>
 
       {/* Content Section */}
-      <Section title="Content">
+      <Section title={messages.inspector.content}>
         <div data-inspector-focus="hero-eyebrow" {...contextualFocusProps("hero-eyebrow")}>
-          <Field label="Eyebrow">
+          <Field label={messages.inspector.eyebrow}>
             <TextInput
               value={content.eyebrow ?? ""}
               onChange={(v) => field("content.eyebrow", v)}
@@ -1332,12 +1511,12 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
           </Field>
         </div>
         <div data-inspector-focus="hero-title" {...contextualFocusProps("hero-title")}>
-          <Field label="Title">
+          <Field label={messages.inspector.title}>
             <TextInput value={content.title ?? ""} onChange={(v) => field("content.title", v)} />
           </Field>
         </div>
         <div data-inspector-focus="hero-subtitle" {...contextualFocusProps("hero-subtitle")}>
-          <Field label="Subtitle">
+          <Field label={messages.inspector.subtitle}>
             <TextInput
               value={content.subtitle ?? ""}
               onChange={(v) => field("content.subtitle", v)}
@@ -1345,7 +1524,7 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
           </Field>
         </div>
         <div data-inspector-focus="hero-description" {...contextualFocusProps("hero-description")}>
-          <Field label="Description">
+          <Field label={messages.inspector.description}>
             <TextArea
               value={content.description ?? ""}
               onChange={(v) => field("content.description", v)}
@@ -1357,14 +1536,14 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
         {/* Badge Sub-section */}
         <div className="mt-3 space-y-2 rounded-lg border border-border p-2 bg-muted/20">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold">Verification Badge</span>
+            <span className="text-xs font-semibold">{messages.inspector.verifiedBadge}</span>
             <Toggle
               checked={badge.enabled ?? false}
               onChange={(v) => field("content.badge.enabled", v)}
             />
           </div>
           {badge.enabled && (
-            <Field label="Badge Label">
+            <Field label={messages.inspector.badgeLabel}>
               <TextInput
                 value={badge.label ?? ""}
                 onChange={(v) => field("content.badge.label", v)}
@@ -1375,14 +1554,14 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
       </Section>
 
       {/* Avatar Section */}
-      <Section title="Avatar">
+      <Section title={messages.inspector.avatar}>
         <AssetField
-          label="Avatar Image"
+          label={messages.inspector.avatar}
           accept="image/*"
           value={avatar.url ?? ""}
           onChange={(v) => field("content.avatar.url", v)}
         />
-        <Field label="Avatar Size">
+        <Field label={messages.inspector.avatarSize}>
           <NumberSlider
             value={currentAvatarSize}
             min={48}
@@ -1391,7 +1570,7 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
             onChange={(v) => setResponsiveField("avatarSize", v)}
           />
         </Field>
-        <Field label="Avatar Overlap">
+        <Field label={messages.inspector.avatarOverlap}>
           <NumberSlider
             value={avatar.overlap ?? 48}
             min={0}
@@ -1400,7 +1579,7 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
             onChange={(v) => field("content.avatar.overlap", v)}
           />
         </Field>
-        <Field label="Border Width">
+        <Field label={messages.inspector.borderWidth}>
           <NumberSlider
             value={avatar.borderWidth ?? 4}
             min={0}
@@ -1409,7 +1588,7 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
             onChange={(v) => field("content.avatar.borderWidth", v)}
           />
         </Field>
-        <Field label="Shadow">
+        <Field label={messages.inspector.shadow}>
           <Segmented
             size="sm"
             value={
@@ -1420,9 +1599,9 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
                 : (avatar.shadow ?? "soft")
             }
             options={[
-              { value: "none", label: "None" },
-              { value: "soft", label: "Soft" },
-              { value: "hard", label: "Hard" },
+              { value: "none", label: messages.options.none },
+              { value: "soft", label: messages.options.soft },
+              { value: "hard", label: messages.options.hard },
             ]}
             onChange={(v) => field("content.avatar.shadow", v)}
           />
@@ -1430,20 +1609,20 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
       </Section>
 
       {/* Image Section */}
-      <Section title="Image">
+      <Section title={messages.inspector.image}>
         {/* Hero foreground/media image controls — contextual sub-target of the
             selected Hero. Wrapped exactly (not the whole Image section) so the
             exact hero-image group centers in the Inspector. */}
         <div data-inspector-focus="hero-image" {...contextualFocusProps("hero-image")}>
           <AssetField
-            label="Top Banner Image"
+            label={messages.inspector.topBannerImage}
             accept="image/*"
             value={bannerImage.url ?? ""}
             onChange={(v) => field("content.bannerImage.url", v)}
           />
           {bannerImage.url && (
             <>
-              <Field label="Banner Blur">
+              <Field label={messages.inspector.bannerBlur}>
                 <NumberSlider
                   value={bannerImage.blur ?? 0}
                   min={0}
@@ -1452,18 +1631,18 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
                   onChange={(v) => field("content.bannerImage.blur", v)}
                 />
               </Field>
-              <Field label="Fit">
+              <Field label={messages.inspector.fit}>
                 <Segmented
                   size="sm"
                   value={bannerImage.fit ?? "cover"}
                   options={[
-                    { value: "cover", label: "Cover" },
-                    { value: "contain", label: "Contain" },
+                    { value: "cover", label: messages.options.cover },
+                    { value: "contain", label: messages.options.contain },
                   ]}
                   onChange={(v) => field("content.bannerImage.fit", v)}
                 />
               </Field>
-              <Field label="Position">
+              <Field label={messages.inspector.position}>
                 <PositionGrid
                   value={bannerImage.position ?? "center"}
                   onChange={(v) => field("content.bannerImage.position", v)}
@@ -1475,27 +1654,27 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
       </Section>
 
       {/* Layout Section */}
-      <Section title={`Layout (${breakpoint})`}>
-        <Field label="Alignment">
+      <Section title={`${messages.inspector.layout} (${formatBreakpoint(locale, breakpoint)})`}>
+        <Field label={messages.inspector.alignment}>
           <Segmented
             size="sm"
             value={currentAlign}
             options={[
-              { value: "left", label: "Left" },
-              { value: "center", label: "Center" },
-              { value: "right", label: "Right" },
+              { value: "left", label: messages.options.left },
+              { value: "center", label: messages.options.center },
+              { value: "right", label: messages.options.right },
             ]}
             onChange={(v) => setResponsiveField("align", v)}
           />
         </Field>
-        <Field label="Width">
+        <Field label={messages.inspector.width}>
           <Segmented
             size="sm"
             value={block.layout.trueFullBleed ? "bleed" : (block.layout.width ?? "content")}
             options={[
-              { value: "content", label: "Contained" },
-              { value: "full", label: "Full Width" },
-              { value: "bleed", label: "Full Bleed" },
+              { value: "content", label: messages.options.contained },
+              { value: "full", label: messages.options.full },
+              { value: "bleed", label: messages.options.fullBleed },
             ]}
             onChange={(v) => {
               if (v === "bleed") {
@@ -1508,7 +1687,7 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
             }}
           />
         </Field>
-        <Field label="Hero Height (Min Height)">
+        <Field label={messages.inspector.heroHeight}>
           <NumberSlider
             value={currentMinHeight}
             min={200}
@@ -1518,13 +1697,13 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
             onChange={(v) => setResponsiveField("minHeight", v)}
           />
         </Field>
-        <Field label="CTA Buttons Direction">
+        <Field label={messages.inspector.ctaButtonsDirection}>
           <Segmented
             size="sm"
             value={currentCtaDirection}
             options={[
-              { value: "row", label: "Row" },
-              { value: "column", label: "Column" },
+              { value: "row", label: messages.options.row },
+              { value: "column", label: messages.options.column },
             ]}
             onChange={(v) => setResponsiveField("ctaDirection", v)}
           />
@@ -1533,14 +1712,14 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
 
       {/* Background Section — contextual sub-target of the selected Hero */}
       <div data-inspector-focus="hero-background" {...contextualFocusProps("hero-background")}>
-        <Section title="Background">
-          <Field label="Background Type">
+        <Section title={messages.inspector.background}>
+          <Field label={messages.inspector.backgroundType}>
             <Segmented
               size="sm"
               value={backgroundType}
               options={[
-                { value: "solid", label: "Solid" },
-                { value: "gradient", label: "Gradient" },
+                { value: "solid", label: messages.options.solid },
+                { value: "gradient", label: messages.options.gradient },
               ]}
               onChange={(v) => {
                 if (v === "gradient") {
@@ -1557,7 +1736,7 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
           </Field>
           {backgroundType === "solid" ? (
             <Field
-              label="Solid Color"
+              label={messages.inspector.solidColor}
               action={
                 block.style.background !== undefined && (
                   <button
@@ -1565,7 +1744,7 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
                     onClick={() => field("style.background", undefined)}
                     className="text-[10px] text-destructive hover:underline font-semibold"
                   >
-                    Reset
+                    {messages.inspector.reset}
                   </button>
                 )
               }
@@ -1577,19 +1756,19 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
             </Field>
           ) : (
             <>
-              <Field label="From Color">
+              <Field label={messages.inspector.fromColor}>
                 <ColorInput
                   value={backgroundGradient?.from ?? state.config.theme.colors.primary}
                   onChange={(v) => field("style.backgroundGradient.from", v)}
                 />
               </Field>
-              <Field label="To Color">
+              <Field label={messages.inspector.toColor}>
                 <ColorInput
                   value={backgroundGradient?.to ?? state.config.theme.colors.accent}
                   onChange={(v) => field("style.backgroundGradient.to", v)}
                 />
               </Field>
-              <Field label="Angle">
+              <Field label={messages.inspector.angle}>
                 <NumberSlider
                   value={backgroundGradient?.angle ?? 180}
                   min={0}
@@ -1602,14 +1781,14 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
             </>
           )}
           <AssetField
-            label="Full Background Image"
+            label={messages.inspector.fullBackgroundImage}
             accept="image/*"
             value={backgroundImage.url ?? ""}
             onChange={(v) => field("content.backgroundImage.url", v)}
           />
           {backgroundImage.url && (
             <>
-              <Field label="Background Blur">
+              <Field label={messages.inspector.backgroundBlur}>
                 <NumberSlider
                   value={backgroundImage.blur ?? 0}
                   min={0}
@@ -1618,18 +1797,18 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
                   onChange={(v) => field("content.backgroundImage.blur", v)}
                 />
               </Field>
-              <Field label="Fit">
+              <Field label={messages.inspector.fit}>
                 <Segmented
                   size="sm"
                   value={backgroundImage.fit ?? "cover"}
                   options={[
-                    { value: "cover", label: "Cover" },
-                    { value: "contain", label: "Contain" },
+                    { value: "cover", label: messages.options.cover },
+                    { value: "contain", label: messages.options.contain },
                   ]}
                   onChange={(v) => field("content.backgroundImage.fit", v)}
                 />
               </Field>
-              <Field label="Position">
+              <Field label={messages.inspector.position}>
                 <PositionGrid
                   value={backgroundImage.position ?? "center"}
                   onChange={(v) => field("content.backgroundImage.position", v)}
@@ -1637,7 +1816,7 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
               </Field>
             </>
           )}
-          <Field label="Corner Radius">
+          <Field label={messages.inspector.cornerRadius}>
             <NumberSlider
               value={block.style.radius ?? 24}
               min={0}
@@ -1650,19 +1829,19 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
 
       {/* Overlay / Scrim Section — contextual sub-target of the selected Hero */}
       <div data-inspector-focus="hero-overlay" {...contextualFocusProps("hero-overlay")}>
-        <Section title="Overlay">
-          <Field label="Overlay Type">
+        <Section title={messages.inspector.overlay}>
+          <Field label={messages.inspector.overlayType}>
             <Segmented
               size="sm"
               value={overlay.type ?? "gradient"}
               options={[
-                { value: "solid", label: "Solid" },
-                { value: "gradient", label: "Gradient" },
+                { value: "solid", label: messages.options.solid },
+                { value: "gradient", label: messages.options.gradient },
               ]}
               onChange={(v) => field("style.overlay.type", v)}
             />
           </Field>
-          <Field label="Intensity" hint="0 hides the overlay, 1 fully covers the image">
+          <Field label={messages.inspector.intensity} hint={messages.inspector.overlayHint}>
             <NumberSlider
               value={overlay.opacity ?? 0.4}
               min={0}
@@ -1672,13 +1851,13 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
             />
           </Field>
           {overlay.type === "gradient" && (
-            <Field label="Gradient Direction">
+            <Field label={messages.inspector.gradientDirection}>
               <Segmented
                 size="sm"
                 value={overlay.direction ?? "to-top"}
                 options={[
-                  { value: "to-top", label: "To Top" },
-                  { value: "to-bottom", label: "To Bottom" },
+                  { value: "to-top", label: messages.options.toTop },
+                  { value: "to-bottom", label: messages.options.toBottom },
                 ]}
                 onChange={(v) => field("style.overlay.direction", v)}
               />
@@ -1689,26 +1868,26 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
 
       {/* CTA / Button — contextual sub-target of the selected Hero */}
       <div data-inspector-focus="hero-cta" {...contextualFocusProps("hero-cta")}>
-        <Section title="CTA / Button">
-          <Field label="Content">
-            <span className="text-xs text-muted-foreground">Label, link and icon</span>
+        <Section title={messages.inspector.ctaButton}>
+          <Field label={messages.inspector.content}>
+            <span className="text-xs text-muted-foreground">{messages.inspector.ctaContentHint}</span>
           </Field>
           {/* Primary CTA */}
           <div className="space-y-2 rounded-lg border border-border p-2 bg-muted/10 mb-2">
-            <span className="text-xs font-bold text-foreground">Primary CTA</span>
-            <Field label="Label">
+            <span className="text-xs font-bold text-foreground">{messages.inspector.primaryCta}</span>
+            <Field label={messages.inspector.label}>
               <TextInput
                 value={primaryCTA.label ?? ""}
                 onChange={(v) => field("content.primaryCTA.label", v)}
               />
             </Field>
-            <Field label="URL">
+            <Field label={messages.inspector.url}>
               <TextInput
                 value={primaryCTA.url ?? ""}
                 onChange={(v) => field("content.primaryCTA.url", v)}
               />
             </Field>
-            <Field label="Icon">
+            <Field label={messages.inspector.icon}>
               <Segmented
                 size="sm"
                 value={primaryCTA.icon ?? "mail"}
@@ -1731,20 +1910,20 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
 
           {/* Secondary CTA */}
           <div className="space-y-2 rounded-lg border border-border p-2 bg-muted/10">
-            <span className="text-xs font-bold text-foreground">Secondary CTA</span>
-            <Field label="Label">
+            <span className="text-xs font-bold text-foreground">{messages.inspector.secondaryCta}</span>
+            <Field label={messages.inspector.label}>
               <TextInput
                 value={secondaryCTA.label ?? ""}
                 onChange={(v) => field("content.secondaryCTA.label", v)}
               />
             </Field>
-            <Field label="URL">
+            <Field label={messages.inspector.url}>
               <TextInput
                 value={secondaryCTA.url ?? ""}
                 onChange={(v) => field("content.secondaryCTA.url", v)}
               />
             </Field>
-            <Field label="Icon">
+            <Field label={messages.inspector.icon}>
               <Segmented
                 size="sm"
                 value={secondaryCTA.icon ?? "arrow-right"}
@@ -1770,7 +1949,7 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
       <PositioningInspectorSection block={block} />
 
       {/* Visibility */}
-      <Section title="Visibility">
+      <Section title={messages.inspector.visibility}>
         <div className="grid grid-cols-3 gap-2">
           {(
             [
@@ -1790,7 +1969,7 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
               }
             >
               <IconCmp className="h-4 w-4" />
-              {key}
+              {formatBreakpoint(locale, key)}
             </button>
           ))}
         </div>
@@ -2326,19 +2505,20 @@ function TimelineBlockInspector({ block }: { block: TemplateBlock }) {
 
 function FeaturedMediaBlockInspector({ block }: { block: TemplateBlock }) {
   const { dispatch } = useStudio();
+  const { messages } = usePowerEditorLocale();
   const c = block.content;
   const field = (path: string, value: unknown) =>
     dispatch({ type: "patchBlockField", id: block.id, path, value });
 
   return (
     <div className="space-y-4">
-      <Section title="Media Source">
-        <Field label="Media Type">
+      <Section title={messages.inspector.mediaSource}>
+        <Field label={messages.inspector.mediaType}>
           <Segmented
             size="sm"
             value={c.mediaType ?? "image"}
             options={[
-              { value: "image", label: "Image" },
+              { value: "image", label: messages.options.image },
               { value: "video", label: "Video" },
             ]}
             onChange={(v) => field("content.mediaType", v)}
@@ -2346,7 +2526,7 @@ function FeaturedMediaBlockInspector({ block }: { block: TemplateBlock }) {
         </Field>
         {c.mediaType === "video" ? (
           <>
-            <Field label="Video Provider">
+            <Field label={messages.inspector.videoProvider}>
               <Segmented
                 size="sm"
                 value={c.videoProvider ?? "youtube"}
@@ -2357,7 +2537,7 @@ function FeaturedMediaBlockInspector({ block }: { block: TemplateBlock }) {
                 onChange={(v) => field("content.videoProvider", v)}
               />
             </Field>
-            <Field label="Video ID or URL">
+            <Field label={messages.inspector.videoIdOrUrl}>
               <TextInput
                 value={c.videoId ?? ""}
                 placeholder="e.g. dQw4w9WgXcQ"
@@ -2367,7 +2547,7 @@ function FeaturedMediaBlockInspector({ block }: { block: TemplateBlock }) {
           </>
         ) : (
           <AssetField
-            label="Image"
+            label={messages.inspector.image}
             accept="image/*"
             value={c.imageUrl ?? ""}
             onChange={(v) => field("content.imageUrl", v)}
@@ -2375,25 +2555,25 @@ function FeaturedMediaBlockInspector({ block }: { block: TemplateBlock }) {
         )}
       </Section>
 
-      <Section title="Media Content">
-        <Field label="Title">
+      <Section title={messages.inspector.mediaContent}>
+        <Field label={messages.inspector.title}>
           <TextInput value={c.title ?? ""} onChange={(v) => field("content.title", v)} />
         </Field>
-        <Field label="Description">
+        <Field label={messages.inspector.description}>
           <TextArea
             value={c.description ?? ""}
             onChange={(v) => field("content.description", v)}
             rows={3}
           />
         </Field>
-        <Field label="CTA Label">
+        <Field label={messages.inspector.ctaLabel}>
           <TextInput
             value={c.ctaLabel ?? ""}
             placeholder="Button label"
             onChange={(v) => field("content.ctaLabel", v)}
           />
         </Field>
-        <Field label="CTA URL">
+        <Field label={messages.inspector.ctaUrl}>
           <TextInput
             value={c.ctaUrl ?? ""}
             placeholder="https://…"
@@ -3140,8 +3320,168 @@ function BottomNavBlockInspector({ block }: { block: TemplateBlock }) {
   );
 }
 
+function TrustBlockInspector({ block }: { block: TemplateBlock }) {
+  const { dispatch } = useStudio();
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const badges = (block.content.badges ?? []) as TrustBadge[];
+  const enabled = block.content.enabled !== false;
+  const setSignals = (next: TrustBadge[]) =>
+    dispatch({ type: "patchBlockField", id: block.id, path: "content.badges", value: next });
+  const setEnabled = (v: boolean) =>
+    dispatch({ type: "patchBlockField", id: block.id, path: "content.enabled", value: v });
+  const activeCount = badges.length;
+  const atMax = activeCount >= MAX_TRUST_SIGNALS;
+  const addSignal = (type: TrustSignalType) => {
+    if (atMax) return;
+    const signal: TrustBadge = { id: uid("sig"), type };
+    const v = defaultTrustSignalValue(type);
+    if (v !== undefined) signal.value = v;
+    setSignals([...badges, signal]);
+    setPickerOpen(false);
+  };
+  const removeSignal = (id: string) => setSignals(badges.filter((s) => s.id !== id));
+  const updateSignal = (id: string, patch: Partial<TrustBadge>) =>
+    setSignals(badges.map((s) => (s.id === id ? { ...s, ...patch } : s)));
+  const activeTypes = new Set(badges.map((b) => b.type).filter(Boolean));
+  const available = USER_SELECTABLE_SIGNALS.filter((d) => !activeTypes.has(d.type));
+
+  return (
+    <Section title="Confianza">
+      <Toggle
+        label="Mostrar señales de confianza"
+        checked={enabled}
+        onChange={setEnabled}
+      />
+      <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
+        <span className="text-xs font-medium text-foreground">Señales activas</span>
+        <span className="text-xs text-muted-foreground">
+          {activeCount}/{MAX_TRUST_SIGNALS}
+        </span>
+      </div>
+
+      {badges.map((signal) => {
+        const def = signal.type ? getTrustSignalDefinition(signal.type) : undefined;
+        return (
+          <div key={signal.id} className="space-y-2 rounded-lg border border-border p-2">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs font-medium text-foreground">
+                {def?.label ?? signal.label ?? signal.type}
+              </span>
+              <button
+                type="button"
+                title="Eliminar"
+                aria-label="Eliminar señal"
+                onClick={() => removeSignal(signal.id)}
+                className="rounded p-0.5 text-muted-foreground transition hover:text-destructive"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </div>
+
+            {signal.type === "response_time" && (
+              <Field label="Tiempo habitual de respuesta">
+                <NumberSlider
+                  value={typeof signal.value === "number" ? signal.value : 2}
+                  min={1}
+                  max={72}
+                  suffix=" h"
+                  onChange={(v) => updateSignal(signal.id, { value: v })}
+                />
+              </Field>
+            )}
+            {signal.type === "rating" && (
+              <>
+                <Field label="Valoración">
+                  <NumberSlider
+                    value={typeof signal.value === "number" ? signal.value : 4.8}
+                    min={1}
+                    max={5}
+                    step={0.1}
+                    onChange={(v) => updateSignal(signal.id, { value: v })}
+                  />
+                </Field>
+                <Field label="Número de reseñas">
+                  <NumberSlider
+                    value={signal.reviewCount ?? 0}
+                    min={0}
+                    max={100000}
+                    onChange={(v) => updateSignal(signal.id, { reviewCount: v })}
+                  />
+                </Field>
+              </>
+            )}
+            {signal.type === "experience" && (
+              <Field label="Años de experiencia">
+                <NumberSlider
+                  value={typeof signal.value === "number" ? signal.value : 5}
+                  min={1}
+                  max={80}
+                  onChange={(v) => updateSignal(signal.id, { value: v })}
+                />
+              </Field>
+            )}
+            {signal.type === "customers_served" && (
+              <Field label="Clientes atendidos">
+                <NumberSlider
+                  value={typeof signal.value === "number" ? signal.value : 100}
+                  min={1}
+                  max={1000000}
+                  onChange={(v) => updateSignal(signal.id, { value: v })}
+                />
+              </Field>
+            )}
+            {(signal.type === "certification" ||
+              signal.type === "award" ||
+              signal.type === "guarantee") && (
+              <Field label={def?.label ?? "Texto"}>
+                <TextInput
+                  value={typeof signal.value === "string" ? signal.value : ""}
+                  onChange={(v) => updateSignal(signal.id, { value: v })}
+                  placeholder={signal.type === "award" ? "Escribe el reconocimiento" : ""}
+                />
+              </Field>
+            )}
+          </div>
+        );
+      })}
+
+      <button
+        type="button"
+        onClick={() => setPickerOpen((v) => !v)}
+        disabled={atMax}
+        aria-disabled={atMax}
+        className="inline-flex w-full items-center justify-center gap-1 rounded-lg border border-dashed border-border px-3 py-2 text-xs text-muted-foreground transition hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        <Plus className="h-3.5 w-3.5" />
+        + Añadir señal
+      </button>
+      {atMax && (
+        <p className="text-[11px] text-muted-foreground">
+          Puedes mostrar hasta 4 señales de confianza.
+        </p>
+      )}
+
+      {pickerOpen && !atMax && (
+        <div className="space-y-1">
+          {available.map((d) => (
+            <button
+              key={d.type}
+              type="button"
+              onClick={() => addSignal(d.type)}
+              className="flex w-full items-center justify-between rounded-lg border border-border px-3 py-2 text-left text-xs text-foreground transition hover:bg-accent"
+            >
+              {d.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </Section>
+  );
+}
+
 function BlockInspector({ block }: { block: TemplateBlock }) {
   const { state, dispatch, breakpoint, tier } = useStudio();
+  const { locale, messages } = usePowerEditorLocale();
   const motionLocked = isCapabilityLocked(tier, "advanced_motion");
   const duplicateLocked = isAssetLocked("block", block.type, tier);
   if (block.type === "hero") {
@@ -3193,7 +3533,7 @@ function BlockInspector({ block }: { block: TemplateBlock }) {
           <div className="flex items-center gap-1">
             <button
               type="button"
-              title={duplicateLocked ? "Duplicate — Disponible en Pro" : "Duplicate"}
+              title={duplicateLocked ? messages.inspector.duplicatePro : messages.inspector.duplicate}
               aria-disabled={duplicateLocked}
               onClick={() => {
                 if (duplicateLocked) return;
@@ -3209,7 +3549,7 @@ function BlockInspector({ block }: { block: TemplateBlock }) {
             </button>
             <button
               type="button"
-              title="Delete"
+              title={messages.inspector.delete}
               onClick={() => dispatch({ type: "deleteBlock", id: block.id })}
               className="rounded p-1 text-muted-foreground hover:text-destructive"
             >
@@ -3219,7 +3559,7 @@ function BlockInspector({ block }: { block: TemplateBlock }) {
         }
       >
         {definition && definition.variants.length > 1 && (
-          <Field label="Variant">
+          <Field label={messages.inspector.variant}>
             <Segmented
               size="sm"
               value={block.variant}
@@ -3231,6 +3571,7 @@ function BlockInspector({ block }: { block: TemplateBlock }) {
           </Field>
         )}
         {block.type === "stats" && <StatsBlockInspector block={block} />}
+        {block.type === "trust" && <TrustBlockInspector block={block} />}
         {block.type === "services" && <ServicesBlockInspector block={block} />}
         {block.type === "testimonials" && <TestimonialsBlockInspector block={block} />}
         {block.type === "pricing" && <PricingBlockInspector block={block} />}
@@ -3251,6 +3592,7 @@ function BlockInspector({ block }: { block: TemplateBlock }) {
         {block.type === "bottomNav" && <BottomNavBlockInspector block={block} />}
 
         {block.type !== "stats" &&
+          block.type !== "trust" &&
           block.type !== "services" &&
           block.type !== "testimonials" &&
           block.type !== "pricing" &&
@@ -3271,7 +3613,7 @@ function BlockInspector({ block }: { block: TemplateBlock }) {
           block.type !== "bottomNav" && (
             <>
               {has("title") && (
-                <Field label="Title">
+                <Field label={messages.inspector.title}>
                   <TextInput
                     value={content.title ?? ""}
                     onChange={(v) => field("content.title", v)}
@@ -3279,7 +3621,7 @@ function BlockInspector({ block }: { block: TemplateBlock }) {
                 </Field>
               )}
               {has("subtitle") && (
-                <Field label="Subtitle">
+                <Field label={messages.inspector.subtitle}>
                   <TextInput
                     value={content.subtitle ?? ""}
                     onChange={(v) => field("content.subtitle", v)}
@@ -3287,7 +3629,7 @@ function BlockInspector({ block }: { block: TemplateBlock }) {
                 </Field>
               )}
               {has("body") && (
-                <Field label="Text">
+                <Field label={messages.inspector.text}>
                   <TextArea
                     value={content.body ?? ""}
                     onChange={(v) => field("content.body", v)}
@@ -3296,7 +3638,7 @@ function BlockInspector({ block }: { block: TemplateBlock }) {
                 </Field>
               )}
               {has("label") && (
-                <Field label="Button label">
+                <Field label={messages.inspector.buttonLabel}>
                   <TextInput
                     value={content.label ?? ""}
                     onChange={(v) => field("content.label", v)}
@@ -3304,20 +3646,20 @@ function BlockInspector({ block }: { block: TemplateBlock }) {
                 </Field>
               )}
               {has("url") && (
-                <Field label="URL">
+                <Field label={messages.inspector.url}>
                   <TextInput value={content.url ?? ""} onChange={(v) => field("content.url", v)} />
                 </Field>
               )}
               {has("imageUrl") && (
                 <AssetField
-                  label="Image"
+                  label={messages.inspector.image}
                   accept="image/*"
                   value={content.imageUrl ?? ""}
                   onChange={(v) => field("content.imageUrl", v)}
                 />
               )}
               {has("videoId") && (
-                <Field label="Video ID or URL">
+                <Field label={messages.inspector.videoIdOrUrl}>
                   <TextInput
                     value={content.videoId ?? ""}
                     onChange={(v) => {
@@ -3334,14 +3676,14 @@ function BlockInspector({ block }: { block: TemplateBlock }) {
               )}
               {has("fileName") && (
                 <>
-                  <Field label="File name">
+                  <Field label={messages.inspector.fileName}>
                     <TextInput
                       value={content.fileName ?? ""}
                       onChange={(v) => field("content.fileName", v)}
                     />
                   </Field>
                   <AssetField
-                    label="File"
+                    label={messages.inspector.file}
                     accept="*/*"
                     value={content.url ?? ""}
                     onChange={(v, asset) => {
@@ -3367,53 +3709,53 @@ function BlockInspector({ block }: { block: TemplateBlock }) {
         block.type !== "carousel" &&
         block.type !== "tabs" &&
         block.type !== "bottomNav" && (
-          <Section title="Items">
+          <Section title={messages.inspector.items}>
             <ItemsEditor block={block} />
           </Section>
         )}
       {content.socials && (
-        <Section title="Socials">
+        <Section title={messages.inspector.socials}>
           <SocialsEditor block={block} />
         </Section>
       )}
 
-      <Section title={`Layout (${breakpoint})`}>
-        <Field label="Alignment">
+      <Section title={`${messages.inspector.layout} (${formatBreakpoint(locale, breakpoint)})`}>
+        <Field label={messages.inspector.alignment}>
           <Segmented
             size="sm"
             value={currentAlign}
             options={[
-              { value: "left", label: "Left" },
-              { value: "center", label: "Center" },
-              { value: "right", label: "Right" },
+              { value: "left", label: messages.options.left },
+              { value: "center", label: messages.options.center },
+              { value: "right", label: messages.options.right },
             ]}
             onChange={(v) => setResponsiveField("align", v)}
           />
         </Field>
-        <Field label="Width">
+        <Field label={messages.inspector.width}>
           <Segmented
             size="sm"
             value={block.layout.width ?? "content"}
             options={[
-              { value: "content", label: "Content" },
-              { value: "full", label: "Full" },
+              { value: "content", label: messages.options.content },
+              { value: "full", label: messages.options.full },
             ]}
             onChange={(v) => field("layout.width", v)}
           />
         </Field>
-        <Field label="Grid span">
+        <Field label={messages.inspector.gridSpan}>
           <Segmented
             size="sm"
             value={String(block.layout.span ?? 2)}
             options={[
-              { value: "1", label: "Half" },
-              { value: "2", label: "Full" },
+              { value: "1", label: messages.options.half },
+              { value: "2", label: messages.options.full },
             ]}
             onChange={(v) => field("layout.span", Number(v))}
           />
         </Field>
         {block.type === "buttonGroup" ? (
-          <Field label="Button columns">
+          <Field label={messages.inspector.buttonColumns}>
             <NumberSlider
               value={Math.max(1, Math.min(2, block.layout.columns ?? 2))}
               min={1}
@@ -3425,7 +3767,7 @@ function BlockInspector({ block }: { block: TemplateBlock }) {
         ) : null}
         {isGridOrBento && (
           <>
-            <Field label="Column Span">
+            <Field label={messages.inspector.columnSpan}>
               <NumberSlider
                 value={currentColSpan}
                 min={1}
@@ -3434,7 +3776,7 @@ function BlockInspector({ block }: { block: TemplateBlock }) {
                 onChange={(v) => setResponsiveField("colSpan", v)}
               />
             </Field>
-            <Field label="Row Span">
+            <Field label={messages.inspector.rowSpan}>
               <NumberSlider
                 value={currentRowSpan}
                 min={1}
@@ -3445,7 +3787,7 @@ function BlockInspector({ block }: { block: TemplateBlock }) {
             </Field>
           </>
         )}
-        <Field label="Order">
+        <Field label={messages.inspector.order}>
           <NumberSlider
             value={currentOrder}
             min={0}
@@ -3456,9 +3798,9 @@ function BlockInspector({ block }: { block: TemplateBlock }) {
         </Field>
       </Section>
 
-      <Section title={`Style (${breakpoint})`}>
+      <Section title={`${messages.inspector.style} (${formatBreakpoint(locale, breakpoint)})`}>
         <Field
-          label="Background override"
+          label={messages.inspector.backgroundOverride}
           action={
             block.style.background !== undefined && (
               <button
@@ -3466,7 +3808,7 @@ function BlockInspector({ block }: { block: TemplateBlock }) {
                 onClick={() => field("style.background", undefined)}
                 className="text-[10px] text-destructive hover:underline font-semibold"
               >
-                Reset
+                {messages.inspector.reset}
               </button>
             )
           }
@@ -3477,7 +3819,7 @@ function BlockInspector({ block }: { block: TemplateBlock }) {
           />
         </Field>
         <Field
-          label="Text color override"
+          label={messages.inspector.textColorOverride}
           action={
             block.style.textColor !== undefined && (
               <button
@@ -3485,7 +3827,7 @@ function BlockInspector({ block }: { block: TemplateBlock }) {
                 onClick={() => field("style.textColor", undefined)}
                 className="text-[10px] text-destructive hover:underline font-semibold"
               >
-                Reset
+                {messages.inspector.reset}
               </button>
             )
           }
@@ -3496,7 +3838,7 @@ function BlockInspector({ block }: { block: TemplateBlock }) {
           />
         </Field>
         <Field
-          label="Corner radius override"
+          label={messages.inspector.cornerRadiusOverride}
           action={
             block.style.radius !== undefined && (
               <button
@@ -3504,7 +3846,7 @@ function BlockInspector({ block }: { block: TemplateBlock }) {
                 onClick={() => field("style.radius", undefined)}
                 className="text-[10px] text-destructive hover:underline font-semibold"
               >
-                Reset
+                {messages.inspector.reset}
               </button>
             )
           }
@@ -3521,7 +3863,7 @@ function BlockInspector({ block }: { block: TemplateBlock }) {
           />
         </Field>
         <Field
-          label="Shadow override"
+          label={messages.inspector.shadowOverride}
           action={
             block.style.shadow !== undefined && (
               <button
@@ -3529,7 +3871,7 @@ function BlockInspector({ block }: { block: TemplateBlock }) {
                 onClick={() => field("style.shadow", undefined)}
                 className="text-[10px] text-destructive hover:underline font-semibold"
               >
-                Reset
+                {messages.inspector.reset}
               </button>
             )
           }
@@ -3538,18 +3880,18 @@ function BlockInspector({ block }: { block: TemplateBlock }) {
             size="sm"
             value={block.style.shadow ?? "theme"}
             options={[
-              { value: "theme", label: "Theme" },
-              { value: "none", label: "None" },
-              { value: "soft", label: "Soft" },
-              { value: "elevated", label: "Elev" },
-              { value: "floating", label: "Float" },
-              { value: "glow", label: "Glow" },
+              { value: "theme", label: messages.options.theme },
+              { value: "none", label: messages.options.none },
+              { value: "soft", label: messages.options.soft },
+              { value: "elevated", label: messages.options.elevated },
+              { value: "floating", label: messages.options.float },
+              { value: "glow", label: messages.options.glow },
             ]}
             onChange={(v) => field("style.shadow", v === "theme" ? undefined : v)}
           />
         </Field>
         <Field
-          label="Border width override"
+          label={messages.inspector.borderWidthOverride}
           action={
             block.style.borderWidth !== undefined && (
               <button
@@ -3557,7 +3899,7 @@ function BlockInspector({ block }: { block: TemplateBlock }) {
                 onClick={() => field("style.borderWidth", undefined)}
                 className="text-[10px] text-destructive hover:underline font-semibold"
               >
-                Reset
+                {messages.inspector.reset}
               </button>
             )
           }
@@ -3573,26 +3915,26 @@ function BlockInspector({ block }: { block: TemplateBlock }) {
             onChange={(v) => field("style.borderWidth", v)}
           />
         </Field>
-        <Field label="Accent color">
+        <Field label={messages.inspector.accentColor}>
           <ColorInput
             value={block.style.accentColor ?? state.config.theme.colors.accent}
             onChange={(v) => field("style.accentColor", v)}
           />
         </Field>
-        <Field label="Decorative frame">
+        <Field label={messages.inspector.decorativeFrame}>
           <select
             className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground"
             value={block.style.frame ?? "none"}
             onChange={(e) => field("style.frame", e.target.value)}
           >
             {[
-              ["none", "None"],
-              ["hairline", "Hairline"],
-              ["double", "Double"],
-              ["inset", "Inset"],
-              ["gradient", "Gradient"],
-              ["luxury", "Luxury"],
-              ["glow", "Glow"],
+              ["none", messages.options.none],
+              ["hairline", messages.options.hairline],
+              ["double", messages.options.double],
+              ["inset", messages.options.inset],
+              ["gradient", messages.options.gradient],
+              ["luxury", messages.options.luxury],
+              ["glow", messages.options.glow],
             ].map(([value, label]) => (
               <option key={value} value={value}>
                 {label}
@@ -3600,7 +3942,7 @@ function BlockInspector({ block }: { block: TemplateBlock }) {
             ))}
           </select>
         </Field>
-        <Field label="Padding">
+        <Field label={messages.inspector.padding}>
           <NumberSlider
             value={currentPadding}
             min={0}
@@ -3608,15 +3950,15 @@ function BlockInspector({ block }: { block: TemplateBlock }) {
             onChange={(v) => setResponsiveField("padding", v)}
           />
         </Field>
-        <Field label="Animation">
+        <Field label={messages.inspector.animation}>
           <Segmented
             size="sm"
             value={block.interaction.animation ?? "soft-rise"}
             options={[
-              { value: "none", label: "None" },
-              { value: "fade", label: "Fade" },
-              { value: "slide", label: "Slide" },
-              { value: "soft-rise", label: "Rise" },
+              { value: "none", label: messages.options.none },
+              { value: "fade", label: messages.options.fade },
+              { value: "slide", label: messages.options.slide },
+              { value: "soft-rise", label: messages.options.rise },
             ]}
             onChange={(v) => field("interaction.animation", v)}
           />
@@ -3627,22 +3969,22 @@ function BlockInspector({ block }: { block: TemplateBlock }) {
 
       {/* ---- Local Motion Overrides ---- */}
       <Locked locked={motionLocked}>
-        <Section title="Motion" action={motionLocked ? <ProBadge /> : undefined}>
+        <Section title={messages.inspector.motion} action={motionLocked ? <ProBadge /> : undefined}>
           <Toggle
-            label="Use global motion"
+            label={messages.inspector.useGlobalMotion}
             checked={block.motion?.useGlobal !== false}
             onChange={(v) => field("motion.useGlobal", v)}
           />
           {block.motion?.useGlobal === false && (
             <>
               <Toggle
-                label="Disable motion"
+                label={messages.inspector.disableMotion}
                 checked={block.motion?.disableMotion === true}
                 onChange={(v) => field("motion.disableMotion", v)}
               />
               {!block.motion?.disableMotion && (
                 <>
-                  <Field label="Entrance override">
+                  <Field label={messages.inspector.entranceOverride}>
                     <Segmented
                       value={(block.motion?.entrance ?? "soft-rise") as EntrancePreset}
                       options={ENTRANCE_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
@@ -3650,7 +3992,7 @@ function BlockInspector({ block }: { block: TemplateBlock }) {
                       size="sm"
                     />
                   </Field>
-                  <Field label="Hover override">
+                  <Field label={messages.inspector.hoverOverride}>
                     <Segmented
                       value={(block.motion?.hover ?? "lift") as HoverPreset}
                       options={HOVER_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
@@ -3665,7 +4007,7 @@ function BlockInspector({ block }: { block: TemplateBlock }) {
         </Section>
       </Locked>
 
-      <Section title="Visibility">
+      <Section title={messages.inspector.visibility}>
         <div className="grid grid-cols-3 gap-2">
           {(
             [
@@ -3685,7 +4027,7 @@ function BlockInspector({ block }: { block: TemplateBlock }) {
               }
             >
               <IconCmp className="h-4 w-4" />
-              {key}
+              {formatBreakpoint(locale, key)}
             </button>
           ))}
         </div>

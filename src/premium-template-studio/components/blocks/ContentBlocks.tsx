@@ -18,6 +18,11 @@ import { useRender } from "../../engine/RenderContext";
 import { cardStyle, headingStyle } from "../../engine/styleEngine";
 import { hexToRgba, qrImageUrl, safeUrl } from "../../utils";
 import type { TemplateBlock } from "../../types";
+import {
+  getTrustSignalDefinition,
+  normalizeTrustSignals,
+  trustSignalLabel,
+} from "../../constants/trustSignals";
 import { BlockTitle, InlineText, SmartLink } from "./primitives";
 
 export interface BlockProps {
@@ -30,6 +35,9 @@ const TRUST_ICONS: Record<string, typeof BadgeCheck> = {
   Clock,
   Star,
   Sparkles,
+  MessageCircle,
+  Calendar,
+  MapPin,
 };
 
 export function HeadingBlock({ block }: BlockProps) {
@@ -271,8 +279,11 @@ export function QRBlock({ block }: BlockProps) {
 
 export function TrustBlock({ block }: BlockProps) {
   const { theme } = useRender();
-  const badges = block.content.badges ?? [];
+  if (block.content.enabled === false) return null;
+  // Defensive: only render valid signals, capped at the 4-signal maximum.
+  const badges = normalizeTrustSignals(block.content.badges);
   const cards = block.variant === "cards";
+  if (badges.length === 0) return null;
   return (
     <div
       style={{
@@ -283,7 +294,8 @@ export function TrustBlock({ block }: BlockProps) {
       }}
     >
       {badges.map((badge) => {
-        const Icon = TRUST_ICONS[badge.icon ?? "BadgeCheck"] ?? BadgeCheck;
+        const def = badge.type ? getTrustSignalDefinition(badge.type) : undefined;
+        const Icon = TRUST_ICONS[def?.icon ?? badge.icon ?? "BadgeCheck"] ?? BadgeCheck;
         return (
           <div
             key={badge.id}
@@ -300,7 +312,7 @@ export function TrustBlock({ block }: BlockProps) {
             }}
           >
             <Icon size={14} aria-hidden style={{ color: theme.colors.accent }} />
-            {badge.label}
+            {trustSignalLabel(badge)}
           </div>
         );
       })}

@@ -253,3 +253,225 @@ describe("Profile Cover blend/fade (Phase 5C6B)", () => {
     });
   });
 });
+
+describe("Profile Avatar Rim (Phase 5C6C)", () => {
+  describe("schema", () => {
+    it("rim absent is backward compatible (no rim data)", () => {
+      expect(createDemoConfig().profile.avatar.rim).toBeUndefined();
+    });
+
+    it("accepts rim via canonical patch (enabled, color)", () => {
+      const state = createInitialState(createDemoConfig());
+      const next = templateReducer(state, {
+        type: "patch",
+        path: "profile.avatar.rim",
+        value: { enabled: true, color: "#ff0000" },
+      });
+      expect(next.config.profile.avatar.rim).toEqual({ enabled: true, color: "#ff0000" });
+    });
+
+    it("rim patch preserves every sibling avatar field and leaves banner untouched", () => {
+      const cfg = createDemoConfig();
+      const next = templateReducer(createInitialState(cfg), {
+        type: "patch",
+        path: "profile.avatar.rim",
+        value: { enabled: true, color: "#ff0000" },
+      });
+      const a = next.config.profile.avatar;
+      expect(a.size).toBe(cfg.profile.avatar.size);
+      expect(a.radius).toBe(cfg.profile.avatar.radius);
+      expect(a.borderWidth).toBe(cfg.profile.avatar.borderWidth);
+      expect(a.shadow).toBe(cfg.profile.avatar.shadow);
+      expect(a.overlap).toBe(cfg.profile.avatar.overlap);
+      expect(a.align).toBe(cfg.profile.avatar.align);
+      expect(next.config.profile.avatarUrl).toBe(cfg.profile.avatarUrl);
+      expect(next.config.profile.banner.widthMode).toBe(cfg.profile.banner.widthMode);
+      expect(next.config.profile.banner.blendFade).toBe(cfg.profile.banner.blendFade);
+    });
+
+    it("Rim ON → color A → OFF → ON preserves color A", () => {
+      let state = createInitialState(createDemoConfig());
+      state = templateReducer(state, {
+        type: "patch",
+        path: "profile.avatar.rim",
+        value: { enabled: true, color: "#123456" },
+      });
+      state = templateReducer(state, {
+        type: "patch",
+        path: "profile.avatar.rim",
+        value: { enabled: false, color: "#123456" },
+      });
+      expect(state.config.profile.avatar.rim?.enabled).toBe(false);
+      expect(state.config.profile.avatar.rim?.color).toBe("#123456");
+      state = templateReducer(state, {
+        type: "patch",
+        path: "profile.avatar.rim",
+        value: { enabled: true, color: state.config.profile.avatar.rim?.color },
+      });
+      expect(state.config.profile.avatar.rim?.color).toBe("#123456");
+    });
+  });
+
+  describe("render", () => {
+    const renderStatic = (cfg: ReturnType<typeof createDemoConfig>) =>
+      renderToStaticMarkup(
+        createElement(TemplateRenderer, {
+          config: cfg,
+          breakpoint: "desktop" as const,
+          mode: "public" as const,
+        }),
+      );
+
+    it("rim OFF renders no colored rim", () => {
+      const cfg = createDemoConfig();
+      cfg.profile.avatarUrl = "https://example.com/avatar.jpg";
+      const markup = renderStatic(cfg);
+      expect(markup).not.toContain("solid #ff0000");
+    });
+
+    it("rim ON renders the selected color", () => {
+      const cfg = createDemoConfig();
+      cfg.profile.avatarUrl = "https://example.com/avatar.jpg";
+      cfg.profile.avatar.rim = { enabled: true, color: "#ff0000" };
+      const markup = renderStatic(cfg);
+      expect(markup).toContain("solid #ff0000");
+    });
+
+    it("rim follows the avatar shape (radius preserved)", () => {
+      const cfg = createDemoConfig();
+      cfg.profile.avatarUrl = "https://example.com/avatar.jpg";
+      cfg.profile.avatar.radius = 16;
+      cfg.profile.avatar.rim = { enabled: true, color: "#ff0000" };
+      const markup = renderStatic(cfg);
+      expect(markup).toContain("border-radius:16px");
+      expect(markup).toContain("solid #ff0000");
+    });
+
+    it("changing rim color changes the render", () => {
+      const cfg = createDemoConfig();
+      cfg.profile.avatarUrl = "https://example.com/avatar.jpg";
+      cfg.profile.avatar.rim = { enabled: true, color: "#ff0000" };
+      const red = renderStatic(cfg);
+      cfg.profile.avatar.rim = { enabled: true, color: "#00ff00" };
+      const green = renderStatic(cfg);
+      expect(red).toContain("solid #ff0000");
+      expect(green).toContain("solid #00ff00");
+    });
+  });
+});
+
+describe("Profile Avatar Rim Thickness (Phase 5C6D)", () => {
+  describe("schema", () => {
+    it("rim.width accepts thin / medium / thick", () => {
+      let state = createInitialState(createDemoConfig());
+      for (const width of ["thin", "medium", "thick"] as const) {
+        state = templateReducer(state, {
+          type: "patch",
+          path: "profile.avatar.rim",
+          value: { enabled: true, color: "#ff0000", width },
+        });
+        expect(state.config.profile.avatar.rim?.width).toBe(width);
+      }
+    });
+
+    it("missing width is absent (renderer defaults semantically to medium)", () => {
+      const cfg = createDemoConfig();
+      cfg.profile.avatar.rim = { enabled: true, color: "#ff0000" };
+      expect(cfg.profile.avatar.rim.width).toBeUndefined();
+    });
+
+    it("changing width preserves rim.enabled, rim.color and all sibling data", () => {
+      const cfg = createDemoConfig();
+      const next = templateReducer(createInitialState(cfg), {
+        type: "patch",
+        path: "profile.avatar.rim",
+        value: { enabled: true, color: "#ff0000", width: "thick" },
+      });
+      const a = next.config.profile.avatar;
+      expect(a.rim?.enabled).toBe(true);
+      expect(a.rim?.color).toBe("#ff0000");
+      expect(a.size).toBe(cfg.profile.avatar.size);
+      expect(a.radius).toBe(cfg.profile.avatar.radius);
+      expect(a.borderWidth).toBe(cfg.profile.avatar.borderWidth);
+      expect(a.shadow).toBe(cfg.profile.avatar.shadow);
+      expect(a.overlap).toBe(cfg.profile.avatar.overlap);
+      expect(a.align).toBe(cfg.profile.avatar.align);
+      expect(next.config.profile.avatarUrl).toBe(cfg.profile.avatarUrl);
+      expect(next.config.profile.banner.widthMode).toBe(cfg.profile.banner.widthMode);
+      expect(next.config.profile.banner.blendFade).toBe(cfg.profile.banner.blendFade);
+    });
+
+    it("Thick → Rim OFF → Rim ON returns Thick", () => {
+      let state = createInitialState(createDemoConfig());
+      state = templateReducer(state, {
+        type: "patch",
+        path: "profile.avatar.rim",
+        value: { enabled: true, color: "#ff0000", width: "thick" },
+      });
+      state = templateReducer(state, {
+        type: "patch",
+        path: "profile.avatar.rim",
+        value: { enabled: false, color: "#ff0000", width: "thick" },
+      });
+      expect(state.config.profile.avatar.rim?.enabled).toBe(false);
+      expect(state.config.profile.avatar.rim?.width).toBe("thick");
+      state = templateReducer(state, {
+        type: "patch",
+        path: "profile.avatar.rim",
+        value: { enabled: true, color: "#ff0000", width: "thick" },
+      });
+      expect(state.config.profile.avatar.rim?.width).toBe("thick");
+    });
+  });
+
+  describe("render", () => {
+    const renderStatic = (cfg: ReturnType<typeof createDemoConfig>) =>
+      renderToStaticMarkup(
+        createElement(TemplateRenderer, {
+          config: cfg,
+          breakpoint: "desktop" as const,
+          mode: "public" as const,
+        }),
+      );
+
+    it("thin / medium / thick produce progressively larger rims in the same color", () => {
+      const mk = (width: "thin" | "medium" | "thick") => {
+        const cfg = createDemoConfig();
+        cfg.profile.avatarUrl = "https://example.com/avatar.jpg";
+        cfg.profile.avatar.rim = { enabled: true, color: "#ff0000", width };
+        return renderStatic(cfg);
+      };
+      expect(mk("thin")).toContain("2px solid #ff0000");
+      expect(mk("medium")).toContain("4px solid #ff0000");
+      expect(mk("thick")).toContain("8px solid #ff0000");
+    });
+
+    it("missing width renders medium (4px)", () => {
+      const cfg = createDemoConfig();
+      cfg.profile.avatarUrl = "https://example.com/avatar.jpg";
+      cfg.profile.avatar.rim = { enabled: true, color: "#ff0000" };
+      const markup = renderStatic(cfg);
+      expect(markup).toContain("4px solid #ff0000");
+    });
+
+    it("Rim OFF ignores thickness visually", () => {
+      const cfg = createDemoConfig();
+      cfg.profile.avatarUrl = "https://example.com/avatar.jpg";
+      cfg.profile.avatar.rim = { enabled: false, color: "#ff0000", width: "thick" };
+      const markup = renderStatic(cfg);
+      expect(markup).not.toContain("solid #ff0000");
+    });
+
+    it("rim follows shape and avatar shadow remains visible", () => {
+      const cfg = createDemoConfig();
+      cfg.profile.avatarUrl = "https://example.com/avatar.jpg";
+      cfg.profile.avatar.radius = 16;
+      cfg.profile.avatar.shadow = true;
+      cfg.profile.avatar.rim = { enabled: true, color: "#ff0000", width: "thick" };
+      const markup = renderStatic(cfg);
+      expect(markup).toContain("border-radius:16px");
+      expect(markup).toContain("8px solid #ff0000");
+      expect(markup).toContain("0 12px 30px -14px");
+    });
+  });
+});

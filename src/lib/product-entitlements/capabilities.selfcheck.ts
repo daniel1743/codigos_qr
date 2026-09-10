@@ -69,12 +69,11 @@ export function runProductCapabilitySelfcheck() {
     );
   }
 
-  /* ---- Free: advanced capabilities are LOCKED (non-early-access) ---- */
-  const freeLocked = [
-    "premium_sections",
-    "premium_templates",
-    "remove_cripqer_branding",
-  ] as const;
+  /* ---- Free: advanced capabilities are LOCKED (non-early-access) ----
+   * `premium_sections` / `premium_templates` are NOT listed here because
+   * they are opened during early access (see POWER_EDITOR_EARLY_ACCESS_CAPABILITIES).
+   */
+  const freeLocked = ["remove_cripqer_branding"] as const;
 
   for (const capability of freeLocked) {
     const decision = resolveCapabilityAccess("free", capability);

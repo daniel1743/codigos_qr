@@ -297,17 +297,17 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
   },
   {
     type: "trust",
-    name: "Trust badges",
-    description: "Verification and credibility indicators",
+    name: "Confianza",
+    description: "Señales de confianza y credibilidad",
     icon: "BadgeCheck",
     group: "Content",
     variants: ["row", "cards"],
     defaults: () =>
       base("trust", "row", {
-        badges: [
-          { id: uid("bdg"), label: "Verified profile", icon: "BadgeCheck" },
-          { id: uid("bdg"), label: "Responds in 24h", icon: "Clock" },
-        ],
+        enabled: true,
+        // Start empty: no fabricated verification/award claims are ever
+        // emitted as defaults. The user adds their own signals.
+        badges: [],
       }),
   },
   {

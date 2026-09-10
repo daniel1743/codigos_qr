@@ -120,9 +120,8 @@ function creatorPremium(): BioTemplateConfig {
       }),
       block("trust", "row", {
         badges: [
-          { id: nextId("bdg"), label: "Verified profile", icon: "BadgeCheck" },
-          { id: nextId("bdg"), label: "Responds in 24h", icon: "Clock" },
-          { id: nextId("bdg"), label: "Awwwards 2025", icon: "Star" },
+          { id: nextId("sig"), type: "local_business" },
+          { id: nextId("sig"), type: "availability_24h" },
         ],
       }),
       block("featuredLink", "cover", {
@@ -266,9 +265,8 @@ function executivePremium(): BioTemplateConfig {
         "cards",
         {
           badges: [
-            { id: nextId("bdg"), label: "CFA Charterholder", icon: "ShieldCheck" },
-            { id: nextId("bdg"), label: "€480M deployed", icon: "Star" },
-            { id: nextId("bdg"), label: "Verified identity", icon: "BadgeCheck" },
+            { id: nextId("sig"), type: "local_business" },
+            { id: nextId("sig"), type: "availability_24h" },
           ],
         },
         { align: "left" },

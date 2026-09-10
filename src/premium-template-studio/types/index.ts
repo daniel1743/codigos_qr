@@ -259,6 +259,12 @@ export interface TemplateProfile {
   location?: string;
   description?: string;
   verified?: boolean;
+  /**
+   * Trusted, system-controlled verification variant. Populated by the backend
+   * from `profiles.verification_variant` — NOT editable from the Power Editor.
+   * Absent ⇒ fall back to the legacy `verified` boolean for `standard`.
+   */
+  verificationVariant?: "none" | "standard" | "official-gold";
   avatarUrl?: string;
   avatar: {
     size: number;
@@ -267,6 +273,16 @@ export interface TemplateProfile {
     shadow: boolean;
     overlap: number;
     align: Alignment;
+    /**
+     * Optional configurable rim. Absent ⇒ off (existing background-colored
+     * border). Reuses `borderWidth` as the rim thickness.
+     */
+    rim?: {
+      enabled: boolean;
+      color: string;
+      /** Semantic thickness. Absent ⇒ "medium". */
+      width?: "thin" | "medium" | "thick";
+    };
   };
   banner: {
     enabled: boolean;
@@ -353,7 +369,8 @@ export interface LinkItem {
   featured?: boolean;
   newTab?: boolean;
   presentation?: "button" | "card" | "media-card";
-  mediaPosition?: "left" | "right";
+  mediaPosition?: "left" | "right" | "bottom";
+  mediaSize?: "25" | "50" | "100";
 }
 
 /** Explicit item payload shared by the currently registered block families. */
@@ -367,7 +384,8 @@ export interface BlockItem {
   featured?: boolean;
   newTab?: boolean;
   presentation?: "button" | "card" | "media-card";
-  mediaPosition?: "left" | "right";
+  mediaPosition?: "left" | "right" | "bottom";
+  mediaSize?: "25" | "50" | "100";
   title?: string;
   name?: string;
   role?: string;
@@ -549,6 +567,37 @@ export interface BlockInteraction {
   trackingId?: string;
 }
 
+/** Canonical ids for the Trust ("Confianza") block signal catalog. */
+export type TrustSignalType =
+  | "availability_24h"
+  | "response_time"
+  | "rating"
+  | "experience"
+  | "customers_served"
+  | "certification"
+  | "award"
+  | "guarantee"
+  | "local_business"
+  | "verified_profile";
+
+/**
+ * A single trust signal. Reuses the existing `badges` storage slot while
+ * adding a typed `type` and optional value fields. Legacy badges carry only
+ * `label`/`icon` and remain renderable for backward compatibility.
+ */
+export interface TrustBadge {
+  id: string;
+  /** Legacy display label (superseded by `type`-derived labels). */
+  label?: string;
+  icon?: string;
+  /** Signal type when this badge represents a typed trust signal. */
+  type?: TrustSignalType;
+  /** Typed value: rating value, response hours, experience years, customers count, or free text. */
+  value?: number | string;
+  /** Optional review count for the `rating` signal. */
+  reviewCount?: number;
+}
+
 /** Free-form but serializable content bag, narrowed per block type. */
 export interface BlockContent {
   title?: string;
@@ -567,7 +616,9 @@ export interface BlockContent {
   email?: string;
   phone?: string;
   address?: string;
-  badges?: { id: string; label: string; icon?: string }[];
+  badges?: TrustBadge[];
+  /** Master visibility toggle for blocks that support enable/disable (e.g. Trust). */
+  enabled?: boolean;
   height?: number;
   alt?: string;
   description?: string;

@@ -25,6 +25,11 @@ import { Label } from "../ui/label";
 import { Switch } from "../ui/switch";
 import { PlatformPicker } from "../profile/PlatformPicker";
 import { getBrowserSupabaseClient } from "../../lib/supabase/client";
+import { resolveSmartLinkPreviewFn } from "../../lib/smart-link-preview/server";
+import {
+  computeCardEnrichment,
+  type SmartLinkPreviewStatus,
+} from "../../lib/smart-link-preview";
 
 interface LinksSectionProps {
   links: Partial<ProfileLink>[];
@@ -60,6 +65,9 @@ export function LinksSection({
   const [openLinkTarget, setOpenLinkTarget] = useState<string | null>(() =>
     links[0] ? getLinkTarget(links[0], 0) : null,
   );
+  const [previewState, setPreviewState] = useState<
+    Record<string, SmartLinkPreviewStatus | "loading">
+  >({});
 
   useEffect(() => {
     if (selectedTarget?.startsWith("link-")) setOpenLinkTarget(selectedTarget);
@@ -148,6 +156,60 @@ export function LinksSection({
     autoDetectedPlatforms.current.delete(linkId);
     updateLink(index, { platform: normalizeBasicPlatform(platform) });
   };
+
+  const handleFetchPreview = async (index: number) => {
+    const link = links[index];
+    const linkId = link.id || `profile-link-${index}`;
+    const url = (link.url || "").trim();
+    if (!url) {
+      toast.error("Escribe primero una URL.");
+      return;
+    }
+
+    setPreviewState((s) => ({ ...s, [linkId]: "loading" }));
+    try {
+      const preview = await resolveSmartLinkPreviewFn({ data: { url } });
+
+      // Fill only empty fields; never overwrite user-entered content.
+      const card = getBasicLinkPresentation(profile, link).card;
+      const titleIsDefault =
+        !card.title.trim() ||
+        card.title === link.label ||
+        card.title === "Enlace" ||
+        card.title === "Mi enlace";
+      const enrichment = computeCardEnrichment(
+        {
+          title: card.title,
+          titleIsDefault,
+          description: card.description,
+          imageUrl: card.imageUrl,
+        },
+        preview,
+      );
+
+      const cardUpdates: {
+        title?: string;
+        description?: string;
+        imageUrl?: string;
+        mediaMode?: CardMediaMode;
+      } = {};
+      if (enrichment.title) cardUpdates.title = enrichment.title;
+      if (enrichment.description) cardUpdates.description = enrichment.description;
+      if (enrichment.imageUrl) {
+        cardUpdates.imageUrl = enrichment.imageUrl;
+        cardUpdates.mediaMode = "image";
+      }
+
+      if (Object.keys(cardUpdates).length > 0) {
+        updateCardPresentation(index, { card: cardUpdates });
+      }
+      setPreviewState((s) => ({ ...s, [linkId]: preview.status }));
+    } catch {
+      setPreviewState((s) => ({ ...s, [linkId]: "error" }));
+      toast.error("No pudimos obtener una imagen, pero el enlace seguirá funcionando.");
+    }
+  };
+
 
   const handleCardImageUpload = async (index: number, event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -326,6 +388,39 @@ export function LinksSection({
                     />
                   </div>
                 </div>
+
+                <div className="flex items-center justify-between gap-3 rounded-xl border border-stone-200 bg-[#fffefa] p-3">
+                  <div className="min-w-0">
+                    <p className="text-xs font-medium text-[#1d1d1b]">Vista previa del enlace</p>
+                    <p className="mt-0.5 truncate text-[11px] text-stone-500">
+                      {(() => {
+                        const state = previewState[link.id || `profile-link-${index}`];
+                        if (state === "loading") return "Obteniendo vista previa…";
+                        if (state === "full") return "Vista previa encontrada";
+                        if (state === "partial") return "Vista previa parcial";
+                        if (state === "fallback") return "Enlace reconocido";
+                        if (state === "error")
+                          return "No pudimos obtener una imagen, pero el enlace seguirá funcionando.";
+                        return "Reconoce el destino y rellena la tarjeta automáticamente.";
+                      })()}
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => handleFetchPreview(index)}
+                    disabled={previewState[link.id || `profile-link-${index}`] === "loading"}
+                    className="h-9 shrink-0 rounded-full border-stone-200"
+                  >
+                    {previewState[link.id || `profile-link-${index}`] === "loading" ? (
+                      <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                    ) : null}
+                    {previewState[link.id || `profile-link-${index}`] === "loading"
+                      ? "Obteniendo…"
+                      : "Obtener vista previa"}
+                  </Button>
+                </div>
+
 
                 <div className="flex items-center justify-between rounded-xl border border-stone-200 bg-stone-50 p-3">
                   <Label htmlFor={`link-enabled-${link.id || index}`}>Mostrar enlace</Label>

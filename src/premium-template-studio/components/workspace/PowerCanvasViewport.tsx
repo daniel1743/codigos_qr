@@ -563,6 +563,7 @@ export function PowerCanvasViewport({
           interaction.isPanning && "pts-power-viewport--panning",
           interaction.isPanReady && !interaction.isPanning && "pts-power-viewport--pan-ready",
         )}
+        style={{ touchAction: "none" }}
         onPointerEnter={interaction.onPointerEnter}
         onPointerLeave={interaction.onPointerLeave}
         onPointerDown={interaction.onPointerDown}
@@ -593,37 +594,31 @@ export function PowerCanvasViewport({
       />
 
       <div
-        className="absolute left-1/2 top-3 z-10 hidden -translate-x-1/2 items-center gap-1 rounded-lg border border-border bg-card/95 p-1 shadow-sm backdrop-blur lg:flex"
-        aria-label="Canvas zoom controls"
+        className="absolute right-3 top-1/2 z-10 hidden -translate-y-1/2 flex-col items-center gap-1 rounded-lg border border-border bg-card/95 p-1 shadow-sm backdrop-blur lg:flex"
+        aria-label="Controles de zoom del lienzo"
         onClick={(event) => event.stopPropagation()}
       >
-        <ZoomButton label="−" onClick={controls.zoomOut} />
+        <ZoomButton label="+" onClick={controls.zoomIn} />
         <span
           className="min-w-12 px-1 text-center text-[11px] font-medium text-foreground"
           aria-live="polite"
         >
           {Math.round(camera.scale * 100)}%
         </span>
-        <ZoomButton label="+" onClick={controls.zoomIn} />
+        <ZoomButton label="−" onClick={controls.zoomOut} />
         <button
           type="button"
           onClick={controls.fit}
-          className={cx(
-            "rounded-md px-2 py-1 text-[11px] font-medium text-muted-foreground transition",
-            "hover:bg-accent hover:text-foreground",
-          )}
+          className="w-full rounded-md px-2 py-1 text-[11px] font-medium text-muted-foreground transition hover:bg-accent hover:text-foreground"
         >
-          Fit
+          Ajustar
         </button>
         <button
           type="button"
           onClick={controls.reset}
-          className={cx(
-            "rounded-md px-2 py-1 text-[11px] font-medium text-muted-foreground transition",
-            "hover:bg-accent hover:text-foreground",
-          )}
+          className="w-full rounded-md px-2 py-1 text-[11px] font-medium text-muted-foreground transition hover:bg-accent hover:text-foreground"
         >
-          Reset
+          Restablecer
         </button>
       </div>
     </div>

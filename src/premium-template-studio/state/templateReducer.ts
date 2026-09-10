@@ -9,6 +9,8 @@ export interface StudioState {
   future: BioTemplateConfig[];
   selectedBlockId: string | null;
   dirty: boolean;
+  /** Monotonic local revision, incremented on every document mutation. */
+  revision: number;
 }
 
 export type StudioAction =
@@ -28,7 +30,7 @@ export type StudioAction =
   | { type: "toggleBlockHidden"; id: string }
   | { type: "undo" }
   | { type: "redo" }
-  | { type: "markSaved" };
+  | { type: "markSaved"; revision?: number };
 
 const HISTORY_LIMIT = 60;
 
@@ -52,6 +54,7 @@ function commit(state: StudioState, config: BioTemplateConfig): StudioState {
     past: [...state.past, state.config].slice(-HISTORY_LIMIT),
     future: [],
     dirty: true,
+    revision: state.revision + 1,
   };
 }
 
@@ -63,7 +66,7 @@ export function templateReducer(state: StudioState, action: StudioAction): Studi
   switch (action.type) {
     case "replaceConfig":
       return action.resetHistory
-        ? { config: action.config, past: [], future: [], selectedBlockId: null, dirty: false }
+        ? { config: action.config, past: [], future: [], selectedBlockId: null, dirty: false, revision: 0 }
         : { ...commit(state, action.config), selectedBlockId: null };
 
     case "patchConfig":
@@ -165,6 +168,7 @@ export function templateReducer(state: StudioState, action: StudioAction): Studi
         past: state.past.slice(0, -1),
         future: [state.config, ...state.future].slice(0, HISTORY_LIMIT),
         dirty: true,
+        revision: state.revision + 1,
       };
     }
 
@@ -177,11 +181,17 @@ export function templateReducer(state: StudioState, action: StudioAction): Studi
         past: [...state.past, state.config].slice(-HISTORY_LIMIT),
         future: state.future.slice(1),
         dirty: true,
+        revision: state.revision + 1,
       };
     }
 
     case "markSaved":
-      return { ...state, dirty: false };
+      // Revision-aware: only clear dirty if the acknowledged revision is the
+      // latest. A stale save must never mask newer unsaved work.
+      return {
+        ...state,
+        dirty: action.revision !== undefined ? state.revision > action.revision : false,
+      };
 
     default:
       return state;
@@ -189,5 +199,5 @@ export function templateReducer(state: StudioState, action: StudioAction): Studi
 }
 
 export function createInitialState(config: BioTemplateConfig): StudioState {
-  return { config, past: [], future: [], selectedBlockId: null, dirty: false };
+  return { config, past: [], future: [], selectedBlockId: null, dirty: false, revision: 0 };
 }

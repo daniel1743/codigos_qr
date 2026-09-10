@@ -26,6 +26,8 @@ import {
 import { cx, formatSlug } from "../../utils";
 import type { BlockType, MotionPresetId, EntrancePreset, HoverPreset } from "../../types";
 import { useCapabilityAccess, isAssetLocked, ProBadge, Locked } from "../../entitlements";
+import { POWER_EDITOR_LOCALES, type PowerEditorLocale } from "../../i18n/messages";
+import { usePowerEditorLocale } from "../../i18n/PowerEditorLocale";
 
 function Icon({ name, className }: { name: string; className?: string }) {
   const Cmp = (Icons as unknown as Record<string, Icons.LucideIcon>)[name] ?? Icons.Square;
@@ -34,9 +36,10 @@ function Icon({ name, className }: { name: string; className?: string }) {
 
 function BlocksPanel() {
   const { state, dispatch, tier } = useStudio();
+  const { messages } = usePowerEditorLocale();
   const [query, setQuery] = useState("");
   const [viewMode, setViewMode] = useState<"presets" | "blocks">("presets");
-  const groups = ["Content", "Actions", "Media", "Structure"];
+  const groups = ["Content", "Actions", "Media", "Structure"] as const;
   const presetCategories = [
     "Hero",
     "Services",
@@ -46,7 +49,7 @@ function BlocksPanel() {
     "Products",
     "Media",
     "Contact",
-  ];
+  ] as const;
 
   const filteredBlocks = BLOCK_DEFINITIONS.filter((d) =>
     d.name.toLowerCase().includes(query.toLowerCase()),
@@ -55,15 +58,31 @@ function BlocksPanel() {
   const filteredPresets = SECTION_PRESETS.filter((p) =>
     p.name.toLowerCase().includes(query.toLowerCase()),
   );
+  const groupLabels = {
+    Content: messages.sidebar.contentGroup,
+    Actions: messages.sidebar.actionsGroup,
+    Media: messages.sidebar.mediaGroup,
+    Structure: messages.sidebar.structureGroup,
+  } as const;
+  const presetCategoryLabels = {
+    Hero: "Hero",
+    Services: messages.sidebar.servicesCategory,
+    Booking: messages.sidebar.bookingCategory,
+    Portfolio: messages.sidebar.portfolioCategory,
+    Reviews: messages.sidebar.reviewsCategory,
+    Products: messages.sidebar.productsCategory,
+    Media: messages.sidebar.mediaGroup,
+    Contact: messages.sidebar.contactCategory,
+  } as const;
 
   return (
     <div>
-      <Section title="Add content">
+      <Section title={messages.sidebar.addContent}>
         <Segmented
           value={viewMode}
           options={[
-            { value: "presets", label: "Sections" },
-            { value: "blocks", label: "Blocks" },
+            { value: "presets", label: messages.sidebar.sections },
+            { value: "blocks", label: messages.sidebar.blocks },
           ]}
           onChange={(v) => setViewMode(v as "presets" | "blocks")}
         />
@@ -71,7 +90,9 @@ function BlocksPanel() {
         <TextInput
           value={query}
           onChange={setQuery}
-          placeholder={viewMode === "presets" ? "Search sections…" : "Search blocks…"}
+          placeholder={
+            viewMode === "presets" ? messages.sidebar.searchSections : messages.sidebar.searchBlocks
+          }
         />
 
         {viewMode === "presets" &&
@@ -81,7 +102,7 @@ function BlocksPanel() {
             return (
               <div key={cat} className="space-y-2 mt-2">
                 <p className="pt-1 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                  {cat}
+                  {presetCategoryLabels[cat]}
                 </p>
                 <div className="grid grid-cols-1 gap-2">
                   {items.map((preset) => {
@@ -113,7 +134,7 @@ function BlocksPanel() {
                           {locked && <ProBadge />}
                         </span>
                         <span className="text-[10px] text-muted-foreground">
-                          {preset.previewType} layout
+                          {preset.previewType} {messages.sidebar.layoutPreview}
                         </span>
                       </button>
                     );
@@ -130,7 +151,7 @@ function BlocksPanel() {
             return (
               <div key={group} className="space-y-2 mt-2">
                 <p className="pt-1 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                  {group}
+                  {groupLabels[group]}
                 </p>
                 <div className="grid grid-cols-2 gap-2">
                   {items.map((definition) => {
@@ -168,7 +189,7 @@ function BlocksPanel() {
           })}
       </Section>
 
-      <Section title={`Structure · ${state.config.blocks.length}`}>
+      <Section title={`${messages.sidebar.structure} · ${state.config.blocks.length}`}>
         <div className="space-y-1.5">
           {state.config.blocks.map((block, index) => {
             const definition = BLOCK_DEFINITIONS.find((d) => d.type === block.type);
@@ -198,7 +219,7 @@ function BlocksPanel() {
                 </button>
                 <button
                   type="button"
-                  title="Move up"
+                  title={messages.sidebar.moveUp}
                   onClick={() => dispatch({ type: "moveBlock", id: block.id, direction: -1 })}
                   className="rounded p-0.5 text-muted-foreground hover:text-foreground disabled:opacity-30"
                   disabled={index === 0}
@@ -207,7 +228,7 @@ function BlocksPanel() {
                 </button>
                 <button
                   type="button"
-                  title="Move down"
+                  title={messages.sidebar.moveDown}
                   onClick={() => dispatch({ type: "moveBlock", id: block.id, direction: 1 })}
                   className="rounded p-0.5 text-muted-foreground hover:text-foreground disabled:opacity-30"
                   disabled={index === state.config.blocks.length - 1}
@@ -216,7 +237,7 @@ function BlocksPanel() {
                 </button>
                 <button
                   type="button"
-                  title="Delete"
+                  title={messages.sidebar.delete}
                   onClick={() => dispatch({ type: "deleteBlock", id: block.id })}
                   className="rounded p-0.5 text-muted-foreground hover:text-destructive"
                 >
@@ -233,6 +254,7 @@ function BlocksPanel() {
 
 function DesignPanel() {
   const { state, dispatch, tier } = useStudio();
+  const { messages } = usePowerEditorLocale();
   const { theme, layout } = state.config;
   const motionConfig = getMotionConfig(state.config);
   const typographyLocked = useCapabilityAccess("advanced_typography").state !== "ALLOW";
@@ -243,7 +265,7 @@ function DesignPanel() {
 
   return (
     <div>
-      <Section title="Visual identity">
+      <Section title={messages.sidebar.visualIdentity}>
         <div className="grid grid-cols-3 gap-2">
           {THEMES.map((preset) => (
             <button
@@ -272,32 +294,32 @@ function DesignPanel() {
         </div>
       </Section>
 
-      <Section title="Colors">
-        <Field label="Primary">
+      <Section title={messages.sidebar.colors}>
+        <Field label={messages.sidebar.primary}>
           <ColorInput
             value={theme.colors.primary}
             onChange={(v) => dispatch({ type: "patch", path: "theme.colors.primary", value: v })}
           />
         </Field>
-        <Field label="Accent">
+        <Field label={messages.sidebar.accent}>
           <ColorInput
             value={theme.colors.accent}
             onChange={(v) => dispatch({ type: "patch", path: "theme.colors.accent", value: v })}
           />
         </Field>
-        <Field label="Background">
+        <Field label={messages.sidebar.background}>
           <ColorInput
             value={theme.colors.background}
             onChange={(v) => dispatch({ type: "patch", path: "theme.colors.background", value: v })}
           />
         </Field>
-        <Field label="Background layer">
+        <Field label={messages.sidebar.backgroundLayer}>
           <ColorInput
             value={theme.background.color ?? theme.colors.background}
             onChange={(v) => dispatch({ type: "patch", path: "theme.background.color", value: v })}
           />
         </Field>
-        <Field label="Background blur">
+        <Field label={messages.sidebar.backgroundBlur}>
           <NumberSlider
             value={theme.background.blur ?? 0}
             min={0}
@@ -306,13 +328,13 @@ function DesignPanel() {
             onChange={(v) => dispatch({ type: "patch", path: "theme.background.blur", value: v })}
           />
         </Field>
-        <Field label="Surface">
+        <Field label={messages.sidebar.surface}>
           <ColorInput
             value={theme.colors.surface}
             onChange={(v) => dispatch({ type: "patch", path: "theme.colors.surface", value: v })}
           />
         </Field>
-        <Field label="Text">
+        <Field label={messages.sidebar.text}>
           <ColorInput
             value={theme.colors.text}
             onChange={(v) => dispatch({ type: "patch", path: "theme.colors.text", value: v })}
@@ -321,7 +343,7 @@ function DesignPanel() {
       </Section>
 
       <Locked locked={typographyLocked}>
-      <Section title="Typography" action={typographyLocked ? <ProBadge /> : undefined}>
+      <Section title={messages.sidebar.typography} action={typographyLocked ? <ProBadge /> : undefined}>
         <div className="grid grid-cols-2 gap-2">
           {TYPOGRAPHY_PRESETS.map((preset) => (
             <button
@@ -355,7 +377,7 @@ function DesignPanel() {
             </button>
           ))}
         </div>
-        <Field label="Heading font">
+        <Field label={messages.sidebar.headingFont}>
           <select
             className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground"
             value={theme.typography.headingFont}
@@ -374,7 +396,7 @@ function DesignPanel() {
             ))}
           </select>
         </Field>
-        <Field label="Body scale">
+        <Field label={messages.sidebar.bodyScale}>
           <NumberSlider
             value={theme.typography.bodySize}
             min={13}
@@ -385,7 +407,7 @@ function DesignPanel() {
             }
           />
         </Field>
-        <Field label="Letter spacing">
+        <Field label={messages.sidebar.letterSpacing}>
           <NumberSlider
             value={theme.typography.letterSpacing}
             min={-2}
@@ -399,7 +421,7 @@ function DesignPanel() {
       </Section>
       </Locked>
 
-      <Section title="Structure">
+      <Section title={messages.sidebar.layout}>
         <div className="grid grid-cols-2 gap-2">
           {LAYOUTS.map((preset) => {
             const layoutLocked = isAssetLocked("layout", preset.id, tier);
@@ -427,13 +449,14 @@ function DesignPanel() {
                   {layoutLocked && <ProBadge />}
                 </span>
                 <span className="text-[10px] text-muted-foreground">
-                  {preset.header} header · {preset.responsive.desktop.columns} col
+                  {preset.header} {messages.sidebar.header} · {preset.responsive.desktop.columns}{" "}
+                  {messages.sidebar.columnsAbbrev}
                 </span>
               </button>
             );
           })}
         </div>
-        <Field label="Max width">
+        <Field label={messages.sidebar.maxWidth}>
           <NumberSlider
             value={theme.spacing.contentWidth}
             min={380}
@@ -445,7 +468,7 @@ function DesignPanel() {
             }
           />
         </Field>
-        <Field label="Block gap">
+        <Field label={messages.sidebar.blockGap}>
           <NumberSlider
             value={theme.spacing.block}
             min={4}
@@ -454,7 +477,7 @@ function DesignPanel() {
             onChange={(v) => dispatch({ type: "patch", path: "theme.spacing.block", value: v })}
           />
         </Field>
-        <Field label="Corner radius">
+        <Field label={messages.sidebar.cornerRadius}>
           <NumberSlider
             value={theme.cards.radius}
             min={0}
@@ -466,36 +489,36 @@ function DesignPanel() {
       </Section>
 
       <Locked locked={cardsButtonsLocked}>
-      <Section title="Cards & buttons" action={cardsButtonsLocked ? <ProBadge /> : undefined}>
-        <Field label="Card preset">
+      <Section title={messages.sidebar.cardsButtons} action={cardsButtonsLocked ? <ProBadge /> : undefined}>
+        <Field label={messages.sidebar.cardPreset}>
           <Segmented
             size="sm"
             value={theme.cards.preset}
             options={[
-              { value: "minimal", label: "Min" },
-              { value: "soft", label: "Soft" },
-              { value: "glass", label: "Glass" },
-              { value: "elevated", label: "Lift" },
-              { value: "luxury", label: "Lux" },
+              { value: "minimal", label: messages.options.min },
+              { value: "soft", label: messages.options.soft },
+              { value: "glass", label: messages.options.glass },
+              { value: "elevated", label: messages.options.lift },
+              { value: "luxury", label: messages.options.lux },
             ]}
             onChange={(v) => dispatch({ type: "patch", path: "theme.cards.preset", value: v })}
           />
         </Field>
-        <Field label="Card shadow">
+        <Field label={messages.sidebar.cardShadow}>
           <Segmented
             size="sm"
             value={theme.cards.shadow}
             options={[
-              { value: "none", label: "None" },
-              { value: "soft", label: "Soft" },
-              { value: "elevated", label: "Elev" },
-              { value: "floating", label: "Float" },
-              { value: "glow", label: "Glow" },
+              { value: "none", label: messages.options.none },
+              { value: "soft", label: messages.options.soft },
+              { value: "elevated", label: messages.options.elevated },
+              { value: "floating", label: messages.options.float },
+              { value: "glow", label: messages.options.glow },
             ]}
             onChange={(v) => dispatch({ type: "patch", path: "theme.cards.shadow", value: v })}
           />
         </Field>
-        <Field label="Card blur">
+        <Field label={messages.sidebar.cardBlur}>
           <NumberSlider
             value={theme.cards.blur}
             min={0}
@@ -504,7 +527,7 @@ function DesignPanel() {
             onChange={(v) => dispatch({ type: "patch", path: "theme.cards.blur", value: v })}
           />
         </Field>
-        <Field label="Card opacity">
+        <Field label={messages.sidebar.cardOpacity}>
           <NumberSlider
             value={Math.round(theme.cards.opacity * 100)}
             min={10}
@@ -515,7 +538,7 @@ function DesignPanel() {
             }
           />
         </Field>
-        <Field label="Card border">
+        <Field label={messages.sidebar.cardBorder}>
           <NumberSlider
             value={theme.cards.borderWidth}
             min={0}
@@ -524,34 +547,34 @@ function DesignPanel() {
             onChange={(v) => dispatch({ type: "patch", path: "theme.cards.borderWidth", value: v })}
           />
         </Field>
-        <Field label="Button style">
+        <Field label={messages.sidebar.buttonStyle}>
           <Segmented
             size="sm"
             value={theme.buttons.variant}
             options={[
-              { value: "solid", label: "Solid" },
-              { value: "outline", label: "Outline" },
-              { value: "glass", label: "Glass" },
-              { value: "gradient", label: "Grad" },
+              { value: "solid", label: messages.options.solid },
+              { value: "outline", label: messages.options.outline },
+              { value: "glass", label: messages.options.glass },
+              { value: "gradient", label: messages.options.grad },
             ]}
             onChange={(v) => dispatch({ type: "patch", path: "theme.buttons.variant", value: v })}
           />
         </Field>
-        <Field label="Button shadow">
+        <Field label={messages.sidebar.buttonShadow}>
           <Segmented
             size="sm"
             value={theme.buttons.shadow}
             options={[
-              { value: "none", label: "None" },
-              { value: "soft", label: "Soft" },
-              { value: "elevated", label: "Elev" },
-              { value: "floating", label: "Float" },
-              { value: "glow", label: "Glow" },
+              { value: "none", label: messages.options.none },
+              { value: "soft", label: messages.options.soft },
+              { value: "elevated", label: messages.options.elevated },
+              { value: "floating", label: messages.options.float },
+              { value: "glow", label: messages.options.glow },
             ]}
             onChange={(v) => dispatch({ type: "patch", path: "theme.buttons.shadow", value: v })}
           />
         </Field>
-        <Field label="Button radius">
+        <Field label={messages.sidebar.buttonRadius}>
           <NumberSlider
             value={theme.buttons.radius}
             min={0}
@@ -559,7 +582,7 @@ function DesignPanel() {
             onChange={(v) => dispatch({ type: "patch", path: "theme.buttons.radius", value: v })}
           />
         </Field>
-        <Field label="Button height">
+        <Field label={messages.sidebar.buttonHeight}>
           <NumberSlider
             value={theme.buttons.height}
             min={32}
@@ -568,7 +591,7 @@ function DesignPanel() {
             onChange={(v) => dispatch({ type: "patch", path: "theme.buttons.height", value: v })}
           />
         </Field>
-        <Field label="Button border">
+        <Field label={messages.sidebar.buttonBorder}>
           <NumberSlider
             value={theme.buttons.borderWidth}
             min={0}
@@ -583,8 +606,8 @@ function DesignPanel() {
       </Locked>
 
       <Locked locked={textureLocked}>
-      <Section title="Texture" action={textureLocked ? <ProBadge /> : undefined}>
-        <Field label="Preset">
+      <Section title={messages.sidebar.texture} action={textureLocked ? <ProBadge /> : undefined}>
+        <Field label={messages.sidebar.preset}>
           <select
             className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground"
             value={theme.texture?.preset ?? "none"}
@@ -600,15 +623,15 @@ function DesignPanel() {
               })
             }
           >
-            <option value="none">None</option>
-            <option value="grain">Grain</option>
-            <option value="paper">Paper</option>
-            <option value="linen">Linen</option>
-            <option value="mesh">Mesh</option>
-            <option value="frost">Frost</option>
+            <option value="none">{messages.options.none}</option>
+            <option value="grain">{messages.sidebar.grain}</option>
+            <option value="paper">{messages.sidebar.paper}</option>
+            <option value="linen">{messages.sidebar.linen}</option>
+            <option value="mesh">{messages.sidebar.mesh}</option>
+            <option value="frost">{messages.sidebar.frost}</option>
           </select>
         </Field>
-        <Field label="Texture opacity">
+        <Field label={messages.sidebar.textureOpacity}>
           <NumberSlider
             value={Math.round((theme.texture?.opacity ?? 0.14) * 100)}
             min={0}
@@ -623,7 +646,7 @@ function DesignPanel() {
             }
           />
         </Field>
-        <Field label="Texture scale">
+        <Field label={messages.sidebar.textureScale}>
           <NumberSlider
             value={theme.texture?.scale ?? 24}
             min={8}
@@ -635,20 +658,20 @@ function DesignPanel() {
       </Section>
       </Locked>
 
-      <Section title="Banner">
+      <Section title={messages.banner.banner}>
         <Toggle
-          label="Show banner"
+          label={messages.banner.showBanner}
           checked={state.config.profile.banner.enabled}
           onChange={(v) => dispatch({ type: "patch", path: "profile.banner.enabled", value: v })}
         />
-        <Field label="Banner image URL">
+        <Field label={messages.banner.bannerImageUrl}>
           <TextInput
             value={state.config.profile.banner.imageUrl ?? ""}
             onChange={(v) => dispatch({ type: "patch", path: "profile.banner.imageUrl", value: v })}
             placeholder="https://…"
           />
         </Field>
-        <Field label="Height">
+        <Field label={messages.banner.height}>
           <NumberSlider
             value={state.config.profile.banner.height}
             min={80}
@@ -657,7 +680,7 @@ function DesignPanel() {
             onChange={(v) => dispatch({ type: "patch", path: "profile.banner.height", value: v })}
           />
         </Field>
-        <Field label="Mobile height">
+        <Field label={messages.banner.mobileHeight}>
           <NumberSlider
             value={state.config.profile.banner.mobileHeight}
             min={64}
@@ -668,7 +691,7 @@ function DesignPanel() {
             }
           />
         </Field>
-        <Field label="Banner blur">
+        <Field label={messages.banner.bannerBlur}>
           <NumberSlider
             value={state.config.profile.banner.blur}
             min={0}
@@ -677,7 +700,7 @@ function DesignPanel() {
             onChange={(v) => dispatch({ type: "patch", path: "profile.banner.blur", value: v })}
           />
         </Field>
-        <Field label="Focal X">
+        <Field label={messages.banner.focalX}>
           <NumberSlider
             value={state.config.profile.banner.focalX}
             min={0}
@@ -686,7 +709,7 @@ function DesignPanel() {
             onChange={(v) => dispatch({ type: "patch", path: "profile.banner.focalX", value: v })}
           />
         </Field>
-        <Field label="Focal Y">
+        <Field label={messages.banner.focalY}>
           <NumberSlider
             value={state.config.profile.banner.focalY}
             min={0}
@@ -695,7 +718,7 @@ function DesignPanel() {
             onChange={(v) => dispatch({ type: "patch", path: "profile.banner.focalY", value: v })}
           />
         </Field>
-        <Field label="Banner radius">
+        <Field label={messages.banner.bannerRadius}>
           <NumberSlider
             value={state.config.profile.banner.radius}
             min={0}
@@ -704,7 +727,7 @@ function DesignPanel() {
             onChange={(v) => dispatch({ type: "patch", path: "profile.banner.radius", value: v })}
           />
         </Field>
-        <Field label="Overlay">
+        <Field label={messages.banner.overlay}>
           <NumberSlider
             value={Math.round(state.config.profile.banner.overlay * 100)}
             min={0}
@@ -715,7 +738,7 @@ function DesignPanel() {
             }
           />
         </Field>
-        <Field label="Avatar size">
+        <Field label={messages.banner.avatarSize}>
           <NumberSlider
             value={state.config.profile.avatar.size}
             min={56}
@@ -724,7 +747,7 @@ function DesignPanel() {
             onChange={(v) => dispatch({ type: "patch", path: "profile.avatar.size", value: v })}
           />
         </Field>
-        <Field label="Avatar corner">
+        <Field label={messages.banner.avatarCorner}>
           <NumberSlider
             value={state.config.profile.avatar.radius}
             min={0}
@@ -736,8 +759,8 @@ function DesignPanel() {
 
       {/* ---- Motion ---- */}
       <Locked locked={motionLocked}>
-      <Section title="Motion" action={motionLocked ? <ProBadge /> : undefined}>
-        <Field label="Preset">
+      <Section title={messages.sidebar.motion} action={motionLocked ? <ProBadge /> : undefined}>
+        <Field label={messages.sidebar.preset}>
           <Segmented
             value={motionConfig.preset}
             options={MOTION_PRESET_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
@@ -750,7 +773,7 @@ function DesignPanel() {
             size="sm"
           />
         </Field>
-        <Field label="Entrance">
+        <Field label={messages.sidebar.entrance}>
           <Segmented
             value={motionConfig.entrance}
             options={ENTRANCE_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
@@ -764,7 +787,7 @@ function DesignPanel() {
             size="sm"
           />
         </Field>
-        <Field label="Hover">
+        <Field label={messages.sidebar.hover}>
           <Segmented
             value={motionConfig.hover}
             options={HOVER_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
@@ -778,7 +801,7 @@ function DesignPanel() {
             size="sm"
           />
         </Field>
-        <Field label="Speed">
+        <Field label={messages.sidebar.speed}>
           <NumberSlider
             value={motionConfig.duration}
             min={0}
@@ -790,7 +813,7 @@ function DesignPanel() {
             }}
           />
         </Field>
-        <Field label="Stagger">
+        <Field label={messages.sidebar.stagger}>
           <NumberSlider
             value={motionConfig.stagger}
             min={0}
@@ -810,12 +833,17 @@ function DesignPanel() {
 
 function TemplatesPanel() {
   const { state, dispatch, tier } = useStudio();
+  const { messages } = usePowerEditorLocale();
   const [keepContent, setKeepContent] = useState(true);
 
   return (
     <div>
-      <Section title="Templates">
-        <Toggle label="Keep my content" checked={keepContent} onChange={setKeepContent} />
+      <Section title={messages.sidebar.templates}>
+        <Toggle
+          label={messages.sidebar.keepContent}
+          checked={keepContent}
+          onChange={setKeepContent}
+        />
         <div className="grid gap-2">
           {TEMPLATE_DEFINITIONS.map((definition) => {
             const active = state.config.templateDefinitionId === definition.id;
@@ -869,13 +897,25 @@ function TemplatesPanel() {
 
 function SettingsPanel() {
   const { state, dispatch } = useStudio();
+  const { locale, messages, setLocale } = usePowerEditorLocale();
   const { seo, settings } = state.config;
   const brandingLocked = useCapabilityAccess("remove_cripqer_branding").state !== "ALLOW";
 
   return (
     <div>
-      <Section title="Page">
-        <Field label="Slug">
+      <Section title={messages.sidebar.page}>
+        <Field label={messages.locale.editorLanguage}>
+          <Segmented
+            value={locale}
+            options={POWER_EDITOR_LOCALES.map((option) => ({
+              value: option,
+              label:
+                option === "es" ? messages.locale.spanish : messages.locale.english,
+            }))}
+            onChange={(v) => setLocale(v as PowerEditorLocale)}
+          />
+        </Field>
+        <Field label={messages.sidebar.slug}>
           <TextInput
             value={settings.slug}
             onChange={(v) =>
@@ -886,7 +926,7 @@ function SettingsPanel() {
         <Locked locked={brandingLocked}>
           <div className="flex items-center justify-between gap-3">
             <Toggle
-              label="Show branding"
+              label={messages.sidebar.showBranding}
               checked={settings.showBranding}
               onChange={(v) => dispatch({ type: "patch", path: "settings.showBranding", value: v })}
             />
@@ -894,25 +934,25 @@ function SettingsPanel() {
           </div>
         </Locked>
         <Toggle
-          label="Index in search engines"
+          label={messages.sidebar.indexSearchEngines}
           checked={seo.index}
           onChange={(v) => dispatch({ type: "patch", path: "seo.index", value: v })}
         />
       </Section>
       <Section title="SEO">
-        <Field label="Title">
+        <Field label={messages.sidebar.seoTitle}>
           <TextInput
             value={seo.title}
             onChange={(v) => dispatch({ type: "patch", path: "seo.title", value: v })}
           />
         </Field>
-        <Field label="Description">
+        <Field label={messages.sidebar.seoDescription}>
           <TextInput
             value={seo.description}
             onChange={(v) => dispatch({ type: "patch", path: "seo.description", value: v })}
           />
         </Field>
-        <Field label="Social image URL">
+        <Field label={messages.sidebar.socialImageUrl}>
           <TextInput
             value={seo.socialImage ?? ""}
             onChange={(v) => dispatch({ type: "patch", path: "seo.socialImage", value: v })}
@@ -933,11 +973,12 @@ export function SidebarContent() {
 
 export function SidebarTabs() {
   const { panel, setPanel } = useStudio();
+  const { messages } = usePowerEditorLocale();
   const tabs = [
-    { id: "blocks", label: "Blocks", icon: "LayoutGrid" },
-    { id: "design", label: "Design", icon: "Palette" },
-    { id: "templates", label: "Templates", icon: "Sparkles" },
-    { id: "settings", label: "Settings", icon: "Settings2" },
+    { id: "blocks", label: messages.nav.blocks, icon: "LayoutGrid" },
+    { id: "design", label: messages.nav.design, icon: "Palette" },
+    { id: "templates", label: messages.nav.templates, icon: "Sparkles" },
+    { id: "settings", label: messages.nav.settings, icon: "Settings2" },
   ] as const;
 
   return (
