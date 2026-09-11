@@ -263,6 +263,17 @@ export function authorizeCanonicalMutation(
   }
 }
 
+/**
+ * The public renderer delegates branding removal to the same canonical
+ * entitlement decision that authorizes the editor's settings toggle.
+ */
+export function canRemoveCripqerBranding(tier: ProductTier | undefined): boolean {
+  return (
+    authorizeCanonicalMutation(tier ?? "free", { kind: "REMOVE_CRIPQER_BRANDING" }).decision ===
+    "ALLOW"
+  );
+}
+
 /* ============================================================================
  * 3. PRESERVATION CHECK
  * ========================================================================== */

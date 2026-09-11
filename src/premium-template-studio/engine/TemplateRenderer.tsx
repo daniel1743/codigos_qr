@@ -40,6 +40,8 @@ import { getMotionConfig } from "../constants/motionPresets";
 import { ProfileBanner, ProfileHeader } from "../components/canvas/ProfileHeader";
 import { useScrollReveal } from "../hooks/useScrollReveal";
 import { cx } from "../utils";
+import type { ProductTier } from "../../lib/product-entitlements/capabilities";
+import { canRemoveCripqerBranding } from "../../lib/product-entitlements/mutation-guard";
 
 export interface EditingHandlers {
   selectedBlockId?: string | null | undefined;
@@ -63,6 +65,8 @@ export interface TemplateRendererProps {
   config: BioTemplateConfig;
   breakpoint?: Breakpoint | undefined;
   mode?: "edit" | "public" | undefined;
+  /** Trusted owner tier from the entitlement authority; absent values are Free. */
+  brandingTier?: ProductTier | undefined;
   editing?: EditingHandlers | undefined;
   onTrack?:
     | ((event: { type: string; blockId?: string | undefined; url?: string | undefined }) => void)
@@ -424,6 +428,7 @@ function TemplateRendererImpl({
   config,
   breakpoint = "desktop",
   mode = "public",
+  brandingTier,
   editing,
   onTrack,
   className,
@@ -508,6 +513,9 @@ function TemplateRendererImpl({
   const motionVars = motionCssVars(motionConfig.duration);
   const backgroundLayer = backgroundLayerStyle(theme);
   const textureLayer = textureStyle(theme.texture);
+  const showCripqerBranding =
+    mode === "public" &&
+    (config.settings.showBranding !== false || !canRemoveCripqerBranding(brandingTier));
 
   return (
     <RenderProvider value={ctx}>
@@ -656,6 +664,42 @@ function TemplateRendererImpl({
               );
             })}
           </div>
+          {showCripqerBranding ? (
+            <footer
+              data-testid="cripqer-public-branding"
+              style={{ display: "flex", justifyContent: "center", paddingTop: 24 }}
+            >
+              <a
+                href="/"
+                aria-label="Visitar Cripqer"
+                style={{ display: "inline-flex", alignItems: "center", minHeight: 32, gap: 7 }}
+              >
+                <span
+                  aria-hidden="true"
+                  style={{
+                    width: 18,
+                    height: 18,
+                    backgroundImage: "url(/brand-assets/cripqer-mark.png)",
+                    backgroundPosition: "center",
+                    backgroundRepeat: "no-repeat",
+                    backgroundSize: "contain",
+                  }}
+                />
+                <span
+                  aria-hidden="true"
+                  style={{
+                    color: "#0D47A1",
+                    fontFamily: "Montserrat, Arial, Helvetica, sans-serif",
+                    fontSize: 13,
+                    fontWeight: 800,
+                    lineHeight: 1,
+                  }}
+                >
+                  Crip<span style={{ color: "#D4AF37" }}>q</span>er
+                </span>
+              </a>
+            </footer>
+          ) : null}
         </div>
       </div>
     </RenderProvider>
