@@ -112,9 +112,46 @@ export function InlineText({
   );
 }
 
+/**
+ * System/component section labels injected by template defaults. They describe
+ * the *kind* of block ("Links", "Selected work", …) rather than user content, so
+ * they are hidden from the public render. Matching is exact + case-insensitive
+ * after trimming, so a user-authored heading that merely resembles one of these
+ * (e.g. "Mis enlaces favoritos") is never removed.
+ */
+const SYSTEM_SECTION_LABELS = new Set([
+  "links",
+  "link",
+  "enlaces",
+  "selected work",
+  "selected works",
+  "portfolio",
+  "portafolio",
+  "social",
+  "socials",
+  "redes sociales",
+  "documents",
+  "documentos",
+  "buttons",
+  "botones",
+  "button",
+  "cta",
+  "section",
+]);
+
+function isSystemSectionLabel(value: string): boolean {
+  const normalized = value.trim().toLowerCase();
+  if (!normalized) return false;
+  return SYSTEM_SECTION_LABELS.has(normalized);
+}
+
 export function BlockTitle({ title, path }: { title?: string | undefined; path: string }) {
-  const { theme } = useRender();
+  const { theme, mode } = useRender();
   if (title === undefined || title === "") return null;
+  // Published pages show user content only — never the generic section labels
+  // that template defaults inject to explain what kind of block this is. The
+  // editor still renders them so users can see and edit the block.
+  if (mode !== "edit" && isSystemSectionLabel(title)) return null;
   return (
     <InlineText
       as="h2"
@@ -134,7 +171,10 @@ export function BlockTitle({ title, path }: { title?: string | undefined; path: 
 }
 
 export function EmptyBlockState({ label }: { label: string }) {
-  const { theme } = useRender();
+  const { theme, mode } = useRender();
+  // Editor-only instruction ("No links yet…", "No projects yet…"). A published
+  // page renders nothing for an empty block — instructions must never leak.
+  if (mode !== "edit") return null;
   return (
     <div
       style={{

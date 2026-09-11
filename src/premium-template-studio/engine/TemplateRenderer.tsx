@@ -656,19 +656,6 @@ function TemplateRendererImpl({
               );
             })}
           </div>
-
-          {config.settings.showBranding ? (
-            <footer
-              style={{
-                textAlign: "center",
-                fontSize: 11.5,
-                color: theme.colors.mutedText,
-                opacity: 0.8,
-              }}
-            >
-              Made with Premium Template Studio
-            </footer>
-          ) : null}
         </div>
       </div>
     </RenderProvider>

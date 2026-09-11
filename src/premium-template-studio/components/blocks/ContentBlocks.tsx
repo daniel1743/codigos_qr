@@ -41,11 +41,18 @@ const TRUST_ICONS: Record<string, typeof BadgeCheck> = {
 };
 
 export function HeadingBlock({ block }: BlockProps) {
-  const { theme } = useRender();
+  const { theme, mode } = useRender();
   const align = block.layout.align ?? "left";
+  const title = block.content.title ?? "";
+  // The untouched heading default ("Section title") is a system placeholder, not
+  // user content: hide it on published pages, but keep it visible while editing.
+  // Matching is exact + case-insensitive so a user-authored heading that merely
+  // resembles it is never removed.
+  const isUntouchedDefault = title.trim().toLowerCase() === "section title";
+  const showTitle = mode === "edit" || !isUntouchedDefault;
   return (
     <header style={{ textAlign: align }}>
-      {block.variant === "eyebrow" && (
+      {block.variant === "eyebrow" && (block.content.subtitle || mode === "edit") && (
         <div
           style={{
             fontSize: 11,
@@ -56,16 +63,18 @@ export function HeadingBlock({ block }: BlockProps) {
             fontWeight: 600,
           }}
         >
-          {block.content.subtitle || "Section"}
+          {block.content.subtitle || (mode === "edit" ? "Section" : "")}
         </div>
       )}
-      <InlineText
-        as="h2"
-        path={`blocks.${block.id}.content.title`}
-        value={block.content.title ?? ""}
-        placeholder="Section title"
-        style={{ ...headingStyle(theme, 0.62) }}
-      />
+      {showTitle && (
+        <InlineText
+          as="h2"
+          path={`blocks.${block.id}.content.title`}
+          value={title}
+          placeholder="Section title"
+          style={{ ...headingStyle(theme, 0.62) }}
+        />
+      )}
       {block.variant !== "eyebrow" && block.content.subtitle ? (
         <InlineText
           as="p"

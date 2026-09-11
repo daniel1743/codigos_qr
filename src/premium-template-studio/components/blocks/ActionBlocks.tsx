@@ -492,7 +492,7 @@ export function FeaturedLinkBlock({ block }: BlockProps) {
 }
 
 export function ButtonGroupBlock({ block }: BlockProps) {
-  const { theme } = useRender();
+  const { theme, mode } = useRender();
   const items = block.content.items ?? [];
   if (items.length === 0) return <EmptyBlockState label="No buttons yet." />;
 
@@ -542,7 +542,7 @@ export function ButtonGroupBlock({ block }: BlockProps) {
                     }),
               }}
             >
-              {item.label ?? "Button"}
+              {item.label ?? (mode === "edit" ? "Button" : "")}
             </div>
           </SmartLink>
         );
@@ -552,7 +552,7 @@ export function ButtonGroupBlock({ block }: BlockProps) {
 }
 
 export function CTABlock({ block }: BlockProps) {
-  const { theme } = useRender();
+  const { theme, mode } = useRender();
   const gradient = block.variant === "gradient";
   const inline = block.variant === "inline";
   const surface = gradient
@@ -621,7 +621,7 @@ export function CTABlock({ block }: BlockProps) {
               : {}),
           }}
         >
-          {block.content.label || "Get in touch"}
+          {block.content.label || (mode === "edit" ? "Get in touch" : "")}
         </div>
       </SmartLink>
     </section>
