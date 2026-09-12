@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { BadgeCheck, MapPin } from "lucide-react";
 import { useRender, type ProfileTarget } from "../../engine/RenderContext";
-import { headingStyle } from "../../engine/styleEngine";
+import { headingStyle, applyTypographyOverride } from "../../engine/styleEngine";
 import { hexToRgba } from "../../utils";
 import type { TemplateLayout, TemplateProfile } from "../../types";
 import { InlineText } from "../blocks/primitives";
@@ -279,7 +279,7 @@ export function ProfileHeader({
           path="profile.name"
           value={profile.name}
           placeholder="Your name"
-          style={headingStyle(theme, hero ? 1 : 0.86)}
+          style={applyTypographyOverride(headingStyle(theme, hero ? 1 : 0.86), profile.nameTypography)}
         />
         <VerificationBadge
           variant={resolveVerificationVariant(profile.verified, profile.verificationVariant)}
@@ -287,12 +287,15 @@ export function ProfileHeader({
       </div>
       {(profile.role || profile.company) && (
         <div
-          style={{
-            marginTop: 8,
-            fontSize: 14,
-            color: theme.colors.mutedText,
-            letterSpacing: "0.01em",
-          }}
+          style={applyTypographyOverride(
+            {
+              marginTop: 8,
+              fontSize: 14,
+              color: theme.colors.mutedText,
+              letterSpacing: "0.01em",
+            },
+            profile.roleTypography
+          )}
         >
           <InlineText as="span" path="profile.role" value={profile.role ?? ""} placeholder="Role" />
           {profile.company ? ` · ${profile.company}` : ""}
@@ -312,15 +315,18 @@ export function ProfileHeader({
             path="profile.description"
             value={profile.description}
             placeholder="Short bio"
-            style={{
-              margin: "12px auto 0",
-              maxWidth: 460,
-              marginLeft: inline || align === "left" ? 0 : undefined,
-              fontSize: theme.typography.bodySize,
-              color: theme.colors.mutedText,
-              lineHeight: theme.typography.lineHeight,
-              whiteSpace: "pre-wrap",
-            }}
+            style={applyTypographyOverride(
+              {
+                margin: "12px auto 0",
+                maxWidth: 460,
+                marginLeft: inline || align === "left" ? 0 : undefined,
+                fontSize: theme.typography.bodySize,
+                color: theme.colors.mutedText,
+                lineHeight: theme.typography.lineHeight,
+                whiteSpace: "pre-wrap",
+              },
+              profile.descriptionTypography
+            )}
           />
         </div>
       ) : null}
@@ -338,7 +344,12 @@ export function ProfileHeader({
       >
         {profile.username ? <span style={{ opacity: 0.9 }}>@{profile.username}</span> : null}
         {profile.location ? (
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+          <span
+            style={applyTypographyOverride(
+              { display: "inline-flex", alignItems: "center", gap: 4 },
+              profile.locationTypography
+            )}
+          >
             <MapPin size={12} aria-hidden /> {profile.location}
           </span>
         ) : null}

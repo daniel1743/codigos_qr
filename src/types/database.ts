@@ -142,3 +142,32 @@ export interface ProfileLink {
   created_at: string;
   updated_at: string;
 }
+
+export type PageType = "landing" | "promotion" | "menu" | "campaign" | "event";
+
+export interface Page {
+  id: string;
+  owner_user_id: string;
+  profile_id: string;
+  public_id: string;
+  title: string;
+  page_type: PageType;
+  template_config: any | null;
+  published_template_config: any | null;
+  published: boolean;
+  published_revision: number;
+  published_at: string | null;
+  slug: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type PageInsert = Omit<Page, "id" | "public_id" | "created_at" | "updated_at"> & {
+  id?: string;
+  public_id?: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type PageUpdate = Partial<PageInsert>;
+

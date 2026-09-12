@@ -1,10 +1,12 @@
-import { ArrowUpRight, ImageOff, PlayCircle } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUpRight, ImageOff, PlayCircle } from "lucide-react";
 import { useState } from "react";
 import { useRender } from "../../engine/RenderContext";
-import { cardStyle, headingStyle } from "../../engine/styleEngine";
+import { applyTypographyOverride, cardStyle, headingStyle } from "../../engine/styleEngine";
 import { videoEmbedUrl } from "../../utils";
 import { BlockTitle, EmptyBlockState, InlineText, SmartLink } from "./primitives";
 import type { BlockProps } from "./ContentBlocks";
+import { Dialog, DialogContent, DialogTitle } from "../../../components/ui/dialog";
+import { getGalleryColumns, moveGalleryLightboxIndex } from "./galleryImages";
 
 const ASPECT: Record<string, string> = {
   square: "1 / 1",
@@ -153,12 +155,20 @@ export function ImageBlock({ block }: BlockProps) {
 }
 
 export function GalleryBlock({ block }: BlockProps) {
-  const { theme, breakpoint } = useRender();
+  const { theme, breakpoint, mode } = useRender();
   const images = block.content.images ?? [];
-  if (images.length === 0)
-    return <EmptyBlockState label="No images yet. Upload from the Assets panel." />;
-  const columns =
-    breakpoint === "mobile" ? Math.min(block.layout.columns ?? 3, 2) : (block.layout.columns ?? 3);
+  const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null);
+  if (images.length === 0) {
+    return mode === "edit" ? <EmptyBlockState label="No images yet. Upload from the Assets panel." /> : null;
+  }
+  const columns = getGalleryColumns(images.length, block.layout.columns ?? 3, breakpoint === "mobile");
+  const activeImage = activeImageIndex === null ? null : images[activeImageIndex];
+  const navigate = (direction: -1 | 1) => {
+    setActiveImageIndex((index) =>
+      index === null ? 0 : moveGalleryLightboxIndex(index, images.length, direction),
+    );
+  };
+
   return (
     <div>
       <BlockTitle title={block.content.title} path={`blocks.${block.id}.content.title`} />
@@ -169,16 +179,74 @@ export function GalleryBlock({ block }: BlockProps) {
           gap: block.layout.gap ?? 8,
         }}
       >
-        {images.map((image, i) => (
-          <SafeImage
-            key={image.id}
-            src={image.url}
-            alt={image.alt ?? ""}
-            radius={theme.cards.radius - 4}
-            aspect={block.variant === "mosaic" && i === 0 ? "video" : "square"}
-          />
-        ))}
+        {images.map((image, i) => {
+          const imageElement = (
+            <SafeImage
+              src={image.url}
+              alt={image.alt ?? ""}
+              radius={theme.cards.radius - 4}
+              aspect={block.variant === "mosaic" && i === 0 ? "video" : "square"}
+            />
+          );
+          return mode === "public" ? (
+            <button
+              key={image.id}
+              type="button"
+              onClick={() => setActiveImageIndex(i)}
+              aria-label={`Open ${image.alt || `gallery image ${i + 1}`}`}
+              style={{ border: 0, padding: 0, background: "transparent", cursor: "zoom-in", minWidth: 0 }}
+            >
+              {imageElement}
+            </button>
+          ) : (
+            <div key={image.id}>{imageElement}</div>
+          );
+        })}
       </div>
+      {mode === "public" ? (
+        <Dialog open={activeImageIndex !== null} onOpenChange={(open) => !open && setActiveImageIndex(null)}>
+          <DialogContent
+            className="max-w-[min(96vw,72rem)] border-0 bg-transparent p-2 shadow-none"
+            style={{ width: "min(96vw, 72rem)", maxWidth: "96vw" }}
+          >
+            <DialogTitle className="sr-only">
+              {activeImage?.alt || "Gallery image"}
+            </DialogTitle>
+            {activeImage ? (
+              <div style={{ display: "grid", gridTemplateColumns: images.length > 1 ? "auto minmax(0, 1fr) auto" : "minmax(0, 1fr)", alignItems: "center", gap: 8 }}>
+                {images.length > 1 ? (
+                  <button
+                    type="button"
+                    onClick={() => navigate(-1)}
+                    aria-label="Previous image"
+                    style={{ border: 0, borderRadius: 6, padding: 10, cursor: "pointer" }}
+                  >
+                    <ArrowLeft size={20} aria-hidden />
+                  </button>
+                ) : null}
+                <img
+                  src={activeImage.url}
+                  alt={activeImage.alt ?? ""}
+                  style={{ display: "block", width: "100%", maxHeight: "calc(100dvh - 7rem)", objectFit: "contain", borderRadius: theme.cards.radius }}
+                />
+                {images.length > 1 ? (
+                  <button
+                    type="button"
+                    onClick={() => navigate(1)}
+                    aria-label="Next image"
+                    style={{ border: 0, borderRadius: 6, padding: 10, cursor: "pointer" }}
+                  >
+                    <ArrowRight size={20} aria-hidden />
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
+            {images.length > 1 && activeImageIndex !== null ? (
+              <p className="sr-only">{`${activeImageIndex + 1} of ${images.length}`}</p>
+            ) : null}
+          </DialogContent>
+        </Dialog>
+      ) : null}
     </div>
   );
 }
@@ -276,7 +344,12 @@ export function PortfolioBlock({ block }: BlockProps) {
                   <ArrowUpRight size={14} aria-hidden style={{ color: theme.colors.mutedText }} />
                 </div>
                 {item.description ? (
-                  <div style={{ fontSize: 12.5, color: theme.colors.mutedText, marginTop: 2 }}>
+                  <div
+                    style={applyTypographyOverride(
+                      { fontSize: 12.5, color: theme.colors.mutedText, marginTop: 2 },
+                      item.descriptionTypography,
+                    )}
+                  >
                     {item.description}
                   </div>
                 ) : null}

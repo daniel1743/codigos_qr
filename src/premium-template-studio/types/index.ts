@@ -253,11 +253,15 @@ export interface TemplateLayout {
 
 export interface TemplateProfile {
   name: string;
+  nameTypography?: TypographyOverride;
   username: string;
   role?: string;
+  roleTypography?: TypographyOverride;
   company?: string;
   location?: string;
+  locationTypography?: TypographyOverride;
   description?: string;
+  descriptionTypography?: TypographyOverride;
   verified?: boolean;
   /**
    * Trusted, system-controlled verification variant. Populated by the backend
@@ -373,6 +377,14 @@ export interface LinkItem {
   mediaSize?: "25" | "50" | "100";
 }
 
+export interface TypographyOverride {
+  fontFamily?: string;
+  fontWeight?: number;
+  fontSize?: number;
+  textAlign?: "left" | "center" | "right" | "justify";
+  textColor?: string;
+}
+
 /** Explicit item payload shared by the currently registered block families. */
 export interface BlockItem {
   id: string;
@@ -408,6 +420,9 @@ export interface BlockItem {
   features?: string[];
   helperText?: string;
   avatarUrl?: string;
+  typography?: TypographyOverride | undefined;
+  descriptionTypography?: TypographyOverride | undefined;
+  ctaTypography?: TypographyOverride | undefined;
 }
 
 export interface HeroAvatarContent {
@@ -497,6 +512,10 @@ export interface BlockStyle {
   borderWidth?: number;
   padding?: number;
   minHeight?: number;
+  titleTypography?: TypographyOverride | undefined;
+  subtitleTypography?: TypographyOverride | undefined;
+  descriptionTypography?: TypographyOverride | undefined;
+  ctaTypography?: TypographyOverride | undefined;
   overlay?: {
     type?: "solid" | "gradient";
     opacity?: number;

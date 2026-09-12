@@ -14,7 +14,12 @@ import {
 } from "lucide-react";
 import { useState, type ComponentType, type CSSProperties } from "react";
 import { useRender } from "../../engine/RenderContext";
-import { buttonStyle, cardStyle, headingStyle } from "../../engine/styleEngine";
+import {
+  applyTypographyOverride,
+  buttonStyle,
+  cardStyle,
+  headingStyle,
+} from "../../engine/styleEngine";
 import { hexToRgba, prettyUrl, readableOn } from "../../utils";
 import type { BlockItem, TemplateBlock } from "../../types";
 import { BlockTitle, EmptyBlockState, InlineText, SmartLink } from "./primitives";
@@ -251,7 +256,9 @@ export function LinksBlock({ block }: BlockProps) {
                     }}
                   >
                     <span style={titleClamp}>{label}</span>
-                    <span style={descClamp}>{item.description || prettyUrl(href)}</span>
+                    <span style={applyTypographyOverride(descClamp, item.descriptionTypography)}>
+                      {item.description || prettyUrl(href)}
+                    </span>
                   </span>
                   <img
                     src={item.imageUrl}
@@ -311,7 +318,9 @@ export function LinksBlock({ block }: BlockProps) {
                   }}
                 >
                   <span style={titleClamp}>{label}</span>
-                  <span style={descClamp}>{item.description || prettyUrl(href)}</span>
+                  <span style={applyTypographyOverride(descClamp, item.descriptionTypography)}>
+                    {item.description || prettyUrl(href)}
+                  </span>
                 </span>
               </article>
             </SmartLink>
@@ -353,7 +362,12 @@ export function LinksBlock({ block }: BlockProps) {
                   <span style={{ display: "block", fontWeight: 600, fontSize: 15 }}>
                     {item.label}
                   </span>
-                  <span style={{ display: "block", fontSize: 12.5, color: theme.colors.mutedText }}>
+                  <span
+                    style={applyTypographyOverride(
+                      { display: "block", fontSize: 12.5, color: theme.colors.mutedText },
+                      item.descriptionTypography,
+                    )}
+                  >
                     {item.description || prettyUrl(href)}
                   </span>
                 </span>
@@ -397,7 +411,7 @@ export function LinksBlock({ block }: BlockProps) {
           >
             <div
               className="pts-hoverable"
-              style={{
+              style={applyTypographyOverride({
                 ...buttonStyle(theme, block.style),
                 ...(glass
                   ? {
@@ -408,7 +422,7 @@ export function LinksBlock({ block }: BlockProps) {
                     }
                   : {}),
                 justifyContent: "space-between",
-              }}
+              }, item.typography)}
             >
               <span style={{ fontWeight: theme.buttons.fontWeight, fontSize: 15 }}>
                 {label}
@@ -526,7 +540,7 @@ export function ButtonGroupBlock({ block }: BlockProps) {
           >
             <div
               className="pts-hoverable"
-              style={{
+              style={applyTypographyOverride({
                 ...style,
                 minHeight: theme.buttons.height - 4,
                 justifyContent: "center",
@@ -540,7 +554,7 @@ export function ButtonGroupBlock({ block }: BlockProps) {
                       borderWidth: 1,
                       boxShadow: "none",
                     }),
-              }}
+              }, item.typography)}
             >
               {item.label ?? (mode === "edit" ? "Button" : "")}
             </div>

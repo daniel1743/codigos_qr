@@ -1,4 +1,4 @@
-import { Monitor, Smartphone, Tablet, Trash2, Copy, Lock, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, Monitor, Smartphone, Tablet, Trash2, Copy, Lock, Plus } from "lucide-react";
 import { useStudio } from "../../state/StudioProvider";
 import { getBlockDefinition } from "../../constants/blockDefinitions";
 import {
@@ -36,6 +36,7 @@ import type {
   HoverPreset,
   TrustBadge,
   TrustSignalType,
+  TypographyOverride,
 } from "../../types";
 import { FONT_OPTIONS } from "../../constants/themes";
 import {
@@ -65,6 +66,13 @@ import {
   type SmartLinkPreview,
   type SmartLinkPreviewStatus,
 } from "../../../lib/smart-link-preview";
+import {
+  appendGalleryImage,
+  moveGalleryImage,
+  removeGalleryImage,
+  replaceGalleryImage,
+  type GalleryImage,
+} from "../blocks/galleryImages";
 
 
 /**
@@ -127,11 +135,15 @@ function AssetField({
   accept,
   value,
   onChange,
+  uploadLabel,
+  showUrlInput = true,
 }: {
   label: string;
   accept: string;
   value: string;
   onChange: (url: string, asset?: { name: string }) => void;
+  uploadLabel?: string | undefined;
+  showUrlInput?: boolean | undefined;
 }) {
   const { adapters } = useStudio();
   const { messages } = usePowerEditorLocale();
@@ -142,10 +154,14 @@ function AssetField({
   return (
     <Field label={label}>
       <div className="space-y-2">
-        <TextInput value={value} onChange={(v) => onChange(v)} placeholder="https://…" />
+        {showUrlInput ? (
+          <TextInput value={value} onChange={(v) => onChange(v)} placeholder="https://…" />
+        ) : null}
         <div className="flex items-center gap-2">
           <GhostButton onClick={() => input.current?.click()}>
-            {busy ? messages.inspector.uploading : value ? messages.inspector.replace : messages.inspector.upload}
+            {busy
+              ? messages.inspector.uploading
+              : (uploadLabel ?? (value ? messages.inspector.replace : messages.inspector.upload))}
           </GhostButton>
           {value && (
             <GhostButton
@@ -200,6 +216,105 @@ function AssetField({
         />
       </div>
     </Field>
+  );
+}
+
+function GalleryBlockInspector({ block }: { block: TemplateBlock }) {
+  const { adapters, dispatch } = useStudio();
+  const images = block.content.images ?? [];
+  const update = (next: GalleryImage[]) =>
+    dispatch({ type: "patchBlockField", id: block.id, path: "content.images", value: next });
+
+  const remove = async (image: GalleryImage) => {
+    if (image.url) {
+      try {
+        await adapters.assets.remove?.(await resolveAssetId(image.url, adapters));
+      } catch {
+        // Removing the item from the gallery remains valid if storage cleanup fails.
+      }
+    }
+    update(removeGalleryImage(images, image.id));
+  };
+
+  return (
+    <div className="space-y-3">
+      <Section title="Imágenes">
+        <div className="space-y-3">
+          {images.map((image, index) => (
+            <div key={image.id} className="space-y-2 rounded-lg border border-border p-3">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  Imagen {index + 1}
+                </span>
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    title="Mover imagen a la izquierda"
+                    aria-label="Mover imagen a la izquierda"
+                    disabled={index === 0}
+                    onClick={() => update(moveGalleryImage(images, index, -1))}
+                    className="rounded p-1 text-muted-foreground hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    title="Mover imagen a la derecha"
+                    aria-label="Mover imagen a la derecha"
+                    disabled={index === images.length - 1}
+                    onClick={() => update(moveGalleryImage(images, index, 1))}
+                    className="rounded p-1 text-muted-foreground hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    title="Eliminar imagen"
+                    aria-label="Eliminar imagen"
+                    onClick={() => void remove(image)}
+                    className="rounded p-1 text-muted-foreground hover:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+              <AssetField
+                label="Sustituir imagen"
+                accept="image/*"
+                value={image.url}
+                onChange={(url) => {
+                  if (url) {
+                    update(replaceGalleryImage(images, image.id, url));
+                    return;
+                  }
+                  // AssetField already asks the adapter to delete the asset.
+                  update(removeGalleryImage(images, image.id));
+                }}
+              />
+              <Field label="Texto alternativo">
+                <TextInput
+                  value={image.alt ?? ""}
+                  onChange={(alt) =>
+                    update(images.map((current) => (current.id === image.id ? { ...current, alt } : current)))
+                  }
+                />
+              </Field>
+            </div>
+          ))}
+          <AssetField
+            label="Agregar imagen"
+            accept="image/*"
+            value=""
+            uploadLabel="Agregar imagen"
+            showUrlInput={false}
+            onChange={(url, asset) => {
+              if (!url) return;
+              update(appendGalleryImage(images, { id: uid("img"), url, alt: asset?.name ?? "" }));
+            }}
+          />
+        </div>
+      </Section>
+    </div>
   );
 }
 
@@ -515,6 +630,10 @@ function ProfileInspector() {
         <Field label={messages.inspector.name}>
           <TextInput value={profile.name} onChange={(v) => patch("profile.name", v)} />
         </Field>
+        <TypographyOverrideEditor
+          value={profile.nameTypography}
+          onChange={(typography) => patch("profile.nameTypography", typography)}
+        />
         <Field label={messages.inspector.username}>
           <TextInput
             value={profile.username ?? ""}
@@ -527,12 +646,20 @@ function ProfileInspector() {
         <Field label={messages.inspector.company}>
           <TextInput value={profile.company ?? ""} onChange={(v) => patch("profile.company", v)} />
         </Field>
+        <TypographyOverrideEditor
+          value={profile.roleTypography}
+          onChange={(typography) => patch("profile.roleTypography", typography)}
+        />
         <Field label={messages.inspector.location}>
           <TextInput
             value={profile.location ?? ""}
             onChange={(v) => patch("profile.location", v)}
           />
         </Field>
+        <TypographyOverrideEditor
+          value={profile.locationTypography}
+          onChange={(typography) => patch("profile.locationTypography", typography)}
+        />
         <div data-inspector-focus="profile-bio" {...contextualFocusProps("profile-bio")}>
           <Field label={messages.inspector.bio}>
             <TextArea
@@ -540,6 +667,10 @@ function ProfileInspector() {
               onChange={(v) => patch("profile.description", v)}
             />
           </Field>
+          <TypographyOverrideEditor
+            value={profile.descriptionTypography}
+            onChange={(typography) => patch("profile.descriptionTypography", typography)}
+          />
         </div>
         <div data-inspector-focus="profile-avatar" {...contextualFocusProps("profile-avatar")}>
           <AssetField
@@ -776,6 +907,89 @@ export function computePowerMediaCardPatch(
   return patch;
 }
 
+function TypographyOverrideEditor({
+  value,
+  onChange,
+  defaultLabel = "Heredar de la página",
+  includeColor = true,
+}: {
+  value?: TypographyOverride | undefined;
+  onChange: (updates: TypographyOverride | undefined) => void;
+  defaultLabel?: string;
+  includeColor?: boolean;
+}) {
+  const { messages } = usePowerEditorLocale();
+  const set = (key: keyof TypographyOverride, val: unknown) => {
+    const next = { ...value, [key]: val };
+    Object.keys(next).forEach((k) => next[k as keyof TypographyOverride] === undefined && delete next[k as keyof TypographyOverride]);
+    if (Object.keys(next).length === 0) onChange(undefined);
+    else onChange(next as TypographyOverride);
+  };
+  return (
+    <div className="space-y-4 pt-2">
+      {includeColor && (
+        <Field label={messages.inspector.textColor ?? "Color"}>
+          <ColorInput
+            value={value?.textColor ?? ""}
+            onChange={(v) => set("textColor", v === "" ? undefined : v)}
+          />
+        </Field>
+      )}
+      <Field label={messages.inspector.fontFamily ?? "Fuente"}>
+        <select
+          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground"
+          value={value?.fontFamily ?? ""}
+          onChange={(e) => set("fontFamily", e.target.value === "" ? undefined : e.target.value)}
+        >
+          <option value="">{defaultLabel}</option>
+          {FONT_OPTIONS.map((font) => (
+            <option key={font.value} value={font.value} style={{ fontFamily: font.value }}>
+              {font.label}
+            </option>
+          ))}
+        </select>
+      </Field>
+      <Field label={messages.inspector.fontWeight ?? "Peso"}>
+        <Segmented
+          size="sm"
+          value={String(value?.fontWeight ?? "")}
+          options={[
+            { value: "", label: "Heredar" },
+            { value: "300", label: "Light" },
+            { value: "400", label: "Regular" },
+            { value: "500", label: "Medium" },
+            { value: "600", label: "Semibold" },
+            { value: "700", label: "Bold" },
+            { value: "800", label: "Extra" },
+          ]}
+          onChange={(v) => set("fontWeight", v === "" ? undefined : Number(v))}
+        />
+      </Field>
+      <Field label={messages.inspector.fontSize ?? "Tamaño"}>
+        <NumberSlider
+          value={value?.fontSize ?? 16}
+          min={10}
+          max={120}
+          step={1}
+          onChange={(v) => set("fontSize", v)}
+        />
+      </Field>
+      <Field label={messages.inspector.alignment ?? "Alineación"}>
+        <Segmented
+          size="sm"
+          value={value?.textAlign ?? ""}
+          options={[
+            { value: "", label: "Auto" },
+            { value: "left", label: "Izq" },
+            { value: "center", label: "Centro" },
+            { value: "right", label: "Der" },
+          ]}
+          onChange={(v) => set("textAlign", v === "" ? undefined : v as any)}
+        />
+      </Field>
+    </div>
+  );
+}
 
 export function ItemsEditor({ block }: { block: TemplateBlock }) {
   const { dispatch } = useStudio();
@@ -857,6 +1071,33 @@ export function ItemsEditor({ block }: { block: TemplateBlock }) {
               update(items.map((i) => (i.id === item.id ? { ...i, description: v } : i)))
             }
           />
+          <div className="pt-2">
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              Título / etiqueta
+            </span>
+            <TypographyOverrideEditor
+              value={item.typography}
+              onChange={(typography) => update(items.map((i) => (i.id === item.id ? { ...i, typography } : i)))}
+              includeColor={!supportsMediaPresentation} // button groups usually have a global text color setting, but let's just include it
+            />
+          </div>
+          {item.description?.trim() ? (
+            <div className="pt-2">
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                Descripción
+              </span>
+              <TypographyOverrideEditor
+                value={item.descriptionTypography}
+                onChange={(descriptionTypography) =>
+                  update(
+                    items.map((i) =>
+                      i.id === item.id ? { ...i, descriptionTypography } : i,
+                    ),
+                  )
+                }
+              />
+            </div>
+          ) : null}
           {supportsMediaPresentation ? (
             <>
               <Field label="Presentation">
@@ -1312,15 +1553,12 @@ function CtaStyleControls({
 
   return (
     <div className="space-y-2">
+      {/* Tipografía — kept first so font/weight/size/color are immediately
+          discoverable when a button/CTA is selected (no hunting through
+          appearance). Edits the same `CTAStyle` authority, not new state. */}
       <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-        {messages.inspector.styleCta}
+        {messages.sidebar.typography}
       </span>
-      <Field label={messages.inspector.background}>
-        <ColorInput
-          value={s.backgroundColor ?? ""}
-          onChange={(v) => set("backgroundColor", v === "" ? undefined : v)}
-        />
-      </Field>
       <Field label={messages.inspector.textColor}>
         <ColorInput
           value={s.textColor ?? ""}
@@ -1335,20 +1573,11 @@ function CtaStyleControls({
         >
           <option value="">{messages.options.theme}</option>
           {FONT_OPTIONS.map((font) => (
-            <option key={font.value} value={font.value}>
+            <option key={font.value} value={font.value} style={{ fontFamily: font.value }}>
               {font.label}
             </option>
           ))}
         </select>
-      </Field>
-      <Field label={messages.inspector.fontSize}>
-        <NumberSlider
-          value={s.fontSize ?? 14}
-          min={10}
-          max={32}
-          step={1}
-          onChange={(v) => set("fontSize", v)}
-        />
       </Field>
       <Field label={messages.inspector.fontWeight}>
         <Segmented
@@ -1362,6 +1591,27 @@ function CtaStyleControls({
             { value: "800", label: "Extra" },
           ]}
           onChange={(v) => set("fontWeight", Number(v))}
+        />
+      </Field>
+      <Field label={messages.inspector.fontSize}>
+        <NumberSlider
+          value={s.fontSize ?? 14}
+          min={10}
+          max={32}
+          step={1}
+          onChange={(v) => set("fontSize", v)}
+        />
+      </Field>
+
+      {/* Apariencia / Estilo (container) — below typography so text styling
+          comes first in the selected-element Inspector. */}
+      <span className="mt-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+        {messages.inspector.styleCta}
+      </span>
+      <Field label={messages.inspector.background}>
+        <ColorInput
+          value={s.backgroundColor ?? ""}
+          onChange={(v) => set("backgroundColor", v === "" ? undefined : v)}
         />
       </Field>
       <Field label={messages.inspector.borderColor}>
@@ -1411,6 +1661,25 @@ function CtaStyleControls({
       </GhostButton>
     </div>
   );
+}
+
+/**
+ * Resolve a theme font stack to a bundled FONT_OPTIONS value for the font-family
+ * `<select>`. Some legacy theme presets store slightly different fallback stacks
+ * (e.g. `'"Inter", system-ui, sans-serif'`) than the canonical `FONT_OPTIONS`
+ * tokens, so we match by the leading family name when an exact token match fails.
+ * Falls back to "" (no preselection) for any truly unknown stack.
+ */
+export function resolveFontOption(font: string): string {
+  const exact = FONT_OPTIONS.find((f) => f.value === font);
+  if (exact) return exact.value;
+  const family = font
+    .split(",")[0]
+    ?.trim()
+    .replace(/^["']|["']$/g, "")
+    .toLowerCase();
+  const byFamily = FONT_OPTIONS.find((f) => f.label.toLowerCase() === family);
+  return byFamily?.value ?? "";
 }
 
 function HeroBlockInspector({ block }: { block: TemplateBlock }) {
@@ -1514,6 +1783,13 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
           <Field label={messages.inspector.title}>
             <TextInput value={content.title ?? ""} onChange={(v) => field("content.title", v)} />
           </Field>
+          <div className="pt-2">
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Tipografía</span>
+            <TypographyOverrideEditor
+              value={block.style.titleTypography}
+              onChange={(typography) => field("style.titleTypography", typography)}
+            />
+          </div>
         </div>
         <div data-inspector-focus="hero-subtitle" {...contextualFocusProps("hero-subtitle")}>
           <Field label={messages.inspector.subtitle}>
@@ -1522,6 +1798,13 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
               onChange={(v) => field("content.subtitle", v)}
             />
           </Field>
+          <div className="pt-2">
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Tipografía</span>
+            <TypographyOverrideEditor
+              value={block.style.subtitleTypography}
+              onChange={(typography) => field("style.subtitleTypography", typography)}
+            />
+          </div>
         </div>
         <div data-inspector-focus="hero-description" {...contextualFocusProps("hero-description")}>
           <Field label={messages.inspector.description}>
@@ -1531,6 +1814,13 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
               rows={3}
             />
           </Field>
+          <div className="pt-2">
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Tipografía</span>
+            <TypographyOverrideEditor
+              value={block.style.descriptionTypography}
+              onChange={(typography) => field("style.descriptionTypography", typography)}
+            />
+          </div>
         </div>
 
         {/* Badge Sub-section */}
@@ -1551,6 +1841,43 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
             </Field>
           )}
         </div>
+      </Section>
+
+      {/* Typography Section — font-family discoverability. Reuses the canonical
+          `theme.typography.headingFont` / `theme.typography.bodyFont` authority and
+          `FONT_OPTIONS` (no new font model). Placed directly after the text controls
+          so "Fuente" is immediately reachable when editing a title or paragraph. */}
+      <Section title={messages.sidebar.typography}>
+        <Field label={messages.sidebar.headingFont}>
+          <select
+            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground"
+            value={resolveFontOption(state.config.theme.typography.headingFont)}
+            onChange={(e) =>
+              dispatch({ type: "patch", path: "theme.typography.headingFont", value: e.target.value })
+            }
+          >
+            {FONT_OPTIONS.map((font) => (
+              <option key={font.value} value={font.value} style={{ fontFamily: font.value }}>
+                {font.label}
+              </option>
+            ))}
+          </select>
+        </Field>
+        <Field label={messages.inspector.fontFamily}>
+          <select
+            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground"
+            value={resolveFontOption(state.config.theme.typography.bodyFont)}
+            onChange={(e) =>
+              dispatch({ type: "patch", path: "theme.typography.bodyFont", value: e.target.value })
+            }
+          >
+            {FONT_OPTIONS.map((font) => (
+              <option key={font.value} value={font.value} style={{ fontFamily: font.value }}>
+                {font.label}
+              </option>
+            ))}
+          </select>
+        </Field>
       </Section>
 
       {/* Avatar Section */}
@@ -2566,6 +2893,10 @@ function FeaturedMediaBlockInspector({ block }: { block: TemplateBlock }) {
             rows={3}
           />
         </Field>
+        <TypographyOverrideEditor
+          value={block.style.descriptionTypography}
+          onChange={(typography) => field("style.descriptionTypography", typography)}
+        />
         <Field label={messages.inspector.ctaLabel}>
           <TextInput
             value={c.ctaLabel ?? ""}
@@ -2573,6 +2904,10 @@ function FeaturedMediaBlockInspector({ block }: { block: TemplateBlock }) {
             onChange={(v) => field("content.ctaLabel", v)}
           />
         </Field>
+        <TypographyOverrideEditor
+          value={block.style.ctaTypography}
+          onChange={(typography) => field("style.ctaTypography", typography)}
+        />
         <Field label={messages.inspector.ctaUrl}>
           <TextInput
             value={c.ctaUrl ?? ""}
@@ -3587,6 +3922,7 @@ function BlockInspector({ block }: { block: TemplateBlock }) {
         {block.type === "events" && <EventsBlockInspector block={block} />}
         {block.type === "map" && <MapBlockInspector block={block} />}
         {block.type === "music" && <MusicBlockInspector block={block} />}
+        {block.type === "gallery" && <GalleryBlockInspector block={block} />}
         {block.type === "carousel" && <CarouselBlockInspector block={block} />}
         {block.type === "tabs" && <TabsBlockInspector block={block} />}
         {block.type === "bottomNav" && <BottomNavBlockInspector block={block} />}
@@ -3608,6 +3944,7 @@ function BlockInspector({ block }: { block: TemplateBlock }) {
           block.type !== "events" &&
           block.type !== "map" &&
           block.type !== "music" &&
+          block.type !== "gallery" &&
           block.type !== "carousel" &&
           block.type !== "tabs" &&
           block.type !== "bottomNav" && (

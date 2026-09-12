@@ -18,6 +18,21 @@ export const canonicalPageService = {
     return readCanonicalPageEnvelope(data?.template_config);
   },
 
+  /** Read the public snapshot without mutating the canonical record. */
+  async getPublished(
+    supabase: SupabaseClient,
+    profileId: string,
+  ): Promise<CanonicalPageEnvelopeV1 | null> {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("published_template_config")
+      .eq("id", profileId)
+      .maybeSingle();
+
+    if (error) throw error;
+    return readCanonicalPageEnvelope(data?.published_template_config);
+  },
+
   /** Persist an Engine/Power Editor config while retaining Basic metadata. */
   async save(
     supabase: SupabaseClient,
@@ -61,16 +76,14 @@ export const canonicalPageService = {
 
     if (error) throw error;
 
-    const profile = data as
-      | {
-          id?: unknown;
-          public_id?: unknown;
-          published?: unknown;
-          published_revision?: unknown;
-          published_at?: unknown;
-          published_template_config?: unknown;
-        }
-      | null;
+    const profile = data as {
+      id?: unknown;
+      public_id?: unknown;
+      published?: unknown;
+      published_revision?: unknown;
+      published_at?: unknown;
+      published_template_config?: unknown;
+    } | null;
     const publishedEnvelope = readCanonicalPageEnvelope(profile?.published_template_config);
     if (
       !profile ||

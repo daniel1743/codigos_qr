@@ -22,6 +22,10 @@ import {
   verifyMutationPreservation,
 } from "../../lib/product-entitlements/mutation-guard";
 import { mutationIntentForAction } from "../entitlements";
+import {
+  describePersistenceConfig,
+  recordPersistenceDebugEvent,
+} from "../diagnostics/persistenceDebug";
 
 export type StudioPanel = "blocks" | "design" | "templates" | "settings";
 
@@ -84,10 +88,7 @@ export function StudioProvider({
   const [state, rawDispatch] = useReducer(templateReducer, initialConfig, createInitialState);
 
   // Fail closed: a missing/invalid tier is treated no more permissively than Free.
-  const effectiveTier: ProductTier = useMemo(
-    () => (isProductTier(tier) ? tier : "free"),
-    [tier],
-  );
+  const effectiveTier: ProductTier = useMemo(() => (isProductTier(tier) ? tier : "free"), [tier]);
 
   // GUARDED DISPATCH — the single shared mutation boundary.
   //
@@ -173,38 +174,69 @@ export function StudioProvider({
   // Surface save-state changes to the host (Saved / Saving / Unsaved / Error).
   useEffect(() => {
     onSaveStateChange?.(saveState);
+    recordPersistenceDebugEvent({
+      stage: "STATUS",
+      profileId: documentId,
+      status: saveState,
+    });
   }, [saveState, onSaveStateChange]);
 
-  const save = useCallback(async () => {
-    // Capture an immutable snapshot tied to the exact document + revision.
-    const snapshot = state.config;
-    const snapshotRevision = state.revision;
-    const snapshotDocumentId = documentId;
-    setSaveState("saving");
-    setError(null);
-    try {
-      await adapters.storage.save(snapshot);
-      await onSave?.(snapshot);
-      // Acknowledge only if (a) we are still on the same document and (b) this
-      // revision is not older than the last acknowledged one (monotonic).
-      if (
-        snapshotDocumentId === documentIdRef.current &&
-        snapshotRevision >= lastSavedRevisionRef.current
-      ) {
-        lastSavedRevisionRef.current = snapshotRevision;
-        dispatch({ type: "markSaved", revision: snapshotRevision });
+  const save = useCallback(
+    async (reason: "autosave" | "manual-save" = "manual-save") => {
+      // Capture an immutable snapshot tied to the exact document + revision.
+      const snapshot = state.config;
+      const snapshotRevision = state.revision;
+      const snapshotDocumentId = documentId;
+      const configSummary = describePersistenceConfig(snapshot);
+      recordPersistenceDebugEvent({
+        stage: "SAVE_START",
+        operation: reason,
+        profileId: snapshotDocumentId,
+        revision: snapshotRevision,
+        config: configSummary,
+      });
+      setSaveState("saving");
+      setError(null);
+      try {
+        await adapters.storage.save(snapshot);
+        await onSave?.(snapshot);
+        recordPersistenceDebugEvent({
+          stage: "SAVE_SUCCESS",
+          operation: reason,
+          profileId: snapshotDocumentId,
+          revision: snapshotRevision,
+          config: configSummary,
+        });
+        // Acknowledge only if (a) we are still on the same document and (b) this
+        // revision is not older than the last acknowledged one (monotonic).
+        if (
+          snapshotDocumentId === documentIdRef.current &&
+          snapshotRevision >= lastSavedRevisionRef.current
+        ) {
+          lastSavedRevisionRef.current = snapshotRevision;
+          dispatch({ type: "markSaved", revision: snapshotRevision });
+        }
+        // If newer edits arrived while saving, stay "dirty" — never "saved".
+        setSaveState(
+          snapshotDocumentId === documentIdRef.current && revisionRef.current > snapshotRevision
+            ? "dirty"
+            : "saved",
+        );
+      } catch (err) {
+        recordPersistenceDebugEvent({
+          stage: "SAVE_ERROR",
+          operation: reason,
+          profileId: snapshotDocumentId,
+          revision: snapshotRevision,
+          config: configSummary,
+          errorCategory: "save",
+        });
+        setError(err instanceof Error ? err.message : "Could not save the template.");
+        setSaveState("error");
       }
-      // If newer edits arrived while saving, stay "dirty" — never "saved".
-      setSaveState(
-        snapshotDocumentId === documentIdRef.current && revisionRef.current > snapshotRevision
-          ? "dirty"
-          : "saved",
-      );
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not save the template.");
-      setSaveState("error");
-    }
-  }, [adapters.storage, state.config, state.revision, documentId, onSave]);
+    },
+    [adapters.storage, state.config, state.revision, documentId, onSave],
+  );
 
   const publish = useCallback(async () => {
     // VALIDATION GATE — never publish an invalid configuration.
@@ -220,12 +252,34 @@ export function StudioProvider({
     const snapshot = state.config;
     const snapshotRevision = state.revision;
     const snapshotDocumentId = documentId;
+    const configSummary = describePersistenceConfig(snapshot);
+    recordPersistenceDebugEvent({
+      stage: "PUBLISH_START",
+      operation: "publish",
+      profileId: snapshotDocumentId,
+      revision: snapshotRevision,
+      config: configSummary,
+    });
     setSaveState("saving");
     setError(null);
     try {
       await adapters.storage.save(snapshot);
+      recordPersistenceDebugEvent({
+        stage: "PRE_PUBLISH_SAVE_SUCCESS",
+        operation: "publish",
+        profileId: snapshotDocumentId,
+        revision: snapshotRevision,
+        config: configSummary,
+      });
       await adapters.storage.publish?.(snapshot);
       await onPublish?.(snapshot);
+      recordPersistenceDebugEvent({
+        stage: "PUBLISH_SUCCESS",
+        operation: "publish",
+        profileId: snapshotDocumentId,
+        revision: snapshotRevision,
+        config: configSummary,
+      });
       if (
         snapshotDocumentId === documentIdRef.current &&
         snapshotRevision >= lastSavedRevisionRef.current
@@ -239,6 +293,14 @@ export function StudioProvider({
           : "saved",
       );
     } catch (err) {
+      recordPersistenceDebugEvent({
+        stage: "PUBLISH_ERROR",
+        operation: "publish",
+        profileId: snapshotDocumentId,
+        revision: snapshotRevision,
+        config: configSummary,
+        errorCategory: "publish",
+      });
       setError(err instanceof Error ? err.message : "Could not publish the template.");
       setSaveState("error");
     }
@@ -248,10 +310,16 @@ export function StudioProvider({
   useEffect(() => {
     lastEmittedConfig.current = state.config;
     onChange?.(state.config);
+    recordPersistenceDebugEvent({
+      stage: "STUDIO_CURRENT",
+      profileId: documentId,
+      revision: state.revision,
+      config: describePersistenceConfig(state.config),
+    });
     if (!autoSave || !state.dirty) return;
     setSaveState("dirty");
     if (timer.current) clearTimeout(timer.current);
-    timer.current = setTimeout(() => void save(), 900);
+    timer.current = setTimeout(() => void save("autosave"), 900);
     return () => {
       if (timer.current) clearTimeout(timer.current);
     };

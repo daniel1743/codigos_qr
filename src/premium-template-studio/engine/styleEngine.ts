@@ -5,8 +5,20 @@ import type {
   DecorativeFramePreset,
   TemplateTheme,
   ThemeTexture,
+  TypographyOverride,
 } from "../types";
 import { hexToRgba, readableOn } from "../utils";
+
+export function applyTypographyOverride(base: CSSProperties, override?: TypographyOverride): CSSProperties {
+  if (!override) return base;
+  const result = { ...base };
+  if (override.fontFamily) result.fontFamily = override.fontFamily;
+  if (override.fontWeight) result.fontWeight = override.fontWeight;
+  if (override.fontSize) result.fontSize = override.fontSize;
+  if (override.textAlign) result.textAlign = override.textAlign;
+  if (override.textColor) result.color = override.textColor;
+  return result;
+}
 
 /**
  * STYLE ENGINE
@@ -382,6 +394,8 @@ export function headingStyle(theme: TemplateTheme, scale = 1): CSSProperties {
     lineHeight: 1.1,
     color: theme.colors.text,
     margin: 0,
+    wordBreak: "break-word",
+    overflowWrap: "anywhere",
   };
 }
 

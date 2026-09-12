@@ -1,8 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { Auth } from "../components/Auth";
-import PlatformNavbar from "../components/brand/PlatformNavbar";
-import { PLATFORM_NAV_ITEMS } from "../components/platform/platform-navigation";
 import { getBrowserSupabaseClient } from "../lib/supabase/client";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -47,12 +45,11 @@ import {
 import type { EncryptionLevel, CreateEncryptedDocumentRequest } from "../types/encrypted-documents";
 import { QRCodeSVG } from "qrcode.react";
 import { CANONICAL_PUBLIC_ORIGIN } from "../lib/url";
+import { AppShell } from "../components/app-shell/AppShell";
 
 export const Route = createFileRoute("/encrypted-documents")({
   component: EncryptedDocumentsPage,
 });
-
-const DOCUMENTS_NAV_ITEMS = PLATFORM_NAV_ITEMS.filter((item) => item.scope !== "admin");
 
 function EncryptedDocumentsPage() {
   const supabase = getBrowserSupabaseClient();
@@ -261,18 +258,8 @@ function EncryptedDocumentsApp({ userId }: { userId: string }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50">
-      <PlatformNavbar
-        variant="editor"
-        brandHref="/editor"
-        logoTheme="inverse"
-        className="sticky top-0 z-40 border-b border-white/10 bg-[#090909]/95 px-3 text-[#f5f2ea] backdrop-blur-xl lg:px-6"
-        innerClassName="mx-auto flex h-14 max-w-[1440px] items-center justify-between gap-4"
-        brandClassName="shrink-0 transition-opacity hover:opacity-80"
-        logoClassName="h-[34px] w-[34px] min-[420px]:w-[146px]"
-        navItems={DOCUMENTS_NAV_ITEMS}
-      />
-
+    <AppShell>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50">
       <header className="border-b bg-white/80 shadow-sm backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -329,6 +316,7 @@ function EncryptedDocumentsApp({ userId }: { userId: string }) {
         )}
       </main>
     </div>
+    </AppShell>
   );
 }
 

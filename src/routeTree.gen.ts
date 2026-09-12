@@ -11,21 +11,28 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AliasRouteImport } from './routes/$alias'
+import { Route as AccountRouteImport } from './routes/account'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as EditorRouteImport } from './routes/editor'
 import { Route as EncryptedDocumentsRouteImport } from './routes/encrypted-documents'
 import { Route as EngineLabRouteImport } from './routes/engine-lab'
 import { Route as OnboardingPreviewRouteImport } from './routes/onboarding-preview'
+import { Route as PageRouteImport } from './routes/page'
+import { Route as PagesRouteImport } from './routes/pages'
 import { Route as PlataformaRouteImport } from './routes/plataforma'
 import { Route as PowerEditorRouteImport } from './routes/power-editor'
 import { Route as PowerEditorPhase4QaRouteImport } from './routes/power-editor-phase4-qa'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as QrRouteImport } from './routes/qr'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as TemplateLabRouteImport } from './routes/template-lab'
 import { Route as DShortUrlRouteImport } from './routes/d.$shortUrl'
 import { Route as InternalPowerEditorRouteImport } from './routes/internal.power-editor'
 import { Route as PPublicIdRouteImport } from './routes/p.$publicId'
+import { Route as PagesPageIdRouteImport } from './routes/pages.$pageId'
+import { Route as PagesNewRouteImport } from './routes/pages.new'
 import { Route as VsLinktreeRouteImport } from './routes/vs/linktree'
+import { Route as PagesPageIdEditRouteImport } from './routes/pages.$pageId.edit'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -35,6 +42,11 @@ const IndexRoute = IndexRouteImport.update({
 const AliasRoute = AliasRouteImport.update({
   id: '/$alias',
   path: '/$alias',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccountRoute = AccountRouteImport.update({
+  id: '/account',
+  path: '/account',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -62,6 +74,16 @@ const OnboardingPreviewRoute = OnboardingPreviewRouteImport.update({
   path: '/onboarding-preview',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PageRoute = PageRouteImport.update({
+  id: '/page',
+  path: '/page',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PagesRoute = PagesRouteImport.update({
+  id: '/pages',
+  path: '/pages',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PlataformaRoute = PlataformaRouteImport.update({
   id: '/plataforma',
   path: '/plataforma',
@@ -80,6 +102,11 @@ const PowerEditorPhase4QaRoute = PowerEditorPhase4QaRouteImport.update({
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QrRoute = QrRouteImport.update({
+  id: '/qr',
+  path: '/qr',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -107,142 +134,203 @@ const PPublicIdRoute = PPublicIdRouteImport.update({
   path: '/p/$publicId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PagesPageIdRoute = PagesPageIdRouteImport.update({
+  id: '/$pageId',
+  path: '/$pageId',
+  getParentRoute: () => PagesRoute,
+} as any)
+const PagesNewRoute = PagesNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => PagesRoute,
+} as any)
 const VsLinktreeRoute = VsLinktreeRouteImport.update({
   id: '/vs/linktree',
   path: '/vs/linktree',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PagesPageIdEditRoute = PagesPageIdEditRouteImport.update({
+  id: '/edit',
+  path: '/edit',
+  getParentRoute: () => PagesPageIdRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$alias': typeof AliasRoute
+  '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
   '/editor': typeof EditorRoute
   '/encrypted-documents': typeof EncryptedDocumentsRoute
   '/engine-lab': typeof EngineLabRoute
   '/onboarding-preview': typeof OnboardingPreviewRoute
+  '/page': typeof PageRoute
+  '/pages': typeof PagesRouteWithChildren
   '/plataforma': typeof PlataformaRoute
   '/power-editor': typeof PowerEditorRoute
   '/power-editor-phase4-qa': typeof PowerEditorPhase4QaRoute
   '/profile': typeof ProfileRoute
+  '/qr': typeof QrRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/template-lab': typeof TemplateLabRoute
   '/d/$shortUrl': typeof DShortUrlRoute
   '/internal/power-editor': typeof InternalPowerEditorRoute
   '/p/$publicId': typeof PPublicIdRoute
+  '/pages/$pageId': typeof PagesPageIdRouteWithChildren
+  '/pages/new': typeof PagesNewRoute
   '/vs/linktree': typeof VsLinktreeRoute
+  '/pages/$pageId/edit': typeof PagesPageIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$alias': typeof AliasRoute
+  '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
   '/editor': typeof EditorRoute
   '/encrypted-documents': typeof EncryptedDocumentsRoute
   '/engine-lab': typeof EngineLabRoute
   '/onboarding-preview': typeof OnboardingPreviewRoute
+  '/page': typeof PageRoute
+  '/pages': typeof PagesRouteWithChildren
   '/plataforma': typeof PlataformaRoute
   '/power-editor': typeof PowerEditorRoute
   '/power-editor-phase4-qa': typeof PowerEditorPhase4QaRoute
   '/profile': typeof ProfileRoute
+  '/qr': typeof QrRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/template-lab': typeof TemplateLabRoute
   '/d/$shortUrl': typeof DShortUrlRoute
   '/internal/power-editor': typeof InternalPowerEditorRoute
   '/p/$publicId': typeof PPublicIdRoute
+  '/pages/$pageId': typeof PagesPageIdRouteWithChildren
+  '/pages/new': typeof PagesNewRoute
   '/vs/linktree': typeof VsLinktreeRoute
+  '/pages/$pageId/edit': typeof PagesPageIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$alias': typeof AliasRoute
+  '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
   '/editor': typeof EditorRoute
   '/encrypted-documents': typeof EncryptedDocumentsRoute
   '/engine-lab': typeof EngineLabRoute
   '/onboarding-preview': typeof OnboardingPreviewRoute
+  '/page': typeof PageRoute
+  '/pages': typeof PagesRouteWithChildren
   '/plataforma': typeof PlataformaRoute
   '/power-editor': typeof PowerEditorRoute
   '/power-editor-phase4-qa': typeof PowerEditorPhase4QaRoute
   '/profile': typeof ProfileRoute
+  '/qr': typeof QrRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/template-lab': typeof TemplateLabRoute
   '/d/$shortUrl': typeof DShortUrlRoute
   '/internal/power-editor': typeof InternalPowerEditorRoute
   '/p/$publicId': typeof PPublicIdRoute
+  '/pages/$pageId': typeof PagesPageIdRouteWithChildren
+  '/pages/new': typeof PagesNewRoute
   '/vs/linktree': typeof VsLinktreeRoute
+  '/pages/$pageId/edit': typeof PagesPageIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/$alias'
+    | '/account'
     | '/admin'
     | '/editor'
     | '/encrypted-documents'
     | '/engine-lab'
     | '/onboarding-preview'
+    | '/page'
+    | '/pages'
     | '/plataforma'
     | '/power-editor'
     | '/power-editor-phase4-qa'
     | '/profile'
+    | '/qr'
     | '/sitemap.xml'
     | '/template-lab'
     | '/d/$shortUrl'
     | '/internal/power-editor'
     | '/p/$publicId'
+    | '/pages/$pageId'
+    | '/pages/new'
     | '/vs/linktree'
+    | '/pages/$pageId/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/$alias'
+    | '/account'
     | '/admin'
     | '/editor'
     | '/encrypted-documents'
     | '/engine-lab'
     | '/onboarding-preview'
+    | '/page'
+    | '/pages'
     | '/plataforma'
     | '/power-editor'
     | '/power-editor-phase4-qa'
     | '/profile'
+    | '/qr'
     | '/sitemap.xml'
     | '/template-lab'
     | '/d/$shortUrl'
     | '/internal/power-editor'
     | '/p/$publicId'
+    | '/pages/$pageId'
+    | '/pages/new'
     | '/vs/linktree'
+    | '/pages/$pageId/edit'
   id:
     | '__root__'
     | '/'
     | '/$alias'
+    | '/account'
     | '/admin'
     | '/editor'
     | '/encrypted-documents'
     | '/engine-lab'
     | '/onboarding-preview'
+    | '/page'
+    | '/pages'
     | '/plataforma'
     | '/power-editor'
     | '/power-editor-phase4-qa'
     | '/profile'
+    | '/qr'
     | '/sitemap.xml'
     | '/template-lab'
     | '/d/$shortUrl'
     | '/internal/power-editor'
     | '/p/$publicId'
+    | '/pages/$pageId'
+    | '/pages/new'
     | '/vs/linktree'
+    | '/pages/$pageId/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AliasRoute: typeof AliasRoute
+  AccountRoute: typeof AccountRoute
   AdminRoute: typeof AdminRoute
   EditorRoute: typeof EditorRoute
   EncryptedDocumentsRoute: typeof EncryptedDocumentsRoute
   EngineLabRoute: typeof EngineLabRoute
   OnboardingPreviewRoute: typeof OnboardingPreviewRoute
+  PageRoute: typeof PageRoute
+  PagesRoute: typeof PagesRouteWithChildren
   PlataformaRoute: typeof PlataformaRoute
   PowerEditorRoute: typeof PowerEditorRoute
   PowerEditorPhase4QaRoute: typeof PowerEditorPhase4QaRoute
   ProfileRoute: typeof ProfileRoute
+  QrRoute: typeof QrRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TemplateLabRoute: typeof TemplateLabRoute
   DShortUrlRoute: typeof DShortUrlRoute
@@ -265,6 +353,13 @@ declare module '@tanstack/react-router' {
       path: '/$alias'
       fullPath: '/$alias'
       preLoaderRoute: typeof AliasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/account': {
+      id: '/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AccountRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -302,6 +397,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OnboardingPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/page': {
+      id: '/page'
+      path: '/page'
+      fullPath: '/page'
+      preLoaderRoute: typeof PageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pages': {
+      id: '/pages'
+      path: '/pages'
+      fullPath: '/pages'
+      preLoaderRoute: typeof PagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/plataforma': {
       id: '/plataforma'
       path: '/plataforma'
@@ -328,6 +437,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/qr': {
+      id: '/qr'
+      path: '/qr'
+      fullPath: '/qr'
+      preLoaderRoute: typeof QrRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -365,6 +481,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PPublicIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pages/$pageId': {
+      id: '/pages/$pageId'
+      path: '/$pageId'
+      fullPath: '/pages/$pageId'
+      preLoaderRoute: typeof PagesPageIdRouteImport
+      parentRoute: typeof PagesRoute
+    }
+    '/pages/new': {
+      id: '/pages/new'
+      path: '/new'
+      fullPath: '/pages/new'
+      preLoaderRoute: typeof PagesNewRouteImport
+      parentRoute: typeof PagesRoute
+    }
     '/vs/linktree': {
       id: '/vs/linktree'
       path: '/vs/linktree'
@@ -372,21 +502,56 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VsLinktreeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pages/$pageId/edit': {
+      id: '/pages/$pageId/edit'
+      path: '/edit'
+      fullPath: '/pages/$pageId/edit'
+      preLoaderRoute: typeof PagesPageIdEditRouteImport
+      parentRoute: typeof PagesPageIdRoute
+    }
   }
 }
+
+interface PagesPageIdRouteChildren {
+  PagesPageIdEditRoute: typeof PagesPageIdEditRoute
+}
+
+const PagesPageIdRouteChildren: PagesPageIdRouteChildren = {
+  PagesPageIdEditRoute: PagesPageIdEditRoute,
+}
+
+const PagesPageIdRouteWithChildren = PagesPageIdRoute._addFileChildren(
+  PagesPageIdRouteChildren,
+)
+
+interface PagesRouteChildren {
+  PagesPageIdRoute: typeof PagesPageIdRouteWithChildren
+  PagesNewRoute: typeof PagesNewRoute
+}
+
+const PagesRouteChildren: PagesRouteChildren = {
+  PagesPageIdRoute: PagesPageIdRouteWithChildren,
+  PagesNewRoute: PagesNewRoute,
+}
+
+const PagesRouteWithChildren = PagesRoute._addFileChildren(PagesRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AliasRoute: AliasRoute,
+  AccountRoute: AccountRoute,
   AdminRoute: AdminRoute,
   EditorRoute: EditorRoute,
   EncryptedDocumentsRoute: EncryptedDocumentsRoute,
   EngineLabRoute: EngineLabRoute,
   OnboardingPreviewRoute: OnboardingPreviewRoute,
+  PageRoute: PageRoute,
+  PagesRoute: PagesRouteWithChildren,
   PlataformaRoute: PlataformaRoute,
   PowerEditorRoute: PowerEditorRoute,
   PowerEditorPhase4QaRoute: PowerEditorPhase4QaRoute,
   ProfileRoute: ProfileRoute,
+  QrRoute: QrRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TemplateLabRoute: TemplateLabRoute,
   DShortUrlRoute: DShortUrlRoute,

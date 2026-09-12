@@ -31,9 +31,7 @@ import { isAdminEmail } from "../../lib/admin-check";
 import { hasPremiumAccessByEmail } from "../../lib/entitlements";
 import { getPublicProfileUrl } from "../../lib/url";
 import { Link, useNavigate } from "@tanstack/react-router";
-import PlatformNavbar from "../brand/PlatformNavbar";
 import { PLATFORM_BRAND } from "../platform/platform-brand";
-import { PLATFORM_NAV_ITEMS } from "../platform/platform-navigation";
 
 interface UserProfile {
   id: string;
@@ -256,34 +254,9 @@ export function MyProfilePage() {
     }
   };
 
-  const platformNavItems = PLATFORM_NAV_ITEMS.filter((item) => item.scope !== "admin" || isAdmin);
-
-  const platformNavbar = (
-    <>
-      <style>{`
-        .profile-user-hub-navbar [data-platform-nav-item="profile"] {
-          border-radius: 0.5rem;
-          background: rgba(255, 255, 255, 0.1);
-          color: #ffffff;
-        }
-      `}</style>
-      <PlatformNavbar
-        variant="editor"
-        brandHref="/profile"
-        logoTheme="inverse"
-        className="profile-user-hub-navbar sticky top-0 z-40 border-b border-white/10 bg-[#090909]/95 px-3 text-[#f5f2ea] backdrop-blur-xl lg:px-6"
-        innerClassName="mx-auto flex h-14 max-w-[1440px] items-center justify-between gap-4"
-        brandClassName="shrink-0 transition-opacity hover:opacity-80"
-        logoClassName="h-[34px] w-[34px] min-[420px]:w-[146px]"
-        navItems={platformNavItems}
-      />
-    </>
-  );
-
   if (loading) {
     return (
       <div className="min-h-screen bg-[#f6f7f9]">
-        {platformNavbar}
         <div className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center px-4">
           <p className="text-sm text-muted-foreground">Cargando tu espacio...</p>
         </div>
@@ -294,7 +267,6 @@ export function MyProfilePage() {
   if (!user || !profile) {
     return (
       <div className="min-h-screen bg-[#f6f7f9]">
-        {platformNavbar}
         <div className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center px-4">
           <p className="text-sm text-muted-foreground">No se pudo cargar tu perfil</p>
         </div>
@@ -315,8 +287,6 @@ export function MyProfilePage() {
 
   return (
     <div className="min-h-screen bg-[#f6f7f9] text-slate-950">
-      {platformNavbar}
-
       <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
         <header className="flex flex-col gap-5 border-b border-slate-200 pb-8 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl space-y-3">

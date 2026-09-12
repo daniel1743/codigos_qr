@@ -19,7 +19,7 @@ import {
   Award,
 } from "lucide-react";
 import { useRender } from "../../engine/RenderContext";
-import { cardStyle, headingStyle } from "../../engine/styleEngine";
+import { applyTypographyOverride, cardStyle, headingStyle } from "../../engine/styleEngine";
 import { hexToRgba, safeUrl } from "../../utils";
 import type { BlockItem, TemplateBlock } from "../../types";
 
@@ -263,12 +263,15 @@ export function ServicesBlock({ block }: { block: TemplateBlock }) {
                 </div>
                 {!isCompact && item.description && (
                   <p
-                    style={{
-                      fontSize: "13px",
-                      color: theme.colors.mutedText,
-                      marginTop: 6,
-                      lineHeight: 1.4,
-                    }}
+                    style={applyTypographyOverride(
+                      {
+                        fontSize: "13px",
+                        color: theme.colors.mutedText,
+                        marginTop: 6,
+                        lineHeight: 1.4,
+                      },
+                      item.descriptionTypography,
+                    )}
                   >
                     {item.description}
                   </p>
@@ -482,12 +485,15 @@ export function PricingBlock({ block }: { block: TemplateBlock }) {
 
             {item.description && (
               <p
-                style={{
-                  fontSize: "12px",
-                  color: theme.colors.mutedText,
-                  marginBottom: 16,
-                  lineHeight: 1.4,
-                }}
+                style={applyTypographyOverride(
+                  {
+                    fontSize: "12px",
+                    color: theme.colors.mutedText,
+                    marginBottom: 16,
+                    lineHeight: 1.4,
+                  },
+                  item.descriptionTypography,
+                )}
               >
                 {item.description}
               </p>
@@ -714,12 +720,15 @@ export function TimelineBlock({ block }: { block: TemplateBlock }) {
               </h3>
               {item.description && (
                 <p
-                  style={{
-                    fontSize: "12.5px",
-                    color: theme.colors.mutedText,
-                    marginTop: 6,
-                    lineHeight: 1.4,
-                  }}
+                  style={applyTypographyOverride(
+                    {
+                      fontSize: "12.5px",
+                      color: theme.colors.mutedText,
+                      marginTop: 6,
+                      lineHeight: 1.4,
+                    },
+                    item.descriptionTypography,
+                  )}
                 >
                   {item.description}
                 </p>
@@ -805,16 +814,16 @@ export function FeaturedMediaBlock({ block }: { block: TemplateBlock }) {
         gap: 8,
       }}
     >
-      {c.title && <h3 style={headingStyle(theme, 0.85)}>{c.title}</h3>}
+      {c.title && <h3 style={applyTypographyOverride(headingStyle(theme, 0.85), block.style.titleTypography)}>{c.title}</h3>}
       {c.description && (
-        <p style={{ fontSize: "13px", color: theme.colors.mutedText, lineHeight: 1.4 }}>
+        <p style={applyTypographyOverride({ fontSize: "13px", color: theme.colors.mutedText, lineHeight: 1.4 }, block.style.descriptionTypography)}>
           {c.description}
         </p>
       )}
       {c.ctaLabel && c.ctaUrl && (
         <button
           onClick={handleCTA}
-          style={{
+          style={applyTypographyOverride({
             display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
@@ -829,7 +838,7 @@ export function FeaturedMediaBlock({ block }: { block: TemplateBlock }) {
             cursor: "pointer",
             alignSelf: "flex-start",
             marginTop: 6,
-          }}
+          }, block.style.ctaTypography)}
         >
           {c.ctaLabel}
           <ArrowRight size={12} />

@@ -1,10 +1,14 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
 import { type ReactNode, useState } from "react";
 import Logo, { type LogoTheme } from "./Logo";
 import { Menu, X } from "lucide-react";
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { PLATFORM_BRAND } from "@/components/platform/platform-brand";
-import type { PlatformNavItem } from "@/components/platform/platform-navigation";
+import type {
+  PlatformNavActiveMatch,
+  PlatformNavItem,
+} from "@/components/platform/platform-navigation";
+import { matchesPlatformNavActivePath } from "@/components/platform/platform-navigation";
 
 export type PlatformNavbarVariant = "landing" | "editor";
 
@@ -47,15 +51,16 @@ export function PlatformNavbar({
   mobileMenuOpen: controlledOpen,
   onMobileMenuChange,
 }: PlatformNavbarProps) {
+  const { pathname } = useLocation();
   const [internalOpen, setInternalOpen] = useState(false);
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setOpen = onMobileMenuChange || setInternalOpen;
   const hasStructuredNavigation = navItems !== undefined;
   const desktopNavigation = hasStructuredNavigation
-    ? renderStructuredNavigation(navItems, false, () => setOpen(false))
+    ? renderStructuredNavigation(navItems, pathname, false, () => setOpen(false))
     : navigation;
   const mobileNavigation = hasStructuredNavigation
-    ? renderStructuredNavigation(navItems, true, () => setOpen(false))
+    ? renderStructuredNavigation(navItems, pathname, true, () => setOpen(false))
     : mobileMenuContent;
 
   return (
@@ -149,6 +154,7 @@ export function PlatformNavbar({
 
 function renderStructuredNavigation(
   items: readonly PlatformNavItem[],
+  pathname: string,
   mobile: boolean,
   onNavigate: () => void,
 ) {
@@ -164,24 +170,43 @@ function renderStructuredNavigation(
       className={mobile ? "flex flex-col gap-1" : "flex items-center gap-2"}
       aria-label={mobile ? "Menú móvil principal" : "Navegación principal"}
     >
-      {visibleItems.map((item) => (
-        <Link
-          key={item.id}
-          to={item.href}
-          onClick={onNavigate}
-          data-platform-nav-item={item.id}
-          data-active-match={`${item.activeMatch.type}${"value" in item.activeMatch ? `:${item.activeMatch.value}` : ""}`}
-          className={
-            mobile
-              ? "block min-h-12 rounded-xl px-4 py-3 text-sm font-medium text-white/75 transition-colors hover:bg-white/5 hover:text-white"
-              : "rounded-lg px-2.5 py-2 text-[13px] font-medium text-white/65 transition-colors hover:bg-white/5 hover:text-white"
-          }
-        >
-          {item.label}
-        </Link>
-      ))}
+      {visibleItems.map((item) => {
+        const active = matchesPlatformNavActivePath(item.activeMatch, pathname);
+
+        return (
+          <Link
+            key={item.id}
+            to={item.href}
+            onClick={onNavigate}
+            aria-current={active ? "page" : undefined}
+            data-platform-nav-item={item.id}
+            data-active={active ? "true" : undefined}
+            data-active-match={describeActiveMatch(item.activeMatch)}
+            className={
+              mobile
+                ? `block min-h-12 rounded-xl px-4 py-3 text-sm font-medium transition-colors ${
+                    active
+                      ? "bg-white/10 text-white"
+                      : "text-white/75 hover:bg-white/5 hover:text-white"
+                  }`
+                : `rounded-lg px-2.5 py-2 text-[13px] font-medium transition-colors ${
+                    active
+                      ? "bg-white/10 text-white"
+                      : "text-white/65 hover:bg-white/5 hover:text-white"
+                  }`
+            }
+          >
+            {item.label}
+          </Link>
+        );
+      })}
     </nav>
   );
+}
+
+function describeActiveMatch(match: PlatformNavActiveMatch): string {
+  if (match.type === "paths") return `paths:${match.values.join(",")}`;
+  return "value" in match ? `${match.type}:${match.value}` : match.type;
 }
 
 export default PlatformNavbar;

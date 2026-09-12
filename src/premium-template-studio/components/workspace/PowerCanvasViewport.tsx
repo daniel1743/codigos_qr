@@ -563,7 +563,7 @@ export function PowerCanvasViewport({
       <div
         ref={viewportRef}
         className={cx(
-          "pts-power-viewport h-full min-h-0 min-w-0 overflow-auto overscroll-contain bg-muted/50 px-4 pt-4 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] sm:px-8 sm:pt-8 sm:pb-[calc(6rem+env(safe-area-inset-bottom,0px))] lg:p-8",
+          "pts-power-viewport h-full min-h-0 min-w-0 overflow-auto overscroll-contain bg-muted/50 p-4 sm:p-8",
           interaction.isPanning && "pts-power-viewport--panning",
           interaction.isPanReady && !interaction.isPanning && "pts-power-viewport--pan-ready",
         )}
@@ -587,6 +587,7 @@ export function PowerCanvasViewport({
             {children}
           </div>
         </div>
+        <div className="h-[calc(4rem+env(safe-area-inset-bottom,0px))] w-full shrink-0 lg:hidden" aria-hidden="true" />
       </div>
 
       {cameraDiagnosticsEnabled ? (

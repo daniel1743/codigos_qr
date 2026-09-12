@@ -41,6 +41,7 @@ import { createDemoConfig } from "../templates/definitions";
 import { parseTemplateJson } from "../engine/TemplateValidator";
 import { PowerCanvasViewport } from "./workspace/PowerCanvasViewport";
 import { PowerEditorLocaleProvider, usePowerEditorLocale } from "../i18n/PowerEditorLocale";
+import { isPersistenceDebugEnabled, PersistenceDebugPanel } from "../diagnostics/persistenceDebug";
 import { formatBreakpoint } from "../i18n/messages";
 import { DiscoveryHintHost } from "../microux/DiscoveryHint";
 import "../styles/studio.css";
@@ -856,6 +857,7 @@ export function PremiumTemplateStudio({
         tier={tier}
       >
         <StudioShell />
+        {isPersistenceDebugEnabled() ? <PersistenceDebugPanel /> : null}
       </StudioProvider>
     </PowerEditorLocaleProvider>
   );

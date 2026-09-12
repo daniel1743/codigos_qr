@@ -2,6 +2,7 @@ import React from "react";
 import { BadgeCheck, Mail, ArrowRight, Globe, Calendar, ExternalLink } from "lucide-react";
 import { useRender, type HeroTextTarget } from "../../engine/RenderContext";
 import {
+  applyTypographyOverride,
   blockBackgroundGradientStyle,
   cardStyle,
   headingStyle,
@@ -393,38 +394,34 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
           {content.title && (
             <h1
               {...heroTextClickProps("title")}
-              style={{
-                ...headingStyle(theme, 1.2),
-                color: isFullImage ? "#ffffff" : theme.colors.text,
-              }}
+              style={applyTypographyOverride({ ...headingStyle(theme, 1.2), color: isFullImage ? "#ffffff" : theme.colors.text,
+               }, block.style.titleTypography)}
             >
               {content.title}
             </h1>
           )}
           {content.subtitle && (
             <p
-              {...heroTextClickProps("subtitle")}
-              style={{
+              {...heroTextClickProps("subtitle")} style={applyTypographyOverride({
                 fontSize: 16,
                 color: isFullImage ? "rgba(255,255,255,0.85)" : theme.colors.text,
                 opacity: 0.9,
                 marginTop: 6,
                 fontWeight: 500,
-              }}
+              }, block.style.subtitleTypography)}
             >
               {content.subtitle}
             </p>
           )}
           {content.description && (
             <p
-              {...heroTextClickProps("description")}
-              style={{
+              {...heroTextClickProps("description")} style={applyTypographyOverride({
                 fontSize: 14,
                 color: isFullImage ? "rgba(255,255,255,0.7)" : theme.colors.mutedText,
                 marginTop: 12,
                 maxWidth: 500,
                 lineHeight: 1.5,
-              }}
+              }, block.style.descriptionTypography)}
             >
               {content.description}
             </p>
@@ -486,37 +483,33 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
           {content.title && (
             <h1
               {...heroTextClickProps("title")}
-              style={{
-                ...headingStyle(theme, 1.3),
-                color: isFullImage ? "#ffffff" : theme.colors.text,
-              }}
+              style={applyTypographyOverride({ ...headingStyle(theme, 1.3), color: isFullImage ? "#ffffff" : theme.colors.text,
+               }, block.style.titleTypography)}
             >
               {content.title}
             </h1>
           )}
           {content.subtitle && (
             <p
-              {...heroTextClickProps("subtitle")}
-              style={{
+              {...heroTextClickProps("subtitle")} style={applyTypographyOverride({
                 fontSize: 16,
                 color: isFullImage ? "rgba(255,255,255,0.85)" : theme.colors.text,
                 opacity: 0.9,
                 marginTop: 6,
                 fontWeight: 500,
-              }}
+              }, block.style.subtitleTypography)}
             >
               {content.subtitle}
             </p>
           )}
           {content.description && (
             <p
-              {...heroTextClickProps("description")}
-              style={{
+              {...heroTextClickProps("description")} style={applyTypographyOverride({
                 fontSize: 14,
                 color: isFullImage ? "rgba(255,255,255,0.7)" : theme.colors.mutedText,
                 marginTop: 12,
                 lineHeight: 1.5,
-              }}
+              }, block.style.descriptionTypography)}
             >
               {content.description}
             </p>
@@ -579,37 +572,33 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
           {content.title && (
             <h1
               {...heroTextClickProps("title")}
-              style={{
-                ...headingStyle(theme, 1.3),
-                color: isFullImage ? "#ffffff" : theme.colors.text,
-              }}
+              style={applyTypographyOverride({ ...headingStyle(theme, 1.3), color: isFullImage ? "#ffffff" : theme.colors.text,
+               }, block.style.titleTypography)}
             >
               {content.title}
             </h1>
           )}
           {content.subtitle && (
             <p
-              {...heroTextClickProps("subtitle")}
-              style={{
+              {...heroTextClickProps("subtitle")} style={applyTypographyOverride({
                 fontSize: 16,
                 color: isFullImage ? "rgba(255,255,255,0.85)" : theme.colors.text,
                 opacity: 0.9,
                 marginTop: 6,
                 fontWeight: 500,
-              }}
+              }, block.style.subtitleTypography)}
             >
               {content.subtitle}
             </p>
           )}
           {content.description && (
             <p
-              {...heroTextClickProps("description")}
-              style={{
+              {...heroTextClickProps("description")} style={applyTypographyOverride({
                 fontSize: 14,
                 color: isFullImage ? "rgba(255,255,255,0.7)" : theme.colors.mutedText,
                 marginTop: 12,
                 lineHeight: 1.5,
-              }}
+              }, block.style.descriptionTypography)}
             >
               {content.description}
             </p>
@@ -713,29 +702,27 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
         {content.title && (
           <h1
             {...heroTextClickProps("title")}
-            style={{ ...headingStyle(theme, 1.4), color: "#ffffff" }}
+            style={applyTypographyOverride({ ...headingStyle(theme, 1.4), color: "#ffffff"  }, block.style.titleTypography)}
           >
             {content.title}
           </h1>
         )}
         {content.subtitle && (
           <p
-            {...heroTextClickProps("subtitle")}
-            style={{ fontSize: 16, color: "rgba(255,255,255,0.9)", marginTop: 6, fontWeight: 500 }}
+            {...heroTextClickProps("subtitle")} style={applyTypographyOverride({ fontSize: 16, color: "rgba(255,255,255,0.9)", marginTop: 6, fontWeight: 500 }, block.style.subtitleTypography)}
           >
             {content.subtitle}
           </p>
         )}
         {content.description && (
           <p
-            {...heroTextClickProps("description")}
-            style={{
+            {...heroTextClickProps("description")} style={applyTypographyOverride({
               fontSize: 14,
               color: "rgba(255,255,255,0.75)",
               marginTop: 12,
               maxWidth: 500,
               lineHeight: 1.5,
-            }}
+            }, block.style.descriptionTypography)}
           >
             {content.description}
           </p>
@@ -745,3 +732,5 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
     </div>
   );
 }
+
+
