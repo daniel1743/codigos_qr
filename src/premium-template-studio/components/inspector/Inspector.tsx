@@ -2464,6 +2464,22 @@ function ServicesBlockInspector({ block }: { block: TemplateBlock }) {
               }
             />
           </Field>
+          <CTAStyleEditor
+            style={item.ctaStyle}
+            pathPrefix="ctaStyle"
+            defaultRadius={100}
+            onField={(path, value) => {
+              const key = path.split(".")[1] as keyof CTAStyle;
+              update(
+                items.map((i) => {
+                  if (i.id !== item.id) return i;
+                  const next = { ...(i.ctaStyle || {}), [key]: value };
+                  if (value === undefined) delete next[key];
+                  return { ...i, ctaStyle: Object.keys(next).length ? next : undefined };
+                })
+              );
+            }}
+          />
         </div>
       ))}
       <GhostButton
@@ -2671,6 +2687,22 @@ function PricingBlockInspector({ block }: { block: TemplateBlock }) {
               }
             />
           </Field>
+          <CTAStyleEditor
+            style={item.ctaStyle}
+            pathPrefix="ctaStyle"
+            defaultRadius={100}
+            onField={(path, value) => {
+              const key = path.split(".")[1] as keyof CTAStyle;
+              update(
+                items.map((i) => {
+                  if (i.id !== item.id) return i;
+                  const next = { ...(i.ctaStyle || {}), [key]: value };
+                  if (value === undefined) delete next[key];
+                  return { ...i, ctaStyle: Object.keys(next).length ? next : undefined };
+                })
+              );
+            }}
+          />
         </div>
       ))}
       <GhostButton
@@ -2886,6 +2918,10 @@ function FeaturedMediaBlockInspector({ block }: { block: TemplateBlock }) {
         <Field label={messages.inspector.title}>
           <TextInput value={c.title ?? ""} onChange={(v) => field("content.title", v)} />
         </Field>
+        <TypographyOverrideEditor
+          value={block.style.titleTypography}
+          onChange={(typography) => field("style.titleTypography", typography)}
+        />
         <Field label={messages.inspector.description}>
           <TextArea
             value={c.description ?? ""}
@@ -2904,9 +2940,11 @@ function FeaturedMediaBlockInspector({ block }: { block: TemplateBlock }) {
             onChange={(v) => field("content.ctaLabel", v)}
           />
         </Field>
-        <TypographyOverrideEditor
-          value={block.style.ctaTypography}
-          onChange={(typography) => field("style.ctaTypography", typography)}
+        <CTAStyleEditor
+          style={block.style.ctaStyle}
+          pathPrefix="style.ctaStyle"
+          defaultRadius={100}
+          onField={field}
         />
         <Field label={messages.inspector.ctaUrl}>
           <TextInput
@@ -3161,6 +3199,15 @@ function ProductGridBlockInspector({ block }: { block: TemplateBlock }) {
               update(products.map((p) => (p.id === prod.id ? { ...p, imageUrl: v } : p)))
             }
           />
+          <Field label="CTA Label">
+            <TextInput
+              value={prod.ctaLabel ?? ""}
+              placeholder="e.g. Buy now"
+              onChange={(v) =>
+                update(products.map((p) => (p.id === prod.id ? { ...p, ctaLabel: v } : p)))
+              }
+            />
+          </Field>
           <Field label="CTA URL">
             <TextInput
               value={prod.ctaUrl ?? ""}
@@ -3183,6 +3230,18 @@ function ProductGridBlockInspector({ block }: { block: TemplateBlock }) {
       >
         Add product card
       </GhostButton>
+
+      <div className="mt-4 border-t border-border pt-4">
+        <h4 className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground mb-3">
+          Estilo de los Botones
+        </h4>
+        <CTAStyleEditor
+          style={block.style.ctaStyle}
+          pathPrefix="style.ctaStyle"
+          defaultRadius={100}
+          onField={field}
+        />
+      </div>
     </div>
   );
 }
@@ -3256,6 +3315,12 @@ function BookingBlockInspector({ block }: { block: TemplateBlock }) {
         <Field label="CTA Button Label">
           <TextInput value={c.ctaLabel ?? ""} onChange={(v) => field("content.ctaLabel", v)} />
         </Field>
+        <CTAStyleEditor
+          style={block.style.ctaStyle}
+          pathPrefix="style.ctaStyle"
+          defaultRadius={100}
+          onField={field}
+        />
       </Section>
     </div>
   );
@@ -3374,6 +3439,22 @@ function EventsBlockInspector({ block }: { block: TemplateBlock }) {
               }
             />
           </Field>
+          <CTAStyleEditor
+            style={event.ctaStyle}
+            pathPrefix="ctaStyle"
+            defaultRadius={100}
+            onField={(path, value) => {
+              const key = path.split(".")[1] as keyof CTAStyle;
+              update(
+                items.map((e) => {
+                  if (e.id !== event.id) return e;
+                  const next = { ...(e.ctaStyle || {}), [key]: value };
+                  if (value === undefined) delete next[key];
+                  return { ...e, ctaStyle: Object.keys(next).length ? next : undefined };
+                })
+              );
+            }}
+          />
         </div>
       ))}
       <GhostButton
@@ -3814,7 +3895,7 @@ function TrustBlockInspector({ block }: { block: TemplateBlock }) {
   );
 }
 
-function BlockInspector({ block }: { block: TemplateBlock }) {
+export function BlockInspector({ block }: { block: TemplateBlock }) {
   const { state, dispatch, breakpoint, tier } = useStudio();
   const { locale, messages } = usePowerEditorLocale();
   const motionLocked = isCapabilityLocked(tier, "advanced_motion");
@@ -4290,7 +4371,7 @@ function BlockInspector({ block }: { block: TemplateBlock }) {
         <Field label={messages.inspector.animation}>
           <Segmented
             size="sm"
-            value={block.interaction.animation ?? "soft-rise"}
+            value={block.interaction?.animation ?? "soft-rise"}
             options={[
               { value: "none", label: messages.options.none },
               { value: "fade", label: messages.options.fade },

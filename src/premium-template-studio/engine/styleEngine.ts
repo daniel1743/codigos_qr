@@ -20,6 +20,29 @@ export function applyTypographyOverride(base: CSSProperties, override?: Typograp
   return result;
 }
 
+export function applyCTAStyle(base: CSSProperties, style?: CTAStyle): CSSProperties {
+  if (!style) return base;
+  const result = { ...base };
+  if (style.backgroundColor) result.backgroundColor = style.backgroundColor;
+  if (style.textColor) result.color = style.textColor;
+  if (style.fontFamily) result.fontFamily = style.fontFamily;
+  if (style.fontSize) result.fontSize = `${style.fontSize}px`;
+  if (style.fontWeight) result.fontWeight = style.fontWeight;
+  if (style.radius !== undefined) result.borderRadius = style.radius;
+  if (style.paddingX !== undefined || style.paddingY !== undefined) {
+    const py = style.paddingY ?? 8;
+    const px = style.paddingX ?? 16;
+    result.padding = `${py}px ${px}px`;
+  }
+  const hasBorder = style.borderColor !== undefined || style.borderWidth !== undefined;
+  if (hasBorder) {
+    const bw = style.borderWidth ?? 1;
+    const bc = style.borderColor ?? "transparent";
+    result.border = `${bw}px solid ${bc}`;
+  }
+  return result;
+}
+
 /**
  * STYLE ENGINE
  * Converts theme tokens into CSS custom properties and reusable inline styles.

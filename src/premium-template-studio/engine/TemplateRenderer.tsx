@@ -157,12 +157,13 @@ function resolveBlockMotion(
   // A block interaction animation is a serializable local contract. It wins
   // over the global preset when present, while legacy blocks without it keep
   // inheriting the global motion settings.
-  if (block.interaction.animation) {
-    if (block.interaction.animation === "none") {
+  const interactionAnimation = block.interaction?.animation;
+  if (interactionAnimation) {
+    if (interactionAnimation === "none") {
       return { entranceClass: "", hoverClass: "", stagger: 0, duration: 0, disabled: true };
     }
     return {
-      entranceClass: ANIMATION_CLASS[block.interaction.animation] ?? "",
+      entranceClass: ANIMATION_CLASS[interactionAnimation] ?? "",
       hoverClass: HOVER_CLASS[motionConfig.hover] ?? "",
       stagger: motionConfig.stagger,
       duration: motionConfig.duration,

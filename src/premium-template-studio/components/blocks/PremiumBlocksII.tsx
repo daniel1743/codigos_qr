@@ -19,7 +19,7 @@ import {
   Heart,
 } from "lucide-react";
 import { useRender } from "../../engine/RenderContext";
-import { cardStyle, headingStyle } from "../../engine/styleEngine";
+import { cardStyle, headingStyle, applyCTAStyle } from "../../engine/styleEngine";
 import { hexToRgba, safeUrl } from "../../utils";
 import type { BlockItem, TemplateBlock } from "../../types";
 
@@ -194,7 +194,7 @@ export function ProductCardBlock({ block }: { block: TemplateBlock }) {
         {c.ctaLabel && (
           <button
             onClick={handleCTA}
-            style={{
+            style={applyCTAStyle({
               width: "100%",
               padding: "8px 14px",
               borderRadius: theme.buttons.radius,
@@ -208,7 +208,7 @@ export function ProductCardBlock({ block }: { block: TemplateBlock }) {
               alignItems: "center",
               justifyContent: "center",
               gap: 6,
-            }}
+            }, block.style.ctaStyle)}
           >
             <ShoppingBag size={14} />
             {c.ctaLabel}
@@ -459,21 +459,24 @@ export function BookingBlock({ block }: { block: TemplateBlock }) {
           <button
             onClick={handleBooking}
             disabled={!selectedDate || !selectedTime}
-            style={{
-              width: "100%",
-              padding: "10px 16px",
-              borderRadius: theme.buttons.radius,
-              backgroundColor:
-                selectedDate && selectedTime
-                  ? theme.colors.primary
-                  : hexToRgba(theme.colors.text, 0.1),
-              color: selectedDate && selectedTime ? "#ffffff" : theme.colors.mutedText,
-              fontWeight: 600,
-              fontSize: "13px",
-              border: "none",
-              cursor: selectedDate && selectedTime ? "pointer" : "default",
-              marginTop: 4,
-            }}
+            style={applyCTAStyle(
+              {
+                width: "100%",
+                padding: "10px 16px",
+                borderRadius: theme.buttons.radius,
+                backgroundColor:
+                  selectedDate && selectedTime
+                    ? theme.colors.primary
+                    : hexToRgba(theme.colors.text, 0.1),
+                color: selectedDate && selectedTime ? "#ffffff" : theme.colors.mutedText,
+                fontWeight: 600,
+                fontSize: "13px",
+                border: "none",
+                cursor: selectedDate && selectedTime ? "pointer" : "default",
+                marginTop: 4,
+              },
+              block.style.ctaStyle,
+            )}
           >
             {c.ctaLabel || "Confirm Reservation"}
           </button>
@@ -662,7 +665,7 @@ export function EventsBlock({ block }: { block: TemplateBlock }) {
             {event.ctaLabel && (
               <button
                 onClick={() => handleCTA(event.ctaUrl)}
-                style={{
+                style={applyCTAStyle({
                   padding: "6px 12px",
                   borderRadius: theme.buttons.radius,
                   backgroundColor: theme.colors.primary,
@@ -673,7 +676,7 @@ export function EventsBlock({ block }: { block: TemplateBlock }) {
                   cursor: "pointer",
                   flexShrink: 0,
                   alignSelf: isFeatured ? "flex-start" : "center",
-                }}
+                }, event.ctaStyle)}
               >
                 {event.ctaLabel}
               </button>

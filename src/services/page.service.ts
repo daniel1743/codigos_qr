@@ -23,6 +23,24 @@ export class PageServiceError extends Error {
 }
 
 /**
+ * The public rendering contract returned by `get_public_page_by_public_id`.
+ *
+ * This is a narrow projection — owner-only fields (`owner_user_id`,
+ * `profile_id`), the draft `template_config`, `published`, `published_revision`
+ * and creation/update timestamps are deliberately absent from the public
+ * document. `published_template_config` is the ONLY canonical source passed
+ * into the public renderer.
+ */
+export interface PublicPageResult {
+  public_id: string;
+  title: string | null;
+  page_type: string | null;
+  published_template_config: unknown;
+  slug: string | null;
+  published_at: string | null;
+}
+
+/**
  * Pages MANAGEMENT FOUNDATION.
  *
  * This service owns the `public.pages` child-page table only. It deliberately

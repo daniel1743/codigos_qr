@@ -26,7 +26,7 @@ export function SmartLink({
 }) {
   const { mode, onTrack } = useRender();
   const url = safeUrl(href);
-  const newTab = newTabProp ?? block?.interaction.newTab ?? false;
+  const newTab = newTabProp ?? block?.interaction?.newTab ?? false;
 
   if (mode === "edit" || !url) {
     return (

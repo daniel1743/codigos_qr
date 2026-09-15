@@ -422,7 +422,7 @@ export interface BlockItem {
   avatarUrl?: string;
   typography?: TypographyOverride | undefined;
   descriptionTypography?: TypographyOverride | undefined;
-  ctaTypography?: TypographyOverride | undefined;
+  ctaStyle?: CTAStyle | undefined;
 }
 
 export interface HeroAvatarContent {
@@ -515,7 +515,7 @@ export interface BlockStyle {
   titleTypography?: TypographyOverride | undefined;
   subtitleTypography?: TypographyOverride | undefined;
   descriptionTypography?: TypographyOverride | undefined;
-  ctaTypography?: TypographyOverride | undefined;
+  ctaStyle?: CTAStyle | undefined;
   overlay?: {
     type?: "solid" | "gradient";
     opacity?: number;

@@ -19,7 +19,7 @@ import {
   Award,
 } from "lucide-react";
 import { useRender } from "../../engine/RenderContext";
-import { applyTypographyOverride, cardStyle, headingStyle } from "../../engine/styleEngine";
+import { applyTypographyOverride, applyCTAStyle, cardStyle, headingStyle } from "../../engine/styleEngine";
 import { hexToRgba, safeUrl } from "../../utils";
 import type { BlockItem, TemplateBlock } from "../../types";
 
@@ -282,7 +282,7 @@ export function ServicesBlock({ block }: { block: TemplateBlock }) {
             {item.ctaLabel && item.ctaUrl && (
               <button
                 onClick={() => handleCTA(item.ctaUrl)}
-                style={{
+                style={applyCTAStyle({
                   display: "inline-flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -297,7 +297,7 @@ export function ServicesBlock({ block }: { block: TemplateBlock }) {
                   cursor: "pointer",
                   marginTop: isCompact ? 0 : 10,
                   alignSelf: isCompact ? "center" : "flex-start",
-                }}
+                }, item.ctaStyle)}
               >
                 {item.ctaLabel}
                 <ArrowRight size={12} />
@@ -532,7 +532,7 @@ export function PricingBlock({ block }: { block: TemplateBlock }) {
             {item.ctaLabel && (
               <button
                 onClick={() => handleCTA(item.ctaUrl)}
-                style={{
+                style={applyCTAStyle({
                   width: "100%",
                   padding: "10px 16px",
                   borderRadius: theme.buttons.radius,
@@ -543,7 +543,7 @@ export function PricingBlock({ block }: { block: TemplateBlock }) {
                   border: "none",
                   cursor: "pointer",
                   marginTop: "auto",
-                }}
+                }, item.ctaStyle)}
               >
                 {item.ctaLabel}
               </button>
@@ -823,7 +823,7 @@ export function FeaturedMediaBlock({ block }: { block: TemplateBlock }) {
       {c.ctaLabel && c.ctaUrl && (
         <button
           onClick={handleCTA}
-          style={applyTypographyOverride({
+          style={applyCTAStyle({
             display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
@@ -838,7 +838,7 @@ export function FeaturedMediaBlock({ block }: { block: TemplateBlock }) {
             cursor: "pointer",
             alignSelf: "flex-start",
             marginTop: 6,
-          }, block.style.ctaTypography)}
+          }, block.style.ctaStyle)}
         >
           {c.ctaLabel}
           <ArrowRight size={12} />
