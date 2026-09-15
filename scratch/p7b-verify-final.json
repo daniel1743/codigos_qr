@@ -1,0 +1,23 @@
+{
+  "captured_at": "2026-09-15T18:12:56.220Z",
+  "pages": [
+    {
+      "id": "9a02efa0-f6de-4bf3-930f-edbed88c3e1e",
+      "public_id": "yfLEdka",
+      "title": "Promo septiembre",
+      "page_type": "promotion",
+      "published": true,
+      "published_revision": 3,
+      "slug": null,
+      "qr_config": null,
+      "template_config_digest": "3608:d8ef72f7",
+      "published_template_config_digest": "3608:d8ef72f7"
+    }
+  ],
+  "protected_profile": {
+    "public_id": "sY9wHGm",
+    "slug": "qa-dual-editor-test",
+    "published_revision": 4,
+    "template_config_digest": "8863:3d012ee1"
+  }
+}

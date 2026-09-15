@@ -240,6 +240,7 @@ Este documento no elimina ni reescribe la historia del proyecto. Ordena la autor
 | `CRIPQER_ESTUDIO_ARQUITECTURA_EJECUTIVO.md` | Estudio ejecutivo de arquitectura, estado tecnico y valoracion. | PARTIAL_OVERLAP | COMPLEMENTARY | Auditoria/valoracion; no reemplaza vision canonica. |
 | `CRIPQER_STATUS_2026-09-09.md` | Snapshot fechado de readiness, gaps y orden de ejecucion. | LOW_OVERLAP | COMPLEMENTARY | Autoridad sobre estado fechado; no sobre identidad de producto. |
 | `CRIPQER_ONBOARDING_V2_TARGET_ARCHITECTURE.md` | Arquitectura objetivo del onboarding semantico. | PARTIAL_OVERLAP | COMPLEMENTARY | Autoridad tecnica de onboarding target; subordinado a esta vision. |
+| `CRIPQER_EDITOR_EXPERIENCE_STRATEGY.md` | Estrategia canonica del sistema de edicion y experiencia Quick/Advanced. | PARTIAL_OVERLAP | COMPLEMENTARY_CANONICAL_DOMAIN | Autoridad canonica para estrategia de editor, Quick/Advanced, Founding Access, Free/Pro UX y preservacion; subordinado a este documento para identidad general del producto. |
 | `CRIPQER_DUAL_EDITOR_ARCHITECTURE.md` | Arquitectura de ownership canonical y dual editor. | LOW_OVERLAP | TECHNICAL_ONLY | Autoridad tecnica historica/especifica; no define producto. |
 | `CRIPQER_PRODUCT_CAPABILITY_POLICY_CORE_V1_REPORT.md` | Politica declarativa de capacidades por tier. | LOW_OVERLAP | TECHNICAL_ONLY | Autoridad de policy tecnica; no define vision. |
 

@@ -1,0 +1,75 @@
+{
+  "stamp": 1789495695950,
+  "mode": "extras",
+  "phase": "bio",
+  "at": "2026-09-15T18:08:15.950Z",
+  "before": {
+    "profile_revision": 4,
+    "child_revision": 3
+  },
+  "pages": {
+    "services": {
+      "page_id": "0800b2da-3cf4-4ee3-bc2c-5e93a45c1ad9",
+      "public_id": "Qr7MBoC",
+      "page_type": "services",
+      "title": "QA PAGES_7B Servicios 1789493723880"
+    },
+    "catalog": {
+      "page_id": "e9097cc8-993e-4b96-9033-1a13aabe79d5",
+      "public_id": "kKch8TD",
+      "page_type": "catalog",
+      "title": "QA PAGES_7B Catálogo 1789493723880"
+    },
+    "portfolio": {
+      "page_id": "e95fc9ec-05c2-46b2-8178-19b75640ba1b",
+      "public_id": "ih9J4QW",
+      "page_type": "portfolio",
+      "title": "QA PAGES_7B Portafolio 1789495053165"
+    }
+  },
+  "auth": true,
+  "bio_linking": {
+    "host_page_id": "62841762-e060-4c6b-a25a-104003612e9d",
+    "host_public_id": "iN9Tes4",
+    "host_editor_accepted_document": true,
+    "host_published": true,
+    "host_publish_http": 200,
+    "canonical_origin": "https://www.cripqer.dev",
+    "observations": {
+      "services": {
+        "absolute_url": "https://www.cripqer.dev/pg/Qr7MBoC",
+        "absolute_rendered": true,
+        "relative_target": "/pg/Qr7MBoC",
+        "relative_rendered": false,
+        "relative_observed_as": "https://www.cripqer.dev/pg/Qr7MBoC"
+      },
+      "catalog": {
+        "absolute_url": "https://www.cripqer.dev/pg/kKch8TD",
+        "absolute_rendered": true,
+        "relative_target": "/pg/kKch8TD",
+        "relative_rendered": false,
+        "relative_observed_as": "https://www.cripqer.dev/pg/kKch8TD"
+      },
+      "portfolio": {
+        "absolute_url": "https://www.cripqer.dev/pg/ih9J4QW",
+        "absolute_rendered": true,
+        "relative_target": "/pg/ih9J4QW",
+        "relative_rendered": false,
+        "relative_observed_as": "https://www.cripqer.dev/pg/ih9J4QW"
+      }
+    }
+  },
+  "runtime_errors": [],
+  "regressions": {
+    "profile_revision": 4,
+    "profile_revision_unchanged": true,
+    "profile_slug_unchanged": true,
+    "profile_canonical_unchanged": true,
+    "child_revision": 3,
+    "child_revision_unchanged": true,
+    "child_slug_unchanged": true,
+    "child_canonical_unchanged": true,
+    "child_published_unchanged": true,
+    "child_qr_unchanged": true
+  }
+}

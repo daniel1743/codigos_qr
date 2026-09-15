@@ -1,0 +1,61 @@
+{
+  "stamp": 1789495241806,
+  "mode": "catalog",
+  "phase": "public",
+  "at": "2026-09-15T18:00:41.806Z",
+  "before": {
+    "profile_revision": 4,
+    "child_revision": 3
+  },
+  "page": {
+    "page_id": "e9097cc8-993e-4b96-9033-1a13aabe79d5",
+    "public_id": "kKch8TD",
+    "page_type": "catalog",
+    "title": "QA PAGES_7B Catálogo 1789493723880",
+    "owner_user_id": "8b1f25ff-ec0a-4cf2-93e2-f67c62a5a165",
+    "published": true,
+    "published_revision": 1,
+    "canonical": {
+      "schema_version": 1,
+      "theme_colors": true,
+      "theme_typography": true,
+      "layout_responsive": true,
+      "blocks": [
+        "text",
+        "cta",
+        "productGrid"
+      ],
+      "block_count": 3
+    },
+    "published_snapshot_is_canonical": true,
+    "published_snapshot_equals_draft": true
+  },
+  "public": {
+    "http": 200,
+    "renderer_mounted": true,
+    "editor_chrome": false,
+    "content_visible": [
+      "Cinturón de cuero",
+      "$19.990",
+      "Billetera de cuero"
+    ],
+    "content_missing": [],
+    "host_action_hrefs": [
+      "https://qa-cripqer.example/catalogo"
+    ],
+    "owner_images": 0,
+    "html_bytes": 16540
+  },
+  "regressions": {
+    "profile_revision": 4,
+    "profile_revision_unchanged": true,
+    "profile_slug_unchanged": true,
+    "profile_canonical_unchanged": true,
+    "child_revision": 3,
+    "child_revision_unchanged": true,
+    "child_slug_unchanged": true,
+    "child_canonical_unchanged": true,
+    "child_published_unchanged": true,
+    "child_qr_unchanged": true
+  }
+}

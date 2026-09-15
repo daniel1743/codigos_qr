@@ -276,6 +276,123 @@ describe("pageService.createPage", () => {
 
 describe("pageService.ALLOWED_PAGE_TYPES", () => {
   it("matches the page_type check constraint", () => {
-    expect(ALLOWED_PAGE_TYPES).toEqual(["landing", "promotion", "menu", "campaign", "event"]);
+    // PAGES_7 extended the canonical contract with the three Page Generator
+    // experiences (services / catalog / portfolio); the original five types are
+    // preserved and the migration keeps them byte-for-byte.
+    expect(ALLOWED_PAGE_TYPES).toEqual([
+      "landing",
+      "promotion",
+      "menu",
+      "campaign",
+      "event",
+      "services",
+      "catalog",
+      "portfolio",
+    ]);
+  });
+});
+
+describe("pageService.getPublicPageByPublicId", () => {
+  type RpcFn = (fn: string, args: unknown) => Promise<{ data: unknown; error: unknown }>;
+
+  function createFakeRpc(
+    onRpc: (fn: string, args: Record<string, unknown>) => { data: unknown; error: unknown },
+  ) {
+    const rpcCalls: { fn: string; args: Record<string, unknown> }[] = [];
+    const fromCalls: string[] = [];
+
+    const fake = {
+      rpc: ((fn: string, args: Record<string, unknown>) => {
+        rpcCalls.push({ fn, args });
+        return Promise.resolve(onRpc(fn, args));
+      }) as RpcFn,
+      // A direct table read would go through `.from(...)`. The public path must
+      // never touch the table (which would expose/read draft `template_config`).
+      from: (table: string) => {
+        fromCalls.push(table);
+        throw new Error(`Unexpected direct table access: ${table}`);
+      },
+      rpcCalls,
+      fromCalls,
+    };
+
+    return fake as unknown as SupabaseClient & {
+      rpcCalls: typeof rpcCalls;
+      fromCalls: typeof fromCalls;
+    };
+  }
+
+  const publishedRow = {
+    public_id: "yfLEdka",
+    title: "Promo septiembre",
+    page_type: "promotion",
+    published_template_config: {
+      schemaVersion: 1,
+      editorConfig: { pageInstanceId: "bio_x", blocks: [] },
+    },
+    slug: null,
+    published_at: "2026-09-12T01:28:31.857+00:00",
+  };
+
+  it("resolves a published child Page by public_id through the public RPC", async () => {
+    const fake = createFakeRpc(() => ({ data: [publishedRow], error: null }));
+
+    const page = await pageService.getPublicPageByPublicId(fake, "yfLEdka");
+
+    expect(page).not.toBeNull();
+    expect(page?.public_id).toBe("yfLEdka");
+    expect(page?.title).toBe("Promo septiembre");
+    expect(page?.page_type).toBe("promotion");
+    expect(page?.published_template_config).toEqual(publishedRow.published_template_config);
+  });
+
+  it("feeds published_template_config (never the draft template_config) to the caller", async () => {
+    const fake = createFakeRpc(() => ({ data: [publishedRow], error: null }));
+
+    const page = await pageService.getPublicPageByPublicId(fake, "yfLEdka");
+
+    // The result carries ONLY the published snapshot.
+    expect(page).toHaveProperty("published_template_config");
+    expect(page).not.toHaveProperty("template_config");
+    // And it never read the table directly (the draft `template_config` lives
+    // on the table and is not part of the public RPC projection).
+    expect(fake.fromCalls).toHaveLength(0);
+  });
+
+  it("calls the RPC with the correct function name and p_public_id argument", async () => {
+    const fake = createFakeRpc(() => ({ data: [publishedRow], error: null }));
+
+    await pageService.getPublicPageByPublicId(fake, "yfLEdka");
+
+    expect(fake.rpcCalls).toHaveLength(1);
+    expect(fake.rpcCalls[0].fn).toBe("get_public_page_by_public_id");
+    expect(fake.rpcCalls[0].args).toEqual({ p_public_id: "yfLEdka" });
+  });
+
+  it("returns null when the page is missing/unpublished (empty RPC result)", async () => {
+    const fake = createFakeRpc(() => ({ data: [], error: null }));
+
+    const page = await pageService.getPublicPageByPublicId(fake, "qa-does-not-exist");
+
+    expect(page).toBeNull();
+  });
+
+  it("returns null when the RPC returns no rows (null data)", async () => {
+    const fake = createFakeRpc(() => ({ data: null, error: null }));
+
+    const page = await pageService.getPublicPageByPublicId(fake, "qa-does-not-exist");
+
+    expect(page).toBeNull();
+  });
+
+  it("propagates RPC errors instead of silently returning draft data", async () => {
+    const fake = createFakeRpc(() => ({
+      data: null,
+      error: { message: "RPC failure" },
+    }));
+
+    await expect(pageService.getPublicPageByPublicId(fake, "yfLEdka")).rejects.toMatchObject({
+      message: "RPC failure",
+    });
   });
 });

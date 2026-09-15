@@ -1,0 +1,59 @@
+{
+  "stamp": 1789495170701,
+  "mode": "services",
+  "phase": "editor",
+  "at": "2026-09-15T17:59:30.702Z",
+  "before": {
+    "profile_revision": 4,
+    "child_revision": 3
+  },
+  "page": {
+    "page_id": "43091dc7-4d74-4ddd-9c04-bfe7f666d8da",
+    "public_id": "6hszW2o",
+    "page_type": "services",
+    "title": "QA PAGES_7B Servicios 1789494717516",
+    "owner_user_id": "8b1f25ff-ec0a-4cf2-93e2-f67c62a5a165",
+    "published": false,
+    "published_revision": 0,
+    "canonical": {
+      "schema_version": 1,
+      "theme_colors": true,
+      "theme_typography": true,
+      "layout_responsive": true,
+      "blocks": [
+        "text",
+        "services",
+        "cta",
+        "contact"
+      ],
+      "block_count": 4
+    },
+    "published_snapshot_is_canonical": false,
+    "published_snapshot_equals_draft": false
+  },
+  "auth": true,
+  "editor": {
+    "editor_mounted": true,
+    "editor_target": "Página: QA PAGES_7B Servicios 1789494717516 · 6hszW2o",
+    "published": {
+      "published": true,
+      "published_revision": 1,
+      "has_published_snapshot": true,
+      "snapshot_is_canonical": true,
+      "snapshot_equals_draft": true
+    }
+  },
+  "runtime_errors": [],
+  "regressions": {
+    "profile_revision": 4,
+    "profile_revision_unchanged": true,
+    "profile_slug_unchanged": true,
+    "profile_canonical_unchanged": true,
+    "child_revision": 3,
+    "child_revision_unchanged": true,
+    "child_slug_unchanged": true,
+    "child_canonical_unchanged": true,
+    "child_published_unchanged": true,
+    "child_qr_unchanged": true
+  }
+}

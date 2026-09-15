@@ -1,0 +1,51 @@
+{
+  "page_id": "7f17fefb-ba7a-4389-b8e2-4d286e1b7da5",
+  "value": "%231a2b3c",
+  "requests": [
+    "GET /rest/v1/pages?select=*&id=eq.7f17fefb-ba7a-4389-b8e2-4d286e1b7da5&owner_user_id=eq.8b1f25ff-ec0a-4cf2-93e2-f67c62a5a165",
+    "GET /rest/v1/pages?select=*&id=eq.7f17fefb-ba7a-4389-b8e2-4d286e1b7da5&owner_user_id=eq.8b1f25ff-ec0a-4cf2-93e2-f67c62a5a165",
+    "GET /rest/v1/pages?select=*&owner_user_id=eq.8b1f25ff-ec0a-4cf2-93e2-f67c62a5a165&order=updated_at.desc&profile_id=eq.ff0cd302-07a4-4106-9a13-a14f9ded2f4b",
+    "PATCH /rest/v1/pages?id=eq.7f17fefb-ba7a-4389-b8e2-4d286e1b7da5&owner_user_id=eq.8b1f25ff-ec0a-4cf2-93e2-f67c62a5a165&select=template_config",
+    "PATCH /rest/v1/pages?id=eq.7f17fefb-ba7a-4389-b8e2-4d286e1b7da5&owner_user_id=eq.8b1f25ff-ec0a-4cf2-93e2-f67c62a5a165&select=template_config"
+  ],
+  "console_errors": [
+    "Failed to load resource: the server responded with a status of 404 ()"
+  ],
+  "after_typing": "%231a2b3c",
+  "requests_before_save": [
+    "GET /rest/v1/pages?select=*&id=eq.7f17fefb-ba7a-4389-b8e2-4d286e1b7da5&owner_user_id=eq.8b1f25ff-ec0a-4cf2-93e2-f67c62a5a165",
+    "GET /rest/v1/pages?select=*&id=eq.7f17fefb-ba7a-4389-b8e2-4d286e1b7da5&owner_user_id=eq.8b1f25ff-ec0a-4cf2-93e2-f67c62a5a165",
+    "GET /rest/v1/pages?select=*&owner_user_id=eq.8b1f25ff-ec0a-4cf2-93e2-f67c62a5a165&order=updated_at.desc&profile_id=eq.ff0cd302-07a4-4106-9a13-a14f9ded2f4b",
+    "PATCH /rest/v1/pages?id=eq.7f17fefb-ba7a-4389-b8e2-4d286e1b7da5&owner_user_id=eq.8b1f25ff-ec0a-4cf2-93e2-f67c62a5a165&select=template_config"
+  ],
+  "statuses": [
+    "Canonical cargado",
+    "Canonical cargado",
+    "Canonical cargado",
+    "Canonical cargado",
+    "Canonical cargado",
+    "Canonical cargado",
+    "Canonical cargado",
+    "Canonical cargado",
+    "Canonical cargado",
+    "Canonical cargado",
+    "Canonical cargado",
+    "Canonical cargado",
+    "Canonical cargado",
+    "Canonical cargado",
+    "Canonical cargado",
+    "Canonical cargado",
+    "Canonical cargado",
+    "Canonical cargado",
+    "Canonical cargado",
+    "Canonical cargado"
+  ],
+  "requests_after_save": [
+    "GET /rest/v1/pages?select=*&id=eq.7f17fefb-ba7a-4389-b8e2-4d286e1b7da5&owner_user_id=eq.8b1f25ff-ec0a-4cf2-93e2-f67c62a5a165",
+    "GET /rest/v1/pages?select=*&id=eq.7f17fefb-ba7a-4389-b8e2-4d286e1b7da5&owner_user_id=eq.8b1f25ff-ec0a-4cf2-93e2-f67c62a5a165",
+    "GET /rest/v1/pages?select=*&owner_user_id=eq.8b1f25ff-ec0a-4cf2-93e2-f67c62a5a165&order=updated_at.desc&profile_id=eq.ff0cd302-07a4-4106-9a13-a14f9ded2f4b",
+    "PATCH /rest/v1/pages?id=eq.7f17fefb-ba7a-4389-b8e2-4d286e1b7da5&owner_user_id=eq.8b1f25ff-ec0a-4cf2-93e2-f67c62a5a165&select=template_config",
+    "PATCH /rest/v1/pages?id=eq.7f17fefb-ba7a-4389-b8e2-4d286e1b7da5&owner_user_id=eq.8b1f25ff-ec0a-4cf2-93e2-f67c62a5a165&select=template_config"
+  ],
+  "db_primary": "#6d5efc"
+}

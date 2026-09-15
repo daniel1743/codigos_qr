@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useMatches } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 import { AppShell } from "../components/app-shell/AppShell";
@@ -16,6 +16,9 @@ const PAGE_TYPE_LABELS: Record<string, string> = {
   menu: "Menú",
   campaign: "Campaña",
   event: "Evento",
+  services: "Servicios",
+  catalog: "Catálogo",
+  portfolio: "Portafolio",
 };
 
 export const Route = createFileRoute("/pages")({ component: PagesList });
@@ -36,6 +39,14 @@ function PagesList() {
   const [pages, setPages] = useState<Page[]>([]);
   const [error, setError] = useState<string | null>(null);
 
+  // /pages is the parent of the nested child routes (/pages/$pageId, /pages/new,
+  // /pages/$pageId/edit). When one of those children is the active match we must
+  // render the outlet instead of the list, otherwise the child UI never mounts.
+  const matches = useMatches();
+  const hasNestedChild = matches.some(
+    (match) => match.routeId !== "/pages" && match.routeId.startsWith("/pages/"),
+  );
+
   useEffect(() => {
     (async () => {
       try {
@@ -54,6 +65,10 @@ function PagesList() {
       }
     })();
   }, []);
+
+  if (hasNestedChild) {
+    return <Outlet />;
+  }
 
   return (
     <AppShell>

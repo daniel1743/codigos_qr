@@ -1,0 +1,522 @@
+{
+  "settingsInputs": [
+    {
+      "index": 0,
+      "label": "Enlace",
+      "value": "qa-pages-7-menu-1789488766185",
+      "type": "text"
+    },
+    {
+      "index": 1,
+      "label": "Título",
+      "value": "QA PAGES_7 Menú 1789488766185 — Barbería",
+      "type": "text"
+    },
+    {
+      "index": 2,
+      "label": "Descripción",
+      "value": "Cortes y cuidado de barba, pedidos por WhatsApp.",
+      "type": "text"
+    },
+    {
+      "index": 3,
+      "label": "URL de imagen social",
+      "value": "",
+      "type": "text"
+    },
+    {
+      "index": 4,
+      "label": "Color",
+      "value": "#fbfcf8",
+      "type": "color"
+    },
+    {
+      "index": 5,
+      "label": "Color",
+      "value": "#FBFCF8",
+      "type": null
+    },
+    {
+      "index": 6,
+      "label": "Nombre",
+      "value": "QA PAGES_7 Menú 1789488766185",
+      "type": "text"
+    },
+    {
+      "index": 7,
+      "label": "Color de texto",
+      "value": "#000000",
+      "type": "color"
+    },
+    {
+      "index": 8,
+      "label": "Color de texto",
+      "value": "",
+      "type": null
+    },
+    {
+      "index": 9,
+      "label": "Tamaño de fuente16",
+      "value": "16",
+      "type": "range"
+    },
+    {
+      "index": 10,
+      "label": "Nombre de usuario",
+      "value": "qa-pages-7-menu-1789488766185",
+      "type": "text"
+    },
+    {
+      "index": 11,
+      "label": "Cargo / Rol",
+      "value": "Barbería",
+      "type": "text"
+    },
+    {
+      "index": 12,
+      "label": "Empresa",
+      "value": "",
+      "type": "text"
+    },
+    {
+      "index": 13,
+      "label": "Color de texto",
+      "value": "#000000",
+      "type": "color"
+    },
+    {
+      "index": 14,
+      "label": "Color de texto",
+      "value": "",
+      "type": null
+    },
+    {
+      "index": 15,
+      "label": "Tamaño de fuente16",
+      "value": "16",
+      "type": "range"
+    },
+    {
+      "index": 16,
+      "label": "Ubicación",
+      "value": "",
+      "type": "text"
+    },
+    {
+      "index": 17,
+      "label": "Color de texto",
+      "value": "#000000",
+      "type": "color"
+    },
+    {
+      "index": 18,
+      "label": "Color de texto",
+      "value": "",
+      "type": null
+    },
+    {
+      "index": 19,
+      "label": "Tamaño de fuente16",
+      "value": "16",
+      "type": "range"
+    },
+    {
+      "index": 20,
+      "label": "Color de texto",
+      "value": "#000000",
+      "type": "color"
+    },
+    {
+      "index": 21,
+      "label": "Color de texto",
+      "value": "",
+      "type": null
+    },
+    {
+      "index": 22,
+      "label": "Tamaño de fuente16",
+      "value": "16",
+      "type": "range"
+    },
+    {
+      "index": 23,
+      "label": "Foto de perfilSubir",
+      "value": "",
+      "type": "text"
+    },
+    {
+      "index": 24,
+      "label": "Foto de perfilSubir",
+      "value": "",
+      "type": "file"
+    },
+    {
+      "index": 25,
+      "label": "Superposición de la foto0px",
+      "value": "0",
+      "type": "range"
+    }
+  ],
+  "designInputs": [
+    {
+      "index": 0,
+      "label": "Primario",
+      "value": "#3f5b32",
+      "type": "color"
+    },
+    {
+      "index": 1,
+      "label": "Primario",
+      "value": "#3F5B32",
+      "type": null
+    },
+    {
+      "index": 2,
+      "label": "Acento",
+      "value": "#3f5b32",
+      "type": "color"
+    },
+    {
+      "index": 3,
+      "label": "Acento",
+      "value": "#3F5B32",
+      "type": null
+    },
+    {
+      "index": 4,
+      "label": "Fondo",
+      "value": "#fbfcf8",
+      "type": "color"
+    },
+    {
+      "index": 5,
+      "label": "Fondo",
+      "value": "#FBFCF8",
+      "type": null
+    },
+    {
+      "index": 6,
+      "label": "Capa de fondo",
+      "value": "#fbfcf8",
+      "type": "color"
+    },
+    {
+      "index": 7,
+      "label": "Capa de fondo",
+      "value": "#FBFCF8",
+      "type": null
+    },
+    {
+      "index": 8,
+      "label": "Desenfoque de fondo0px",
+      "value": "0",
+      "type": "range"
+    },
+    {
+      "index": 9,
+      "label": "Superficie",
+      "value": "#edf0e6",
+      "type": "color"
+    },
+    {
+      "index": 10,
+      "label": "Superficie",
+      "value": "#EDF0E6",
+      "type": null
+    },
+    {
+      "index": 11,
+      "label": "Texto",
+      "value": "#1e231a",
+      "type": "color"
+    },
+    {
+      "index": 12,
+      "label": "Texto",
+      "value": "#1E231A",
+      "type": null
+    },
+    {
+      "index": 13,
+      "label": "Escala del cuerpo15px",
+      "value": "15",
+      "type": "range"
+    },
+    {
+      "index": 14,
+      "label": "Espaciado de letras0",
+      "value": "0",
+      "type": "range"
+    },
+    {
+      "index": 15,
+      "label": "Ancho máximo640px",
+      "value": "640",
+      "type": "range"
+    },
+    {
+      "index": 16,
+      "label": "Espacio entre bloques18px",
+      "value": "18",
+      "type": "range"
+    },
+    {
+      "index": 17,
+      "label": "Radio de esquinas10px",
+      "value": "10",
+      "type": "range"
+    },
+    {
+      "index": 18,
+      "label": "Desenfoque de tarjeta0px",
+      "value": "0",
+      "type": "range"
+    },
+    {
+      "index": 19,
+      "label": "Opacidad de tarjeta100%",
+      "value": "100",
+      "type": "range"
+    },
+    {
+      "index": 20,
+      "label": "Borde de tarjeta1px",
+      "value": "1",
+      "type": "range"
+    },
+    {
+      "index": 21,
+      "label": "Radio de botón10",
+      "value": "10",
+      "type": "range"
+    },
+    {
+      "index": 22,
+      "label": "Alto de botón58px",
+      "value": "58",
+      "type": "range"
+    },
+    {
+      "index": 23,
+      "label": "Borde de botón0px",
+      "value": "0",
+      "type": "range"
+    },
+    {
+      "index": 24,
+      "label": "Opacidad de textura0%",
+      "value": "0",
+      "type": "range"
+    },
+    {
+      "index": 25,
+      "label": "Escala de textura24px",
+      "value": "24",
+      "type": "range"
+    },
+    {
+      "index": 26,
+      "label": "URL de la imagen de portada",
+      "value": "",
+      "type": "text"
+    },
+    {
+      "index": 27,
+      "label": "Alto180px",
+      "value": "180",
+      "type": "range"
+    },
+    {
+      "index": 28,
+      "label": "Alto en móvil136px",
+      "value": "136",
+      "type": "range"
+    },
+    {
+      "index": 29,
+      "label": "Desenfoque de portada0px",
+      "value": "0",
+      "type": "range"
+    },
+    {
+      "index": 30,
+      "label": "Punto focal X50%",
+      "value": "50",
+      "type": "range"
+    },
+    {
+      "index": 31,
+      "label": "Punto focal Y50%",
+      "value": "50",
+      "type": "range"
+    },
+    {
+      "index": 32,
+      "label": "Esquinas de portada18px",
+      "value": "18",
+      "type": "range"
+    },
+    {
+      "index": 33,
+      "label": "Superposición15%",
+      "value": "15",
+      "type": "range"
+    },
+    {
+      "index": 34,
+      "label": "Tamaño del avatar84px",
+      "value": "84",
+      "type": "range"
+    },
+    {
+      "index": 35,
+      "label": "Esquinas del avatar4",
+      "value": "4",
+      "type": "range"
+    },
+    {
+      "index": 36,
+      "label": "Velocidad480ms",
+      "value": "480",
+      "type": "range"
+    },
+    {
+      "index": 37,
+      "label": "Escalonado90ms",
+      "value": "90",
+      "type": "range"
+    },
+    {
+      "index": 38,
+      "label": "Color",
+      "value": "#fbfcf8",
+      "type": "color"
+    },
+    {
+      "index": 39,
+      "label": "Color",
+      "value": "#FBFCF8",
+      "type": null
+    },
+    {
+      "index": 40,
+      "label": "Nombre",
+      "value": "QA PAGES_7 Menú 1789488766185",
+      "type": "text"
+    },
+    {
+      "index": 41,
+      "label": "Color de texto",
+      "value": "#000000",
+      "type": "color"
+    },
+    {
+      "index": 42,
+      "label": "Color de texto",
+      "value": "",
+      "type": null
+    },
+    {
+      "index": 43,
+      "label": "Tamaño de fuente16",
+      "value": "16",
+      "type": "range"
+    },
+    {
+      "index": 44,
+      "label": "Nombre de usuario",
+      "value": "qa-pages-7-menu-1789488766185",
+      "type": "text"
+    },
+    {
+      "index": 45,
+      "label": "Cargo / Rol",
+      "value": "Barbería",
+      "type": "text"
+    },
+    {
+      "index": 46,
+      "label": "Empresa",
+      "value": "",
+      "type": "text"
+    },
+    {
+      "index": 47,
+      "label": "Color de texto",
+      "value": "#000000",
+      "type": "color"
+    },
+    {
+      "index": 48,
+      "label": "Color de texto",
+      "value": "",
+      "type": null
+    },
+    {
+      "index": 49,
+      "label": "Tamaño de fuente16",
+      "value": "16",
+      "type": "range"
+    },
+    {
+      "index": 50,
+      "label": "Ubicación",
+      "value": "",
+      "type": "text"
+    },
+    {
+      "index": 51,
+      "label": "Color de texto",
+      "value": "#000000",
+      "type": "color"
+    },
+    {
+      "index": 52,
+      "label": "Color de texto",
+      "value": "",
+      "type": null
+    },
+    {
+      "index": 53,
+      "label": "Tamaño de fuente16",
+      "value": "16",
+      "type": "range"
+    },
+    {
+      "index": 54,
+      "label": "Color de texto",
+      "value": "#000000",
+      "type": "color"
+    },
+    {
+      "index": 55,
+      "label": "Color de texto",
+      "value": "",
+      "type": null
+    },
+    {
+      "index": 56,
+      "label": "Tamaño de fuente16",
+      "value": "16",
+      "type": "range"
+    },
+    {
+      "index": 57,
+      "label": "Foto de perfilSubir",
+      "value": "",
+      "type": "text"
+    },
+    {
+      "index": 58,
+      "label": "Foto de perfilSubir",
+      "value": "",
+      "type": "file"
+    },
+    {
+      "index": 59,
+      "label": "Superposición de la foto0px",
+      "value": "0",
+      "type": "range"
+    }
+  ]
+}

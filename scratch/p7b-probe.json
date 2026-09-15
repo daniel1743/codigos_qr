@@ -1,0 +1,21 @@
+{
+  "steps": [
+    {
+      "route": "/editor",
+      "http": 200
+    },
+    {
+      "route": "/pages/new",
+      "http": 200,
+      "h1": "¿Qué quieres crear?",
+      "create_buttons": 6
+    },
+    {
+      "route": "/pages/new (services form)",
+      "title_value": "Servicios",
+      "items": 1
+    }
+  ],
+  "auth": true,
+  "errors": []
+}

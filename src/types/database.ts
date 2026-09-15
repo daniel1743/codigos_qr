@@ -1,4 +1,13 @@
 // 'square' is kept strictly for safe legacy handling, the UI normalizes it to 'rounded'
+import type {
+  CornerDotType,
+  CornerSquareType,
+  DotsType,
+  GradientOptions,
+  QREffectType,
+  QRFrameStyle,
+} from "./qr-advanced";
+
 export type AvatarShape = "circle" | "rounded" | "none" | "square";
 export type ButtonRadius = "none" | "rounded" | "full";
 export type ButtonStyle =
@@ -143,7 +152,40 @@ export interface ProfileLink {
   updated_at: string;
 }
 
-export type PageType = "landing" | "promotion" | "menu" | "campaign" | "event";
+export type PageType =
+  | "landing"
+  | "promotion"
+  | "menu"
+  | "campaign"
+  | "event"
+  | "services"
+  | "catalog"
+  | "portfolio";
+
+/**
+ * Page-owned QR customization. Mirrors the existing QR Studio config contract
+ * (the `profiles.qr_*` columns) but lives independently on `public.pages` so a
+ * child Page never shares the primary profile's QR state. Stored as JSONB.
+ */
+export interface PageQrConfig {
+  qr_foreground_color?: string | null;
+  qr_background_color?: string | null;
+  qr_logo_url?: string | null;
+  qr_logo_enabled?: boolean | null;
+  qr_gradient?: GradientOptions | null;
+  qr_dots_type?: DotsType | null;
+  qr_corners_square_type?: CornerSquareType | null;
+  qr_corners_dot_type?: CornerDotType | null;
+  qr_corners_square_color?: string | null;
+  qr_corners_dot_color?: string | null;
+  qr_corner_top_left_color?: string | null;
+  qr_corner_top_right_color?: string | null;
+  qr_corner_bottom_left_color?: string | null;
+  qr_frame_style?: QRFrameStyle | null;
+  qr_effect?: QREffectType | null;
+  qr_demo_logo_id?: string | null;
+}
+
 
 export interface Page {
   id: string;
@@ -158,6 +200,7 @@ export interface Page {
   published_revision: number;
   published_at: string | null;
   slug: string | null;
+  qr_config?: PageQrConfig | null;
   created_at: string;
   updated_at: string;
 }

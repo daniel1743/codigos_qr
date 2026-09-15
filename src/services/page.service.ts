@@ -1,13 +1,22 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Page, PageInsert, PageType } from "../types/database";
 
-/** The only page types the `pages` table (and this service) accepts. */
+/**
+ * The only page types the `pages` table (and this service) accepts.
+ *
+ * PAGES_7 extended the canonical contract with the three product experiences
+ * that the Page Generator can create ("services", "catalog", "portfolio").
+ * Existing types are preserved unchanged.
+ */
 export const ALLOWED_PAGE_TYPES: readonly PageType[] = [
   "landing",
   "promotion",
   "menu",
   "campaign",
   "event",
+  "services",
+  "catalog",
+  "portfolio",
 ];
 
 function isAllowedPageType(value: unknown): value is PageType {
@@ -153,5 +162,33 @@ export const pageService = {
 
     if (error) throw error;
     return data;
+  },
+
+  /**
+   * Resolve one PUBLISHED child page by its public_id through the safe public
+   * RPC (`get_public_page_by_public_id`).
+   *
+   * This is the ONLY public read path for `public.pages`: it never does a
+   * direct anon `SELECT` against the table, and it never exposes or falls back
+   * to the draft `template_config` — the RPC returns `published_template_config`
+   * only, and only for rows that are `published = TRUE`.
+   */
+  async getPublicPageByPublicId(
+    supabase: SupabaseClient,
+    publicId: string,
+  ): Promise<PublicPageResult | null> {
+    const { data, error } = await supabase.rpc("get_public_page_by_public_id", {
+      p_public_id: publicId,
+    });
+
+    if (error) throw error;
+
+    // The RPC is `RETURNS TABLE (...)`, so PostgREST responds with an array of
+    // rows — empty when the page is missing, unpublished, or has no published
+    // config. We never synthesize a result from draft data.
+    const rows = Array.isArray(data) ? data : data ? [data] : [];
+    if (rows.length === 0) return null;
+
+    return rows[0] as PublicPageResult;
   },
 };

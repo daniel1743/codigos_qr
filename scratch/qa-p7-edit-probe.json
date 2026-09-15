@@ -1,0 +1,34 @@
+{
+  "dom": {
+    "editor_roots": 1,
+    "asides": 2,
+    "studios": 1,
+    "readOnly": false,
+    "disabled": false,
+    "value": "QA PAGES_7 Menú 1789488766185 — Barbería",
+    "chain": [
+      "INPUT.w-full rounded-lg border border-border b",
+      "DIV.",
+      "LABEL.block",
+      "DIV.space-y-3",
+      "SECTION.border-b border-border px-4 py-4 last:bo",
+      "DIV."
+    ]
+  },
+  "before": "QA PAGES_7 Menú 1789488766185 — Barbería",
+  "after_typing": "QA PAGES_7 Menú 1789488766185 — Barbería",
+  "status_0": "Canonical cargado",
+  "status_1": "Canonical cargado",
+  "status_2": "Canonical cargado",
+  "status_3": "Canonical cargado",
+  "status_4": "Canonical cargado",
+  "status_5": "Canonical cargado",
+  "status_6": "Canonical cargado",
+  "status_7": "Canonical cargado",
+  "status_8": "Canonical cargado",
+  "status_9": "Canonical cargado",
+  "status_10": "Canonical cargado",
+  "status_11": "Canonical cargado",
+  "after_save_input": "QA PAGES_7 Menú 1789488766185 — Barbería",
+  "db_seo_title": "QA PAGES_7 Menú 1789488766185 — Barbería"
+}

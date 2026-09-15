@@ -8,6 +8,22 @@ import {
 import { CRIPQER_ACTION_HOST_POLICY_V1 } from "@/lib/host-contracts";
 import { generatePowerEditorTemplate, type GenerateV2Options } from "./power-editor";
 import { normalizeContent, type ContentSourceV2 } from "./power-editor/content-source";
+
+/**
+ * HOST SEAM — structured content pass-through (PAGES_7).
+ *
+ * Engine V2 decides which blocks exist and how they look, but it never invents
+ * user data: a services / portfolio / product / event block is only planned when
+ * the host actually supplies that content. The original host entrypoint mapped
+ * only `bio` + `links`, so owner-supplied structured items were dropped before
+ * reaching the engine.
+ *
+ * This additive pass-through lets a host caller forward already-structured
+ * content. The engine's own `normalizeContent` still sanitizes, caps and drops
+ * anything invalid, so no engine business logic, block planning, scoring or
+ * rendering contract is changed by this seam.
+ */
+export type EngineV2HostContentBlocks = Partial<ContentSourceV2>;
 import type { CuratedMediaResult } from "./media";
 import type { SupervisorOutcome } from "./ai";
 import type { BioTemplateConfig } from "@/premium-template-studio/types";
@@ -26,6 +42,12 @@ export interface EngineV2HostGenerationInput extends CripqerOnboardingIntentV1 {
     bannerUrl?: string;
   };
   preferredColor?: string;
+  /**
+   * Declares that the host really holds owner media (cover image and/or item
+   * images). It only reports availability — the engine still decides which media
+   * block, if any, is planned.
+   */
+  cardMedia?: boolean;
   primaryAction?: {
     type: PrimaryActionType;
     value: string;
@@ -37,6 +59,12 @@ export interface EngineV2HostGenerationOptions {
   engine?: GenerateV2Options;
   curatedMedia?: CuratedMediaResult;
   supervisor?: SupervisorOutcome;
+  /**
+   * PAGES_7 host seam: owner-supplied structured content (services, portfolio,
+   * products, events, pricing, gallery, trust badges, stats, contact). Never
+   * invented by the engine; invalid entries are dropped by `normalizeContent`.
+   */
+  contentBlocks?: EngineV2HostContentBlocks;
 }
 
 export interface EngineV2HostGenerationResult {
@@ -88,11 +116,15 @@ function primaryGoal(goal: string): PrimaryGoal {
   return "leads";
 }
 
-function contentFor(input: EngineV2HostGenerationInput): ContentSourceV2 {
+function contentFor(
+  input: EngineV2HostGenerationInput,
+  contentBlocks?: EngineV2HostContentBlocks,
+): ContentSourceV2 {
   const links = input.content?.links
     ?.map((link) => ({ label: link.label, url: link.url }))
     .filter((link) => link.label.trim() && link.url.trim());
   return normalizeContent({
+    ...(contentBlocks ?? {}),
     ...(input.content?.bio?.trim() ? { about: input.content.bio } : {}),
     ...(links?.length ? { links } : {}),
   });
@@ -118,9 +150,11 @@ function toEngineIntent(
   const name = input.content?.name?.trim() || profession;
   const bio = input.content?.bio?.trim() || `${name} — ${profession}`;
   const selectedFeatures = input.selectedFeatures.map(normalized);
-  const hasCardMedia = selectedFeatures.some((feature) =>
-    ["gallery", "portfolio", "media-card", "image", "video"].includes(feature),
-  );
+  const hasCardMedia =
+    input.cardMedia === true ||
+    selectedFeatures.some((feature) =>
+      ["gallery", "portfolio", "media-card", "image", "video"].includes(feature),
+    );
   const action = actionFor(input, content);
 
   return {
@@ -183,7 +217,7 @@ export function generateCripqerPageWithEngineV2(
   options: EngineV2HostGenerationOptions = {},
 ): EngineV2HostGenerationResult {
   const now = options.now ?? new Date().toISOString();
-  const content = contentFor(input);
+  const content = contentFor(input, options.contentBlocks);
   const intent = toEngineIntent(input, content, now);
   const candidate = generatePowerEditorTemplate(intent, {
     ...(options.engine ?? {}),

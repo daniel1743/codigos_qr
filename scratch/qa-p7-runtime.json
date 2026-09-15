@@ -1,0 +1,133 @@
+{
+  "stamp": 1789489666784,
+  "qa_title": "QA PAGES_7 Menú 1789489666784",
+  "auth": true,
+  "entry_ui": {
+    "h1": "¿Qué quieres crear?",
+    "options_visible": [
+      "Servicios",
+      "Catálogo",
+      "Portafolio",
+      "Menú",
+      "Promoción",
+      "Evento",
+      "Página simple"
+    ],
+    "internal_jargon_visible": []
+  },
+  "services_runtime": {
+    "navigated_to_editor": false,
+    "blocked_message": true,
+    "rows_created": 0,
+    "note": "PageType extension migration not applied on this project yet."
+  },
+  "generation": {
+    "editor_mounted": true,
+    "url": "http://localhost:8080/pages/fa874e9c-b8ca-4099-9035-470e2237e7bd/edit",
+    "page_id": "fa874e9c-b8ca-4099-9035-470e2237e7bd",
+    "public_id": "9umuhJk",
+    "page_type": "menu",
+    "owner_matches_qa_user": true,
+    "profile_matches": true,
+    "published": false,
+    "has_canonical_envelope": true
+  },
+  "canonical": {
+    "page_instance_id": "page-r1_4c2c3594c1ab5800",
+    "theme_colors": true,
+    "theme_typography": true,
+    "layout_responsive": true,
+    "blocks": [
+      "text",
+      "services",
+      "cta",
+      "contact"
+    ],
+    "carries_owner_item": true,
+    "carries_owner_price": true,
+    "carries_owner_cta": true
+  },
+  "editor_form": {
+    "primary_before": "",
+    "primary_after_typing": "#1a2b3c"
+  },
+  "editor_save": {
+    "save_signal": "timeout",
+    "draft_wait_matched": false,
+    "draft_wait_elapsed_ms": 45001,
+    "save_status": "Canonical cargado",
+    "theme_primary_in_db": "#3F5B32",
+    "draft_persisted": false,
+    "generated_content_survived": true,
+    "published_still_false": true
+  },
+  "editor_reload": {
+    "primary_input": "#1a2b3c",
+    "generated_content_visible": true
+  },
+  "publish": {
+    "published": true,
+    "published_revision": 1,
+    "has_published_snapshot": true,
+    "snapshot_equals_draft": true,
+    "snapshot_is_canonical": true,
+    "published_snapshot_has_editor_edit": true
+  },
+  "public_render": {
+    "http": 200,
+    "content_visible": true,
+    "title_visible": true,
+    "editor_chrome": false,
+    "runtime_errors": []
+  },
+  "child_identity": {
+    "qr_panel_open": true,
+    "qr_destination_is_stable_route": true,
+    "public_id_shown": true
+  },
+  "alias": {
+    "http": 200,
+    "same_content": true,
+    "runtime_errors": []
+  },
+  "mobile": {
+    "360x800": {
+      "generator_overflow": 0,
+      "generator_usable": true,
+      "public_overflow": 0,
+      "cta_reachable": true,
+      "runtime_errors": []
+    },
+    "390x844": {
+      "generator_overflow": 0,
+      "generator_usable": true,
+      "public_overflow": 0,
+      "cta_reachable": true,
+      "runtime_errors": []
+    },
+    "430x932": {
+      "generator_overflow": 0,
+      "generator_usable": true,
+      "public_overflow": 0,
+      "cta_reachable": true,
+      "runtime_errors": []
+    }
+  },
+  "regressions": {
+    "profile_public_id": "sY9wHGm",
+    "profile_revision_unchanged": true,
+    "profile_slug_unchanged": true,
+    "profile_canonical_unchanged": true,
+    "existing_child_revision_unchanged": true,
+    "existing_child_slug_unchanged": true,
+    "existing_child_canonical_unchanged": true,
+    "existing_child_qr_unchanged": true
+  },
+  "cleanup": {
+    "page_deleted": 200,
+    "qa_rows_left": 0
+  },
+  "runtime_errors": [
+    "console: Failed to load resource: the server responded with a status of 400 ()"
+  ]
+}
