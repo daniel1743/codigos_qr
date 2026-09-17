@@ -69,5 +69,9 @@ export function applyTemplateDefinition(
     },
     seo: current.seo,
     settings: { ...next.settings, slug: current.settings.slug },
+    // A template switch changes the visual shell while keeping the complete
+    // owner-authored block composition, including products, services, links
+    // and durable image references.
+    blocks: deepClone(current.blocks),
   };
 }

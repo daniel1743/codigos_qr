@@ -13,10 +13,13 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AliasRouteImport } from './routes/$alias'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as CorreoConfirmadoRouteImport } from './routes/correo-confirmado'
 import { Route as EditorRouteImport } from './routes/editor'
 import { Route as EncryptedDocumentsRouteImport } from './routes/encrypted-documents'
 import { Route as EngineLabRouteImport } from './routes/engine-lab'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as OnboardingPreviewRouteImport } from './routes/onboarding-preview'
+import { Route as OnboardingTestRouteImport } from './routes/onboarding-test'
 import { Route as PageRouteImport } from './routes/page'
 import { Route as PagesRouteImport } from './routes/pages'
 import { Route as PlataformaRouteImport } from './routes/plataforma'
@@ -56,6 +59,11 @@ const AdminRoute = AdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CorreoConfirmadoRoute = CorreoConfirmadoRouteImport.update({
+  id: '/correo-confirmado',
+  path: '/correo-confirmado',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EditorRoute = EditorRouteImport.update({
   id: '/editor',
   path: '/editor',
@@ -71,9 +79,19 @@ const EngineLabRoute = EngineLabRouteImport.update({
   path: '/engine-lab',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OnboardingPreviewRoute = OnboardingPreviewRouteImport.update({
   id: '/onboarding-preview',
   path: '/onboarding-preview',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingTestRoute = OnboardingTestRouteImport.update({
+  id: '/onboarding-test',
+  path: '/onboarding-test',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PageRoute = PageRouteImport.update({
@@ -172,10 +190,13 @@ export interface FileRoutesByFullPath {
   '/$alias': typeof AliasRoute
   '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
+  '/correo-confirmado': typeof CorreoConfirmadoRoute
   '/editor': typeof EditorRoute
   '/encrypted-documents': typeof EncryptedDocumentsRoute
   '/engine-lab': typeof EngineLabRoute
+  '/login': typeof LoginRoute
   '/onboarding-preview': typeof OnboardingPreviewRoute
+  '/onboarding-test': typeof OnboardingTestRoute
   '/page': typeof PageRoute
   '/pages': typeof PagesRouteWithChildren
   '/plataforma': typeof PlataformaRoute
@@ -200,10 +221,13 @@ export interface FileRoutesByTo {
   '/$alias': typeof AliasRoute
   '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
+  '/correo-confirmado': typeof CorreoConfirmadoRoute
   '/editor': typeof EditorRoute
   '/encrypted-documents': typeof EncryptedDocumentsRoute
   '/engine-lab': typeof EngineLabRoute
+  '/login': typeof LoginRoute
   '/onboarding-preview': typeof OnboardingPreviewRoute
+  '/onboarding-test': typeof OnboardingTestRoute
   '/page': typeof PageRoute
   '/pages': typeof PagesRouteWithChildren
   '/plataforma': typeof PlataformaRoute
@@ -229,10 +253,13 @@ export interface FileRoutesById {
   '/$alias': typeof AliasRoute
   '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
+  '/correo-confirmado': typeof CorreoConfirmadoRoute
   '/editor': typeof EditorRoute
   '/encrypted-documents': typeof EncryptedDocumentsRoute
   '/engine-lab': typeof EngineLabRoute
+  '/login': typeof LoginRoute
   '/onboarding-preview': typeof OnboardingPreviewRoute
+  '/onboarding-test': typeof OnboardingTestRoute
   '/page': typeof PageRoute
   '/pages': typeof PagesRouteWithChildren
   '/plataforma': typeof PlataformaRoute
@@ -259,10 +286,13 @@ export interface FileRouteTypes {
     | '/$alias'
     | '/account'
     | '/admin'
+    | '/correo-confirmado'
     | '/editor'
     | '/encrypted-documents'
     | '/engine-lab'
+    | '/login'
     | '/onboarding-preview'
+    | '/onboarding-test'
     | '/page'
     | '/pages'
     | '/plataforma'
@@ -287,10 +317,13 @@ export interface FileRouteTypes {
     | '/$alias'
     | '/account'
     | '/admin'
+    | '/correo-confirmado'
     | '/editor'
     | '/encrypted-documents'
     | '/engine-lab'
+    | '/login'
     | '/onboarding-preview'
+    | '/onboarding-test'
     | '/page'
     | '/pages'
     | '/plataforma'
@@ -315,10 +348,13 @@ export interface FileRouteTypes {
     | '/$alias'
     | '/account'
     | '/admin'
+    | '/correo-confirmado'
     | '/editor'
     | '/encrypted-documents'
     | '/engine-lab'
+    | '/login'
     | '/onboarding-preview'
+    | '/onboarding-test'
     | '/page'
     | '/pages'
     | '/plataforma'
@@ -344,10 +380,13 @@ export interface RootRouteChildren {
   AliasRoute: typeof AliasRoute
   AccountRoute: typeof AccountRoute
   AdminRoute: typeof AdminRoute
+  CorreoConfirmadoRoute: typeof CorreoConfirmadoRoute
   EditorRoute: typeof EditorRoute
   EncryptedDocumentsRoute: typeof EncryptedDocumentsRoute
   EngineLabRoute: typeof EngineLabRoute
+  LoginRoute: typeof LoginRoute
   OnboardingPreviewRoute: typeof OnboardingPreviewRoute
+  OnboardingTestRoute: typeof OnboardingTestRoute
   PageRoute: typeof PageRoute
   PagesRoute: typeof PagesRouteWithChildren
   PlataformaRoute: typeof PlataformaRoute
@@ -395,6 +434,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/correo-confirmado': {
+      id: '/correo-confirmado'
+      path: '/correo-confirmado'
+      fullPath: '/correo-confirmado'
+      preLoaderRoute: typeof CorreoConfirmadoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/editor': {
       id: '/editor'
       path: '/editor'
@@ -416,11 +462,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EngineLabRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/onboarding-preview': {
       id: '/onboarding-preview'
       path: '/onboarding-preview'
       fullPath: '/onboarding-preview'
       preLoaderRoute: typeof OnboardingPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding-test': {
+      id: '/onboarding-test'
+      path: '/onboarding-test'
+      fullPath: '/onboarding-test'
+      preLoaderRoute: typeof OnboardingTestRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/page': {
@@ -581,10 +641,13 @@ const rootRouteChildren: RootRouteChildren = {
   AliasRoute: AliasRoute,
   AccountRoute: AccountRoute,
   AdminRoute: AdminRoute,
+  CorreoConfirmadoRoute: CorreoConfirmadoRoute,
   EditorRoute: EditorRoute,
   EncryptedDocumentsRoute: EncryptedDocumentsRoute,
   EngineLabRoute: EngineLabRoute,
+  LoginRoute: LoginRoute,
   OnboardingPreviewRoute: OnboardingPreviewRoute,
+  OnboardingTestRoute: OnboardingTestRoute,
   PageRoute: PageRoute,
   PagesRoute: PagesRouteWithChildren,
   PlataformaRoute: PlataformaRoute,

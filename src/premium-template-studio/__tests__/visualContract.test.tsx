@@ -149,6 +149,65 @@ describe("Power Editor visual contract", () => {
     expect(none).toEqual({});
   });
 
+  it("lets Engine theme cards win over a minimal services variant unless explicitly overridden", () => {
+    const base = createDemoConfig();
+    const serviceBlock: TemplateBlock = {
+      ...base.blocks[0]!,
+      id: "services-precedence",
+      type: "services",
+      variant: "minimal",
+      style: {},
+      content: {
+        title: "Servicios",
+        items: [{ id: "service-1", title: "Sesión QA", price: "$45.000" }],
+      },
+    };
+    const config: BioTemplateConfig = {
+      ...base,
+      profile: { ...base.profile, avatarUrl: "", banner: { ...base.profile.banner, enabled: false } },
+      theme: {
+        ...base.theme,
+        cards: { ...base.theme.cards, preset: "elevated", radius: 18, borderWidth: 1, shadow: "md" },
+      },
+      blocks: [serviceBlock],
+    };
+
+    const markup = renderConfig(config);
+    expect(markup).toContain("border-style:solid");
+    expect(markup).toContain("border-width:1px");
+    expect(markup).toContain("border-radius:18px");
+    expect(markup).toContain("box-shadow:");
+    expect(markup).toContain("background-color:");
+  });
+
+  it("lets an explicit services block override win over the Engine card theme", () => {
+    const base = createDemoConfig();
+    const serviceBlock: TemplateBlock = {
+      ...base.blocks[0]!,
+      id: "services-explicit-override",
+      type: "services",
+      variant: "minimal",
+      style: { background: "transparent", borderWidth: 0, shadow: "none", radius: 6 },
+      content: { items: [{ id: "service-1", title: "Sesión QA" }] },
+    };
+    const config: BioTemplateConfig = {
+      ...base,
+      profile: { ...base.profile, avatarUrl: "", banner: { ...base.profile.banner, enabled: false } },
+      theme: {
+        ...base.theme,
+        cards: { ...base.theme.cards, preset: "elevated", radius: 18, borderWidth: 1, shadow: "md" },
+      },
+      blocks: [serviceBlock],
+    };
+
+    const markup = renderConfig(config);
+    expect(markup).toContain("background-color:transparent");
+    expect(markup).toContain("border-style:none");
+    expect(markup).toContain("border-width:0");
+    expect(markup).toContain("border-radius:6px");
+    expect(markup).toContain("box-shadow:none");
+  });
+
   it("keeps background blur in a separate layer and preserves sticky/floating styles", () => {
     const stickyConfig = makeConfig({
       layout: {

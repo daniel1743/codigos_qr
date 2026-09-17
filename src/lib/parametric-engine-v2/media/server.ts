@@ -9,8 +9,6 @@ import { validateCuratedMediaRequest, type CuratedMediaResult } from "./types";
 export const fetchCuratedMedia = createServerFn({ method: "POST" })
   .validator(validateCuratedMediaRequest)
   .handler(async ({ data }): Promise<CuratedMediaResult> => {
-    if (import.meta.env.PROD)
-      throw new Error("Pexels media curation is available only in the local QA playground");
     const [{ searchPexels }, { searchUnsplashPhotos }] = await Promise.all([
       import("./pexels-provider"),
       import("./unsplash-provider"),

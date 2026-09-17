@@ -517,6 +517,7 @@ function TemplateRendererImpl({
   const showCripqerBranding =
     mode === "public" &&
     (config.settings.showBranding !== false || !canRemoveCripqerBranding(brandingTier));
+  const hasAuthoredHero = blocks.some((block) => block.type === "hero");
 
   return (
     <RenderProvider value={ctx}>
@@ -571,7 +572,7 @@ function TemplateRendererImpl({
             gap: theme.spacing.section,
           }}
         >
-          <ProfileHeader profile={profile} layout={layout} />
+          {hasAuthoredHero ? null : <ProfileHeader profile={profile} layout={layout} />}
 
           <div
             style={{

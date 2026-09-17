@@ -19,6 +19,9 @@ dist-ssr
 .env.local
 .env.*.local
 
+# Local Playwright authentication state (credential-bearing; never commit)
+e2e/.auth/
+
 # Wrangler / Cloudflare
 .wrangler/
 .dev.vars

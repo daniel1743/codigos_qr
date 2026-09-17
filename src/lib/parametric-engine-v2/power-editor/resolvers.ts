@@ -23,6 +23,7 @@ import type {
   ThemeTypography,
 } from "@/premium-template-studio/types";
 import type { DesignProfile, FamilyId, FontToken, PageRecipeV1 } from "../types";
+import type { BusinessArchetype } from "../business-signals";
 import type { PowerEditorCapabilities } from "./capabilities-v2";
 import type {
   BackgroundMood,
@@ -34,6 +35,45 @@ import type {
 } from "./types-v2";
 import type { CompositionPattern } from "../composition-patterns";
 import type { MediaStrategyV2 } from "./media-strategy-v2";
+
+/* ----------------------------------------------------- archetype class */
+
+/**
+ * Coarse commercial class used to vary visual treatment across businesses.
+ * Different archetypes must look meaningfully different, not just wear a
+ * different accent color — this class is the semantic lever for that.
+ */
+type ArchetypeClass = "service" | "retail" | "portfolio" | "generic";
+
+const SERVICE_ARCHETYPES: ReadonlySet<BusinessArchetype> = new Set<BusinessArchetype>([
+  "home_service",
+  "appointment_service",
+  "professional_service",
+  "hospitality",
+  "food_service",
+  "wellness",
+  "education",
+  "local_business",
+  "digital_service",
+]);
+
+const RETAIL_ARCHETYPES: ReadonlySet<BusinessArchetype> = new Set<BusinessArchetype>([
+  "retail",
+  "custom_craft",
+]);
+
+const PORTFOLIO_ARCHETYPES: ReadonlySet<BusinessArchetype> = new Set<BusinessArchetype>([
+  "portfolio_service",
+  "events",
+  "real_estate",
+]);
+
+function archetypeClass(archetype: BusinessArchetype): ArchetypeClass {
+  if (SERVICE_ARCHETYPES.has(archetype)) return "service";
+  if (RETAIL_ARCHETYPES.has(archetype)) return "retail";
+  if (PORTFOLIO_ARCHETYPES.has(archetype)) return "portfolio";
+  return "generic";
+}
 
 /* ------------------------------------------------------------- colors */
 
@@ -79,10 +119,25 @@ export function resolveColors(recipe: PageRecipeV1): ThemeColors {
   const background = p.background;
   const text = ensureReadable(p.text, background, 4.5);
   const surface = p.surface;
+  // The canonical theme has one primary and one accent token, while the
+  // profile hero uses both as gradient endpoints. Some family palettes
+  // intentionally reuse the accent for both tokens, which renders a flat
+  // hero. Use the palette's existing readable text color as a deterministic
+  // companion; no new color or random derivation is introduced.
+  const accentKey = p.accent.toLowerCase();
+  const heroAccent =
+    [p.text, p.text_muted, p.surface, p.background].find(
+      (candidate) =>
+        candidate.toLowerCase() !== accentKey && contrastRatio(candidate, p.accent) >= 1.5,
+    ) ??
+    [p.text, p.text_muted, p.surface, p.background].find(
+      (candidate) => candidate.toLowerCase() !== accentKey,
+    ) ??
+    p.accent;
   return {
     primary: p.accent,
     secondary: ensureReadable(p.text_muted, background, 3),
-    accent: p.accent,
+    accent: heroAccent,
     background,
     surface,
     card: surface,
@@ -156,16 +211,20 @@ const FAMILY_TRACKING: Record<FamilyId, number> = {
 
 export function resolveTypography(
   recipe: PageRecipeV1,
-  semantics: Pick<RecipeSemanticsV2, "family" | "density" | "visual_weight">,
+  semantics: Pick<RecipeSemanticsV2, "family" | "density" | "visual_weight" | "archetype">,
 ): ThemeTypography {
   const t = recipe.design.typography;
   const bump = semantics.visual_weight === "high" ? 4 : semantics.visual_weight === "light" ? -2 : 0;
+  // A visible hero hierarchy: retail and portfolio lean editorial, services
+  // stay a touch smaller and calmer so the CTA hierarchy reads first.
+  const cls = archetypeClass(semantics.archetype);
+  const heroBump = cls === "portfolio" ? 8 : cls === "retail" ? 6 : cls === "service" ? 4 : 0;
   const lineHeight =
     semantics.density === "compact" ? 1.45 : semantics.density === "spacious" ? 1.62 : 1.55;
   return {
     headingFont: FONT_STACKS[t.heading_family],
     bodyFont: FONT_STACKS[t.body_family],
-    headingSize: Math.max(26, HEADING_BASE[t.heading_scale] + bump),
+    headingSize: Math.max(30, HEADING_BASE[t.heading_scale] + bump + heroBump),
     bodySize: BODY_BASE[t.body_scale],
     headingWeight: t.heading_weight,
     bodyWeight: t.body_weight,
@@ -193,7 +252,10 @@ const PATTERN_BY_FAMILY: Record<FamilyId, NonNullable<ThemeBackground["pattern"]
 export function resolveBackground(
   recipe: PageRecipeV1,
   colors: ThemeColors,
-  semantics: Pick<RecipeSemanticsV2, "family" | "background_mood" | "visual_weight" | "media_strategy">,
+  semantics: Pick<
+    RecipeSemanticsV2,
+    "family" | "background_mood" | "visual_weight" | "media_strategy" | "archetype"
+  >,
   capabilities: PowerEditorCapabilities,
 ): ThemeBackground {
   const source = recipe.design.background;
@@ -266,6 +328,25 @@ export function resolveBackground(
     };
   }
 
+  // Archetype-aware depth: every commercial class gets a subtle directional
+  // gradient instead of a flat white sheet. This is the "not a plain page"
+  // guarantee, while keeping readable contrast (surface -> background stays
+  // within the approved palette).
+  if (semantics.archetype !== "generic" && capabilities.background_linear_gradient) {
+    const cls = archetypeClass(semantics.archetype);
+    const angle = cls === "portfolio" ? 165 : cls === "retail" ? 180 : 155;
+    return {
+      type: "gradient",
+      color: colors.background,
+      gradient: {
+        kind: "linear",
+        angle,
+        from: colors.surface,
+        to: colors.background,
+      },
+    };
+  }
+
   return { type: "solid", color: colors.background };
 }
 
@@ -280,13 +361,24 @@ const RADIUS_TOKEN: Record<PageRecipeV1["design"]["geometry"]["radius"], number>
 
 export function resolveCards(
   recipe: PageRecipeV1,
-  semantics: Pick<RecipeSemanticsV2, "surface_mood" | "density" | "visual_weight" | "family">,
+  semantics: Pick<
+    RecipeSemanticsV2,
+    "surface_mood" | "density" | "visual_weight" | "family" | "archetype"
+  >,
   capabilities: PowerEditorCapabilities,
 ): ThemeCards {
   const geometry = recipe.design.geometry;
   let preset: ThemeCards["preset"] = semantics.surface_mood;
   if (preset === "glass" && !capabilities.card_preset_glass) preset = "elevated";
   if (preset === "luxury" && !capabilities.card_preset_luxury) preset = "flat";
+
+  // Archetype-aware card material: services present trustworthy, elevated
+  // cards; retail emphasizes media with soft cards; portfolio keeps cards
+  // minimal/low-chrome so the images themselves lead.
+  const cls = archetypeClass(semantics.archetype);
+  if (cls === "service" && preset !== "luxury" && preset !== "glass") preset = "elevated";
+  else if (cls === "retail" && preset !== "luxury" && preset !== "glass") preset = "soft";
+  else if (cls === "portfolio") preset = "minimal";
 
   const radius = semantics.family === "luxury" ? 2 : RADIUS_TOKEN[geometry.radius];
   const borderWidth = geometry.border_style === "none" ? 0 : 1;
@@ -323,6 +415,7 @@ export function resolveButtons(
     | "density"
     | "visual_weight"
     | "surface_mood"
+    | "archetype"
   >,
   capabilities: PowerEditorCapabilities,
 ): ThemeButtons {
@@ -336,10 +429,21 @@ export function resolveButtons(
   else if (button.style === "soft") variant = "soft";
   else variant = "solid";
 
+  // Archetype-aware CTA character: booking/services want a confident solid,
+  // retail wants a commercial gradient, portfolio keeps chrome low with an
+  // outline so the work stays the hero.
+  const cls = archetypeClass(semantics.archetype);
+
   // Button treatment is a semantic decision, not just a palette decision.
   // Every branch stays inside the frozen ThemeButtons vocabulary.
   if (semantics.family === "luxury") variant = strong ? "outline" : "soft";
-  else if (semantics.family === "creator") {
+  else if (cls === "portfolio" && !directGoal && capabilities.button_outline) {
+    variant = "outline";
+  } else if (cls === "retail" && strong && capabilities.button_gradient) {
+    variant = "gradient";
+  } else if (cls === "service" && strong && capabilities.button_solid) {
+    variant = "solid";
+  } else if (semantics.family === "creator") {
     if (semantics.surface_mood === "glass" && capabilities.button_glass && !directGoal) {
       variant = "glass";
     } else if (!directGoal || soft) {
@@ -380,17 +484,22 @@ export function resolveButtons(
 /* ----------------------------------------------------------- spacing */
 
 export function resolveSpacing(
-  semantics: Pick<RecipeSemanticsV2, "density" | "family">,
+  semantics: Pick<RecipeSemanticsV2, "density" | "family" | "archetype">,
   layoutId: RecipeLayoutV2["id"],
 ): ThemeSpacing {
   const section = semantics.density === "compact" ? 24 : semantics.density === "spacious" ? 40 : 32;
   const block = semantics.density === "compact" ? 12 : semantics.density === "spacious" ? 18 : 14;
+  const cls = archetypeClass(semantics.archetype);
   const contentWidth =
-    layoutId === "portfolio" || layoutId === "bento"
+    layoutId === "full-width"
+      ? 680
+      : layoutId === "portfolio" || layoutId === "bento"
       ? 720
-      : semantics.family === "luxury" || semantics.family === "editorial"
-        ? 600
-        : 640;
+      : cls === "retail" || cls === "portfolio"
+        ? 680
+        : semantics.family === "luxury" || semantics.family === "editorial"
+          ? 600
+          : 640;
   return { section, block, contentWidth };
 }
 
@@ -487,16 +596,33 @@ export function resolveAvatar(
 
 export function resolveBanner(
   recipe: PageRecipeV1,
-  semantics: Pick<RecipeSemanticsV2, "family" | "visual_weight" | "media_weight">,
+  semantics: Pick<RecipeSemanticsV2, "family" | "visual_weight" | "media_weight" | "archetype">,
 ): RecipeBannerV2 {
-  const enabled = recipe.structure.hero.show_banner && hasUsableAsset(recipe.identity.banner);
+  const hasAsset = hasUsableAsset(recipe.identity.banner);
+  const cls = archetypeClass(semantics.archetype);
+  // A hero surface is warranted when there is a real banner OR a commercial
+  // archetype that would otherwise open on a bare text header. The frozen
+  // renderer draws a primary->accent gradient when no imageUrl is present, so
+  // this is a gradient-led hero — never a fabricated photograph.
+  const gradientHero = !hasAsset && cls !== "generic" && recipe.structure.hero.enabled;
+  const enabled = (recipe.structure.hero.show_banner && hasAsset) || gradientHero;
+
   const tall = semantics.media_weight >= 55 || semantics.visual_weight === "high";
+  const height = hasAsset
+    ? tall
+      ? 230
+      : 180
+    : cls === "portfolio"
+      ? 260
+      : cls === "retail"
+        ? 240
+        : 220;
   const rawFocalY = recipe.design.card.image_focal_y ?? 50;
   const focalY = Math.max(0, Math.min(100, rawFocalY <= 1 ? rawFocalY * 100 : rawFocalY));
   return {
     enabled,
-    height: tall ? 230 : 180,
-    mobileHeight: tall ? 170 : 136,
+    height,
+    mobileHeight: Math.round(height * 0.72),
     overlay: semantics.family === "luxury" ? 0.4 : semantics.family === "energetic" ? 0.25 : 0.15,
     blur: semantics.family === "luxury" ? 2 : 0,
     gradient: true,

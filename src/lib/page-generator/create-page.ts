@@ -78,6 +78,17 @@ export interface CreateGeneratedPageInput {
   generate?: (request: GeneratedPageEngineRequest) => Promise<OnboardingV2GenerationResult>;
 }
 
+export interface PersistGeneratedCanonicalPageInput {
+  supabase: SupabaseClient;
+  userId: string;
+  profileId: string;
+  title: string;
+  pageType: Page["page_type"];
+  editorConfig: unknown;
+  generation: CreateGeneratedPageSuccess["generation"];
+  diagnostics?: string[];
+}
+
 function failure(
   code: CreateGeneratedPageFailureCode,
   error: string,
@@ -108,6 +119,82 @@ async function defaultGenerate(
       ...(request.now ? { now: request.now } : {}),
     },
   });
+}
+
+/**
+ * Reuses the authoritative child-page persistence tail for callers that have
+ * already run generation elsewhere. This function never invokes an engine.
+ */
+export async function persistGeneratedCanonicalPage({
+  supabase,
+  userId,
+  profileId,
+  title,
+  pageType,
+  editorConfig,
+  generation,
+  diagnostics = [],
+}: PersistGeneratedCanonicalPageInput): Promise<CreateGeneratedPageResult> {
+  const canonical = toCanonicalPageDocument(editorConfig);
+  if (!canonical.ok) {
+    return failure("INVALID_ENGINE_OUTPUT", "La página generada no es válida.", {
+      issues: canonical.errors,
+    });
+  }
+
+  let page: Page;
+  try {
+    page = await pageService.createPage(supabase, {
+      userId,
+      profileId: profileId.trim(),
+      title: title.trim(),
+      pageType,
+    });
+  } catch (error) {
+    return failure(
+      "PAGE_CREATE_FAILED",
+      error instanceof Error ? error.message : "No se pudo crear la página.",
+    );
+  }
+
+  try {
+    const persisted = await pageCanonicalService.saveDraft(
+      supabase,
+      page.id,
+      userId,
+      canonical.envelope.editorConfig,
+    );
+    if (stableJson(persisted.editorConfig) !== stableJson(canonical.envelope.editorConfig)) {
+      return failure("VERIFICATION_FAILED", "La página guardada no coincide con lo generado.", {
+        pageId: page.id,
+      });
+    }
+  } catch (error) {
+    return failure(
+      "CANONICAL_SAVE_FAILED",
+      error instanceof Error ? error.message : "No se pudo guardar la página generada.",
+      { pageId: page.id },
+    );
+  }
+
+  const verified = await pageService.getOwnPageById(supabase, page.id, userId);
+  const verifiedEnvelope = readCanonicalPageEnvelope(verified?.template_config);
+  if (
+    !verifiedEnvelope ||
+    stableJson(verifiedEnvelope.editorConfig) !== stableJson(canonical.envelope.editorConfig)
+  ) {
+    return failure("VERIFICATION_FAILED", "No pudimos verificar la página generada.", {
+      pageId: page.id,
+    });
+  }
+
+  return {
+    status: "CREATED",
+    page: verified ?? page,
+    envelope: verifiedEnvelope,
+    generation,
+    diagnostics,
+  };
 }
 
 export async function createGeneratedPage({
@@ -172,63 +259,13 @@ export async function createGeneratedPage({
     );
   }
 
-  const canonical = toCanonicalPageDocument(generated.editorConfig);
-  if (!canonical.ok) {
-    return failure("INVALID_ENGINE_OUTPUT", "La página generada no es válida.", {
-      issues: canonical.errors,
-    });
-  }
-
-  let page: Page;
-  try {
-    page = await pageService.createPage(supabase, {
-      userId,
-      profileId: normalizedProfileId,
-      title: input.title.trim(),
-      pageType: preset.pageType,
-    });
-  } catch (error) {
-    return failure(
-      "PAGE_CREATE_FAILED",
-      error instanceof Error ? error.message : "No se pudo crear la página.",
-    );
-  }
-
-  try {
-    const persisted = await pageCanonicalService.saveDraft(
-      supabase,
-      page.id,
-      userId,
-      canonical.envelope.editorConfig,
-    );
-    if (stableJson(persisted.editorConfig) !== stableJson(canonical.envelope.editorConfig)) {
-      return failure("VERIFICATION_FAILED", "La página guardada no coincide con lo generado.", {
-        pageId: page.id,
-      });
-    }
-  } catch (error) {
-    return failure(
-      "CANONICAL_SAVE_FAILED",
-      error instanceof Error ? error.message : "No se pudo guardar la página generada.",
-      { pageId: page.id },
-    );
-  }
-
-  const verified = await pageService.getOwnPageById(supabase, page.id, userId);
-  const verifiedEnvelope = readCanonicalPageEnvelope(verified?.template_config);
-  if (
-    !verifiedEnvelope ||
-    stableJson(verifiedEnvelope.editorConfig) !== stableJson(canonical.envelope.editorConfig)
-  ) {
-    return failure("VERIFICATION_FAILED", "No pudimos verificar la página generada.", {
-      pageId: page.id,
-    });
-  }
-
-  return {
-    status: "CREATED",
-    page: verified ?? page,
-    envelope: verifiedEnvelope,
+  return persistGeneratedCanonicalPage({
+    supabase,
+    userId,
+    profileId: normalizedProfileId,
+    title: input.title,
+    pageType: preset.pageType,
+    editorConfig: generated.editorConfig,
     generation: {
       candidateId: generated.generationMetadata.candidateId,
       score: generated.generationMetadata.score,
@@ -236,5 +273,5 @@ export async function createGeneratedPage({
       layout: generated.generationMetadata.layout,
     },
     diagnostics: mapped.diagnostics.warnings,
-  };
+  });
 }

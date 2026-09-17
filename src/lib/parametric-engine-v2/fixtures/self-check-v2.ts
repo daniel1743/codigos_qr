@@ -246,6 +246,7 @@ function semantics(
 ): RecipeSemanticsV2 {
   return {
     family,
+    archetype: "generic",
     personality: v2[0]!.recipe.semantics.personality,
     primary_goal: v2[0]!.recipe.semantics.primary_goal,
     pattern,

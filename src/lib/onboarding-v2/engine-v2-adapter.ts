@@ -5,8 +5,8 @@ import {
   isValidHttpUrl,
   isValidWhatsApp,
 } from "@/lib/parametric-engine-v2/destinations";
-import { normalizeBusinessCategory } from "@/lib/parametric-engine-v2/normalize";
 import type { ActionIntentV2, ActionTypeV2, ContentNeedV2, OnboardingIntentV2 } from "./types";
+import type { MediaProvenanceV1 } from "@/premium-template-studio/types";
 import { validateOnboardingIntentV2 } from "./validation";
 
 export interface OnboardingV2AdapterDiagnostics {
@@ -225,7 +225,9 @@ export function mapOnboardingIntentV2ToEngineInput(
   }
 
   const profession = intent.identity.professionOrActivity.trim();
-  const isCustomActivity = normalizeBusinessCategory(profession) === "other";
+  const category = intent.business.category;
+  const engineCategory = category === "retail" ? "other" : category;
+  const isCustomActivity = category === "other";
   if (isCustomActivity) {
     pushOnce(result.mappedFields, "identity.professionOrActivity -> businessOther");
     pushOnce(result.deferredFields, "business.category/customCategory");
@@ -291,6 +293,7 @@ export function mapOnboardingIntentV2ToEngineInput(
 
   const input: EngineV2HostGenerationInput = {
     profession,
+    businessCategory: engineCategory,
     ...(isCustomActivity ? { businessOther: profession } : {}),
     goal: mapGoal(intent, result),
     ...(STYLE_MAP[intent.visualDirection.preference]
@@ -304,11 +307,24 @@ export function mapOnboardingIntentV2ToEngineInput(
     },
     ...(primaryAction ? { primaryAction } : {}),
     ...(avatarUrl || bannerUrl
-      ? { userMedia: { ...(avatarUrl ? { avatarUrl } : {}), ...(bannerUrl ? { bannerUrl } : {}) } }
+      ? {
+          userMedia: {
+            ...(avatarUrl ? { avatarUrl } : {}),
+            ...(bannerUrl ? { bannerUrl } : {}),
+            ...(bannerUrl
+              ? { bannerProvenance: { origin: "owner" } satisfies MediaProvenanceV1 }
+              : {}),
+          },
+        }
       : {}),
   };
   pushOnce(result.mappedFields, "identity.displayName -> content.name");
   pushOnce(result.mappedFields, "identity.professionOrActivity -> profession");
+  pushOnce(result.mappedFields, `business.category -> businessCategory=${engineCategory}`);
+  if (category === "retail") {
+    pushOnce(result.deferredFields, "business.category=retail");
+    result.warnings.push("The current Engine V2 category vocabulary has no retail value; using other.");
+  }
   if (intent.identity.bio) pushOnce(result.mappedFields, "identity.bio -> content.bio");
   pushOnce(result.mappedFields, "actions.primary -> primaryAction");
   return { ok: true, engineInput: input, diagnostics: result };

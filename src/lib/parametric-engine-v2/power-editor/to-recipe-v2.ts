@@ -8,8 +8,10 @@
 
 import { ENGINE_VERSION } from "../engine";
 import { fingerprintRecipe } from "../fingerprint";
+import type { BusinessArchetype } from "../business-signals";
 import type { CompositionPattern } from "../composition-patterns";
 import type { DesignPresetId } from "../presets";
+import type { MediaProvenanceV1 } from "@/premium-template-studio/types";
 import type { RecipeQualityScoreV1 } from "../quality-score";
 import type { DesignProfile, PageRecipeV1 } from "../types";
 import {
@@ -57,6 +59,9 @@ export interface BuildRecipeV2Input {
   candidateId?: string;
   preset?: DesignPresetId | null;
   mediaStrategy?: MediaStrategyV2;
+  /** V2: archetype already inferred upstream; direct callers may omit it. */
+  archetype?: BusinessArchetype;
+  bannerProvenance?: MediaProvenanceV1;
 }
 
 function densityOf(recipe: PageRecipeV1): RecipeSemanticsV2["density"] {
@@ -90,7 +95,8 @@ function contentDensityOf(
     content.map,
   ].filter(Boolean).length;
 
-  if (richSections === 0 && actionCount <= 3) return "compact";
+  const singleService = richSections === 1 && (content.services?.length ?? 0) === 1;
+  if ((richSections === 0 || singleService) && actionCount <= 3) return "compact";
   if (
     richSections >= 2 ||
     Boolean(content.gallery || content.portfolio || content.video || content.products)
@@ -124,6 +130,7 @@ export function buildPowerEditorRecipeV2(input: BuildRecipeV2Input): PowerEditor
   const content = normalizeContent(input.content);
 
   const family = recipe.meta.family;
+  const archetype: BusinessArchetype = input.archetype ?? "generic";
   const density = contentDensityOf(recipe, content);
   const visual_weight = resolveVisualWeight(profile);
   const media_strategy =
@@ -134,12 +141,15 @@ export function buildPowerEditorRecipeV2(input: BuildRecipeV2Input): PowerEditor
       avatarUrl: recipe.identity.avatar,
       bannerUrl: recipe.identity.banner,
       content,
+      ownerBanner: input.bannerProvenance?.origin === "owner",
+      primaryGoal: recipe.meta.primary_goal,
     });
 
   const hasBanner = hasUsableAsset(recipe.identity.banner);
   const layout = resolveLayout(pattern, hasBanner, media_strategy);
   const semantics: RecipeSemanticsV2 = {
     family,
+    archetype,
     personality: recipe.meta.personality,
     primary_goal: recipe.meta.primary_goal,
     pattern,
@@ -182,7 +192,7 @@ export function buildPowerEditorRecipeV2(input: BuildRecipeV2Input): PowerEditor
   const useHeroBlock =
     capabilities.block_hero &&
     capabilities.hero_replaces_profile_header &&
-    (pattern === "visual_cover" || pattern === "media_story") &&
+    pattern === "visual_cover" &&
     Boolean(recipe.identity.banner || recipe.identity.avatar);
 
   const hero: HeroSourceV2 = {
@@ -192,6 +202,7 @@ export function buildPowerEditorRecipeV2(input: BuildRecipeV2Input): PowerEditor
     bio: recipe.identity.bio,
     avatarUrl: recipe.identity.avatar,
     bannerUrl: recipe.identity.banner,
+    ...(input.bannerProvenance ? { bannerProvenance: input.bannerProvenance } : {}),
     verified: recipe.structure.hero.show_professional_badge,
   };
 

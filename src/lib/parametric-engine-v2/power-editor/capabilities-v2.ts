@@ -136,7 +136,7 @@ export const POWER_EDITOR_CAPABILITIES = {
    * profile name). A `hero` block therefore duplicates the identity unless
    * the host suppresses the header, so the Engine keeps it opt-in.
    */
-  hero_replaces_profile_header: false,
+  hero_replaces_profile_header: true,
   block_heading: true,
   block_text: true,
   block_links: true,

@@ -184,5 +184,28 @@ describe("pageCanonicalService canonical validation (PAGES_3B)", () => {
     expect(result.published_template_config).toEqual(envelope);
     expect(fake.allCalls.every((c) => c.table === "pages")).toBe(true);
   });
+
+  it("unpublish keeps the child snapshot and advances the same publication revision", async () => {
+    const unpublishedRow = {
+      id: PAGE_ID,
+      published: false,
+      published_revision: 2,
+      published_at: null,
+      published_template_config: validEnvelope(),
+    };
+    const fake = createFakeSupabase(() => ({ data: unpublishedRow, error: null }));
+
+    const result = await pageCanonicalService.unpublish(fake, PAGE_ID, USER_ID, 1);
+
+    expect(result.published).toBe(false);
+    expect(result.published_revision).toBe(2);
+    const updateCall = fake.allCalls.find((c) => c.method === "update");
+    expect(updateCall?.args[0]).toEqual({
+      published: false,
+      published_at: null,
+      published_revision: 2,
+    });
+    expect(fake.allCalls.every((c) => c.table === "pages")).toBe(true);
+  });
 });
 

@@ -102,6 +102,64 @@ export const pageService = {
   },
 
   /**
+   * Permanently delete one owned child Page.
+   *
+   * The page table is the child-page authority; the primary profile is never
+   * represented by a `pages` row. We still verify the owning profile before
+   * issuing the delete, while the database `owner_delete_page` RLS policy is
+   * the final server-side authority for the authenticated user.
+   *
+   * `slug` and `qr_config` are page-owned columns, so deleting the authoritative
+   * row also removes the page alias and page QR relationship. No profile row or
+   * profile QR state is touched.
+   */
+  async deleteOwnedChildPage(
+    supabase: SupabaseClient,
+    pageId: string,
+    userId: string,
+  ): Promise<void> {
+    if (!pageId || !userId) {
+      throw new PageServiceError("Se requiere una sesión autenticada y una página válida.");
+    }
+
+    const page = await pageService.getOwnPageById(supabase, pageId, userId);
+    if (!page) {
+      throw new PageServiceError("La página no existe o no te pertenece.");
+    }
+
+    // A primary profile has no row in `public.pages`. Keep this explicit guard
+    // so a malformed/legacy row can never be treated as the profile itself.
+    if (page.id === page.profile_id) {
+      throw new PageServiceError("La página principal no se puede eliminar.");
+    }
+
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("id", page.profile_id)
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (profileError) throw profileError;
+    if (!profile) {
+      throw new PageServiceError("El perfil de esta página no existe o no te pertenece.");
+    }
+
+    const { data: deleted, error } = await supabase
+      .from("pages")
+      .delete()
+      .eq("id", page.id)
+      .eq("owner_user_id", userId)
+      .select("id")
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!deleted) {
+      throw new PageServiceError("La página no existe o no pudo eliminarse.");
+    }
+  },
+
+  /**
    * Create a child page. `owner_user_id` is ALWAYS taken from the authenticated
    * session (`input.userId`), never from UI input. The database generates
    * `id`, `public_id`, `created_at` and `updated_at`.

@@ -448,6 +448,20 @@ export type ImagePosition =
   | "bottom-left"
   | "bottom-right";
 
+export type MediaProvenanceOrigin = "owner" | "contextual_stock" | "legacy_unknown";
+export type ContextualMediaProvider = "unsplash" | "pexels";
+
+/** Optional canonical provenance; absent provenance means legacy_unknown. */
+export interface MediaProvenanceV1 {
+  origin: MediaProvenanceOrigin;
+  provider?: ContextualMediaProvider;
+  providerAssetId?: string;
+  sourcePageUrl?: string;
+  creatorName?: string;
+  creatorUrl?: string;
+  attributionText?: string;
+}
+
 export interface HeroMediaContent {
   url?: string;
   blur?: number;
@@ -455,6 +469,7 @@ export interface HeroMediaContent {
   fit?: ImageFit;
   /** Absent → "center" (current default). */
   position?: ImagePosition;
+  provenance?: MediaProvenanceV1;
 }
 
 export interface HeroBadgeContent {

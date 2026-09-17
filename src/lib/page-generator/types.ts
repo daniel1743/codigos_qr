@@ -81,6 +81,7 @@ export interface GeneratedPageInput {
   title: string;
   businessName: string;
   activity: string;
+  businessCategory?: GeneratedBusinessCategory;
   description?: string;
   /**
    * Owner-supplied cover image (https). It is real owner media — never invented.
@@ -89,8 +90,16 @@ export interface GeneratedPageInput {
    * exists.
    */
   coverImageUrl?: string;
+  /** Owner-supplied avatar image forwarded to the existing Engine media seam. */
+  avatarImageUrl?: string;
   cta?: GeneratedPageCta;
   style?: GeneratedPageStyle;
+  /**
+   * Optional primary-goal carry-through from Smart Pages. This is an adapter
+   * field, not canonical document data; legacy callers continue to use the
+   * objective preset when it is absent.
+   */
+  primaryGoal?: PrimaryGoalV2;
   items: GeneratedPageItem[];
 }
 

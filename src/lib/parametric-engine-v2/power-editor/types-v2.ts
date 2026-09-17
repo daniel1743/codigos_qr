@@ -30,6 +30,7 @@ import type {
   ThemeTypography,
   TemplateBlock,
 } from "@/premium-template-studio/types";
+import type { BusinessArchetype } from "../business-signals";
 import type { CompositionPattern } from "../composition-patterns";
 import type { DesignPresetId } from "../presets";
 import type { FamilyId, PageRecipeV1, PrimaryGoal, VisualPersonality } from "../types";
@@ -54,6 +55,8 @@ export type BackgroundMood =
 /** The semantic decisions the Engine actually reasons about. */
 export interface RecipeSemanticsV2 {
   family: FamilyId;
+  /** V2: commercial archetype already inferred upstream (never invented here). */
+  archetype: BusinessArchetype;
   personality: VisualPersonality;
   primary_goal: PrimaryGoal;
   pattern: CompositionPattern;

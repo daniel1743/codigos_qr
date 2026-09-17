@@ -8,6 +8,7 @@
 
 import type { EngineV2HostGenerationResult } from "@/lib/parametric-engine-v2/internal-entrypoint";
 import { generateCripqerPageWithEngineV2 } from "@/lib/parametric-engine-v2/internal-entrypoint";
+import { acceptEngineGeneratedConfig } from "@/lib/canonical-page";
 import { validateTemplate } from "@/premium-template-studio/engine/TemplateValidator";
 import type {
   CatalogItemV1,
@@ -20,12 +21,20 @@ import type {
   ExperienceType,
 } from "@/lib/smart-pages/smart-pages.types";
 import { generatePagePlan } from "@/lib/smart-pages/page-orchestrator";
+import {
+  mapRetailPresentationToHostInput,
+  reconcileRetailGeneratedConfig,
+  type SmartPagesRetailMappingResult,
+} from "./smart-pages-retail-map";
 import { mapGeneratedPageToEngineInput, type GeneratedPageEngineMappingSuccess } from "./adapter";
+import type { CuratedMediaResult } from "@/lib/parametric-engine-v2/media";
+import { selectedContextualHero } from "@/lib/parametric-engine-v2/media/contextual";
 import type { GeneratedPageActionType, GeneratedPageInput, GeneratedPageItem } from "./types";
 
 export interface SmartPagesHostMapOptions {
   /** Required so the semantic-to-host mapping remains deterministic. */
   now: string;
+  curatedMedia?: CuratedMediaResult;
 }
 
 export interface SmartPagesHostDiagnostics {
@@ -67,6 +76,17 @@ function diagnostics(): SmartPagesHostDiagnostics {
 
 function pushOnce(target: string[], value: string): void {
   if (!target.includes(value)) target.push(value);
+}
+
+function appendRetailDiagnostics(
+  target: SmartPagesHostDiagnostics,
+  retail: SmartPagesRetailMappingResult,
+): void {
+  const diagnostics = retail.diagnostics;
+  for (const value of diagnostics.mapped) pushOnce(target.mappedFields, value);
+  for (const value of diagnostics.deferred) pushOnce(target.deferredFields, value);
+  for (const value of diagnostics.rejected) pushOnce(target.unsupportedFields, value);
+  for (const value of diagnostics.warnings) pushOnce(target.warnings, value);
 }
 
 function catalogFor(
@@ -194,11 +214,19 @@ function buildGeneratedInput(
     title: plan.title,
     businessName: request.content.business.name,
     activity: request.businessType,
+    ...(request.businessCategory ? { businessCategory: request.businessCategory } : {}),
     ...(request.content.business.about ? { description: request.content.business.about } : {}),
     ...(request.content.business.cover?.url
       ? { coverImageUrl: request.content.business.cover.url }
       : {}),
+    ...(request.content.business.avatar?.url
+      ? { avatarImageUrl: request.content.business.avatar.url }
+      : {}),
     ...(action ? { cta: action.cta } : {}),
+    // Preserve the booking semantic from the request. The services objective
+    // alone is broader and its legacy preset maps to show_services/leads.
+    // Keeping this only for `book` avoids changing legacy host input shapes.
+    ...(request.goal === "book" ? { primaryGoal: "bookings" as const } : {}),
     items,
   };
 }
@@ -214,7 +242,21 @@ export function mapSmartPageToEngineInput(
   if (!generatedInput)
     return { ok: false, plan, errors: [...result.warnings], diagnostics: result };
 
-  const mapped = mapGeneratedPageToEngineInput(generatedInput, { now: options.now });
+  // Retail semantics remain transient. This additive gate only augments the
+  // existing host input/content blocks; it does not call the Engine or persist.
+  const retail =
+    plan.experienceType === "catalog"
+      ? mapRetailPresentationToHostInput(request, plan, generatedInput)
+      : undefined;
+  if (retail) {
+    appendRetailDiagnostics(result, retail);
+    if (!retail.ok) {
+      return { ok: false, plan, errors: retail.errors, diagnostics: result };
+    }
+  }
+  const inputForAdapter = retail?.ok ? retail.input : generatedInput;
+
+  const mapped = mapGeneratedPageToEngineInput(inputForAdapter, { now: options.now });
   if (!mapped.ok) {
     return {
       ok: false,
@@ -231,11 +273,15 @@ export function mapSmartPageToEngineInput(
   result.deferredFields.push(...mapped.diagnostics.deferredFields);
   result.unsupportedFields.push(...mapped.diagnostics.unsupportedFields);
   result.warnings.push(...mapped.diagnostics.warnings);
+  const adapter = retail?.ok
+    ? { ...mapped, contentBlocks: { ...(mapped.contentBlocks ?? {}), ...retail.contentBlocks } }
+    : mapped;
+
   return {
     ok: true,
     plan,
-    generatedPageInput: generatedInput,
-    adapter: mapped,
+    generatedPageInput: inputForAdapter,
+    adapter,
     diagnostics: result,
   };
 }
@@ -249,11 +295,49 @@ export function generateSmartPageWithEngineV2(
   const mapping = mapSmartPageToEngineInput(request, options, suppliedPlan);
   if (!mapping.ok) return { ok: false, mapping, errors: mapping.errors };
   try {
-    const result = generateCripqerPageWithEngineV2(mapping.adapter.engineInput, {
+    const contextual = selectedContextualHero(options.curatedMedia);
+    const engineInput = { ...mapping.adapter.engineInput };
+    if (!engineInput.userMedia?.bannerUrl && contextual) {
+      engineInput.userMedia = {
+        ...(engineInput.userMedia ?? {}),
+        bannerUrl: contextual.url,
+        bannerProvenance: {
+          origin: "contextual_stock",
+          provider: contextual.provider,
+          providerAssetId: contextual.providerId,
+          sourcePageUrl: contextual.sourcePage,
+          ...(contextual.creatorName ? { creatorName: contextual.creatorName } : {}),
+          ...(contextual.creatorUrl ? { creatorUrl: contextual.creatorUrl } : {}),
+        },
+      };
+    }
+    const generated = generateCripqerPageWithEngineV2(engineInput, {
       now: options.now,
       ...(mapping.adapter.contentBlocks ? { contentBlocks: mapping.adapter.contentBlocks } : {}),
       ...(mapping.adapter.engineOptions ? { engine: mapping.adapter.engineOptions } : {}),
     });
+    const retailConfig =
+      mapping.plan.experienceType === "catalog"
+        ? reconcileRetailGeneratedConfig(
+            generated.editorConfig,
+            mapping.adapter.engineInput.primaryAction?.type === "whatsapp"
+              ? mapping.adapter.engineInput.primaryAction.value
+              : undefined,
+          )
+        : generated.editorConfig;
+    const result: EngineV2HostGenerationResult =
+      retailConfig === generated.editorConfig
+        ? generated
+        : {
+            ...generated,
+            editorConfig: acceptEngineGeneratedConfig(retailConfig).editorConfig,
+            canonicalEnvelope: acceptEngineGeneratedConfig(retailConfig),
+          };
+    if (retailConfig !== generated.editorConfig) {
+      mapping.diagnostics.mappedFields.push(
+        "retail host projection -> renderer productGrid/WhatsApp contract",
+      );
+    }
     const validation = validateTemplate(result.editorConfig);
     if (!validation.valid) {
       return {

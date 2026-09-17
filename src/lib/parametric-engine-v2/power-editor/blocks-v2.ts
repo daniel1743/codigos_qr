@@ -7,7 +7,7 @@
  * Deterministic: ids are derived from type + index, never from uid()/Date.
  */
 
-import type { BlockStyle, BlockType } from "@/premium-template-studio/types";
+import type { BlockStyle, BlockType, MediaProvenanceV1 } from "@/premium-template-studio/types";
 import type { PageRecipeV1 } from "../types";
 import type { ContentSourceV2 } from "./content-source";
 import type { PowerEditorCapabilities } from "./capabilities-v2";
@@ -27,6 +27,7 @@ export interface HeroSourceV2 {
   bio: string;
   avatarUrl: string | null;
   bannerUrl: string | null;
+  bannerProvenance?: MediaProvenanceV1;
   verified: boolean;
 }
 
@@ -193,6 +194,10 @@ function mediaBlockAllowed(
   strategy: RecipeSemanticsV2["media_strategy"],
   type: BlockType,
 ): boolean {
+  // Catalog content (products) and music are semantic CONTENT sections, never
+  // a "media decoration" story: they render whenever the host supplied them,
+  // regardless of the media strategy in play.
+  if (type === "product" || type === "productGrid" || type === "music") return true;
   if (strategy === "minimal-no-media") return false;
   if (strategy === "video-first") return type === "video";
   if (strategy === "gallery-first") return type === "gallery";
@@ -207,6 +212,7 @@ function strategyRank(strategy: RecipeSemanticsV2["media_strategy"], type: Block
     "video-first": ["video"],
     "gallery-first": ["gallery"],
     "portfolio-first": ["portfolio"],
+    "catalog-first": ["product", "productGrid"],
     "media-cards": ["links", "mediaCard"],
   };
   return first[strategy]?.includes(type) ? 0 : 1;
@@ -232,6 +238,7 @@ export function planBlocks(
     contentValue: Record<string, unknown>,
     layout: BlockPlanV2["layout"] = {},
     emphasis: "primary" | "secondary" = "secondary",
+    styleOverride?: BlockStyle,
   ) => {
     const frame = resolveFrame(semantics, emphasis, capabilities);
     const blockLayout = { width: "content" as const, align: "center" as const, span: 2, ...layout };
@@ -239,7 +246,7 @@ export function planBlocks(
       type,
       variant,
       role,
-      style: frame === "none" ? style : { ...style, frame },
+      style: styleOverride ?? (frame === "none" ? style : { ...style, frame }),
       layout: blockLayout,
       visibility: { desktop: true, tablet: true, mobile: true },
       animation: semantics.family === "minimal" ? "fade" : "soft-rise",
@@ -281,7 +288,9 @@ export function planBlocks(
               overlap: 44,
             })
           : undefined,
-        bannerImage: hero.bannerUrl ? { url: hero.bannerUrl, blur: 0 } : undefined,
+        bannerImage: hero.bannerUrl
+          ? { url: hero.bannerUrl, blur: 0, ...(hero.bannerProvenance ? { provenance: hero.bannerProvenance } : {}) }
+          : undefined,
         badge: hero.verified ? { enabled: true, label: hero.profession || "Verified" } : undefined,
         primaryCTA: {
           enabled: true,
@@ -290,12 +299,15 @@ export function planBlocks(
         },
         ctaDirection: semantics.density === "compact" ? "row" : "column",
       },
-      { width: "full", span: 2 },
+      { width: "full", trueFullBleed: true, span: 2 },
       "primary",
+      { ...style, frame: "none", shadow: "none", radius: 0, padding: 0 },
     );
   }
 
-  if (content.about && semantics.family !== "energetic") {
+  // The authored Hero already carries the owner's bio. A second quote block
+  // would duplicate identity content and create a sparse-page dead zone.
+  if (content.about && !hero.enabled && semantics.family !== "energetic") {
     push("text", semantics.family === "editorial" ? "quote" : "default", "identity", {
       body: content.about,
     });
@@ -324,19 +336,23 @@ export function planBlocks(
   /* ---------------------------------------------------- conversion */
   const cta = recipe.conversion.primary_cta;
   const ctaKind = ctaVariant(semantics);
-  push(
-    "cta",
-    ctaKind,
-    "conversion",
-    {
-      // The panel headline is semantic, never a copy of the button label.
-      title: ctaKind === "inline" ? undefined : GOAL_HEADLINE[recipe.conversion.primary_goal],
-      label: cta.label,
-      url: cta.destination,
-    },
-    {},
-    "primary",
-  );
+  // A Hero-owned CTA is the primary conversion surface; do not emit a second
+  // panel for the same action in cover-led compositions.
+  if (!hero.enabled) {
+    push(
+      "cta",
+      ctaKind,
+      "conversion",
+      {
+        // The panel headline is semantic, never a copy of the button label.
+        title: ctaKind === "inline" ? undefined : GOAL_HEADLINE[recipe.conversion.primary_goal],
+        label: cta.label,
+        url: cta.destination,
+      },
+      {},
+      "primary",
+    );
+  }
 
   /* ---------------------------------------------------- navigation */
   if (content.featured) {
@@ -699,7 +715,7 @@ export function planBlocks(
       semantics.family === "minimal" ? "minimal" : "cards",
       "media",
       {
-        items: content.products.map((p, i) =>
+        products: content.products.map((p, i) =>
           clean({
             id: `prd-${i}`,
             title: p.title,

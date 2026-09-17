@@ -97,4 +97,37 @@ export const pageCanonicalService = {
     }
     return data as Page;
   },
+
+  /**
+   * Take a published child page offline without deleting its canonical
+   * snapshot. The next publish can reuse that snapshot and still uses the
+   * same optimistic revision authority as publish.
+   */
+  async unpublish(
+    supabase: SupabaseClient,
+    pageId: string,
+    userId: string,
+    expectedRevision: number,
+  ): Promise<Page> {
+    const { data, error } = await supabase
+      .from("pages")
+      .update({
+        published: false,
+        published_at: null,
+        published_revision: expectedRevision + 1,
+      })
+      .eq("id", pageId)
+      .eq("owner_user_id", userId)
+      .eq("published_revision", expectedRevision)
+      .select()
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!data) {
+      throw new Error(
+        "No se pudo despublicar: la página fue modificada en otra sesión. Recarga la página e inténtalo de nuevo.",
+      );
+    }
+    return data as Page;
+  },
 };

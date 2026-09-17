@@ -39,6 +39,7 @@ export type PrimaryActionType = (typeof PRIMARY_ACTION_TYPES)[number];
 export interface OnboardingIntentV1 {
   business_type: string;
   business_other: string | null;
+  business_category?: BusinessCategory;
   primary_goal: PrimaryGoal;
   visual_personality: VisualPersonality;
   identity: {

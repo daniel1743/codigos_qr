@@ -11,6 +11,7 @@ import type { BusinessCategoryV2, OnboardingIntentV2 } from "@/lib/onboarding-v2
 import { GENERATED_PAGE_OBJECTIVE_PRESETS } from "./objective-presets";
 import type { GeneratedPageInput } from "./types";
 import { generatedPageItems } from "./validation";
+import { ownerContentFromGeneratedPageInput } from "./owner-content";
 
 function categoryFor(activity: string): BusinessCategoryV2 {
   // The engine's own normalizer is authoritative: "other" stays "other" and is
@@ -18,8 +19,8 @@ function categoryFor(activity: string): BusinessCategoryV2 {
   return normalizeBusinessCategory(activity.trim()) as BusinessCategoryV2;
 }
 
-function businessFor(activity: string): OnboardingIntentV2["business"] {
-  const category = categoryFor(activity);
+function businessFor(activity: string, explicit?: BusinessCategoryV2): OnboardingIntentV2["business"] {
+  const category = explicit ?? categoryFor(activity);
   return {
     category,
     ...(category === "other" ? { customCategory: activity.trim() } : {}),
@@ -44,6 +45,7 @@ export function buildGeneratedPageIntent(
   const description = input.description?.trim() ?? "";
   const cta = input.cta;
   const items = generatedPageItems(input);
+  const ownerContent = ownerContentFromGeneratedPageInput(input);
 
   return {
     version: "2",
@@ -52,9 +54,9 @@ export function buildGeneratedPageIntent(
       professionOrActivity: activity,
       ...(description ? { bio: description } : {}),
     },
-    business: businessFor(activity),
+    business: businessFor(activity, input.businessCategory),
     outcome: {
-      primaryGoal: preset.goal,
+      primaryGoal: input.primaryGoal ?? preset.goal,
       experienceHint: preset.experienceHint,
     },
     visualDirection: {
@@ -81,6 +83,7 @@ export function buildGeneratedPageIntent(
       preference: items.some((item) => item.imageUrl) ? "own_media" : "minimal_media",
     },
     scope: { density: preset.density, userSelected: true },
+    ownerContent,
     meta: {
       version: "2",
       completedAt: options.now ?? new Date().toISOString(),

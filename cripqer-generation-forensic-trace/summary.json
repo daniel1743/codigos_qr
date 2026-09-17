@@ -1,0 +1,221 @@
+{
+  "now": "2026-09-15T12:00:00.000Z",
+  "scenarios": {
+    "A": {
+      "id": "SERVICE_BOOKING",
+      "businessType": "Peluquería y belleza",
+      "goal": "book",
+      "experienceType": "services",
+      "planSections": [
+        {
+          "kind": "hero",
+          "order": 0
+        },
+        {
+          "kind": "about",
+          "order": 1,
+          "title": "About us"
+        },
+        {
+          "kind": "serviceGrid",
+          "order": 2,
+          "title": "What we offer"
+        },
+        {
+          "kind": "whatsappCta",
+          "order": 3
+        },
+        {
+          "kind": "footer",
+          "order": 4
+        }
+      ],
+      "objective": "services",
+      "archetype": "appointment_service",
+      "businessCategory": "other",
+      "baselineFamily": "corporate",
+      "selectedFamily": "editorial",
+      "layout": "split",
+      "pattern": "service_first",
+      "preset": null,
+      "mediaStrategy": "minimal-no-media",
+      "familyScores": {
+        "editorial": 30,
+        "luxury": 22,
+        "corporate": 68,
+        "minimal": 24,
+        "creator": 8,
+        "energetic": 0
+      },
+      "blockTypes": [
+        "text",
+        "services",
+        "cta",
+        "contact"
+      ],
+      "themeColors": {
+        "primary": "#1F3A5F",
+        "secondary": "#5A564F",
+        "accent": "#1A1A1A",
+        "background": "#FFFFFF",
+        "surface": "#F7F6F3",
+        "card": "#F7F6F3",
+        "text": "#1A1A1A",
+        "mutedText": "#5A564F",
+        "border": "#E4E2DC"
+      },
+      "typography": {
+        "headingFont": "\"Times New Roman\", Times, serif",
+        "bodyFont": "\"Trebuchet MS\", \"Segoe UI\", sans-serif",
+        "headingSize": 48,
+        "bodySize": 15,
+        "headingWeight": 600,
+        "bodyWeight": 400,
+        "lineHeight": 1.62,
+        "letterSpacing": -0.02
+      }
+    },
+    "B": {
+      "id": "RETAIL_CATALOG",
+      "businessType": "Tienda de ropa",
+      "goal": "sell",
+      "experienceType": "catalog",
+      "planSections": [
+        {
+          "kind": "hero",
+          "order": 0
+        },
+        {
+          "kind": "productGrid",
+          "order": 1,
+          "title": "Catalog"
+        },
+        {
+          "kind": "whatsappCta",
+          "order": 2
+        },
+        {
+          "kind": "footer",
+          "order": 3
+        }
+      ],
+      "objective": "catalog",
+      "archetype": "retail",
+      "businessCategory": "other",
+      "baselineFamily": "corporate",
+      "selectedFamily": "editorial",
+      "layout": "compact",
+      "pattern": "conversion_first",
+      "preset": null,
+      "mediaStrategy": "banner-first",
+      "familyScores": {
+        "editorial": 24,
+        "luxury": 0,
+        "corporate": 64,
+        "minimal": 24,
+        "creator": 16,
+        "energetic": 26
+      },
+      "blockTypes": [
+        "text",
+        "cta",
+        "productGrid",
+        "contact"
+      ],
+      "themeColors": {
+        "primary": "#1F3A5F",
+        "secondary": "#5A564F",
+        "accent": "#1A1A1A",
+        "background": "#FFFFFF",
+        "surface": "#F7F6F3",
+        "card": "#F7F6F3",
+        "text": "#1A1A1A",
+        "mutedText": "#5A564F",
+        "border": "#E4E2DC"
+      },
+      "typography": {
+        "headingFont": "Georgia, \"Times New Roman\", serif",
+        "bodyFont": "system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "headingSize": 50,
+        "bodySize": 15,
+        "headingWeight": 700,
+        "bodyWeight": 400,
+        "lineHeight": 1.62,
+        "letterSpacing": -0.02
+      }
+    },
+    "C": {
+      "id": "CREATIVE_PORTFOLIO",
+      "businessType": "Fotografía",
+      "goal": "showcase",
+      "experienceType": "portfolio",
+      "planSections": [
+        {
+          "kind": "hero",
+          "order": 0
+        },
+        {
+          "kind": "about",
+          "order": 1,
+          "title": "About us"
+        },
+        {
+          "kind": "portfolioGrid",
+          "order": 2,
+          "title": "What we offer"
+        },
+        {
+          "kind": "whatsappCta",
+          "order": 3
+        },
+        {
+          "kind": "footer",
+          "order": 4
+        }
+      ],
+      "objective": "portfolio",
+      "archetype": "portfolio_service",
+      "businessCategory": "other",
+      "baselineFamily": "editorial",
+      "selectedFamily": "editorial",
+      "layout": "editorial",
+      "pattern": "editorial_stack",
+      "preset": "editorial_calm",
+      "mediaStrategy": "banner-first",
+      "familyScores": {
+        "editorial": 56,
+        "luxury": 0,
+        "corporate": 46,
+        "minimal": 42,
+        "creator": 22,
+        "energetic": 0
+      },
+      "blockTypes": [
+        "text",
+        "cta",
+        "portfolio"
+      ],
+      "themeColors": {
+        "primary": "#7A3B2E",
+        "secondary": "#574E45",
+        "accent": "#241F1B",
+        "background": "#FDFBF8",
+        "surface": "#F1EAE2",
+        "card": "#F1EAE2",
+        "text": "#241F1B",
+        "mutedText": "#574E45",
+        "border": "#E3D8CC"
+      },
+      "typography": {
+        "headingFont": "Georgia, \"Times New Roman\", serif",
+        "bodyFont": "system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "headingSize": 52,
+        "bodySize": 15,
+        "headingWeight": 700,
+        "bodyWeight": 400,
+        "lineHeight": 1.62,
+        "letterSpacing": -0.02
+      }
+    }
+  }
+}

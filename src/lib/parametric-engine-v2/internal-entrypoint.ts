@@ -6,8 +6,17 @@ import {
   type CripqerOnboardingIntentV1,
 } from "@/lib/canonical-page";
 import { CRIPQER_ACTION_HOST_POLICY_V1 } from "@/lib/host-contracts";
-import { generatePowerEditorTemplate, type GenerateV2Options } from "./power-editor";
+import {
+  generatePowerEditorCandidates,
+  generatePowerEditorTemplate,
+  type GenerateV2Options,
+  type PowerEditorRecipeV2,
+} from "./power-editor";
 import { normalizeContent, type ContentSourceV2 } from "./power-editor/content-source";
+import { inferArchetype, type BusinessArchetype } from "./business-signals";
+import { ARCHETYPE_STRATEGIES } from "./archetypes";
+import { normalizeIntent } from "./normalize";
+import { buildDesignProfile } from "./strategy";
 
 /**
  * HOST SEAM — structured content pass-through (PAGES_7).
@@ -27,7 +36,10 @@ export type EngineV2HostContentBlocks = Partial<ContentSourceV2>;
 import type { CuratedMediaResult } from "./media";
 import type { SupervisorOutcome } from "./ai";
 import type { BioTemplateConfig } from "@/premium-template-studio/types";
+import type { MediaProvenanceV1 } from "@/premium-template-studio/types";
 import type {
+  BusinessCategory,
+  FamilyId,
   OnboardingIntentV1,
   PrimaryActionType,
   PrimaryGoal,
@@ -35,11 +47,14 @@ import type {
 } from "./types";
 
 export interface EngineV2HostGenerationInput extends CripqerOnboardingIntentV1 {
+  /** Explicit category from the semantic host; text inference is fallback only. */
+  businessCategory?: BusinessCategory;
   /** Specific free-form activity when profession is outside the host catalogue. */
   businessOther?: string | null;
   userMedia?: {
     avatarUrl?: string;
     bannerUrl?: string;
+    bannerProvenance?: MediaProvenanceV1;
   };
   preferredColor?: string;
   /**
@@ -160,6 +175,7 @@ function toEngineIntent(
   return {
     business_type: profession,
     business_other: input.businessOther?.trim() || null,
+    ...(input.businessCategory ? { business_category: input.businessCategory } : {}),
     primary_goal: primaryGoal(input.goal),
     visual_personality: visualPersonality(input.style),
     identity: {
@@ -173,6 +189,18 @@ function toEngineIntent(
     ...(action ? { primary_action: action } : {}),
     meta: { version: "1", completed_at: now },
   };
+}
+
+/** QA diagnostic seam: exposes the exact legacy payload before validation. */
+export function toEngineIntentForDiagnostics(
+  input: EngineV2HostGenerationInput,
+  options: { now?: string; contentBlocks?: EngineV2HostContentBlocks } = {},
+): OnboardingIntentV1 {
+  return toEngineIntent(
+    input,
+    contentFor(input, options.contentBlocks),
+    options.now ?? new Date().toISOString(),
+  );
 }
 
 function mediaMetadata(
@@ -223,6 +251,7 @@ export function generateCripqerPageWithEngineV2(
     ...(options.engine ?? {}),
     ...(Object.keys(content).length ? { content } : {}),
     now,
+    ...(input.userMedia?.bannerProvenance ? { bannerProvenance: input.userMedia.bannerProvenance } : {}),
   });
   if (!candidate) throw new Error("Engine V2 did not produce an acceptable candidate.");
   const canonicalEnvelope = acceptEngineGeneratedConfig(candidate.config);
@@ -239,5 +268,88 @@ export function generateCripqerPageWithEngineV2(
     media: mediaMetadata(input, options.curatedMedia),
     supervisor: options.supervisor ?? null,
     hostActionPolicy: CRIPQER_ACTION_HOST_POLICY_V1,
+  };
+}
+
+/**
+ * QA-ONLY strategy trace for the Cripqer generation inspector.
+ *
+ * This is a NON-BEHAVIORAL diagnostic seam: it runs the exact same engine
+ * functions as `generateCripqerPageWithEngineV2` (same `contentFor`, same
+ * `toEngineIntent`, same candidate pipeline) and additionally exposes the
+ * strategy decisions the engine already computed internally (normalized
+ * category/personality/goal, inferred archetype, family_bias, family scores
+ * and the full PowerEditorRecipeV2). It never changes generation output and is
+ * never used by production callers.
+ */
+export interface EngineV2StrategyTrace {
+  normalized: {
+    businessType: string;
+    businessCategory: BusinessCategory;
+    businessOther: string | null;
+    visualPersonality: VisualPersonality;
+    primaryGoal: PrimaryGoal;
+  };
+  archetype: BusinessArchetype;
+  familyBias: Partial<Record<FamilyId, number>>;
+  familyScores: Record<FamilyId, number>;
+  selectedFamily: FamilyId;
+  recipe: PowerEditorRecipeV2;
+}
+
+export function generateCripqerPageWithEngineV2Traced(
+  input: EngineV2HostGenerationInput,
+  options: EngineV2HostGenerationOptions = {},
+): EngineV2HostGenerationResult & { trace: EngineV2StrategyTrace } {
+  const now = options.now ?? new Date().toISOString();
+  const content = contentFor(input, options.contentBlocks);
+  const intent = toEngineIntent(input, content, now);
+  const normalized = normalizeIntent(intent);
+  const archetype = inferArchetype(normalized);
+  const familyBias = ARCHETYPE_STRATEGIES[archetype].family_bias;
+  const profile = buildDesignProfile(normalized, 0);
+
+  const candidates = generatePowerEditorCandidates(intent, {
+    ...(options.engine ?? {}),
+    ...(Object.keys(content).length ? { content } : {}),
+    count: 1,
+    now,
+    ...(input.userMedia?.bannerProvenance ? { bannerProvenance: input.userMedia.bannerProvenance } : {}),
+  });
+  const candidate = candidates[0];
+  if (!candidate) throw new Error("Engine V2 did not produce an acceptable candidate.");
+
+  const canonicalEnvelope = acceptEngineGeneratedConfig(candidate.config);
+  const result: EngineV2HostGenerationResult = {
+    editorConfig: canonicalEnvelope.editorConfig,
+    canonicalEnvelope,
+    generation: {
+      candidateId: candidate.id,
+      score: candidate.total_score,
+      family: candidate.recipe.semantics.family,
+      layout: candidate.recipe.layout.id,
+      fingerprint: candidate.recipe.meta.fingerprint,
+    },
+    media: mediaMetadata(input, options.curatedMedia),
+    supervisor: options.supervisor ?? null,
+    hostActionPolicy: CRIPQER_ACTION_HOST_POLICY_V1,
+  };
+
+  return {
+    ...result,
+    trace: {
+      normalized: {
+        businessType: intent.business_type,
+        businessCategory: normalized.business_category,
+        businessOther: intent.business_other,
+        visualPersonality: normalized.visual_personality,
+        primaryGoal: normalized.primary_goal,
+      },
+      archetype,
+      familyBias,
+      familyScores: profile.family_scores,
+      selectedFamily: candidate.recipe.semantics.family as FamilyId,
+      recipe: candidate.recipe,
+    },
   };
 }

@@ -191,6 +191,16 @@ describe("PAGES_7 generated Page → Engine V2 mapping", () => {
     expect(mapped.engineInput.primaryAction).toBeUndefined();
   });
 
+  it("preserves an explicit booking goal through PAGES_7 into Engine V2", () => {
+    const mapped = mapGeneratedPageToEngineInput(servicesInput({ primaryGoal: "bookings" }), {
+      now: NOW,
+    });
+    expect(mapped.ok).toBe(true);
+    if (!mapped.ok) return;
+    expect(mapped.intent.outcome.primaryGoal).toBe("bookings");
+    expect(mapped.engineInput.goal).toBe("booking");
+  });
+
   it("forwards the owner cover as real media and selects the existing banner-first strategy", () => {
     const mapped = mapGeneratedPageToEngineInput({ ...catalogInput() }, { now: NOW });
     expect(mapped.ok).toBe(true);

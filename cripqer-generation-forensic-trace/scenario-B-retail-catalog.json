@@ -1,0 +1,1004 @@
+{
+  "id": "scenario-B-retail-catalog",
+  "T1_OnboardingIntent": {
+    "version": "2",
+    "identity": {
+      "displayName": "Norte Concept",
+      "professionOrActivity": "Tienda de ropa",
+      "bio": "Prendas esenciales para todos los días."
+    },
+    "business": {
+      "category": "retail"
+    },
+    "outcome": {
+      "primaryGoal": "sell",
+      "experienceHint": "catalog"
+    },
+    "visualDirection": {
+      "preference": "modern"
+    },
+    "contentNeeds": {
+      "items": [
+        {
+          "type": "products"
+        }
+      ]
+    },
+    "actions": {
+      "primary": {
+        "type": "website",
+        "source": "user",
+        "value": "https://norte.example/shop"
+      },
+      "secondary": []
+    },
+    "media": {
+      "preference": "own_media"
+    },
+    "scope": {
+      "density": "complete",
+      "userSelected": true
+    },
+    "meta": {
+      "version": "2",
+      "completedAt": "2026-09-15T12:00:00.000Z",
+      "source": "onboarding_v2",
+      "locale": "es-CL"
+    },
+    "ownerContent": {
+      "identity": {
+        "businessName": "Norte Concept",
+        "shortDescription": "Prendas esenciales para todos los días."
+      },
+      "products": [
+        {
+          "name": "Chaqueta Urbana",
+          "price": "$49.990",
+          "media": [
+            {
+              "url": "https://cdn.example/jacket.jpg",
+              "alt": "Chaqueta Urbana",
+              "kind": "image"
+            }
+          ],
+          "destination": "https://norte.example/jacket"
+        },
+        {
+          "name": "Polera Essential",
+          "price": "$19.990",
+          "media": [
+            {
+              "url": "https://cdn.example/shirt.jpg",
+              "alt": "Polera Essential",
+              "kind": "image"
+            }
+          ],
+          "destination": "https://norte.example/shirt"
+        }
+      ],
+      "contact": {
+        "externalUrl": "https://norte.example/shop"
+      },
+      "media": {
+        "cover": {
+          "url": "https://cdn.example/norte-cover.jpg",
+          "alt": "Norte Concept",
+          "kind": "image"
+        }
+      }
+    }
+  },
+  "T2_OwnerContent": {
+    "identity": {
+      "businessName": "Norte Concept",
+      "shortDescription": "Prendas esenciales para todos los días."
+    },
+    "products": [
+      {
+        "name": "Chaqueta Urbana",
+        "price": "$49.990",
+        "media": [
+          {
+            "url": "https://cdn.example/jacket.jpg",
+            "alt": "Chaqueta Urbana",
+            "kind": "image"
+          }
+        ],
+        "destination": "https://norte.example/jacket"
+      },
+      {
+        "name": "Polera Essential",
+        "price": "$19.990",
+        "media": [
+          {
+            "url": "https://cdn.example/shirt.jpg",
+            "alt": "Polera Essential",
+            "kind": "image"
+          }
+        ],
+        "destination": "https://norte.example/shirt"
+      }
+    ],
+    "contact": {
+      "externalUrl": "https://norte.example/shop"
+    },
+    "media": {
+      "cover": {
+        "url": "https://cdn.example/norte-cover.jpg",
+        "alt": "Norte Concept",
+        "kind": "image"
+      }
+    }
+  },
+  "T3_PageGenerationRequest": {
+    "version": "1",
+    "businessType": "Tienda de ropa",
+    "goal": "sell",
+    "density": "rich",
+    "salesMode": "info",
+    "primaryAction": {
+      "kind": "external_url",
+      "label": "website",
+      "target": "https://norte.example/shop",
+      "enabled": true
+    },
+    "secondaryActions": [],
+    "content": {
+      "version": "1",
+      "business": {
+        "name": "Norte Concept",
+        "businessType": "Tienda de ropa",
+        "about": "Prendas esenciales para todos los días.",
+        "cover": {
+          "id": "owner-cover-1",
+          "url": "https://cdn.example/norte-cover.jpg",
+          "alt": "Norte Concept",
+          "kind": "image"
+        }
+      },
+      "catalogs": [
+        {
+          "id": "owner-products",
+          "kind": "catalog",
+          "categories": [],
+          "items": [
+            {
+              "id": "owner-product-1",
+              "type": "product",
+              "name": "Chaqueta Urbana",
+              "price": {
+                "label": "$49.990"
+              },
+              "media": [
+                {
+                  "id": "owner-product-1-1",
+                  "url": "https://cdn.example/jacket.jpg",
+                  "alt": "Chaqueta Urbana",
+                  "kind": "image"
+                }
+              ],
+              "attributes": [
+                {
+                  "key": "url",
+                  "label": "Owner destination",
+                  "value": "https://norte.example/jacket"
+                }
+              ],
+              "salesMode": "info",
+              "action": {
+                "kind": "external_url",
+                "label": "Chaqueta Urbana",
+                "target": "https://norte.example/jacket",
+                "enabled": true
+              },
+              "featured": false,
+              "enabled": true,
+              "confidence": 1,
+              "review": []
+            },
+            {
+              "id": "owner-product-2",
+              "type": "product",
+              "name": "Polera Essential",
+              "price": {
+                "label": "$19.990"
+              },
+              "media": [
+                {
+                  "id": "owner-product-2-1",
+                  "url": "https://cdn.example/shirt.jpg",
+                  "alt": "Polera Essential",
+                  "kind": "image"
+                }
+              ],
+              "attributes": [
+                {
+                  "key": "url",
+                  "label": "Owner destination",
+                  "value": "https://norte.example/shirt"
+                }
+              ],
+              "salesMode": "info",
+              "action": {
+                "kind": "external_url",
+                "label": "Polera Essential",
+                "target": "https://norte.example/shirt",
+                "enabled": true
+              },
+              "featured": false,
+              "enabled": true,
+              "confidence": 1,
+              "review": []
+            }
+          ]
+        }
+      ],
+      "gallery": [],
+      "team": [],
+      "testimonials": [],
+      "faq": [],
+      "contact": {
+        "socials": []
+      },
+      "issues": []
+    },
+    "preferences": {
+      "experienceType": "catalog"
+    }
+  },
+  "T4_PagePlan": {
+    "version": "1",
+    "pageId": "page_norte-concept",
+    "title": "Norte Concept",
+    "slug": "norte-concept",
+    "experienceType": "catalog",
+    "sections": [
+      {
+        "id": "sec_hero_0",
+        "kind": "hero",
+        "order": 0
+      },
+      {
+        "id": "sec_productGrid_1",
+        "kind": "productGrid",
+        "order": 1,
+        "title": "Catalog",
+        "binding": {
+          "catalogId": "owner-products"
+        }
+      },
+      {
+        "id": "sec_footer_2",
+        "kind": "footer",
+        "order": 2
+      }
+    ],
+    "ctaHierarchy": {
+      "primary": {
+        "kind": "external_url",
+        "label": "website",
+        "target": "https://norte.example/shop",
+        "enabled": true
+      },
+      "secondary": []
+    },
+    "navigation": [
+      {
+        "id": "nav_sec_productGrid_1",
+        "label": "Catalog",
+        "destination": {
+          "mode": "section",
+          "sectionId": "sec_productGrid_1"
+        }
+      }
+    ],
+    "heroVariant": "split",
+    "runtimeRequirements": {
+      "needsSearch": false,
+      "needsFilters": false,
+      "needsDetailView": true,
+      "needsCategoryNav": false,
+      "checkoutEnabled": false
+    }
+  },
+  "T5_HostMapping": {
+    "generatedPageInput": {
+      "objective": "catalog",
+      "title": "Norte Concept",
+      "businessName": "Norte Concept",
+      "activity": "Tienda de ropa",
+      "description": "Prendas esenciales para todos los días.",
+      "coverImageUrl": "https://cdn.example/norte-cover.jpg",
+      "cta": {
+        "type": "website",
+        "value": "https://norte.example/shop"
+      },
+      "items": [
+        {
+          "title": "Chaqueta Urbana",
+          "price": "$49.990",
+          "imageUrl": "https://cdn.example/jacket.jpg",
+          "url": "https://norte.example/jacket"
+        },
+        {
+          "title": "Polera Essential",
+          "price": "$19.990",
+          "imageUrl": "https://cdn.example/shirt.jpg",
+          "url": "https://norte.example/shirt"
+        }
+      ]
+    },
+    "diagnostics": {
+      "mappedFields": [
+        "catalog.owner-products.items -> host content",
+        "owner item media -> Engine V2 contentBlocks",
+        "primaryAction.external_url",
+        "retail.gridDensity=standard -> existing default grid behavior",
+        "retail.products -> Engine productGrid",
+        "retail.owner price/media/name/description preserved",
+        "actions.primary.type=website",
+        "identity.professionOrActivity -> businessOther",
+        "contentNeeds.products -> selectedFeatures=products",
+        "contentNeeds.contact -> selectedFeatures=contact",
+        "outcome.primaryGoal -> goal=sell",
+        "identity.displayName -> content.name",
+        "identity.professionOrActivity -> profession",
+        "identity.bio -> content.bio",
+        "actions.primary -> primaryAction",
+        "items -> engine contentBlocks (2 item(s))",
+        "coverImageUrl -> userMedia.bannerUrl",
+        "owner visual -> assets.card_media",
+        "media strategy -> banner-first (owner cover)"
+      ],
+      "deferredFields": [
+        "retail.richItemDetail -> deferred; no modal/detail route",
+        "business.category/customCategory",
+        "scope.density=complete",
+        "outcome.experienceHint"
+      ],
+      "unsupportedFields": [],
+      "warnings": []
+    }
+  },
+  "T6_GeneratedPageInput": {
+    "objective": "catalog",
+    "title": "Norte Concept",
+    "businessName": "Norte Concept",
+    "activity": "Tienda de ropa",
+    "description": "Prendas esenciales para todos los días.",
+    "coverImageUrl": "https://cdn.example/norte-cover.jpg",
+    "cta": {
+      "type": "website",
+      "value": "https://norte.example/shop"
+    },
+    "items": [
+      {
+        "title": "Chaqueta Urbana",
+        "price": "$49.990",
+        "imageUrl": "https://cdn.example/jacket.jpg",
+        "url": "https://norte.example/jacket"
+      },
+      {
+        "title": "Polera Essential",
+        "price": "$19.990",
+        "imageUrl": "https://cdn.example/shirt.jpg",
+        "url": "https://norte.example/shirt"
+      }
+    ]
+  },
+  "T7_EngineInput": {
+    "profession": "Tienda de ropa",
+    "businessOther": "Tienda de ropa",
+    "goal": "sell",
+    "selectedFeatures": [
+      "products",
+      "contact"
+    ],
+    "content": {
+      "name": "Norte Concept",
+      "bio": "Prendas esenciales para todos los días."
+    },
+    "primaryAction": {
+      "type": "website",
+      "value": "https://norte.example/shop"
+    },
+    "userMedia": {
+      "bannerUrl": "https://cdn.example/norte-cover.jpg"
+    },
+    "cardMedia": true
+  },
+  "T7_EngineContentBlocks": {
+    "about": "Prendas esenciales para todos los días.",
+    "products": [
+      {
+        "title": "Chaqueta Urbana",
+        "imageUrl": "https://cdn.example/jacket.jpg",
+        "price": "$49.990",
+        "ctaUrl": "https://norte.example/jacket"
+      },
+      {
+        "title": "Polera Essential",
+        "imageUrl": "https://cdn.example/shirt.jpg",
+        "price": "$19.990",
+        "ctaUrl": "https://norte.example/shirt"
+      }
+    ]
+  },
+  "T7_EngineOptions": {
+    "mediaStrategy": "banner-first"
+  },
+  "T7_EngineV1InternalEquivalent": {
+    "business_type": "Tienda de ropa",
+    "business_other": "Tienda de ropa",
+    "primary_goal": "sell",
+    "visual_personality": "professional",
+    "identity": {
+      "name": "Norte Concept",
+      "profession": "Tienda de ropa",
+      "bio": "Prendas esenciales para todos los días.",
+      "avatar_preview": null,
+      "banner_preview": "https://cdn.example/norte-cover.jpg"
+    },
+    "assets": {
+      "card_media": true
+    },
+    "primary_action": {
+      "type": "website",
+      "value": "https://norte.example/shop"
+    },
+    "meta": {
+      "version": "1",
+      "completed_at": "2026-09-15T12:00:00.000Z"
+    }
+  },
+  "T8_EngineDecisions": {
+    "candidateId": "engine#1.1",
+    "score": 91,
+    "family": "minimal",
+    "layout": "split",
+    "fingerprint": "r1_1f14a63f13ea4845",
+    "recipeMeta": {
+      "recipe_version": "2",
+      "engine_version": "1",
+      "generated_at": "2026-09-15T12:00:00.000Z",
+      "candidate_id": "engine#1.1",
+      "fingerprint": "r1_1f14a63f13ea4845",
+      "preset": null,
+      "quality": {
+        "accessibility": 100,
+        "business_fit": 92,
+        "conversion_fit": 97,
+        "content_fit": 70,
+        "hierarchy": 100,
+        "mobile_viability": 85,
+        "visual_coherence": 80,
+        "capability_fit": 100,
+        "total": 91
+      }
+    },
+    "semantics": {
+      "family": "minimal",
+      "personality": "professional",
+      "primary_goal": "sell",
+      "pattern": "service_first",
+      "energy": 52,
+      "trust": 65,
+      "media_weight": 33,
+      "cta_pressure": 90,
+      "density": "spacious",
+      "visual_weight": "medium",
+      "surface_mood": "minimal",
+      "background_mood": "clean",
+      "media_strategy": "banner-first",
+      "top_signature": "banner-inline"
+    },
+    "visual": {
+      "colors": {
+        "primary": "#7A3B2E",
+        "secondary": "#574E45",
+        "accent": "#7A3B2E",
+        "background": "#FDFBF8",
+        "surface": "#F1EAE2",
+        "card": "#F1EAE2",
+        "text": "#241F1B",
+        "mutedText": "#574E45",
+        "border": "#E3D8CC"
+      },
+      "typography": {
+        "headingFont": "\"Trebuchet MS\", \"Segoe UI\", sans-serif",
+        "bodyFont": "\"Trebuchet MS\", \"Segoe UI\", sans-serif",
+        "headingSize": 30,
+        "bodySize": 15,
+        "headingWeight": 600,
+        "bodyWeight": 400,
+        "lineHeight": 1.62,
+        "letterSpacing": 0
+      },
+      "background": {
+        "type": "solid",
+        "color": "#FDFBF8"
+      },
+      "cards": {
+        "preset": "minimal",
+        "radius": 10,
+        "borderWidth": 1,
+        "shadow": "none",
+        "blur": 0,
+        "padding": 24,
+        "opacity": 1
+      },
+      "buttons": {
+        "variant": "solid",
+        "radius": 10,
+        "height": 58,
+        "fontWeight": 650,
+        "shadow": "md",
+        "borderWidth": 0
+      },
+      "spacing": {
+        "section": 40,
+        "block": 18,
+        "contentWidth": 640
+      },
+      "animation": "fade",
+      "texture": {
+        "preset": "none",
+        "opacity": 0
+      },
+      "motion": {
+        "preset": "minimal",
+        "entrance": "fade",
+        "hover": "none",
+        "duration": 480,
+        "delay": 0,
+        "stagger": 90
+      }
+    },
+    "responsive": {
+      "mobile_columns": 1,
+      "stack_media_below_identity": true,
+      "hide_on_mobile": []
+    },
+    "blockPlan": [
+      {
+        "type": "text",
+        "variant": "default",
+        "role": "identity",
+        "style": {},
+        "layout": {
+          "width": "content",
+          "align": "center",
+          "span": 2
+        },
+        "visibility": {
+          "desktop": true,
+          "tablet": true,
+          "mobile": true
+        },
+        "animation": "fade",
+        "motion": {
+          "useGlobal": true
+        },
+        "frame": "none",
+        "responsive": {
+          "desktop": {
+            "colSpan": 2
+          },
+          "tablet": {
+            "colSpan": 1
+          },
+          "mobile": {
+            "colSpan": 1,
+            "rowSpan": 1,
+            "padding": 16
+          }
+        },
+        "content": {
+          "body": "Prendas esenciales para todos los días."
+        },
+        "id": "text-0",
+        "order": 0
+      },
+      {
+        "type": "cta",
+        "variant": "panel",
+        "role": "conversion",
+        "style": {},
+        "layout": {
+          "width": "content",
+          "align": "center",
+          "span": 2,
+          "sticky": {
+            "enabled": true,
+            "top": 12
+          },
+          "zIndex": 20
+        },
+        "visibility": {
+          "desktop": true,
+          "tablet": true,
+          "mobile": true
+        },
+        "animation": "fade",
+        "motion": {
+          "useGlobal": true
+        },
+        "frame": "none",
+        "responsive": {
+          "desktop": {
+            "colSpan": 2
+          },
+          "tablet": {
+            "colSpan": 1
+          },
+          "mobile": {
+            "colSpan": 1,
+            "rowSpan": 1,
+            "padding": 16
+          }
+        },
+        "content": {
+          "title": "Empieza tu pedido",
+          "label": "Visitar",
+          "url": "https://norte.example/shop"
+        },
+        "id": "cta-1",
+        "order": 1
+      },
+      {
+        "type": "productGrid",
+        "variant": "minimal",
+        "role": "media",
+        "style": {},
+        "layout": {
+          "width": "content",
+          "align": "center",
+          "span": 2,
+          "columns": 2,
+          "gap": 10
+        },
+        "visibility": {
+          "desktop": true,
+          "tablet": true,
+          "mobile": true
+        },
+        "animation": "fade",
+        "motion": {
+          "useGlobal": true
+        },
+        "frame": "none",
+        "responsive": {
+          "desktop": {
+            "colSpan": 2
+          },
+          "tablet": {
+            "colSpan": 1
+          },
+          "mobile": {
+            "colSpan": 1,
+            "rowSpan": 1,
+            "padding": 16
+          }
+        },
+        "content": {
+          "items": [
+            {
+              "id": "prd-0",
+              "title": "Chaqueta Urbana",
+              "price": "$49.990",
+              "imageUrl": "https://cdn.example/jacket.jpg",
+              "ctaUrl": "https://norte.example/jacket"
+            },
+            {
+              "id": "prd-1",
+              "title": "Polera Essential",
+              "price": "$19.990",
+              "imageUrl": "https://cdn.example/shirt.jpg",
+              "ctaUrl": "https://norte.example/shirt"
+            }
+          ]
+        },
+        "id": "productGrid-2",
+        "order": 2
+      }
+    ]
+  },
+  "T9_BioTemplateConfig": {
+    "schemaVersion": 1,
+    "pageInstanceId": "page-r1_1f14a63f13ea4845",
+    "templateDefinitionId": "engine-minimal-split",
+    "metadata": {
+      "templateDefinitionId": "engine-minimal-split",
+      "name": "minimal · service_first",
+      "category": "Minimal",
+      "premium": true,
+      "createdAt": "2026-09-15T12:00:00.000Z",
+      "updatedAt": "2026-09-15T12:00:00.000Z",
+      "author": "Cripqer Parametric Engine",
+      "tags": [
+        "minimal",
+        "service_first",
+        "sell"
+      ]
+    },
+    "theme": {
+      "id": "engine-minimal",
+      "name": "Engine minimal",
+      "colors": {
+        "primary": "#7A3B2E",
+        "secondary": "#574E45",
+        "accent": "#7A3B2E",
+        "background": "#FDFBF8",
+        "surface": "#F1EAE2",
+        "card": "#F1EAE2",
+        "text": "#241F1B",
+        "mutedText": "#574E45",
+        "border": "#E3D8CC"
+      },
+      "typography": {
+        "headingFont": "\"Trebuchet MS\", \"Segoe UI\", sans-serif",
+        "bodyFont": "\"Trebuchet MS\", \"Segoe UI\", sans-serif",
+        "headingSize": 30,
+        "bodySize": 15,
+        "headingWeight": 600,
+        "bodyWeight": 400,
+        "lineHeight": 1.62,
+        "letterSpacing": 0
+      },
+      "background": {
+        "type": "solid",
+        "color": "#FDFBF8"
+      },
+      "cards": {
+        "preset": "minimal",
+        "radius": 10,
+        "borderWidth": 1,
+        "shadow": "none",
+        "blur": 0,
+        "padding": 24,
+        "opacity": 1
+      },
+      "buttons": {
+        "variant": "solid",
+        "radius": 10,
+        "height": 58,
+        "fontWeight": 650,
+        "shadow": "md",
+        "borderWidth": 0
+      },
+      "spacing": {
+        "section": 40,
+        "block": 18,
+        "contentWidth": 640
+      },
+      "animation": "fade",
+      "texture": {
+        "preset": "none",
+        "opacity": 0
+      }
+    },
+    "layout": {
+      "id": "split",
+      "name": "Split",
+      "header": "inline",
+      "type": "grid",
+      "responsive": {
+        "desktop": {
+          "columns": 2,
+          "gutter": 14,
+          "align": "left",
+          "padding": 24
+        },
+        "tablet": {
+          "columns": 1,
+          "gutter": 12,
+          "align": "left",
+          "padding": 24
+        },
+        "mobile": {
+          "columns": 1,
+          "gutter": 12,
+          "align": "left",
+          "padding": 18
+        }
+      }
+    },
+    "profile": {
+      "name": "Norte Concept",
+      "username": "norte-concept",
+      "role": "Tienda de ropa",
+      "description": "Prendas esenciales para todos los días.",
+      "verified": false,
+      "avatar": {
+        "size": 84,
+        "radius": 4,
+        "borderWidth": 0,
+        "shadow": false,
+        "overlap": 0,
+        "align": "left"
+      },
+      "banner": {
+        "enabled": true,
+        "height": 180,
+        "mobileHeight": 136,
+        "overlay": 0.15,
+        "blur": 0,
+        "gradient": true,
+        "focalX": 50,
+        "focalY": 50,
+        "radius": 18,
+        "imageUrl": "https://cdn.example/norte-cover.jpg"
+      }
+    },
+    "blocks": [
+      {
+        "id": "text-0",
+        "type": "text",
+        "variant": "default",
+        "content": {
+          "body": "Prendas esenciales para todos los días."
+        },
+        "style": {},
+        "layout": {
+          "width": "content",
+          "align": "center",
+          "span": 2
+        },
+        "visibility": {
+          "desktop": true,
+          "tablet": true,
+          "mobile": true
+        },
+        "interaction": {
+          "newTab": true,
+          "animation": "fade"
+        },
+        "motion": {
+          "useGlobal": true
+        },
+        "responsive": {
+          "desktop": {
+            "colSpan": 2
+          },
+          "tablet": {
+            "colSpan": 1
+          },
+          "mobile": {
+            "colSpan": 1,
+            "rowSpan": 1,
+            "padding": 16
+          }
+        }
+      },
+      {
+        "id": "cta-1",
+        "type": "cta",
+        "variant": "panel",
+        "content": {
+          "title": "Empieza tu pedido",
+          "label": "Visitar",
+          "url": "https://norte.example/shop"
+        },
+        "style": {},
+        "layout": {
+          "width": "content",
+          "align": "center",
+          "span": 2,
+          "sticky": {
+            "enabled": true,
+            "top": 12
+          },
+          "zIndex": 20
+        },
+        "visibility": {
+          "desktop": true,
+          "tablet": true,
+          "mobile": true
+        },
+        "interaction": {
+          "newTab": true,
+          "animation": "fade"
+        },
+        "motion": {
+          "useGlobal": true
+        },
+        "responsive": {
+          "desktop": {
+            "colSpan": 2
+          },
+          "tablet": {
+            "colSpan": 1
+          },
+          "mobile": {
+            "colSpan": 1,
+            "rowSpan": 1,
+            "padding": 16
+          }
+        }
+      },
+      {
+        "id": "productGrid-2",
+        "type": "productGrid",
+        "variant": "minimal",
+        "content": {
+          "products": [
+            {
+              "id": "prd-0",
+              "title": "Chaqueta Urbana",
+              "price": "$49.990",
+              "imageUrl": "https://cdn.example/jacket.jpg",
+              "ctaUrl": "https://norte.example/jacket"
+            },
+            {
+              "id": "prd-1",
+              "title": "Polera Essential",
+              "price": "$19.990",
+              "imageUrl": "https://cdn.example/shirt.jpg",
+              "ctaUrl": "https://norte.example/shirt"
+            }
+          ]
+        },
+        "style": {},
+        "layout": {
+          "width": "content",
+          "align": "center",
+          "span": 2,
+          "columns": 2,
+          "gap": 10
+        },
+        "visibility": {
+          "desktop": true,
+          "tablet": true,
+          "mobile": true
+        },
+        "interaction": {
+          "newTab": true,
+          "animation": "fade"
+        },
+        "motion": {
+          "useGlobal": true
+        },
+        "responsive": {
+          "desktop": {
+            "colSpan": 2
+          },
+          "tablet": {
+            "colSpan": 1
+          },
+          "mobile": {
+            "colSpan": 1,
+            "rowSpan": 1,
+            "padding": 16
+          }
+        }
+      }
+    ],
+    "seo": {
+      "title": "Norte Concept — Tienda de ropa",
+      "description": "Prendas esenciales para todos los días.",
+      "index": true
+    },
+    "motion": {
+      "preset": "minimal",
+      "entrance": "fade",
+      "hover": "none",
+      "duration": 480,
+      "delay": 0,
+      "stagger": 90
+    },
+    "settings": {
+      "showBranding": true,
+      "slug": "norte-concept",
+      "animation": "fade",
+      "language": "es"
+    }
+  },
+  "T10_Render": {
+    "valid": true,
+    "renderedBlockIds": [],
+    "renderedSectionCount": 4,
+    "renderedMarkupLength": 6492,
+    "containsBusinessName": true,
+    "containsOwnerItemNames": true
+  }
+}

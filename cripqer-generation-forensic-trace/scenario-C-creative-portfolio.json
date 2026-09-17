@@ -1,0 +1,965 @@
+{
+  "id": "scenario-C-creative-portfolio",
+  "T1_OnboardingIntent": {
+    "version": "2",
+    "identity": {
+      "displayName": "Luz Norte",
+      "professionOrActivity": "Fotografía",
+      "bio": "Historias visuales con luz y carácter."
+    },
+    "business": {
+      "category": "creator"
+    },
+    "outcome": {
+      "primaryGoal": "show_portfolio",
+      "experienceHint": "professional_landing"
+    },
+    "visualDirection": {
+      "preference": "premium"
+    },
+    "contentNeeds": {
+      "items": [
+        {
+          "type": "portfolio"
+        }
+      ]
+    },
+    "actions": {
+      "primary": null,
+      "secondary": []
+    },
+    "media": {
+      "preference": "own_media"
+    },
+    "scope": {
+      "density": "complete",
+      "userSelected": true
+    },
+    "meta": {
+      "version": "2",
+      "completedAt": "2026-09-15T12:00:00.000Z",
+      "source": "onboarding_v2",
+      "locale": "es-CL"
+    },
+    "ownerContent": {
+      "identity": {
+        "businessName": "Luz Norte",
+        "shortDescription": "Historias visuales con luz y carácter."
+      },
+      "portfolioItems": [
+        {
+          "name": "Editorial Nocturna",
+          "media": [
+            {
+              "url": "https://cdn.example/night.jpg",
+              "alt": "Editorial Nocturna",
+              "kind": "image"
+            }
+          ],
+          "destination": "https://luz.example/night"
+        },
+        {
+          "name": "Retratos Urbanos",
+          "media": [
+            {
+              "url": "https://cdn.example/urban.jpg",
+              "alt": "Retratos Urbanos",
+              "kind": "image"
+            }
+          ],
+          "destination": "https://luz.example/urban"
+        }
+      ],
+      "media": {
+        "cover": {
+          "url": "https://cdn.example/luz-cover.jpg",
+          "alt": "Luz Norte",
+          "kind": "image"
+        }
+      }
+    }
+  },
+  "T2_OwnerContent": {
+    "identity": {
+      "businessName": "Luz Norte",
+      "shortDescription": "Historias visuales con luz y carácter."
+    },
+    "portfolioItems": [
+      {
+        "name": "Editorial Nocturna",
+        "media": [
+          {
+            "url": "https://cdn.example/night.jpg",
+            "alt": "Editorial Nocturna",
+            "kind": "image"
+          }
+        ],
+        "destination": "https://luz.example/night"
+      },
+      {
+        "name": "Retratos Urbanos",
+        "media": [
+          {
+            "url": "https://cdn.example/urban.jpg",
+            "alt": "Retratos Urbanos",
+            "kind": "image"
+          }
+        ],
+        "destination": "https://luz.example/urban"
+      }
+    ],
+    "media": {
+      "cover": {
+        "url": "https://cdn.example/luz-cover.jpg",
+        "alt": "Luz Norte",
+        "kind": "image"
+      }
+    }
+  },
+  "T3_PageGenerationRequest": {
+    "version": "1",
+    "businessType": "Fotografía",
+    "goal": "showcase",
+    "density": "rich",
+    "salesMode": "info",
+    "primaryAction": {
+      "kind": "contact",
+      "label": "Contact",
+      "enabled": false
+    },
+    "secondaryActions": [],
+    "content": {
+      "version": "1",
+      "business": {
+        "name": "Luz Norte",
+        "businessType": "Fotografía",
+        "about": "Historias visuales con luz y carácter.",
+        "cover": {
+          "id": "owner-cover-1",
+          "url": "https://cdn.example/luz-cover.jpg",
+          "alt": "Luz Norte",
+          "kind": "image"
+        }
+      },
+      "catalogs": [
+        {
+          "id": "owner-portfolio",
+          "kind": "portfolio",
+          "categories": [],
+          "items": [
+            {
+              "id": "owner-portfolio_item-1",
+              "type": "portfolio_item",
+              "name": "Editorial Nocturna",
+              "media": [
+                {
+                  "id": "owner-portfolio_item-1-1",
+                  "url": "https://cdn.example/night.jpg",
+                  "alt": "Editorial Nocturna",
+                  "kind": "image"
+                }
+              ],
+              "attributes": [
+                {
+                  "key": "url",
+                  "label": "Owner destination",
+                  "value": "https://luz.example/night"
+                }
+              ],
+              "salesMode": "info",
+              "action": {
+                "kind": "external_url",
+                "label": "Editorial Nocturna",
+                "target": "https://luz.example/night",
+                "enabled": true
+              },
+              "featured": false,
+              "enabled": true,
+              "confidence": 1,
+              "review": [
+                "price"
+              ]
+            },
+            {
+              "id": "owner-portfolio_item-2",
+              "type": "portfolio_item",
+              "name": "Retratos Urbanos",
+              "media": [
+                {
+                  "id": "owner-portfolio_item-2-1",
+                  "url": "https://cdn.example/urban.jpg",
+                  "alt": "Retratos Urbanos",
+                  "kind": "image"
+                }
+              ],
+              "attributes": [
+                {
+                  "key": "url",
+                  "label": "Owner destination",
+                  "value": "https://luz.example/urban"
+                }
+              ],
+              "salesMode": "info",
+              "action": {
+                "kind": "external_url",
+                "label": "Retratos Urbanos",
+                "target": "https://luz.example/urban",
+                "enabled": true
+              },
+              "featured": false,
+              "enabled": true,
+              "confidence": 1,
+              "review": [
+                "price"
+              ]
+            }
+          ]
+        }
+      ],
+      "gallery": [],
+      "team": [],
+      "testimonials": [],
+      "faq": [],
+      "contact": {
+        "socials": []
+      },
+      "issues": []
+    },
+    "preferences": {
+      "experienceType": "portfolio"
+    }
+  },
+  "T4_PagePlan": {
+    "version": "1",
+    "pageId": "page_luz-norte",
+    "title": "Luz Norte",
+    "slug": "luz-norte",
+    "experienceType": "portfolio",
+    "sections": [
+      {
+        "id": "sec_hero_0",
+        "kind": "hero",
+        "order": 0
+      },
+      {
+        "id": "sec_about_1",
+        "kind": "about",
+        "order": 1,
+        "title": "About us"
+      },
+      {
+        "id": "sec_portfolioGrid_2",
+        "kind": "portfolioGrid",
+        "order": 2,
+        "title": "What we offer",
+        "binding": {
+          "catalogId": "owner-portfolio"
+        }
+      },
+      {
+        "id": "sec_footer_3",
+        "kind": "footer",
+        "order": 3
+      }
+    ],
+    "ctaHierarchy": {
+      "primary": {
+        "kind": "contact",
+        "label": "Contact",
+        "enabled": false
+      },
+      "secondary": []
+    },
+    "navigation": [
+      {
+        "id": "nav_sec_about_1",
+        "label": "About",
+        "destination": {
+          "mode": "section",
+          "sectionId": "sec_about_1"
+        }
+      },
+      {
+        "id": "nav_sec_portfolioGrid_2",
+        "label": "Portfolio",
+        "destination": {
+          "mode": "section",
+          "sectionId": "sec_portfolioGrid_2"
+        }
+      }
+    ],
+    "heroVariant": "media",
+    "runtimeRequirements": {
+      "needsSearch": false,
+      "needsFilters": false,
+      "needsDetailView": true,
+      "needsCategoryNav": false,
+      "checkoutEnabled": false
+    }
+  },
+  "T5_HostMapping": {
+    "generatedPageInput": {
+      "objective": "portfolio",
+      "title": "Luz Norte",
+      "businessName": "Luz Norte",
+      "activity": "Fotografía",
+      "description": "Historias visuales con luz y carácter.",
+      "coverImageUrl": "https://cdn.example/luz-cover.jpg",
+      "items": [
+        {
+          "title": "Editorial Nocturna",
+          "imageUrl": "https://cdn.example/night.jpg",
+          "url": "https://luz.example/night"
+        },
+        {
+          "title": "Retratos Urbanos",
+          "imageUrl": "https://cdn.example/urban.jpg",
+          "url": "https://luz.example/urban"
+        }
+      ]
+    },
+    "diagnostics": {
+      "mappedFields": [
+        "catalog.owner-portfolio.items -> host content",
+        "owner item media -> Engine V2 contentBlocks",
+        "actions.primary -> explicit no-CTA",
+        "identity.professionOrActivity -> businessOther",
+        "contentNeeds.portfolio -> selectedFeatures=portfolio",
+        "contentNeeds.contact -> selectedFeatures=contact",
+        "outcome.primaryGoal -> goal=portfolio",
+        "identity.displayName -> content.name",
+        "identity.professionOrActivity -> profession",
+        "identity.bio -> content.bio",
+        "actions.primary -> primaryAction",
+        "items -> engine contentBlocks (2 item(s))",
+        "coverImageUrl -> userMedia.bannerUrl",
+        "owner visual -> assets.card_media",
+        "media strategy -> banner-first (owner cover)"
+      ],
+      "deferredFields": [
+        "business.category/customCategory",
+        "scope.density=complete",
+        "outcome.experienceHint"
+      ],
+      "unsupportedFields": [],
+      "warnings": []
+    }
+  },
+  "T6_GeneratedPageInput": {
+    "objective": "portfolio",
+    "title": "Luz Norte",
+    "businessName": "Luz Norte",
+    "activity": "Fotografía",
+    "description": "Historias visuales con luz y carácter.",
+    "coverImageUrl": "https://cdn.example/luz-cover.jpg",
+    "items": [
+      {
+        "title": "Editorial Nocturna",
+        "imageUrl": "https://cdn.example/night.jpg",
+        "url": "https://luz.example/night"
+      },
+      {
+        "title": "Retratos Urbanos",
+        "imageUrl": "https://cdn.example/urban.jpg",
+        "url": "https://luz.example/urban"
+      }
+    ]
+  },
+  "T7_EngineInput": {
+    "profession": "Fotografía",
+    "businessOther": "Fotografía",
+    "goal": "portfolio",
+    "selectedFeatures": [
+      "portfolio",
+      "contact"
+    ],
+    "content": {
+      "name": "Luz Norte",
+      "bio": "Historias visuales con luz y carácter."
+    },
+    "userMedia": {
+      "bannerUrl": "https://cdn.example/luz-cover.jpg"
+    },
+    "cardMedia": true
+  },
+  "T7_EngineContentBlocks": {
+    "about": "Historias visuales con luz y carácter.",
+    "portfolio": [
+      {
+        "label": "Editorial Nocturna",
+        "url": "https://luz.example/night",
+        "imageUrl": "https://cdn.example/night.jpg"
+      },
+      {
+        "label": "Retratos Urbanos",
+        "url": "https://luz.example/urban",
+        "imageUrl": "https://cdn.example/urban.jpg"
+      }
+    ]
+  },
+  "T7_EngineOptions": {
+    "mediaStrategy": "banner-first"
+  },
+  "T7_EngineV1InternalEquivalent": {
+    "business_type": "Fotografía",
+    "business_other": "Fotografía",
+    "primary_goal": "portfolio",
+    "visual_personality": "professional",
+    "identity": {
+      "name": "Luz Norte",
+      "profession": "Fotografía",
+      "bio": "Historias visuales con luz y carácter.",
+      "avatar_preview": null,
+      "banner_preview": "https://cdn.example/luz-cover.jpg"
+    },
+    "assets": {
+      "card_media": true
+    },
+    "meta": {
+      "version": "1",
+      "completed_at": "2026-09-15T12:00:00.000Z"
+    }
+  },
+  "T8_EngineDecisions": {
+    "candidateId": "editorial_calm#0.1",
+    "score": 89,
+    "family": "editorial",
+    "layout": "editorial",
+    "fingerprint": "r1_cc2eb224780e9c10",
+    "recipeMeta": {
+      "recipe_version": "2",
+      "engine_version": "1",
+      "generated_at": "2026-09-15T12:00:00.000Z",
+      "candidate_id": "editorial_calm#0.1",
+      "fingerprint": "r1_cc2eb224780e9c10",
+      "preset": "editorial_calm",
+      "quality": {
+        "accessibility": 100,
+        "business_fit": 92,
+        "conversion_fit": 85,
+        "content_fit": 70,
+        "hierarchy": 100,
+        "mobile_viability": 80,
+        "visual_coherence": 80,
+        "capability_fit": 100,
+        "total": 89
+      }
+    },
+    "semantics": {
+      "family": "editorial",
+      "personality": "professional",
+      "primary_goal": "portfolio",
+      "pattern": "editorial_stack",
+      "energy": 38,
+      "trust": 65,
+      "media_weight": 58,
+      "cta_pressure": 45,
+      "density": "spacious",
+      "visual_weight": "medium",
+      "surface_mood": "flat",
+      "background_mood": "paper",
+      "media_strategy": "banner-first",
+      "top_signature": "editorial-cover"
+    },
+    "visual": {
+      "colors": {
+        "primary": "#38524A",
+        "secondary": "#575349",
+        "accent": "#38524A",
+        "background": "#FBFAF7",
+        "surface": "#F1EEE7",
+        "card": "#F1EEE7",
+        "text": "#20201D",
+        "mutedText": "#575349",
+        "border": "#E0DBD0"
+      },
+      "typography": {
+        "headingFont": "\"Times New Roman\", Times, serif",
+        "bodyFont": "\"Trebuchet MS\", \"Segoe UI\", sans-serif",
+        "headingSize": 44,
+        "bodySize": 15,
+        "headingWeight": 600,
+        "bodyWeight": 400,
+        "lineHeight": 1.62,
+        "letterSpacing": -0.02
+      },
+      "background": {
+        "type": "solid",
+        "color": "#FBFAF7"
+      },
+      "cards": {
+        "preset": "flat",
+        "radius": 10,
+        "borderWidth": 1,
+        "shadow": "none",
+        "blur": 0,
+        "padding": 24,
+        "opacity": 1
+      },
+      "buttons": {
+        "variant": "solid",
+        "radius": 10,
+        "height": 54,
+        "fontWeight": 570,
+        "shadow": "sm",
+        "borderWidth": 0
+      },
+      "spacing": {
+        "section": 40,
+        "block": 18,
+        "contentWidth": 600
+      },
+      "animation": "fade",
+      "texture": {
+        "preset": "paper",
+        "opacity": 0.07,
+        "scale": 28
+      },
+      "motion": {
+        "preset": "editorial",
+        "entrance": "slide-up",
+        "hover": "soft-scale",
+        "duration": 480,
+        "delay": 0,
+        "stagger": 90
+      }
+    },
+    "responsive": {
+      "mobile_columns": 1,
+      "stack_media_below_identity": true,
+      "hide_on_mobile": []
+    },
+    "blockPlan": [
+      {
+        "type": "text",
+        "variant": "quote",
+        "role": "identity",
+        "style": {},
+        "layout": {
+          "width": "content",
+          "align": "center",
+          "span": 2
+        },
+        "visibility": {
+          "desktop": true,
+          "tablet": true,
+          "mobile": true
+        },
+        "animation": "soft-rise",
+        "motion": {
+          "useGlobal": true
+        },
+        "frame": "none",
+        "responsive": {
+          "desktop": {
+            "colSpan": 1
+          },
+          "tablet": {
+            "colSpan": 1
+          },
+          "mobile": {
+            "colSpan": 1,
+            "rowSpan": 1,
+            "padding": 16
+          }
+        },
+        "content": {
+          "body": "Historias visuales con luz y carácter."
+        },
+        "id": "text-0",
+        "order": 0
+      },
+      {
+        "type": "cta",
+        "variant": "inline",
+        "role": "conversion",
+        "style": {
+          "frame": "hairline"
+        },
+        "layout": {
+          "width": "content",
+          "align": "center",
+          "span": 2
+        },
+        "visibility": {
+          "desktop": true,
+          "tablet": true,
+          "mobile": true
+        },
+        "animation": "soft-rise",
+        "motion": {
+          "useGlobal": true
+        },
+        "frame": "hairline",
+        "responsive": {
+          "desktop": {
+            "colSpan": 1
+          },
+          "tablet": {
+            "colSpan": 1
+          },
+          "mobile": {
+            "colSpan": 1,
+            "rowSpan": 1,
+            "padding": 16
+          }
+        },
+        "content": {
+          "label": "Ver mi trabajo",
+          "url": "#"
+        },
+        "id": "cta-1",
+        "order": 1
+      },
+      {
+        "type": "portfolio",
+        "variant": "grid",
+        "role": "media",
+        "style": {},
+        "layout": {
+          "width": "content",
+          "align": "center",
+          "span": 2,
+          "columns": 2,
+          "gap": 10
+        },
+        "visibility": {
+          "desktop": true,
+          "tablet": true,
+          "mobile": true
+        },
+        "animation": "soft-rise",
+        "motion": {
+          "useGlobal": true
+        },
+        "frame": "none",
+        "responsive": {
+          "desktop": {
+            "colSpan": 1
+          },
+          "tablet": {
+            "colSpan": 1
+          },
+          "mobile": {
+            "colSpan": 1,
+            "rowSpan": 1,
+            "padding": 16
+          }
+        },
+        "content": {
+          "title": "Selected work",
+          "items": [
+            {
+              "id": "pf-0",
+              "label": "Editorial Nocturna",
+              "url": "https://luz.example/night",
+              "imageUrl": "https://cdn.example/night.jpg"
+            },
+            {
+              "id": "pf-1",
+              "label": "Retratos Urbanos",
+              "url": "https://luz.example/urban",
+              "imageUrl": "https://cdn.example/urban.jpg"
+            }
+          ]
+        },
+        "id": "portfolio-2",
+        "order": 2
+      }
+    ]
+  },
+  "T9_BioTemplateConfig": {
+    "schemaVersion": 1,
+    "pageInstanceId": "page-r1_cc2eb224780e9c10",
+    "templateDefinitionId": "engine-editorial-editorial",
+    "metadata": {
+      "templateDefinitionId": "engine-editorial-editorial",
+      "name": "editorial · editorial_stack",
+      "category": "Personal",
+      "premium": true,
+      "createdAt": "2026-09-15T12:00:00.000Z",
+      "updatedAt": "2026-09-15T12:00:00.000Z",
+      "author": "Cripqer Parametric Engine",
+      "tags": [
+        "editorial",
+        "editorial_stack",
+        "portfolio"
+      ]
+    },
+    "theme": {
+      "id": "engine-editorial",
+      "name": "Engine editorial",
+      "colors": {
+        "primary": "#38524A",
+        "secondary": "#575349",
+        "accent": "#38524A",
+        "background": "#FBFAF7",
+        "surface": "#F1EEE7",
+        "card": "#F1EEE7",
+        "text": "#20201D",
+        "mutedText": "#575349",
+        "border": "#E0DBD0"
+      },
+      "typography": {
+        "headingFont": "\"Times New Roman\", Times, serif",
+        "bodyFont": "\"Trebuchet MS\", \"Segoe UI\", sans-serif",
+        "headingSize": 44,
+        "bodySize": 15,
+        "headingWeight": 600,
+        "bodyWeight": 400,
+        "lineHeight": 1.62,
+        "letterSpacing": -0.02
+      },
+      "background": {
+        "type": "solid",
+        "color": "#FBFAF7"
+      },
+      "cards": {
+        "preset": "flat",
+        "radius": 10,
+        "borderWidth": 1,
+        "shadow": "none",
+        "blur": 0,
+        "padding": 24,
+        "opacity": 1
+      },
+      "buttons": {
+        "variant": "solid",
+        "radius": 10,
+        "height": 54,
+        "fontWeight": 570,
+        "shadow": "sm",
+        "borderWidth": 0
+      },
+      "spacing": {
+        "section": 40,
+        "block": 18,
+        "contentWidth": 600
+      },
+      "animation": "fade",
+      "texture": {
+        "preset": "paper",
+        "opacity": 0.07,
+        "scale": 28
+      }
+    },
+    "layout": {
+      "id": "editorial",
+      "name": "Editorial",
+      "header": "stacked",
+      "type": "stack",
+      "responsive": {
+        "desktop": {
+          "columns": 1,
+          "gutter": 14,
+          "align": "left",
+          "padding": 32
+        },
+        "tablet": {
+          "columns": 1,
+          "gutter": 12,
+          "align": "left",
+          "padding": 32
+        },
+        "mobile": {
+          "columns": 1,
+          "gutter": 12,
+          "align": "left",
+          "padding": 18
+        }
+      }
+    },
+    "profile": {
+      "name": "Luz Norte",
+      "username": "luz-norte",
+      "role": "Fotografía",
+      "description": "Historias visuales con luz y carácter.",
+      "verified": false,
+      "avatar": {
+        "size": 96,
+        "radius": 999,
+        "borderWidth": 4,
+        "shadow": false,
+        "overlap": 0,
+        "align": "left"
+      },
+      "banner": {
+        "enabled": true,
+        "height": 230,
+        "mobileHeight": 170,
+        "overlay": 0.15,
+        "blur": 0,
+        "gradient": true,
+        "focalX": 50,
+        "focalY": 50,
+        "radius": 18,
+        "imageUrl": "https://cdn.example/luz-cover.jpg"
+      }
+    },
+    "blocks": [
+      {
+        "id": "text-0",
+        "type": "text",
+        "variant": "quote",
+        "content": {
+          "body": "Historias visuales con luz y carácter."
+        },
+        "style": {},
+        "layout": {
+          "width": "content",
+          "align": "center",
+          "span": 2
+        },
+        "visibility": {
+          "desktop": true,
+          "tablet": true,
+          "mobile": true
+        },
+        "interaction": {
+          "newTab": true,
+          "animation": "soft-rise"
+        },
+        "motion": {
+          "useGlobal": true
+        },
+        "responsive": {
+          "desktop": {
+            "colSpan": 1
+          },
+          "tablet": {
+            "colSpan": 1
+          },
+          "mobile": {
+            "colSpan": 1,
+            "rowSpan": 1,
+            "padding": 16
+          }
+        }
+      },
+      {
+        "id": "cta-1",
+        "type": "cta",
+        "variant": "inline",
+        "content": {
+          "label": "Ver mi trabajo",
+          "url": "#"
+        },
+        "style": {
+          "frame": "hairline"
+        },
+        "layout": {
+          "width": "content",
+          "align": "center",
+          "span": 2
+        },
+        "visibility": {
+          "desktop": true,
+          "tablet": true,
+          "mobile": true
+        },
+        "interaction": {
+          "newTab": true,
+          "animation": "soft-rise"
+        },
+        "motion": {
+          "useGlobal": true
+        },
+        "responsive": {
+          "desktop": {
+            "colSpan": 1
+          },
+          "tablet": {
+            "colSpan": 1
+          },
+          "mobile": {
+            "colSpan": 1,
+            "rowSpan": 1,
+            "padding": 16
+          }
+        }
+      },
+      {
+        "id": "portfolio-2",
+        "type": "portfolio",
+        "variant": "grid",
+        "content": {
+          "title": "Selected work",
+          "items": [
+            {
+              "id": "pf-0",
+              "label": "Editorial Nocturna",
+              "url": "https://luz.example/night",
+              "imageUrl": "https://cdn.example/night.jpg"
+            },
+            {
+              "id": "pf-1",
+              "label": "Retratos Urbanos",
+              "url": "https://luz.example/urban",
+              "imageUrl": "https://cdn.example/urban.jpg"
+            }
+          ]
+        },
+        "style": {},
+        "layout": {
+          "width": "content",
+          "align": "center",
+          "span": 2,
+          "columns": 2,
+          "gap": 10
+        },
+        "visibility": {
+          "desktop": true,
+          "tablet": true,
+          "mobile": true
+        },
+        "interaction": {
+          "newTab": true,
+          "animation": "soft-rise"
+        },
+        "motion": {
+          "useGlobal": true
+        },
+        "responsive": {
+          "desktop": {
+            "colSpan": 1
+          },
+          "tablet": {
+            "colSpan": 1
+          },
+          "mobile": {
+            "colSpan": 1,
+            "rowSpan": 1,
+            "padding": 16
+          }
+        }
+      }
+    ],
+    "seo": {
+      "title": "Luz Norte — Fotografía",
+      "description": "Historias visuales con luz y carácter.",
+      "index": true
+    },
+    "motion": {
+      "preset": "editorial",
+      "entrance": "slide-up",
+      "hover": "soft-scale",
+      "duration": 480,
+      "delay": 0,
+      "stagger": 90
+    },
+    "settings": {
+      "showBranding": true,
+      "slug": "luz-norte",
+      "animation": "fade",
+      "language": "es"
+    }
+  },
+  "T10_Render": {
+    "valid": true,
+    "renderedBlockIds": [],
+    "renderedSectionCount": 4,
+    "renderedMarkupLength": 7681,
+    "containsBusinessName": true,
+    "containsOwnerItemNames": true
+  }
+}

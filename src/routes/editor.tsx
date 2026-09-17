@@ -44,6 +44,8 @@ import { EDIT_TARGETS, linkEditTarget, type EditTargetRegistry } from "../types/
 import type { Profile, ProfileLink } from "../types/database";
 import { ExistingUserOnboardingInviteModal } from "../components/ExistingUserOnboardingInviteModal";
 import { PowerEditorHost } from "../components/power-editor/PowerEditorHost";
+import { createCanonicalPageEnvelope } from "@/lib/canonical-page";
+import { createDemoConfig } from "@/premium-template-studio";
 
 export const Route = createFileRoute("/editor")({
   component: EditorPage,
@@ -173,6 +175,7 @@ function EditorPage() {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [isProcessingInvite, setIsProcessingInvite] = useState(false);
   const [canonicalProfileId, setCanonicalProfileId] = useState<string | null>(null);
+  const [guidedPowerEditor, setGuidedPowerEditor] = useState(false);
 
   const loadedProfileKey = useRef<string | null>(null);
   const canvasViewportRef = useRef<HTMLDivElement>(null);
@@ -188,7 +191,10 @@ function EditorPage() {
         onboarding_v2_invite_status: "accepted",
       });
       setShowInviteModal(false);
-      navigate({ to: "/onboarding-preview" });
+      navigate({
+        to: "/onboarding-preview",
+        search: { profileId: profile.id as string },
+      });
     } catch (e) {
       console.error(e);
       toast.error("Error al actualizar la invitación.");
@@ -338,7 +344,21 @@ function EditorPage() {
         const currentLinks = await linkService.getProfileLinks(supabase, currentProfile.id);
         setLinks(currentLinks);
       } else {
-        window.location.assign("/onboarding-preview");
+        // A first-use account has no document yet. Seed it with the existing
+        // premium starter and enter the Power Editor directly. This is an
+        // authenticated, owner-scoped insert; it does not invoke generation.
+        const publicId = generatePublicId();
+        const starter = createCanonicalPageEnvelope(createDemoConfig());
+        const createdProfile = await profileService.createProfile(supabase, {
+          user_id: userId,
+          public_id: publicId,
+          slug: getInternalSlugFromPublicId(publicId),
+          display_name: "Mi página",
+          template_config: starter,
+        });
+        loadedProfileKey.current = profileKey;
+        setCanonicalProfileId(createdProfile.id);
+        setGuidedPowerEditor(true);
         return;
       }
     } catch (error) {
@@ -469,7 +489,10 @@ function EditorPage() {
 
   if (loading) return <div className="flex justify-center p-12">Cargando...</div>;
   if (!session) return <Auth showPlatformMenu />;
-  if (canonicalProfileId) return <PowerEditorHost profileId={canonicalProfileId} />;
+  if (canonicalProfileId)
+    return (
+      <PowerEditorHost profileId={canonicalProfileId} guidedOnboarding={guidedPowerEditor} />
+    );
 
   const publicId = profile.public_id || savedPublicId || "";
   const isValid = validate();

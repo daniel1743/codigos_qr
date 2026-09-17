@@ -80,6 +80,47 @@ describe("SMART_PAGES_3 host mapping", () => {
     });
   });
 
+  it("carries a Smart Pages booking goal into the booking-capable Engine goal", () => {
+    const source = content("Agenda Norte", "peluquería");
+    source.catalogs = [
+      {
+        id: "services-booking-1",
+        kind: "services",
+        categories: [],
+        items: [
+          {
+            id: "service-booking-1",
+            type: "service",
+            name: "Sesión reservable",
+            media: [],
+            attributes: [],
+            salesMode: "booking",
+            featured: false,
+            enabled: true,
+            confidence: 1,
+            review: [],
+          },
+        ],
+      },
+    ];
+    const mapped = mapSmartPageToEngineInput(
+      { ...baseRequest(source, "book"), salesMode: "booking" },
+      { now: NOW },
+    );
+    expect(mapped.ok).toBe(true);
+    if (!mapped.ok) return;
+    expect(mapped.generatedPageInput.primaryGoal).toBe("bookings");
+    expect(mapped.adapter.intent.outcome.primaryGoal).toBe("bookings");
+    expect(mapped.adapter.engineInput.goal).toBe("booking");
+
+    const generated = generateSmartPageWithEngineV2(
+      { ...baseRequest(source, "book"), salesMode: "booking" },
+      { now: NOW },
+    );
+    expect(generated.ok).toBe(true);
+    if (generated.ok) expect(validateTemplate(generated.result.editorConfig).valid).toBe(true);
+  });
+
   it.each(["catalog", "portfolio", "menu"] as const)("maps %s owner content", (kind) => {
     const source = content("Negocio Norte", kind);
     if (kind === "catalog" || kind === "portfolio") {

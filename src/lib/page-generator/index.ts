@@ -35,6 +35,30 @@ export {
 } from "./validation";
 export { buildGeneratedPageIntent, type GeneratedPageIntentOptions } from "./intent";
 export {
+  getOwnerContentReadiness,
+  ownerContentFromGeneratedPageInput,
+  ownerContentToEngineContentBlocks,
+  ownerContentToNormalizedContent,
+  ownerContentToPageGenerationRequest,
+  validateOwnerContentInput,
+  type OwnerContactInput,
+  type OwnerContentInput,
+  type OwnerContentIdentity,
+  type OwnerContentPageGenerationContext,
+  type OwnerContentNormalizedContext,
+  type OwnerContentReadinessIssue,
+  type OwnerContentReadinessResult,
+  type OwnerContentValidationCode,
+  type OwnerContentValidationIssue,
+  type OwnerContentValidationResult,
+  type OwnerEventInput,
+  type OwnerMediaReference,
+  type OwnerMenuItemInput,
+  type OwnerPortfolioItemInput,
+  type OwnerProductInput,
+  type OwnerServiceInput,
+} from "./owner-content";
+export {
   buildEngineContentBlocks,
   mapGeneratedPageToEngineInput,
   pageGeneratorAdapter,
@@ -54,13 +78,14 @@ export {
   type CreateGeneratedPageSuccess,
   type GeneratedPageEngineRequest,
 } from "./create-page";
+// The Smart Pages host map imports the server-only Engine V2 entrypoint. Keep
+// it out of this client-safe barrel; server callers import the seam directly
+// from `./smart-pages-host-map` (or from the onboarding server adapter).
 export {
-  generateSmartPageWithEngineV2,
-  mapSmartPageToEngineInput,
-  type SmartPagesGenerationResult,
-  type SmartPagesHostDiagnostics,
-  type SmartPagesHostMapOptions,
-  type SmartPagesHostMappingFailure,
-  type SmartPagesHostMappingResult,
-  type SmartPagesHostMappingSuccess,
-} from "./smart-pages-host-map";
+  mapRetailPresentationToHostInput,
+  reconcileRetailGeneratedConfig,
+  type SmartPagesRetailDiagnostics,
+  type SmartPagesRetailMappingFailure,
+  type SmartPagesRetailMappingResult,
+  type SmartPagesRetailMappingSuccess,
+} from "./smart-pages-retail-map";

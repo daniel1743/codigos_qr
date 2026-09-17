@@ -1,6 +1,6 @@
 import { createFileRoute, Link, Outlet, useMatches } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Copy, Loader2 } from "lucide-react";
+import { ArrowLeft, Copy, Eye, Loader2, Rocket } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "../components/app-shell/AppShell";
 import { Badge } from "../components/ui/badge";
@@ -13,6 +13,9 @@ import { pageService } from "../services/page.service";
 import { pageAliasService } from "../services/page-alias.service";
 import { isValidPageAlias, normalizePageAlias } from "../lib/page-alias";
 import { getPublicPageAliasUrl } from "../lib/url";
+import { getPublicPageUrl } from "../lib/url";
+import { readCanonicalPageEnvelope } from "../lib/canonical-page";
+import { pageCanonicalService } from "../services/page-canonical.service";
 import { PageQrPanel } from "../components/qr/PageQrPanel";
 import type { Page } from "../types/database";
 
@@ -162,6 +165,7 @@ function PageDetail() {
   const [notFound, setNotFound] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [showQr, setShowQr] = useState(false);
+  const [publicationBusy, setPublicationBusy] = useState(false);
 
   // /pages/$pageId is the parent of the nested child route /pages/$pageId/edit.
   // When the edit child is the active match we must render the outlet instead of
@@ -189,6 +193,37 @@ function PageDetail() {
       }
     })();
   }, [pageId]);
+
+  const togglePublication = async () => {
+    if (!page || !userId) return;
+    setPublicationBusy(true);
+    try {
+      const updated = page.published
+        ? await pageCanonicalService.unpublish(
+            supabase,
+            page.id,
+            userId,
+            page.published_revision,
+          )
+        : (() => {
+            const envelope = readCanonicalPageEnvelope(page.template_config);
+            if (!envelope) throw new Error("Abre la página y guárdala antes de publicarla.");
+            return pageCanonicalService.publish(
+              supabase,
+              page.id,
+              userId,
+              envelope.editorConfig,
+              page.published_revision,
+            );
+          })();
+      setPage(await updated);
+      toast.success(page.published ? "Página despublicada" : "Página publicada");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "No se pudo cambiar la publicación.");
+    } finally {
+      setPublicationBusy(false);
+    }
+  };
 
   if (hasNestedChild) {
     return <Outlet />;
@@ -229,6 +264,21 @@ function PageDetail() {
                   <Link to="/pages/$pageId/edit" params={{ pageId: page.id }}>
                     Editar con Power
                   </Link>
+                </Button>
+                {page.published && (
+                  <Button asChild variant="outline">
+                    <a href={getPublicPageUrl(page.public_id)} target="_blank" rel="noreferrer">
+                      <Eye className="mr-2 h-4 w-4" /> Abrir página
+                    </a>
+                  </Button>
+                )}
+                <Button onClick={() => void togglePublication()} disabled={publicationBusy}>
+                  {publicationBusy ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Rocket className="mr-2 h-4 w-4" />
+                  )}
+                  {page.published ? "Despublicar" : "Publicar"}
                 </Button>
                 <Button variant="outline" onClick={() => setShowQr((v) => !v)}>
                   QR / Compartir

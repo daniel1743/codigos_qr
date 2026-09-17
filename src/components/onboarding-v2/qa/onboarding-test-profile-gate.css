@@ -1,0 +1,80 @@
+.qa-profile-gate {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 32px 20px;
+  background: #f6f8fc;
+  color: #15213d;
+}
+
+.qa-profile-gate__card {
+  width: min(100%, 520px);
+  padding: 36px;
+  border: 1px solid #dfe5ef;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 18px 50px rgb(21 33 61 / 10%);
+}
+
+.qa-profile-gate__eyebrow {
+  margin: 0 0 10px;
+  color: #165dff;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.qa-profile-gate h1 {
+  margin: 0;
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+}
+
+.qa-profile-gate p:not(.qa-profile-gate__eyebrow) {
+  color: #68738a;
+  line-height: 1.6;
+}
+
+.qa-profile-gate label,
+.qa-profile-gate select,
+.qa-profile-gate button,
+.qa-profile-gate a {
+  display: block;
+  width: 100%;
+}
+
+.qa-profile-gate label {
+  margin: 24px 0 8px;
+  font-weight: 700;
+}
+
+.qa-profile-gate select,
+.qa-profile-gate button,
+.qa-profile-gate a {
+  min-height: 44px;
+  border-radius: 10px;
+  font: inherit;
+}
+
+.qa-profile-gate select {
+  padding: 0 12px;
+  border: 1px solid #cbd5e5;
+  background: #fff;
+}
+
+.qa-profile-gate button,
+.qa-profile-gate a {
+  margin-top: 20px;
+  padding: 11px 16px;
+  border: 0;
+  background: #165dff;
+  color: #fff;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+}
+
+.qa-profile-gate button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}

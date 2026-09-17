@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, Monitor, Smartphone, Tablet, Trash2, Copy, Lock, Plus } from "lucide-react";
+import { ArrowDown, ArrowUp, ChevronLeft, ChevronRight, Monitor, Smartphone, Tablet, Trash2, Copy, Lock, Plus } from "lucide-react";
 import { useStudio } from "../../state/StudioProvider";
 import { getBlockDefinition } from "../../constants/blockDefinitions";
 import {
@@ -894,8 +894,8 @@ export function computePowerMediaCardPatch(
     {
       title: item.label ?? "",
       titleIsDefault: labelIsDefault,
-      description: item.description,
-      imageUrl: item.imageUrl,
+      ...(item.description !== undefined ? { description: item.description } : {}),
+      ...(item.imageUrl !== undefined ? { imageUrl: item.imageUrl } : {}),
     },
     preview,
   );
@@ -2385,6 +2385,14 @@ function ServicesBlockInspector({ block }: { block: TemplateBlock }) {
   const field = (path: string, value: unknown) =>
     dispatch({ type: "patchBlockField", id: block.id, path, value });
   const update = (next: BlockItem[]) => field("content.items", next);
+  const move = (index: number, direction: -1 | 1) => {
+    const nextIndex = index + direction;
+    if (nextIndex < 0 || nextIndex >= items.length) return;
+    const next = [...items];
+    const [item] = next.splice(index, 1);
+    if (item) next.splice(nextIndex, 0, item);
+    update(next);
+  };
 
   return (
     <div className="space-y-3">
@@ -2397,13 +2405,11 @@ function ServicesBlockInspector({ block }: { block: TemplateBlock }) {
             <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               Service {index + 1}
             </span>
-            <button
-              type="button"
-              className="text-muted-foreground hover:text-destructive"
-              onClick={() => update(items.filter((i) => i.id !== item.id))}
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
+            <div className="flex items-center gap-1">
+              <button type="button" aria-label="Move service up" disabled={index === 0} onClick={() => move(index, -1)} className="text-muted-foreground disabled:opacity-30"><ArrowUp className="h-3.5 w-3.5" /></button>
+              <button type="button" aria-label="Move service down" disabled={index === items.length - 1} onClick={() => move(index, 1)} className="text-muted-foreground disabled:opacity-30"><ArrowDown className="h-3.5 w-3.5" /></button>
+              <button type="button" aria-label="Remove service" className="text-muted-foreground hover:text-destructive" onClick={() => update(items.filter((i) => i.id !== item.id))}><Trash2 className="h-3.5 w-3.5" /></button>
+            </div>
           </div>
           <Field label="Title">
             <TextInput
@@ -2464,7 +2470,7 @@ function ServicesBlockInspector({ block }: { block: TemplateBlock }) {
               }
             />
           </Field>
-          <CTAStyleEditor
+          <CtaStyleControls
             style={item.ctaStyle}
             pathPrefix="ctaStyle"
             defaultRadius={100}
@@ -2687,7 +2693,7 @@ function PricingBlockInspector({ block }: { block: TemplateBlock }) {
               }
             />
           </Field>
-          <CTAStyleEditor
+          <CtaStyleControls
             style={item.ctaStyle}
             pathPrefix="ctaStyle"
             defaultRadius={100}
@@ -2940,7 +2946,7 @@ function FeaturedMediaBlockInspector({ block }: { block: TemplateBlock }) {
             onChange={(v) => field("content.ctaLabel", v)}
           />
         </Field>
-        <CTAStyleEditor
+        <CtaStyleControls
           style={block.style.ctaStyle}
           pathPrefix="style.ctaStyle"
           defaultRadius={100}
@@ -3155,6 +3161,14 @@ function ProductGridBlockInspector({ block }: { block: TemplateBlock }) {
   const field = (path: string, value: unknown) =>
     dispatch({ type: "patchBlockField", id: block.id, path, value });
   const update = (next: BlockItem[]) => field("content.products", next);
+  const move = (index: number, direction: -1 | 1) => {
+    const nextIndex = index + direction;
+    if (nextIndex < 0 || nextIndex >= products.length) return;
+    const next = [...products];
+    const [item] = next.splice(index, 1);
+    if (item) next.splice(nextIndex, 0, item);
+    update(next);
+  };
 
   return (
     <div className="space-y-3">
@@ -3167,13 +3181,11 @@ function ProductGridBlockInspector({ block }: { block: TemplateBlock }) {
             <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               Product {index + 1}
             </span>
-            <button
-              type="button"
-              className="text-muted-foreground hover:text-destructive"
-              onClick={() => update(products.filter((p) => p.id !== prod.id))}
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
+            <div className="flex items-center gap-1">
+              <button type="button" aria-label="Move product up" disabled={index === 0} onClick={() => move(index, -1)} className="text-muted-foreground disabled:opacity-30"><ArrowUp className="h-3.5 w-3.5" /></button>
+              <button type="button" aria-label="Move product down" disabled={index === products.length - 1} onClick={() => move(index, 1)} className="text-muted-foreground disabled:opacity-30"><ArrowDown className="h-3.5 w-3.5" /></button>
+              <button type="button" aria-label="Remove product" className="text-muted-foreground hover:text-destructive" onClick={() => update(products.filter((p) => p.id !== prod.id))}><Trash2 className="h-3.5 w-3.5" /></button>
+            </div>
           </div>
           <Field label="Title">
             <TextInput
@@ -3189,6 +3201,15 @@ function ProductGridBlockInspector({ block }: { block: TemplateBlock }) {
               onChange={(v) =>
                 update(products.map((p) => (p.id === prod.id ? { ...p, price: v } : p)))
               }
+            />
+          </Field>
+          <Field label="Description">
+            <TextArea
+              value={prod.description ?? ""}
+              onChange={(v) =>
+                update(products.map((p) => (p.id === prod.id ? { ...p, description: v } : p)))
+              }
+              rows={2}
             />
           </Field>
           <AssetField
@@ -3235,7 +3256,7 @@ function ProductGridBlockInspector({ block }: { block: TemplateBlock }) {
         <h4 className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground mb-3">
           Estilo de los Botones
         </h4>
-        <CTAStyleEditor
+        <CtaStyleControls
           style={block.style.ctaStyle}
           pathPrefix="style.ctaStyle"
           defaultRadius={100}
@@ -3315,7 +3336,7 @@ function BookingBlockInspector({ block }: { block: TemplateBlock }) {
         <Field label="CTA Button Label">
           <TextInput value={c.ctaLabel ?? ""} onChange={(v) => field("content.ctaLabel", v)} />
         </Field>
-        <CTAStyleEditor
+        <CtaStyleControls
           style={block.style.ctaStyle}
           pathPrefix="style.ctaStyle"
           defaultRadius={100}
@@ -3439,7 +3460,7 @@ function EventsBlockInspector({ block }: { block: TemplateBlock }) {
               }
             />
           </Field>
-          <CTAStyleEditor
+          <CtaStyleControls
             style={event.ctaStyle}
             pathPrefix="ctaStyle"
             defaultRadius={100}

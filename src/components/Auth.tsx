@@ -51,6 +51,10 @@ export function Auth({ showPlatformMenu = false }: { showPlatformMenu?: boolean 
           email,
           password,
           options: {
+            emailRedirectTo:
+              typeof window === "undefined"
+                ? "https://www.cripqer.dev/correo-confirmado"
+                : `${window.location.origin}/correo-confirmado`,
             data: {
               full_name: name,
             },

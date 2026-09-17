@@ -1,0 +1,595 @@
+{
+  "id": "RETAIL_CATALOG",
+  "T1_intent": {
+    "identity": {
+      "displayName": "Norte Concept",
+      "professionOrActivity": "Tienda de ropa",
+      "bio": "Ropa urbana con identidad propia."
+    },
+    "business": {
+      "category": "retail",
+      "customCategory": "Tienda de ropa"
+    },
+    "outcome": {
+      "primaryGoal": "sell",
+      "experienceHint": "catalog"
+    },
+    "visualDirection": {
+      "preference": "let_cripqer_decide"
+    },
+    "contentNeeds": {
+      "items": [
+        {
+          "type": "products"
+        },
+        {
+          "type": "contact"
+        }
+      ]
+    },
+    "actions": {
+      "primary": {
+        "type": "whatsapp",
+        "source": "user"
+      },
+      "secondary": []
+    },
+    "scope": {
+      "density": "complete",
+      "userSelected": true
+    }
+  },
+  "T2_ownerContent": {
+    "identity": {
+      "businessName": "Norte Concept",
+      "shortDescription": "Tienda de ropa"
+    },
+    "products": [
+      {
+        "name": "Chaqueta Urbana",
+        "price": "$49.990",
+        "media": [
+          {
+            "url": "https://cdn.example/chaqueta.jpg",
+            "kind": "image"
+          }
+        ],
+        "destination": "https://store.example/chaqueta"
+      },
+      {
+        "name": "Polera Essential",
+        "price": "$19.990",
+        "media": [
+          {
+            "url": "https://cdn.example/polera.jpg",
+            "kind": "image"
+          }
+        ],
+        "destination": "https://store.example/polera"
+      }
+    ],
+    "contact": {
+      "whatsapp": "+56933334444"
+    },
+    "media": {
+      "cover": {
+        "url": "https://cdn.example/norte-cover.jpg",
+        "kind": "image"
+      }
+    }
+  },
+  "T3_pageGenerationRequest": {
+    "businessType": "Tienda de ropa",
+    "goal": "sell",
+    "density": "rich",
+    "salesMode": "info",
+    "experienceType": "catalog",
+    "primaryAction": {
+      "kind": "whatsapp",
+      "label": "whatsapp",
+      "target": "+56933334444",
+      "enabled": true
+    },
+    "secondaryActions": [],
+    "catalogs": [
+      {
+        "kind": "catalog",
+        "itemCount": 2,
+        "items": [
+          {
+            "name": "Chaqueta Urbana",
+            "price": {
+              "label": "$49.990"
+            },
+            "mediaCount": 1
+          },
+          {
+            "name": "Polera Essential",
+            "price": {
+              "label": "$19.990"
+            },
+            "mediaCount": 1
+          }
+        ]
+      }
+    ],
+    "contact": {
+      "whatsapp": "+56933334444",
+      "socials": []
+    },
+    "mappedFields": [
+      "actions.primary.whatsapp <- owner destination",
+      "identity.professionOrActivity -> businessType",
+      "outcome.primaryGoal -> goal=sell",
+      "scope.density -> density=rich",
+      "ownerContent -> NormalizedContentV1",
+      "actions.primary -> SalesActionV1",
+      "ownerContent.media -> NormalizedContentV1.business media"
+    ],
+    "deferredFields": [
+      "visualDirection",
+      "contentNeeds",
+      "scope.userSelected",
+      "business.customCategory"
+    ],
+    "unsupportedFields": []
+  },
+  "T4_pagePlan": {
+    "pageId": "page_norte-concept",
+    "experienceType": "catalog",
+    "heroVariant": "split",
+    "sections": [
+      {
+        "kind": "hero",
+        "order": 0
+      },
+      {
+        "kind": "productGrid",
+        "order": 1,
+        "title": "Catalog"
+      },
+      {
+        "kind": "whatsappCta",
+        "order": 2
+      },
+      {
+        "kind": "footer",
+        "order": 3
+      }
+    ],
+    "ctaHierarchy": {
+      "primary": {
+        "kind": "whatsapp",
+        "label": "whatsapp",
+        "target": "+56933334444",
+        "enabled": true
+      },
+      "secondary": [
+        {
+          "kind": "contact",
+          "label": "Contact",
+          "enabled": true
+        },
+        {
+          "kind": "call",
+          "label": "Call",
+          "enabled": true
+        }
+      ]
+    },
+    "runtimeRequirements": {
+      "needsSearch": false,
+      "needsFilters": false,
+      "needsDetailView": true,
+      "needsCategoryNav": false,
+      "checkoutEnabled": false
+    }
+  },
+  "T5_hostMapping": {
+    "mappedFields": [
+      "catalog.owner-products.items -> host content",
+      "owner item media -> Engine V2 contentBlocks",
+      "primaryAction.whatsapp",
+      "retail.gridDensity=standard -> existing default grid behavior",
+      "retail.products -> Engine productGrid",
+      "retail.owner price/media/name/description preserved",
+      "actions.primary.type=whatsapp",
+      "identity.professionOrActivity -> businessOther",
+      "contentNeeds.products -> selectedFeatures=products",
+      "contentNeeds.contact -> selectedFeatures=contact",
+      "outcome.primaryGoal -> goal=sell",
+      "identity.displayName -> content.name",
+      "identity.professionOrActivity -> profession",
+      "identity.bio -> content.bio",
+      "actions.primary -> primaryAction",
+      "items -> engine contentBlocks (2 item(s))",
+      "coverImageUrl -> userMedia.bannerUrl",
+      "owner visual -> assets.card_media",
+      "media strategy -> banner-first (owner cover)",
+      "retail host projection -> renderer productGrid/WhatsApp contract"
+    ],
+    "deferredFields": [
+      "retail.richItemDetail -> deferred; no modal/detail route",
+      "business.category/customCategory",
+      "scope.density=complete",
+      "outcome.experienceHint"
+    ],
+    "unsupportedFields": [],
+    "warnings": []
+  },
+  "T6_generatedPageInput": {
+    "objective": "catalog",
+    "title": "Norte Concept",
+    "businessName": "Norte Concept",
+    "activity": "Tienda de ropa",
+    "coverImageUrl": "https://cdn.example/norte-cover.jpg",
+    "cta": {
+      "type": "whatsapp",
+      "value": "+56933334444"
+    },
+    "items": [
+      {
+        "title": "Chaqueta Urbana",
+        "price": "$49.990",
+        "imageUrl": "https://cdn.example/chaqueta.jpg",
+        "url": "https://store.example/chaqueta"
+      },
+      {
+        "title": "Polera Essential",
+        "price": "$19.990",
+        "imageUrl": "https://cdn.example/polera.jpg",
+        "url": "https://store.example/polera"
+      }
+    ]
+  },
+  "T7_engineInput": {
+    "profession": "Tienda de ropa",
+    "businessOther": "Tienda de ropa",
+    "goal": "sell",
+    "selectedFeatures": [
+      "products",
+      "contact"
+    ],
+    "cardMedia": true,
+    "content": {
+      "name": "Norte Concept",
+      "bio": "Tienda de ropa"
+    },
+    "primaryAction": {
+      "type": "whatsapp",
+      "value": "+56933334444"
+    },
+    "userMedia": {
+      "bannerUrl": "https://cdn.example/norte-cover.jpg"
+    },
+    "contentBlocks": {
+      "about": "Tienda de ropa",
+      "products": [
+        {
+          "title": "Chaqueta Urbana",
+          "imageUrl": "https://cdn.example/chaqueta.jpg",
+          "price": "$49.990",
+          "ctaUrl": "https://store.example/chaqueta"
+        },
+        {
+          "title": "Polera Essential",
+          "imageUrl": "https://cdn.example/polera.jpg",
+          "price": "$19.990",
+          "ctaUrl": "https://store.example/polera"
+        }
+      ],
+      "contact": {
+        "phone": "+56933334444"
+      }
+    },
+    "engineOptions": {
+      "mediaStrategy": "banner-first"
+    },
+    "adapterMapped": [
+      "actions.primary.type=whatsapp",
+      "identity.professionOrActivity -> businessOther",
+      "contentNeeds.products -> selectedFeatures=products",
+      "contentNeeds.contact -> selectedFeatures=contact",
+      "outcome.primaryGoal -> goal=sell",
+      "identity.displayName -> content.name",
+      "identity.professionOrActivity -> profession",
+      "identity.bio -> content.bio",
+      "actions.primary -> primaryAction",
+      "items -> engine contentBlocks (2 item(s))",
+      "coverImageUrl -> userMedia.bannerUrl",
+      "owner visual -> assets.card_media",
+      "media strategy -> banner-first (owner cover)"
+    ],
+    "adapterDeferred": [
+      "business.category/customCategory",
+      "scope.density=complete",
+      "outcome.experienceHint"
+    ],
+    "adapterUnsupported": []
+  },
+  "T8_engineDecisions": {
+    "businessCategory": "other",
+    "archetype": "retail",
+    "conversionMode": "purchase",
+    "proofPriority": "reviews",
+    "priceModel": "fixed",
+    "visualPersonality": "professional",
+    "primaryGoal": "sell",
+    "familyScores": {
+      "editorial": 24,
+      "luxury": 0,
+      "corporate": 64,
+      "minimal": 24,
+      "creator": 16,
+      "energetic": 26
+    },
+    "baselineFamily": "corporate",
+    "selectedFamily": "editorial",
+    "selectedLayout": "compact",
+    "candidateId": "engine#2.0",
+    "score": 91,
+    "fingerprint": "r1_5cc7e9c4f563d430",
+    "pattern": "conversion_first",
+    "preset": null,
+    "mediaStrategy": "banner-first",
+    "recipeFamily": "editorial",
+    "visual": {
+      "colors": {
+        "primary": "#1F3A5F",
+        "secondary": "#5A564F",
+        "accent": "#1A1A1A",
+        "background": "#FFFFFF",
+        "surface": "#F7F6F3",
+        "card": "#F7F6F3",
+        "text": "#1A1A1A",
+        "mutedText": "#5A564F",
+        "border": "#E4E2DC"
+      },
+      "typography": {
+        "headingFont": "Georgia, \"Times New Roman\", serif",
+        "bodyFont": "system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "headingSize": 50,
+        "bodySize": 15,
+        "headingWeight": 700,
+        "bodyWeight": 400,
+        "lineHeight": 1.62,
+        "letterSpacing": -0.02
+      },
+      "background": {
+        "type": "gradient",
+        "color": "#FFFFFF",
+        "gradient": {
+          "kind": "linear",
+          "angle": 180,
+          "from": "#F7F6F3",
+          "to": "#FFFFFF"
+        }
+      },
+      "cards": {
+        "preset": "soft",
+        "radius": 10,
+        "borderWidth": 1,
+        "shadow": "sm",
+        "blur": 0,
+        "padding": 24,
+        "opacity": 1
+      },
+      "buttons": {
+        "variant": "gradient",
+        "radius": 10,
+        "height": 58,
+        "fontWeight": 650,
+        "shadow": "md",
+        "borderWidth": 0
+      },
+      "spacing": {
+        "section": 40,
+        "block": 18,
+        "contentWidth": 680
+      },
+      "animation": "fade",
+      "texture": {
+        "preset": "paper",
+        "opacity": 0.07,
+        "scale": 28
+      },
+      "motion": {
+        "preset": "editorial",
+        "entrance": "slide-up",
+        "hover": "soft-scale",
+        "duration": 480,
+        "delay": 0,
+        "stagger": 90
+      }
+    }
+  },
+  "T9_bioTemplateConfig": {
+    "schemaVersion": 1,
+    "templateDefinitionId": "engine-editorial-compact",
+    "metadata": {
+      "templateDefinitionId": "engine-editorial-compact",
+      "name": "editorial · conversion_first",
+      "category": "Personal",
+      "premium": true,
+      "createdAt": "2026-09-15T12:00:00.000Z",
+      "updatedAt": "2026-09-15T12:00:00.000Z",
+      "author": "Cripqer Parametric Engine",
+      "tags": [
+        "editorial",
+        "conversion_first",
+        "sell"
+      ]
+    },
+    "theme": {
+      "id": "engine-editorial",
+      "name": "Engine editorial",
+      "colors": {
+        "primary": "#1F3A5F",
+        "secondary": "#5A564F",
+        "accent": "#1A1A1A",
+        "background": "#FFFFFF",
+        "surface": "#F7F6F3",
+        "card": "#F7F6F3",
+        "text": "#1A1A1A",
+        "mutedText": "#5A564F",
+        "border": "#E4E2DC"
+      },
+      "typography": {
+        "headingFont": "Georgia, \"Times New Roman\", serif",
+        "bodyFont": "system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "headingSize": 50,
+        "bodySize": 15,
+        "headingWeight": 700,
+        "bodyWeight": 400,
+        "lineHeight": 1.62,
+        "letterSpacing": -0.02
+      },
+      "background": {
+        "type": "gradient",
+        "color": "#FFFFFF",
+        "gradient": {
+          "kind": "linear",
+          "angle": 180,
+          "from": "#F7F6F3",
+          "to": "#FFFFFF"
+        }
+      },
+      "cards": {
+        "preset": "soft",
+        "radius": 10,
+        "borderWidth": 1,
+        "shadow": "sm",
+        "blur": 0,
+        "padding": 24,
+        "opacity": 1
+      },
+      "buttons": {
+        "variant": "gradient",
+        "radius": 10,
+        "height": 58,
+        "fontWeight": 650,
+        "shadow": "md",
+        "borderWidth": 0
+      },
+      "spacing": {
+        "section": 40,
+        "block": 18,
+        "contentWidth": 680
+      },
+      "animation": "fade",
+      "texture": {
+        "preset": "paper",
+        "opacity": 0.07,
+        "scale": 28
+      }
+    },
+    "layoutId": "compact",
+    "layoutHeader": "inline",
+    "profile": {
+      "name": "Norte Concept",
+      "role": "Tienda de ropa",
+      "verified": false
+    },
+    "blocks": [
+      {
+        "type": "text",
+        "variant": "quote",
+        "contentKeys": [
+          "body"
+        ]
+      },
+      {
+        "type": "cta",
+        "variant": "panel",
+        "contentKeys": [
+          "title",
+          "label",
+          "url"
+        ]
+      },
+      {
+        "type": "productGrid",
+        "variant": "cards",
+        "contentKeys": [
+          "products"
+        ]
+      },
+      {
+        "type": "contact",
+        "variant": "list",
+        "contentKeys": [
+          "title",
+          "phone"
+        ]
+      }
+    ],
+    "motion": {
+      "preset": "editorial",
+      "entrance": "slide-up",
+      "hover": "soft-scale",
+      "duration": 480,
+      "delay": 0,
+      "stagger": 90
+    }
+  },
+  "T10_renderSummary": {
+    "blockTypes": [
+      "text",
+      "cta",
+      "productGrid",
+      "contact"
+    ],
+    "themeColors": {
+      "primary": "#1F3A5F",
+      "secondary": "#5A564F",
+      "accent": "#1A1A1A",
+      "background": "#FFFFFF",
+      "surface": "#F7F6F3",
+      "card": "#F7F6F3",
+      "text": "#1A1A1A",
+      "mutedText": "#5A564F",
+      "border": "#E4E2DC"
+    },
+    "themeTypography": {
+      "headingFont": "Georgia, \"Times New Roman\", serif",
+      "bodyFont": "system-ui, -apple-system, \"Segoe UI\", sans-serif",
+      "headingSize": 50,
+      "bodySize": 15,
+      "headingWeight": 700,
+      "bodyWeight": 400,
+      "lineHeight": 1.62,
+      "letterSpacing": -0.02
+    },
+    "themeBackground": {
+      "type": "gradient",
+      "color": "#FFFFFF",
+      "gradient": {
+        "kind": "linear",
+        "angle": 180,
+        "from": "#F7F6F3",
+        "to": "#FFFFFF"
+      }
+    },
+    "themeCards": {
+      "preset": "soft",
+      "radius": 10,
+      "borderWidth": 1,
+      "shadow": "sm",
+      "blur": 0,
+      "padding": 24,
+      "opacity": 1
+    },
+    "themeButtons": {
+      "variant": "gradient",
+      "radius": 10,
+      "height": 58,
+      "fontWeight": 650,
+      "shadow": "md",
+      "borderWidth": 0
+    },
+    "validation": {
+      "valid": true,
+      "issues": []
+    }
+  }
+}

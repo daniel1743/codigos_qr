@@ -1,14 +1,29 @@
 import { createFileRoute, Link, Outlet, useMatches } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Plus } from "lucide-react";
+import { Eye, Loader2, Pencil, Plus, QrCode, Rocket, Trash2 } from "lucide-react";
 import { AppShell } from "../components/app-shell/AppShell";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
 import { getBrowserSupabaseClient } from "../lib/supabase/client";
 import { pageService } from "../services/page.service";
+import { pageCanonicalService } from "../services/page-canonical.service";
 import { profileService } from "../services/profile.service";
+import { readCanonicalPageEnvelope } from "../lib/canonical-page";
+import { getPublicPageUrl } from "../lib/url";
+import { toast } from "sonner";
 import type { Page, Profile } from "../types/database";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "../components/ui/alert-dialog";
 
 const PAGE_TYPE_LABELS: Record<string, string> = {
   landing: "Landing",
@@ -30,6 +45,137 @@ function formatDate(value: string | null): string {
     month: "short",
     day: "numeric",
   });
+}
+
+function PageActions({
+  page,
+  onChange,
+  onDeleted,
+}: {
+  page: Page;
+  onChange: (page: Page) => void;
+  onDeleted: (pageId: string) => void;
+}) {
+  const supabase = getBrowserSupabaseClient();
+  const [busy, setBusy] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+
+  const togglePublication = async () => {
+    setBusy(true);
+    try {
+      const { data: auth } = await supabase.auth.getUser();
+      if (!auth.user) throw new Error("Debes iniciar sesión para cambiar la publicación.");
+      const userId = auth.user.id;
+      if (page.published) {
+        onChange(
+          await pageCanonicalService.unpublish(
+            supabase,
+            page.id,
+            userId,
+            page.published_revision,
+          ),
+        );
+        toast.success("Página despublicada");
+        return;
+      }
+
+      const envelope = readCanonicalPageEnvelope(page.template_config);
+      if (!envelope) {
+        toast.error("Abre la página y guárdala antes de publicarla.");
+        return;
+      }
+      onChange(
+        await pageCanonicalService.publish(
+          supabase,
+          page.id,
+          userId,
+          envelope.editorConfig,
+          page.published_revision,
+        ),
+      );
+      toast.success("Página publicada");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "No se pudo cambiar la publicación.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const deletePage = async () => {
+    setBusy(true);
+    try {
+      const { data: auth } = await supabase.auth.getUser();
+      if (!auth.user) throw new Error("Debes iniciar sesión para eliminar una página.");
+      await pageService.deleteOwnedChildPage(supabase, page.id, auth.user.id);
+      onDeleted(page.id);
+      setDeleteOpen(false);
+      toast.success("Página eliminada");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "No se pudo eliminar la página.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-wrap items-center justify-end gap-2">
+      <Button asChild variant="outline" size="sm">
+        <Link to="/pages/$pageId/edit" params={{ pageId: page.id }}>
+          <Pencil className="mr-1.5 h-3.5 w-3.5" /> Editar
+        </Link>
+      </Button>
+      {page.published && (
+        <Button asChild variant="outline" size="sm">
+          <a href={getPublicPageUrl(page.public_id)} target="_blank" rel="noreferrer">
+            <Eye className="mr-1.5 h-3.5 w-3.5" /> Abrir
+          </a>
+        </Button>
+      )}
+      <Button asChild variant="outline" size="sm">
+        <Link to="/pages/$pageId" params={{ pageId: page.id }}>
+          <QrCode className="mr-1.5 h-3.5 w-3.5" /> QR
+        </Link>
+      </Button>
+      <Button size="sm" onClick={() => void togglePublication()} disabled={busy}>
+        {busy ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Rocket className="mr-1.5 h-3.5 w-3.5" />}
+        {page.published ? "Despublicar" : "Publicar"}
+      </Button>
+      <AlertDialog
+        open={deleteOpen}
+        onOpenChange={(open) => {
+          if (!busy) setDeleteOpen(open);
+        }}
+      >
+        <AlertDialogTrigger asChild>
+          <Button variant="destructive" size="sm" disabled={busy}>
+            <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Eliminar
+          </Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Eliminar página</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción eliminará esta página. No podrás recuperarla.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={busy}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={busy}
+              onClick={(event) => {
+                event.preventDefault();
+                void deletePage();
+              }}
+            >
+              {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
 }
 
 function PagesList() {
@@ -143,16 +289,32 @@ function PagesList() {
                           {PAGE_TYPE_LABELS[page.page_type] ?? page.page_type} · Actualizada{" "}
                           {formatDate(page.updated_at)}
                         </p>
+                        {page.published && (
+                          <a
+                            href={getPublicPageUrl(page.public_id)}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="mt-1 block truncate text-xs text-muted-foreground underline-offset-4 hover:underline"
+                          >
+                            {getPublicPageUrl(page.public_id)}
+                          </a>
+                        )}
                       </div>
-                      <div className="flex shrink-0 items-center gap-3">
+                      <div className="flex shrink-0 flex-col items-end gap-2">
                         <Badge variant={page.published ? "default" : "secondary"}>
                           {page.published ? "Publicada" : "Borrador"}
                         </Badge>
-                        <Button asChild variant="outline" size="sm">
-                          <Link to="/pages/$pageId" params={{ pageId: page.id }}>
-                            Abrir
-                          </Link>
-                        </Button>
+                        <PageActions
+                          page={page}
+                          onChange={(updated) =>
+                            setPages((current) =>
+                              current.map((item) => (item.id === updated.id ? updated : item)),
+                            )
+                          }
+                          onDeleted={(pageId) =>
+                            setPages((current) => current.filter((item) => item.id !== pageId))
+                          }
+                        />
                       </div>
                     </div>
                   ))}

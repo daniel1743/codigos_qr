@@ -14,6 +14,7 @@ import type {
   VisualDirectionV2,
 } from "@/lib/onboarding-v2/types";
 import { ONBOARDING_V2_STORAGE_KEY } from "@/lib/onboarding-v2/config";
+import type { OwnerContentInput } from "@/lib/page-generator/owner-content";
 
 export interface OnboardingV2Draft {
   identity: {
@@ -153,6 +154,7 @@ function optionalText(value: string): string | undefined {
 export function buildOnboardingIntentV2(
   draft: OnboardingV2Draft,
   completedAt = new Date().toISOString(),
+  ownerContent?: OwnerContentInput,
 ): { intent: OnboardingIntentV2 | null; validation: OnboardingV2ValidationResult } {
   const bio = optionalText(draft.identity.bio);
   const customCategory = optionalText(draft.business.customCategory);
@@ -202,6 +204,7 @@ export function buildOnboardingIntentV2(
     ...(isCommercialRelevant(draft) && draft.commercial.mode
       ? { commercial: { mode: draft.commercial.mode, relevant: true } }
       : {}),
+    ...(ownerContent !== undefined ? { ownerContent } : {}),
     meta: { version: "2", completedAt, source: "onboarding_v2", locale: "es-CL" },
   };
   const validation = validateOnboardingIntentV2(candidate);

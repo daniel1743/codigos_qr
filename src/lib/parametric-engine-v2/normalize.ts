@@ -11,6 +11,7 @@ import type {
 } from "./types";
 import { destinationIssueMessage, isValidDestination } from "./destinations";
 import {
+  BUSINESS_CATEGORIES,
   PRIMARY_ACTION_TYPES,
   PRIMARY_GOALS,
   VISUAL_PERSONALITIES,
@@ -107,11 +108,18 @@ export function validateIntent(intent: unknown): ValidationIssue[] {
   if (other !== null && typeof other !== "string") {
     push("business_other", "type", "business_other must be a string or null.");
   }
-  if (
-    typeof i["business_type"] === "string" &&
-    normalizeBusinessCategory(i["business_type"]) === "other" &&
-    (typeof other !== "string" || other.trim().length < 2)
-  ) {
+  const explicitCategory = i["business_category"];
+  const category =
+    typeof explicitCategory === "string" &&
+    BUSINESS_CATEGORIES.includes(explicitCategory as (typeof BUSINESS_CATEGORIES)[number])
+      ? explicitCategory
+      : typeof i["business_type"] === "string"
+        ? normalizeBusinessCategory(i["business_type"])
+        : "other";
+  if (explicitCategory !== undefined && !BUSINESS_CATEGORIES.includes(explicitCategory as never)) {
+    push("business_category", "enum", "business_category is not a supported category.");
+  }
+  if (category === "other" && (typeof other !== "string" || other.trim().length < 2)) {
     push("business_other", "required", "business_other is required when the category is other.");
   }
 
@@ -217,7 +225,7 @@ function isPresent(value: string | null | undefined): boolean {
 }
 
 export function normalizeIntent(intent: OnboardingIntentV1): NormalizedIntent {
-  const category = normalizeBusinessCategory(intent.business_type);
+  const category = intent.business_category ?? normalizeBusinessCategory(intent.business_type);
   const other = intent.business_other?.trim() || null;
   return {
     business_category: category,

@@ -3,6 +3,55 @@ import { SCHEMA_VERSION } from "../types";
 import { BlockRegistry } from "./BlockRegistry";
 import { isValidUrl } from "../utils";
 
+function validateMediaProvenance(
+  value: unknown,
+  path: string,
+  push: (level: ValidationIssue["level"], path: string, message: string) => void,
+): void {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    push("error", path, "Media provenance must be an object.");
+    return;
+  }
+  const provenance = value as Record<string, unknown>;
+  const origin = provenance.origin;
+  if (origin !== "owner" && origin !== "contextual_stock" && origin !== "legacy_unknown")
+    push("error", `${path}.origin`, "Unknown media provenance origin.");
+  const provider = provenance.provider;
+  if (provider !== undefined && provider !== "unsplash" && provider !== "pexels")
+    push("error", `${path}.provider`, "Unknown contextual media provider.");
+  if (origin === "contextual_stock" && provider !== "unsplash" && provider !== "pexels")
+    push("error", `${path}.provider`, "Contextual stock media requires Unsplash or Pexels.");
+  if (origin === "owner" && provider !== undefined)
+    push("error", `${path}.provider`, "Owner media cannot declare a stock provider.");
+  for (const key of [
+    "providerAssetId", "sourcePageUrl", "creatorName", "creatorUrl", "attributionText",
+  ]) {
+    if (provenance[key] !== undefined && typeof provenance[key] !== "string")
+      push("error", `${path}.${key}`, "Media provenance text fields must be strings.");
+  }
+  for (const key of ["sourcePageUrl", "creatorUrl"]) {
+    if (typeof provenance[key] === "string" && !isValidUrl(provenance[key]))
+      push("warning", `${path}.${key}`, `"${provenance[key]}" is not a valid URL.`);
+  }
+}
+
+function validateHeroMedia(
+  value: unknown,
+  path: string,
+  push: (level: ValidationIssue["level"], path: string, message: string) => void,
+): void {
+  if (value === undefined) return;
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    push("error", path, "Hero media must be an object.");
+    return;
+  }
+  const media = value as Record<string, unknown>;
+  if (media.url !== undefined && typeof media.url !== "string")
+    push("error", `${path}.url`, "Hero media URL must be a string.");
+  if (media.provenance !== undefined)
+    validateMediaProvenance(media.provenance, `${path}.provenance`, push);
+}
+
 /**
  * validateTemplate — run before publishing and before importing JSON.
  * Detects duplicate ids, unknown block types, corrupt configs and missing
@@ -69,6 +118,8 @@ export function validateTemplate(input: unknown): ValidationResult {
       if (block.content?.url && !isValidUrl(block.content.url)) {
         push("warning", `${path}.content.url`, `"${block.content.url}" is not a valid URL.`);
       }
+      validateHeroMedia(block.content?.bannerImage, `${path}.content.bannerImage`, push);
+      validateHeroMedia(block.content?.backgroundImage, `${path}.content.backgroundImage`, push);
     });
   }
 

@@ -12,6 +12,7 @@ import {
   type ActionIntentV2,
   type OnboardingIntentV2,
 } from "./types";
+import { validateOwnerContentInput } from "@/lib/page-generator/owner-content";
 
 export interface OnboardingV2ValidationIssue {
   path: string;
@@ -341,6 +342,21 @@ export function validateOnboardingIntentV2(value: unknown): OnboardingV2Validati
 
   if (value["extensions"] !== undefined && !isRecord(value["extensions"])) {
     issue(issues, "extensions", "invalid_type", "Extensions must be a namespaced object.");
+  }
+
+  if (value["ownerContent"] !== undefined) {
+    const ownerContent = validateOwnerContentInput(value["ownerContent"]);
+    ownerContent.issues.forEach((ownerIssue) =>
+      issue(
+        issues,
+        `ownerContent.${ownerIssue.path === "ownerContent" ? "" : ownerIssue.path}`.replace(
+          /\.$/,
+          "",
+        ),
+        ownerIssue.code === "too_long" ? "invalid_format" : ownerIssue.code,
+        ownerIssue.message,
+      ),
+    );
   }
 
   const meta = value["meta"];

@@ -1,0 +1,254 @@
+.gi-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(440px, 100vw);
+  background: #101216;
+  color: #e6e8ec;
+  border-left: 1px solid #262a33;
+  display: flex;
+  flex-direction: column;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  z-index: 9999;
+  box-shadow: -12px 0 40px rgba(0, 0, 0, 0.45);
+}
+
+.gi-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid #262a33;
+  background: #15181e;
+}
+
+.gi-header__title {
+  display: block;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.gi-header__trace {
+  display: block;
+  color: #8b93a3;
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+.gi-header__close {
+  background: transparent;
+  border: none;
+  color: #8b93a3;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.gi-header__close:hover {
+  background: #262a33;
+  color: #fff;
+}
+
+.gi-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 8px 12px;
+  border-bottom: 1px solid #262a33;
+  background: #15181e;
+}
+
+.gi-nav__item {
+  background: transparent;
+  border: 1px solid #2a2f3a;
+  color: #aeb6c4;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 11px;
+  font-family: inherit;
+}
+
+.gi-nav__item.is-active {
+  background: #2f6fed;
+  border-color: #2f6fed;
+  color: #fff;
+}
+
+.gi-main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 16px 40px;
+}
+
+.gi-section {
+  margin-bottom: 18px;
+}
+
+.gi-section__title {
+  margin: 0 0 8px;
+  font-size: 12px;
+  color: #7ee787;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.gi-row {
+  display: flex;
+  gap: 8px;
+  padding: 4px 0;
+  border-bottom: 1px solid #1d2129;
+}
+
+.gi-row__label {
+  flex: 0 0 150px;
+  color: #8b93a3;
+}
+
+.gi-row__value {
+  flex: 1;
+  color: #e6e8ec;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+.gi-json {
+  background: #0b0d11;
+  border: 1px solid #1f242d;
+  border-radius: 8px;
+  padding: 10px;
+  overflow-x: auto;
+  color: #cdd3de;
+  font-size: 11px;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.gi-summary__row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 5px 0;
+  border-bottom: 1px solid #1d2129;
+}
+
+.gi-summary__layer {
+  flex: 0 0 140px;
+  font-weight: 600;
+}
+
+.gi-summary__evidence {
+  color: #8b93a3;
+}
+
+.gi-diagnosis__primary {
+  color: #ffa657;
+  font-size: 13px;
+}
+
+.gi-diagnosis__explanation {
+  color: #cdd3de;
+  margin: 6px 0;
+}
+
+.gi-diagnosis__findings {
+  margin: 0;
+  padding-left: 18px;
+  color: #aeb6c4;
+}
+
+.gi-failure {
+  border: 1px solid #f85149;
+  background: rgba(248, 81, 73, 0.08);
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.gi-failure code {
+  display: block;
+  color: #f85149;
+  margin: 6px 0;
+}
+
+.gi-engine-scores {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.gi-engine-scores h5 {
+  margin: 0 0 4px;
+  color: #8b93a3;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.gi-copy {
+  background: #2a2f3a;
+  color: #e6e8ec;
+  border: 1px solid #3a4150;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-bottom: 8px;
+  font-family: inherit;
+}
+
+.gi-copy:hover {
+  background: #333a48;
+}
+
+.gi-event {
+  border: 1px solid #252b35;
+  border-radius: 7px;
+  margin-bottom: 6px;
+  background: #15181e;
+}
+
+.gi-event summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.gi-event summary::-webkit-details-marker { display: none; }
+.gi-event__sequence { color: #7ee787; width: 22px; }
+.gi-event__name { flex: 1; color: #e6e8ec; }
+.gi-event__status { color: #8b93a3; font-size: 10px; }
+.gi-event__status--degraded, .gi-event__status--fallback { color: #ffa657; }
+.gi-event__status--failed, .gi-event__status--lost { color: #f85149; }
+.gi-event__body { padding: 0 8px 8px; }
+.gi-export-actions { display: flex; gap: 8px; margin-top: 10px; }
+
+@media (max-width: 768px) {
+  .gi-drawer {
+    width: 100vw;
+    border-left: none;
+  }
+}
+
+.gi-floating-btn {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 9998;
+  background: #15181e;
+  color: #7ee787;
+  border: 1px solid #2f6fed;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+
+.gi-floating-btn:hover {
+  background: #1c222c;
+}

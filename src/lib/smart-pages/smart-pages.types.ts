@@ -17,6 +17,7 @@
  */
 
 import type { NormalizedContentV1, SalesActionV1, SalesMode } from "./catalog.types";
+import type { BusinessCategoryV2 } from "@/lib/onboarding-v2/types";
 
 /**
  * Semantic navigation destination. `internal_page` / `section` reference the
@@ -56,6 +57,8 @@ export interface ContentCapabilitiesV1 {
 export interface PageGenerationRequest {
   version: "1";
   businessType: string;
+  /** Explicit onboarding category; activity text remains a fallback only. */
+  businessCategory?: BusinessCategoryV2;
   goal: PageGoal;
   density: Density;
   salesMode: SalesMode;

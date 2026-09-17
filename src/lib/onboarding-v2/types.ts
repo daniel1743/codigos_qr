@@ -174,6 +174,8 @@ export interface OnboardingIntentV2 {
     mode: CommercialModeV2;
     relevant: boolean;
   };
+  /** Optional shared owner facts; absent legacy payloads remain valid. */
+  ownerContent?: import("@/lib/page-generator/owner-content").OwnerContentInput;
   /** Versioned namespaces for future semantic capabilities only. */
   extensions?: Record<string, unknown>;
   meta: {

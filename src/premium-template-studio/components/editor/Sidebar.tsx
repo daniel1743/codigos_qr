@@ -848,10 +848,12 @@ function TemplatesPanel() {
           {TEMPLATE_DEFINITIONS.map((definition) => {
             const active = state.config.templateDefinitionId === definition.id;
             const locked = isAssetLocked("template", definition.id, tier);
-            return (
-              <button
-                key={definition.id}
-                type="button"
+          return (
+            <button
+              key={definition.id}
+              type="button"
+              data-tour-template-option={definition.id}
+              data-tour-template-option-active={active ? "true" : "false"}
                 disabled={locked}
                 aria-disabled={locked}
                 onClick={() => {
@@ -984,9 +986,12 @@ export function SidebarTabs() {
   return (
     <div className="flex items-center gap-1 border-b border-border px-2 py-2">
       {tabs.map((tab) => (
-        <button
-          key={tab.id}
-          type="button"
+      <button
+        key={tab.id}
+        type="button"
+        {...(tab.id === "templates" ? { "data-tour-template-selector": true } : {})}
+        {...(tab.id === "design" ? { "data-tour-style-panel": true } : {})}
+        {...(tab.id === "blocks" ? { "data-tour-tools-panel": true } : {})}
           onClick={() => setPanel(tab.id)}
           className={cx(
             "flex flex-1 flex-col items-center gap-1 rounded-lg px-2 py-2 text-[10px] font-medium transition",

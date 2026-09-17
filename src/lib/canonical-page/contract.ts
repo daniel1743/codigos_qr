@@ -27,6 +27,7 @@ export interface CanonicalPageValidationV1 {
 export interface CripqerOnboardingIntentV1 {
   readonly profession: string;
   readonly goal: string;
+  readonly businessCategory?: import("@/lib/parametric-engine-v2/types").BusinessCategory;
   readonly style?: string;
   readonly selectedFeatures: readonly string[];
   readonly preferredColor?: string;

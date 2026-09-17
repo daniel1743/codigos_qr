@@ -14,6 +14,7 @@ import { getBrowserSupabaseClient } from "@/lib/supabase/client";
 import { canonicalPageService } from "@/services/canonical-page.service";
 import { pageService } from "@/services/page.service";
 import { applyTrustedVerificationVariant } from "@/components/profile/canonicalRenderBridge";
+import { PowerEditorGuidedTour } from "./PowerEditorGuidedTour";
 import { AppShell } from "@/components/app-shell/AppShell";
 import {
   createPageStorageAdapter,
@@ -28,6 +29,12 @@ import {
   subscribePersistenceDebug,
   type PersistenceDebugEvent,
 } from "@/premium-template-studio/diagnostics/persistenceDebug";
+import {
+  appendBlackBoxStage,
+  canonicalRuntimeSnapshot,
+  captureEffectiveDomSnapshot,
+  findBlackBoxTraceForPage,
+} from "@/lib/generation-inspector";
 
 interface OwnedProfile {
   id: string;
@@ -51,6 +58,7 @@ interface OwnedPage {
 
 interface PowerEditorHostProps {
   profileId?: string | null;
+  guidedOnboarding?: boolean;
   /**
    * Explicit document target. When `kind === "page"` the host opens a child
    * page from `public.pages`; otherwise it keeps the existing primary-profile
@@ -125,7 +133,7 @@ function createDurableAssetAdapter(
   };
 }
 
-export function PowerEditorHost({ profileId, target }: PowerEditorHostProps) {
+export function PowerEditorHost({ profileId, target, guidedOnboarding = false }: PowerEditorHostProps) {
   const targetKind = target?.kind ?? null;
   const targetPageId = target?.kind === "page" ? target.id : null;
   const isPageMode = targetKind === "page";
@@ -272,6 +280,48 @@ export function PowerEditorHost({ profileId, target }: PowerEditorHostProps) {
       publicId: profile.public_id,
     });
   }, [profile]);
+
+  useEffect(() => {
+    if (!isPageMode || !targetPageId || !config) return;
+    const trace = findBlackBoxTraceForPage(targetPageId);
+    if (!trace) return;
+
+    const loadStage = trace.stages.some((stage) => stage.id === "E20") ? "E20B" : "E20";
+    const loaded = appendBlackBoxStage(trace.traceId, {
+      id: loadStage,
+      name: loadStage === "E20B" ? "EDITOR BROWSER RELOAD" : "POWER EDITOR LOAD",
+      contract: "PowerEditorHost child-page canonical load",
+      status: "ok",
+      data: {
+        pageId: targetPageId,
+        ...canonicalRuntimeSnapshot(config),
+      },
+      fields: [],
+    });
+    if (!loaded) return;
+
+    const rendererInput = appendBlackBoxStage(trace.traceId, {
+      id: "E21",
+      name: "ACTUAL RENDERER INPUT",
+      contract: "BioTemplateConfig passed to PremiumTemplateStudio renderer",
+      status: "ok",
+      data: canonicalRuntimeSnapshot(config),
+      fields: [],
+    });
+    if (!rendererInput) return;
+
+    const frame = window.requestAnimationFrame(() => {
+      appendBlackBoxStage(trace.traceId, {
+        id: "E22",
+        name: "EFFECTIVE DOM/CSS",
+        contract: "computed browser values on the editor renderer surface",
+        status: "ok",
+        data: captureEffectiveDomSnapshot(),
+        fields: [],
+      });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [config, isPageMode, targetPageId]);
 
   useEffect(() => {
     if (!profile || !supabase || !isPersistenceDebugEnabled()) return;
@@ -472,6 +522,7 @@ export function PowerEditorHost({ profileId, target }: PowerEditorHostProps) {
             if (s === "dirty") setPublishState("idle");
           }}
         />
+        {!isPageMode && <PowerEditorGuidedTour enabled={guidedOnboarding} />}
       </main>
     </AppShell>
   );

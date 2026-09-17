@@ -1,0 +1,571 @@
+{
+  "id": "CREATIVE_PORTFOLIO",
+  "T1_intent": {
+    "identity": {
+      "displayName": "Luz Norte",
+      "professionOrActivity": "Fotografía",
+      "bio": "Fotografía editorial y retratos urbanos."
+    },
+    "business": {
+      "category": "creator",
+      "customCategory": "Fotografía"
+    },
+    "outcome": {
+      "primaryGoal": "show_portfolio",
+      "experienceHint": "professional_landing"
+    },
+    "visualDirection": {
+      "preference": "let_cripqer_decide"
+    },
+    "contentNeeds": {
+      "items": [
+        {
+          "type": "portfolio"
+        },
+        {
+          "type": "contact"
+        }
+      ]
+    },
+    "actions": {
+      "primary": {
+        "type": "website",
+        "source": "user",
+        "value": "https://luznorte.example"
+      },
+      "secondary": []
+    },
+    "scope": {
+      "density": "complete",
+      "userSelected": true
+    }
+  },
+  "T2_ownerContent": {
+    "identity": {
+      "businessName": "Luz Norte",
+      "shortDescription": "Fotografía"
+    },
+    "portfolioItems": [
+      {
+        "name": "Editorial Nocturna",
+        "media": [
+          {
+            "url": "https://cdn.example/nocturna.jpg",
+            "kind": "image"
+          }
+        ],
+        "destination": "https://luznorte.example/nocturna"
+      },
+      {
+        "name": "Retratos Urbanos",
+        "media": [
+          {
+            "url": "https://cdn.example/urbanos.jpg",
+            "kind": "image"
+          }
+        ],
+        "destination": "https://luznorte.example/urbanos"
+      }
+    ],
+    "media": {
+      "cover": {
+        "url": "https://cdn.example/luz-cover.jpg",
+        "kind": "image"
+      }
+    },
+    "contact": {
+      "whatsapp": "+56955556666"
+    }
+  },
+  "T3_pageGenerationRequest": {
+    "businessType": "Fotografía",
+    "goal": "showcase",
+    "density": "rich",
+    "salesMode": "info",
+    "experienceType": "portfolio",
+    "primaryAction": {
+      "kind": "external_url",
+      "label": "website",
+      "target": "https://luznorte.example",
+      "enabled": true
+    },
+    "secondaryActions": [],
+    "catalogs": [
+      {
+        "kind": "portfolio",
+        "itemCount": 2,
+        "items": [
+          {
+            "name": "Editorial Nocturna",
+            "mediaCount": 1
+          },
+          {
+            "name": "Retratos Urbanos",
+            "mediaCount": 1
+          }
+        ]
+      }
+    ],
+    "contact": {
+      "whatsapp": "+56955556666",
+      "socials": []
+    },
+    "mappedFields": [
+      "identity.professionOrActivity -> businessType",
+      "outcome.primaryGoal -> goal=showcase",
+      "scope.density -> density=rich",
+      "ownerContent -> NormalizedContentV1",
+      "actions.primary -> SalesActionV1",
+      "ownerContent.media -> NormalizedContentV1.business media"
+    ],
+    "deferredFields": [
+      "visualDirection",
+      "contentNeeds",
+      "scope.userSelected",
+      "business.customCategory"
+    ],
+    "unsupportedFields": []
+  },
+  "T4_pagePlan": {
+    "pageId": "page_luz-norte",
+    "experienceType": "portfolio",
+    "heroVariant": "media",
+    "sections": [
+      {
+        "kind": "hero",
+        "order": 0
+      },
+      {
+        "kind": "about",
+        "order": 1,
+        "title": "About us"
+      },
+      {
+        "kind": "portfolioGrid",
+        "order": 2,
+        "title": "What we offer"
+      },
+      {
+        "kind": "whatsappCta",
+        "order": 3
+      },
+      {
+        "kind": "footer",
+        "order": 4
+      }
+    ],
+    "ctaHierarchy": {
+      "primary": {
+        "kind": "external_url",
+        "label": "website",
+        "target": "https://luznorte.example",
+        "enabled": true
+      },
+      "secondary": [
+        {
+          "kind": "whatsapp",
+          "label": "WhatsApp",
+          "enabled": true
+        },
+        {
+          "kind": "call",
+          "label": "Call",
+          "enabled": true
+        }
+      ]
+    },
+    "runtimeRequirements": {
+      "needsSearch": false,
+      "needsFilters": false,
+      "needsDetailView": true,
+      "needsCategoryNav": false,
+      "checkoutEnabled": false
+    }
+  },
+  "T5_hostMapping": {
+    "mappedFields": [
+      "catalog.owner-portfolio.items -> host content",
+      "owner item media -> Engine V2 contentBlocks",
+      "primaryAction.external_url",
+      "actions.primary.type=website",
+      "identity.professionOrActivity -> businessOther",
+      "contentNeeds.portfolio -> selectedFeatures=portfolio",
+      "contentNeeds.contact -> selectedFeatures=contact",
+      "outcome.primaryGoal -> goal=portfolio",
+      "identity.displayName -> content.name",
+      "identity.professionOrActivity -> profession",
+      "identity.bio -> content.bio",
+      "actions.primary -> primaryAction",
+      "items -> engine contentBlocks (2 item(s))",
+      "coverImageUrl -> userMedia.bannerUrl",
+      "owner visual -> assets.card_media",
+      "media strategy -> banner-first (owner cover)"
+    ],
+    "deferredFields": [
+      "business.category/customCategory",
+      "scope.density=complete",
+      "outcome.experienceHint"
+    ],
+    "unsupportedFields": [],
+    "warnings": []
+  },
+  "T6_generatedPageInput": {
+    "objective": "portfolio",
+    "title": "Luz Norte",
+    "businessName": "Luz Norte",
+    "activity": "Fotografía",
+    "coverImageUrl": "https://cdn.example/luz-cover.jpg",
+    "cta": {
+      "type": "website",
+      "value": "https://luznorte.example"
+    },
+    "items": [
+      {
+        "title": "Editorial Nocturna",
+        "imageUrl": "https://cdn.example/nocturna.jpg",
+        "url": "https://luznorte.example/nocturna"
+      },
+      {
+        "title": "Retratos Urbanos",
+        "imageUrl": "https://cdn.example/urbanos.jpg",
+        "url": "https://luznorte.example/urbanos"
+      }
+    ]
+  },
+  "T7_engineInput": {
+    "profession": "Fotografía",
+    "businessOther": "Fotografía",
+    "goal": "portfolio",
+    "selectedFeatures": [
+      "portfolio",
+      "contact"
+    ],
+    "cardMedia": true,
+    "content": {
+      "name": "Luz Norte",
+      "bio": "Fotografía"
+    },
+    "primaryAction": {
+      "type": "website",
+      "value": "https://luznorte.example"
+    },
+    "userMedia": {
+      "bannerUrl": "https://cdn.example/luz-cover.jpg"
+    },
+    "contentBlocks": {
+      "about": "Fotografía",
+      "portfolio": [
+        {
+          "label": "Editorial Nocturna",
+          "url": "https://luznorte.example/nocturna",
+          "imageUrl": "https://cdn.example/nocturna.jpg"
+        },
+        {
+          "label": "Retratos Urbanos",
+          "url": "https://luznorte.example/urbanos",
+          "imageUrl": "https://cdn.example/urbanos.jpg"
+        }
+      ]
+    },
+    "engineOptions": {
+      "mediaStrategy": "banner-first"
+    },
+    "adapterMapped": [
+      "actions.primary.type=website",
+      "identity.professionOrActivity -> businessOther",
+      "contentNeeds.portfolio -> selectedFeatures=portfolio",
+      "contentNeeds.contact -> selectedFeatures=contact",
+      "outcome.primaryGoal -> goal=portfolio",
+      "identity.displayName -> content.name",
+      "identity.professionOrActivity -> profession",
+      "identity.bio -> content.bio",
+      "actions.primary -> primaryAction",
+      "items -> engine contentBlocks (2 item(s))",
+      "coverImageUrl -> userMedia.bannerUrl",
+      "owner visual -> assets.card_media",
+      "media strategy -> banner-first (owner cover)"
+    ],
+    "adapterDeferred": [
+      "business.category/customCategory",
+      "scope.density=complete",
+      "outcome.experienceHint"
+    ],
+    "adapterUnsupported": []
+  },
+  "T8_engineDecisions": {
+    "businessCategory": "other",
+    "archetype": "portfolio_service",
+    "conversionMode": "portfolio_then_contact",
+    "proofPriority": "portfolio",
+    "priceModel": "starting_at",
+    "visualPersonality": "professional",
+    "primaryGoal": "portfolio",
+    "familyScores": {
+      "editorial": 56,
+      "luxury": 0,
+      "corporate": 46,
+      "minimal": 42,
+      "creator": 22,
+      "energetic": 0
+    },
+    "baselineFamily": "editorial",
+    "selectedFamily": "editorial",
+    "selectedLayout": "editorial",
+    "candidateId": "editorial_calm#2.1",
+    "score": 89,
+    "fingerprint": "r1_a59de291589dbdaf",
+    "pattern": "editorial_stack",
+    "preset": "editorial_calm",
+    "mediaStrategy": "banner-first",
+    "recipeFamily": "editorial",
+    "visual": {
+      "colors": {
+        "primary": "#7A3B2E",
+        "secondary": "#574E45",
+        "accent": "#241F1B",
+        "background": "#FDFBF8",
+        "surface": "#F1EAE2",
+        "card": "#F1EAE2",
+        "text": "#241F1B",
+        "mutedText": "#574E45",
+        "border": "#E3D8CC"
+      },
+      "typography": {
+        "headingFont": "Georgia, \"Times New Roman\", serif",
+        "bodyFont": "system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "headingSize": 52,
+        "bodySize": 15,
+        "headingWeight": 700,
+        "bodyWeight": 400,
+        "lineHeight": 1.62,
+        "letterSpacing": -0.02
+      },
+      "background": {
+        "type": "gradient",
+        "color": "#FDFBF8",
+        "gradient": {
+          "kind": "linear",
+          "angle": 165,
+          "from": "#F1EAE2",
+          "to": "#FDFBF8"
+        }
+      },
+      "cards": {
+        "preset": "minimal",
+        "radius": 10,
+        "borderWidth": 1,
+        "shadow": "none",
+        "blur": 0,
+        "padding": 24,
+        "opacity": 1
+      },
+      "buttons": {
+        "variant": "outline",
+        "radius": 10,
+        "height": 54,
+        "fontWeight": 570,
+        "shadow": "none",
+        "borderWidth": 1
+      },
+      "spacing": {
+        "section": 40,
+        "block": 18,
+        "contentWidth": 680
+      },
+      "animation": "fade",
+      "texture": {
+        "preset": "paper",
+        "opacity": 0.07,
+        "scale": 28
+      },
+      "motion": {
+        "preset": "editorial",
+        "entrance": "slide-up",
+        "hover": "soft-scale",
+        "duration": 480,
+        "delay": 0,
+        "stagger": 90
+      }
+    }
+  },
+  "T9_bioTemplateConfig": {
+    "schemaVersion": 1,
+    "templateDefinitionId": "engine-editorial-editorial",
+    "metadata": {
+      "templateDefinitionId": "engine-editorial-editorial",
+      "name": "editorial · editorial_stack",
+      "category": "Personal",
+      "premium": true,
+      "createdAt": "2026-09-15T12:00:00.000Z",
+      "updatedAt": "2026-09-15T12:00:00.000Z",
+      "author": "Cripqer Parametric Engine",
+      "tags": [
+        "editorial",
+        "editorial_stack",
+        "portfolio"
+      ]
+    },
+    "theme": {
+      "id": "engine-editorial",
+      "name": "Engine editorial",
+      "colors": {
+        "primary": "#7A3B2E",
+        "secondary": "#574E45",
+        "accent": "#241F1B",
+        "background": "#FDFBF8",
+        "surface": "#F1EAE2",
+        "card": "#F1EAE2",
+        "text": "#241F1B",
+        "mutedText": "#574E45",
+        "border": "#E3D8CC"
+      },
+      "typography": {
+        "headingFont": "Georgia, \"Times New Roman\", serif",
+        "bodyFont": "system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "headingSize": 52,
+        "bodySize": 15,
+        "headingWeight": 700,
+        "bodyWeight": 400,
+        "lineHeight": 1.62,
+        "letterSpacing": -0.02
+      },
+      "background": {
+        "type": "gradient",
+        "color": "#FDFBF8",
+        "gradient": {
+          "kind": "linear",
+          "angle": 165,
+          "from": "#F1EAE2",
+          "to": "#FDFBF8"
+        }
+      },
+      "cards": {
+        "preset": "minimal",
+        "radius": 10,
+        "borderWidth": 1,
+        "shadow": "none",
+        "blur": 0,
+        "padding": 24,
+        "opacity": 1
+      },
+      "buttons": {
+        "variant": "outline",
+        "radius": 10,
+        "height": 54,
+        "fontWeight": 570,
+        "shadow": "none",
+        "borderWidth": 1
+      },
+      "spacing": {
+        "section": 40,
+        "block": 18,
+        "contentWidth": 680
+      },
+      "animation": "fade",
+      "texture": {
+        "preset": "paper",
+        "opacity": 0.07,
+        "scale": 28
+      }
+    },
+    "layoutId": "editorial",
+    "layoutHeader": "stacked",
+    "profile": {
+      "name": "Luz Norte",
+      "role": "Fotografía",
+      "verified": false
+    },
+    "blocks": [
+      {
+        "type": "text",
+        "variant": "quote",
+        "contentKeys": [
+          "body"
+        ]
+      },
+      {
+        "type": "cta",
+        "variant": "inline",
+        "contentKeys": [
+          "label",
+          "url"
+        ]
+      },
+      {
+        "type": "portfolio",
+        "variant": "grid",
+        "contentKeys": [
+          "title",
+          "items"
+        ]
+      }
+    ],
+    "motion": {
+      "preset": "editorial",
+      "entrance": "slide-up",
+      "hover": "soft-scale",
+      "duration": 480,
+      "delay": 0,
+      "stagger": 90
+    }
+  },
+  "T10_renderSummary": {
+    "blockTypes": [
+      "text",
+      "cta",
+      "portfolio"
+    ],
+    "themeColors": {
+      "primary": "#7A3B2E",
+      "secondary": "#574E45",
+      "accent": "#241F1B",
+      "background": "#FDFBF8",
+      "surface": "#F1EAE2",
+      "card": "#F1EAE2",
+      "text": "#241F1B",
+      "mutedText": "#574E45",
+      "border": "#E3D8CC"
+    },
+    "themeTypography": {
+      "headingFont": "Georgia, \"Times New Roman\", serif",
+      "bodyFont": "system-ui, -apple-system, \"Segoe UI\", sans-serif",
+      "headingSize": 52,
+      "bodySize": 15,
+      "headingWeight": 700,
+      "bodyWeight": 400,
+      "lineHeight": 1.62,
+      "letterSpacing": -0.02
+    },
+    "themeBackground": {
+      "type": "gradient",
+      "color": "#FDFBF8",
+      "gradient": {
+        "kind": "linear",
+        "angle": 165,
+        "from": "#F1EAE2",
+        "to": "#FDFBF8"
+      }
+    },
+    "themeCards": {
+      "preset": "minimal",
+      "radius": 10,
+      "borderWidth": 1,
+      "shadow": "none",
+      "blur": 0,
+      "padding": 24,
+      "opacity": 1
+    },
+    "themeButtons": {
+      "variant": "outline",
+      "radius": 10,
+      "height": 54,
+      "fontWeight": 570,
+      "shadow": "none",
+      "borderWidth": 1
+    },
+    "validation": {
+      "valid": true,
+      "issues": []
+    }
+  }
+}

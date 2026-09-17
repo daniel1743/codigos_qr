@@ -9,11 +9,13 @@
 import type { BioTemplateConfig } from "@/premium-template-studio/types";
 import { generateCandidateSet, type CandidateOptions } from "../candidates";
 import { normalizeIntent } from "../normalize";
+import { inferArchetype } from "../business-signals";
 import { buildDesignProfile } from "../strategy";
 import type { OnboardingIntentV1 } from "../types";
 import type { PowerEditorCapabilities } from "./capabilities-v2";
 import type { ContentSourceV2 } from "./content-source";
 import type { MediaStrategyV2 } from "./media-strategy-v2";
+import type { MediaProvenanceV1 } from "@/premium-template-studio/types";
 import { buildPowerEditorRecipeV2 } from "./to-recipe-v2";
 import { toBioTemplateConfig } from "./to-template-config";
 import type { PowerEditorRecipeV2 } from "./types-v2";
@@ -23,6 +25,7 @@ export interface GenerateV2Options extends CandidateOptions {
   powerEditorCapabilities?: Partial<PowerEditorCapabilities>;
   /** Existing semantic media strategy, useful for controlled QA fixtures. */
   mediaStrategy?: MediaStrategyV2;
+  bannerProvenance?: MediaProvenanceV1;
 }
 
 export interface PowerEditorCandidateV2 {
@@ -36,9 +39,10 @@ export function generatePowerEditorCandidates(
   intent: OnboardingIntentV1,
   options: GenerateV2Options = {},
 ): PowerEditorCandidateV2[] {
-  const { content, powerEditorCapabilities, mediaStrategy, ...candidateOptions } = options;
+  const { content, powerEditorCapabilities, mediaStrategy, bannerProvenance, ...candidateOptions } = options;
   const set = generateCandidateSet(intent, candidateOptions);
   const normalized = normalizeIntent(intent);
+  const archetype = inferArchetype(normalized);
 
   return set.candidates.map((candidate) => {
     const profile = buildDesignProfile(
@@ -50,12 +54,14 @@ export function generatePowerEditorCandidates(
       ...(content ? { content } : {}),
       ...(powerEditorCapabilities ? { capabilities: powerEditorCapabilities } : {}),
       ...(mediaStrategy ? { mediaStrategy } : {}),
+      ...(bannerProvenance ? { bannerProvenance } : {}),
       recipe: candidate.recipe,
       profile,
       pattern: candidate.pattern === "unknown" ? "centered_profile" : candidate.pattern,
       score: candidate.score,
       candidateId: candidate.id,
       preset: candidate.preset,
+      archetype,
     });
     return {
       id: candidate.id,

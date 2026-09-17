@@ -199,12 +199,11 @@ export function ServicesBlock({ block }: { block: TemplateBlock }) {
           <div
             key={item.id ?? idx}
             style={{
-              ...cardStyle(
-                theme,
-                variant === "minimal"
-                  ? { background: "transparent", borderWidth: 0, shadow: "none" }
-                  : block.style,
-              ),
+              // Material precedence is intentional: an explicit block style
+              // wins over the Engine-authored theme card material. The
+              // variant remains structural; it must not erase an elevated or
+              // soft theme merely because the planner called it "minimal".
+              ...cardStyle(theme, block.style),
               display: "flex",
               flexDirection: isCompact ? "row" : "column",
               alignItems: isCompact ? "center" : "stretch",

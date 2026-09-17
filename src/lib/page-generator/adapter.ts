@@ -29,6 +29,10 @@ import { buildGeneratedPageIntent } from "./intent";
 import { GENERATED_PAGE_OBJECTIVE_PRESETS } from "./objective-presets";
 import type { GeneratedPageInput } from "./types";
 import { generatedPageItems } from "./validation";
+import {
+  ownerContentFromGeneratedPageInput,
+  ownerContentToEngineContentBlocks,
+} from "./owner-content";
 
 export interface GeneratedPageEngineMappingSuccess {
   ok: true;
@@ -64,55 +68,7 @@ export type CanonicalDocumentResult =
 export function buildEngineContentBlocks(
   input: GeneratedPageInput,
 ): Partial<ContentSourceV2> | undefined {
-  const preset = GENERATED_PAGE_OBJECTIVE_PRESETS[input.objective];
-  const items = generatedPageItems(input);
-  const blocks: Partial<ContentSourceV2> = {};
-
-  if (items.length) {
-    switch (preset.itemKind) {
-      case "service":
-        blocks.services = items.map((item) => ({
-          title: item.title,
-          ...(item.description ? { description: item.description } : {}),
-          ...(item.price ? { price: item.price } : {}),
-          ...(item.imageUrl ? { imageUrl: item.imageUrl } : {}),
-        }));
-        break;
-      case "product":
-        blocks.products = items.map((item) => ({
-          title: item.title,
-          imageUrl: item.imageUrl as string,
-          ...(item.price ? { price: item.price } : {}),
-          ...(item.description ? { description: item.description } : {}),
-          ...(item.url ? { ctaUrl: item.url } : {}),
-        }));
-        break;
-      case "project":
-        blocks.portfolio = items.map((item) => ({
-          label: item.title,
-          url: item.url as string,
-          imageUrl: item.imageUrl as string,
-          ...(item.description ? { description: item.description } : {}),
-        }));
-        break;
-      case "event":
-        blocks.events = items.map((item) => ({
-          title: item.title,
-          ...(item.date ? { date: item.date } : {}),
-        }));
-        break;
-    }
-  }
-
-  // A declared WhatsApp/email action is real owner data: it can also power the
-  // canonical contact block instead of being lost after the CTA.
-  const cta = input.cta;
-  if (cta?.value.trim()) {
-    if (cta.type === "whatsapp") blocks.contact = { phone: cta.value.trim() };
-    if (cta.type === "email") blocks.contact = { email: cta.value.trim() };
-  }
-
-  return Object.keys(blocks).length ? blocks : undefined;
+  return ownerContentToEngineContentBlocks(ownerContentFromGeneratedPageInput(input));
 }
 
 export interface GeneratedPageAdapterOptions {
@@ -154,15 +110,22 @@ export function mapGeneratedPageToEngineInput(
 
   const preset = GENERATED_PAGE_OBJECTIVE_PRESETS[input.objective];
   const cover = input.coverImageUrl?.trim() ?? "";
+  const avatar = input.avatarImageUrl?.trim() ?? "";
   const engineInput: EngineV2HostGenerationInput = { ...mapped.engineInput };
-  const hasOwnVisual = Boolean(cover) || generatedPageItems(input).some((item) => item.imageUrl);
-  if (cover && mapped.engineInput.userMedia?.bannerUrl !== cover) {
-    engineInput.userMedia = { ...(mapped.engineInput.userMedia ?? {}), bannerUrl: cover };
+  const hasOwnVisual = Boolean(cover || avatar) || generatedPageItems(input).some((item) => item.imageUrl);
+  if (cover || avatar) {
+    engineInput.userMedia = {
+      ...(mapped.engineInput.userMedia ?? {}),
+      ...(avatar ? { avatarUrl: avatar } : {}),
+      ...(cover ? { bannerUrl: cover } : {}),
+      ...(cover ? { bannerProvenance: { origin: "owner" } } : {}),
+    };
   }
   if (hasOwnVisual && engineInput.cardMedia !== true) {
     engineInput.cardMedia = true;
   }
   if (cover) diagnostics.mappedFields.push("coverImageUrl -> userMedia.bannerUrl");
+  if (avatar) diagnostics.mappedFields.push("avatarImageUrl -> userMedia.avatarUrl");
   if (hasOwnVisual) diagnostics.mappedFields.push("owner visual -> assets.card_media");
 
   /**
