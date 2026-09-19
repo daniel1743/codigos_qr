@@ -24,8 +24,10 @@ import {
   RenderProvider,
   useRender,
   type HeroTextTarget,
+  type HeroCtaTarget,
   type ProfileTarget,
 } from "./RenderContext";
+import { collectionTarget } from "../components/inspector/inspectorFocus";
 import {
   ANIMATION_CLASS,
   HOVER_CLASS,
@@ -48,11 +50,14 @@ export interface EditingHandlers {
   onSelect?: ((id: string) => void) | undefined;
   onSelectProfileCover?: (() => void) | undefined;
   onSelectProfileTarget?: ((target: ProfileTarget) => void) | undefined;
-  onSelectHeroCta?: ((blockId: string) => void) | undefined;
+  onSelectHeroCta?: ((blockId: string, target: HeroCtaTarget) => void) | undefined;
   onSelectHeroText?: ((blockId: string, target: HeroTextTarget) => void) | undefined;
   onSelectHeroImage?: ((blockId: string) => void) | undefined;
   onSelectHeroBackground?: ((blockId: string) => void) | undefined;
   onSelectPageBackground?: (() => void) | undefined;
+  onSelectCollectionItem?:
+    | ((blockId: string, collection: string, itemId: string, field?: string) => void)
+    | undefined;
   onInlineEdit?: ((path: string, value: string) => void) | undefined;
   onMove?: ((id: string, direction: -1 | 1) => void) | undefined;
   onDuplicate?: ((id: string) => void) | undefined;
@@ -69,7 +74,13 @@ export interface TemplateRendererProps {
   brandingTier?: ProductTier | undefined;
   editing?: EditingHandlers | undefined;
   onTrack?:
-    | ((event: { type: string; blockId?: string | undefined; url?: string | undefined }) => void)
+    | ((event: {
+        type: string;
+        blockId?: string | undefined;
+        url?: string | undefined;
+        itemId?: string | undefined;
+        label?: string | undefined;
+      }) => void)
     | undefined;
   className?: string | undefined;
   style?: CSSProperties | undefined;
@@ -438,7 +449,8 @@ function TemplateRendererImpl({
   const { theme, layout, profile, blocks } = config;
   const rule = layout.responsive[breakpoint];
   const banner = profile.banner;
-  const fullBleed = banner.enabled && banner.widthMode === "full-bleed";
+  const hasAuthoredHero = blocks.some((block) => block.type === "hero");
+  const fullBleed = !hasAuthoredHero && banner.enabled && banner.widthMode === "full-bleed";
   const fullBleedOverlap = fullBleed && layout.header === "overlap";
 
   const isGridOrBento = layout.type === "grid" || layout.type === "bento";
@@ -488,6 +500,8 @@ function TemplateRendererImpl({
       onSelectHeroImage: editing?.onSelectHeroImage,
       onSelectHeroBackground: editing?.onSelectHeroBackground,
       onSelectPageBackground: editing?.onSelectPageBackground,
+      onSelectCollectionItem: editing?.onSelectCollectionItem,
+      collectionTarget,
       onInlineEdit: editing?.onInlineEdit,
       onTrack,
     }),
@@ -504,6 +518,7 @@ function TemplateRendererImpl({
       editing?.onSelectHeroImage,
       editing?.onSelectHeroBackground,
       editing?.onSelectPageBackground,
+      editing?.onSelectCollectionItem,
       editing?.onInlineEdit,
       onTrack,
     ],
@@ -517,7 +532,6 @@ function TemplateRendererImpl({
   const showCripqerBranding =
     mode === "public" &&
     (config.settings.showBranding !== false || !canRemoveCripqerBranding(brandingTier));
-  const hasAuthoredHero = blocks.some((block) => block.type === "hero");
 
   return (
     <RenderProvider value={ctx}>
@@ -628,16 +642,8 @@ function TemplateRendererImpl({
               const floatingClass = floating?.enabled ? "pts-floating-enter" : "";
 
               // Press feedback for interactive blocks
-              const isInteractive =
-                !!mergedBlock.content.url ||
-                mergedBlock.type === "cta" ||
-                mergedBlock.type === "buttonGroup";
-              const pressClass = isInteractive && !bm.disabled ? "pts-press-feedback" : "";
-
               const innerClasses = cx(
                 bm.entranceClass,
-                bm.hoverClass,
-                pressClass,
                 stickyClass,
                 floatingClass,
               );

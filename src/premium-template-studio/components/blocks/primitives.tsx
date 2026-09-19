@@ -2,6 +2,48 @@ import type { CSSProperties, ReactNode } from "react";
 import { useRender } from "../../engine/RenderContext";
 import { safeUrl } from "../../utils";
 import type { TemplateBlock } from "../../types";
+import { collectionTarget } from "../inspector/inspectorFocus";
+
+/**
+ * Edit-only semantic target. `display: contents` preserves the block's layout
+ * while allowing a precise child click to beat BlockFrame's parent fallback.
+ */
+export function ContextualItemTarget({
+  blockId,
+  collection,
+  itemId,
+  field = "item",
+  children,
+}: {
+  blockId: string;
+  collection: string;
+  itemId: string;
+  field?: string;
+  children: ReactNode;
+}) {
+  const { mode, onSelectCollectionItem } = useRender();
+  if (mode !== "edit" || !onSelectCollectionItem) return <>{children}</>;
+  const target = collectionTarget(blockId, collection, itemId, field);
+  return (
+    <div
+      data-editor-target={target}
+      style={{ display: "contents" }}
+      onClick={(event) => {
+        event.stopPropagation();
+        onSelectCollectionItem(blockId, collection, itemId, field);
+      }}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          event.stopPropagation();
+          onSelectCollectionItem(blockId, collection, itemId, field);
+        }
+      }}
+    >
+      {children}
+    </div>
+  );
+}
 
 /** A link that is always safe, analytics-aware and inert while editing. */
 export function SmartLink({

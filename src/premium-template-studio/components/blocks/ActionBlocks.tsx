@@ -15,6 +15,7 @@ import {
 import { useState, type ComponentType, type CSSProperties } from "react";
 import { useRender } from "../../engine/RenderContext";
 import {
+  applyCTAStyle,
   applyTypographyOverride,
   buttonStyle,
   cardStyle,
@@ -22,7 +23,7 @@ import {
 } from "../../engine/styleEngine";
 import { hexToRgba, prettyUrl, readableOn } from "../../utils";
 import type { BlockItem, TemplateBlock } from "../../types";
-import { BlockTitle, EmptyBlockState, InlineText, SmartLink } from "./primitives";
+import { BlockTitle, ContextualItemTarget, EmptyBlockState, InlineText, SmartLink } from "./primitives";
 import type { BlockProps } from "./ContentBlocks";
 import { getPlatformDef } from "../../../constants/platforms";
 import { detectProviderFromUrl } from "../../../lib/smart-link-preview";
@@ -165,9 +166,9 @@ export function LinksBlock({ block }: BlockProps) {
           };
 
           if (hasImage && size === "100") {
-            return (
+              return (
+              <ContextualItemTarget key={item.id} blockId={block.id} collection="links" itemId={item.id} field="media">
               <SmartLink
-                key={item.id}
                 href={href}
                 block={block}
                 newTab={item.newTab}
@@ -220,13 +221,14 @@ export function LinksBlock({ block }: BlockProps) {
                   </span>
                 </article>
               </SmartLink>
+              </ContextualItemTarget>
             );
           }
 
           if (hasImage && position === "bottom") {
             return (
+              <ContextualItemTarget key={item.id} blockId={block.id} collection="links" itemId={item.id}>
               <SmartLink
-                key={item.id}
                 href={href}
                 block={block}
                 newTab={item.newTab}
@@ -273,14 +275,15 @@ export function LinksBlock({ block }: BlockProps) {
                   />
                 </article>
               </SmartLink>
+              </ContextualItemTarget>
             );
           }
 
           const mediaLeft = position === "left";
           const mediaGrid = size === "50" ? "1fr 1fr" : mediaLeft ? "1fr 3fr" : "3fr 1fr";
           return (
+            <ContextualItemTarget key={item.id} blockId={block.id} collection="links" itemId={item.id} field="media">
             <SmartLink
-              key={item.id}
               href={href}
               block={block}
               newTab={item.newTab}
@@ -324,13 +327,14 @@ export function LinksBlock({ block }: BlockProps) {
                 </span>
               </article>
             </SmartLink>
+            </ContextualItemTarget>
           );
         }
 
         if (presentation === "card") {
           return (
+            <ContextualItemTarget key={item.id} blockId={block.id} collection="links" itemId={item.id}>
             <SmartLink
-              key={item.id}
               href={href}
               block={block}
               newTab={item.newTab}
@@ -374,12 +378,13 @@ export function LinksBlock({ block }: BlockProps) {
                 <ArrowUpRight size={16} aria-hidden style={{ color: theme.colors.mutedText }} />
               </div>
             </SmartLink>
+            </ContextualItemTarget>
           );
         }
         if (variant === "list" && !item.presentation) {
           return (
+            <ContextualItemTarget key={item.id} blockId={block.id} collection="links" itemId={item.id}>
             <SmartLink
-              key={item.id}
               href={href}
               block={block}
               newTab={item.newTab}
@@ -398,19 +403,20 @@ export function LinksBlock({ block }: BlockProps) {
                 <ArrowUpRight size={15} aria-hidden style={{ color: theme.colors.mutedText }} />
               </div>
             </SmartLink>
+            </ContextualItemTarget>
           );
         }
         const glass = variant === "glass";
         return (
+          <ContextualItemTarget key={item.id} blockId={block.id} collection="links" itemId={item.id} field="button">
           <SmartLink
-            key={item.id}
             href={href}
             block={block}
             newTab={item.newTab}
             ariaLabel={label}
           >
             <div
-              className="pts-hoverable"
+              className="pts-hoverable pts-press-feedback"
               style={applyTypographyOverride({
                 ...buttonStyle(theme, block.style),
                 ...(glass
@@ -430,6 +436,7 @@ export function LinksBlock({ block }: BlockProps) {
               <ArrowUpRight size={16} aria-hidden style={{ opacity: 0.65 }} />
             </div>
           </SmartLink>
+          </ContextualItemTarget>
         );
       })}
     </div>
@@ -530,8 +537,8 @@ export function ButtonGroupBlock({ block }: BlockProps) {
         const primary = index === 0;
         const style = buttonStyle(theme, block.style);
         return (
+          <ContextualItemTarget key={item.id} blockId={block.id} collection="button-group" itemId={item.id} field="button">
           <SmartLink
-            key={item.id}
             href={item.url}
             block={block}
             newTab={item.newTab}
@@ -540,7 +547,7 @@ export function ButtonGroupBlock({ block }: BlockProps) {
           >
             <div
               className="pts-hoverable"
-              style={applyTypographyOverride({
+              style={applyTypographyOverride(applyCTAStyle(applyCTAStyle({
                 ...style,
                 minHeight: theme.buttons.height - 4,
                 justifyContent: "center",
@@ -554,11 +561,12 @@ export function ButtonGroupBlock({ block }: BlockProps) {
                       borderWidth: 1,
                       boxShadow: "none",
                     }),
-              }, item.typography)}
+              }, block.style.ctaStyle), item.ctaStyle), item.typography)}
             >
               {item.label ?? (mode === "edit" ? "Button" : "")}
             </div>
           </SmartLink>
+          </ContextualItemTarget>
         );
       })}
     </div>
@@ -620,7 +628,7 @@ export function CTABlock({ block }: BlockProps) {
         style={{ display: "block", marginTop: inline ? 0 : 16, width: inline ? "auto" : "100%" }}
       >
         <div
-          className="pts-hoverable"
+          className="pts-hoverable pts-press-feedback"
           style={{
             ...buttonStyle(theme, block.style),
             justifyContent: "center",
@@ -660,7 +668,13 @@ export function SocialBlock({ block }: BlockProps) {
       {socials.map((social) => {
         const Icon = SOCIAL_ICONS[social.platform] ?? Globe;
         return (
-          <SmartLink key={social.id} href={social.url} block={block} ariaLabel={social.platform}>
+          <ContextualItemTarget
+            key={social.id}
+            blockId={block.id}
+            collection="social"
+            itemId={social.id}
+          >
+          <SmartLink href={social.url} block={block} ariaLabel={social.platform}>
             <span
               className="pts-hoverable"
               style={{
@@ -684,6 +698,7 @@ export function SocialBlock({ block }: BlockProps) {
               ) : null}
             </span>
           </SmartLink>
+          </ContextualItemTarget>
         );
       })}
     </div>

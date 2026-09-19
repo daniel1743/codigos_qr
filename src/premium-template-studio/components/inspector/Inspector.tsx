@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUp, ChevronLeft, ChevronRight, Monitor, Smartphone, Tablet, Trash2, Copy, Lock, Plus } from "lucide-react";
+import { Monitor, Smartphone, Tablet, Trash2, Copy, Lock, Plus } from "lucide-react";
 import { useStudio } from "../../state/StudioProvider";
 import { getBlockDefinition } from "../../constants/blockDefinitions";
 import {
@@ -68,11 +68,14 @@ import {
 } from "../../../lib/smart-link-preview";
 import {
   appendGalleryImage,
-  moveGalleryImage,
   removeGalleryImage,
   replaceGalleryImage,
   type GalleryImage,
 } from "../blocks/galleryImages";
+import {
+  CollectionItemControls,
+  moveCollectionItem,
+} from "./CollectionItemControls";
 
 
 /**
@@ -137,13 +140,18 @@ function AssetField({
   onChange,
   uploadLabel,
   showUrlInput = true,
+  deleteAssetOnRemove = true,
+  cleanupPreviousAssetOnReplace = true,
 }: {
   label: string;
   accept: string;
   value: string;
-  onChange: (url: string, asset?: { name: string }) => void;
+  onChange: (url: string, asset?: { name: string; size?: number }) => void;
   uploadLabel?: string | undefined;
   showUrlInput?: boolean | undefined;
+  /** Keep profile media recoverable through the editor history. */
+  deleteAssetOnRemove?: boolean | undefined;
+  cleanupPreviousAssetOnReplace?: boolean | undefined;
 }) {
   const { adapters } = useStudio();
   const { messages } = usePowerEditorLocale();
@@ -166,11 +174,13 @@ function AssetField({
           {value && (
             <GhostButton
               onClick={async () => {
-                try {
-                  const assetId = await resolveAssetId(value, adapters);
-                  await adapters.assets.remove?.(assetId);
-                } catch {
-                  /* adapter may not support deletion */
+                if (deleteAssetOnRemove) {
+                  try {
+                    const assetId = await resolveAssetId(value, adapters);
+                    await adapters.assets.remove?.(assetId);
+                  } catch {
+                    /* adapter may not support deletion */
+                  }
                 }
                 onChange("");
               }}
@@ -195,7 +205,7 @@ function AssetField({
               const asset = await adapters.assets.upload(file);
 
               // If replacing, delete the old asset
-              if (oldUrl && adapters.assets.remove) {
+              if (oldUrl && cleanupPreviousAssetOnReplace && adapters.assets.remove) {
                 try {
                   const oldAssetId = await resolveAssetId(oldUrl, adapters);
                   await adapters.assets.remove(oldAssetId);
@@ -205,7 +215,7 @@ function AssetField({
               }
 
               saveAssetMapping(asset.url, asset.id);
-              onChange(asset.url, { name: asset.name });
+              onChange(asset.url, { name: asset.name, size: asset.size });
             } catch (err) {
               setAssetError(err instanceof Error ? err.message : "Upload failed.");
             } finally {
@@ -219,20 +229,26 @@ function AssetField({
   );
 }
 
+function formatAssetSize(bytes?: number): string | undefined {
+  if (!bytes || bytes <= 0) return undefined;
+  if (bytes < 1024) return `${bytes} B`;
+  const units = ["KB", "MB", "GB"];
+  let value = bytes / 1024;
+  let unit = 0;
+  while (value >= 1024 && unit < units.length - 1) {
+    value /= 1024;
+    unit += 1;
+  }
+  return `${value.toFixed(value >= 10 ? 0 : 1)} ${units[unit]}`;
+}
+
 function GalleryBlockInspector({ block }: { block: TemplateBlock }) {
-  const { adapters, dispatch } = useStudio();
+  const { dispatch } = useStudio();
   const images = block.content.images ?? [];
   const update = (next: GalleryImage[]) =>
     dispatch({ type: "patchBlockField", id: block.id, path: "content.images", value: next });
 
-  const remove = async (image: GalleryImage) => {
-    if (image.url) {
-      try {
-        await adapters.assets.remove?.(await resolveAssetId(image.url, adapters));
-      } catch {
-        // Removing the item from the gallery remains valid if storage cleanup fails.
-      }
-    }
+  const remove = (image: GalleryImage) => {
     update(removeGalleryImage(images, image.id));
   };
 
@@ -241,47 +257,26 @@ function GalleryBlockInspector({ block }: { block: TemplateBlock }) {
       <Section title="Imágenes">
         <div className="space-y-3">
           {images.map((image, index) => (
-            <div key={image.id} className="space-y-2 rounded-lg border border-border p-3">
+            <div key={image.id} data-inspector-item={`${block.id}:${image.id}`} className="space-y-2 rounded-lg border border-border p-3">
               <div className="flex items-center justify-between gap-2">
                 <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                   Imagen {index + 1}
                 </span>
                 <div className="flex items-center gap-1">
-                  <button
-                    type="button"
-                    title="Mover imagen a la izquierda"
-                    aria-label="Mover imagen a la izquierda"
-                    disabled={index === 0}
-                    onClick={() => update(moveGalleryImage(images, index, -1))}
-                    className="rounded p-1 text-muted-foreground hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </button>
-                  <button
-                    type="button"
-                    title="Mover imagen a la derecha"
-                    aria-label="Mover imagen a la derecha"
-                    disabled={index === images.length - 1}
-                    onClick={() => update(moveGalleryImage(images, index, 1))}
-                    className="rounded p-1 text-muted-foreground hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </button>
-                  <button
-                    type="button"
-                    title="Eliminar imagen"
-                    aria-label="Eliminar imagen"
-                    onClick={() => void remove(image)}
-                    className="rounded p-1 text-muted-foreground hover:text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+                  <CollectionItemControls
+                    index={index}
+                    count={images.length}
+                    onMove={(direction) => update(moveCollectionItem(images, index, direction))}
+                    onDelete={() => remove(image)}
+                  />
                 </div>
               </div>
               <AssetField
                 label="Sustituir imagen"
                 accept="image/*"
                 value={image.url}
+                deleteAssetOnRemove={false}
+                cleanupPreviousAssetOnReplace={false}
                 onChange={(url) => {
                   if (url) {
                     update(replaceGalleryImage(images, image.id, url));
@@ -314,6 +309,116 @@ function GalleryBlockInspector({ block }: { block: TemplateBlock }) {
           />
         </div>
       </Section>
+    </div>
+  );
+}
+
+function PortfolioBlockInspector({ block }: { block: TemplateBlock }) {
+  const { dispatch } = useStudio();
+  const items = block.content.items ?? [];
+  const update = (next: BlockItem[]) =>
+    dispatch({ type: "patchBlockField", id: block.id, path: "content.items", value: next });
+
+  return (
+    <div className="space-y-3">
+      <Field label="Título del portfolio">
+        <TextInput
+          value={block.content.title ?? ""}
+          onChange={(value) =>
+            dispatch({ type: "patchBlockField", id: block.id, path: "content.title", value })
+          }
+        />
+      </Field>
+      {items.map((item, index) => (
+        <div key={item.id} data-inspector-item={`${block.id}:${item.id}`} className="space-y-2 rounded-xl border border-border p-3">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Proyecto {index + 1}
+            </span>
+            <CollectionItemControls
+              index={index}
+              count={items.length}
+              onMove={(direction) => update(moveCollectionItem(items, index, direction))}
+              onDelete={() => update(items.filter((current) => current.id !== item.id))}
+            />
+          </div>
+          <Field label="Título / proyecto">
+            <TextInput
+              value={item.label ?? ""}
+              onChange={(value) =>
+                update(
+                  items.map((current) =>
+                    current.id === item.id ? { ...current, label: value } : current,
+                  ),
+                )
+              }
+            />
+          </Field>
+          <TypographyOverrideEditor
+            value={item.typography}
+            onChange={(typography) =>
+              update(items.map((current) => (current.id === item.id ? { ...current, typography } : current)))
+            }
+          />
+          <Field label="Descripción / categoría">
+            <TextInput
+              value={item.description ?? ""}
+              onChange={(value) =>
+                update(
+                  items.map((current) =>
+                    current.id === item.id ? { ...current, description: value } : current,
+                  ),
+                )
+              }
+            />
+          </Field>
+          <Field label="URL del proyecto">
+            <TextInput
+              value={item.url ?? ""}
+              onChange={(value) =>
+                update(
+                  items.map((current) =>
+                    current.id === item.id ? { ...current, url: value } : current,
+                  ),
+                )
+              }
+            />
+          </Field>
+          {item.imageUrl ? (
+            <img
+              src={item.imageUrl}
+              alt={item.label ? "Vista previa de " + item.label : "Vista previa del proyecto"}
+              className="h-28 w-full rounded-lg object-cover"
+            />
+          ) : null}
+          <AssetField
+            label="Imagen del proyecto"
+            accept="image/*"
+            value={item.imageUrl ?? ""}
+            uploadLabel={item.imageUrl ? "Cambiar imagen" : "Agregar imagen"}
+            deleteAssetOnRemove={false}
+            cleanupPreviousAssetOnReplace={false}
+            onChange={(value) =>
+              update(
+                items.map((current) =>
+                  current.id === item.id ? { ...current, imageUrl: value } : current,
+                ),
+              )
+            }
+          />
+        </div>
+      ))}
+      <GhostButton
+        className="w-full"
+        onClick={() =>
+          update([
+            ...items,
+            { id: uid("pf"), label: "Nuevo proyecto", description: "", url: "", imageUrl: "" },
+          ])
+        }
+      >
+        Agregar proyecto
+      </GhostButton>
     </div>
   );
 }
@@ -504,6 +609,9 @@ function ProfileInspector() {
                 label={messages.inspector.coverImage}
                 accept="image/*"
                 value={banner.imageUrl ?? ""}
+                uploadLabel={banner.imageUrl ? "Cambiar imagen" : "+ Añadir banner"}
+                deleteAssetOnRemove={false}
+                cleanupPreviousAssetOnReplace={false}
                 onChange={(v) => patch("profile.banner.imageUrl", v)}
               />
               <Field
@@ -623,6 +731,21 @@ function ProfileInspector() {
               ) : null}
             </>
           )}
+          {!banner.enabled ? (
+            <AssetField
+              label={messages.inspector.coverBanner}
+              accept="image/*"
+              value=""
+              uploadLabel="+ Añadir banner"
+              showUrlInput={false}
+              deleteAssetOnRemove={false}
+              cleanupPreviousAssetOnReplace={false}
+              onChange={(v) => {
+                patch("profile.banner.enabled", true);
+                patch("profile.banner.imageUrl", v);
+              }}
+            />
+          ) : null}
         </Section>
       </div>
 
@@ -677,6 +800,9 @@ function ProfileInspector() {
             label={messages.inspector.avatar}
             accept="image/*"
             value={profile.avatarUrl ?? ""}
+            uploadLabel={profile.avatarUrl ? "Cambiar foto" : "+ Añadir foto de perfil"}
+            deleteAssetOnRemove={false}
+            cleanupPreviousAssetOnReplace={false}
             onChange={(v) => patch("profile.avatarUrl", v)}
           />
           <Field label={messages.inspector.avatarAlignment}>
@@ -1020,18 +1146,17 @@ export function ItemsEditor({ block }: { block: TemplateBlock }) {
   return (
     <div className="space-y-3">
       {items.map((item, index) => (
-        <div key={item.id} className="space-y-2 rounded-xl border border-border p-3">
+        <div key={item.id} data-inspector-item={`${block.id}:${item.id}`} className="space-y-2 rounded-xl border border-border p-3">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               Item {index + 1}
             </span>
-            <button
-              type="button"
-              className="text-muted-foreground hover:text-destructive"
-              onClick={() => update(items.filter((i) => i.id !== item.id))}
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
+            <CollectionItemControls
+              index={index}
+              count={items.length}
+              onMove={(direction) => update(moveCollectionItem(items, index, direction))}
+              onDelete={() => update(items.filter((i) => i.id !== item.id))}
+            />
           </div>
           <TextInput
             value={item.label ?? ""}
@@ -1081,6 +1206,29 @@ export function ItemsEditor({ block }: { block: TemplateBlock }) {
               includeColor={!supportsMediaPresentation} // button groups usually have a global text color setting, but let's just include it
             />
           </div>
+          {block.type === "buttonGroup" ? (
+            <div className="pt-2">
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                Estilo de este botón
+              </span>
+              <CtaStyleControls
+                style={item.ctaStyle}
+                pathPrefix="ctaStyle"
+                defaultRadius={100}
+                onField={(path, value) => {
+                  const key = path.split(".")[1] as keyof CTAStyle;
+                  update(
+                    items.map((i) => {
+                      if (i.id !== item.id) return i;
+                      const next = { ...(i.ctaStyle || {}), [key]: value };
+                      if (value === undefined) delete next[key];
+                      return { ...i, ctaStyle: Object.keys(next).length ? next : undefined };
+                    }),
+                  );
+                }}
+              />
+            </div>
+          ) : null}
           {item.description?.trim() ? (
             <div className="pt-2">
               <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
@@ -1169,6 +1317,8 @@ export function ItemsEditor({ block }: { block: TemplateBlock }) {
                 label="Item image"
                 accept="image/*"
                 value={item.imageUrl ?? ""}
+                deleteAssetOnRemove={false}
+                cleanupPreviousAssetOnReplace={false}
                 onChange={(v) =>
                   update(items.map((i) => (i.id === item.id ? { ...i, imageUrl: v } : i)))
                 }
@@ -1209,8 +1359,8 @@ function SocialsEditor({ block }: { block: TemplateBlock }) {
 
   return (
     <div className="space-y-2">
-      {socials.map((social) => (
-        <div key={social.id} className="flex items-center gap-2">
+      {socials.map((social, index) => (
+        <div key={social.id} data-inspector-item={`${block.id}:${social.id}`} className="flex items-center gap-2">
           <select
             className="w-28 shrink-0 rounded-lg border border-border bg-background px-2 py-2 text-xs text-foreground"
             value={social.platform}
@@ -1236,13 +1386,12 @@ function SocialsEditor({ block }: { block: TemplateBlock }) {
               update(socials.map((s) => (s.id === social.id ? { ...s, url: v } : s)))
             }
           />
-          <button
-            type="button"
-            className="shrink-0 text-muted-foreground hover:text-destructive"
-            onClick={() => update(socials.filter((s) => s.id !== social.id))}
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </button>
+          <CollectionItemControls
+            index={index}
+            count={socials.length}
+            onMove={(direction) => update(moveCollectionItem(socials, index, direction))}
+            onDelete={() => update(socials.filter((s) => s.id !== social.id))}
+          />
         </div>
       ))}
       <GhostButton
@@ -2200,7 +2349,7 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
             <span className="text-xs text-muted-foreground">{messages.inspector.ctaContentHint}</span>
           </Field>
           {/* Primary CTA */}
-          <div className="space-y-2 rounded-lg border border-border p-2 bg-muted/10 mb-2">
+          <div data-inspector-focus="hero-cta-primary" {...contextualFocusProps("hero-cta-primary")} className="space-y-2 rounded-lg border border-border p-2 bg-muted/10 mb-2">
             <span className="text-xs font-bold text-foreground">{messages.inspector.primaryCta}</span>
             <Field label={messages.inspector.label}>
               <TextInput
@@ -2236,7 +2385,7 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
           </div>
 
           {/* Secondary CTA */}
-          <div className="space-y-2 rounded-lg border border-border p-2 bg-muted/10">
+          <div data-inspector-focus="hero-cta-secondary" {...contextualFocusProps("hero-cta-secondary")} className="space-y-2 rounded-lg border border-border p-2 bg-muted/10">
             <span className="text-xs font-bold text-foreground">{messages.inspector.secondaryCta}</span>
             <Field label={messages.inspector.label}>
               <TextInput
@@ -2313,23 +2462,23 @@ function StatsBlockInspector({ block }: { block: TemplateBlock }) {
   const update = (next: BlockItem[]) => field("content.items", next);
 
   return (
-    <div className="space-y-3">
+      <div className="space-y-3">
       {items.map((item: BlockItem, index: number) => (
         <div
           key={item.id ?? index}
+          data-inspector-item={`${block.id}:${item.id ?? index}`}
           className="space-y-2 rounded-xl border border-border p-3 bg-muted/5"
         >
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               Stat {index + 1}
             </span>
-            <button
-              type="button"
-              className="text-muted-foreground hover:text-destructive"
-              onClick={() => update(items.filter((i) => i.id !== item.id))}
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
+            <CollectionItemControls
+              index={index}
+              count={items.length}
+              onMove={(direction) => update(moveCollectionItem(items, index, direction))}
+              onDelete={() => update(items.filter((i) => i.id !== item.id))}
+            />
           </div>
           <Field label="Value">
             <TextInput
@@ -2385,31 +2534,24 @@ function ServicesBlockInspector({ block }: { block: TemplateBlock }) {
   const field = (path: string, value: unknown) =>
     dispatch({ type: "patchBlockField", id: block.id, path, value });
   const update = (next: BlockItem[]) => field("content.items", next);
-  const move = (index: number, direction: -1 | 1) => {
-    const nextIndex = index + direction;
-    if (nextIndex < 0 || nextIndex >= items.length) return;
-    const next = [...items];
-    const [item] = next.splice(index, 1);
-    if (item) next.splice(nextIndex, 0, item);
-    update(next);
-  };
-
   return (
-    <div className="space-y-3">
+      <div className="space-y-3">
       {items.map((item: BlockItem, index: number) => (
         <div
           key={item.id ?? index}
+          data-inspector-item={`${block.id}:${item.id ?? index}`}
           className="space-y-2 rounded-xl border border-border p-3 bg-muted/5"
         >
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               Service {index + 1}
             </span>
-            <div className="flex items-center gap-1">
-              <button type="button" aria-label="Move service up" disabled={index === 0} onClick={() => move(index, -1)} className="text-muted-foreground disabled:opacity-30"><ArrowUp className="h-3.5 w-3.5" /></button>
-              <button type="button" aria-label="Move service down" disabled={index === items.length - 1} onClick={() => move(index, 1)} className="text-muted-foreground disabled:opacity-30"><ArrowDown className="h-3.5 w-3.5" /></button>
-              <button type="button" aria-label="Remove service" className="text-muted-foreground hover:text-destructive" onClick={() => update(items.filter((i) => i.id !== item.id))}><Trash2 className="h-3.5 w-3.5" /></button>
-            </div>
+            <CollectionItemControls
+              index={index}
+              count={items.length}
+              onMove={(direction) => update(moveCollectionItem(items, index, direction))}
+              onDelete={() => update(items.filter((i) => i.id !== item.id))}
+            />
           </div>
           <Field label="Title">
             <TextInput
@@ -2419,6 +2561,12 @@ function ServicesBlockInspector({ block }: { block: TemplateBlock }) {
               }
             />
           </Field>
+          <TypographyOverrideEditor
+            value={item.typography}
+            onChange={(typography) =>
+              update(items.map((i) => (i.id === item.id ? { ...i, typography } : i)))
+            }
+          />
           <Field label="Description">
             <TextArea
               value={item.description ?? ""}
@@ -2428,6 +2576,12 @@ function ServicesBlockInspector({ block }: { block: TemplateBlock }) {
               }
             />
           </Field>
+          <TypographyOverrideEditor
+            value={item.descriptionTypography}
+            onChange={(descriptionTypography) =>
+              update(items.map((i) => (i.id === item.id ? { ...i, descriptionTypography } : i)))
+            }
+          />
           <Field label="Price">
             <TextInput
               value={item.price ?? ""}
@@ -2448,6 +2602,8 @@ function ServicesBlockInspector({ block }: { block: TemplateBlock }) {
             label="Image (for image variant)"
             accept="image/*"
             value={item.imageUrl ?? ""}
+            deleteAssetOnRemove={false}
+            cleanupPreviousAssetOnReplace={false}
             onChange={(v) =>
               update(items.map((i) => (i.id === item.id ? { ...i, imageUrl: v } : i)))
             }
@@ -2515,19 +2671,19 @@ function TestimonialsBlockInspector({ block }: { block: TemplateBlock }) {
       {items.map((item: BlockItem, index: number) => (
         <div
           key={item.id ?? index}
+          data-inspector-item={`${block.id}:${item.id ?? index}`}
           className="space-y-2 rounded-xl border border-border p-3 bg-muted/5"
         >
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               Testimonial {index + 1}
             </span>
-            <button
-              type="button"
-              className="text-muted-foreground hover:text-destructive"
-              onClick={() => update(items.filter((i) => i.id !== item.id))}
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
+            <CollectionItemControls
+              index={index}
+              count={items.length}
+              onMove={(direction) => update(moveCollectionItem(items, index, direction))}
+              onDelete={() => update(items.filter((i) => i.id !== item.id))}
+            />
           </div>
           <Field label="Quote">
             <TextArea
@@ -2538,6 +2694,12 @@ function TestimonialsBlockInspector({ block }: { block: TemplateBlock }) {
               }
             />
           </Field>
+          <TypographyOverrideEditor
+            value={item.typography}
+            onChange={(typography) =>
+              update(items.map((i) => (i.id === item.id ? { ...i, typography } : i)))
+            }
+          />
           <Field label="Name">
             <TextInput
               value={item.name ?? ""}
@@ -2575,6 +2737,8 @@ function TestimonialsBlockInspector({ block }: { block: TemplateBlock }) {
             label="Avatar"
             accept="image/*"
             value={item.avatarUrl ?? ""}
+            deleteAssetOnRemove={false}
+            cleanupPreviousAssetOnReplace={false}
             onChange={(v) =>
               update(items.map((i) => (i.id === item.id ? { ...i, avatarUrl: v } : i)))
             }
@@ -2608,19 +2772,19 @@ function PricingBlockInspector({ block }: { block: TemplateBlock }) {
       {items.map((item: BlockItem, index: number) => (
         <div
           key={item.id ?? index}
+          data-inspector-item={`${block.id}:${item.id ?? index}`}
           className="space-y-2 rounded-xl border border-border p-3 bg-muted/5"
         >
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               Plan {index + 1}
             </span>
-            <button
-              type="button"
-              className="text-muted-foreground hover:text-destructive"
-              onClick={() => update(items.filter((i) => i.id !== item.id))}
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
+            <CollectionItemControls
+              index={index}
+              count={items.length}
+              onMove={(direction) => update(moveCollectionItem(items, index, direction))}
+              onDelete={() => update(items.filter((i) => i.id !== item.id))}
+            />
           </div>
           <Field label="Plan title">
             <TextInput
@@ -2630,6 +2794,12 @@ function PricingBlockInspector({ block }: { block: TemplateBlock }) {
               }
             />
           </Field>
+          <TypographyOverrideEditor
+            value={item.typography}
+            onChange={(typography) =>
+              update(items.map((i) => (i.id === item.id ? { ...i, typography } : i)))
+            }
+          />
           <Field label="Price">
             <TextInput
               value={item.price ?? ""}
@@ -2750,19 +2920,19 @@ function FAQBlockInspector({ block }: { block: TemplateBlock }) {
           {items.map((item: BlockItem, index: number) => (
             <div
               key={item.id ?? index}
+              data-inspector-item={`${block.id}:${item.id ?? index}`}
               className="space-y-2 rounded-xl border border-border p-3 bg-muted/5"
             >
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                   FAQ {index + 1}
                 </span>
-                <button
-                  type="button"
-                  className="text-muted-foreground hover:text-destructive"
-                  onClick={() => update(items.filter((i) => i.id !== item.id))}
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
+                <CollectionItemControls
+                  index={index}
+                  count={items.length}
+                  onMove={(direction) => update(moveCollectionItem(items, index, direction))}
+                  onDelete={() => update(items.filter((i) => i.id !== item.id))}
+                />
               </div>
               <Field label="Question">
                 <TextInput
@@ -2809,19 +2979,19 @@ function TimelineBlockInspector({ block }: { block: TemplateBlock }) {
       {items.map((item: BlockItem, index: number) => (
         <div
           key={item.id ?? index}
+          data-inspector-item={`${block.id}:${item.id ?? index}`}
           className="space-y-2 rounded-xl border border-border p-3 bg-muted/5"
         >
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               Event {index + 1}
             </span>
-            <button
-              type="button"
-              className="text-muted-foreground hover:text-destructive"
-              onClick={() => update(items.filter((i) => i.id !== item.id))}
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
+            <CollectionItemControls
+              index={index}
+              count={items.length}
+              onMove={(direction) => update(moveCollectionItem(items, index, direction))}
+              onDelete={() => update(items.filter((i) => i.id !== item.id))}
+            />
           </div>
           <Field label="Date / Label">
             <TextInput
@@ -2976,19 +3146,19 @@ function FloatingActionsBlockInspector({ block }: { block: TemplateBlock }) {
       {items.map((item: BlockItem, index: number) => (
         <div
           key={item.id ?? index}
+          data-inspector-item={`${block.id}:${item.id ?? index}`}
           className="space-y-2 rounded-xl border border-border p-3 bg-muted/5"
         >
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               Action {index + 1}
             </span>
-            <button
-              type="button"
-              className="text-muted-foreground hover:text-destructive"
-              onClick={() => update(items.filter((i) => i.id !== item.id))}
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
+            <CollectionItemControls
+              index={index}
+              count={items.length}
+              onMove={(direction) => update(moveCollectionItem(items, index, direction))}
+              onDelete={() => update(items.filter((i) => i.id !== item.id))}
+            />
           </div>
           <Field label="Tooltip / Label">
             <TextInput
@@ -3066,6 +3236,20 @@ function ContactBlockInspector({ block }: { block: TemplateBlock }) {
             onChange={(v) => field("content.bookingUrl", v)}
           />
         </Field>
+        <Field label="WhatsApp button label">
+          <TextInput
+            value={c.whatsappLabel ?? ""}
+            placeholder="Chat on WhatsApp"
+            onChange={(v) => field("content.whatsappLabel", v)}
+          />
+        </Field>
+        <Field label="Booking button label">
+          <TextInput
+            value={c.bookingLabel ?? ""}
+            placeholder="Book an Appointment"
+            onChange={(v) => field("content.bookingLabel", v)}
+          />
+        </Field>
         <div className="flex items-center justify-between mt-2 pt-1 border-t border-border">
           <span className="text-xs font-medium text-foreground">
             Add "Download Contact Card" button
@@ -3075,6 +3259,15 @@ function ContactBlockInspector({ block }: { block: TemplateBlock }) {
             onChange={(v) => field("content.downloadContact", v)}
           />
         </div>
+        {c.downloadContact ? (
+          <Field label="Contact card button label">
+            <TextInput
+              value={c.downloadContactLabel ?? ""}
+              placeholder="Download Contact Card"
+              onChange={(v) => field("content.downloadContactLabel", v)}
+            />
+          </Field>
+        ) : null}
       </Section>
 
       <Section title="Custom Call to Action">
@@ -3142,6 +3335,8 @@ function ProductBlockInspector({ block }: { block: TemplateBlock }) {
           label="Product Image"
           accept="image/*"
           value={c.imageUrl ?? ""}
+          deleteAssetOnRemove={false}
+          cleanupPreviousAssetOnReplace={false}
           onChange={(v) => field("content.imageUrl", v)}
         />
         <Field label="CTA Button Label">
@@ -3161,31 +3356,24 @@ function ProductGridBlockInspector({ block }: { block: TemplateBlock }) {
   const field = (path: string, value: unknown) =>
     dispatch({ type: "patchBlockField", id: block.id, path, value });
   const update = (next: BlockItem[]) => field("content.products", next);
-  const move = (index: number, direction: -1 | 1) => {
-    const nextIndex = index + direction;
-    if (nextIndex < 0 || nextIndex >= products.length) return;
-    const next = [...products];
-    const [item] = next.splice(index, 1);
-    if (item) next.splice(nextIndex, 0, item);
-    update(next);
-  };
-
   return (
     <div className="space-y-3">
       {products.map((prod: BlockItem, index: number) => (
         <div
           key={prod.id ?? index}
+          data-inspector-item={`${block.id}:${prod.id ?? index}`}
           className="space-y-2 rounded-xl border border-border p-3 bg-muted/5"
         >
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               Product {index + 1}
             </span>
-            <div className="flex items-center gap-1">
-              <button type="button" aria-label="Move product up" disabled={index === 0} onClick={() => move(index, -1)} className="text-muted-foreground disabled:opacity-30"><ArrowUp className="h-3.5 w-3.5" /></button>
-              <button type="button" aria-label="Move product down" disabled={index === products.length - 1} onClick={() => move(index, 1)} className="text-muted-foreground disabled:opacity-30"><ArrowDown className="h-3.5 w-3.5" /></button>
-              <button type="button" aria-label="Remove product" className="text-muted-foreground hover:text-destructive" onClick={() => update(products.filter((p) => p.id !== prod.id))}><Trash2 className="h-3.5 w-3.5" /></button>
-            </div>
+            <CollectionItemControls
+              index={index}
+              count={products.length}
+              onMove={(direction) => update(moveCollectionItem(products, index, direction))}
+              onDelete={() => update(products.filter((p) => p.id !== prod.id))}
+            />
           </div>
           <Field label="Title">
             <TextInput
@@ -3195,6 +3383,12 @@ function ProductGridBlockInspector({ block }: { block: TemplateBlock }) {
               }
             />
           </Field>
+          <TypographyOverrideEditor
+            value={prod.typography}
+            onChange={(typography) =>
+              update(products.map((p) => (p.id === prod.id ? { ...p, typography } : p)))
+            }
+          />
           <Field label="Price">
             <TextInput
               value={prod.price ?? ""}
@@ -3216,6 +3410,8 @@ function ProductGridBlockInspector({ block }: { block: TemplateBlock }) {
             label="Image"
             accept="image/*"
             value={prod.imageUrl ?? ""}
+            deleteAssetOnRemove={false}
+            cleanupPreviousAssetOnReplace={false}
             onChange={(v) =>
               update(products.map((p) => (p.id === prod.id ? { ...p, imageUrl: v } : p)))
             }
@@ -3238,6 +3434,22 @@ function ProductGridBlockInspector({ block }: { block: TemplateBlock }) {
               }
             />
           </Field>
+          <CtaStyleControls
+            style={prod.ctaStyle}
+            pathPrefix="ctaStyle"
+            defaultRadius={100}
+            onField={(path, value) => {
+              const key = path.split(".")[1] as keyof CTAStyle;
+              update(
+                products.map((p) => {
+                  if (p.id !== prod.id) return p;
+                  const next = { ...(p.ctaStyle || {}), [key]: value };
+                  if (value === undefined) delete next[key];
+                  return { ...p, ctaStyle: Object.keys(next).length ? next : undefined };
+                }),
+              );
+            }}
+          />
         </div>
       ))}
       <GhostButton
@@ -3336,6 +3548,13 @@ function BookingBlockInspector({ block }: { block: TemplateBlock }) {
         <Field label="CTA Button Label">
           <TextInput value={c.ctaLabel ?? ""} onChange={(v) => field("content.ctaLabel", v)} />
         </Field>
+        <Field label="CTA Destination URL">
+          <TextInput
+            value={c.ctaUrl ?? ""}
+            placeholder="https://…"
+            onChange={(v) => field("content.ctaUrl", v)}
+          />
+        </Field>
         <CtaStyleControls
           style={block.style.ctaStyle}
           pathPrefix="style.ctaStyle"
@@ -3386,19 +3605,19 @@ function EventsBlockInspector({ block }: { block: TemplateBlock }) {
       {items.map((event: BlockItem, index: number) => (
         <div
           key={event.id ?? index}
+          data-inspector-item={`${block.id}:${event.id ?? index}`}
           className="space-y-2 rounded-xl border border-border p-3 bg-muted/5"
         >
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               Event {index + 1}
             </span>
-            <button
-              type="button"
-              className="text-muted-foreground hover:text-destructive"
-              onClick={() => update(items.filter((e) => e.id !== event.id))}
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
+            <CollectionItemControls
+              index={index}
+              count={items.length}
+              onMove={(direction) => update(moveCollectionItem(items, index, direction))}
+              onDelete={() => update(items.filter((e) => e.id !== event.id))}
+            />
           </div>
           <Field label="Event Title">
             <TextInput
@@ -3440,6 +3659,8 @@ function EventsBlockInspector({ block }: { block: TemplateBlock }) {
             label="Event Image"
             accept="image/*"
             value={event.imageUrl ?? ""}
+            deleteAssetOnRemove={false}
+            cleanupPreviousAssetOnReplace={false}
             onChange={(v) =>
               update(items.map((e) => (e.id === event.id ? { ...e, imageUrl: v } : e)))
             }
@@ -3583,24 +3804,26 @@ function CarouselBlockInspector({ block }: { block: TemplateBlock }) {
       {items.map((slide: BlockItem, index: number) => (
         <div
           key={slide.id ?? index}
+          data-inspector-item={`${block.id}:${slide.id ?? index}`}
           className="space-y-2 rounded-xl border border-border p-3 bg-muted/5"
         >
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               Slide {index + 1}
             </span>
-            <button
-              type="button"
-              className="text-muted-foreground hover:text-destructive"
-              onClick={() => update(items.filter((s) => s.id !== slide.id))}
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
+            <CollectionItemControls
+              index={index}
+              count={items.length}
+              onMove={(direction) => update(moveCollectionItem(items, index, direction))}
+              onDelete={() => update(items.filter((s) => s.id !== slide.id))}
+            />
           </div>
           <AssetField
             label="Slide Image"
             accept="image/*"
             value={slide.imageUrl ?? ""}
+            deleteAssetOnRemove={false}
+            cleanupPreviousAssetOnReplace={false}
             onChange={(v) =>
               update(items.map((s) => (s.id === slide.id ? { ...s, imageUrl: v } : s)))
             }
@@ -3656,19 +3879,19 @@ function TabsBlockInspector({ block }: { block: TemplateBlock }) {
       {items.map((tab: BlockItem, index: number) => (
         <div
           key={tab.id ?? index}
+          data-inspector-item={`${block.id}:${tab.id ?? index}`}
           className="space-y-2 rounded-xl border border-border p-3 bg-muted/5"
         >
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               Tab {index + 1}
             </span>
-            <button
-              type="button"
-              className="text-muted-foreground hover:text-destructive"
-              onClick={() => update(items.filter((t) => t.id !== tab.id))}
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
+            <CollectionItemControls
+              index={index}
+              count={items.length}
+              onMove={(direction) => update(moveCollectionItem(items, index, direction))}
+              onDelete={() => update(items.filter((t) => t.id !== tab.id))}
+            />
           </div>
           <Field label="Tab label">
             <TextInput
@@ -3709,19 +3932,19 @@ function BottomNavBlockInspector({ block }: { block: TemplateBlock }) {
       {items.map((item: BlockItem, index: number) => (
         <div
           key={item.id ?? index}
+          data-inspector-item={`${block.id}:${item.id ?? index}`}
           className="space-y-2 rounded-xl border border-border p-3 bg-muted/5"
         >
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               Tab button {index + 1}
             </span>
-            <button
-              type="button"
-              className="text-muted-foreground hover:text-destructive"
-              onClick={() => update(items.filter((i) => i.id !== item.id))}
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
+            <CollectionItemControls
+              index={index}
+              count={items.length}
+              onMove={(direction) => update(moveCollectionItem(items, index, direction))}
+              onDelete={() => update(items.filter((i) => i.id !== item.id))}
+            />
           </div>
           <Field label="Button Label">
             <TextInput
@@ -4025,6 +4248,7 @@ export function BlockInspector({ block }: { block: TemplateBlock }) {
         {block.type === "map" && <MapBlockInspector block={block} />}
         {block.type === "music" && <MusicBlockInspector block={block} />}
         {block.type === "gallery" && <GalleryBlockInspector block={block} />}
+        {block.type === "portfolio" && <PortfolioBlockInspector block={block} />}
         {block.type === "carousel" && <CarouselBlockInspector block={block} />}
         {block.type === "tabs" && <TabsBlockInspector block={block} />}
         {block.type === "bottomNav" && <BottomNavBlockInspector block={block} />}
@@ -4047,6 +4271,7 @@ export function BlockInspector({ block }: { block: TemplateBlock }) {
           block.type !== "map" &&
           block.type !== "music" &&
           block.type !== "gallery" &&
+          block.type !== "portfolio" &&
           block.type !== "carousel" &&
           block.type !== "tabs" &&
           block.type !== "bottomNav" && (
@@ -4128,6 +4353,8 @@ export function BlockInspector({ block }: { block: TemplateBlock }) {
                     onChange={(v, asset) => {
                       field("content.url", v);
                       if (asset?.name) field("content.fileName", asset.name);
+                      const fileSize = formatAssetSize(asset?.size);
+                      if (fileSize) field("content.fileSize", fileSize);
                     }}
                   />
                 </>
@@ -4144,6 +4371,7 @@ export function BlockInspector({ block }: { block: TemplateBlock }) {
         block.type !== "faq" &&
         block.type !== "timeline" &&
         block.type !== "floatingActions" &&
+        block.type !== "portfolio" &&
         block.type !== "events" &&
         block.type !== "carousel" &&
         block.type !== "tabs" &&
@@ -4509,7 +4737,23 @@ export function Inspector() {
         else setTimeout(cb, 0);
       };
       defer(() => {
-        const el = container.querySelector<HTMLElement>(`[data-inspector-focus="${target}"]`);
+        let el = container.querySelector<HTMLElement>(`[data-inspector-focus="${target}"]`);
+        // Collection targets are stable by item id. If a specialized editor
+        // exposes only the item anchor, use it instead of a stale array index.
+        if (!el && target.startsWith("collection-")) {
+          const parts = target.split("-");
+          parts.shift();
+          parts.pop();
+          const itemEncoded = parts.pop();
+          const blockEncoded = parts.pop();
+          const itemId = itemEncoded ? decodeURIComponent(itemEncoded) : undefined;
+          const blockId = blockEncoded ? decodeURIComponent(blockEncoded) : undefined;
+          if (itemId && blockId) {
+            el = container.querySelector<HTMLElement>(
+              `[data-inspector-item="${blockId}:${itemId}"]`,
+            );
+          }
+        }
         if (!el) return;
         // Exact-target centering: place the target's center at ~45% of the
         // visible Inspector height (comfortable 35%–55% band), clamped to the

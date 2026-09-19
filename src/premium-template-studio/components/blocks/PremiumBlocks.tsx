@@ -22,6 +22,7 @@ import { useRender } from "../../engine/RenderContext";
 import { applyTypographyOverride, applyCTAStyle, cardStyle, headingStyle } from "../../engine/styleEngine";
 import { hexToRgba, safeUrl } from "../../utils";
 import type { BlockItem, TemplateBlock } from "../../types";
+import { ContextualItemTarget } from "./primitives";
 
 // Dynamic Icon resolver
 function SmartIcon({
@@ -180,12 +181,20 @@ export function StatsBlock({ block }: { block: TemplateBlock }) {
 /* 2. Services Block                                                   */
 /* ------------------------------------------------------------------ */
 export function ServicesBlock({ block }: { block: TemplateBlock }) {
-  const { theme, mode } = useRender();
+  const { theme, mode, onTrack } = useRender();
   const items = block.content.items ?? [];
   const variant = block.variant ?? "cards";
 
-  const handleCTA = (url?: string) => {
+  const handleCTA = (item: BlockItem) => {
+    const url = item.ctaUrl;
     if (!url || mode === "edit") return;
+    onTrack?.({
+      type: "service_click",
+      blockId: block.id,
+      itemId: item.id,
+      label: item.title,
+      url,
+    });
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
@@ -196,8 +205,13 @@ export function ServicesBlock({ block }: { block: TemplateBlock }) {
         const isCompact = variant === "compact";
 
         return (
-          <div
+          <ContextualItemTarget
             key={item.id ?? idx}
+            blockId={block.id}
+            collection="services"
+            itemId={item.id ?? String(idx)}
+          >
+          <div
             style={{
               // Material precedence is intentional: an explicit block style
               // wins over the Engine-authored theme card material. The
@@ -214,7 +228,7 @@ export function ServicesBlock({ block }: { block: TemplateBlock }) {
             }}
           >
             {hasImage && (
-              <div style={{ height: 140, margin: "-20px -20px 14px", overflow: "hidden" }}>
+              <div data-editor-target={mode === "edit" ? `collection-services-${block.id}-${item.id ?? idx}-image` : undefined} style={{ height: 140, margin: "-20px -20px 14px", overflow: "hidden" }}>
                 <img
                   src={item.imageUrl}
                   alt=""
@@ -246,7 +260,14 @@ export function ServicesBlock({ block }: { block: TemplateBlock }) {
                     gap: 8,
                   }}
                 >
-                  <h3 style={{ ...headingStyle(theme, 0.8), fontSize: "15px" }}>{item.title}</h3>
+                  <h3
+                    style={applyTypographyOverride(
+                      { ...headingStyle(theme, 0.8), fontSize: "15px" },
+                      item.typography,
+                    )}
+                  >
+                    {item.title}
+                  </h3>
                   {item.price && (
                     <span
                       style={{
@@ -280,7 +301,8 @@ export function ServicesBlock({ block }: { block: TemplateBlock }) {
 
             {item.ctaLabel && item.ctaUrl && (
               <button
-                onClick={() => handleCTA(item.ctaUrl)}
+                className="pts-hoverable pts-press-feedback"
+                onClick={() => handleCTA(item)}
                 style={applyCTAStyle({
                   display: "inline-flex",
                   alignItems: "center",
@@ -303,6 +325,7 @@ export function ServicesBlock({ block }: { block: TemplateBlock }) {
               </button>
             )}
           </div>
+          </ContextualItemTarget>
         );
       })}
     </div>
@@ -325,8 +348,13 @@ export function TestimonialsBlock({ block }: { block: TemplateBlock }) {
         const rating = item.rating ?? 0;
 
         return (
-          <div
+          <ContextualItemTarget
             key={item.id ?? idx}
+            blockId={block.id}
+            collection="testimonials"
+            itemId={item.id ?? String(idx)}
+          >
+          <div
             style={{
               ...cardStyle(
                 theme,
@@ -355,12 +383,15 @@ export function TestimonialsBlock({ block }: { block: TemplateBlock }) {
             )}
 
             <p
-              style={{
-                fontSize: isQuote ? "15px" : "13.5px",
-                fontStyle: isQuote ? "italic" : "normal",
-                color: theme.colors.text,
-                lineHeight: 1.5,
-              }}
+              style={applyTypographyOverride(
+                {
+                  fontSize: isQuote ? "15px" : "13.5px",
+                  fontStyle: isQuote ? "italic" : "normal",
+                  color: theme.colors.text,
+                  lineHeight: 1.5,
+                },
+                item.typography,
+              )}
             >
               "{item.quote}"
             </p>
@@ -390,7 +421,7 @@ export function TestimonialsBlock({ block }: { block: TemplateBlock }) {
                 </div>
               )}
               <div>
-                <h4 style={{ fontSize: "13px", fontWeight: 700, color: theme.colors.text }}>
+                <h4 style={applyTypographyOverride({ fontSize: "13px", fontWeight: 700, color: theme.colors.text }, item.typography)}>
                   {item.name}
                 </h4>
                 {(item.role || item.source) && (
@@ -402,6 +433,7 @@ export function TestimonialsBlock({ block }: { block: TemplateBlock }) {
               </div>
             </div>
           </div>
+          </ContextualItemTarget>
         );
       })}
     </div>
@@ -435,8 +467,13 @@ export function PricingBlock({ block }: { block: TemplateBlock }) {
         const isCompact = variant === "compact";
 
         return (
-          <div
+          <ContextualItemTarget
             key={item.id ?? idx}
+            blockId={block.id}
+            collection="pricing"
+            itemId={item.id ?? String(idx)}
+          >
+          <div
             style={{
               ...cardStyle(theme, block.style),
               borderColor: isRec ? theme.colors.accent : undefined,
@@ -469,7 +506,7 @@ export function PricingBlock({ block }: { block: TemplateBlock }) {
               </span>
             )}
 
-            <h3 style={{ ...headingStyle(theme, 0.8), fontSize: "16px" }}>{item.title}</h3>
+            <h3 style={applyTypographyOverride({ ...headingStyle(theme, 0.8), fontSize: "16px" }, item.typography)}>{item.title}</h3>
 
             <div style={{ display: "flex", alignItems: "baseline", gap: 4, margin: "14px 0" }}>
               <span style={{ fontSize: "28px", fontWeight: 800, color: theme.colors.text }}>
@@ -530,6 +567,7 @@ export function PricingBlock({ block }: { block: TemplateBlock }) {
 
             {item.ctaLabel && (
               <button
+                className="pts-hoverable pts-press-feedback"
                 onClick={() => handleCTA(item.ctaUrl)}
                 style={applyCTAStyle({
                   width: "100%",
@@ -548,6 +586,7 @@ export function PricingBlock({ block }: { block: TemplateBlock }) {
               </button>
             )}
           </div>
+          </ContextualItemTarget>
         );
       })}
     </div>
@@ -584,8 +623,13 @@ export function FAQBlock({ block }: { block: TemplateBlock }) {
         const isOpen = openIds.includes(itemId);
 
         return (
-          <div
+          <ContextualItemTarget
             key={itemId}
+            blockId={block.id}
+            collection="faq"
+            itemId={itemId}
+          >
+          <div
             style={{
               ...cardStyle(theme, block.style),
               padding: "14px 16px",
@@ -636,6 +680,7 @@ export function FAQBlock({ block }: { block: TemplateBlock }) {
               </div>
             )}
           </div>
+          </ContextualItemTarget>
         );
       })}
     </div>
@@ -675,8 +720,13 @@ export function TimelineBlock({ block }: { block: TemplateBlock }) {
       {items.map((item: BlockItem, idx: number) => {
         const isCard = variant === "cards";
         return (
-          <div
+          <ContextualItemTarget
             key={item.id ?? idx}
+            blockId={block.id}
+            collection="timeline"
+            itemId={item.id ?? String(idx)}
+          >
+          <div
             style={{
               position: "relative",
               marginBottom: idx === items.length - 1 ? 0 : 20,
@@ -734,6 +784,7 @@ export function TimelineBlock({ block }: { block: TemplateBlock }) {
               )}
             </div>
           </div>
+          </ContextualItemTarget>
         );
       })}
     </div>
@@ -901,8 +952,14 @@ export function FloatingActionsBlock({ block }: { block: TemplateBlock }) {
       }}
     >
       {items.map((item: BlockItem, idx: number) => (
-        <button
+        <ContextualItemTarget
           key={item.id ?? idx}
+          blockId={block.id}
+          collection="floating-actions"
+          itemId={item.id ?? String(idx)}
+          field="action"
+        >
+        <button
           onClick={() => handleAction(item.url)}
           title={item.label}
           style={{
@@ -923,6 +980,7 @@ export function FloatingActionsBlock({ block }: { block: TemplateBlock }) {
         >
           <SmartIcon name={item.icon ?? ""} size={18} />
         </button>
+        </ContextualItemTarget>
       ))}
     </div>
   );

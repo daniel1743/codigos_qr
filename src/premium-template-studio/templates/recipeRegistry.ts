@@ -13,6 +13,7 @@ function composeRecipe(
   layoutId: string,
   presetIds: string[],
   base: string = "creator",
+  transform?: (config: BioTemplateConfig) => BioTemplateConfig,
 ): TemplateDefinition {
   return {
     id,
@@ -31,7 +32,7 @@ function composeRecipe(
           blocks.push(...preset.createBlocks());
         }
       }
-      return buildTemplate({
+      const config = buildTemplate({
         pageInstanceId: `${id}-demo`,
         templateDefinitionId: id,
         name,
@@ -73,7 +74,122 @@ function composeRecipe(
           },
         },
       });
+      return transform ? transform(config) : config;
     },
+  };
+}
+
+function restaurantVisualDefaults(config: BioTemplateConfig): BioTemplateConfig {
+  const blocks = config.blocks.map((block) => {
+    if (block.type === "hero") {
+      return {
+        ...block,
+        content: {
+          ...block.content,
+          title: "Casa Mediterránea",
+          eyebrow: "Cocina mediterránea",
+          subtitle: "Cocina fresca, simple y hecha para compartir",
+          body: "Descubre nuestros platos, horarios y opciones para reservar.",
+          description: "Sabores mediterráneos preparados para compartir.",
+          badge: { label: "Restaurante", enabled: true },
+          primaryCTA: { label: "Ver menú", url: "#menu" },
+          secondaryCTA: { label: "Reservar", url: "#reservas" },
+        },
+      };
+    }
+
+    if (block.type === "heading") {
+      return {
+        ...block,
+        content: {
+          ...block.content,
+          title: "Nuestro menú",
+          subtitle: "Platos frescos y sabores mediterráneos",
+        },
+      };
+    }
+
+    if (block.type === "buttonGroup") {
+      return {
+        ...block,
+        content: {
+          ...block.content,
+          items: [
+            { id: `${block.id}-menu`, label: "Ver menú", url: "#menu" },
+            { id: `${block.id}-booking`, label: "Reservar", url: "#reservas" },
+          ],
+        },
+      };
+    }
+
+    if (block.type === "productGrid") {
+      return {
+        ...block,
+        content: {
+          ...block.content,
+          products: [
+            {
+              id: `${block.id}-pasta`,
+              title: "Pasta de la casa",
+              description: "Pasta fresca, salsa de tomate asado y albahaca.",
+              price: "$12.900",
+              imageUrl: "https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=600",
+              ctaLabel: "Pedir",
+              ctaUrl: "#reservas",
+            },
+            {
+              id: `${block.id}-salad`,
+              title: "Ensalada mediterránea",
+              description: "Hojas frescas, tomate, aceitunas y queso.",
+              price: "$9.900",
+              imageUrl: "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600",
+              ctaLabel: "Pedir",
+              ctaUrl: "#reservas",
+            },
+            {
+              id: `${block.id}-tiramisu`,
+              title: "Tiramisú",
+              description: "Postre clásico de café y cacao.",
+              price: "$6.500",
+              imageUrl: "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=600",
+              ctaLabel: "Pedir",
+              ctaUrl: "#reservas",
+            },
+          ],
+        },
+      };
+    }
+
+    if (block.type === "contact") {
+      return {
+        ...block,
+        content: {
+          ...block.content,
+          title: "Visítanos o reserva",
+          email: "reservas@casamediterranea.example",
+          phone: "+56 2 2345 6789",
+          address: "Av. Providencia 1234, Santiago",
+          bookingUrl: "#reservas",
+          bookingLabel: "Reservar una mesa",
+          customCtaUrl: "#menu",
+          customCtaLabel: "Ver menú completo",
+        },
+      };
+    }
+
+    return block;
+  });
+
+  return {
+    ...config,
+    profile: {
+      ...config.profile,
+      name: "Casa Mediterránea",
+      role: "Restaurante y cocina mediterránea",
+      location: "Santiago, Chile",
+      description: "Cocina fresca, simple y hecha para compartir.",
+    },
+    blocks,
   };
 }
 
@@ -211,7 +327,9 @@ export const RECIPE_REGISTRY: TemplateDefinition[] = [
     "Photo-heavy menu showcase.",
     "midnight",
     "bento",
-    ["hero-creator-full-image", "portfolio-gallery", "contact-card"],
+    ["hero-professional-trust", "product-grid-premium", "contact-card"],
+    "restaurant",
+    restaurantVisualDefaults,
   ),
   composeRecipe(
     "cafe-minimal",

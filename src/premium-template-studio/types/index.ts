@@ -656,6 +656,9 @@ export interface BlockContent {
   height?: number;
   alt?: string;
   description?: string;
+  typography?: TypographyOverride;
+  descriptionTypography?: TypographyOverride;
+  ctaStyle?: CTAStyle;
   eyebrow?: string;
   ctaDirection?: "row" | "column";
   avatar?: HeroAvatarContent;
@@ -669,6 +672,9 @@ export interface BlockContent {
   website?: string;
   whatsappUrl?: string;
   bookingUrl?: string;
+  whatsappLabel?: string;
+  bookingLabel?: string;
+  downloadContactLabel?: string;
   downloadContact?: boolean;
   customCtaUrl?: string;
   customCtaLabel?: string;

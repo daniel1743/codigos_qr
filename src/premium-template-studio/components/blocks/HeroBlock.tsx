@@ -106,9 +106,9 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
   // Edit-mode click on a CTA selects the parent Hero (if needed) and requests
   // a one-shot Inspector focus on the CTA controls. Public/preview navigation
   // is untouched.
-  const handleCTAClick = (url?: string) => {
+  const handleCTAClick = (url: string | undefined, target: "primary" | "secondary") => {
     if (mode === "edit" && onSelectHeroCta) {
-      onSelectHeroCta(block.id);
+      onSelectHeroCta(block.id, target);
       return;
     }
     handleCTA(url);
@@ -256,10 +256,12 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
       >
         {primaryCTA.label && (
           <button
+            className="pts-hoverable pts-press-feedback"
             type="button"
+            {...(mode === "edit" ? { "data-editor-target": "hero-cta-primary" } : {})}
             onClick={(e) => {
               e.stopPropagation();
-              handleCTAClick(primaryCTA.url);
+              handleCTAClick(primaryCTA.url, "primary");
             }}
             style={{
               ...heroCtaButtonStyle(theme, {
@@ -276,10 +278,12 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
         )}
         {secondaryCTA.label && (
           <button
+            className="pts-hoverable pts-press-feedback"
             type="button"
+            {...(mode === "edit" ? { "data-editor-target": "hero-cta-secondary" } : {})}
             onClick={(e) => {
               e.stopPropagation();
-              handleCTAClick(secondaryCTA.url);
+              handleCTAClick(secondaryCTA.url, "secondary");
             }}
             style={{
               ...heroCtaButtonStyle(theme, {

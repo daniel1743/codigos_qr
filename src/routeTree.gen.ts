@@ -36,6 +36,7 @@ import { Route as PagesPageIdRouteImport } from './routes/pages.$pageId'
 import { Route as PagesNewRouteImport } from './routes/pages.new'
 import { Route as PgPublicIdRouteImport } from './routes/pg.$publicId'
 import { Route as VsLinktreeRouteImport } from './routes/vs/linktree'
+import { Route as PagesPageIdAnalyticsRouteImport } from './routes/pages.$pageId.analytics'
 import { Route as PagesPageIdEditRouteImport } from './routes/pages.$pageId.edit'
 import { Route as PgASlugRouteImport } from './routes/pg.a.$slug'
 
@@ -174,6 +175,11 @@ const VsLinktreeRoute = VsLinktreeRouteImport.update({
   path: '/vs/linktree',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PagesPageIdAnalyticsRoute = PagesPageIdAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => PagesPageIdRoute,
+} as any)
 const PagesPageIdEditRoute = PagesPageIdEditRouteImport.update({
   id: '/edit',
   path: '/edit',
@@ -213,6 +219,7 @@ export interface FileRoutesByFullPath {
   '/pages/new': typeof PagesNewRoute
   '/pg/$publicId': typeof PgPublicIdRoute
   '/vs/linktree': typeof VsLinktreeRoute
+  '/pages/$pageId/analytics': typeof PagesPageIdAnalyticsRoute
   '/pages/$pageId/edit': typeof PagesPageIdEditRoute
   '/pg/a/$slug': typeof PgASlugRoute
 }
@@ -244,6 +251,7 @@ export interface FileRoutesByTo {
   '/pages/new': typeof PagesNewRoute
   '/pg/$publicId': typeof PgPublicIdRoute
   '/vs/linktree': typeof VsLinktreeRoute
+  '/pages/$pageId/analytics': typeof PagesPageIdAnalyticsRoute
   '/pages/$pageId/edit': typeof PagesPageIdEditRoute
   '/pg/a/$slug': typeof PgASlugRoute
 }
@@ -276,6 +284,7 @@ export interface FileRoutesById {
   '/pages/new': typeof PagesNewRoute
   '/pg/$publicId': typeof PgPublicIdRoute
   '/vs/linktree': typeof VsLinktreeRoute
+  '/pages/$pageId/analytics': typeof PagesPageIdAnalyticsRoute
   '/pages/$pageId/edit': typeof PagesPageIdEditRoute
   '/pg/a/$slug': typeof PgASlugRoute
 }
@@ -309,6 +318,7 @@ export interface FileRouteTypes {
     | '/pages/new'
     | '/pg/$publicId'
     | '/vs/linktree'
+    | '/pages/$pageId/analytics'
     | '/pages/$pageId/edit'
     | '/pg/a/$slug'
   fileRoutesByTo: FileRoutesByTo
@@ -340,6 +350,7 @@ export interface FileRouteTypes {
     | '/pages/new'
     | '/pg/$publicId'
     | '/vs/linktree'
+    | '/pages/$pageId/analytics'
     | '/pages/$pageId/edit'
     | '/pg/a/$slug'
   id:
@@ -371,6 +382,7 @@ export interface FileRouteTypes {
     | '/pages/new'
     | '/pg/$publicId'
     | '/vs/linktree'
+    | '/pages/$pageId/analytics'
     | '/pages/$pageId/edit'
     | '/pg/a/$slug'
   fileRoutesById: FileRoutesById
@@ -595,6 +607,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VsLinktreeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pages/$pageId/analytics': {
+      id: '/pages/$pageId/analytics'
+      path: '/analytics'
+      fullPath: '/pages/$pageId/analytics'
+      preLoaderRoute: typeof PagesPageIdAnalyticsRouteImport
+      parentRoute: typeof PagesPageIdRoute
+    }
     '/pages/$pageId/edit': {
       id: '/pages/$pageId/edit'
       path: '/edit'
@@ -613,10 +632,12 @@ declare module '@tanstack/react-router' {
 }
 
 interface PagesPageIdRouteChildren {
+  PagesPageIdAnalyticsRoute: typeof PagesPageIdAnalyticsRoute
   PagesPageIdEditRoute: typeof PagesPageIdEditRoute
 }
 
 const PagesPageIdRouteChildren: PagesPageIdRouteChildren = {
+  PagesPageIdAnalyticsRoute: PagesPageIdAnalyticsRoute,
   PagesPageIdEditRoute: PagesPageIdEditRoute,
 }
 

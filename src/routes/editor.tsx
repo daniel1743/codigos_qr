@@ -273,6 +273,7 @@ function EditorPage() {
           loadData(session.user.id, requestedProfileId);
         } else {
           setLoading(false);
+          void navigate({ to: "/login" });
         }
       })
       .catch((error) => {
@@ -488,7 +489,7 @@ function EditorPage() {
   };
 
   if (loading) return <div className="flex justify-center p-12">Cargando...</div>;
-  if (!session) return <Auth showPlatformMenu />;
+  if (!session) return <div className="flex min-h-screen items-center justify-center">Redirigiendo a iniciar sesión…</div>;
   if (canonicalProfileId)
     return (
       <PowerEditorHost profileId={canonicalProfileId} guidedOnboarding={guidedPowerEditor} />

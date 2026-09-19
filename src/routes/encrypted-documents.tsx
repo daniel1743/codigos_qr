@@ -1,6 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
-import { Auth } from "../components/Auth";
 import { getBrowserSupabaseClient } from "../lib/supabase/client";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -53,6 +52,7 @@ export const Route = createFileRoute("/encrypted-documents")({
 
 function EncryptedDocumentsPage() {
   const supabase = getBrowserSupabaseClient();
+  const navigate = useNavigate();
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -72,6 +72,10 @@ function EncryptedDocumentsPage() {
     return () => subscription.unsubscribe();
   }, []);
 
+  useEffect(() => {
+    if (!loading && !session) void navigate({ to: "/login" });
+  }, [loading, navigate, session]);
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -84,22 +88,7 @@ function EncryptedDocumentsPage() {
   }
 
   if (!session) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
-        <div className="w-full max-w-md space-y-6">
-          <div className="text-center space-y-2">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 shadow-lg mb-4">
-              <Shield className="w-8 h-8 text-white" />
-            </div>
-            <h1 className="text-3xl font-bold tracking-tight">Documentos Encriptados</h1>
-            <p className="text-muted-foreground">
-              Comparte archivos de forma segura con un QR
-            </p>
-          </div>
-          <Auth />
-        </div>
-      </div>
-    );
+    return <div className="flex min-h-screen items-center justify-center">Redirigiendo a iniciar sesión…</div>;
   }
 
   return <EncryptedDocumentsApp userId={session.user.id} />;

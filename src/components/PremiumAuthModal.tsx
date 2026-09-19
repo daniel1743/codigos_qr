@@ -33,6 +33,9 @@ type PremiumAuthModalProps = {
   onLogin?: (credentials: PremiumAuthCredentials) => void;
   onRegister?: (details: PremiumRegistrationDetails) => void;
   onForgotPassword?: (email: string) => void;
+  loading?: boolean;
+  error?: string | null;
+  successMessage?: string | null;
 };
 
 function FieldShell({ children }: { children: React.ReactNode }) {
@@ -58,6 +61,9 @@ export function PremiumAuthModal({
   onLogin,
   onRegister,
   onForgotPassword,
+  loading = false,
+  error = null,
+  successMessage = null,
 }: PremiumAuthModalProps) {
   const [mode, setMode] = useState<PremiumAuthMode>(defaultMode);
   const [showPassword, setShowPassword] = useState(false);
@@ -285,7 +291,7 @@ export function PremiumAuthModal({
                   </span>
                 </label>
 
-                {isLogin && (
+                {isLogin && onForgotPassword && (
                   <button
                     type="button"
                     onClick={requestPasswordHelp}
@@ -304,15 +310,17 @@ export function PremiumAuthModal({
               )}
 
               <div aria-live="polite" className="mt-5 min-h-5 text-center text-xs leading-5 text-[#d9f1f0]">
-                {notice}
+                {error || successMessage || notice}
               </div>
 
               <button
                 type="submit"
+                disabled={loading}
+                aria-busy={loading}
                 className="mt-2 flex h-14 w-full items-center justify-center gap-2 bg-[#78aeb3] px-6 text-sm font-bold uppercase tracking-[0.2em] text-white shadow-[0_10px_28px_rgba(0,24,28,0.28)] transition duration-150 hover:bg-[#8bc1c4] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#12545b] active:scale-[0.98]"
               >
-                {isLogin ? "Iniciar sesión" : "Registrarse"}
-                <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                {loading ? "Procesando…" : isLogin ? "Iniciar sesión" : "Registrarse"}
+                {!loading && <ArrowRight className="h-4 w-4" aria-hidden="true" />}
               </button>
 
               <p className="mt-6 text-center text-sm text-[#dbeff0]">

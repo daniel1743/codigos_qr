@@ -1,8 +1,12 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
+import { useCallback, useEffect } from "react";
 import { getServerSupabaseClient } from "../lib/supabase/server";
 import { PublicTemplateRenderer } from "../premium-template-studio/engine/PublicTemplateRenderer";
 import { resolveCanonicalEditorConfig } from "../components/profile/canonicalRenderBridge";
 import { pageAliasService } from "../services/page-alias.service";
+import { analyticsService } from "../services/analyticsService";
+import { getBrowserSupabaseClient } from "../lib/supabase/client";
+import type { PageAnalyticsInteraction } from "../types/analytics";
 
 /**
  * PUBLIC CHILD PAGE CUSTOM-ALIAS ROUTE.
@@ -64,6 +68,35 @@ export const Route = createFileRoute("/pg/a/$slug")({
 });
 
 function PublicPageAlias() {
-  const { config } = Route.useLoaderData();
-  return <PublicTemplateRenderer config={config} />;
+  const { page, config } = Route.useLoaderData();
+
+  useEffect(() => {
+    void analyticsService.trackPageEvent(getBrowserSupabaseClient(), page.page_id, "view");
+  }, [page.page_id]);
+
+  const handleTrack = useCallback(
+    (event: { type: string; blockId?: string; url?: string; itemId?: string; label?: string }) => {
+      const interaction: PageAnalyticsInteraction | undefined =
+        event.type === "product_click"
+          ? "product"
+          : event.type === "service_click"
+            ? "service"
+            : event.url?.toLowerCase().includes("wa.me") ||
+                event.url?.toLowerCase().includes("whatsapp")
+              ? "whatsapp"
+              : "button";
+      void analyticsService.trackPageEvent(
+        getBrowserSupabaseClient(),
+        page.page_id,
+        "link_click",
+        interaction,
+        event.itemId ?? event.blockId,
+        event.label,
+        event.url,
+      );
+    },
+    [page.page_id],
+  );
+
+  return <PublicTemplateRenderer config={config} onTrack={handleTrack} />;
 }

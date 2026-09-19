@@ -1,6 +1,6 @@
 import { createFileRoute, Link, Outlet, useMatches } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Eye, Loader2, Pencil, Plus, QrCode, Rocket, Trash2 } from "lucide-react";
+import { BarChart3, Eye, Loader2, Pencil, Plus, QrCode, Rocket, Trash2 } from "lucide-react";
 import { AppShell } from "../components/app-shell/AppShell";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
@@ -122,6 +122,11 @@ function PageActions({
       <Button asChild variant="outline" size="sm">
         <Link to="/pages/$pageId/edit" params={{ pageId: page.id }}>
           <Pencil className="mr-1.5 h-3.5 w-3.5" /> Editar
+        </Link>
+      </Button>
+      <Button asChild variant="outline" size="sm">
+        <Link to="/pages/$pageId/analytics" params={{ pageId: page.id }}>
+          <BarChart3 className="mr-1.5 h-3.5 w-3.5" /> Estadísticas
         </Link>
       </Button>
       {page.published && (

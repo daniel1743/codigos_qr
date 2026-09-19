@@ -26,10 +26,28 @@ export type ContextualTarget =
   | "hero-subtitle"
   | "hero-description"
   | "hero-cta"
+  | "hero-cta-primary"
+  | "hero-cta-secondary"
   | "hero-image"
   | "hero-background"
   | "hero-overlay"
-  | "page-background";
+  | "page-background"
+  | `collection-${string}`;
+
+/** Stable, ephemeral target identity for a collection item. */
+export function collectionTarget(
+  blockId: string,
+  collection: string,
+  itemId: string,
+  field = "item",
+): ContextualTarget {
+  return `collection-${encodeURIComponent(collection)}-${encodeURIComponent(blockId)}-${encodeURIComponent(itemId)}-${encodeURIComponent(field)}`;
+}
+
+/** DOM key used by Inspector item anchors; deliberately independent of array index. */
+export function collectionItemKey(blockId: string, itemId: string): string {
+  return `${blockId}:${itemId}`;
+}
 
 export type InspectorFocusTarget = ContextualTarget;
 

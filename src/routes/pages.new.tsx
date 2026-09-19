@@ -8,11 +8,11 @@ import { Card, CardContent } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
-import { createDemoConfig } from "../premium-template-studio/templates/definitions";
 import { getBrowserSupabaseClient } from "../lib/supabase/client";
 import { pageCanonicalService } from "../services/page-canonical.service";
 import { pageService } from "../services/page.service";
 import { profileService } from "../services/profile.service";
+import { createPageStarterConfig } from "../components/power-editor/pageStarterConfig";
 import type { PageType, Profile } from "../types/database";
 
 const PAGE_TYPE_OPTIONS: { value: PageType; label: string }[] = [
@@ -98,11 +98,9 @@ function PageForm({
         pageType,
       });
 
-      // Use the approved canonical starter directly. This create flow does not
-      // invoke Engine V2 or Smart Pages.
-      const starter = createDemoConfig();
-      starter.metadata.name = title.trim();
-      starter.profile.name = title.trim();
+      // Select an existing canonical template by page intent. This create flow
+      // does not invoke Engine V2 or Smart Pages.
+      const starter = createPageStarterConfig(title, pageType);
       await pageCanonicalService.saveDraft(supabase, page.id, auth.user.id, starter);
 
       toast.success("Página creada");

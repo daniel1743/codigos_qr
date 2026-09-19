@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useRender } from "../../engine/RenderContext";
 import { applyTypographyOverride, cardStyle, headingStyle } from "../../engine/styleEngine";
 import { videoEmbedUrl } from "../../utils";
-import { BlockTitle, EmptyBlockState, InlineText, SmartLink } from "./primitives";
+import { BlockTitle, ContextualItemTarget, EmptyBlockState, InlineText, SmartLink } from "./primitives";
 import type { BlockProps } from "./ContentBlocks";
 import { Dialog, DialogContent, DialogTitle } from "../../../components/ui/dialog";
 import { getGalleryColumns, moveGalleryLightboxIndex } from "./galleryImages";
@@ -309,13 +309,13 @@ export function PortfolioBlock({ block }: BlockProps) {
         }}
       >
         {items.map((item) => (
-          <SmartLink
-            key={item.id}
-            href={item.url}
-            block={block}
-            newTab={item.newTab}
-            ariaLabel={item.label}
-          >
+          <ContextualItemTarget key={item.id} blockId={block.id} collection="portfolio" itemId={item.id}>
+            <SmartLink
+              href={item.url}
+              block={block}
+              newTab={item.newTab}
+              ariaLabel={item.label}
+            >
             <article
               className="pts-hoverable"
               style={{
@@ -355,7 +355,8 @@ export function PortfolioBlock({ block }: BlockProps) {
                 ) : null}
               </div>
             </article>
-          </SmartLink>
+            </SmartLink>
+          </ContextualItemTarget>
         ))}
       </div>
     </div>

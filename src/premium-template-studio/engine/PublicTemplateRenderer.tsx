@@ -15,7 +15,13 @@ export interface PublicTemplateRendererProps {
   breakpoint?: Breakpoint | undefined;
   /** ANALYTICS ADAPTER hook */
   onTrack?:
-    | ((event: { type: string; blockId?: string | undefined; url?: string | undefined }) => void)
+    | ((event: {
+        type: string;
+        blockId?: string | undefined;
+        url?: string | undefined;
+        itemId?: string | undefined;
+        label?: string | undefined;
+      }) => void)
     | undefined;
 }
 

@@ -32,6 +32,7 @@ import {
   clampScrollValue,
   computeInspectorFocusScroll,
   requestInspectorFocus,
+  collectionTarget,
   subscribeInspectorFocus,
   type InspectorFocusTarget,
 } from "./inspector/inspectorFocus";
@@ -330,6 +331,12 @@ function Canvas() {
                 }
                 requestInspectorFocus("page-background");
               },
+              onSelectCollectionItem: (blockId, collection, itemId, field = "item") => {
+                if (state.selectedBlockId !== blockId) {
+                  dispatch({ type: "selectBlock", id: blockId });
+                }
+                requestInspectorFocus(collectionTarget(blockId, collection, itemId, field));
+              },
               onSelectProfileTarget: (target) => {
                 // Generalized Profile contextual selection (cover/avatar/bio).
                 // Clear any block selection so the Inspector switches from a
@@ -341,7 +348,7 @@ function Canvas() {
                 }
                 requestInspectorFocus(target);
               },
-              onSelectHeroCta: (blockId) => {
+              onSelectHeroCta: (blockId, target) => {
                 // Select the parent Hero if it is not already selected (no
                 // redundant selection churn), then request a one-shot Inspector
                 // focus on the CTA controls. Selection is UI state — never a
@@ -349,7 +356,7 @@ function Canvas() {
                 if (state.selectedBlockId !== blockId) {
                   dispatch({ type: "selectBlock", id: blockId });
                 }
-                requestInspectorFocus("hero-cta");
+                requestInspectorFocus(`hero-cta-${target}`);
               },
               onSelectHeroText: (blockId, target) => {
                 // Select the parent Hero if it is not already selected (no

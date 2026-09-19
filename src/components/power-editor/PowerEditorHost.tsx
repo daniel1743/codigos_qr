@@ -52,6 +52,7 @@ interface OwnedPage {
   public_id: string;
   title: string;
   page_type: string;
+  slug: string | null;
   template_config: unknown;
   published_revision: number;
 }
@@ -194,6 +195,7 @@ export function PowerEditorHost({ profileId, target, guidedOnboarding = false }:
             public_id: ownedPage.public_id,
             title: ownedPage.title,
             page_type: ownedPage.page_type,
+            slug: ownedPage.slug,
             template_config: ownedPage.template_config,
             published_revision: ownedPage.published_revision,
           });
@@ -512,16 +514,18 @@ export function PowerEditorHost({ profileId, target, guidedOnboarding = false }:
                           : "Canonical cargado"}
           </span>
         </div>
-        <PremiumTemplateStudio
-          config={config ?? undefined}
-          adapters={adapters}
-          autoSave
-          documentId={documentId}
-          onSaveStateChange={(s) => {
-            setSaveState(s);
-            if (s === "dirty") setPublishState("idle");
-          }}
-        />
+        <div className="min-h-0 flex-1">
+          <PremiumTemplateStudio
+            config={config ?? undefined}
+            adapters={adapters}
+            autoSave
+            documentId={documentId}
+            onSaveStateChange={(s) => {
+              setSaveState(s);
+              if (s === "dirty") setPublishState("idle");
+            }}
+          />
+        </div>
         {!isPageMode && <PowerEditorGuidedTour enabled={guidedOnboarding} />}
       </main>
     </AppShell>

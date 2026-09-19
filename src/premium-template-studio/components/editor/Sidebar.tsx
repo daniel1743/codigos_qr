@@ -28,10 +28,97 @@ import type { BlockType, MotionPresetId, EntrancePreset, HoverPreset } from "../
 import { useCapabilityAccess, isAssetLocked, ProBadge, Locked } from "../../entitlements";
 import { POWER_EDITOR_LOCALES, type PowerEditorLocale } from "../../i18n/messages";
 import { usePowerEditorLocale } from "../../i18n/PowerEditorLocale";
+import { requestInspectorFocus } from "../inspector/inspectorFocus";
+import { isFullHeroActive, replaceHeroPresetBlocks } from "../../engine/headerMode";
 
 function Icon({ name, className }: { name: string; className?: string }) {
   const Cmp = (Icons as unknown as Record<string, Icons.LucideIcon>)[name] ?? Icons.Square;
   return <Cmp className={className ?? "h-4 w-4"} strokeWidth={1.7} />;
+}
+
+function PrimaryMediaQuickAdd() {
+  const { state, dispatch } = useStudio();
+  const { profile } = state.config;
+  const fullHeroActive = isFullHeroActive(state.config.blocks);
+  const bannerPresent = !fullHeroActive && Boolean(profile.banner.enabled && profile.banner.imageUrl);
+  const avatarPresent = !fullHeroActive && Boolean(profile.avatarUrl);
+  const hero = state.config.blocks.find((block) => block.type === "hero");
+
+  const focusBanner = () => requestInspectorFocus("profile-cover");
+  const focusAvatar = () => requestInspectorFocus("profile-avatar");
+
+  return (
+    <Section title="Elementos principales">
+      <div className="space-y-2">
+        <button
+          type="button"
+          disabled={bannerPresent || fullHeroActive}
+          aria-disabled={bannerPresent || fullHeroActive}
+          title={fullHeroActive ? "Este Hero ya reemplaza el banner." : bannerPresent ? "Ya está añadido a esta página" : "Añadir banner"}
+          onClick={() => {
+            if (bannerPresent || fullHeroActive) return;
+            dispatch({ type: "patch", path: "profile.banner.enabled", value: true });
+            focusBanner();
+          }}
+          className={cx(
+            "flex min-h-11 w-full items-center gap-2 rounded-xl border px-3 py-2 text-left text-sm transition",
+            bannerPresent || fullHeroActive
+              ? "cursor-not-allowed border-border bg-muted/50 text-muted-foreground"
+              : "border-border bg-background text-foreground hover:border-foreground/30 hover:bg-accent",
+          )}
+        >
+          <Icon name="Image" className="h-4 w-4 shrink-0" />
+          <span className="min-w-0 flex-1 font-medium">
+            {fullHeroActive ? "✓ Banner reemplazado por Hero" : bannerPresent ? "✓ Banner añadido" : "+ Añadir banner"}
+          </span>
+        </button>
+        {fullHeroActive && <p className="px-1 text-[10px] text-muted-foreground">Este Hero ya reemplaza el banner.</p>}
+
+        <button
+          type="button"
+          disabled={avatarPresent || fullHeroActive}
+          aria-disabled={avatarPresent || fullHeroActive}
+          title={fullHeroActive ? "Este Hero ya incluye/controla la foto principal." : avatarPresent ? "Ya está añadido a esta página" : "Añadir avatar"}
+          onClick={() => {
+            if (avatarPresent || fullHeroActive) return;
+            focusAvatar();
+          }}
+          className={cx(
+            "flex min-h-11 w-full items-center gap-2 rounded-xl border px-3 py-2 text-left text-sm transition",
+            avatarPresent || fullHeroActive
+              ? "cursor-not-allowed border-border bg-muted/50 text-muted-foreground"
+              : "border-border bg-background text-foreground hover:border-foreground/30 hover:bg-accent",
+          )}
+        >
+          <Icon name="UserRound" className="h-4 w-4 shrink-0" />
+          <span className="min-w-0 flex-1 font-medium">
+            {fullHeroActive ? "✓ Avatar controlado por Hero" : avatarPresent ? "✓ Avatar añadido" : "+ Añadir avatar"}
+          </span>
+        </button>
+        {fullHeroActive && <p className="px-1 text-[10px] text-muted-foreground">Este Hero ya incluye/controla la foto principal.</p>}
+
+        <button
+          type="button"
+          disabled={!hero}
+          title={hero ? "Editar el texto del hero" : "No hay un hero en esta página"}
+          onClick={() => {
+            if (!hero) return;
+            dispatch({ type: "selectBlock", id: hero.id });
+            requestInspectorFocus("hero-title");
+          }}
+          className={cx(
+            "flex min-h-11 w-full items-center gap-2 rounded-xl border px-3 py-2 text-left text-sm transition",
+            hero
+              ? "border-border bg-background text-foreground hover:border-foreground/30 hover:bg-accent"
+              : "cursor-not-allowed border-border bg-muted/50 text-muted-foreground",
+          )}
+        >
+          <Icon name="Type" className="h-4 w-4 shrink-0" />
+          <span className="min-w-0 flex-1 font-medium">Texto del hero</span>
+        </button>
+      </div>
+    </Section>
+  );
 }
 
 function BlocksPanel() {
@@ -87,6 +174,8 @@ function BlocksPanel() {
           onChange={(v) => setViewMode(v as "presets" | "blocks")}
         />
         <div className="mt-2" />
+        {viewMode === "presets" && <PrimaryMediaQuickAdd />}
+
         <TextInput
           value={query}
           onChange={setQuery}
@@ -115,7 +204,19 @@ function BlocksPanel() {
                         aria-disabled={locked}
                         onClick={() => {
                           if (locked) return;
-                          dispatch({ type: "insertBlocks", blocks: preset.createBlocks() });
+                          const presetBlocks = preset.createBlocks();
+                          if (preset.category === "Hero") {
+                            dispatch({
+                              type: "replaceConfig",
+                              config: {
+                                ...state.config,
+                                blocks: replaceHeroPresetBlocks(state.config.blocks, presetBlocks),
+                              },
+                              resetHistory: false,
+                            });
+                            return;
+                          }
+                          dispatch({ type: "insertBlocks", blocks: presetBlocks });
                         }}
                         className={cx(
                           "group relative flex flex-col gap-1 overflow-hidden rounded-xl border border-border bg-background p-3 text-left transition",
@@ -130,7 +231,9 @@ function BlocksPanel() {
                           </span>
                         )}
                         <span className="flex items-center justify-between gap-2 text-sm font-medium text-foreground">
-                          {preset.name}
+                          {preset.category === "Hero" && !isFullHeroActive(state.config.blocks)
+                            ? `Cambiar a ${preset.name}`
+                            : preset.name}
                           {locked && <ProBadge />}
                         </span>
                         <span className="text-[10px] text-muted-foreground">

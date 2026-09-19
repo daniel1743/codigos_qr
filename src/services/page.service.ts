@@ -41,6 +41,7 @@ export class PageServiceError extends Error {
  * into the public renderer.
  */
 export interface PublicPageResult {
+  page_id: string;
   public_id: string;
   title: string | null;
   page_type: string | null;

@@ -1,7 +1,8 @@
-import { useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { getBrowserSupabaseClient } from "../lib/supabase/client";
 import PlatformNavbar from "./brand/PlatformNavbar";
+import Logo from "./brand/Logo";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -20,7 +21,17 @@ import {
 } from "lucide-react";
 import { Checkbox } from "./ui/checkbox";
 
-export function Auth({ showPlatformMenu = false }: { showPlatformMenu?: boolean }) {
+export function Auth({
+  showPlatformMenu = false,
+  navigateAfterLogin = false,
+  premium = false,
+  initialMode = "login",
+}: {
+  showPlatformMenu?: boolean;
+  navigateAfterLogin?: boolean;
+  premium?: boolean;
+  initialMode?: "login" | "signup";
+}) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -28,62 +39,229 @@ export function Auth({ showPlatformMenu = false }: { showPlatformMenu?: boolean 
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [mode, setMode] = useState<"login" | "signup">("login");
+  const [mode, setMode] = useState<"login" | "signup">(initialMode);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const supabase = getBrowserSupabaseClient();
+  const navigate = useNavigate();
 
-  const handleAuth = async (e: React.FormEvent) => {
-    e.preventDefault();
+  useEffect(() => {
+    let active = true;
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (active && session) void navigate({ to: "/profile" });
+    });
+    return () => {
+      active = false;
+    };
+  }, [navigate, supabase]);
+
+  const submitAuth = async (
+    nextMode: "login" | "signup",
+    values: { email: string; password: string; name?: string; termsAccepted?: boolean },
+  ) => {
     setLoading(true);
     setError(null);
     setSuccessMessage(null);
 
     try {
-      if (mode === "signup") {
-        if (!termsAccepted) {
+      if (nextMode === "signup") {
+        if (!values.termsAccepted) {
           throw new Error("Debes aceptar los términos y condiciones para continuar.");
         }
-        if (!name.trim()) {
+        if (!values.name?.trim()) {
           throw new Error("Por favor, ingresa tu nombre.");
         }
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
+        const { error: signUpError } = await supabase.auth.signUp({
+          email: values.email.trim(),
+          password: values.password,
           options: {
             emailRedirectTo:
               typeof window === "undefined"
                 ? "https://www.cripqer.dev/correo-confirmado"
                 : `${window.location.origin}/correo-confirmado`,
-            data: {
-              full_name: name,
-            },
+            data: { full_name: values.name.trim() },
           },
         });
-        if (error) throw error;
+        if (signUpError) throw signUpError;
         setSuccessMessage(
           "Revisa tu correo para confirmar la cuenta (o ingresa si el auto-confirm está activado).",
         );
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        if (error) throw error;
-        // La sesión se establecerá automáticamente y el padre escuchará el onAuthStateChange
+        return;
       }
+
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email: values.email.trim(),
+        password: values.password,
+      });
+      if (signInError) throw signInError;
+      if (!data.session) throw new Error("No se pudo iniciar sesión. Intenta nuevamente.");
+      if (navigateAfterLogin) await navigate({ to: "/profile" });
     } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message || "Ha ocurrido un error durante la autenticación.");
-      } else {
-        setError("Ha ocurrido un error durante la autenticación.");
-      }
+      setError(err instanceof Error ? err.message || "Ha ocurrido un error durante la autenticación." : "Ha ocurrido un error durante la autenticación.");
     } finally {
       setLoading(false);
     }
   };
 
+  const handleAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await submitAuth(mode, { name, email, password, termsAccepted });
+    } catch {
+      // submitAuth has already exposed the authoritative error in the UI.
+    }
+  };
+
   const isLogin = mode === "login";
+
+  if (premium) {
+    return (
+      <div className="min-h-screen bg-[#0B1A2E] px-4 py-8 text-white sm:px-6">
+        <div className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-md items-center justify-center">
+          <div className="w-full rounded-3xl border border-white/10 bg-white p-7 text-slate-950 shadow-2xl shadow-black/30 sm:p-9">
+            <div className="flex flex-col items-center text-center">
+              <div className="flex items-center gap-2" aria-label="Cripqer">
+                <Logo variant="symbol" width={48} height={48} title="Cripqer" />
+                <Logo variant="wordmark" showTagline={false} title="Cripqer" />
+              </div>
+              <h1 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">{isLogin ? "Iniciar sesión" : "Crear cuenta"}</h1>
+              <p className="mt-2 text-sm leading-6 text-slate-500">
+                {isLogin
+                  ? "Ingresa a tu editor para actualizar enlaces, diseño y QR."
+                  : "Crea tu acceso para generar tu QR y publicar tu página."}
+              </p>
+            </div>
+
+            <form onSubmit={handleAuth} noValidate className="mt-7 space-y-4">
+              {error && (
+                <Alert variant="destructive" className="rounded-2xl">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+              {successMessage && (
+                <Alert className="rounded-2xl border-emerald-200 bg-emerald-50 text-emerald-700">
+                  <AlertDescription>{successMessage}</AlertDescription>
+                </Alert>
+              )}
+
+              {!isLogin && (
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="name"
+                    className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500"
+                  >
+                    Nombre completo
+                  </Label>
+                  <div className="relative">
+                    <User className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                    <Input
+                      id="name"
+                      type="text"
+                      placeholder="Tu nombre"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      required
+                      className="h-12 rounded-2xl border-slate-200 bg-slate-50 pl-11 text-slate-950 shadow-inner shadow-slate-900/[0.02] focus-visible:ring-blue-500"
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <Label
+                  htmlFor="email"
+                  className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500"
+                >
+                  Correo electrónico
+                </Label>
+                <div className="relative">
+                  <Mail className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="tu@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="h-12 rounded-2xl border-slate-200 bg-slate-50 pl-11 text-slate-950 shadow-inner shadow-slate-900/[0.02] focus-visible:ring-blue-500"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label
+                  htmlFor="password"
+                  className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500"
+                >
+                  Contraseña
+                </Label>
+                <div className="relative">
+                  <LockKeyhole className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    minLength={6}
+                    className="h-12 rounded-2xl border-slate-200 bg-slate-50 pl-11 pr-11 text-slate-950 shadow-inner shadow-slate-900/[0.02] focus-visible:ring-blue-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-300 hover:text-slate-500 focus:outline-none"
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {!isLogin && (
+                <div className="flex items-center space-x-2 pt-1">
+                  <Checkbox
+                    id="terms"
+                    checked={termsAccepted}
+                    onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
+                    className="border-slate-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <label
+                    htmlFor="terms"
+                    className="text-sm font-medium leading-none text-slate-600 peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Acepto los términos y condiciones
+                  </label>
+                </div>
+              )}
+
+              <div className="space-y-3 pt-2">
+                <Button
+                  type="submit"
+                  className="h-12 w-full rounded-2xl bg-[#0D47A1] text-sm font-bold text-white shadow-lg shadow-blue-900/20 hover:bg-[#0b3c89]"
+                  disabled={loading}
+                >
+                  {loading ? "Procesando..." : isLogin ? "Iniciar sesión" : "Crear mi cuenta"}
+                  {!loading && <ArrowRight className="ml-2 h-4 w-4" />}
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="h-11 w-full rounded-2xl text-slate-600 hover:bg-slate-100 hover:text-slate-950"
+                  onClick={() => {
+                    setMode(mode === "login" ? "signup" : "login");
+                    setError(null);
+                    setSuccessMessage(null);
+                  }}
+                >
+                  {isLogin ? "¿No tienes cuenta? Regístrate" : "¿Ya tienes cuenta? Inicia sesión"}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen overflow-hidden bg-[#0b1020] text-white">
@@ -234,7 +412,7 @@ export function Auth({ showPlatformMenu = false }: { showPlatformMenu?: boolean 
                 </h1>
                 <p className="mt-3 text-sm leading-6 text-slate-500">
                   {isLogin
-                    ? "Ingresa a tu editor para actualizar enlaces, diseño y QR."
+                  ? "Ingresa a tu espacio Cripqer para gestionar tu página, QR y herramientas."
                     : "Crea tu acceso para generar tu QR y publicar tu página."}
                 </p>
               </div>

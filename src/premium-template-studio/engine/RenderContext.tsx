@@ -1,8 +1,10 @@
 import { createContext, useContext } from "react";
 import type { Breakpoint, TemplateTheme } from "../types";
+import type { ContextualTarget } from "../components/inspector/inspectorFocus";
 
 /** Editable Hero text sub-targets (parent block + Inspector focus, not blocks). */
 export type HeroTextTarget = "title" | "subtitle" | "description" | "eyebrow";
+export type HeroCtaTarget = "primary" | "secondary";
 
 /** Profile sub-targets (cover/avatar/bio) — ephemeral contextual UI targets. */
 export type ProfileTarget = "profile-cover" | "profile-avatar" | "profile-bio";
@@ -22,7 +24,7 @@ export interface RenderContextValue {
   /** Generalized Profile contextual selection (cover/avatar/bio) — not a block. */
   onSelectProfileTarget?: ((target: ProfileTarget) => void) | undefined;
   /** Selecting a Hero CTA sub-target (parent block id + focus, not a new block). */
-  onSelectHeroCta?: ((blockId: string) => void) | undefined;
+  onSelectHeroCta?: ((blockId: string, target: HeroCtaTarget) => void) | undefined;
   /** Selecting a Hero text sub-target (title/subtitle/description/eyebrow). */
   onSelectHeroText?: ((blockId: string, target: HeroTextTarget) => void) | undefined;
   /** Selecting the Hero foreground/media image (parent block id + focus). */
@@ -31,11 +33,25 @@ export interface RenderContextValue {
   onSelectHeroBackground?: ((blockId: string) => void) | undefined;
   /** Selecting the page/template background surface (contextual navigation — not a block). */
   onSelectPageBackground?: (() => void) | undefined;
+  /** Select a stable collection item/child without creating document state. */
+  onSelectCollectionItem?:
+    | ((blockId: string, collection: string, itemId: string, field?: string) => void)
+    | undefined;
+  /** Exposed for block primitives that need a stable target attribute. */
+  collectionTarget?:
+    | ((blockId: string, collection: string, itemId: string, field?: string) => ContextualTarget)
+    | undefined;
   /** inline editing hook: path is dot-notation into the config */
   onInlineEdit?: ((path: string, value: string) => void) | undefined;
   /** ANALYTICS ADAPTER hook */
   onTrack?:
-    | ((event: { type: string; blockId?: string | undefined; url?: string | undefined }) => void)
+    | ((event: {
+        type: string;
+        blockId?: string | undefined;
+        url?: string | undefined;
+        itemId?: string | undefined;
+        label?: string | undefined;
+      }) => void)
     | undefined;
 }
 

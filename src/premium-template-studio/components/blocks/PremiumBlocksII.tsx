@@ -19,9 +19,10 @@ import {
   Heart,
 } from "lucide-react";
 import { useRender } from "../../engine/RenderContext";
-import { cardStyle, headingStyle, applyCTAStyle } from "../../engine/styleEngine";
+import { applyCTAStyle, applyTypographyOverride, cardStyle, headingStyle } from "../../engine/styleEngine";
 import { hexToRgba, safeUrl } from "../../utils";
 import type { BlockItem, TemplateBlock } from "../../types";
+import { ContextualItemTarget } from "./primitives";
 
 // Dynamic Icon resolver
 function SmartIcon({
@@ -93,12 +94,19 @@ function MailIconPlaceholder({
 /* 1. Product Card                                                    */
 /* ------------------------------------------------------------------ */
 export function ProductCardBlock({ block }: { block: TemplateBlock }) {
-  const { theme, mode } = useRender();
+  const { theme, mode, onTrack } = useRender();
   const c = block.content;
   const variant = block.variant ?? "card";
 
   const handleCTA = () => {
     if (!c.ctaUrl || mode === "edit") return;
+    onTrack?.({
+      type: "product_click",
+      blockId: block.id,
+      itemId: block.id,
+      label: c.title,
+      url: c.ctaUrl,
+    });
     window.open(c.ctaUrl, "_blank", "noopener,noreferrer");
   };
 
@@ -113,6 +121,7 @@ export function ProductCardBlock({ block }: { block: TemplateBlock }) {
 
   return (
     <div
+      className="pts-hoverable"
       style={{
         ...wrapperStyle,
         position: "relative",
@@ -161,20 +170,20 @@ export function ProductCardBlock({ block }: { block: TemplateBlock }) {
           gap: 8,
         }}
       >
-        <h3 style={{ ...headingStyle(theme, 0.85), fontSize: isFeatured ? "17px" : "14.5px" }}>
+        <h3 style={applyTypographyOverride({ ...headingStyle(theme, 0.85), fontSize: isFeatured ? "17px" : "14.5px" }, c.typography)}>
           {c.title || "Product Title"}
         </h3>
 
         {c.description && (
           <p
-            style={{ fontSize: "12.5px", color: theme.colors.mutedText, lineHeight: 1.4, flex: 1 }}
+            style={applyTypographyOverride({ fontSize: "12.5px", color: theme.colors.mutedText, lineHeight: 1.4, flex: 1 }, c.descriptionTypography)}
           >
             {c.description}
           </p>
         )}
 
         <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "6px 0 2px" }}>
-          <span style={{ fontSize: "16px", fontWeight: 700, color: theme.colors.text }}>
+          <span style={applyTypographyOverride({ fontSize: "16px", fontWeight: 700, color: theme.colors.text }, c.typography)}>
             {c.price || "$0.00"}
           </span>
           {c.comparePrice && (
@@ -208,7 +217,7 @@ export function ProductCardBlock({ block }: { block: TemplateBlock }) {
               alignItems: "center",
               justifyContent: "center",
               gap: 6,
-            }, block.style.ctaStyle)}
+            }, c.ctaStyle ?? block.style.ctaStyle)}
           >
             <ShoppingBag size={14} />
             {c.ctaLabel}
@@ -252,7 +261,16 @@ export function ProductGridBlock({ block }: { block: TemplateBlock }) {
           visibility: { desktop: true, tablet: true, mobile: true },
           interaction: block.interaction,
         };
-        return <ProductCardBlock key={prodBlock.id} block={prodBlock} />;
+        return (
+          <ContextualItemTarget
+            key={prodBlock.id}
+            blockId={block.id}
+            collection="product-grid"
+            itemId={prod.id ?? `prod-${idx}`}
+          >
+            <ProductCardBlock block={prodBlock} />
+          </ContextualItemTarget>
+        );
       })}
     </div>
   );
@@ -274,6 +292,13 @@ export function BookingBlock({ block }: { block: TemplateBlock }) {
 
   const handleBooking = () => {
     if (!selectedDate || !selectedTime || mode === "edit") return;
+    if (c.ctaUrl) {
+      const destination = safeUrl(c.ctaUrl);
+      if (destination) {
+        window.open(destination, "_blank", "noopener,noreferrer");
+        return;
+      }
+    }
     setConfirmed(true);
     // Integration point: call external webhook/adapter if present
     const adapter = (
@@ -457,6 +482,7 @@ export function BookingBlock({ block }: { block: TemplateBlock }) {
           )}
 
           <button
+            className="pts-hoverable pts-press-feedback"
             onClick={handleBooking}
             disabled={!selectedDate || !selectedTime}
             style={applyCTAStyle(
@@ -597,8 +623,13 @@ export function EventsBlock({ block }: { block: TemplateBlock }) {
         const isCards = variant === "cards" || isFeatured;
 
         return (
-          <div
+          <ContextualItemTarget
             key={event.id ?? idx}
+            blockId={block.id}
+            collection="events"
+            itemId={event.id ?? String(idx)}
+          >
+          <div
             style={{
               ...cardStyle(
                 theme,
@@ -682,6 +713,7 @@ export function EventsBlock({ block }: { block: TemplateBlock }) {
               </button>
             )}
           </div>
+          </ContextualItemTarget>
         );
       })}
     </div>
@@ -1011,7 +1043,14 @@ export function CarouselBlock({ block }: { block: TemplateBlock }) {
           }}
         >
           {items.map((item: BlockItem, i: number) => (
-            <div key={i} style={{ width: `${100 / items.length}%`, height: "100%", flexShrink: 0 }}>
+            <ContextualItemTarget
+              key={item.id ?? i}
+              blockId={block.id}
+              collection="carousel"
+              itemId={item.id ?? String(i)}
+              field="image"
+            >
+            <div style={{ width: `${100 / items.length}%`, height: "100%", flexShrink: 0 }}>
               {item.imageUrl && (
                 <img
                   src={item.imageUrl}
@@ -1020,6 +1059,7 @@ export function CarouselBlock({ block }: { block: TemplateBlock }) {
                 />
               )}
             </div>
+            </ContextualItemTarget>
           ))}
         </div>
 
@@ -1173,9 +1213,15 @@ export function TabsBlock({ block }: { block: TemplateBlock }) {
       >
         {items.map((item: BlockItem, idx: number) => {
           const isSelected = activeTab === item.id;
-          return (
-            <button
+            return (
+            <ContextualItemTarget
               key={item.id}
+              blockId={block.id}
+              collection="tabs"
+              itemId={item.id ?? String(idx)}
+              field="label"
+            >
+            <button
               role="tab"
               aria-selected={isSelected}
               tabIndex={isSelected ? 0 : -1}
@@ -1197,6 +1243,7 @@ export function TabsBlock({ block }: { block: TemplateBlock }) {
             >
               {item.label}
             </button>
+            </ContextualItemTarget>
           );
         })}
       </div>
@@ -1243,8 +1290,14 @@ export function BottomNavigationBlock({ block }: { block: TemplateBlock }) {
       }}
     >
       {items.map((item: BlockItem, idx: number) => (
-        <button
+        <ContextualItemTarget
           key={item.id ?? idx}
+          blockId={block.id}
+          collection="bottom-nav"
+          itemId={item.id ?? String(idx)}
+          field="item"
+        >
+        <button
           onClick={() => handleNav(item.url)}
           style={{
             display: "flex",
@@ -1266,6 +1319,7 @@ export function BottomNavigationBlock({ block }: { block: TemplateBlock }) {
           </div>
           <span style={{ fontSize: "10px", fontWeight: 500 }}>{item.label}</span>
         </button>
+        </ContextualItemTarget>
       ))}
     </div>
   );

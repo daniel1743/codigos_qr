@@ -1,11 +1,16 @@
 export type AnalyticsEventType = "view" | "link_click";
+export type PageAnalyticsInteraction = "button" | "whatsapp" | "product" | "service";
 export type DeviceType = "mobile" | "desktop" | "tablet" | "unknown";
 
 export interface QRAnalyticsEvent {
   id: string;
   profile_id: string;
+  page_id?: string | null;
   event_type: AnalyticsEventType;
   link_id?: string | null;
+  interaction_type?: PageAnalyticsInteraction | null;
+  item_id?: string | null;
+  item_label?: string | null;
   country?: string | null;
   city?: string | null;
   latitude?: number | null;
@@ -30,6 +35,18 @@ export interface AnalyticsFilters {
   endDate?: string;
   eventType?: AnalyticsEventType;
   linkId?: string;
+  pageId?: string;
+}
+
+export interface PageAnalyticsSummary {
+  visits: number;
+  buttonClicks: number;
+  whatsappClicks: number;
+  productClicks: number;
+  serviceClicks: number;
+  topProducts: Array<{ label: string; count: number }>;
+  topServices: Array<{ label: string; count: number }>;
+  dailyVisits: Array<{ date: string; count: number }>;
 }
 
 export interface AggregatedAnalytics {

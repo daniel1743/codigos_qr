@@ -114,6 +114,8 @@ export function ProfileBanner({
   const fadeStrength = blendFade?.strength ?? 1;
   const fadeAlpha = Math.round((1 - fadeStrength) * 1000) / 1000;
 
+  if (!banner.imageUrl && mode !== "edit") return null;
+
   const selectCover = () => {
     if (onSelectProfileTarget) {
       onSelectProfileTarget("profile-cover");
@@ -171,7 +173,31 @@ export function ProfileBanner({
             height: "100%",
             backgroundImage: `linear-gradient(120deg, ${theme.colors.primary}, ${theme.colors.accent})`,
           }}
-        />
+        >
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              selectCover();
+            }}
+            style={{
+              position: "absolute",
+              inset: 0,
+              margin: "auto",
+              width: "fit-content",
+              height: "fit-content",
+              border: "1px solid rgba(255,255,255,.55)",
+              borderRadius: 999,
+              padding: "8px 14px",
+              background: "rgba(0,0,0,.24)",
+              color: "#fff",
+              fontSize: 12,
+              cursor: "pointer",
+            }}
+          >
+            + Añadir banner
+          </button>
+        </div>
       )}
       <div
         aria-hidden
@@ -242,7 +268,7 @@ export function ProfileHeader({
         flexShrink: 0,
       }}
     />
-  ) : (
+  ) : mode === "edit" ? (
     <div
       aria-hidden
       style={{
@@ -259,9 +285,26 @@ export function ProfileHeader({
         flexShrink: 0,
       }}
     >
-      {profile.name.slice(0, 1)}
+      <button
+        type="button"
+        onClick={(event) => {
+          event.stopPropagation();
+          selectProfileTarget("profile-avatar");
+        }}
+        style={{
+          border: "1px solid rgba(255,255,255,.55)",
+          borderRadius: 999,
+          padding: "7px 10px",
+          background: "rgba(0,0,0,.24)",
+          color: "#fff",
+          fontSize: 11,
+          cursor: "pointer",
+        }}
+      >
+        + Añadir foto
+      </button>
     </div>
-  );
+  ) : null;
 
   const identity = (
     <div style={{ textAlign: inline ? "left" : align, flex: 1, minWidth: 0 }}>

@@ -539,8 +539,8 @@ export default function CripqerLanding() {
         }
         actions={
           <div className="cq-nav-cta">
-            <Link to="/editor" data-cta="login">Iniciar sesión</Link>
-            <Link to="/editor" className="cq-btn cq-btn-primary cq-btn-sm" data-cta="crear-qr">Crear mi QR</Link>
+          <Link to="/login" data-cta="login">Iniciar sesión</Link>
+            <Link to="/login" search={{ mode: "register" }} className="cq-btn cq-btn-primary cq-btn-sm" data-cta="crear-qr">Crear mi QR</Link>
           </div>
         }
         mobileMenuContent={
@@ -553,8 +553,8 @@ export default function CripqerLanding() {
               <a href="#faq" className="block rounded-xl px-4 py-3 text-lg font-medium text-white/80 hover:bg-white/10 hover:text-white transition-colors">FAQ</a>
             </nav>
             <div className="mt-auto flex flex-col gap-3 pt-6 border-t border-white/10">
-              <Link to="/editor" className="block rounded-xl px-4 py-3 text-center text-lg font-medium text-white bg-white/10 hover:bg-white/20 transition-colors">Iniciar sesión</Link>
-              <Link to="/editor" className="block rounded-xl px-4 py-3 text-center text-lg font-medium text-black bg-[#D4AF37] hover:bg-[#e6c45b] transition-colors">Crear mi QR</Link>
+              <Link to="/login" className="block rounded-xl px-4 py-3 text-center text-lg font-medium text-white bg-white/10 hover:bg-white/20 transition-colors">Iniciar sesión</Link>
+              <Link to="/login" search={{ mode: "register" }} className="block rounded-xl px-4 py-3 text-center text-lg font-medium text-black bg-[#D4AF37] hover:bg-[#e6c45b] transition-colors">Crear mi QR</Link>
             </div>
           </div>
         }
@@ -570,7 +570,7 @@ export default function CripqerLanding() {
               QR + Biolink + Analytics + Gestión en una sola plataforma.
             </p>
             <div className="cq-hero-actions">
-              <Link to="/editor" className="cq-btn cq-btn-accent" data-cta="crear-qr">Crear mi QR {Icon.arrow}</Link>
+              <Link to="/login" search={{ mode: "register" }} className="cq-btn cq-btn-accent" data-cta="crear-qr">Crear mi QR {Icon.arrow}</Link>
               <a href="#disenos" className="cq-btn cq-btn-ghost" data-cta="ver-disenos">Ver diseños</a>
             </div>
             <p className="cq-hero-note">Más que un biolink. Es tu sistema de crecimiento.</p>
@@ -969,7 +969,7 @@ export default function CripqerLanding() {
             <h2>Haz que el próximo escaneo cuente.</h2>
             <p>Construye la experiencia que quieres que las personas descubran cuando escanean tu QR.</p>
             <div className="cq-hero-actions" style={{ justifyContent: "center" }}>
-              <Link to="/editor" className="cq-btn cq-btn-accent" data-cta="crear-qr">Crear mi QR {Icon.arrow}</Link>
+              <Link to="/login" search={{ mode: "register" }} className="cq-btn cq-btn-accent" data-cta="crear-qr">Crear mi QR {Icon.arrow}</Link>
               <a href="#disenos" className="cq-btn cq-btn-ghost" data-cta="ver-disenos">Ver diseños</a>
             </div>
           </div>
@@ -982,7 +982,7 @@ export default function CripqerLanding() {
           <a href="#producto">Producto</a>
           <a href="#disenos">Diseños</a>
           <a href="#seguridad">Documentos</a>
-          <Link to="/editor" data-cta="login">Iniciar sesión</Link>
+            <Link to="/login" data-cta="login">Iniciar sesión</Link>
         </nav>
       </PlatformFooter>
     </div>

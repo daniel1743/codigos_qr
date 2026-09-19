@@ -1,11 +1,14 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type {
   QRAnalyticsEvent,
+  AnalyticsEventType,
   AnalyticsContext,
   AnalyticsFilters,
   AggregatedAnalytics,
   GeolocationData,
   DeviceType,
+  PageAnalyticsInteraction,
+  PageAnalyticsSummary,
 } from "../types/analytics";
 
 /**
@@ -125,6 +128,36 @@ async function getGeolocation(): Promise<GeolocationData> {
 }
 
 export const analyticsService = {
+  /** Track one public child-page event through the existing analytics authority. */
+  async trackPageEvent(
+    supabase: SupabaseClient,
+    pageId: string,
+    eventType: AnalyticsEventType,
+    interactionType?: PageAnalyticsInteraction,
+    itemId?: string,
+    itemLabel?: string,
+    url?: string,
+  ): Promise<string | null> {
+    try {
+      const { data, error } = await supabase.rpc("track_child_page_event", {
+        p_page_id: pageId,
+        p_event_type: eventType,
+        p_interaction_type: interactionType || null,
+        p_item_id: itemId || null,
+        p_item_label: itemLabel || null,
+        p_url: url || null,
+        p_user_agent: typeof navigator === "undefined" ? null : navigator.userAgent,
+        p_referrer: typeof document === "undefined" ? null : document.referrer || null,
+      });
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      // Analytics must never block the public page or its navigation.
+      console.error("Error tracking child page event:", error);
+      return null;
+    }
+  },
+
   /**
    * Track page view
    */
@@ -212,11 +245,11 @@ export const analyticsService = {
     profileId: string,
     filters: AnalyticsFilters = {},
   ): Promise<QRAnalyticsEvent[]> {
-    let query = supabase
-      .from("qr_analytics")
-      .select("*")
-      .eq("profile_id", profileId)
-      .order("created_at", { ascending: false });
+    let query = supabase.from("qr_analytics").select("*").order("created_at", { ascending: false });
+
+    if (profileId) {
+      query = query.eq("profile_id", profileId);
+    }
 
     if (filters.startDate) {
       query = query.gte("created_at", filters.startDate);
@@ -234,10 +267,68 @@ export const analyticsService = {
       query = query.eq("link_id", filters.linkId);
     }
 
+    if (filters.pageId) {
+      query = query.eq("page_id", filters.pageId);
+    }
+
     const { data, error } = await query;
 
     if (error) throw error;
     return data || [];
+  },
+
+  async getPageAnalytics(
+    supabase: SupabaseClient,
+    pageId: string,
+    days = 30,
+  ): Promise<PageAnalyticsSummary> {
+    const startDate = new Date();
+    startDate.setHours(0, 0, 0, 0);
+    startDate.setDate(startDate.getDate() - Math.max(0, days - 1));
+
+    const events = await this.getProfileAnalytics(supabase, "", {
+      pageId,
+      startDate: startDate.toISOString(),
+    });
+    const pageEvents = events.filter((event) => event.page_id === pageId);
+    const daily = new Map<string, number>();
+    const items = {
+      product: new Map<string, number>(),
+      service: new Map<string, number>(),
+    };
+    pageEvents
+      .filter((event) => event.event_type === "view")
+      .forEach((event) => {
+        const date = event.created_at.split("T")[0] ?? event.created_at;
+        daily.set(date, (daily.get(date) ?? 0) + 1);
+      });
+
+    pageEvents.forEach((event) => {
+      if ((event.interaction_type === "product" || event.interaction_type === "service") && event.item_label) {
+        const counts = items[event.interaction_type];
+        counts.set(event.item_label, (counts.get(event.item_label) ?? 0) + 1);
+      }
+    });
+
+    const rankItems = (counts: Map<string, number>) =>
+      Array.from(counts.entries())
+        .map(([label, count]) => ({ label, count }))
+        .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
+
+    return {
+      visits: pageEvents.filter((event) => event.event_type === "view").length,
+      buttonClicks: pageEvents.filter(
+        (event) => event.event_type === "link_click" || event.interaction_type === "button",
+      ).length,
+      whatsappClicks: pageEvents.filter((event) => event.interaction_type === "whatsapp").length,
+      productClicks: pageEvents.filter((event) => event.interaction_type === "product").length,
+      serviceClicks: pageEvents.filter((event) => event.interaction_type === "service").length,
+      topProducts: rankItems(items.product),
+      topServices: rankItems(items.service),
+      dailyVisits: Array.from(daily.entries())
+        .map(([date, count]) => ({ date, count }))
+        .sort((a, b) => a.date.localeCompare(b.date)),
+    };
   },
 
   /**

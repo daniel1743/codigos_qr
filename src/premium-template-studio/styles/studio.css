@@ -75,9 +75,15 @@
     box-shadow 0.18s ease,
     filter 0.18s ease;
 }
-.pts-hoverable:hover {
-  transform: translateY(-2px);
-  filter: brightness(1.03);
+@media (hover: hover) and (pointer: fine) {
+  .pts-hoverable:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.03);
+  }
+}
+.pts-hoverable:focus-visible {
+  outline: 2px solid var(--pts-accent, #6d5efc);
+  outline-offset: 2px;
 }
 
 .pts-page a {
@@ -250,31 +256,39 @@
     transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
     box-shadow 0.2s ease;
 }
-.pts-hover-lift:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+@media (hover: hover) and (pointer: fine) {
+  .pts-hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  }
 }
 
 .pts-hover-scale {
   transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.pts-hover-scale:hover {
-  transform: scale(1.025);
+@media (hover: hover) and (pointer: fine) {
+  .pts-hover-scale:hover {
+    transform: scale(1.0125);
+  }
 }
 
 .pts-hover-glow {
   transition: box-shadow 0.25s ease;
 }
-.pts-hover-glow:hover {
-  box-shadow: 0 0 24px -4px var(--pts-accent, rgba(109, 94, 252, 0.35));
+@media (hover: hover) and (pointer: fine) {
+  .pts-hover-glow:hover {
+    box-shadow: 0 0 24px -4px var(--pts-accent, rgba(109, 94, 252, 0.35));
+  }
 }
 
 .pts-hover-border {
   transition: border-color 0.2s ease;
   border-color: transparent;
 }
-.pts-hover-border:hover {
-  border-color: var(--pts-accent, #6d5efc);
+@media (hover: hover) and (pointer: fine) {
+  .pts-hover-border:hover {
+    border-color: var(--pts-accent, #6d5efc);
+  }
 }
 
 /* ---- Press / tap feedback ---- */

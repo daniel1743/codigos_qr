@@ -4,8 +4,10 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "../components/app-shell/AppShell";
 import { QRStudio } from "../components/qr/QRStudio";
+import { CustomPublicLinkControl } from "../components/qr/CustomPublicLinkControl";
 import { Button } from "../components/ui/button";
 import { getBrowserSupabaseClient } from "../lib/supabase/client";
+import { getAliasProfileUrl } from "../lib/url";
 import { profileService } from "../services/profile.service";
 import type { Profile } from "../types/database";
 
@@ -98,17 +100,43 @@ function QrPage() {
           <p className="text-sm text-muted-foreground">Cargando…</p>
         ) : profile?.public_id ? (
           <>
-            <QRStudio
-              publicId={profile.public_id}
-              published={!!profile.published}
-              saving={saving}
-              onSave={saveDesign}
-              isValid
-              profile={profile}
-              onChange={onChange}
-              basicOnly
-              showSaveControls={false}
+            <CustomPublicLinkControl
+              currentAlias={profile?.slug ?? null}
+              publicUrlPrefix="cripqer.dev/"
+              getPublicUrl={getAliasProfileUrl}
+              checkAvailability={async (alias) => {
+                const id = profile?.id;
+                if (!id) return false;
+                const { data, error } = await supabase
+                  .from("profiles")
+                  .select("id")
+                  .eq("slug", alias)
+                  .neq("id", id)
+                  .maybeSingle();
+                if (error) throw error;
+                return data == null;
+              }}
+              saveAlias={async (alias) => {
+                const id = profile?.id;
+                if (!id) throw new Error("Perfil no disponible");
+                const saved = await profileService.updateProfile(supabase, id, { slug: alias ?? "" });
+                setProfile((current) => (current ? { ...current, slug: saved.slug } : current));
+                return saved.slug;
+              }}
             />
+            <div className="mt-6">
+              <QRStudio
+                publicId={profile.public_id}
+                published={!!profile.published}
+                saving={saving}
+                onSave={saveDesign}
+                isValid
+                profile={profile}
+                onChange={onChange}
+                basicOnly
+                showSaveControls={false}
+              />
+            </div>
             <div className="mt-6 flex justify-end">
               <Button onClick={saveDesign} disabled={saving}>
                 {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}

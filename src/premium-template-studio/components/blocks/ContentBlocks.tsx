@@ -201,19 +201,19 @@ export function ContactBlock({ block }: BlockProps) {
     { icon: Globe, label: c.website, href: safeUrl(c.website) },
     {
       icon: MessageCircle,
-      label: c.whatsappUrl ? "Chat on WhatsApp" : undefined,
+      label: c.whatsappUrl ? c.whatsappLabel || "Chat on WhatsApp" : undefined,
       href: safeUrl(c.whatsappUrl),
     },
     {
       icon: Calendar,
-      label: c.bookingUrl ? "Book an Appointment" : undefined,
+      label: c.bookingUrl ? c.bookingLabel || "Book an Appointment" : undefined,
       href: safeUrl(c.bookingUrl),
     },
     ...(c.downloadContact
       ? [
           {
             icon: Download,
-            label: "Download Contact Card",
+            label: c.downloadContactLabel || "Download Contact Card",
             href: generateVCardDataUri(c.title || "Contact", c.email, c.phone),
             download: "contact.vcf",
           },
@@ -252,7 +252,25 @@ export function ContactBlock({ block }: BlockProps) {
 
 export function QRBlock({ block }: BlockProps) {
   const { theme } = useRender();
-  const url = safeUrl(block.content.url) ?? "https://example.com";
+  const url = safeUrl(block.content.url);
+  if (!url) {
+    return (
+      <div
+        style={{
+          ...(block.variant === "card" ? cardStyle(theme, block.style) : {}),
+          display: "grid",
+          placeItems: "center",
+          minHeight: 160,
+          padding: 20,
+          textAlign: "center",
+          color: theme.colors.mutedText,
+          fontSize: 13,
+        }}
+      >
+        {block.content.title || "Añade una URL para generar el código QR."}
+      </div>
+    );
+  }
   const light = theme.colors.card.replace("#", "").slice(0, 6) || "ffffff";
   const dark = theme.colors.text.replace("#", "").slice(0, 6) || "000000";
   return (
