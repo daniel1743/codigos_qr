@@ -193,6 +193,109 @@ function restaurantVisualDefaults(config: BioTemplateConfig): BioTemplateConfig 
   };
 }
 
+function storeBentoDefaults(config: BioTemplateConfig): BioTemplateConfig {
+  const blocks = config.blocks
+    .filter((block) => block.type !== "image" && block.type !== "social")
+    .map((block) => {
+      if (block.type === "hero") {
+        return {
+          ...block,
+          content: {
+            ...block.content,
+            title: "Nuestro catálogo",
+            eyebrow: "Productos y soluciones",
+            subtitle: "Explora nuestros productos y encuentra lo que necesitas.",
+            body: "Conoce nuestra selección y consulta disponibilidad o detalles.",
+            description: "Una selección clara de productos para elegir con confianza.",
+            badge: { label: "Catálogo", enabled: true },
+            primaryCTA: { label: "Ver productos", url: "#catalogo" },
+            secondaryCTA: { label: "Consultar", url: "#contacto" },
+          },
+        };
+      }
+
+      if (block.type === "heading") {
+        return {
+          ...block,
+          content: {
+            ...block.content,
+            title: "Productos destacados",
+            subtitle: "Opciones para cada necesidad",
+          },
+        };
+      }
+
+      if (block.type === "productGrid") {
+        return {
+          ...block,
+          content: {
+            ...block.content,
+            products: [
+              {
+                id: `${block.id}-featured`,
+                title: "Producto destacado",
+                description: "Una opción versátil para comenzar.",
+                price: "$29.900",
+                imageUrl: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600",
+                ctaLabel: "Ver producto",
+                ctaUrl: "#contacto",
+              },
+              {
+                id: `${block.id}-classic`,
+                title: "Producto clásico",
+                description: "Diseñado para el uso diario y resultados confiables.",
+                price: "$19.900",
+                imageUrl: "https://images.unsplash.com/photo-1498049794561-7780e7231661?w=600",
+                ctaLabel: "Consultar",
+                ctaUrl: "#contacto",
+              },
+              {
+                id: `${block.id}-collection`,
+                title: "Nueva colección",
+                description: "Descubre las novedades disponibles esta temporada.",
+                price: "$39.900",
+                imageUrl: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600",
+                ctaLabel: "Comprar",
+                ctaUrl: "#contacto",
+              },
+            ],
+          },
+        };
+      }
+
+      if (block.type === "contact") {
+        return {
+          ...block,
+          content: {
+            ...block.content,
+            title: "Consulta o compra",
+            email: "hola@tuempresa.example",
+            phone: "+56 2 2345 6789",
+            address: "Av. Providencia 1234, Santiago",
+            bookingUrl: "#contacto",
+            bookingLabel: "Consultar",
+            customCtaUrl: "#catalogo",
+            customCtaLabel: "Ver catálogo completo",
+          },
+        };
+      }
+
+      return block;
+    });
+
+  return {
+    ...config,
+    profile: {
+      ...config.profile,
+      name: "Nuestro catálogo",
+      role: "Productos y soluciones",
+      location: "Santiago, Chile",
+      description: "Explora nuestros productos y encuentra lo que necesitas.",
+    },
+    blocks,
+  };
+}
+
 export const RECIPE_REGISTRY: TemplateDefinition[] = [
   // 1. Creator (3)
   composeRecipe(
@@ -359,6 +462,8 @@ export const RECIPE_REGISTRY: TemplateDefinition[] = [
     "aurora",
     "bento",
     ["hero-creator-bento-intro", "product-bento-showcase", "contact-minimal"],
+    "store",
+    storeBentoDefaults,
   ),
   composeRecipe(
     "luxury-product",

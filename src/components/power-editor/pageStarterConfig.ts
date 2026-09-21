@@ -28,9 +28,18 @@ export function createPageStarterConfig(title: string, pageType: PageType): BioT
   const templateId = PAGE_TYPE_STARTER_TEMPLATE_IDS[pageType] ?? FALLBACK_STARTER_TEMPLATE_ID;
   const config = getTemplateDefinition(templateId).build();
   const safeTitle = title.trim();
+  const blocks = config.blocks.map((block) =>
+    block.type === "hero"
+      ? {
+          ...block,
+          content: { ...block.content, title: safeTitle },
+        }
+      : block,
+  );
 
   return {
     ...config,
+    blocks,
     metadata: { ...config.metadata, name: safeTitle },
     profile: { ...config.profile, name: safeTitle },
   };
