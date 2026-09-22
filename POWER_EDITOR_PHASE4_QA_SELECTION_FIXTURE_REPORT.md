@@ -2,7 +2,7 @@
 
 ## Summary
 
-Phase 4A code remains frozen and unchanged. This task only produced a valid,
+Phase 4A code remains frozen and unchange<<d. This task only produced a valid,
 deterministic DEV/QA document (plus its minimal DEV-only loading seam) so the
 manual SELECT-01..08 gate can be executed against trustworthy, vertically
 distributed content.

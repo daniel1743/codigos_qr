@@ -65,6 +65,9 @@ export function applyTemplateDefinition(
       location: current.profile.location ?? "",
       description: current.profile.description ?? "",
       avatarUrl: current.profile.avatarUrl ?? next.profile.avatarUrl ?? "",
+      ...(current.profile.showAvatar === undefined
+        ? {}
+        : { showAvatar: current.profile.showAvatar }),
       verified: current.profile.verified ?? false,
     },
     seo: current.seo,

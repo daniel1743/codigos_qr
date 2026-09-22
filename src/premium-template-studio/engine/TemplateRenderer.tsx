@@ -26,6 +26,7 @@ import {
   type HeroTextTarget,
   type HeroCtaTarget,
   type ProfileTarget,
+  type SelectedCollectionItem,
 } from "./RenderContext";
 import { collectionTarget } from "../components/inspector/inspectorFocus";
 import {
@@ -47,6 +48,7 @@ import { canRemoveCripqerBranding } from "../../lib/product-entitlements/mutatio
 
 export interface EditingHandlers {
   selectedBlockId?: string | null | undefined;
+  selectedCollectionItem?: SelectedCollectionItem | null | undefined;
   onSelect?: ((id: string) => void) | undefined;
   onSelectProfileCover?: (() => void) | undefined;
   onSelectProfileTarget?: ((target: ProfileTarget) => void) | undefined;
@@ -56,9 +58,17 @@ export interface EditingHandlers {
   onSelectHeroBackground?: ((blockId: string) => void) | undefined;
   onSelectPageBackground?: (() => void) | undefined;
   onSelectCollectionItem?:
-    | ((blockId: string, collection: string, itemId: string, field?: string) => void)
+    ((blockId: string, collection: string, itemId: string, field?: string) => void) | undefined;
+  onCollectionItemAction?:
+    | ((
+        blockId: string,
+        collection: string,
+        itemId: string,
+        action: "duplicate" | "delete" | "up" | "down",
+      ) => void)
     | undefined;
-  onInlineEdit?: ((path: string, value: string) => void) | undefined;
+  onAddCollectionItem?: ((blockId: string, collection: string) => void) | undefined;
+  onInlineEdit?: ((path: string, value: unknown) => void) | undefined;
   onMove?: ((id: string, direction: -1 | 1) => void) | undefined;
   onDuplicate?: ((id: string) => void) | undefined;
   onToggleHidden?: ((id: string) => void) | undefined;
@@ -449,9 +459,10 @@ function TemplateRendererImpl({
   const { theme, layout, profile, blocks } = config;
   const rule = layout.responsive[breakpoint];
   const banner = profile.banner;
+  const showAvatar = profile.showAvatar !== false;
   const hasAuthoredHero = blocks.some((block) => block.type === "hero");
   const fullBleed = !hasAuthoredHero && banner.enabled && banner.widthMode === "full-bleed";
-  const fullBleedOverlap = fullBleed && layout.header === "overlap";
+  const fullBleedOverlap = fullBleed && layout.header === "overlap" && showAvatar;
 
   const isGridOrBento = layout.type === "grid" || layout.type === "bento";
   let columns = 1;
@@ -492,6 +503,7 @@ function TemplateRendererImpl({
       breakpoint,
       mode,
       selectedBlockId: editing?.selectedBlockId,
+      selectedCollectionItem: editing?.selectedCollectionItem,
       onSelectBlock: editing?.onSelect,
       onSelectProfileCover: editing?.onSelectProfileCover,
       onSelectProfileTarget: editing?.onSelectProfileTarget,
@@ -501,6 +513,8 @@ function TemplateRendererImpl({
       onSelectHeroBackground: editing?.onSelectHeroBackground,
       onSelectPageBackground: editing?.onSelectPageBackground,
       onSelectCollectionItem: editing?.onSelectCollectionItem,
+      onCollectionItemAction: editing?.onCollectionItemAction,
+      onAddCollectionItem: editing?.onAddCollectionItem,
       collectionTarget,
       onInlineEdit: editing?.onInlineEdit,
       onTrack,
@@ -510,6 +524,7 @@ function TemplateRendererImpl({
       breakpoint,
       mode,
       editing?.selectedBlockId,
+      editing?.selectedCollectionItem,
       editing?.onSelect,
       editing?.onSelectProfileCover,
       editing?.onSelectProfileTarget,
@@ -519,6 +534,8 @@ function TemplateRendererImpl({
       editing?.onSelectHeroBackground,
       editing?.onSelectPageBackground,
       editing?.onSelectCollectionItem,
+      editing?.onCollectionItemAction,
+      editing?.onAddCollectionItem,
       editing?.onInlineEdit,
       onTrack,
     ],
@@ -642,11 +659,7 @@ function TemplateRendererImpl({
               const floatingClass = floating?.enabled ? "pts-floating-enter" : "";
 
               // Press feedback for interactive blocks
-              const innerClasses = cx(
-                bm.entranceClass,
-                stickyClass,
-                floatingClass,
-              );
+              const innerClasses = cx(bm.entranceClass, stickyClass, floatingClass);
 
               // In public mode, use scroll reveal for entrance animations
               const AnimWrapper =

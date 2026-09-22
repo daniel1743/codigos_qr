@@ -270,6 +270,8 @@ export interface TemplateProfile {
    */
   verificationVariant?: "none" | "standard" | "official-gold";
   avatarUrl?: string;
+  /** Whether the custom profile header participates in the layout. Missing means visible for legacy documents. */
+  showAvatar?: boolean;
   avatar: {
     size: number;
     radius: number;
@@ -383,6 +385,8 @@ export interface TypographyOverride {
   fontSize?: number;
   textAlign?: "left" | "center" | "right" | "justify";
   textColor?: string;
+  fontStyle?: "normal" | "italic";
+  textDecoration?: "none" | "underline";
 }
 
 /** Explicit item payload shared by the currently registered block families. */

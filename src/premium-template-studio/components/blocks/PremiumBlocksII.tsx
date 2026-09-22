@@ -17,12 +17,19 @@ import {
   Briefcase,
   User,
   Heart,
+  X,
 } from "lucide-react";
 import { useRender } from "../../engine/RenderContext";
-import { applyCTAStyle, applyTypographyOverride, cardStyle, headingStyle } from "../../engine/styleEngine";
+import {
+  applyCTAStyle,
+  applyTypographyOverride,
+  cardStyle,
+  headingStyle,
+} from "../../engine/styleEngine";
 import { hexToRgba, safeUrl } from "../../utils";
 import type { BlockItem, TemplateBlock } from "../../types";
-import { ContextualItemTarget } from "./primitives";
+import { ContextualItemTarget, InlineText } from "./primitives";
+import { ContextualEditingToolbar } from "../ContextualEditingToolbar";
 
 // Dynamic Icon resolver
 function SmartIcon({
@@ -93,10 +100,26 @@ function MailIconPlaceholder({
 /* ------------------------------------------------------------------ */
 /* 1. Product Card                                                    */
 /* ------------------------------------------------------------------ */
-export function ProductCardBlock({ block }: { block: TemplateBlock }) {
-  const { theme, mode, onTrack } = useRender();
+export function ProductCardBlock({
+  block,
+  inlinePathPrefix,
+  onOpenDetail,
+  collectionBlockId,
+  collectionItemId,
+  isSelected,
+}: {
+  block: TemplateBlock;
+  inlinePathPrefix?: string;
+  onOpenDetail?: () => void;
+  collectionBlockId?: string;
+  collectionItemId?: string;
+  isSelected?: boolean;
+}) {
+  const { theme, mode, onTrack, onSelectCollectionItem, onInlineEdit } = useRender();
   const c = block.content;
   const variant = block.variant ?? "card";
+  const [selectedTextField, setSelectedTextField] = useState<string | null>(null);
+  const [imageSelected, setImageSelected] = useState(false);
 
   const handleCTA = () => {
     if (!c.ctaUrl || mode === "edit") return;
@@ -109,6 +132,12 @@ export function ProductCardBlock({ block }: { block: TemplateBlock }) {
     });
     window.open(c.ctaUrl, "_blank", "noopener,noreferrer");
   };
+  const inline = (field: string) =>
+    inlinePathPrefix ? `${inlinePathPrefix}.${field}` : `blocks.${block.id}.content.${field}`;
+  const typographyPath = (field: string) =>
+    inline(field === "description" ? "descriptionTypography" : "typography");
+  const activeTypography =
+    selectedTextField === "description" ? c.descriptionTypography : c.typography;
 
   const isMinimal = variant === "minimal";
   const isImageFirst = variant === "image-first";
@@ -128,31 +157,228 @@ export function ProductCardBlock({ block }: { block: TemplateBlock }) {
         display: "flex",
         flexDirection: "column",
         height: "100%",
+        outline: isSelected ? "2px solid #2563eb" : undefined,
+        outlineOffset: isSelected ? 2 : undefined,
+      }}
+      onClick={() => {
+        if (mode === "public") onOpenDetail?.();
       }}
     >
+      {mode === "edit" && isSelected && inlinePathPrefix && selectedTextField && onInlineEdit && (
+        <ContextualEditingToolbar
+          aria-label="Text styling"
+          onClick={(event) => event.stopPropagation()}
+          style={{
+            position: "absolute",
+            top: -42,
+            left: 0,
+            zIndex: 20,
+            display: "flex",
+            gap: 4,
+            padding: 5,
+            borderRadius: 8,
+            background: "#111827",
+            color: "white",
+            boxShadow: "0 6px 18px rgba(0,0,0,.22)",
+            fontSize: 11,
+          }}
+        >
+          <select
+            aria-label="Font family"
+            value={activeTypography?.fontFamily ?? ""}
+            onChange={(event) =>
+              onInlineEdit(
+                `${typographyPath(selectedTextField)}.fontFamily`,
+                event.target.value || undefined,
+              )
+            }
+          >
+            <option value="">Fuente</option>
+            <option value="Inter, sans-serif">Inter</option>
+            <option value="Georgia, serif">Serif</option>
+            <option value="ui-monospace, monospace">Mono</option>
+          </select>
+          <input
+            aria-label="Font size"
+            type="number"
+            min={8}
+            max={96}
+            value={activeTypography?.fontSize ?? ""}
+            placeholder="px"
+            onChange={(event) =>
+              onInlineEdit(
+                `${typographyPath(selectedTextField)}.fontSize`,
+                event.target.value ? Number(event.target.value) : undefined,
+              )
+            }
+            style={{ width: 42 }}
+          />
+          <select
+            aria-label="Font weight"
+            value={activeTypography?.fontWeight ?? ""}
+            onChange={(event) =>
+              onInlineEdit(
+                `${typographyPath(selectedTextField)}.fontWeight`,
+                event.target.value ? Number(event.target.value) : undefined,
+              )
+            }
+          >
+            <option value="">Peso</option>
+            <option value="400">400</option>
+            <option value="500">500</option>
+            <option value="600">600</option>
+            <option value="700">700</option>
+          </select>
+          <input
+            aria-label="Text color"
+            type="color"
+            value={activeTypography?.textColor ?? "#000000"}
+            onChange={(event) =>
+              onInlineEdit(`${typographyPath(selectedTextField)}.textColor`, event.target.value)
+            }
+          />
+          <select
+            aria-label="Text alignment"
+            value={activeTypography?.textAlign ?? ""}
+            onChange={(event) =>
+              onInlineEdit(
+                `${typographyPath(selectedTextField)}.textAlign`,
+                event.target.value || undefined,
+              )
+            }
+          >
+            <option value="">Alinear</option>
+            <option value="left">Izq.</option>
+            <option value="center">Centro</option>
+            <option value="right">Der.</option>
+          </select>
+          <button
+            type="button"
+            aria-label="Bold"
+            onClick={() =>
+              onInlineEdit(
+                `${typographyPath(selectedTextField)}.fontWeight`,
+                activeTypography?.fontWeight === 700 ? 400 : 700,
+              )
+            }
+          >
+            B
+          </button>
+          <button
+            type="button"
+            aria-label="Italic"
+            onClick={() =>
+              onInlineEdit(
+                `${typographyPath(selectedTextField)}.fontStyle`,
+                activeTypography?.fontStyle === "italic" ? "normal" : "italic",
+              )
+            }
+          >
+            I
+          </button>
+          <button
+            type="button"
+            aria-label="Underline"
+            onClick={() =>
+              onInlineEdit(
+                `${typographyPath(selectedTextField)}.textDecoration`,
+                activeTypography?.textDecoration === "underline" ? "none" : "underline",
+              )
+            }
+          >
+            U
+          </button>
+          <button type="button" aria-label="More text options" title="More">
+            ⋯
+          </button>
+          {selectedTextField === "ctaLabel" && (
+            <input
+              aria-label="CTA URL"
+              value={c.ctaUrl ?? ""}
+              placeholder="Enlace"
+              onChange={(event) => onInlineEdit(inline("ctaUrl"), event.target.value)}
+              style={{ width: 110 }}
+            />
+          )}
+        </ContextualEditingToolbar>
+      )}
+      {mode === "edit" && isSelected && inlinePathPrefix && imageSelected && (
+        <ContextualEditingToolbar
+          aria-label="Image controls"
+          onClick={(event) => event.stopPropagation()}
+          style={{
+            position: "absolute",
+            top: -42,
+            right: 0,
+            zIndex: 20,
+            display: "flex",
+            gap: 4,
+            padding: 5,
+            borderRadius: 8,
+            background: "#111827",
+            color: "white",
+          }}
+        >
+          <button
+            type="button"
+            onClick={() =>
+              collectionBlockId &&
+              collectionItemId &&
+              onSelectCollectionItem?.(collectionBlockId, "product-grid", collectionItemId, "image")
+            }
+          >
+            Cambiar
+          </button>
+          <button type="button" onClick={() => onInlineEdit(inline("imageUrl"), "")}>
+            Quitar
+          </button>
+          <button type="button" disabled title="Crop seam reserved for ImagePipeline">
+            Recortar
+          </button>
+          <button type="button" disabled title="Position seam reserved for ImagePipeline">
+            Posición
+          </button>
+        </ContextualEditingToolbar>
+      )}
       {/* Badge */}
       {typeof c.badge === "string" && c.badge && (
         <span
-          style={{
-            position: "absolute",
-            top: 12,
-            left: 12,
-            backgroundColor: theme.colors.accent,
-            color: "#ffffff",
-            fontSize: "10px",
-            fontWeight: 700,
-            padding: "3px 8px",
-            borderRadius: 4,
-            textTransform: "uppercase",
-            zIndex: 10,
-          }}
+          style={applyTypographyOverride(
+            {
+              position: "absolute",
+              top: 12,
+              left: 12,
+              backgroundColor: theme.colors.accent,
+              color: "#ffffff",
+              fontSize: "10px",
+              fontWeight: 700,
+              padding: "3px 8px",
+              borderRadius: 4,
+              textTransform: "uppercase",
+              zIndex: 10,
+            },
+            c.typography,
+          )}
         >
-          {c.badge}
+          <InlineText
+            path={inline("badge")}
+            value={c.badge}
+            onFocus={() => setSelectedTextField("badge")}
+          />
         </span>
       )}
 
       {c.imageUrl && !isMinimal && (
-        <div style={{ width: "100%", height: isFeatured ? 220 : 160, overflow: "hidden" }}>
+        <div
+          data-editor-target={inlinePathPrefix ? "product-image" : undefined}
+          onClick={(event) => {
+            if (mode !== "edit" || !collectionBlockId || !collectionItemId) return;
+            event.stopPropagation();
+            setImageSelected(true);
+            onSelectCollectionItem?.(collectionBlockId, "product-grid", collectionItemId, "image");
+          }}
+          style={{ width: "100%", height: isFeatured ? 220 : 160, overflow: "hidden" }}
+        >
           <img
             src={c.imageUrl}
             alt={c.title ?? "Product Image"}
@@ -170,21 +396,49 @@ export function ProductCardBlock({ block }: { block: TemplateBlock }) {
           gap: 8,
         }}
       >
-        <h3 style={applyTypographyOverride({ ...headingStyle(theme, 0.85), fontSize: isFeatured ? "17px" : "14.5px" }, c.typography)}>
-          {c.title || "Product Title"}
+        <h3
+          style={applyTypographyOverride(
+            { ...headingStyle(theme, 0.85), fontSize: isFeatured ? "17px" : "14.5px" },
+            c.typography,
+          )}
+        >
+          <InlineText
+            path={inline("title")}
+            value={c.title ?? ""}
+            placeholder="Product Title"
+            onFocus={() => setSelectedTextField("title")}
+          />
         </h3>
 
         {c.description && (
-          <p
-            style={applyTypographyOverride({ fontSize: "12.5px", color: theme.colors.mutedText, lineHeight: 1.4, flex: 1 }, c.descriptionTypography)}
+          <div
+            style={applyTypographyOverride(
+              { fontSize: "12.5px", color: theme.colors.mutedText, lineHeight: 1.4, flex: 1 },
+              c.descriptionTypography,
+            )}
           >
-            {c.description}
-          </p>
+            <InlineText
+              as="p"
+              path={inline("description")}
+              value={c.description ?? ""}
+              onFocus={() => setSelectedTextField("description")}
+            />
+          </div>
         )}
 
         <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "6px 0 2px" }}>
-          <span style={applyTypographyOverride({ fontSize: "16px", fontWeight: 700, color: theme.colors.text }, c.typography)}>
-            {c.price || "$0.00"}
+          <span
+            style={applyTypographyOverride(
+              { fontSize: "16px", fontWeight: 700, color: theme.colors.text },
+              c.typography,
+            )}
+          >
+            <InlineText
+              path={inline("price")}
+              value={c.price ?? ""}
+              placeholder="$0.00"
+              onFocus={() => setSelectedTextField("price")}
+            />
           </span>
           {c.comparePrice && (
             <span
@@ -202,25 +456,39 @@ export function ProductCardBlock({ block }: { block: TemplateBlock }) {
 
         {c.ctaLabel && (
           <button
-            onClick={handleCTA}
-            style={applyCTAStyle({
-              width: "100%",
-              padding: "8px 14px",
-              borderRadius: theme.buttons.radius,
-              backgroundColor: theme.colors.primary,
-              color: "#ffffff",
-              fontWeight: 600,
-              fontSize: "13px",
-              border: "none",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 6,
-            }, c.ctaStyle ?? block.style.ctaStyle)}
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              handleCTA();
+            }}
+            style={applyCTAStyle(
+              applyTypographyOverride(
+                {
+                  width: "100%",
+                  padding: "8px 14px",
+                  borderRadius: theme.buttons.radius,
+                  backgroundColor: theme.colors.primary,
+                  color: "#ffffff",
+                  fontWeight: 600,
+                  fontSize: "13px",
+                  border: "none",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 6,
+                },
+                c.typography,
+              ),
+              c.ctaStyle ?? block.style.ctaStyle,
+            )}
           >
             <ShoppingBag size={14} />
-            {c.ctaLabel}
+            <InlineText
+              path={inline("ctaLabel")}
+              value={c.ctaLabel ?? ""}
+              onFocus={() => setSelectedTextField("ctaLabel")}
+            />
           </button>
         )}
       </div>
@@ -232,15 +500,25 @@ export function ProductCardBlock({ block }: { block: TemplateBlock }) {
 /* 2. Product Grid                                                    */
 /* ------------------------------------------------------------------ */
 export function ProductGridBlock({ block }: { block: TemplateBlock }) {
-  const { theme } = useRender();
+  const {
+    breakpoint,
+    mode,
+    selectedCollectionItem,
+    onCollectionItemAction,
+    onAddCollectionItem,
+    onSelectCollectionItem,
+  } = useRender();
   const products = block.content.products ?? [];
-  const columns = block.layout.columns ?? 2;
+  const columns = block.layout.columns ?? 3;
+  const gridColumns =
+    breakpoint === "mobile" ? 1 : breakpoint === "tablet" ? Math.min(3, columns) : columns;
+  const [detailProduct, setDetailProduct] = useState<BlockItem | null>(null);
 
   return (
     <div
       style={{
         display: "grid",
-        gridTemplateColumns: `repeat(auto-fit, minmax(200px, 1fr))`,
+        gridTemplateColumns: `repeat(${Math.max(1, gridColumns)}, minmax(0, 1fr))`,
         gap: 16,
         width: "100%",
       }}
@@ -262,16 +540,198 @@ export function ProductGridBlock({ block }: { block: TemplateBlock }) {
           interaction: block.interaction,
         };
         return (
-          <ContextualItemTarget
-            key={prodBlock.id}
-            blockId={block.id}
-            collection="product-grid"
-            itemId={prod.id ?? `prod-${idx}`}
-          >
-            <ProductCardBlock block={prodBlock} />
-          </ContextualItemTarget>
+          <div key={prodBlock.id} style={{ position: "relative", minWidth: 0 }}>
+            <ContextualItemTarget
+              blockId={block.id}
+              collection="product-grid"
+              itemId={prod.id ?? `prod-${idx}`}
+            >
+              <ProductCardBlock
+                block={prodBlock}
+                inlinePathPrefix={`blocks.${block.id}.content.products.${idx}`}
+                collectionBlockId={block.id}
+                collectionItemId={prodBlock.id}
+                isSelected={selectedCollectionItem?.itemId === prodBlock.id}
+                onOpenDetail={() => setDetailProduct(prod)}
+              />
+            </ContextualItemTarget>
+            {mode === "edit" &&
+              selectedCollectionItem?.blockId === block.id &&
+              selectedCollectionItem.itemId === prodBlock.id &&
+              onCollectionItemAction && (
+                <div
+                  aria-label={`Product ${idx + 1} actions`}
+                  style={{
+                    position: "absolute",
+                    top: 6,
+                    right: 6,
+                    zIndex: 3,
+                    display: "flex",
+                    gap: 3,
+                  }}
+                >
+                  <button
+                    type="button"
+                    aria-label="Mover producto arriba"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onCollectionItemAction(block.id, "product-grid", prodBlock.id, "up");
+                    }}
+                  >
+                    ↑
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="Mover producto abajo"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onCollectionItemAction(block.id, "product-grid", prodBlock.id, "down");
+                    }}
+                  >
+                    ↓
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="Duplicar producto"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onCollectionItemAction(block.id, "product-grid", prodBlock.id, "duplicate");
+                    }}
+                  >
+                    +
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="Ver detalle"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setDetailProduct(prod);
+                    }}
+                  >
+                    Ver detalle
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="Fondo de tarjeta"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onSelectCollectionItem?.(
+                        block.id,
+                        "product-grid",
+                        prodBlock.id,
+                        "card-background",
+                      );
+                    }}
+                  >
+                    Fondo
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="Borde de tarjeta"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onSelectCollectionItem?.(
+                        block.id,
+                        "product-grid",
+                        prodBlock.id,
+                        "card-border",
+                      );
+                    }}
+                  >
+                    Borde
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="Radio de tarjeta"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onSelectCollectionItem?.(
+                        block.id,
+                        "product-grid",
+                        prodBlock.id,
+                        "card-radius",
+                      );
+                    }}
+                  >
+                    Radio
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="Eliminar producto"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onCollectionItemAction(block.id, "product-grid", prodBlock.id, "delete");
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
+              )}
+          </div>
         );
       })}
+      {mode === "edit" && onAddCollectionItem && (
+        <button
+          type="button"
+          onClick={() => onAddCollectionItem(block.id, "product-grid")}
+          style={{ minHeight: 48, border: "1px dashed currentColor", borderRadius: 12 }}
+        >
+          + Añadir producto
+        </button>
+      )}
+      {detailProduct && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={detailProduct.title ?? "Product detail"}
+          onClick={() => setDetailProduct(null)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 1000,
+            display: "grid",
+            placeItems: "center",
+            padding: 24,
+            background: "rgba(0,0,0,0.6)",
+          }}
+        >
+          <div
+            onClick={(event) => event.stopPropagation()}
+            style={{
+              position: "relative",
+              width: "min(100%, 620px)",
+              maxHeight: "90vh",
+              overflow: "auto",
+              borderRadius: 20,
+              background: "var(--pts-surface, #fff)",
+              padding: 20,
+            }}
+          >
+            <button
+              type="button"
+              aria-label="Close product detail"
+              onClick={() => setDetailProduct(null)}
+              style={{ position: "absolute", top: 12, right: 12 }}
+            >
+              <X size={18} />
+            </button>
+            {detailProduct.imageUrl && (
+              <img
+                src={detailProduct.imageUrl}
+                alt={detailProduct.title ?? "Product"}
+                style={{ width: "100%", maxHeight: 360, objectFit: "cover", borderRadius: 14 }}
+              />
+            )}
+            <h2 style={{ marginTop: 16 }}>{detailProduct.title}</h2>
+            {detailProduct.badge && <p>{String(detailProduct.badge)}</p>}
+            <p>{detailProduct.description}</p>
+            <strong>{detailProduct.price}</strong>
+            {detailProduct.ctaLabel && detailProduct.ctaUrl && (
+              <a href={safeUrl(detailProduct.ctaUrl) ?? undefined}>{detailProduct.ctaLabel}</a>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -629,90 +1089,95 @@ export function EventsBlock({ block }: { block: TemplateBlock }) {
             collection="events"
             itemId={event.id ?? String(idx)}
           >
-          <div
-            style={{
-              ...cardStyle(
-                theme,
-                isCards
-                  ? block.style
-                  : { background: "transparent", borderWidth: 0, shadow: "none" },
-              ),
-              display: "flex",
-              flexDirection: isFeatured ? "column" : "row",
-              alignItems: isFeatured ? "stretch" : "center",
-              padding: isCards ? "16px" : "8px",
-              gap: 14,
-              overflow: "hidden",
-            }}
-          >
-            {event.imageUrl && (
-              <div
-                style={{
-                  width: isFeatured ? "100%" : 70,
-                  height: isFeatured ? 160 : 70,
-                  borderRadius: 8,
-                  overflow: "hidden",
-                  flexShrink: 0,
-                }}
-              >
-                <img
-                  src={event.imageUrl}
-                  alt=""
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                />
-              </div>
-            )}
+            <div
+              style={{
+                ...cardStyle(
+                  theme,
+                  isCards
+                    ? block.style
+                    : { background: "transparent", borderWidth: 0, shadow: "none" },
+                ),
+                display: "flex",
+                flexDirection: isFeatured ? "column" : "row",
+                alignItems: isFeatured ? "stretch" : "center",
+                padding: isCards ? "16px" : "8px",
+                gap: 14,
+                overflow: "hidden",
+              }}
+            >
+              {event.imageUrl && (
+                <div
+                  style={{
+                    width: isFeatured ? "100%" : 70,
+                    height: isFeatured ? 160 : 70,
+                    borderRadius: 8,
+                    overflow: "hidden",
+                    flexShrink: 0,
+                  }}
+                >
+                  <img
+                    src={event.imageUrl}
+                    alt=""
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  />
+                </div>
+              )}
 
-            <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 4 }}>
               <div
-                style={{
-                  display: "flex",
-                  gap: 6,
-                  fontSize: "11px",
-                  fontWeight: 700,
-                  color: theme.colors.accent,
-                }}
+                style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 4 }}
               >
-                <span>{event.date}</span>
-                {event.time && <span>· {event.time}</span>}
-              </div>
-              <h3 style={{ ...headingStyle(theme, 0.8), fontSize: "14px" }}>{event.title}</h3>
-              {event.location && (
                 <div
                   style={{
                     display: "flex",
-                    alignItems: "center",
-                    gap: 4,
+                    gap: 6,
                     fontSize: "11px",
-                    color: theme.colors.mutedText,
+                    fontWeight: 700,
+                    color: theme.colors.accent,
                   }}
                 >
-                  <MapPin size={11} style={{ flexShrink: 0 }} />
-                  <span className="truncate">{event.location}</span>
+                  <span>{event.date}</span>
+                  {event.time && <span>· {event.time}</span>}
                 </div>
+                <h3 style={{ ...headingStyle(theme, 0.8), fontSize: "14px" }}>{event.title}</h3>
+                {event.location && (
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 4,
+                      fontSize: "11px",
+                      color: theme.colors.mutedText,
+                    }}
+                  >
+                    <MapPin size={11} style={{ flexShrink: 0 }} />
+                    <span className="truncate">{event.location}</span>
+                  </div>
+                )}
+              </div>
+
+              {event.ctaLabel && (
+                <button
+                  onClick={() => handleCTA(event.ctaUrl)}
+                  style={applyCTAStyle(
+                    {
+                      padding: "6px 12px",
+                      borderRadius: theme.buttons.radius,
+                      backgroundColor: theme.colors.primary,
+                      color: "#ffffff",
+                      fontSize: "12px",
+                      fontWeight: 600,
+                      border: "none",
+                      cursor: "pointer",
+                      flexShrink: 0,
+                      alignSelf: isFeatured ? "flex-start" : "center",
+                    },
+                    event.ctaStyle,
+                  )}
+                >
+                  {event.ctaLabel}
+                </button>
               )}
             </div>
-
-            {event.ctaLabel && (
-              <button
-                onClick={() => handleCTA(event.ctaUrl)}
-                style={applyCTAStyle({
-                  padding: "6px 12px",
-                  borderRadius: theme.buttons.radius,
-                  backgroundColor: theme.colors.primary,
-                  color: "#ffffff",
-                  fontSize: "12px",
-                  fontWeight: 600,
-                  border: "none",
-                  cursor: "pointer",
-                  flexShrink: 0,
-                  alignSelf: isFeatured ? "flex-start" : "center",
-                }, event.ctaStyle)}
-              >
-                {event.ctaLabel}
-              </button>
-            )}
-          </div>
           </ContextualItemTarget>
         );
       })}
@@ -1050,15 +1515,15 @@ export function CarouselBlock({ block }: { block: TemplateBlock }) {
               itemId={item.id ?? String(i)}
               field="image"
             >
-            <div style={{ width: `${100 / items.length}%`, height: "100%", flexShrink: 0 }}>
-              {item.imageUrl && (
-                <img
-                  src={item.imageUrl}
-                  alt=""
-                  style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.9 }}
-                />
-              )}
-            </div>
+              <div style={{ width: `${100 / items.length}%`, height: "100%", flexShrink: 0 }}>
+                {item.imageUrl && (
+                  <img
+                    src={item.imageUrl}
+                    alt=""
+                    style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.9 }}
+                  />
+                )}
+              </div>
             </ContextualItemTarget>
           ))}
         </div>
@@ -1213,7 +1678,7 @@ export function TabsBlock({ block }: { block: TemplateBlock }) {
       >
         {items.map((item: BlockItem, idx: number) => {
           const isSelected = activeTab === item.id;
-            return (
+          return (
             <ContextualItemTarget
               key={item.id}
               blockId={block.id}
@@ -1221,28 +1686,28 @@ export function TabsBlock({ block }: { block: TemplateBlock }) {
               itemId={item.id ?? String(idx)}
               field="label"
             >
-            <button
-              role="tab"
-              aria-selected={isSelected}
-              tabIndex={isSelected ? 0 : -1}
-              onClick={() => setActiveTab(item.id)}
-              onKeyDown={(e) => handleKeyDown(e, idx)}
-              style={{
-                flex: 1,
-                padding: "12px 14px",
-                border: "none",
-                background: "none",
-                cursor: "pointer",
-                fontSize: "13px",
-                fontWeight: 600,
-                color: isSelected ? theme.colors.accent : theme.colors.mutedText,
-                borderBottom: isSelected ? `2.5px solid ${theme.colors.accent}` : "none",
-                marginBottom: -1.5,
-                transition: "color 0.16s ease",
-              }}
-            >
-              {item.label}
-            </button>
+              <button
+                role="tab"
+                aria-selected={isSelected}
+                tabIndex={isSelected ? 0 : -1}
+                onClick={() => setActiveTab(item.id)}
+                onKeyDown={(e) => handleKeyDown(e, idx)}
+                style={{
+                  flex: 1,
+                  padding: "12px 14px",
+                  border: "none",
+                  background: "none",
+                  cursor: "pointer",
+                  fontSize: "13px",
+                  fontWeight: 600,
+                  color: isSelected ? theme.colors.accent : theme.colors.mutedText,
+                  borderBottom: isSelected ? `2.5px solid ${theme.colors.accent}` : "none",
+                  marginBottom: -1.5,
+                  transition: "color 0.16s ease",
+                }}
+              >
+                {item.label}
+              </button>
             </ContextualItemTarget>
           );
         })}
@@ -1297,28 +1762,28 @@ export function BottomNavigationBlock({ block }: { block: TemplateBlock }) {
           itemId={item.id ?? String(idx)}
           field="item"
         >
-        <button
-          onClick={() => handleNav(item.url)}
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 4,
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            flex: 1,
-            color: theme.colors.mutedText,
-            transition: "color 0.16s ease",
-          }}
-          title={item.label}
-        >
-          <div style={{ color: theme.colors.accent }}>
-            <SmartIcon name={item.icon ?? ""} size={20} />
-          </div>
-          <span style={{ fontSize: "10px", fontWeight: 500 }}>{item.label}</span>
-        </button>
+          <button
+            onClick={() => handleNav(item.url)}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 4,
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              flex: 1,
+              color: theme.colors.mutedText,
+              transition: "color 0.16s ease",
+            }}
+            title={item.label}
+          >
+            <div style={{ color: theme.colors.accent }}>
+              <SmartIcon name={item.icon ?? ""} size={20} />
+            </div>
+            <span style={{ fontSize: "10px", fontWeight: 500 }}>{item.label}</span>
+          </button>
         </ContextualItemTarget>
       ))}
     </div>

@@ -72,11 +72,7 @@ import {
   replaceGalleryImage,
   type GalleryImage,
 } from "../blocks/galleryImages";
-import {
-  CollectionItemControls,
-  moveCollectionItem,
-} from "./CollectionItemControls";
-
+import { CollectionItemControls, moveCollectionItem } from "./CollectionItemControls";
 
 /**
  * ASSET ADAPTER UI — minimal upload / replace / remove, always through
@@ -257,7 +253,11 @@ function GalleryBlockInspector({ block }: { block: TemplateBlock }) {
       <Section title="Imágenes">
         <div className="space-y-3">
           {images.map((image, index) => (
-            <div key={image.id} data-inspector-item={`${block.id}:${image.id}`} className="space-y-2 rounded-lg border border-border p-3">
+            <div
+              key={image.id}
+              data-inspector-item={`${block.id}:${image.id}`}
+              className="space-y-2 rounded-lg border border-border p-3"
+            >
               <div className="flex items-center justify-between gap-2">
                 <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                   Imagen {index + 1}
@@ -290,7 +290,11 @@ function GalleryBlockInspector({ block }: { block: TemplateBlock }) {
                 <TextInput
                   value={image.alt ?? ""}
                   onChange={(alt) =>
-                    update(images.map((current) => (current.id === image.id ? { ...current, alt } : current)))
+                    update(
+                      images.map((current) =>
+                        current.id === image.id ? { ...current, alt } : current,
+                      ),
+                    )
                   }
                 />
               </Field>
@@ -330,7 +334,11 @@ function PortfolioBlockInspector({ block }: { block: TemplateBlock }) {
         />
       </Field>
       {items.map((item, index) => (
-        <div key={item.id} data-inspector-item={`${block.id}:${item.id}`} className="space-y-2 rounded-xl border border-border p-3">
+        <div
+          key={item.id}
+          data-inspector-item={`${block.id}:${item.id}`}
+          className="space-y-2 rounded-xl border border-border p-3"
+        >
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               Proyecto {index + 1}
@@ -357,7 +365,11 @@ function PortfolioBlockInspector({ block }: { block: TemplateBlock }) {
           <TypographyOverrideEditor
             value={item.typography}
             onChange={(typography) =>
-              update(items.map((current) => (current.id === item.id ? { ...current, typography } : current)))
+              update(
+                items.map((current) =>
+                  current.id === item.id ? { ...current, typography } : current,
+                ),
+              )
             }
           />
           <Field label="Descripción / categoría">
@@ -796,6 +808,11 @@ function ProfileInspector() {
           />
         </div>
         <div data-inspector-focus="profile-avatar" {...contextualFocusProps("profile-avatar")}>
+          <Toggle
+            label={messages.inspector.showAvatar}
+            checked={profile.showAvatar !== false}
+            onChange={(v) => patch("profile.showAvatar", v)}
+          />
           <AssetField
             label={messages.inspector.avatar}
             accept="image/*"
@@ -993,7 +1010,6 @@ function ProfileInspector() {
   );
 }
 
-
 const PREVIEW_STATUS_LABELS: Record<SmartLinkPreviewStatus, string> = {
   full: "Vista previa encontrada",
   partial: "Vista previa parcial",
@@ -1047,7 +1063,11 @@ function TypographyOverrideEditor({
   const { messages } = usePowerEditorLocale();
   const set = (key: keyof TypographyOverride, val: unknown) => {
     const next = { ...value, [key]: val };
-    Object.keys(next).forEach((k) => next[k as keyof TypographyOverride] === undefined && delete next[k as keyof TypographyOverride]);
+    Object.keys(next).forEach(
+      (k) =>
+        next[k as keyof TypographyOverride] === undefined &&
+        delete next[k as keyof TypographyOverride],
+    );
     if (Object.keys(next).length === 0) onChange(undefined);
     else onChange(next as TypographyOverride);
   };
@@ -1110,7 +1130,7 @@ function TypographyOverrideEditor({
             { value: "center", label: "Centro" },
             { value: "right", label: "Der" },
           ]}
-          onChange={(v) => set("textAlign", v === "" ? undefined : v as any)}
+          onChange={(v) => set("textAlign", v === "" ? undefined : (v as any))}
         />
       </Field>
     </div>
@@ -1124,7 +1144,9 @@ export function ItemsEditor({ block }: { block: TemplateBlock }) {
     dispatch({ type: "patchBlockField", id: block.id, path: "content.items", value: next });
   const supportsMediaPresentation = block.type === "links" || block.type === "buttonGroup";
 
-  const [previewState, setPreviewState] = useState<Record<string, SmartLinkPreviewStatus | "loading">>({});
+  const [previewState, setPreviewState] = useState<
+    Record<string, SmartLinkPreviewStatus | "loading">
+  >({});
 
   const fetchPreview = async (item: BlockItem) => {
     const url = (item.url ?? "").trim();
@@ -1142,11 +1164,14 @@ export function ItemsEditor({ block }: { block: TemplateBlock }) {
     }
   };
 
-
   return (
     <div className="space-y-3">
       {items.map((item, index) => (
-        <div key={item.id} data-inspector-item={`${block.id}:${item.id}`} className="space-y-2 rounded-xl border border-border p-3">
+        <div
+          key={item.id}
+          data-inspector-item={`${block.id}:${item.id}`}
+          className="space-y-2 rounded-xl border border-border p-3"
+        >
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               Item {index + 1}
@@ -1202,7 +1227,9 @@ export function ItemsEditor({ block }: { block: TemplateBlock }) {
             </span>
             <TypographyOverrideEditor
               value={item.typography}
-              onChange={(typography) => update(items.map((i) => (i.id === item.id ? { ...i, typography } : i)))}
+              onChange={(typography) =>
+                update(items.map((i) => (i.id === item.id ? { ...i, typography } : i)))
+              }
               includeColor={!supportsMediaPresentation} // button groups usually have a global text color setting, but let's just include it
             />
           </div>
@@ -1237,11 +1264,7 @@ export function ItemsEditor({ block }: { block: TemplateBlock }) {
               <TypographyOverrideEditor
                 value={item.descriptionTypography}
                 onChange={(descriptionTypography) =>
-                  update(
-                    items.map((i) =>
-                      i.id === item.id ? { ...i, descriptionTypography } : i,
-                    ),
-                  )
+                  update(items.map((i) => (i.id === item.id ? { ...i, descriptionTypography } : i)))
                 }
               />
             </div>
@@ -1303,9 +1326,7 @@ export function ItemsEditor({ block }: { block: TemplateBlock }) {
                       onChange={(v) =>
                         update(
                           items.map((i) =>
-                            i.id === item.id
-                              ? { ...i, mediaSize: v as BlockItem["mediaSize"] }
-                              : i,
+                            i.id === item.id ? { ...i, mediaSize: v as BlockItem["mediaSize"] } : i,
                           ) as BlockItem[],
                         )
                       }
@@ -1360,7 +1381,11 @@ function SocialsEditor({ block }: { block: TemplateBlock }) {
   return (
     <div className="space-y-2">
       {socials.map((social, index) => (
-        <div key={social.id} data-inspector-item={`${block.id}:${social.id}`} className="flex items-center gap-2">
+        <div
+          key={social.id}
+          data-inspector-item={`${block.id}:${social.id}`}
+          className="flex items-center gap-2"
+        >
           <select
             className="w-28 shrink-0 rounded-lg border border-border bg-background px-2 py-2 text-xs text-foreground"
             value={social.platform}
@@ -1431,7 +1456,9 @@ function PositioningInspectorSection({ block }: { block: TemplateBlock }) {
 
   return (
     <>
-      <Section title={`${messages.inspector.layoutConstraints} (${formatBreakpoint(locale, breakpoint)})`}>
+      <Section
+        title={`${messages.inspector.layoutConstraints} (${formatBreakpoint(locale, breakpoint)})`}
+      >
         <Field label={messages.sidebar.maxWidth}>
           <NumberSlider
             value={Number(constraints.maxWidth) || 0}
@@ -1481,7 +1508,9 @@ function PositioningInspectorSection({ block }: { block: TemplateBlock }) {
         </Field>
       </Section>
 
-      <Section title={`${messages.inspector.positioningOverrides} (${formatBreakpoint(locale, breakpoint)})`}>
+      <Section
+        title={`${messages.inspector.positioningOverrides} (${formatBreakpoint(locale, breakpoint)})`}
+      >
         {/* Overlap */}
         <div className="space-y-2 rounded-lg border border-border p-2 bg-muted/10 mb-3">
           <div className="flex items-center justify-between">
@@ -1564,7 +1593,9 @@ function PositioningInspectorSection({ block }: { block: TemplateBlock }) {
         </Field>
       </Section>
 
-      <Section title={`${messages.inspector.behaviorOverrides} (${formatBreakpoint(locale, breakpoint)})`}>
+      <Section
+        title={`${messages.inspector.behaviorOverrides} (${formatBreakpoint(locale, breakpoint)})`}
+      >
         {/* Sticky */}
         <div className="space-y-2 rounded-lg border border-border p-2 bg-muted/10 mb-3">
           <div className="flex items-center justify-between">
@@ -1591,7 +1622,9 @@ function PositioningInspectorSection({ block }: { block: TemplateBlock }) {
         {/* Floating */}
         <div className="space-y-2 rounded-lg border border-border p-2 bg-muted/10">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold">{messages.inspector.fixedFloatingPosition}</span>
+            <span className="text-xs font-semibold">
+              {messages.inspector.fixedFloatingPosition}
+            </span>
             <Toggle
               checked={floating.enabled ?? false}
               onChange={(v) => setResponsiveField("floating.enabled", v)}
@@ -1933,7 +1966,9 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
             <TextInput value={content.title ?? ""} onChange={(v) => field("content.title", v)} />
           </Field>
           <div className="pt-2">
-            <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Tipografía</span>
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              Tipografía
+            </span>
             <TypographyOverrideEditor
               value={block.style.titleTypography}
               onChange={(typography) => field("style.titleTypography", typography)}
@@ -1948,7 +1983,9 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
             />
           </Field>
           <div className="pt-2">
-            <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Tipografía</span>
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              Tipografía
+            </span>
             <TypographyOverrideEditor
               value={block.style.subtitleTypography}
               onChange={(typography) => field("style.subtitleTypography", typography)}
@@ -1964,7 +2001,9 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
             />
           </Field>
           <div className="pt-2">
-            <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Tipografía</span>
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              Tipografía
+            </span>
             <TypographyOverrideEditor
               value={block.style.descriptionTypography}
               onChange={(typography) => field("style.descriptionTypography", typography)}
@@ -2002,7 +2041,11 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
             className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground"
             value={resolveFontOption(state.config.theme.typography.headingFont)}
             onChange={(e) =>
-              dispatch({ type: "patch", path: "theme.typography.headingFont", value: e.target.value })
+              dispatch({
+                type: "patch",
+                path: "theme.typography.headingFont",
+                value: e.target.value,
+              })
             }
           >
             {FONT_OPTIONS.map((font) => (
@@ -2346,11 +2389,19 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
       <div data-inspector-focus="hero-cta" {...contextualFocusProps("hero-cta")}>
         <Section title={messages.inspector.ctaButton}>
           <Field label={messages.inspector.content}>
-            <span className="text-xs text-muted-foreground">{messages.inspector.ctaContentHint}</span>
+            <span className="text-xs text-muted-foreground">
+              {messages.inspector.ctaContentHint}
+            </span>
           </Field>
           {/* Primary CTA */}
-          <div data-inspector-focus="hero-cta-primary" {...contextualFocusProps("hero-cta-primary")} className="space-y-2 rounded-lg border border-border p-2 bg-muted/10 mb-2">
-            <span className="text-xs font-bold text-foreground">{messages.inspector.primaryCta}</span>
+          <div
+            data-inspector-focus="hero-cta-primary"
+            {...contextualFocusProps("hero-cta-primary")}
+            className="space-y-2 rounded-lg border border-border p-2 bg-muted/10 mb-2"
+          >
+            <span className="text-xs font-bold text-foreground">
+              {messages.inspector.primaryCta}
+            </span>
             <Field label={messages.inspector.label}>
               <TextInput
                 value={primaryCTA.label ?? ""}
@@ -2385,8 +2436,14 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
           </div>
 
           {/* Secondary CTA */}
-          <div data-inspector-focus="hero-cta-secondary" {...contextualFocusProps("hero-cta-secondary")} className="space-y-2 rounded-lg border border-border p-2 bg-muted/10">
-            <span className="text-xs font-bold text-foreground">{messages.inspector.secondaryCta}</span>
+          <div
+            data-inspector-focus="hero-cta-secondary"
+            {...contextualFocusProps("hero-cta-secondary")}
+            className="space-y-2 rounded-lg border border-border p-2 bg-muted/10"
+          >
+            <span className="text-xs font-bold text-foreground">
+              {messages.inspector.secondaryCta}
+            </span>
             <Field label={messages.inspector.label}>
               <TextInput
                 value={secondaryCTA.label ?? ""}
@@ -2462,7 +2519,7 @@ function StatsBlockInspector({ block }: { block: TemplateBlock }) {
   const update = (next: BlockItem[]) => field("content.items", next);
 
   return (
-      <div className="space-y-3">
+    <div className="space-y-3">
       {items.map((item: BlockItem, index: number) => (
         <div
           key={item.id ?? index}
@@ -2535,7 +2592,7 @@ function ServicesBlockInspector({ block }: { block: TemplateBlock }) {
     dispatch({ type: "patchBlockField", id: block.id, path, value });
   const update = (next: BlockItem[]) => field("content.items", next);
   return (
-      <div className="space-y-3">
+    <div className="space-y-3">
       {items.map((item: BlockItem, index: number) => (
         <div
           key={item.id ?? index}
@@ -2638,7 +2695,7 @@ function ServicesBlockInspector({ block }: { block: TemplateBlock }) {
                   const next = { ...(i.ctaStyle || {}), [key]: value };
                   if (value === undefined) delete next[key];
                   return { ...i, ctaStyle: Object.keys(next).length ? next : undefined };
-                })
+                }),
               );
             }}
           />
@@ -2875,7 +2932,7 @@ function PricingBlockInspector({ block }: { block: TemplateBlock }) {
                   const next = { ...(i.ctaStyle || {}), [key]: value };
                   if (value === undefined) delete next[key];
                   return { ...i, ctaStyle: Object.keys(next).length ? next : undefined };
-                })
+                }),
               );
             }}
           />
@@ -3693,7 +3750,7 @@ function EventsBlockInspector({ block }: { block: TemplateBlock }) {
                   const next = { ...(e.ctaStyle || {}), [key]: value };
                   if (value === undefined) delete next[key];
                   return { ...e, ctaStyle: Object.keys(next).length ? next : undefined };
-                })
+                }),
               );
             }}
           />
@@ -4007,11 +4064,7 @@ function TrustBlockInspector({ block }: { block: TemplateBlock }) {
 
   return (
     <Section title="Confianza">
-      <Toggle
-        label="Mostrar señales de confianza"
-        checked={enabled}
-        onChange={setEnabled}
-      />
+      <Toggle label="Mostrar señales de confianza" checked={enabled} onChange={setEnabled} />
       <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
         <span className="text-xs font-medium text-foreground">Señales activas</span>
         <span className="text-xs text-muted-foreground">
@@ -4112,8 +4165,7 @@ function TrustBlockInspector({ block }: { block: TemplateBlock }) {
         aria-disabled={atMax}
         className="inline-flex w-full items-center justify-center gap-1 rounded-lg border border-dashed border-border px-3 py-2 text-xs text-muted-foreground transition hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
       >
-        <Plus className="h-3.5 w-3.5" />
-        + Añadir señal
+        <Plus className="h-3.5 w-3.5" />+ Añadir señal
       </button>
       {atMax && (
         <p className="text-[11px] text-muted-foreground">
@@ -4193,7 +4245,9 @@ export function BlockInspector({ block }: { block: TemplateBlock }) {
           <div className="flex items-center gap-1">
             <button
               type="button"
-              title={duplicateLocked ? messages.inspector.duplicatePro : messages.inspector.duplicate}
+              title={
+                duplicateLocked ? messages.inspector.duplicatePro : messages.inspector.duplicate
+              }
               aria-disabled={duplicateLocked}
               onClick={() => {
                 if (duplicateLocked) return;

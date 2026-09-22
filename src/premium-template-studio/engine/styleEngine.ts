@@ -9,7 +9,10 @@ import type {
 } from "../types";
 import { hexToRgba, readableOn } from "../utils";
 
-export function applyTypographyOverride(base: CSSProperties, override?: TypographyOverride): CSSProperties {
+export function applyTypographyOverride(
+  base: CSSProperties,
+  override?: TypographyOverride,
+): CSSProperties {
   if (!override) return base;
   const result = { ...base };
   if (override.fontFamily) result.fontFamily = override.fontFamily;
@@ -17,6 +20,8 @@ export function applyTypographyOverride(base: CSSProperties, override?: Typograp
   if (override.fontSize) result.fontSize = override.fontSize;
   if (override.textAlign) result.textAlign = override.textAlign;
   if (override.textColor) result.color = override.textColor;
+  if (override.fontStyle) result.fontStyle = override.fontStyle;
+  if (override.textDecoration) result.textDecoration = override.textDecoration;
   return result;
 }
 

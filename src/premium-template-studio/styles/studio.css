@@ -399,7 +399,6 @@
   }
 }
 
-
 /* ===================================================================== */
 /* Phase 1 — Approved Lovable visual tokens + Power Editor shell frame.   */
 /* Scoped to `.pts-scope` (Power Editor only). Does NOT touch the global   */
@@ -487,4 +486,37 @@
     linear-gradient(to right, oklch(1 0 0 / 4%) 1px, transparent 1px),
     linear-gradient(to bottom, oklch(1 0 0 / 4%) 1px, transparent 1px);
   background-size: 32px 32px;
+}
+
+.pts-scope .pts-contextual-toolbar {
+  max-width: min(92vw, 720px);
+}
+
+.pts-scope .pts-contextual-toolbar button,
+.pts-scope .pts-contextual-toolbar select,
+.pts-scope .pts-contextual-toolbar input {
+  min-height: 30px;
+  border-radius: 5px;
+}
+
+@media (max-width: 640px) {
+  .pts-scope .pts-contextual-toolbar {
+    position: fixed !important;
+    top: auto !important;
+    right: 10px !important;
+    bottom: 10px !important;
+    left: 10px !important;
+    z-index: 80 !important;
+    max-width: none;
+    min-height: 52px;
+    flex-wrap: wrap;
+    padding: 8px !important;
+    border-radius: 14px !important;
+  }
+
+  .pts-scope .pts-contextual-toolbar button,
+  .pts-scope .pts-contextual-toolbar select,
+  .pts-scope .pts-contextual-toolbar input {
+    min-height: 44px;
+  }
 }

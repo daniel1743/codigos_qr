@@ -10,7 +10,8 @@ describe("createPageStarterConfig", () => {
     expect(landing.metadata.templateDefinitionId).toBe(PAGE_TYPE_STARTER_TEMPLATE_IDS.landing);
     expect(menu.metadata.templateDefinitionId).toBe(PAGE_TYPE_STARTER_TEMPLATE_IDS.menu);
     expect(services.metadata.templateDefinitionId).toBe(PAGE_TYPE_STARTER_TEMPLATE_IDS.services);
-    expect(menu.metadata.templateDefinitionId).toBe("restaurant-visual");
+    expect(menu.metadata.templateDefinitionId).toBe("menu-default-v1");
+    expect(menu.profile.showAvatar).toBe(false);
     expect(menu.blocks.map((block) => block.type)).toContain("productGrid");
     expect(menu.blocks.map((block) => block.type)).not.toContain("featuredMedia");
     expect(services.blocks.map((block) => block.type)).toContain("services");
@@ -22,11 +23,13 @@ describe("createPageStarterConfig", () => {
     const portfolio = createPageStarterConfig("Portfolio QA", "portfolio");
     const catalogText = JSON.stringify(catalog);
     const portfolioText = JSON.stringify(portfolio);
-    expect(catalog.metadata.templateDefinitionId).toBe("store-bento");
+    expect(catalog.metadata.templateDefinitionId).toBe("catalog-default-v1");
     expect(portfolio.metadata.templateDefinitionId).toBe("portfolio-bento");
+    expect(catalog.profile.showAvatar).toBe(false);
+    expect(portfolio.profile.showAvatar).toBe(true);
     expect(catalog.metadata.templateDefinitionId).not.toBe(portfolio.metadata.templateDefinitionId);
     expect(catalog.blocks.map((block) => block.type)).toContain("productGrid");
-    expect(catalog.blocks.find((block) => block.type === "hero")?.content.title).toBe("Catalog QA");
+    expect(catalog.blocks.find((block) => block.type === "hero")).toBeUndefined();
     expect(catalogText).toContain("Productos y soluciones");
     expect(catalogText).toContain("Producto destacado");
     expect(catalogText).not.toContain("Hi, I'm Alex");
@@ -52,7 +55,8 @@ describe("createPageStarterConfig", () => {
       const config = createPageStarterConfig(title, pageType);
       const hero = config.blocks.find((block) => block.type === "hero");
 
-      expect(hero?.content.title).toBe(title);
+      if (pageType === "menu" || pageType === "catalog") expect(hero).toBeUndefined();
+      else expect(hero?.content.title).toBe(title);
       expect(config.profile.name).toBe(title);
     },
   );

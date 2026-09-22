@@ -39,9 +39,7 @@ export function resolveVerificationVariant(
 /** Premium metallic gold badge reserved for official Cripqer profiles. */
 function OfficialGoldBadge() {
   // Stable, unique gradient id per instance (avoids SVG id collisions).
-  const gradientId = useRef(
-    `cripqer-gold-${Math.random().toString(36).slice(2, 9)}`,
-  ).current;
+  const gradientId = useRef(`cripqer-gold-${Math.random().toString(36).slice(2, 9)}`).current;
   return (
     <span
       role="img"
@@ -225,6 +223,7 @@ export function ProfileHeader({
   const align = layout.header === "overlap" ? "center" : rule.align;
   const avatarAlign = profile.avatar.align ?? align;
   const banner = profile.banner;
+  const showAvatar = profile.showAvatar !== false;
   const fullBleed = banner.enabled && banner.widthMode === "full-bleed";
   const inline = layout.header === "inline";
   const hero = layout.header === "hero";
@@ -322,7 +321,10 @@ export function ProfileHeader({
           path="profile.name"
           value={profile.name}
           placeholder="Your name"
-          style={applyTypographyOverride(headingStyle(theme, hero ? 1 : 0.86), profile.nameTypography)}
+          style={applyTypographyOverride(
+            headingStyle(theme, hero ? 1 : 0.86),
+            profile.nameTypography,
+          )}
         />
         <VerificationBadge
           variant={resolveVerificationVariant(profile.verified, profile.verificationVariant)}
@@ -337,7 +339,7 @@ export function ProfileHeader({
               color: theme.colors.mutedText,
               letterSpacing: "0.01em",
             },
-            profile.roleTypography
+            profile.roleTypography,
           )}
         >
           <InlineText as="span" path="profile.role" value={profile.role ?? ""} placeholder="Role" />
@@ -368,7 +370,7 @@ export function ProfileHeader({
                 lineHeight: theme.typography.lineHeight,
                 whiteSpace: "pre-wrap",
               },
-              profile.descriptionTypography
+              profile.descriptionTypography,
             )}
           />
         </div>
@@ -390,7 +392,7 @@ export function ProfileHeader({
           <span
             style={applyTypographyOverride(
               { display: "inline-flex", alignItems: "center", gap: 4 },
-              profile.locationTypography
+              profile.locationTypography,
             )}
           >
             <MapPin size={12} aria-hidden /> {profile.location}
@@ -415,35 +417,39 @@ export function ProfileHeader({
           marginTop: fullBleed
             ? 0
             : banner.enabled && layout.header === "overlap"
-              ? -profile.avatar.overlap
+              ? showAvatar
+                ? -profile.avatar.overlap
+                : 0
               : banner.enabled
                 ? 18
                 : 0,
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            justifyContent:
-              inline || avatarAlign === "left"
-                ? "flex-start"
-                : avatarAlign === "right"
-                  ? "flex-end"
-                  : "center",
-          }}
-        >
+        {showAvatar ? (
           <div
-            {...(mode === "edit" ? { "data-editor-target": "profile-avatar" } : {})}
-            onClick={(e) => {
-              if (mode !== "edit") return;
-              e.stopPropagation();
-              selectProfileTarget("profile-avatar");
+            style={{
+              display: "flex",
+              justifyContent:
+                inline || avatarAlign === "left"
+                  ? "flex-start"
+                  : avatarAlign === "right"
+                    ? "flex-end"
+                    : "center",
             }}
-            style={{ cursor: mode === "edit" ? "pointer" : undefined }}
           >
-            {avatar}
+            <div
+              {...(mode === "edit" ? { "data-editor-target": "profile-avatar" } : {})}
+              onClick={(e) => {
+                if (mode !== "edit") return;
+                e.stopPropagation();
+                selectProfileTarget("profile-avatar");
+              }}
+              style={{ cursor: mode === "edit" ? "pointer" : undefined }}
+            >
+              {avatar}
+            </div>
           </div>
-        </div>
+        ) : null}
         {identity}
       </div>
     </header>

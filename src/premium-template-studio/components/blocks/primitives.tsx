@@ -115,6 +115,8 @@ export function InlineText({
   style?: CSSProperties | undefined;
   className?: string | undefined;
   placeholder?: string | undefined;
+  onFocus?: (() => void) | undefined;
+  onBlur?: (() => void) | undefined;
 }) {
   const { mode, onInlineEdit } = useRender();
   const editable = mode === "edit" && Boolean(onInlineEdit);
@@ -136,7 +138,10 @@ export function InlineText({
       suppressContentEditableWarning
       spellCheck={false}
       data-pts-inline={path}
-      onFocus={(e) => e.stopPropagation()}
+      onFocus={(e) => {
+        e.stopPropagation();
+        onFocus?.();
+      }}
       onKeyDown={(e) => {
         if (e.key === "Enter" && Tag !== "p" && Tag !== "div") {
           e.preventDefault();
@@ -147,6 +152,7 @@ export function InlineText({
       onBlur={(e) => {
         const next = (e.target as HTMLElement).innerText.replace(/\n{3,}/g, "\n\n").trim();
         if (next !== value) onInlineEdit?.(path, next);
+        onBlur?.();
       }}
     >
       {content}

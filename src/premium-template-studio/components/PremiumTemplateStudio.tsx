@@ -20,11 +20,12 @@ import {
   PanelRightClose,
   PanelRightOpen,
 } from "lucide-react";
-import type { BioTemplateConfig, Breakpoint, SaveState } from "../types";
+import type { BioTemplateConfig, BlockItem, Breakpoint, SaveState } from "../types";
 import type { ProductTier } from "../../lib/product-entitlements/capabilities";
 import { StudioProvider, useStudio } from "../state/StudioProvider";
 import type { StudioAdapters } from "../adapters";
 import { TemplateRenderer } from "../engine/TemplateRenderer";
+import type { SelectedCollectionItem } from "../engine/RenderContext";
 import { BREAKPOINT_WIDTHS } from "../constants/layouts";
 import { Sidebar, SidebarContent, SidebarTabs } from "./editor/Sidebar";
 import { Inspector, InspectorContent } from "./inspector/Inspector";
@@ -45,6 +46,7 @@ import { PowerEditorLocaleProvider, usePowerEditorLocale } from "../i18n/PowerEd
 import { isPersistenceDebugEnabled, PersistenceDebugPanel } from "../diagnostics/persistenceDebug";
 import { formatBreakpoint } from "../i18n/messages";
 import { DiscoveryHintHost } from "../microux/DiscoveryHint";
+import { cloneProductItem } from "./blocks/productGridCollection";
 import "../styles/studio.css";
 
 function Toolbar({ onExport }: { onExport: () => void }) {
@@ -242,13 +244,13 @@ function BinaryIsolationDiagnostic({
   mode: BinaryIsolationMode;
 }) {
   const [evidence, setEvidence] = useState<BinaryIsolationEvidence | null>(null);
-  
-  const showDiagnostic = 
-    import.meta.env.DEV && 
-    typeof window !== "undefined" && 
+
+  const showDiagnostic =
+    import.meta.env.DEV &&
+    typeof window !== "undefined" &&
     (new URLSearchParams(window.location.search).get("binaryDebug") === "1" ||
-     new URLSearchParams(window.location.search).get("binaryDebug") === "true" ||
-     new URLSearchParams(window.location.search).get("isolationDebug") === "1");
+      new URLSearchParams(window.location.search).get("binaryDebug") === "true" ||
+      new URLSearchParams(window.location.search).get("isolationDebug") === "1");
 
   useEffect(() => {
     if (!showDiagnostic || typeof document === "undefined") return;
@@ -293,6 +295,8 @@ function BinaryIsolationDiagnostic({
 
 function Canvas() {
   const { state, dispatch, breakpoint, previewing } = useStudio();
+  const [selectedCollectionItem, setSelectedCollectionItem] =
+    useState<SelectedCollectionItem | null>(null);
   const frameWidth = BREAKPOINT_WIDTHS[breakpoint];
   const cameraBypass =
     import.meta.env.DEV &&
@@ -309,12 +313,17 @@ function Canvas() {
           ? undefined
           : {
               selectedBlockId: state.selectedBlockId,
-              onSelect: (id) => dispatch({ type: "selectBlock", id }),
+              selectedCollectionItem,
+              onSelect: (id) => {
+                setSelectedCollectionItem(null);
+                dispatch({ type: "selectBlock", id });
+              },
               onSelectProfileCover: () => {
                 // Clear any block selection so the Inspector shows the Profile
                 // panel, then request the Cover/Banner section be brought into
                 // view. Only the Inspector scroll moves — never the Canvas zoom
                 // or pan (the camera is untouched).
+                setSelectedCollectionItem(null);
                 dispatch({ type: "selectBlock", id: null });
                 requestInspectorFocus("profile-cover");
               },
@@ -329,13 +338,67 @@ function Canvas() {
                 if (state.selectedBlockId !== null) {
                   dispatch({ type: "selectBlock", id: null });
                 }
+                setSelectedCollectionItem(null);
                 requestInspectorFocus("page-background");
               },
               onSelectCollectionItem: (blockId, collection, itemId, field = "item") => {
                 if (state.selectedBlockId !== blockId) {
                   dispatch({ type: "selectBlock", id: blockId });
                 }
+                setSelectedCollectionItem({ blockId, collection, itemId, field });
                 requestInspectorFocus(collectionTarget(blockId, collection, itemId, field));
+              },
+              onCollectionItemAction: (blockId, collection, itemId, action) => {
+                if (collection !== "product-grid") return;
+                const block = state.config.blocks.find((candidate) => candidate.id === blockId);
+                if (!block) return;
+                const products = [...(block.content.products ?? [])];
+                const index = products.findIndex((product) => product.id === itemId);
+                if (index < 0) return;
+                if (action === "delete") products.splice(index, 1);
+                if (action === "up" && index > 0) {
+                  [products[index - 1], products[index]] = [products[index], products[index - 1]];
+                }
+                if (action === "down" && index < products.length - 1) {
+                  [products[index], products[index + 1]] = [products[index + 1], products[index]];
+                }
+                if (action === "duplicate") {
+                  const copy = cloneProductItem(products[index] as BlockItem);
+                  products.splice(index + 1, 0, copy);
+                  setSelectedCollectionItem({
+                    blockId,
+                    collection,
+                    itemId: copy.id,
+                    field: "item",
+                  });
+                }
+                dispatch({
+                  type: "patchBlockField",
+                  id: blockId,
+                  path: "content.products",
+                  value: products,
+                });
+                if (action === "duplicate")
+                  requestInspectorFocus(
+                    collectionTarget(blockId, collection, products[index + 1]!.id!, "item"),
+                  );
+              },
+              onAddCollectionItem: (blockId, collection) => {
+                if (collection !== "product-grid") return;
+                const sourceBlock = state.config.blocks.find(
+                  (candidate) => candidate.id === blockId,
+                );
+                const sourceProducts = sourceBlock?.content.products ?? [];
+                const source = sourceProducts[sourceProducts.length - 1];
+                const next = cloneProductItem(source);
+                dispatch({
+                  type: "patchBlockField",
+                  id: blockId,
+                  path: "content.products",
+                  value: [...sourceProducts, next],
+                });
+                setSelectedCollectionItem({ blockId, collection, itemId: next.id, field: "item" });
+                requestInspectorFocus(collectionTarget(blockId, collection, next.id, "item"));
               },
               onSelectProfileTarget: (target) => {
                 // Generalized Profile contextual selection (cover/avatar/bio).
@@ -739,79 +802,79 @@ function StudioShell() {
           <Canvas />
         </div>
       ) : (
-      <div className="pts-studio-workspace flex min-h-0 flex-1 overflow-hidden">
-        <div
-          className={cx(
-            "pts-desktop-panel pts-desktop-panel--tools hidden lg:block",
-            toolsCollapsed ? "pts-desktop-panel--collapsed" : "",
-          )}
-        >
-          {toolsCollapsed ? (
-            <div className="pts-panel-rail border-r border-border bg-card">
-              <button
-                type="button"
-                title={messages.toolbar.openTools}
-                aria-label={messages.toolbar.openTools}
-                aria-expanded={false}
-                onClick={() => setToolsCollapsed(false)}
-                className="rounded-lg p-2 text-muted-foreground transition hover:bg-accent hover:text-foreground"
-              >
-                <PanelLeftOpen className="h-4 w-4" />
-              </button>
-            </div>
-          ) : (
-            <div className="relative h-full min-h-0 overflow-hidden">
-              <Sidebar />
-              <button
-                type="button"
-                title={messages.toolbar.collapseTools}
-                aria-label={messages.toolbar.collapseTools}
-                aria-expanded={true}
-                onClick={() => setToolsCollapsed(true)}
-                className="absolute right-2 top-2 z-10 rounded-lg border border-border bg-card p-1.5 text-muted-foreground shadow-sm transition hover:bg-accent hover:text-foreground"
-              >
-                <PanelLeftClose className="h-4 w-4" />
-              </button>
-            </div>
-          )}
+        <div className="pts-studio-workspace flex min-h-0 flex-1 overflow-hidden">
+          <div
+            className={cx(
+              "pts-desktop-panel pts-desktop-panel--tools hidden lg:block",
+              toolsCollapsed ? "pts-desktop-panel--collapsed" : "",
+            )}
+          >
+            {toolsCollapsed ? (
+              <div className="pts-panel-rail border-r border-border bg-card">
+                <button
+                  type="button"
+                  title={messages.toolbar.openTools}
+                  aria-label={messages.toolbar.openTools}
+                  aria-expanded={false}
+                  onClick={() => setToolsCollapsed(false)}
+                  className="rounded-lg p-2 text-muted-foreground transition hover:bg-accent hover:text-foreground"
+                >
+                  <PanelLeftOpen className="h-4 w-4" />
+                </button>
+              </div>
+            ) : (
+              <div className="relative h-full min-h-0 overflow-hidden">
+                <Sidebar />
+                <button
+                  type="button"
+                  title={messages.toolbar.collapseTools}
+                  aria-label={messages.toolbar.collapseTools}
+                  aria-expanded={true}
+                  onClick={() => setToolsCollapsed(true)}
+                  className="absolute right-2 top-2 z-10 rounded-lg border border-border bg-card p-1.5 text-muted-foreground shadow-sm transition hover:bg-accent hover:text-foreground"
+                >
+                  <PanelLeftClose className="h-4 w-4" />
+                </button>
+              </div>
+            )}
+          </div>
+          <Canvas />
+          <div
+            className={cx(
+              "pts-desktop-panel pts-desktop-panel--inspector hidden lg:block",
+              inspectorCollapsed ? "pts-desktop-panel--collapsed" : "",
+            )}
+          >
+            {inspectorCollapsed ? (
+              <div className="pts-panel-rail pts-panel-rail--right border-l border-border bg-card">
+                <button
+                  type="button"
+                  title={messages.toolbar.openInspector}
+                  aria-label={messages.toolbar.openInspector}
+                  aria-expanded={false}
+                  onClick={() => setInspectorCollapsed(false)}
+                  className="rounded-lg p-2 text-muted-foreground transition hover:bg-accent hover:text-foreground"
+                >
+                  <PanelRightOpen className="h-4 w-4" />
+                </button>
+              </div>
+            ) : (
+              <div className="relative h-full min-h-0 overflow-hidden">
+                <Inspector />
+                <button
+                  type="button"
+                  title={messages.toolbar.collapseInspector}
+                  aria-label={messages.toolbar.collapseInspector}
+                  aria-expanded={true}
+                  onClick={() => setInspectorCollapsed(true)}
+                  className="absolute left-2 top-2 z-10 rounded-lg border border-border bg-card p-1.5 text-muted-foreground shadow-sm transition hover:bg-accent hover:text-foreground"
+                >
+                  <PanelRightClose className="h-4 w-4" />
+                </button>
+              </div>
+            )}
+          </div>
         </div>
-        <Canvas />
-        <div
-          className={cx(
-            "pts-desktop-panel pts-desktop-panel--inspector hidden lg:block",
-            inspectorCollapsed ? "pts-desktop-panel--collapsed" : "",
-          )}
-        >
-          {inspectorCollapsed ? (
-            <div className="pts-panel-rail pts-panel-rail--right border-l border-border bg-card">
-              <button
-                type="button"
-                title={messages.toolbar.openInspector}
-                aria-label={messages.toolbar.openInspector}
-                aria-expanded={false}
-                onClick={() => setInspectorCollapsed(false)}
-                className="rounded-lg p-2 text-muted-foreground transition hover:bg-accent hover:text-foreground"
-              >
-                <PanelRightOpen className="h-4 w-4" />
-              </button>
-            </div>
-          ) : (
-            <div className="relative h-full min-h-0 overflow-hidden">
-              <Inspector />
-              <button
-                type="button"
-                title={messages.toolbar.collapseInspector}
-                aria-label={messages.toolbar.collapseInspector}
-                aria-expanded={true}
-                onClick={() => setInspectorCollapsed(true)}
-                className="absolute left-2 top-2 z-10 rounded-lg border border-border bg-card p-1.5 text-muted-foreground shadow-sm transition hover:bg-accent hover:text-foreground"
-              >
-                <PanelRightClose className="h-4 w-4" />
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
       )}
       {!previewing && <MobileDock />}
       {exporting && !previewing && <ExportSheet onClose={() => setExporting(false)} />}

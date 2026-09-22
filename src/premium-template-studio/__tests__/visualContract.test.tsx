@@ -164,10 +164,20 @@ describe("Power Editor visual contract", () => {
     };
     const config: BioTemplateConfig = {
       ...base,
-      profile: { ...base.profile, avatarUrl: "", banner: { ...base.profile.banner, enabled: false } },
+      profile: {
+        ...base.profile,
+        avatarUrl: "",
+        banner: { ...base.profile.banner, enabled: false },
+      },
       theme: {
         ...base.theme,
-        cards: { ...base.theme.cards, preset: "elevated", radius: 18, borderWidth: 1, shadow: "md" },
+        cards: {
+          ...base.theme.cards,
+          preset: "elevated",
+          radius: 18,
+          borderWidth: 1,
+          shadow: "md",
+        },
       },
       blocks: [serviceBlock],
     };
@@ -192,10 +202,20 @@ describe("Power Editor visual contract", () => {
     };
     const config: BioTemplateConfig = {
       ...base,
-      profile: { ...base.profile, avatarUrl: "", banner: { ...base.profile.banner, enabled: false } },
+      profile: {
+        ...base.profile,
+        avatarUrl: "",
+        banner: { ...base.profile.banner, enabled: false },
+      },
       theme: {
         ...base.theme,
-        cards: { ...base.theme.cards, preset: "elevated", radius: 18, borderWidth: 1, shadow: "md" },
+        cards: {
+          ...base.theme.cards,
+          preset: "elevated",
+          radius: 18,
+          borderWidth: 1,
+          shadow: "md",
+        },
       },
       blocks: [serviceBlock],
     };
@@ -243,5 +263,28 @@ describe("Power Editor visual contract", () => {
 
     expect(markup).toContain("pts-anim-fade");
     expect(markup).toContain("justify-content:flex-end");
+  });
+
+  it("hides the custom avatar without leaving an avatar wrapper or changing the asset", () => {
+    const config = { ...createDemoConfig(), blocks: [] };
+    config.profile.avatarUrl = "https://example.com/avatar.jpg";
+    config.profile.showAvatar = false;
+
+    const markup = renderConfig(config, "public");
+
+    expect(markup).not.toContain("https://example.com/avatar.jpg");
+    expect(markup).not.toContain('data-editor-target="profile-avatar"');
+    expect(markup).toContain(config.profile.name);
+    expect(config.profile.avatarUrl).toBe("https://example.com/avatar.jpg");
+  });
+
+  it("keeps legacy documents with no visibility field visible", () => {
+    const config = { ...createDemoConfig(), blocks: [] };
+    config.profile.avatarUrl = "https://example.com/avatar.jpg";
+    delete config.profile.showAvatar;
+
+    const markup = renderConfig(config, "public");
+
+    expect(markup).toContain("https://example.com/avatar.jpg");
   });
 });

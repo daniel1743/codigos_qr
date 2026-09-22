@@ -1,39 +1,202 @@
-# Cripqer — Child Publish Revision Post Manual Click V1
+TASK:
+  id: "CRIPQER_PHASE_8_RUNTIME_CERTIFICATION_RESUME_V2"
+  project: "CRIPQER"
+  mode: "RUNTIME_CERTIFICATION"
+  language: "es"
 
-**Modo:** `READ_ONLY_POST_ACTION_VERIFICATION`  
-**Fecha:** `2026-09-21`  
-**Task:** `CRIPQER_CHILD_PUBLISH_REVISION_POST_MANUAL_CLICK_V1`
+PARENT_GATE:
+  "CRIPQER_POWER_EDITOR_TEMPLATE_PRODUCTIZATION_RUNTIME_PASS_FROZEN"
 
-## Lectura canónica posterior
+NEWLY_CLOSED_GATES:
+  - "CRIPQER_P1_CHILD_PAGE_PUBLISH_PERSISTENCE_FIXED_FROZEN"
+  - "CRIPQER_CATALOG_AND_PAGE_PUBLISH_CONTRACT_VERIFIED"
 
-Fila `public.pages` para `page_id = 6b01e073-da2a-464c-9c1e-d16c9207fb6d`:
+CONFIRMED_RUNTIME:
+  catalog:
+    starter_semantics: "PASS"
+    persistence_reload: "PASS"
+    publish: "PASS"
+    public_route: "PASS"
 
-| Campo | Resultado | Estado |
-|---|---:|---|
-| `published` | `true` | PASS |
-| `published_revision` | `5` | PASS (`4 -> 5`) |
-| `published_at` | `2026-09-21T18:56:08.655-03:00` | PASS, actualizado/no nulo |
-| `published_template_config` | presente | PASS |
-| `template_config` | presente | PASS |
-| `public_id` | `A8LjoRw` | PASS |
+  portfolio:
+    starter_semantics: "PASS"
+    distinct_from_catalog: "PASS"
 
-## Ruta pública
+  child_publish:
+    single_publish_single_revision: "PASS"
+    snapshot: "PASS"
+    main_bio_isolation: "PASS"
+    main_qr_isolation: "PASS"
 
-`GET https://www.cripqer.dev/pg/A8LjoRw` respondió `HTTP 200` y contiene
-`Nuestro catálogo`.
+OBJECTIVE: >
+  Reanudar únicamente los gates runtime restantes de Phase 8.
+  No reabrir Catalog/Publish salvo regresión nueva demostrada.
 
-## Clasificación
+CODE_POLICY:
+  default: "FROZEN"
 
-- `PUBLISHED_REVISION_RUNTIME_PASS`
-- `SINGLE_PUBLISH_SINGLE_REVISION_PASS`
-- No es defecto de publicación duplicada: la revisión no alcanzó `6`.
-- No es `NO_PUBLISH`: la revisión incrementó exactamente una vez.
+  repair_only_if:
+    "runtime reproduce un defecto concreto"
 
-## Gates emitidos
+DO_NOT_REPEAT:
+  - "Catalog starter certification"
+  - "Catalog publish contract"
+  - "public_id investigation"
+  - "child public route investigation"
+  - "revision monotonicity"
+  - "Bio isolation"
+  - "QR isolation"
 
-- `CRIPQER_P1_CHILD_PAGE_PUBLISH_PERSISTENCE_FIXED_FROZEN`
-- `CRIPQER_CATALOG_AND_PAGE_PUBLISH_CONTRACT_VERIFIED`
+# ------------------------------------------------------------
+# GATE A — RESTAURANT STARTER FRESH RUNTIME
+# ------------------------------------------------------------
 
-No se realizaron mutaciones durante esta verificación.
+RESTAURANT_RUNTIME:
 
-**STOP_AFTER:** `true`
+  reason: >
+    Las páginas antiguas fueron creadas antes del último cleanup semántico.
+    Se necesita una página fresca posterior al fix.
+
+  create_through:
+    "/pages/new"
+
+  title:
+    "QA Menu Clean Final"
+
+  type:
+    "Menú"
+
+  require:
+    - "Restaurant Visual / menu starter correcto"
+    - "sin Creative Director"
+    - "sin Shop"
+    - "sin texto creator residual"
+    - "semántica restaurante coherente"
+    - "hard reload preserva contenido"
+
+  gate:
+    "CRIPQER_RESTAURANT_VISUAL_TRUE_MENU_STARTER_RUNTIME_PASS"
+
+# ------------------------------------------------------------
+# GATE B — CONTEXTUAL SELECTION RESPONSIVE
+# ------------------------------------------------------------
+
+CONTEXTUAL_SELECTION:
+
+  desktop:
+    require:
+      - "selección de child item"
+      - "reorder conserva identidad"
+      - "inspector apunta al item correcto"
+
+  mobile:
+    widths:
+      - 360
+      - 390
+      - 430
+
+    require:
+      - "canvas sigue utilizable"
+      - "selección contextual funciona"
+      - "controles no ocultan permanentemente canvas"
+      - "sin crash"
+
+# ------------------------------------------------------------
+# GATE C — CTA EDITOR/PUBLIC PARITY
+# ------------------------------------------------------------
+
+CTA_PARITY:
+
+  verify:
+    - "ButtonGroup item CTA"
+    - "ProductGrid item CTA"
+    - "Hero CTA"
+    - "shared/block fallback"
+
+  require:
+    - "editor preview coincide con public renderer"
+    - "destination preservado"
+    - "item override precedence correcta"
+
+# ------------------------------------------------------------
+# GATE D — HOVER / MOTION / REDUCED MOTION
+# ------------------------------------------------------------
+
+MOTION:
+
+  desktop_pointer:
+    require:
+      - "hover afecta child interactivo"
+      - "no transforma container completo"
+
+  reduced_motion:
+    require:
+      - "animaciones reducidas/desactivadas según contrato"
+      - "sin pérdida funcional"
+
+  touch:
+    require:
+      - "hover no queda sticky"
+
+# ------------------------------------------------------------
+# GATE E — KEYBOARD / FOCUS
+# ------------------------------------------------------------
+
+KEYBOARD:
+
+  require:
+    - "focus-visible observable"
+    - "controles principales accesibles por teclado"
+    - "no focus trap accidental"
+    - "acciones esenciales alcanzables"
+
+# ------------------------------------------------------------
+# GATE F — PUBLIC PARITY
+# ------------------------------------------------------------
+
+PUBLIC_PARITY:
+
+  require:
+    - "documento publicado usa snapshot publicado"
+    - "no muestra chrome/editor controls"
+    - "contenido principal coincide con preview esperado"
+    - "CTA funcionales"
+    - "media correcta"
+    - "sin crash"
+
+# ------------------------------------------------------------
+# RESULT CLASSIFICATION
+# ------------------------------------------------------------
+
+EACH_GATE:
+  allowed:
+    - "PASS"
+    - "FAIL"
+    - "BLOCKED"
+    - "NOT_VERIFIED"
+
+RULE:
+  "No convertir static/code/test PASS en runtime PASS."
+
+IF_AUTOMATION_FAILS:
+  classify:
+    "BLOCKED_AUTOMATION"
+
+  rule:
+    "No modificar producto por falla del debugger."
+
+FINAL_SUCCESS_REQUIRES:
+  - "Restaurant fresh runtime PASS"
+  - "Contextual selection desktop/mobile PASS"
+  - "CTA parity PASS"
+  - "Motion/reduced-motion PASS"
+  - "Keyboard/focus PASS"
+  - "Public parity PASS"
+  - "ZERO known P0"
+  - "ZERO release-blocking P1"
+
+FINAL_GATE:
+  "CRIPQER_POWER_EDITOR_TEMPLATE_PRODUCTIZATION_RUNTIME_PASS_FROZEN"
+
+STOP_AFTER:
+  true

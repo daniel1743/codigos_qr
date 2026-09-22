@@ -8,6 +8,12 @@ export type HeroCtaTarget = "primary" | "secondary";
 
 /** Profile sub-targets (cover/avatar/bio) — ephemeral contextual UI targets. */
 export type ProfileTarget = "profile-cover" | "profile-avatar" | "profile-bio";
+export interface SelectedCollectionItem {
+  blockId: string;
+  collection: string;
+  itemId: string;
+  field?: string;
+}
 
 /**
  * Render-time context shared by every block. The public renderer supplies a
@@ -18,6 +24,7 @@ export interface RenderContextValue {
   breakpoint: Breakpoint;
   mode: "edit" | "public";
   selectedBlockId?: string | null | undefined;
+  selectedCollectionItem?: SelectedCollectionItem | null | undefined;
   onSelectBlock?: ((id: string) => void) | undefined;
   /** Selecting the profile cover/banner (contextual navigation — not a block). */
   onSelectProfileCover?: (() => void) | undefined;
@@ -35,14 +42,22 @@ export interface RenderContextValue {
   onSelectPageBackground?: (() => void) | undefined;
   /** Select a stable collection item/child without creating document state. */
   onSelectCollectionItem?:
-    | ((blockId: string, collection: string, itemId: string, field?: string) => void)
+    ((blockId: string, collection: string, itemId: string, field?: string) => void) | undefined;
+  onCollectionItemAction?:
+    | ((
+        blockId: string,
+        collection: string,
+        itemId: string,
+        action: "duplicate" | "delete" | "up" | "down",
+      ) => void)
     | undefined;
+  onAddCollectionItem?: ((blockId: string, collection: string) => void) | undefined;
   /** Exposed for block primitives that need a stable target attribute. */
   collectionTarget?:
     | ((blockId: string, collection: string, itemId: string, field?: string) => ContextualTarget)
     | undefined;
   /** inline editing hook: path is dot-notation into the config */
-  onInlineEdit?: ((path: string, value: string) => void) | undefined;
+  onInlineEdit?: ((path: string, value: unknown) => void) | undefined;
   /** ANALYTICS ADAPTER hook */
   onTrack?:
     | ((event: {

@@ -1,8 +1,9 @@
-import type { BioTemplateConfig, LayoutId, TemplateDefinition } from "../types";
+import type { BioTemplateConfig, LayoutId, TemplateBlock, TemplateDefinition } from "../types";
 import { buildTemplate } from "../engine/TemplateBuilder";
 import { getLayout } from "../constants/layouts";
 import { getTheme } from "../constants/themes";
 import { SECTION_PRESETS } from "../constants/sectionPresets";
+import { uid } from "../utils";
 
 function composeRecipe(
   id: string,
@@ -193,6 +194,143 @@ function restaurantVisualDefaults(config: BioTemplateConfig): BioTemplateConfig 
   };
 }
 
+/**
+ * Canonical menu starter captured from the approved persisted reference page
+ * 33b083d9-7387-44cc-ac78-889a91bf0a1a. Keep this repository-owned: new pages
+ * must not depend on the reference row remaining in the database.
+ */
+function menuDefaultV1(): BioTemplateConfig {
+  const blockDefaults = {
+    style: {},
+    layout: { span: 2, align: "center" as const, width: "content" as const, colSpan: 12 },
+    visibility: { mobile: true, tablet: true, desktop: true },
+    interaction: { newTab: true },
+  };
+  const blocks: TemplateBlock[] = [
+    {
+      ...blockDefaults,
+      id: "block_b66d11b7",
+      type: "buttonGroup",
+      variant: "inline",
+      content: {
+        items: [
+          { id: "block_b66d11b7-menu", url: "#menu", label: "Ver menú" },
+          { id: "block_b66d11b7-booking", url: "#reservas", label: "Reservar" },
+        ],
+      },
+    },
+    {
+      ...blockDefaults,
+      id: "block_cc4983c7",
+      type: "heading",
+      variant: "default",
+      content: {
+        title: "Nuestro menú",
+        subtitle: "Platos frescos y sabores mediterráneos",
+      },
+    },
+    {
+      ...blockDefaults,
+      id: "block_dc4480cd",
+      type: "productGrid",
+      variant: "default",
+      content: {
+        products: [
+          {
+            id: "block_dc4480cd-pasta",
+            price: "$12.900",
+            title: "Pasta de la casa",
+            ctaUrl: "#reservas",
+            ctaLabel: "Pedir",
+            imageUrl: "https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=600",
+            description: "Pasta fresca, salsa de tomate asado y albahaca.",
+          },
+          {
+            id: "block_dc4480cd-salad",
+            price: "$9.900",
+            title: "Ensalada mediterránea",
+            ctaUrl: "#reservas",
+            ctaLabel: "Pedir",
+            imageUrl: "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600",
+            description: "Hojas frescas, tomate, aceitunas y queso.",
+          },
+          {
+            id: "block_dc4480cd-tiramisu",
+            price: "$6.500",
+            title: "Tiramisú",
+            ctaUrl: "#reservas",
+            ctaLabel: "Pedir",
+            imageUrl: "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=600",
+            description: "Postre clásico de café y cacao.",
+          },
+        ],
+      },
+    },
+    {
+      ...blockDefaults,
+      id: "block_f90723e5",
+      type: "contact",
+      variant: "card",
+      content: {
+        email: "reservas@casamediterranea.example",
+        phone: "+56 2 2345 6789",
+        title: "Visítanos o reserva",
+        address: "Av. Providencia 1234, Santiago",
+        bookingUrl: "#reservas",
+        bookingLabel: "Reservar una mesa",
+        customCtaUrl: "#menu",
+        customCtaLabel: "Ver menú completo",
+      },
+    },
+  ];
+
+  return buildTemplate({
+    pageInstanceId: "menu-default-v1-demo",
+    templateDefinitionId: "menu-default-v1",
+    name: "Menu Default V1",
+    category: "Restaurant",
+    premium: true,
+    theme: getTheme("aurora"),
+    layout: getLayout("centered"),
+    blocks,
+    profile: {
+      name: "DONDE MI NEGRO",
+      username: "user",
+      role: "Restaurante y cocina mediterránea",
+      company: "",
+      location: "Santiago, Chile",
+      description: "Cocina fresca, simple y hecha para compartir.",
+      verified: true,
+      avatarUrl:
+        "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=70",
+      showAvatar: false,
+      avatar: {
+        size: 104,
+        align: "center",
+        radius: 999,
+        shadow: true,
+        overlap: 56,
+        borderWidth: 4,
+      },
+      banner: {
+        blur: 1,
+        focalX: 50,
+        focalY: 45,
+        height: 210,
+        radius: 0,
+        enabled: true,
+        overlay: 0.85,
+        gradient: true,
+        imageUrl:
+          "https://mlinfiuhkxdhlveflbkj.supabase.co/storage/v1/object/public/avatars/8b1f25ff-ec0a-4cf2-93e2-f67c62a5a165/power-editor/1790033330029-ChatGPT_Image_21_sept_2026__20_28_30.png",
+        blendFade: { enabled: true, distance: 80, strength: 1 },
+        widthMode: "full-bleed",
+        mobileHeight: 272,
+      },
+    },
+  });
+}
+
 function storeBentoDefaults(config: BioTemplateConfig): BioTemplateConfig {
   const blocks = config.blocks
     .filter((block) => block.type !== "image" && block.type !== "social")
@@ -294,6 +432,119 @@ function storeBentoDefaults(config: BioTemplateConfig): BioTemplateConfig {
     },
     blocks,
   };
+}
+
+/** Canonical Catalog starter captured from approved page 0d1ad73e-bedb-4250-a5ff-c33c2c55eaa7. */
+function catalogDefaultV1(): BioTemplateConfig {
+  const productGridId = uid("block");
+  const headingId = uid("block");
+  const contactId = uid("block");
+  const shared = {
+    style: {},
+    layout: { span: 2, align: "center" as const, width: "content" as const, colSpan: 12 },
+    visibility: { mobile: true, tablet: true, desktop: true },
+    interaction: { newTab: true },
+  };
+  const blocks: TemplateBlock[] = [
+    {
+      ...shared,
+      id: productGridId,
+      type: "productGrid",
+      variant: "bento",
+      content: {
+        products: [
+          {
+            id: `${productGridId}-featured`,
+            price: "$29.900",
+            title: "Producto destacado",
+            ctaUrl: "#contacto",
+            ctaLabel: "Ver producto",
+            imageUrl: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600",
+            description: "Una opción versátil para comenzar.",
+          },
+          {
+            id: `${productGridId}-classic`,
+            price: "$19.900",
+            title: "Producto clásico",
+            ctaUrl: "#contacto",
+            ctaLabel: "Consultar",
+            imageUrl: "https://images.unsplash.com/photo-1498049794561-7780e7231661?w=600",
+            description: "Diseñado para el uso diario y resultados confiables.",
+          },
+          {
+            id: `${productGridId}-collection`,
+            price: "$39.900",
+            title: "Nueva colección",
+            ctaUrl: "#contacto",
+            ctaLabel: "Comprar",
+            imageUrl: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600",
+            description: "Descubre las novedades disponibles esta temporada.",
+          },
+        ],
+      },
+    },
+    {
+      ...shared,
+      id: headingId,
+      type: "heading",
+      variant: "default",
+      content: { title: "Productos destacados", subtitle: "Opciones para cada necesidad" },
+    },
+    {
+      ...shared,
+      id: contactId,
+      type: "contact",
+      variant: "list",
+      content: {
+        email: "hola@tuempresa.example",
+        phone: "+56 2 2345 6789",
+        title: "Consulta o compra",
+        address: "Av. Providencia 1234, Santiago",
+        bookingUrl: "#contacto",
+        bookingLabel: "Consultar",
+        customCtaUrl: "#catalogo",
+        customCtaLabel: "Ver catálogo completo",
+      },
+    },
+  ];
+
+  return buildTemplate({
+    pageInstanceId: "catalog-default-v1-demo",
+    templateDefinitionId: "catalog-default-v1",
+    name: "Catalog Default V1",
+    category: "Store / Product",
+    premium: true,
+    theme: getTheme("warm"),
+    layout: getLayout("centered"),
+    blocks,
+    profile: {
+      name: "Catalogo Fuxion",
+      username: "user",
+      role: "Productos y soluciones",
+      company: "",
+      location: "Santiago, Chile",
+      description: "Explora nuestros productos y encuentra lo que necesitas.",
+      verified: true,
+      avatarUrl:
+        "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=70",
+      showAvatar: false,
+      avatar: { size: 88, align: "left", radius: 14, shadow: false, overlap: 40, borderWidth: 0 },
+      banner: {
+        blur: 0,
+        focalX: 50,
+        focalY: 40,
+        height: 352,
+        radius: 48,
+        enabled: true,
+        overlay: 0.35,
+        gradient: true,
+        imageUrl:
+          "https://mlinfiuhkxdhlveflbkj.supabase.co/storage/v1/object/public/avatars/8b1f25ff-ec0a-4cf2-93e2-f67c62a5a165/power-editor/1790035167806-Diseno_sin_titulo-111.webp",
+        widthMode: "full-bleed",
+        mobileHeight: 272,
+      },
+    },
+  });
 }
 
 export const RECIPE_REGISTRY: TemplateDefinition[] = [
@@ -414,6 +665,17 @@ export const RECIPE_REGISTRY: TemplateDefinition[] = [
   ),
 
   // 5. Restaurant (3)
+  {
+    id: "menu-default-v1",
+    name: "Menu Default V1",
+    category: "Restaurant",
+    description: "Approved menu starter derived from the canonical reference page.",
+    premium: true,
+    base: "menu-default-v1",
+    layout: "centered",
+    themeId: "aurora",
+    build: menuDefaultV1,
+  },
   composeRecipe(
     "restaurant-premium",
     "Restaurant Premium",
@@ -445,6 +707,17 @@ export const RECIPE_REGISTRY: TemplateDefinition[] = [
   ),
 
   // 6. Store / Product (3)
+  {
+    id: "catalog-default-v1",
+    name: "Catalog Default V1",
+    category: "Store / Product",
+    description: "Approved catalog starter derived from the canonical reference page.",
+    premium: true,
+    base: "catalog-default-v1",
+    layout: "centered",
+    themeId: "warm",
+    build: catalogDefaultV1,
+  },
   composeRecipe(
     "product-launch",
     "Product Launch",

@@ -10,15 +10,25 @@ import { getTemplateDefinition } from "../../premium-template-studio/templates/d
 export const PAGE_TYPE_STARTER_TEMPLATE_IDS: Record<PageType, string> = {
   landing: "modern-bento-003",
   promotion: "product-launch",
-  menu: "restaurant-visual",
+  menu: "menu-default-v1",
   campaign: "product-launch",
   event: "dj-events",
   services: "professional-trust",
-  catalog: "store-bento",
+  catalog: "catalog-default-v1",
   portfolio: "portfolio-bento",
 };
 
 const FALLBACK_STARTER_TEMPLATE_ID = PAGE_TYPE_STARTER_TEMPLATE_IDS.landing;
+
+const PAGE_TYPE_DEFAULT_SHOW_AVATAR: Partial<Record<PageType, boolean>> = {
+  promotion: false,
+  menu: false,
+  campaign: false,
+  event: false,
+  services: true,
+  catalog: false,
+  portfolio: true,
+};
 
 /**
  * Build a valid child-page starter from the selected page type. The fallback
@@ -28,6 +38,7 @@ export function createPageStarterConfig(title: string, pageType: PageType): BioT
   const templateId = PAGE_TYPE_STARTER_TEMPLATE_IDS[pageType] ?? FALLBACK_STARTER_TEMPLATE_ID;
   const config = getTemplateDefinition(templateId).build();
   const safeTitle = title.trim();
+  const defaultShowAvatar = PAGE_TYPE_DEFAULT_SHOW_AVATAR[pageType];
   const blocks = config.blocks.map((block) =>
     block.type === "hero"
       ? {
@@ -41,6 +52,10 @@ export function createPageStarterConfig(title: string, pageType: PageType): BioT
     ...config,
     blocks,
     metadata: { ...config.metadata, name: safeTitle },
-    profile: { ...config.profile, name: safeTitle },
+    profile: {
+      ...config.profile,
+      name: safeTitle,
+      ...(defaultShowAvatar === undefined ? {} : { showAvatar: defaultShowAvatar }),
+    },
   };
 }
