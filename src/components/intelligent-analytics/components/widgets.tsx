@@ -409,7 +409,7 @@ export function GeographyWidget({ metrics }: { metrics: AnalyticsMetricsV1 }) {
 
 export function DevicesWidget({ metrics }: { metrics: AnalyticsMetricsV1 }) {
   return (
-    <Card title="Devices" hint="How people open your page">
+    <Card title="Devices" hint="By device (from browser signal)">
       <Donut items={metrics.devices} />
     </Card>
   );

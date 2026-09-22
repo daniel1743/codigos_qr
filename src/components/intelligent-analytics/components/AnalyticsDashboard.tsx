@@ -27,6 +27,7 @@ import { computeMetrics, resolveRange } from "../metrics-engine";
 import { EMPTY_NOTIFICATION_STATE, scoreNotifications } from "../notification-engine";
 import { computeRollingWindow } from "../rolling-window";
 import { resolveWidgets, widgetMap } from "../widget-registry";
+import { resolveRealDataWidgets, type RealDataAvailabilityV1 } from "../real-data-capability";
 import { NotificationCenter } from "./NotificationCenter";
 import { NotificationToasts } from "./NotificationToasts";
 import { LockedWidget } from "./widgets";
@@ -66,6 +67,8 @@ export interface AnalyticsDashboardProps {
   /** Rendered above the widget grid (host chrome, tabs, breadcrumbs…). */
   slot?: React.ReactNode;
   loading?: boolean;
+  /** REAL data availability gate — hides session-dependent widgets truthfully. */
+  availability?: RealDataAvailabilityV1;
 }
 
 export function AnalyticsDashboard({
@@ -76,6 +79,7 @@ export function AnalyticsDashboard({
   theme = "light",
   slot,
   loading = false,
+  availability,
 }: AnalyticsDashboardProps) {
   const now = useMemo(() => (context.now ? new Date(context.now) : new Date()), [context.now]);
   const [period, setPeriod] = useState<PeriodId>("30d");
@@ -111,8 +115,13 @@ export function AnalyticsDashboard({
     [insights, metrics, notificationState, now],
   );
   const widgets = useMemo(
-    () => widgetMap(resolveWidgets(metrics, context.plan)),
-    [metrics, context.plan],
+    () =>
+      widgetMap(
+        availability
+          ? resolveRealDataWidgets(metrics, context.plan, availability)
+          : resolveWidgets(metrics, context.plan),
+      ),
+    [metrics, context.plan, availability],
   );
 
   /* Notification centre feed + host callback ------------------------- */

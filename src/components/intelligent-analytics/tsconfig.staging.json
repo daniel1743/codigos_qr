@@ -8,5 +8,5 @@
     "skipLibCheck": true,
     "lib": ["ES2022", "DOM"]
   },
-  "include": ["analytics.types.ts", "timezone.ts", "metrics-engine.ts", "goals-engine.ts", "intelligence-engine.ts", "daily-brief.ts", "rolling-window.ts", "notification-engine.ts", "widget-registry.ts", "cripqer-event-adapter.ts", "staging-harness.ts"]
+  "include": ["analytics.types.ts", "timezone.ts", "metrics-engine.ts", "goals-engine.ts", "intelligence-engine.ts", "daily-brief.ts", "rolling-window.ts", "notification-engine.ts", "widget-registry.ts", "cripqer-event-adapter.ts", "real-data-capability.ts", "staging-harness.ts"]
 }

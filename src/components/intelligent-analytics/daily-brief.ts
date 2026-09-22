@@ -63,7 +63,7 @@ export function buildDailyBrief(
 
   if (leader && leader.clicks > 0) {
     paragraphs.push(
-      `${leader.label} is your strongest channel with ${leader.clicks} clicks (${Math.round(leader.share * 100)}% of everything people tapped)${
+      `${leader.label} is your strongest channel with ${leader.clicks} clicks (${Math.round(leader.share * 100)}% of all clicks)${
         topLink ? `, and "${topLink.label}" is the single most used link` : ""
       }.`,
     );

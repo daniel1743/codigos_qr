@@ -34,6 +34,23 @@ export {
   type ScoreNotificationsResult,
 } from "./notification-engine";
 export { resolveWidgets, widgetMap, planRank } from "./widget-registry";
+export {
+  fromLegacyAnalyticsRecord,
+  fromLegacyAnalyticsRecords,
+  toAnalyticsEventV1,
+  toAnalyticsEventsV1,
+  provenanceOf,
+  type CripqerLegacyAnalyticsEvent,
+  type AdapterContext,
+  type ProvenanceClass,
+  type FieldProvenance,
+} from "./cripqer-event-adapter";
+export {
+  inferAvailability,
+  resolveRealDataWidgets,
+  SESSION_DEPENDENT_WIDGET_IDS,
+  type RealDataAvailabilityV1,
+} from "./real-data-capability";
 export { AnalyticsDashboard, type AnalyticsDashboardProps } from "./components/AnalyticsDashboard";
 export { NotificationToasts } from "./components/NotificationToasts";
 export { NotificationCenter } from "./components/NotificationCenter";

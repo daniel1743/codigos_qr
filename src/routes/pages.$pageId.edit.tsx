@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PowerEditorHost } from "@/components/power-editor/PowerEditorHost";
+import { DirectPageEditorPilotHost } from "@/components/direct-page-editor/DirectPageEditorPilotHost";
 
 /**
  * Opens one child Page as an independent Power Editor document.
@@ -14,5 +15,9 @@ export const Route = createFileRoute("/pages/$pageId/edit")({
 
 function PagePowerEditor() {
   const { pageId } = Route.useParams();
+  const magicPilot =
+    typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).get("directEditor") === "magic";
+  if (magicPilot) return <DirectPageEditorPilotHost pageId={pageId} />;
   return <PowerEditorHost target={{ kind: "page", id: pageId }} />;
 }

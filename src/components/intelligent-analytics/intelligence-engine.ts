@@ -164,7 +164,7 @@ export function generateInsights(
     drafts.push({
       type: improving ? "ctr_improvement" : "ctr_drop",
       category: improving ? "positive" : "opportunity",
-      title: improving ? "People are engaging more" : "Fewer visitors are clicking",
+      title: improving ? "Engagement is rising" : "Fewer interactions per view",
       message: improving
         ? `Interactions per view rose to ${metrics.interactionRate.toFixed(2)} (${fmtPct(ctrDelta)}). Whatever changed, keep it.`
         : `Interactions per view fell to ${metrics.interactionRate.toFixed(2)} (${fmtPct(ctrDelta)}). A clearer main button usually recovers this.`,
@@ -187,8 +187,8 @@ export function generateInsights(
     drafts.push({
       type: improving ? "conversion_improvement" : "conversion_deterioration",
       category: improving ? "positive" : "warning",
-      title: improving ? "More visitors are converting" : "Conversion is slipping",
-      message: `${fmtRate(metrics.conversionRate)} of visitors now convert (${fmtPct(conversionDelta)}).`,
+      title: improving ? "More views are converting" : "Conversion is slipping",
+      message: `${fmtRate(metrics.conversionRate)} of views now convert (${fmtPct(conversionDelta)}).`,
       severity: improving ? "notable" : "important",
       confidence: confidenceFor(sampleSize, conversionDelta),
       metrics: [

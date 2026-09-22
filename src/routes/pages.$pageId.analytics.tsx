@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { BarChart3, ArrowLeft, Eye, MousePointerClick } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import "../components/intelligent-analytics/analytics.css";
 import { AppShell } from "../components/app-shell/AppShell";
@@ -12,11 +12,15 @@ import {
   ANALYTICS_SCENARIOS,
   AnalyticsDashboard,
   buildScenarioEvents,
+  inferAvailability,
+  type AnalyticsEventV1,
+  type RealDataAvailabilityV1,
   type ScenarioId,
 } from "../components/intelligent-analytics";
 import type { PlanId } from "../components/intelligent-analytics/analytics.types";
 import { getAnalyticsEffectiveTierFn } from "../lib/billing/analytics-entitlement-server";
 import { analyticsService } from "../services/analyticsService";
+import { analyticsRealDataService, realDataPeriodBounds } from "../services/analyticsRealDataService";
 import { pageService } from "../services/page.service";
 import type { Page } from "../types/database";
 import type { PageAnalyticsSummary } from "../types/analytics";
@@ -50,6 +54,19 @@ function MetricCard({ label, value, icon }: { label: string; value: number; icon
   );
 }
 
+type AnalyticsMode = "fixtures" | "real" | "legacy";
+
+function initialMode(): AnalyticsMode {
+  if (!import.meta.env.DEV) return "legacy";
+  const param =
+    typeof window === "undefined"
+      ? null
+      : new URLSearchParams(window.location.search).get("analytics");
+  if (param === "legacy") return "legacy";
+  if (param === "real") return "real";
+  return "fixtures";
+}
+
 function PageAnalytics() {
   const { pageId } = Route.useParams();
   const [page, setPage] = useState<Page | null>(null);
@@ -62,15 +79,29 @@ function PageAnalytics() {
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [qaMode, setQaMode] = useState(
-    () =>
-      import.meta.env.DEV &&
-      (typeof window === "undefined" ||
-        new URLSearchParams(window.location.search).get("analytics") !== "legacy"),
-  );
+  const [mode, setMode] = useState<AnalyticsMode>(initialMode);
+  const [realEvents, setRealEvents] = useState<AnalyticsEventV1[]>([]);
+  const [realRows, setRealRows] = useState(0);
+  const [realTruncated, setRealTruncated] = useState(false);
+  const [realAvailability, setRealAvailability] = useState<RealDataAvailabilityV1>({
+    sessionTracking: false,
+    qrProvenance: false,
+    hasGeography: false,
+    hasDevice: false,
+    hasTrafficSource: false,
+  });
 
   const qaNow = "2026-09-22T15:00:00.000Z";
   const qaTimezone = "America/Santiago";
+  const timezone = useMemo(() => {
+    try {
+      return Intl.DateTimeFormat().resolvedOptions().timeZone || qaTimezone;
+    } catch {
+      return qaTimezone;
+    }
+  }, []);
+
+  const isLegacy = mode === "legacy";
 
   useEffect(() => {
     let active = true;
@@ -81,13 +112,23 @@ function PageAnalytics() {
         if (!auth.user) throw new Error("Debes iniciar sesión para ver estadísticas.");
         const ownedPage = await pageService.getOwnPageById(supabase, pageId, auth.user.id);
         if (!ownedPage) throw new Error("No se encontró esta página o no tienes acceso a ella.");
-        const analytics = qaMode
-          ? null
-          : await analyticsService.getPageAnalytics(supabase, pageId, days);
         if (!active) return;
         setPage(ownedPage);
-        if (analytics) setSummary(analytics);
-        setError(null);
+
+        if (mode === "legacy") {
+          const analytics = await analyticsService.getPageAnalytics(supabase, pageId, days);
+          if (active) setSummary(analytics);
+        } else if (mode === "real") {
+          const bounds = realDataPeriodBounds("90d", new Date(), timezone);
+          const result = await analyticsRealDataService.getRealPageEvents(supabase, pageId, bounds);
+          if (active) {
+            setRealEvents(result.events);
+            setRealRows(result.rows);
+            setRealTruncated(result.truncated);
+            setRealAvailability(inferAvailability(result.events));
+          }
+        }
+        if (active) setError(null);
       } catch (reason) {
         if (active)
           setError(
@@ -100,10 +141,10 @@ function PageAnalytics() {
     return () => {
       active = false;
     };
-  }, [pageId, days, qaMode]);
+  }, [pageId, days, mode, timezone]);
 
   useEffect(() => {
-    if (!qaMode) {
+    if (isLegacy) {
       setBillingStatus("resolved");
       return;
     }
@@ -122,7 +163,7 @@ function PageAnalytics() {
     return () => {
       active = false;
     };
-  }, [qaMode]);
+  }, [isLegacy]);
 
   const hasEvents = summary.visits + summary.buttonClicks > 0;
 
@@ -162,19 +203,26 @@ function PageAnalytics() {
                 <span className="font-medium">Analytics QA</span>
                 <Button
                   size="sm"
-                  variant={qaMode ? "default" : "outline"}
-                  onClick={() => setQaMode(true)}
+                  variant={mode === "fixtures" ? "default" : "outline"}
+                  onClick={() => setMode("fixtures")}
                 >
                   Fixtures
                 </Button>
                 <Button
                   size="sm"
-                  variant={!qaMode ? "default" : "outline"}
-                  onClick={() => setQaMode(false)}
+                  variant={mode === "real" ? "default" : "outline"}
+                  onClick={() => setMode("real")}
+                >
+                  Datos reales
+                </Button>
+                <Button
+                  size="sm"
+                  variant={mode === "legacy" ? "default" : "outline"}
+                  onClick={() => setMode("legacy")}
                 >
                   Dashboard anterior
                 </Button>
-                {qaMode ? (
+                {mode === "fixtures" ? (
                   <label className="flex items-center gap-2">
                     Escenario
                     <select
@@ -194,7 +242,7 @@ function PageAnalytics() {
               </div>
             ) : null}
 
-            {qaMode ? (
+            {mode === "fixtures" ? (
               <div className="mt-6">
                 <AnalyticsDashboard
                   events={buildScenarioEvents(fixture, new Date(qaNow), page.profile_id)}
@@ -227,7 +275,44 @@ function PageAnalytics() {
               </div>
             ) : null}
 
-            {!qaMode ? (
+            {mode === "real" ? (
+              <div className="mt-6">
+                <AnalyticsDashboard
+                  events={realEvents}
+                  availability={realAvailability}
+                  context={{
+                    profileId: page.profile_id,
+                    displayName: page.title,
+                    plan,
+                    availableChannels: [
+                      "whatsapp",
+                      "instagram",
+                      "facebook",
+                      "tiktok",
+                      "youtube",
+                      "linkedin",
+                      "other",
+                    ],
+                    timezone,
+                    timezoneLabel: timezone,
+                  }}
+                  slot={
+                    <div className="cq-qa-banner" role="status">
+                      <strong>Datos reales · solo lectura</strong> · {realRows} eventos cargados
+                      (máx. 90 días)
+                      {realTruncated ? " · truncado al límite" : " · ventana completa"}
+                      {" · session_id "}
+                      {realAvailability.sessionTracking ? "disponible" : "no disponible"}
+                      {billingStatus === "fallback"
+                        ? " · Billing no disponible, se aplicó fail-closed free"
+                        : ""}
+                    </div>
+                  }
+                />
+              </div>
+            ) : null}
+
+            {mode === "legacy" ? (
               <div className="mt-6 flex flex-wrap gap-2" aria-label="Periodo de estadísticas">
                 {[1, 7, 30].map((range) => (
                   <Button
@@ -242,7 +327,7 @@ function PageAnalytics() {
               </div>
             ) : null}
 
-            {!qaMode ? (
+            {mode === "legacy" ? (
               <section
                 className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
                 aria-label="Resumen"
@@ -274,7 +359,7 @@ function PageAnalytics() {
               </section>
             ) : null}
 
-            {!qaMode && !hasEvents ? (
+            {mode === "legacy" && !hasEvents ? (
               <Card className="mt-6">
                 <CardHeader>
                   <CardTitle>Todavía no hay visitas</CardTitle>
@@ -283,7 +368,7 @@ function PageAnalytics() {
                   Comparte tu página o tu QR y aquí podrás ver cómo interactúan las personas.
                 </CardContent>
               </Card>
-            ) : !qaMode ? (
+            ) : mode === "legacy" ? (
               <div className="mt-6 grid gap-6 lg:grid-cols-2">
                 <Card>
                   <CardHeader>
