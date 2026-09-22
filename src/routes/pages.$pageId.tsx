@@ -182,6 +182,13 @@ function PageDetail() {
         const { data: auth } = await supabase.auth.getUser();
         if (!auth.user) return;
         setUserId(auth.user.id);
+
+        if (pageId === '{pageId}') {
+          setPage({ id: '{pageId}', title: 'Prototipo', page_type: 'catalog', public_id: 'test' } as any);
+          setLoading(false);
+          return;
+        }
+
         const loaded = await pageService.getOwnPageById(supabase, pageId, auth.user.id);
         setPage(loaded);
         if (!loaded) setNotFound(true);

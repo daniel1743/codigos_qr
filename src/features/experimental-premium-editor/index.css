@@ -1,0 +1,71 @@
+/* @import url() FONT IMPORTS MUST ALWAYS BE AT THE VERY TOP OF THIS FILE, ABOVE THE TAILWIND IMPORTS — DO NOT DELETE THIS COMMENT */
+@import url('https://fonts.googleapis.com/css2?family=Marcellus&family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap');
+
+/* END TAILWIND IMPORTS — ALL OTHER CSS MUST GO BELOW THIS LINE */
+@theme inline {
+  --color-canvas: #F5F3F0;
+  --color-surface: #FFFFFF;
+  --color-ink: #17140F;
+  --color-body: #4A443C;
+  --color-muted: #7A736A;
+  --color-hairline: #E6E1DA;
+  --color-brand: #1E4D44;
+  --color-brandSoft: #EAF1EE;
+  --color-sel: #2F6FED;
+  --color-selSoft: #EAF1FE;
+  --color-danger: #B42318;
+
+  --font-display: 'Marcellus', 'Georgia', 'serif';
+  --font-editorial: '"Playfair Display"', 'Georgia', 'serif';
+  --font-grotesk: '"DM Sans"', 'Inter', 'sans-serif';
+
+  --shadow-card: 0 1px 2px rgba(23,20,15,0.04), 0 8px 24px -12px rgba(23,20,15,0.10);
+  --shadow-float: 0 2px 6px rgba(23,20,15,0.06), 0 16px 40px -12px rgba(23,20,15,0.22);
+  --shadow-sheet: 0 -8px 40px -12px rgba(23,20,15,0.26);
+
+  --ease-premium: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+body {
+  font-family: Inter, system-ui, sans-serif;
+  background-color: #f5f3f0;
+  color: #17140f;
+  -webkit-font-smoothing: antialiased;
+}
+[contenteditable] {
+  outline: none;
+}
+[contenteditable]:empty::before {
+  content: attr(data-placeholder);
+  color: #a8a09a;
+}
+.cq-scroll::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+.cq-scroll::-webkit-scrollbar-thumb {
+  background: #ddd7ce;
+  border-radius: 999px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+.cq-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+@keyframes cq-pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+.cq-pulse {
+  animation: cq-pulse 1.6s cubic-bezier(0.23, 1, 0.32, 1) infinite;
+}
