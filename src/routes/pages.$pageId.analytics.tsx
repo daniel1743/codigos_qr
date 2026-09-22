@@ -2,11 +2,20 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { BarChart3, ArrowLeft, Eye, MousePointerClick } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
+import "../components/intelligent-analytics/analytics.css";
 import { AppShell } from "../components/app-shell/AppShell";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { getBrowserSupabaseClient } from "../lib/supabase/client";
+import {
+  ANALYTICS_SCENARIOS,
+  AnalyticsDashboard,
+  buildScenarioEvents,
+  type ScenarioId,
+} from "../components/intelligent-analytics";
+import type { PlanId } from "../components/intelligent-analytics/analytics.types";
+import { getAnalyticsEffectiveTierFn } from "../lib/billing/analytics-entitlement-server";
 import { analyticsService } from "../services/analyticsService";
 import { pageService } from "../services/page.service";
 import type { Page } from "../types/database";
@@ -46,8 +55,22 @@ function PageAnalytics() {
   const [page, setPage] = useState<Page | null>(null);
   const [summary, setSummary] = useState<PageAnalyticsSummary>(EMPTY);
   const [days, setDays] = useState(30);
+  const [fixture, setFixture] = useState<ScenarioId>("growing_business");
+  const [plan, setPlan] = useState<PlanId>("free");
+  const [billingStatus, setBillingStatus] = useState<"loading" | "resolved" | "fallback">(
+    "loading",
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [qaMode, setQaMode] = useState(
+    () =>
+      import.meta.env.DEV &&
+      (typeof window === "undefined" ||
+        new URLSearchParams(window.location.search).get("analytics") !== "legacy"),
+  );
+
+  const qaNow = "2026-09-22T15:00:00.000Z";
+  const qaTimezone = "America/Santiago";
 
   useEffect(() => {
     let active = true;
@@ -58,10 +81,12 @@ function PageAnalytics() {
         if (!auth.user) throw new Error("Debes iniciar sesión para ver estadísticas.");
         const ownedPage = await pageService.getOwnPageById(supabase, pageId, auth.user.id);
         if (!ownedPage) throw new Error("No se encontró esta página o no tienes acceso a ella.");
-        const analytics = await analyticsService.getPageAnalytics(supabase, pageId, days);
+        const analytics = qaMode
+          ? null
+          : await analyticsService.getPageAnalytics(supabase, pageId, days);
         if (!active) return;
         setPage(ownedPage);
-        setSummary(analytics);
+        if (analytics) setSummary(analytics);
         setError(null);
       } catch (reason) {
         if (active)
@@ -75,7 +100,29 @@ function PageAnalytics() {
     return () => {
       active = false;
     };
-  }, [pageId, days]);
+  }, [pageId, days, qaMode]);
+
+  useEffect(() => {
+    if (!qaMode) {
+      setBillingStatus("resolved");
+      return;
+    }
+    let active = true;
+    void getAnalyticsEffectiveTierFn()
+      .then((effectiveTier) => {
+        if (!active) return;
+        setPlan(effectiveTier);
+        setBillingStatus("resolved");
+      })
+      .catch(() => {
+        if (!active) return;
+        setPlan("free");
+        setBillingStatus("fallback");
+      });
+    return () => {
+      active = false;
+    };
+  }, [qaMode]);
 
   const hasEvents = summary.visits + summary.buttonClicks > 0;
 
@@ -110,47 +157,124 @@ function PageAnalytics() {
               </Badge>
             </header>
 
-            <div className="mt-6 flex flex-wrap gap-2" aria-label="Periodo de estadísticas">
-              {[1, 7, 30].map((range) => (
+            {import.meta.env.DEV ? (
+              <div className="mt-4 flex flex-wrap items-center gap-2 rounded-lg border border-dashed border-border bg-muted/30 p-3 text-sm">
+                <span className="font-medium">Analytics QA</span>
                 <Button
-                  key={range}
                   size="sm"
-                  variant={days === range ? "default" : "outline"}
-                  onClick={() => setDays(range)}
+                  variant={qaMode ? "default" : "outline"}
+                  onClick={() => setQaMode(true)}
                 >
-                  {range === 1 ? "Hoy" : `Últimos ${range} días`}
+                  Fixtures
                 </Button>
-              ))}
-            </div>
+                <Button
+                  size="sm"
+                  variant={!qaMode ? "default" : "outline"}
+                  onClick={() => setQaMode(false)}
+                >
+                  Dashboard anterior
+                </Button>
+                {qaMode ? (
+                  <label className="flex items-center gap-2">
+                    Escenario
+                    <select
+                      aria-label="Escenario de analytics"
+                      className="rounded-md border border-border bg-background px-2 py-1"
+                      value={fixture}
+                      onChange={(event) => setFixture(event.target.value as ScenarioId)}
+                    >
+                      {ANALYTICS_SCENARIOS.map((scenario) => (
+                        <option key={scenario.id} value={scenario.id}>
+                          {scenario.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                ) : null}
+              </div>
+            ) : null}
 
-            <section className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label="Resumen">
-              <MetricCard
-                label="Visitas"
-                value={summary.visits}
-                icon={<Eye className="h-5 w-5" />}
-              />
-              <MetricCard
-                label="Clics en botones"
-                value={summary.buttonClicks}
-                icon={<MousePointerClick className="h-5 w-5" />}
-              />
-              <MetricCard
-                label="Clics en WhatsApp"
-                value={summary.whatsappClicks}
-                icon={<span className="text-sm font-bold">WA</span>}
-              />
-              <MetricCard
-                label="Interés en productos/servicios"
-                value={summary.productClicks + summary.serviceClicks}
-                icon={
-                  <span className="text-sm font-bold">
-                    {summary.productClicks + summary.serviceClicks}
-                  </span>
-                }
-              />
-            </section>
+            {qaMode ? (
+              <div className="mt-6">
+                <AnalyticsDashboard
+                  events={buildScenarioEvents(fixture, new Date(qaNow), page.profile_id)}
+                  context={{
+                    profileId: page.profile_id,
+                    displayName: page.title,
+                    plan,
+                    availableChannels: [
+                      "whatsapp",
+                      "instagram",
+                      "facebook",
+                      "tiktok",
+                      "youtube",
+                      "linkedin",
+                      "other",
+                    ],
+                    timezone: qaTimezone,
+                    timezoneLabel: qaTimezone,
+                    now: qaNow,
+                  }}
+                  slot={
+                    <div className="cq-qa-banner" role="status">
+                      <strong>QA fixtures</strong> · {fixture} · timezone {qaTimezone} · plan {plan}
+                      {billingStatus === "fallback"
+                        ? " · Billing no disponible, se aplicó fail-closed free"
+                        : ""}
+                    </div>
+                  }
+                />
+              </div>
+            ) : null}
 
-            {!hasEvents ? (
+            {!qaMode ? (
+              <div className="mt-6 flex flex-wrap gap-2" aria-label="Periodo de estadísticas">
+                {[1, 7, 30].map((range) => (
+                  <Button
+                    key={range}
+                    size="sm"
+                    variant={days === range ? "default" : "outline"}
+                    onClick={() => setDays(range)}
+                  >
+                    {range === 1 ? "Hoy" : `Últimos ${range} días`}
+                  </Button>
+                ))}
+              </div>
+            ) : null}
+
+            {!qaMode ? (
+              <section
+                className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+                aria-label="Resumen"
+              >
+                <MetricCard
+                  label="Visitas"
+                  value={summary.visits}
+                  icon={<Eye className="h-5 w-5" />}
+                />
+                <MetricCard
+                  label="Clics en botones"
+                  value={summary.buttonClicks}
+                  icon={<MousePointerClick className="h-5 w-5" />}
+                />
+                <MetricCard
+                  label="Clics en WhatsApp"
+                  value={summary.whatsappClicks}
+                  icon={<span className="text-sm font-bold">WA</span>}
+                />
+                <MetricCard
+                  label="Interés en productos/servicios"
+                  value={summary.productClicks + summary.serviceClicks}
+                  icon={
+                    <span className="text-sm font-bold">
+                      {summary.productClicks + summary.serviceClicks}
+                    </span>
+                  }
+                />
+              </section>
+            ) : null}
+
+            {!qaMode && !hasEvents ? (
               <Card className="mt-6">
                 <CardHeader>
                   <CardTitle>Todavía no hay visitas</CardTitle>
@@ -159,7 +283,7 @@ function PageAnalytics() {
                   Comparte tu página o tu QR y aquí podrás ver cómo interactúan las personas.
                 </CardContent>
               </Card>
-            ) : (
+            ) : !qaMode ? (
               <div className="mt-6 grid gap-6 lg:grid-cols-2">
                 <Card>
                   <CardHeader>
@@ -212,7 +336,7 @@ function PageAnalytics() {
                   </Card>
                 )}
               </div>
-            )}
+            ) : null}
           </>
         )}
       </main>
