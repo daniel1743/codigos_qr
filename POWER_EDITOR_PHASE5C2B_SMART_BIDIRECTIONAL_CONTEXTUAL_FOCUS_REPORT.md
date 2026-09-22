@@ -124,6 +124,7 @@ None.
 ## TESTS
 
 `contextualFocus.test.ts` (8 tests):
+
 - comfortable positioning: already-visible → 0, below → +delta, above → −delta, upper-band
 - source separation: canvas-origin moves Inspector only; inspector-origin moves Canvas only
 - canvas focus signal delivers once and unsubscribes

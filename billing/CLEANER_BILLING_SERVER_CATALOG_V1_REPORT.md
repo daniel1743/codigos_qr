@@ -11,30 +11,30 @@ Task: CRIPQER BILLING — CANONICAL SERVER BILLING CATALOG V1
 
 ### Files read (exact — nothing else)
 
-| File | Role |
-|---|---|
-| `src/lib/billing/billing.types.ts` | Canonical receiving types (plans / providers / intervals) |
-| `src/server/billing/checkout.ts` | Checkout Host — `BillingCatalogResolver`, `ResolvedOffer`, `ValidatedCheckoutRequest` seam |
-| `billing/CLEANER_BILLING_PORTABLE_V1_1_1_RECONCILIATION_REPORT.md` | Approved portable reconciliation baseline (reference) |
-| `billing/CLEANER_BILLING_CHECKOUT_HOST_V1_REPORT.md` | Prior Checkout Host pattern reference (selfcheck/run conventions) |
-| `tsconfig.json` | Strict compiler flags (validation only) |
-| `package.json` | `"type": "module"` + TypeScript version (validation only) |
+| File                                                               | Role                                                                                       |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
+| `src/lib/billing/billing.types.ts`                                 | Canonical receiving types (plans / providers / intervals)                                  |
+| `src/server/billing/checkout.ts`                                   | Checkout Host — `BillingCatalogResolver`, `ResolvedOffer`, `ValidatedCheckoutRequest` seam |
+| `billing/CLEANER_BILLING_PORTABLE_V1_1_1_RECONCILIATION_REPORT.md` | Approved portable reconciliation baseline (reference)                                      |
+| `billing/CLEANER_BILLING_CHECKOUT_HOST_V1_REPORT.md`               | Prior Checkout Host pattern reference (selfcheck/run conventions)                          |
+| `tsconfig.json`                                                    | Strict compiler flags (validation only)                                                    |
+| `package.json`                                                     | `"type": "module"` + TypeScript version (validation only)                                  |
 
 Portable ZIP entries (read via `tar -xOf`, **no extraction**, reference only):
 
-| Entry | Purpose |
-|---|---|
-| `cripqer-billing-v1/billing.catalog.ts` | Portable SHAPES / helpers (placeholder DATA reference-only) |
-| `cripqer-billing-v1/billing.providers.ts` | Provider metadata organization |
-| `cripqer-billing-v1/billing.types.ts` | Portable type shapes |
+| Entry                                     | Purpose                                                     |
+| ----------------------------------------- | ----------------------------------------------------------- |
+| `cripqer-billing-v1/billing.catalog.ts`   | Portable SHAPES / helpers (placeholder DATA reference-only) |
+| `cripqer-billing-v1/billing.providers.ts` | Provider metadata organization                              |
+| `cripqer-billing-v1/billing.types.ts`     | Portable type shapes                                        |
 
 ### Files created (exact — nothing else)
 
-| File | Role |
-|---|---|
-| `src/server/billing/catalog.ts` | Canonical Server Billing Catalog Core (server-authoritative) |
-| `src/server/billing/catalog.selfcheck.ts` | Pure-local selfcheck (no network, no DB, no provider SDK) |
-| `billing/CLEANER_BILLING_SERVER_CATALOG_V1_REPORT.md` | This report |
+| File                                                  | Role                                                         |
+| ----------------------------------------------------- | ------------------------------------------------------------ |
+| `src/server/billing/catalog.ts`                       | Canonical Server Billing Catalog Core (server-authoritative) |
+| `src/server/billing/catalog.selfcheck.ts`             | Pure-local selfcheck (no network, no DB, no provider SDK)    |
+| `billing/CLEANER_BILLING_SERVER_CATALOG_V1_REPORT.md` | This report                                                  |
 
 ### Files modified
 
@@ -93,6 +93,7 @@ issue list covering: `DUPLICATE_OFFER`, `FREE_OFFER`, `UNSUPPORTED_PLAN`,
 `INVALID_CURRENCY`, `EMPTY_PROVIDER_REFERENCE`, `MALFORMED_ENABLED_OFFER`.
 
 Amount rules (minor-unit contract, no floating point):
+
 - non-integer → `INVALID_AMOUNT`
 - negative → `INVALID_AMOUNT`
 - enabled offer with `amount <= 0` → `MALFORMED_ENABLED_OFFER`
@@ -111,17 +112,16 @@ explicitly-approved registry is injected. No portable placeholder prices and no
 
 ## C. AUTHORITY
 
-
 ---
 
 ## D. SECURITY (mandatory)
 
-| Check | Result |
-|---|---|
-| Browser price authoritative | **NO** |
-| Portable placeholder price used | **NO** |
+| Check                                    | Result |
+| ---------------------------------------- | ------ |
+| Browser price authoritative              | **NO** |
+| Portable placeholder price used          | **NO** |
 | Test provider IDs promoted to production | **NO** |
-| Free checkout offer possible | **NO** |
+| Free checkout offer possible             | **NO** |
 
 ---
 
@@ -170,9 +170,9 @@ not modified.
 > The only writes are `src/server/billing/catalog.ts`,
 > `src/server/billing/catalog.selfcheck.ts`, and this report.
 
-| Concern | Authority |
-|---|---|
-| Price authority | Trusted server-side registry only (`amount` integer minor units) |
-| Currency authority | Trusted server-side registry only (uppercase ISO-like) |
-| Provider offer reference authority | Trusted server-side registry only (opaque, never a secret, never an amount, never trusted from browser) |
-| Plan / interval / provider authority | Canonical `billing.types.ts` enums + catalog registry |
+| Concern                              | Authority                                                                                               |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------- |
+| Price authority                      | Trusted server-side registry only (`amount` integer minor units)                                        |
+| Currency authority                   | Trusted server-side registry only (uppercase ISO-like)                                                  |
+| Provider offer reference authority   | Trusted server-side registry only (opaque, never a secret, never an amount, never trusted from browser) |
+| Plan / interval / provider authority | Canonical `billing.types.ts` enums + catalog registry                                                   |

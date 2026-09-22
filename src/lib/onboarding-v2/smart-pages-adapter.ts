@@ -529,10 +529,14 @@ export function generateSmartPageFromOnboarding(
   if (!mapped.ok)
     return { ok: false, code: mapped.code, errors: mapped.errors, diagnostics: mapped.diagnostics };
   const plan = generatePagePlan(mapped.request);
-  const generation = generateSmartPageWithEngineV2(mapped.request, {
-    now: options.now,
-    ...(options.curatedMedia ? { curatedMedia: options.curatedMedia } : {}),
-  }, plan);
+  const generation = generateSmartPageWithEngineV2(
+    mapped.request,
+    {
+      now: options.now,
+      ...(options.curatedMedia ? { curatedMedia: options.curatedMedia } : {}),
+    },
+    plan,
+  );
   if (!generation.ok) {
     return {
       ok: false,

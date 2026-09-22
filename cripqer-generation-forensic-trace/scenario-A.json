@@ -214,10 +214,7 @@
     "profession": "Peluquería y belleza",
     "businessOther": "Peluquería y belleza",
     "goal": "booking",
-    "selectedFeatures": [
-      "services",
-      "contact"
-    ],
+    "selectedFeatures": ["services", "contact"],
     "content": {
       "name": "Studio Aura",
       "bio": "Peluquería y belleza"
@@ -368,11 +365,7 @@
       "createdAt": "2026-09-15T12:00:00.000Z",
       "updatedAt": "2026-09-15T12:00:00.000Z",
       "author": "Cripqer Parametric Engine",
-      "tags": [
-        "editorial",
-        "service_first",
-        "booking"
-      ]
+      "tags": ["editorial", "service_first", "booking"]
     },
     "theme": {
       "id": "engine-editorial",
@@ -448,34 +441,22 @@
       {
         "type": "text",
         "variant": "quote",
-        "contentKeys": [
-          "body"
-        ]
+        "contentKeys": ["body"]
       },
       {
         "type": "services",
         "variant": "cards",
-        "contentKeys": [
-          "title",
-          "items"
-        ]
+        "contentKeys": ["title", "items"]
       },
       {
         "type": "cta",
         "variant": "panel",
-        "contentKeys": [
-          "title",
-          "label",
-          "url"
-        ]
+        "contentKeys": ["title", "label", "url"]
       },
       {
         "type": "contact",
         "variant": "list",
-        "contentKeys": [
-          "title",
-          "phone"
-        ]
+        "contentKeys": ["title", "phone"]
       }
     ],
     "motion": {
@@ -488,12 +469,7 @@
     }
   },
   "T10_renderSummary": {
-    "blockTypes": [
-      "text",
-      "services",
-      "cta",
-      "contact"
-    ],
+    "blockTypes": ["text", "services", "cta", "contact"],
     "themeColors": {
       "primary": "#1F3A5F",
       "secondary": "#5A564F",

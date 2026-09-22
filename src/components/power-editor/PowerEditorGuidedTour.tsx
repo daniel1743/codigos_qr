@@ -37,7 +37,8 @@ const STEPS: TourStep[] = [
   },
   {
     title: "Listo para personalizar",
-    message: "Tu página ya está lista para personalizar. Puedes volver a estas herramientas cuando quieras.",
+    message:
+      "Tu página ya está lista para personalizar. Puedes volver a estas herramientas cuando quieras.",
     target: "[data-testid=power-editor]",
     requiresInteraction: false,
   },
@@ -174,24 +175,51 @@ export function PowerEditorGuidedTour({ enabled }: { enabled: boolean }) {
         >
           <X size={16} />
         </button>
-        <p style={{ color: "#d4af37", fontSize: 10, fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase" }}>
+        <p
+          style={{
+            color: "#d4af37",
+            fontSize: 10,
+            fontWeight: 700,
+            letterSpacing: ".14em",
+            textTransform: "uppercase",
+          }}
+        >
           Guía {step + 1} de {STEPS.length}
         </p>
         <h2 style={{ marginTop: 8, fontSize: 18, fontWeight: 700 }}>{current.title}</h2>
-        <p style={{ marginTop: 6, color: "#d0d0d0", fontSize: 13, lineHeight: 1.5 }}>{current.message}</p>
+        <p style={{ marginTop: 6, color: "#d0d0d0", fontSize: 13, lineHeight: 1.5 }}>
+          {current.message}
+        </p>
         {current.requiresInteraction ? (
-          <p style={{ marginTop: 12, color: "#d4af37", fontSize: 12 }}>Prueba esta acción para continuar.</p>
+          <p style={{ marginTop: 12, color: "#d4af37", fontSize: 12 }}>
+            Prueba esta acción para continuar.
+          </p>
         ) : (
           <button
             type="button"
             onClick={next}
-            style={{ marginTop: 14, display: "inline-flex", alignItems: "center", gap: 7, borderRadius: 9, background: "#d4af37", color: "#111", padding: "8px 12px", fontSize: 12, fontWeight: 700 }}
+            style={{
+              marginTop: 14,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 7,
+              borderRadius: 9,
+              background: "#d4af37",
+              color: "#111",
+              padding: "8px 12px",
+              fontSize: 12,
+              fontWeight: 700,
+            }}
           >
             {step === STEPS.length - 1 ? <Check size={14} /> : <ArrowRight size={14} />}
             {step === STEPS.length - 1 ? "Terminar" : "Siguiente"}
           </button>
         )}
-        <button type="button" onClick={finish} style={{ marginLeft: 12, color: "#aaa", fontSize: 12 }}>
+        <button
+          type="button"
+          onClick={finish}
+          style={{ marginLeft: 12, color: "#aaa", fontSize: 12 }}
+        >
           Saltar
         </button>
       </aside>

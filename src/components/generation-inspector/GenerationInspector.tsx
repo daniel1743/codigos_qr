@@ -28,19 +28,25 @@ function downloadTrace(trace: GenerationTraceV1, format: "json" | "ndjson") {
   const body =
     format === "json"
       ? JSON.stringify(trace, null, 2)
-      : trace.stages.map((stage, index) => JSON.stringify({
-          traceId: trace.traceId,
-          sequence: index + 1,
-          timestamp: trace.startedAt,
-          stage: stage.id,
-          event: stage.name,
-          inputSnapshot: stage.data,
-          outputSnapshot: stage.data,
-          changes: stage.fields,
-          warnings: [],
-          classification: stage.status === "ok" ? "PASS" : stage.status.toUpperCase(),
-        })).join("\n");
-  const blob = new Blob([body], { type: format === "json" ? "application/json" : "application/x-ndjson" });
+      : trace.stages
+          .map((stage, index) =>
+            JSON.stringify({
+              traceId: trace.traceId,
+              sequence: index + 1,
+              timestamp: trace.startedAt,
+              stage: stage.id,
+              event: stage.name,
+              inputSnapshot: stage.data,
+              outputSnapshot: stage.data,
+              changes: stage.fields,
+              warnings: [],
+              classification: stage.status === "ok" ? "PASS" : stage.status.toUpperCase(),
+            }),
+          )
+          .join("\n");
+  const blob = new Blob([body], {
+    type: format === "json" ? "application/json" : "application/x-ndjson",
+  });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = url;
@@ -95,7 +101,12 @@ export function GenerationInspector({
   const stageData = (id: string) => trace.stages.find((s) => s.id === id)?.data;
 
   return (
-    <div className="gi-drawer" role="dialog" aria-modal="false" aria-label="Diagnóstico de generación">
+    <div
+      className="gi-drawer"
+      role="dialog"
+      aria-modal="false"
+      aria-label="Diagnóstico de generación"
+    >
       <header className="gi-header">
         <div>
           <span className="gi-header__title">Cripqer Generation Inspector</span>
@@ -125,7 +136,11 @@ export function GenerationInspector({
             <SectionBlock title="Diagnóstico">
               <div className="gi-diagnosis__primary">
                 <strong>Primera divergencia</strong>
-                <p>{trace.firstDivergence ? `${trace.firstDivergence.field}: ${trace.firstDivergence.status}` : "Ninguna"}</p>
+                <p>
+                  {trace.firstDivergence
+                    ? `${trace.firstDivergence.field}: ${trace.firstDivergence.status}`
+                    : "Ninguna"}
+                </p>
               </div>
               <div className="gi-diagnosis">
                 <div className="gi-diagnosis__primary">
@@ -178,11 +193,16 @@ export function GenerationInspector({
                   <summary>
                     <span className="gi-event__sequence">{String(index + 1).padStart(2, "0")}</span>
                     <span className="gi-event__name">{stage.name}</span>
-                    <span className={`gi-event__status gi-event__status--${stage.status}`}>{stage.status}</span>
+                    <span className={`gi-event__status gi-event__status--${stage.status}`}>
+                      {stage.status}
+                    </span>
                   </summary>
                   <div className="gi-event__body">
                     <Row label="Contract" value={stage.contract} />
-                    <Row label="Classification" value={stage.status === "ok" ? "PASS" : stage.status.toUpperCase()} />
+                    <Row
+                      label="Classification"
+                      value={stage.status === "ok" ? "PASS" : stage.status.toUpperCase()}
+                    />
                     <pre className="gi-json">{json(stage.data)}</pre>
                     {stage.fields.length > 0 && <pre className="gi-json">{json(stage.fields)}</pre>}
                   </div>
@@ -190,10 +210,18 @@ export function GenerationInspector({
               ))}
             </div>
             <div className="gi-export-actions">
-              <button type="button" className="gi-copy" onClick={() => downloadTrace(trace, "json")}>
+              <button
+                type="button"
+                className="gi-copy"
+                onClick={() => downloadTrace(trace, "json")}
+              >
                 Exportar JSON
               </button>
-              <button type="button" className="gi-copy" onClick={() => downloadTrace(trace, "ndjson")}>
+              <button
+                type="button"
+                className="gi-copy"
+                onClick={() => downloadTrace(trace, "ndjson")}
+              >
                 Exportar NDJSON
               </button>
             </div>
@@ -270,12 +298,30 @@ export function GenerationInspector({
 
         {section === "Media" && (
           <SectionBlock title="Contextual Media">
-            <Row label="Owner media available" value={trace.media.ownerMediaAvailable ? "SÍ" : "NO"} />
-            <Row label="Owner media priority" value={trace.media.ownerMediaPriority ? "SÍ" : "NO"} />
-            <Row label="Contextual needed" value={trace.media.contextualMediaNeeded ? "SÍ" : "NO"} />
-            <Row label="Contextual allowed" value={trace.media.contextualMediaAllowed ? "SÍ" : "NO"} />
-            <Row label="Unsplash" value={trace.media.unsplashConnected ? "CONNECTED" : "NOT_CONNECTED"} />
-            <Row label="Pexels" value={trace.media.pexelsConnected ? "CONNECTED" : "NOT_CONNECTED"} />
+            <Row
+              label="Owner media available"
+              value={trace.media.ownerMediaAvailable ? "SÍ" : "NO"}
+            />
+            <Row
+              label="Owner media priority"
+              value={trace.media.ownerMediaPriority ? "SÍ" : "NO"}
+            />
+            <Row
+              label="Contextual needed"
+              value={trace.media.contextualMediaNeeded ? "SÍ" : "NO"}
+            />
+            <Row
+              label="Contextual allowed"
+              value={trace.media.contextualMediaAllowed ? "SÍ" : "NO"}
+            />
+            <Row
+              label="Unsplash"
+              value={trace.media.unsplashConnected ? "CONNECTED" : "NOT_CONNECTED"}
+            />
+            <Row
+              label="Pexels"
+              value={trace.media.pexelsConnected ? "CONNECTED" : "NOT_CONNECTED"}
+            />
             <Row label="Search executed" value={trace.media.searchQuery ?? "NO"} />
             <Row label="Selected asset" value={trace.media.selectedAsset ?? "—"} />
             <Row label="Result" value={trace.media.result} />

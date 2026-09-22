@@ -33,12 +33,37 @@ export const NO_MOTION: MotionStrategyV1 = {
 };
 
 const FAMILY_MOTION: Record<FamilyId, MotionStrategyV1> = {
-  editorial: { motion_level: "subtle", hover: "fade", entrance: "fade", respect_reduced_motion: true },
-  luxury: { motion_level: "subtle", hover: "fade", entrance: "fade_up", respect_reduced_motion: true },
-  corporate: { motion_level: "subtle", hover: "lift", entrance: "fade", respect_reduced_motion: true },
+  editorial: {
+    motion_level: "subtle",
+    hover: "fade",
+    entrance: "fade",
+    respect_reduced_motion: true,
+  },
+  luxury: {
+    motion_level: "subtle",
+    hover: "fade",
+    entrance: "fade_up",
+    respect_reduced_motion: true,
+  },
+  corporate: {
+    motion_level: "subtle",
+    hover: "lift",
+    entrance: "fade",
+    respect_reduced_motion: true,
+  },
   minimal: { motion_level: "none", hover: "none", entrance: "none", respect_reduced_motion: true },
-  creator: { motion_level: "expressive", hover: "soft_scale", entrance: "fade_up", respect_reduced_motion: true },
-  energetic: { motion_level: "expressive", hover: "lift", entrance: "fade_up", respect_reduced_motion: true },
+  creator: {
+    motion_level: "expressive",
+    hover: "soft_scale",
+    entrance: "fade_up",
+    respect_reduced_motion: true,
+  },
+  energetic: {
+    motion_level: "expressive",
+    hover: "lift",
+    entrance: "fade_up",
+    respect_reduced_motion: true,
+  },
 };
 
 /** Returns null unless the renderer declares motion token support. */

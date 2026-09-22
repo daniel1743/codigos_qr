@@ -92,7 +92,8 @@ function QrPage() {
         <header className="mb-6">
           <h1 className="text-2xl font-semibold tracking-tight">Tu código QR</h1>
           <p className="text-sm text-muted-foreground">
-            Este QR apunta permanentemente a tu página pública. Editar el diseño no cambia su destino.
+            Este QR apunta permanentemente a tu página pública. Editar el diseño no cambia su
+            destino.
           </p>
         </header>
 
@@ -119,7 +120,9 @@ function QrPage() {
               saveAlias={async (alias) => {
                 const id = profile?.id;
                 if (!id) throw new Error("Perfil no disponible");
-                const saved = await profileService.updateProfile(supabase, id, { slug: alias ?? "" });
+                const saved = await profileService.updateProfile(supabase, id, {
+                  slug: alias ?? "",
+                });
                 setProfile((current) => (current ? { ...current, slug: saved.slug } : current));
                 return saved.slug;
               }}

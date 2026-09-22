@@ -2,17 +2,8 @@ import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  BASIC_CARD_CTA_PRESETS,
-  cardEditTarget,
-  socialEditTarget,
-} from "@/types/basic-templates";
-import type {
-  CardCtaLabel,
-  CardItem,
-  SocialItem,
-  SocialPlatform,
-} from "@/types/basic-templates";
+import { BASIC_CARD_CTA_PRESETS, cardEditTarget, socialEditTarget } from "@/types/basic-templates";
+import type { CardCtaLabel, CardItem, SocialItem, SocialPlatform } from "@/types/basic-templates";
 import { ImageInput } from "./controls";
 
 /* ------------------------------------------------------------------ */

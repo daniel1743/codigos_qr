@@ -37,13 +37,13 @@ export interface CTAStyle {
   backgroundColor?: string;
   textColor?: string;
   fontFamily?: string;
-  fontSize?: number;   // px
+  fontSize?: number; // px
   fontWeight?: number;
   borderColor?: string;
   borderWidth?: number;
-  radius?: number;     // px
-  paddingX?: number;   // px
-  paddingY?: number;   // px
+  radius?: number; // px
+  paddingX?: number; // px
+  paddingY?: number; // px
 }
 
 export interface CTAContent {

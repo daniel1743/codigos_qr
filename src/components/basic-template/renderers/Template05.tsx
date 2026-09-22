@@ -6,13 +6,7 @@ import type { StandaloneStyle } from "./standaloneStyle";
 /* Template05 — Link-in-bio verde salvia: banner tropical + avatar en curva + botones blancos */
 
 export type Template05SocialType =
-  | "tiktok"
-  | "youtube"
-  | "twitter"
-  | "facebook"
-  | "instagram"
-  | "pinterest"
-  | "email";
+  "tiktok" | "youtube" | "twitter" | "facebook" | "instagram" | "pinterest" | "email";
 
 export interface Template05Social {
   type: Template05SocialType;
@@ -42,13 +36,7 @@ export interface Template05Props {
   standaloneStyle?: StandaloneStyle;
 }
 
-function Icon({
-  type,
-  color,
-}: {
-  type: Template05SocialType;
-  color: string;
-}) {
+function Icon({ type, color }: { type: Template05SocialType; color: string }) {
   const p = { fill: color };
   const size = 30;
   switch (type) {
@@ -209,21 +197,21 @@ export default function Template05({
                 background: standaloneStyle?.background ?? primaryColor,
               }}
             >
-            <img
-              src={avatarUrl}
-              alt={name}
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                display: "block",
-              }}
-            />
+              <img
+                src={avatarUrl}
+                alt={name}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  display: "block",
+                }}
+              />
             </div>
           </EditableTarget>
         </div>
 
-          <div style={{ textAlign: standaloneStyle?.title.align ?? "center", paddingTop: 84 }}>
+        <div style={{ textAlign: standaloneStyle?.title.align ?? "center", paddingTop: 84 }}>
           <EditableTarget
             id={EDIT_TARGETS.name}
             registry={targetRegistry}
@@ -282,32 +270,38 @@ export default function Template05({
             registry={targetRegistry}
             active={highlightedTarget === EDIT_TARGETS.socials}
           >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              gap: 20,
-              padding: "18px 16px 8px",
-            }}
-          >
-            {socials.map((s) => (
-              <a
-                key={s.type + s.url}
-                href={s.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={s.label || s.type}
-                title={s.label || s.type}
-                style={{ lineHeight: 0, textDecoration: "none" }}
-              >
-                <Icon type={s.type} color={secondaryColor} />
-              </a>
-            ))}
-          </div>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                gap: 20,
+                padding: "18px 16px 8px",
+              }}
+            >
+              {socials.map((s) => (
+                <a
+                  key={s.type + s.url}
+                  href={s.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={s.label || s.type}
+                  title={s.label || s.type}
+                  style={{ lineHeight: 0, textDecoration: "none" }}
+                >
+                  <Icon type={s.type} color={secondaryColor} />
+                </a>
+              ))}
+            </div>
           </EditableTarget>
         </div>
 
-        <div style={{ padding: "18px 16px 6px", display: "grid", gap: standaloneStyle?.button.spacing ?? 16 }}>
+        <div
+          style={{
+            padding: "18px 16px 6px",
+            display: "grid",
+            gap: standaloneStyle?.button.spacing ?? 16,
+          }}
+        >
           {links.map((l) => (
             <EditableTarget
               key={l.id}
@@ -320,17 +314,17 @@ export default function Template05({
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
-                display: "block",
-                background: standaloneStyle?.button.background ?? "#ffffff",
-                color: standaloneStyle?.button.textColor ?? secondaryColor,
-                border: buttonBorder,
-                borderRadius: standaloneStyle?.button.radius,
-                textAlign: "center",
-                fontSize: 20,
-                fontWeight: 700,
-                padding: "22px 14px",
-                textDecoration: "none",
-                boxSizing: "border-box",
+                  display: "block",
+                  background: standaloneStyle?.button.background ?? "#ffffff",
+                  color: standaloneStyle?.button.textColor ?? secondaryColor,
+                  border: buttonBorder,
+                  borderRadius: standaloneStyle?.button.radius,
+                  textAlign: "center",
+                  fontSize: 20,
+                  fontWeight: 700,
+                  padding: "22px 14px",
+                  textDecoration: "none",
+                  boxSizing: "border-box",
                 }}
               >
                 {l.label}
@@ -363,4 +357,3 @@ export default function Template05({
     </div>
   );
 }
-

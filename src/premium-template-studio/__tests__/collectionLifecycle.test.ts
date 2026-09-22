@@ -72,8 +72,9 @@ describe("Phase 2 shared collection lifecycle", () => {
         path,
         value: moveCollectionItem(added, added.length - 1, -1),
       });
-      const reordered = ((afterReorder.config.blocks[0]?.content as Record<string, unknown>)[field] ??
-        []) as unknown[];
+      const reordered = ((afterReorder.config.blocks[0]?.content as Record<string, unknown>)[
+        field
+      ] ?? []) as unknown[];
       const afterDelete = templateReducer(afterReorder, {
         type: "patchBlockField",
         id: block.id,
@@ -81,21 +82,24 @@ describe("Phase 2 shared collection lifecycle", () => {
         value: reordered.slice(0, -1),
       });
 
-      expect(((afterAdd.config.blocks[0]?.content as Record<string, unknown>)[field] ?? []) as unknown[]).toHaveLength(
-        added.length,
-      );
-      expect(((afterDelete.config.blocks[0]?.content as Record<string, unknown>)[field] ?? []) as unknown[]).toHaveLength(
-        reordered.length - 1,
-      );
+      expect(
+        ((afterAdd.config.blocks[0]?.content as Record<string, unknown>)[field] ?? []) as unknown[],
+      ).toHaveLength(added.length);
+      expect(
+        ((afterDelete.config.blocks[0]?.content as Record<string, unknown>)[field] ??
+          []) as unknown[],
+      ).toHaveLength(reordered.length - 1);
 
       const undoDelete = templateReducer(afterDelete, { type: "undo" });
-      expect(((undoDelete.config.blocks[0]?.content as Record<string, unknown>)[field] ?? []) as unknown[]).toEqual(
-        reordered,
-      );
+      expect(
+        ((undoDelete.config.blocks[0]?.content as Record<string, unknown>)[field] ??
+          []) as unknown[],
+      ).toEqual(reordered);
       const redoDelete = templateReducer(undoDelete, { type: "redo" });
-      expect(((redoDelete.config.blocks[0]?.content as Record<string, unknown>)[field] ?? []) as unknown[]).toHaveLength(
-        reordered.length - 1,
-      );
+      expect(
+        ((redoDelete.config.blocks[0]?.content as Record<string, unknown>)[field] ??
+          []) as unknown[],
+      ).toHaveLength(reordered.length - 1);
 
       const reloaded = JSON.parse(JSON.stringify(undoDelete.config)) as typeof undoDelete.config;
       expect(reloaded.blocks[0]?.content).toEqual(undoDelete.config.blocks[0]?.content);

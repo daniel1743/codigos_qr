@@ -47,7 +47,17 @@ export const GENERIC_PRESET: SemanticPreset = {
 export const SEMANTIC_PRESETS: SemanticPreset[] = [
   {
     id: "food_service",
-    match: ["restaurant", "cafe", "coffee", "bakery", "bar", "food", "pizzeria", "restaurante", "panaderia"],
+    match: [
+      "restaurant",
+      "cafe",
+      "coffee",
+      "bakery",
+      "bar",
+      "food",
+      "pizzeria",
+      "restaurante",
+      "panaderia",
+    ],
     experienceType: "menu",
     goal: "sell",
     sequence: [
@@ -67,7 +77,16 @@ export const SEMANTIC_PRESETS: SemanticPreset[] = [
   },
   {
     id: "care_service",
-    match: ["veterinarian", "vet", "clinic", "dentist", "doctor", "therapist", "spa", "veterinaria"],
+    match: [
+      "veterinarian",
+      "vet",
+      "clinic",
+      "dentist",
+      "doctor",
+      "therapist",
+      "spa",
+      "veterinaria",
+    ],
     experienceType: "services",
     goal: "book",
     sequence: [
@@ -87,7 +106,16 @@ export const SEMANTIC_PRESETS: SemanticPreset[] = [
   },
   {
     id: "appointment_service",
-    match: ["hairdresser", "salon", "barber", "nails", "beauty", "peluqueria", "barberia", "tattoo"],
+    match: [
+      "hairdresser",
+      "salon",
+      "barber",
+      "nails",
+      "beauty",
+      "peluqueria",
+      "barberia",
+      "tattoo",
+    ],
     experienceType: "services",
     goal: "book",
     sequence: [
@@ -107,7 +135,16 @@ export const SEMANTIC_PRESETS: SemanticPreset[] = [
   },
   {
     id: "craft_service",
-    match: ["tailor", "carpenter", "designer", "agency", "studio", "sastre", "artesano", "contractor"],
+    match: [
+      "tailor",
+      "carpenter",
+      "designer",
+      "agency",
+      "studio",
+      "sastre",
+      "artesano",
+      "contractor",
+    ],
     experienceType: "portfolio",
     goal: "quote",
     sequence: [
@@ -145,7 +182,16 @@ export const SEMANTIC_PRESETS: SemanticPreset[] = [
   },
   {
     id: "listings",
-    match: ["real_estate", "realtor", "property", "vehicles", "cars", "equipment", "inmobiliaria", "b2b"],
+    match: [
+      "real_estate",
+      "realtor",
+      "property",
+      "vehicles",
+      "cars",
+      "equipment",
+      "inmobiliaria",
+      "b2b",
+    ],
     experienceType: "listings",
     goal: "contact",
     sequence: [

@@ -9,11 +9,11 @@ Task: CRIPQER BILLING — FIRST-PURCHASE OWNERSHIP LOOKUPS V1
 
 ## A. SCHEMA VERIFICATION
 
-| Check | Result |
-|---|---|
+| Check                                                | Result  |
+| ---------------------------------------------------- | ------- |
 | Customer reverse lookup supported by existing schema | **YES** |
 | Checkout reverse lookup supported by existing schema | **YES** |
-| Migration required | **NO** |
+| Migration required                                   | **NO**  |
 
 Evidence (`supabase/migrations/20260903000001_create_canonical_billing_persistence.sql`):
 
@@ -36,8 +36,8 @@ with a unique row guarantee. No SQL modification was required and none was made.
 
 ### Exact queries introduced
 
-| Function | Table | Filters | Result |
-|---|---|---|---|
+| Function                                 | Table               | Filters                                                                            | Result                                             |
+| ---------------------------------------- | ------------------- | ---------------------------------------------------------------------------------- | -------------------------------------------------- |
 | `getBillingCustomerByProviderCustomerId` | `billing_customers` | `.eq("provider", provider)` + `.eq("provider_customer_id", requireTrustedId(...))` | `.maybeSingle()` → `BillingCustomerRecord \| null` |
 | `getBillingCheckoutByProviderCheckoutId` | `billing_checkouts` | `.eq("provider", provider)` + `.eq("provider_checkout_id", requireTrustedId(...))` | `.maybeSingle()` → `BillingCheckoutRecord \| null` |
 
@@ -53,19 +53,23 @@ change is two additive exports. No mass formatting, no refactor, no renames.
 
 ## C. OWNERSHIP
 
-| Check | Result |
-|---|---|
-| `providerCustomerId` can resolve canonical user | **YES** |
-| `providerCheckoutId` can resolve canonical user | **YES** |
-| Provider scoped | **YES** (every lookup is keyed on `(provider, id)`) |
-| Resolution Core seams now satisfiable | **YES** |
+| Check                                           | Result                                              |
+| ----------------------------------------------- | --------------------------------------------------- |
+| `providerCustomerId` can resolve canonical user | **YES**                                             |
+| `providerCheckoutId` can resolve canonical user | **YES**                                             |
+| Provider scoped                                 | **YES** (every lookup is keyed on `(provider, id)`) |
+| Resolution Core seams now satisfiable           | **YES**                                             |
 
 Resolution Core V1 (`resolution.ts`) already declares the two OPTIONAL seam
 members with exactly these signatures:
 
 ```ts
-getBillingCustomerByProviderCustomerId?(provider, providerCustomerId): Promise<BillingCustomerRecord | null>
-getBillingCheckoutByProviderCheckoutId?(provider, providerCheckoutId): Promise<BillingCheckoutRecord | null>
+getBillingCustomerByProviderCustomerId
+  ? (provider, providerCustomerId)
+  : Promise<BillingCustomerRecord | null>;
+getBillingCheckoutByProviderCheckoutId
+  ? (provider, providerCheckoutId)
+  : Promise<BillingCheckoutRecord | null>;
 ```
 
 The two new persistence exports are structurally identical (modulo the
@@ -77,12 +81,12 @@ conventional optional `client?` trailing parameter, which is assignable), so the
 
 ## D. SECURITY
 
-| Check | Result |
-|---|---|
-| Email used for ownership | **NO** |
-| Browser userId authoritative | **NO** |
+| Check                                  | Result |
+| -------------------------------------- | ------ |
+| Email used for ownership               | **NO** |
+| Browser userId authoritative           | **NO** |
 | Provider metadata userId authoritative | **NO** |
-| Fallback guessing introduced | **NO** |
+| Fallback guessing introduced           | **NO** |
 
 Both functions use the privileged server-only `BillingPersistenceClient`
 (service-role) and require a non-empty provider identifier via

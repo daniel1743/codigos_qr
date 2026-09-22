@@ -28,7 +28,10 @@ function AccountPage() {
   const supabase = getBrowserSupabaseClient();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<{ email?: string; user_metadata?: Record<string, unknown> } | null>(null);
+  const [user, setUser] = useState<{
+    email?: string;
+    user_metadata?: Record<string, unknown>;
+  } | null>(null);
   const [premium, setPremium] = useState(false);
   const [publicUrl, setPublicUrl] = useState<string | null>(null);
 
@@ -67,7 +70,8 @@ function AccountPage() {
     );
   }
 
-  const name = (user?.user_metadata?.full_name as string) || user?.email?.split("@")[0] || "Usuario";
+  const name =
+    (user?.user_metadata?.full_name as string) || user?.email?.split("@")[0] || "Usuario";
   const email = user?.email || "";
   const avatarUrl = user?.user_metadata?.avatar_url as string | undefined;
 

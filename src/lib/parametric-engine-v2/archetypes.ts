@@ -104,15 +104,7 @@ export const ARCHETYPE_STRATEGIES: Record<BusinessArchetype, ArchetypeStrategy> 
     ],
     { corporate: 22, editorial: 10, minimal: 8 },
     ["trust_first", "editorial_stack", "conversion_first"],
-    [
-      "services",
-      "trust_badges",
-      "testimonials",
-      "faq",
-      "contact_form",
-      "location",
-      "pricing",
-    ],
+    ["services", "trust_badges", "testimonials", "faq", "contact_form", "location", "pricing"],
     { cta_pressure: 70, trust: 95, visual: 25, locality: 50 },
   ),
   custom_craft: S(

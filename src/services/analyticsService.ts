@@ -304,7 +304,10 @@ export const analyticsService = {
       });
 
     pageEvents.forEach((event) => {
-      if ((event.interaction_type === "product" || event.interaction_type === "service") && event.item_label) {
+      if (
+        (event.interaction_type === "product" || event.interaction_type === "service") &&
+        event.item_label
+      ) {
         const counts = items[event.interaction_type];
         counts.set(event.item_label, (counts.get(event.item_label) ?? 0) + 1);
       }

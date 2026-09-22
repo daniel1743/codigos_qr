@@ -85,18 +85,45 @@ export const PLAYGROUND_CASES: PlaygroundCase[] = [
         { value: "4.9", label: "Satisfacción" },
       ],
       services: [
-        { title: "Planificación patrimonial", description: "Estructura y sucesión.", price: "Desde 1.200 €" },
-        { title: "Asesoría fiscal", description: "Optimización legal y reporting.", price: "Desde 600 €" },
+        {
+          title: "Planificación patrimonial",
+          description: "Estructura y sucesión.",
+          price: "Desde 1.200 €",
+        },
+        {
+          title: "Asesoría fiscal",
+          description: "Optimización legal y reporting.",
+          price: "Desde 600 €",
+        },
       ],
       testimonials: [
-        { name: "Familia Rovira", quote: "Rigor absoluto y una discreción impecable.", role: "Cliente privado", rating: 5 },
+        {
+          name: "Familia Rovira",
+          quote: "Rigor absoluto y una discreción impecable.",
+          role: "Cliente privado",
+          rating: 5,
+        },
       ],
       pricing: [
-        { title: "Consulta", price: "250 €", period: "sesión", features: ["60 minutos", "Informe posterior"] },
-        { title: "Acompañamiento", price: "1.200 €", period: "mes", features: ["Revisión trimestral", "Contacto directo"], recommended: true },
+        {
+          title: "Consulta",
+          price: "250 €",
+          period: "sesión",
+          features: ["60 minutos", "Informe posterior"],
+        },
+        {
+          title: "Acompañamiento",
+          price: "1.200 €",
+          period: "mes",
+          features: ["Revisión trimestral", "Contacto directo"],
+          recommended: true,
+        },
       ],
       faq: [
-        { question: "¿Trabajas con patrimonios internacionales?", answer: "Sí, con equipos locales en cada jurisdicción." },
+        {
+          question: "¿Trabajas con patrimonios internacionales?",
+          answer: "Sí, con equipos locales en cada jurisdicción.",
+        },
       ],
       timeline: [
         { date: "2018 - hoy", title: "Práctica independiente" },
@@ -197,7 +224,12 @@ export const PLAYGROUND_CASES: PlaygroundCase[] = [
           imageUrl: IMG("photo-1541701494587-cb58502866ab"),
         },
       ],
-      document: { title: "Portfolio 2026", fileName: "portfolio.pdf", fileSize: "3.1 MB", url: "https://example.com/portfolio.pdf" },
+      document: {
+        title: "Portfolio 2026",
+        fileName: "portfolio.pdf",
+        fileSize: "3.1 MB",
+        url: "https://example.com/portfolio.pdf",
+      },
       socials: SOCIALS,
     },
   },
@@ -224,7 +256,12 @@ export const PLAYGROUND_CASES: PlaygroundCase[] = [
         { label: "Metodología", url: "https://example.com/metodo" },
       ],
       contact: { email: "contacto@verande.com", phone: "+34 910 000 000" },
-      document: { title: "Dossier corporativo", fileName: "dossier.pdf", fileSize: "1.8 MB", url: "https://example.com/dossier.pdf" },
+      document: {
+        title: "Dossier corporativo",
+        fileName: "dossier.pdf",
+        fileSize: "1.8 MB",
+        url: "https://example.com/dossier.pdf",
+      },
     },
   },
   {

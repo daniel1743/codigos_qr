@@ -20,11 +20,7 @@
       "theme_colors": true,
       "theme_typography": true,
       "layout_responsive": true,
-      "blocks": [
-        "text",
-        "cta",
-        "productGrid"
-      ],
+      "blocks": ["text", "cta", "productGrid"],
       "block_count": 3
     },
     "published_snapshot_is_canonical": true,
@@ -34,15 +30,9 @@
     "http": 200,
     "renderer_mounted": true,
     "editor_chrome": false,
-    "content_visible": [
-      "Cinturón de cuero",
-      "$19.990",
-      "Billetera de cuero"
-    ],
+    "content_visible": ["Cinturón de cuero", "$19.990", "Billetera de cuero"],
     "content_missing": [],
-    "host_action_hrefs": [
-      "https://qa-cripqer.example/catalogo"
-    ],
+    "host_action_hrefs": ["https://qa-cripqer.example/catalogo"],
     "owner_images": 0,
     "html_bytes": 16540
   },

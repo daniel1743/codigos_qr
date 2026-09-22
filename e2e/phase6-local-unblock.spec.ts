@@ -27,14 +27,22 @@ test("logout dispatches a real click and destroys the auth session", async ({ pa
   captureBaseline(before);
   const events: string[] = [];
   const logoutResponses: number[] = [];
-  page.on("console", (message) => { if (message.text().startsWith("[logout-event]")) events.push(message.text()); });
-  page.on("response", (response) => { if (response.url().includes("/auth/v1/logout")) logoutResponses.push(response.status()); });
+  page.on("console", (message) => {
+    if (message.text().startsWith("[logout-event]")) events.push(message.text());
+  });
+  page.on("response", (response) => {
+    if (response.url().includes("/auth/v1/logout")) logoutResponses.push(response.status());
+  });
   await page.evaluate(() => {
     for (const name of ["pointerdown", "pointerup", "click"]) {
-      document.addEventListener(name, (event) => {
-        const button = (event.target as Element)?.closest("button");
-        if (button?.textContent?.includes("Cerrar sesión")) console.log(`[logout-event] ${name}`);
-      }, true);
+      document.addEventListener(
+        name,
+        (event) => {
+          const button = (event.target as Element)?.closest("button");
+          if (button?.textContent?.includes("Cerrar sesión")) console.log(`[logout-event] ${name}`);
+        },
+        true,
+      );
     }
   });
   await page.getByRole("button", { name: "Abrir menú" }).click();
@@ -49,6 +57,13 @@ test("logout dispatches a real click and destroys the auth session", async ({ pa
     await login(page, enabledBaseUrl);
     sameStoredData(await snapshot(page), before);
   } finally {
-    console.log(JSON.stringify({ events, logoutResponses, url: page.url(), expectedProfileId: before.profile.id }));
+    console.log(
+      JSON.stringify({
+        events,
+        logoutResponses,
+        url: page.url(),
+        expectedProfileId: before.profile.id,
+      }),
+    );
   }
 });

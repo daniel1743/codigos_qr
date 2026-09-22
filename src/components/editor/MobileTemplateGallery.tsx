@@ -107,7 +107,9 @@ export function MobileTemplateGallery({
           <div className="flex-1 overflow-y-auto px-5 pb-8">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-stone-500">Galería</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-stone-500">
+                  Galería
+                </p>
                 <h3 className="text-xl font-bold tracking-[-0.04em] text-[#1d1d1b]">Plantillas</h3>
                 <p className="text-sm text-stone-500">Elige un diseño para tu página</p>
               </div>

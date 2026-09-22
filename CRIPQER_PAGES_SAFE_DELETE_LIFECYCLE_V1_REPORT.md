@@ -28,7 +28,7 @@
   ID cannot be treated as deletable primary-profile content.
 - Added Pages Hub `Eliminar` action with the required confirmation dialog:
   `Eliminar página` / `Esta acción eliminará esta página. No podrás
-  recuperarla.`
+recuperarla.`
 - Delete is secondary/destructive, disabled while pending, and does not remove
   the item from the Hub until the authoritative delete succeeds.
 - Successful deletion removes the page from the Hub and shows confirmation;
@@ -60,4 +60,3 @@ Authenticated browser QA was not run. Therefore the following remain
 - primary profile continuity;
 - double-click behavior in a real browser;
 - current-page deletion redirect and mobile smoke.
-

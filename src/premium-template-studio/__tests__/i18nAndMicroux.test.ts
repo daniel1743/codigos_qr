@@ -45,9 +45,7 @@ function renderLocaleProbe() {
   document.body.appendChild(container);
   const root = createRoot(container);
   act(() => {
-    root.render(
-      createElement(PowerEditorLocaleProvider, null, createElement(LocaleProbe)),
-    );
+    root.render(createElement(PowerEditorLocaleProvider, null, createElement(LocaleProbe)));
   });
   return { container, root };
 }

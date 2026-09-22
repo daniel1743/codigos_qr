@@ -54,9 +54,10 @@ function PageAliasSection({
 }) {
   const [draft, setDraft] = useState(page.slug ?? "");
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState<
-    { kind: "invalid" | "collision" | "saved"; text: string } | null
-  >(null);
+  const [message, setMessage] = useState<{
+    kind: "invalid" | "collision" | "saved";
+    text: string;
+  } | null>(null);
 
   const aliasUrl = page.slug ? getPublicPageAliasUrl(page.slug) : "";
 
@@ -172,8 +173,7 @@ function PageDetail() {
   // the PageDetail content, otherwise the editor child UI never mounts.
   const matches = useMatches();
   const hasNestedChild = matches.some(
-    (match) =>
-      match.routeId !== "/pages/$pageId" && match.routeId.startsWith("/pages/$pageId/"),
+    (match) => match.routeId !== "/pages/$pageId" && match.routeId.startsWith("/pages/$pageId/"),
   );
 
   useEffect(() => {
@@ -183,8 +183,13 @@ function PageDetail() {
         if (!auth.user) return;
         setUserId(auth.user.id);
 
-        if (pageId === '{pageId}') {
-          setPage({ id: '{pageId}', title: 'Prototipo', page_type: 'catalog', public_id: 'test' } as any);
+        if (pageId === "{pageId}") {
+          setPage({
+            id: "{pageId}",
+            title: "Prototipo",
+            page_type: "catalog",
+            public_id: "test",
+          } as any);
           setLoading(false);
           return;
         }
@@ -206,12 +211,7 @@ function PageDetail() {
     setPublicationBusy(true);
     try {
       const updated = page.published
-        ? await pageCanonicalService.unpublish(
-            supabase,
-            page.id,
-            userId,
-            page.published_revision,
-          )
+        ? await pageCanonicalService.unpublish(supabase, page.id, userId, page.published_revision)
         : (() => {
             const envelope = readCanonicalPageEnvelope(page.template_config);
             if (!envelope) throw new Error("Abre la página y guárdala antes de publicarla.");
@@ -317,9 +317,7 @@ function PageDetail() {
                 </div>
                 <div className="flex items-center justify-between gap-4">
                   <span className="text-muted-foreground">Estado</span>
-                  <span className="font-medium">
-                    {page.published ? "Publicada" : "Borrador"}
-                  </span>
+                  <span className="font-medium">{page.published ? "Publicada" : "Borrador"}</span>
                 </div>
                 <div className="flex items-center justify-between gap-4">
                   <span className="text-muted-foreground">Creada</span>

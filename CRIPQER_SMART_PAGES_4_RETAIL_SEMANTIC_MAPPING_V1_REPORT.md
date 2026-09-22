@@ -37,19 +37,19 @@ dense grid intent.
 
 ### Existing capability confirmation
 
-| Capability | Result |
-| --- | --- |
-| Current `product` block | Supported by Engine V2, canonical types, registry, and renderer. |
-| Current `productGrid` block | Supported by registry and renderer; Engine planner required a host-side field-name projection described below. |
-| `featuredMedia` / `featuredLink` | Supported by current Engine V2 and renderer when supplied media and destination are valid. |
-| Owner media | Supported through existing `coverImageUrl`, `userMedia`, and `ContentSourceV2` media fields. |
-| Price representation | Supported as owner-supplied display strings; amount/currency is formatted without inventing a value. |
-| CTA destinations | Existing host vocabulary is reused; WhatsApp phone input is projected to the renderer's valid `https://wa.me/…` URL. |
-| Responsive grid | Supported by existing Engine layout and canonical responsive rules. |
-| Existing Retail mapper | None found before this task. |
-| New canonical fields required | No. |
-| Renderer changes required | No. |
-| Engine V2 internal changes required | No. |
+| Capability                          | Result                                                                                                               |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Current `product` block             | Supported by Engine V2, canonical types, registry, and renderer.                                                     |
+| Current `productGrid` block         | Supported by registry and renderer; Engine planner required a host-side field-name projection described below.       |
+| `featuredMedia` / `featuredLink`    | Supported by current Engine V2 and renderer when supplied media and destination are valid.                           |
+| Owner media                         | Supported through existing `coverImageUrl`, `userMedia`, and `ContentSourceV2` media fields.                         |
+| Price representation                | Supported as owner-supplied display strings; amount/currency is formatted without inventing a value.                 |
+| CTA destinations                    | Existing host vocabulary is reused; WhatsApp phone input is projected to the renderer's valid `https://wa.me/…` URL. |
+| Responsive grid                     | Supported by existing Engine layout and canonical responsive rules.                                                  |
+| Existing Retail mapper              | None found before this task.                                                                                         |
+| New canonical fields required       | No.                                                                                                                  |
+| Renderer changes required           | No.                                                                                                                  |
+| Engine V2 internal changes required | No.                                                                                                                  |
 
 ## Implementation
 
@@ -210,17 +210,17 @@ density contract exists.
 
 ## Deferred capability statuses
 
-| Semantic | Status | Implementation behavior |
-| --- | --- | --- |
-| `categoryTiles` / category navigation | `DEFERRED` | Category metadata and counts are retained in transient diagnostics; no category block or schema field is emitted. |
-| `secondaryCollection` | `DEFERRED` | Diagnosed and not emitted as a second rail; it is not silently relabeled as a new canonical collection. |
-| `benefits` | `DEFERRED` | Real owner differentiators/badges are retained semantically; no unsupported benefit strip is generated. |
-| `gridDensity=dense` | `DEFERRED_AS_SEMANTIC` | Existing layout behavior remains; no `gridDensity` canonical field is invented. |
-| rich item detail/modal/detail page | `DEFERRED` | No modal runtime, detail router, or second product renderer. |
-| stock/inventory | `UNSUPPORTED` | Diagnosed when supplied as an attribute; never emitted. |
-| SKU | `UNSUPPORTED` | Diagnosed when supplied as an attribute; never emitted. |
-| discount/old price | `UNSUPPORTED` | Never inferred or emitted. |
-| checkout/cart/orders/payment | `UNSUPPORTED` | No transaction model, persistence, or checkout URL is created. |
+| Semantic                              | Status                 | Implementation behavior                                                                                           |
+| ------------------------------------- | ---------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `categoryTiles` / category navigation | `DEFERRED`             | Category metadata and counts are retained in transient diagnostics; no category block or schema field is emitted. |
+| `secondaryCollection`                 | `DEFERRED`             | Diagnosed and not emitted as a second rail; it is not silently relabeled as a new canonical collection.           |
+| `benefits`                            | `DEFERRED`             | Real owner differentiators/badges are retained semantically; no unsupported benefit strip is generated.           |
+| `gridDensity=dense`                   | `DEFERRED_AS_SEMANTIC` | Existing layout behavior remains; no `gridDensity` canonical field is invented.                                   |
+| rich item detail/modal/detail page    | `DEFERRED`             | No modal runtime, detail router, or second product renderer.                                                      |
+| stock/inventory                       | `UNSUPPORTED`          | Diagnosed when supplied as an attribute; never emitted.                                                           |
+| SKU                                   | `UNSUPPORTED`          | Diagnosed when supplied as an attribute; never emitted.                                                           |
+| discount/old price                    | `UNSUPPORTED`          | Never inferred or emitted.                                                                                        |
+| checkout/cart/orders/payment          | `UNSUPPORTED`          | No transaction model, persistence, or checkout URL is created.                                                    |
 
 ## Owner data truth policy
 

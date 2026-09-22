@@ -77,7 +77,7 @@ exposición fue la frontera serverFn sin normalización.
 2. El error real se conserva en `console.error` server-side.
 3. El browser recibe únicamente el failure estable:
    `No pudimos crear tu página todavía. Tus datos siguen aquí. Revisa la
-   información o inténtalo nuevamente.`
+información o inténtalo nuevamente.`
 4. `sanitizeGenerationError()` cubre HTML crudo, `_serverFn`, stack traces,
    `Failed to fetch` y `NetworkError`, sin ocultar errores de datos seguros como
    `Missing owner fact: services[0].name.`.

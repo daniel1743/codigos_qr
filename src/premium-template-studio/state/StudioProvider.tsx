@@ -1,19 +1,9 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useReducer,
-  useRef,
-  useState,
-} from "react";
-import type { ReactNode } from "react";
-import type { BioTemplateConfig, Breakpoint, SaveState } from "../types";
+import { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from "react";
+import type { BioTemplateConfig } from "../types";
 import { createInitialState, templateReducer } from "./templateReducer";
 import type { StudioAction, StudioState } from "./templateReducer";
 import { resolveAdapters } from "../adapters";
-import { validateTemplate } from "../engine/TemplateValidator";
+import { findReferenceStockImages, validateTemplate } from "../engine/TemplateValidator";
 import type { StudioAdapters } from "../adapters";
 import type { ProductTier } from "../../lib/product-entitlements/capabilities";
 import { isProductTier } from "../../lib/product-entitlements/capabilities";
@@ -26,50 +16,17 @@ import {
   describePersistenceConfig,
   recordPersistenceDebugEvent,
 } from "../diagnostics/persistenceDebug";
-
-export type StudioPanel = "blocks" | "design" | "templates" | "settings";
-
-interface StudioContextValue {
-  state: StudioState;
-  dispatch: React.Dispatch<StudioAction>;
-  /** Effective product tier (fail-closed "free" when missing/invalid). */
-  tier: ProductTier;
-  adapters: StudioAdapters;
-  breakpoint: Breakpoint;
-  setBreakpoint: (b: Breakpoint) => void;
-  panel: StudioPanel;
-  setPanel: (p: StudioPanel) => void;
-  previewing: boolean;
-  setPreviewing: (v: boolean) => void;
-  saveState: SaveState;
-  /** Last save/publish/validation error, if any. */
-  error: string | null;
-  save: () => Promise<void>;
-  publish: () => Promise<void>;
-}
-
-const StudioContext = createContext<StudioContextValue | null>(null);
+import {
+  StudioContext,
+  type StudioContextValue,
+  type StudioPanel,
+  type StudioProviderProps,
+} from "./studioContext";
 
 export function useStudio(): StudioContextValue {
   const ctx = useContext(StudioContext);
   if (!ctx) throw new Error("useStudio must be used inside <StudioProvider>");
   return ctx;
-}
-
-export interface StudioProviderProps {
-  initialConfig: BioTemplateConfig;
-  adapters?: Partial<StudioAdapters> | undefined;
-  autoSave?: boolean | undefined;
-  onChange?: ((config: BioTemplateConfig) => void) | undefined;
-  onSave?: ((config: BioTemplateConfig) => void | Promise<void>) | undefined;
-  onPublish?: ((config: BioTemplateConfig) => void | Promise<void>) | undefined;
-  /** Stable document identity (e.g. profile id) used to isolate saves per document. */
-  documentId?: string | undefined;
-  /** Reports save-state changes (idle/saving/saved/dirty/error) to the host. */
-  onSaveStateChange?: ((state: SaveState) => void) | undefined;
-  /** Effective product tier from the host boundary. Missing/invalid → "free". */
-  tier?: ProductTier | undefined;
-  children: ReactNode;
 }
 
 export function StudioProvider({
@@ -245,6 +202,14 @@ export function StudioProvider({
       const first = result.issues.find((i) => i.level === "error");
       setError(
         `Cannot publish: ${first?.path ?? "config"} — ${first?.message ?? "invalid configuration."}`,
+      );
+      setSaveState("error");
+      return;
+    }
+    const referenceImages = findReferenceStockImages(state.config);
+    if (referenceImages.length > 0) {
+      setError(
+        "Reemplaza las imágenes de referencia antes de publicar. Revisa la primera imagen seleccionada en el catálogo.",
       );
       setSaveState("error");
       return;

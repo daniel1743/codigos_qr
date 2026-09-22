@@ -11,29 +11,29 @@ Task: CRIPQER BILLING — CANONICAL SUBSCRIPTION APPLICATION CORE V1
 
 ### Files read (exact — nothing else)
 
-| File | Role |
-|---|---|
-| `src/lib/billing/billing.types.ts` | Canonical receiving types (authority) |
-| `src/server/billing/persistence.ts` | Canonical persistence primitive signatures (mirrored, not modified) |
-| `src/server/billing/webhooks.ts` | Frozen webhook normalization — `NormalizedBillingEvent` contract |
-| `src/server/billing/checkout.ts` | Frozen Checkout Host (reference for DI/selfcheck conventions) |
-| `billing/CLEANER_BILLING_WEBHOOK_CORE_V1_REPORT.md` | Prior convention reference |
-| `billing/CLEANER_BILLING_CHECKOUT_HOST_V1_REPORT.md` | Prior convention reference |
-| `billing/CLEANER_BILLING_SERVER_CATALOG_V1_REPORT.md` | Prior convention reference |
-| `billing/CLEANER_BILLING_PROVIDER_HOST_V1_REPORT.md` | Prior convention reference |
-| `tsconfig.json` | Compiler flags (validation only) |
-| `package.json` | `"type": "module"` (validation only) |
+| File                                                  | Role                                                                |
+| ----------------------------------------------------- | ------------------------------------------------------------------- |
+| `src/lib/billing/billing.types.ts`                    | Canonical receiving types (authority)                               |
+| `src/server/billing/persistence.ts`                   | Canonical persistence primitive signatures (mirrored, not modified) |
+| `src/server/billing/webhooks.ts`                      | Frozen webhook normalization — `NormalizedBillingEvent` contract    |
+| `src/server/billing/checkout.ts`                      | Frozen Checkout Host (reference for DI/selfcheck conventions)       |
+| `billing/CLEANER_BILLING_WEBHOOK_CORE_V1_REPORT.md`   | Prior convention reference                                          |
+| `billing/CLEANER_BILLING_CHECKOUT_HOST_V1_REPORT.md`  | Prior convention reference                                          |
+| `billing/CLEANER_BILLING_SERVER_CATALOG_V1_REPORT.md` | Prior convention reference                                          |
+| `billing/CLEANER_BILLING_PROVIDER_HOST_V1_REPORT.md`  | Prior convention reference                                          |
+| `tsconfig.json`                                       | Compiler flags (validation only)                                    |
+| `package.json`                                        | `"type": "module"` (validation only)                                |
 
 > A temporary `tsconfig.application-check.json` was created for a targeted
 > type-check and then **deleted**. It is not part of the deliverable.
 
 ### Files created (exact — nothing else)
 
-| File | Role |
-|---|---|
-| `src/server/billing/application.ts` | Canonical Subscription Application Core |
-| `src/server/billing/application.selfcheck.ts` | Pure-local selfcheck (no network, no DB) |
-| `billing/CLEANER_BILLING_APPLICATION_CORE_V1_REPORT.md` | This report |
+| File                                                    | Role                                     |
+| ------------------------------------------------------- | ---------------------------------------- |
+| `src/server/billing/application.ts`                     | Canonical Subscription Application Core  |
+| `src/server/billing/application.selfcheck.ts`           | Pure-local selfcheck (no network, no DB) |
+| `billing/CLEANER_BILLING_APPLICATION_CORE_V1_REPORT.md` | This report                              |
 
 ### Files modified
 
@@ -79,15 +79,15 @@ payment id.
 
 ## C. SECURITY (mandatory)
 
-| Check | Result |
-|---|---|
+| Check                                                | Result                                          |
+| ---------------------------------------------------- | ----------------------------------------------- |
 | `requiresAuthoritativeLookup` can write subscription | **NO** (returns `LOOKUP_REQUIRED`, zero writes) |
-| provider/browser `userId` authoritative | **NO** |
-| amount used to infer plan | **NO** |
-| free row possible | **NO** |
-| raw payload persisted/returned | **NO** |
-| entitlement granted | **NO** |
-| provider network calls | **NO** |
+| provider/browser `userId` authoritative              | **NO**                                          |
+| amount used to infer plan                            | **NO**                                          |
+| free row possible                                    | **NO**                                          |
+| raw payload persisted/returned                       | **NO**                                          |
+| entitlement granted                                  | **NO**                                          |
+| provider network calls                               | **NO**                                          |
 
 ---
 

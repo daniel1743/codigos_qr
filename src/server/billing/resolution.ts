@@ -69,10 +69,7 @@ function isCanonicalPlanId(value: unknown): value is BillingPlanId {
 export type OwnershipResolutionStatus = "RESOLVED" | "OWNER_REQUIRED" | "OWNER_CONFLICT";
 
 export type OwnershipSource =
-  | "TRUSTED_CONTEXT"
-  | "EXISTING_SUBSCRIPTION"
-  | "CANONICAL_CUSTOMER"
-  | "CANONICAL_CHECKOUT";
+  "TRUSTED_CONTEXT" | "EXISTING_SUBSCRIPTION" | "CANONICAL_CUSTOMER" | "CANONICAL_CHECKOUT";
 
 export interface OwnershipResolutionResult {
   status: OwnershipResolutionStatus;
@@ -153,14 +150,8 @@ export async function resolveOwnership(
   }
 
   // P2 — existing canonical subscription (frozen persistence).
-  if (
-    typeof input.providerSubscriptionId === "string" &&
-    input.providerSubscriptionId.length > 0
-  ) {
-    const existing = await deps.getSubscriptionByProviderId(
-      provider,
-      input.providerSubscriptionId,
-    );
+  if (typeof input.providerSubscriptionId === "string" && input.providerSubscriptionId.length > 0) {
+    const existing = await deps.getSubscriptionByProviderId(provider, input.providerSubscriptionId);
     if (existing && typeof existing.user_id === "string" && existing.user_id.length > 0) {
       candidates.push({ source: "EXISTING_SUBSCRIPTION", userId: existing.user_id });
     }
@@ -197,31 +188,52 @@ export async function resolveOwnership(
   }
 
   if (candidates.length === 0) {
-    return { status: "OWNER_REQUIRED", userId: null, source: null, provider, code: "OWNER_REQUIRED" };
+    return {
+      status: "OWNER_REQUIRED",
+      userId: null,
+      source: null,
+      provider,
+      code: "OWNER_REQUIRED",
+    };
   }
 
   const firstUserId = candidates[0]?.userId;
   const firstSource = candidates[0]?.source ?? null;
   if (typeof firstUserId !== "string") {
-    return { status: "OWNER_REQUIRED", userId: null, source: null, provider, code: "OWNER_REQUIRED" };
+    return {
+      status: "OWNER_REQUIRED",
+      userId: null,
+      source: null,
+      provider,
+      code: "OWNER_REQUIRED",
+    };
   }
 
   const conflicting = candidates.some((candidate) => candidate.userId !== firstUserId);
   if (conflicting) {
-    return { status: "OWNER_CONFLICT", userId: null, source: null, provider, code: "OWNER_CONFLICT" };
+    return {
+      status: "OWNER_CONFLICT",
+      userId: null,
+      source: null,
+      provider,
+      code: "OWNER_CONFLICT",
+    };
   }
 
-  return { status: "RESOLVED", userId: firstUserId, source: firstSource, provider, code: "RESOLVED" };
+  return {
+    status: "RESOLVED",
+    userId: firstUserId,
+    source: firstSource,
+    provider,
+    code: "RESOLVED",
+  };
 }
 
 /* ======================================================================== */
 /* PLAN RESOLUTION                                                          */
 /* ======================================================================== */
 
-export type PlanResolutionStatus =
-  | "RESOLVED"
-  | "PLAN_MAPPING_REQUIRED"
-  | "PLAN_MAPPING_CONFLICT";
+export type PlanResolutionStatus = "RESOLVED" | "PLAN_MAPPING_REQUIRED" | "PLAN_MAPPING_CONFLICT";
 
 export type PlanMappingSource = "REGISTRY";
 
@@ -275,9 +287,7 @@ function isFreePlanReference(planId: unknown): boolean {
   return planId === "free";
 }
 
-function validatePlanMappings(
-  entries: readonly PlanMappingEntry[],
-): PlanMappingValidationResult {
+function validatePlanMappings(entries: readonly PlanMappingEntry[]): PlanMappingValidationResult {
   const issues: PlanMappingIssue[] = [];
   const conflictKeys = new Set<string>();
   const seen = new Map<string, PlanMappingEntry>();
@@ -322,7 +332,11 @@ function validatePlanMappings(
     }
 
     // Conflict detection only applies to well-formed keys.
-    if (isCanonicalProvider(provider) && typeof providerPlanId === "string" && providerPlanId.trim().length > 0) {
+    if (
+      isCanonicalProvider(provider) &&
+      typeof providerPlanId === "string" &&
+      providerPlanId.trim().length > 0
+    ) {
       const key = planKey(provider, providerPlanId);
       const prior = seen.get(key);
       if (prior) {
@@ -357,7 +371,8 @@ function buildPlanIndex(registry: PlanMappingRegistry): BuiltPlanIndex {
 
   for (const entry of registry.entries) {
     if (!isCanonicalProvider(entry.provider)) continue;
-    if (typeof entry.providerPlanId !== "string" || entry.providerPlanId.trim().length === 0) continue;
+    if (typeof entry.providerPlanId !== "string" || entry.providerPlanId.trim().length === 0)
+      continue;
     const key = planKey(entry.provider, entry.providerPlanId);
     if (validation.conflictKeys.has(key)) continue;
     if (!index.has(key)) index.set(key, entry);
@@ -380,27 +395,57 @@ export function resolvePlanReference(
   const { validation, index } = buildPlanIndex(registry);
 
   if (typeof providerPlanId !== "string" || providerPlanId.length === 0) {
-    return { status: "PLAN_MAPPING_REQUIRED", planId: null, billingInterval: null, source: null, code: "PLAN_MAPPING_REQUIRED" };
+    return {
+      status: "PLAN_MAPPING_REQUIRED",
+      planId: null,
+      billingInterval: null,
+      source: null,
+      code: "PLAN_MAPPING_REQUIRED",
+    };
   }
   if (!isCanonicalProvider(provider)) {
-    return { status: "PLAN_MAPPING_REQUIRED", planId: null, billingInterval: null, source: null, code: "PLAN_MAPPING_REQUIRED" };
+    return {
+      status: "PLAN_MAPPING_REQUIRED",
+      planId: null,
+      billingInterval: null,
+      source: null,
+      code: "PLAN_MAPPING_REQUIRED",
+    };
   }
 
   const key = planKey(provider, providerPlanId);
 
   if (validation.conflictKeys.has(key)) {
-    return { status: "PLAN_MAPPING_CONFLICT", planId: null, billingInterval: null, source: null, code: "PLAN_MAPPING_CONFLICT" };
+    return {
+      status: "PLAN_MAPPING_CONFLICT",
+      planId: null,
+      billingInterval: null,
+      source: null,
+      code: "PLAN_MAPPING_CONFLICT",
+    };
   }
 
   // Fail closed: an invalid registry (e.g. a free/unsupported entry elsewhere)
   // can never produce a mapping.
   if (!validation.valid) {
-    return { status: "PLAN_MAPPING_REQUIRED", planId: null, billingInterval: null, source: null, code: "PLAN_MAPPING_REQUIRED" };
+    return {
+      status: "PLAN_MAPPING_REQUIRED",
+      planId: null,
+      billingInterval: null,
+      source: null,
+      code: "PLAN_MAPPING_REQUIRED",
+    };
   }
 
   const entry = index.get(key);
   if (!entry) {
-    return { status: "PLAN_MAPPING_REQUIRED", planId: null, billingInterval: null, source: null, code: "PLAN_MAPPING_REQUIRED" };
+    return {
+      status: "PLAN_MAPPING_REQUIRED",
+      planId: null,
+      billingInterval: null,
+      source: null,
+      code: "PLAN_MAPPING_REQUIRED",
+    };
   }
 
   return {
@@ -417,9 +462,7 @@ export function resolvePlanReference(
  * Application Core seam (`application.ts`) WITHOUT modifying it. Returning
  * `null` fails closed as PLAN_MAPPING_REQUIRED inside the Application Core.
  */
-export function createBillingPlanResolver(
-  registry: PlanMappingRegistry,
-): BillingPlanResolver {
+export function createBillingPlanResolver(registry: PlanMappingRegistry): BillingPlanResolver {
   const { validation, index } = buildPlanIndex(registry);
 
   return {

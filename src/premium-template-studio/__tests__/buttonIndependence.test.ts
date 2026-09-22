@@ -7,7 +7,10 @@ describe("Phase 5 button and CTA independence", () => {
   it("keeps Button Group item destinations and styles isolated", () => {
     const block = createBlock("buttonGroup");
     const items = block.content.items ?? [];
-    const base = createInitialState({ ...createDemoConfig(), blocks: [{ ...block, id: "buttons" }] });
+    const base = createInitialState({
+      ...createDemoConfig(),
+      blocks: [{ ...block, id: "buttons" }],
+    });
     const first = items[0]!;
     const second = items[1]!;
     const next = templateReducer(base, {

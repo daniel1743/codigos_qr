@@ -39,6 +39,36 @@ export interface StudioAdapters {
 }
 
 const STORAGE_PREFIX = "pts:config:";
+const ASSET_STORAGE_KEY = "pts:assets";
+
+function readLocalAssets(): UploadedAsset[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(ASSET_STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as UploadedAsset[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeLocalAsset(asset: UploadedAsset): void {
+  if (typeof window === "undefined") return;
+  const assets = readLocalAssets().filter((current) => current.id !== asset.id);
+  window.localStorage.setItem(ASSET_STORAGE_KEY, JSON.stringify([asset, ...assets]));
+}
+
+function fileAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    if (typeof FileReader === "undefined") {
+      resolve(typeof URL !== "undefined" ? URL.createObjectURL(file) : "");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => resolve(typeof reader.result === "string" ? reader.result : "");
+    reader.onerror = () => reject(reader.error ?? new Error("Unable to read uploaded asset."));
+    reader.readAsDataURL(file);
+  });
+}
 
 export const localStorageAdapter: StorageAdapter = {
   async load(pageInstanceId) {
@@ -65,13 +95,25 @@ export const localStorageAdapter: StorageAdapter = {
 
 export const objectUrlAssetAdapter: AssetAdapter = {
   async upload(file) {
-    const url = typeof URL !== "undefined" ? URL.createObjectURL(file) : "";
+    const url = await fileAsDataUrl(file);
     const kind: UploadedAsset["type"] = file.type.startsWith("image/")
       ? "image"
       : file.type.startsWith("video/")
         ? "video"
         : "document";
-    return { id: `${Date.now()}`, url, name: file.name, size: file.size, type: kind };
+    const asset = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      url,
+      name: file.name,
+      size: file.size,
+      type: kind,
+      createdAt: new Date().toISOString(),
+    } satisfies UploadedAsset;
+    writeLocalAsset(asset);
+    return asset;
+  },
+  async list() {
+    return readLocalAssets();
   },
 };
 

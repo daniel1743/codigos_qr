@@ -236,10 +236,7 @@
     "profession": "Fotografía",
     "businessOther": "Fotografía",
     "goal": "portfolio",
-    "selectedFeatures": [
-      "portfolio",
-      "contact"
-    ],
+    "selectedFeatures": ["portfolio", "contact"],
     "cardMedia": true,
     "content": {
       "name": "Luz Norte",
@@ -399,11 +396,7 @@
       "createdAt": "2026-09-15T12:00:00.000Z",
       "updatedAt": "2026-09-15T12:00:00.000Z",
       "author": "Cripqer Parametric Engine",
-      "tags": [
-        "editorial",
-        "editorial_stack",
-        "portfolio"
-      ]
+      "tags": ["editorial", "editorial_stack", "portfolio"]
     },
     "theme": {
       "id": "engine-editorial",
@@ -479,25 +472,17 @@
       {
         "type": "text",
         "variant": "quote",
-        "contentKeys": [
-          "body"
-        ]
+        "contentKeys": ["body"]
       },
       {
         "type": "cta",
         "variant": "inline",
-        "contentKeys": [
-          "label",
-          "url"
-        ]
+        "contentKeys": ["label", "url"]
       },
       {
         "type": "portfolio",
         "variant": "grid",
-        "contentKeys": [
-          "title",
-          "items"
-        ]
+        "contentKeys": ["title", "items"]
       }
     ],
     "motion": {
@@ -510,11 +495,7 @@
     }
   },
   "T10_renderSummary": {
-    "blockTypes": [
-      "text",
-      "cta",
-      "portfolio"
-    ],
+    "blockTypes": ["text", "cta", "portfolio"],
     "themeColors": {
       "primary": "#7A3B2E",
       "secondary": "#574E45",

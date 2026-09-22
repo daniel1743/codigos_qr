@@ -37,9 +37,7 @@ function stableHash(value: string): number {
 }
 
 function hasMediaCards(content: ContentSourceV2): boolean {
-  return Boolean(
-    content.mediaCard || content.links?.some((link) => Boolean(link.imageUrl)),
-  );
+  return Boolean(content.mediaCard || content.links?.some((link) => Boolean(link.imageUrl)));
 }
 
 function hasUsableUrl(value: string | null | undefined): value is string {
@@ -69,11 +67,39 @@ function isAvailable(strategy: MediaStrategyV2, input: MediaStrategyInput): bool
 }
 
 const FAMILY_STRATEGIES: Record<FamilyId, readonly MediaStrategyV2[]> = {
-  luxury: ["catalog-first", "banner-first", "immersive-background", "media-cards", "profile-first", "minimal-no-media"],
-  creator: ["catalog-first", "gallery-first", "video-first", "portfolio-first", "media-cards", "banner-first", "profile-first"],
+  luxury: [
+    "catalog-first",
+    "banner-first",
+    "immersive-background",
+    "media-cards",
+    "profile-first",
+    "minimal-no-media",
+  ],
+  creator: [
+    "catalog-first",
+    "gallery-first",
+    "video-first",
+    "portfolio-first",
+    "media-cards",
+    "banner-first",
+    "profile-first",
+  ],
   corporate: ["catalog-first", "profile-first", "banner-first", "minimal-no-media", "media-cards"],
-  energetic: ["catalog-first", "video-first", "gallery-first", "immersive-background", "media-cards", "banner-first"],
-  editorial: ["catalog-first", "banner-first", "gallery-first", "portfolio-first", "minimal-no-media"],
+  energetic: [
+    "catalog-first",
+    "video-first",
+    "gallery-first",
+    "immersive-background",
+    "media-cards",
+    "banner-first",
+  ],
+  editorial: [
+    "catalog-first",
+    "banner-first",
+    "gallery-first",
+    "portfolio-first",
+    "minimal-no-media",
+  ],
   minimal: ["catalog-first", "minimal-no-media", "profile-first", "banner-first"],
 };
 

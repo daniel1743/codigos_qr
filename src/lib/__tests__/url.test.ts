@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { getAliasProfileUrl, getPublicPageAliasUrl, getPublicPageUrl, getPublicProfileUrl } from "../url";
+import {
+  getAliasProfileUrl,
+  getPublicPageAliasUrl,
+  getPublicPageUrl,
+  getPublicProfileUrl,
+} from "../url";
 
 describe("getPublicPageUrl (PAGES_5)", () => {
   it("resolves a child Page URL from its stable public_id", () => {

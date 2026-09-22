@@ -108,40 +108,45 @@ Target inspected: `EngineV2HostGenerationInput`
 (`src/lib/parametric-engine-v2/internal-entrypoint.ts`) + `ContentSourceV2`.
 
 ### PLAN_FIELDS_MAPPABLE
-| Semantic field | Future host field |
-| --- | --- |
-| `PageGenerationRequest.businessType` | `EngineV2HostGenerationInput.profession` |
-| `PageGenerationRequest.goal` | `EngineV2HostGenerationInput.goal` (goal vocabulary map) |
-| `PageGenerationRequest.density` | `EngineV2HostGenerationInput.style` (visual personality) |
-| `PageGenerationRequest.primaryAction` (kind+target) | `primaryAction { type, value }` (kind map) |
-| `NormalizedContentV1.business.name` | `content.name` / `identity.name` |
-| `NormalizedContentV1.business.about` | `content.bio` / `contentBlocks.about` |
-| `NormalizedContentV1.business.cover` / `avatar` | `userMedia.bannerUrl` / `avatarUrl` + `cardMedia` |
-| `NormalizedContentV1.contact.*` | `contentBlocks.contact` / `bookingUrl` |
-| catalogs `services` | `contentBlocks.services[]` |
-| catalogs `catalog` items | `contentBlocks.products[]` |
-| catalogs `portfolio` items | `contentBlocks.portfolio[]` |
-| `gallery` / `testimonials` / `faq` / `badges` | `contentBlocks.gallery/testimonials/faq/badges` |
+
+| Semantic field                                      | Future host field                                        |
+| --------------------------------------------------- | -------------------------------------------------------- |
+| `PageGenerationRequest.businessType`                | `EngineV2HostGenerationInput.profession`                 |
+| `PageGenerationRequest.goal`                        | `EngineV2HostGenerationInput.goal` (goal vocabulary map) |
+| `PageGenerationRequest.density`                     | `EngineV2HostGenerationInput.style` (visual personality) |
+| `PageGenerationRequest.primaryAction` (kind+target) | `primaryAction { type, value }` (kind map)               |
+| `NormalizedContentV1.business.name`                 | `content.name` / `identity.name`                         |
+| `NormalizedContentV1.business.about`                | `content.bio` / `contentBlocks.about`                    |
+| `NormalizedContentV1.business.cover` / `avatar`     | `userMedia.bannerUrl` / `avatarUrl` + `cardMedia`        |
+| `NormalizedContentV1.contact.*`                     | `contentBlocks.contact` / `bookingUrl`                   |
+| catalogs `services`                                 | `contentBlocks.services[]`                               |
+| catalogs `catalog` items                            | `contentBlocks.products[]`                               |
+| catalogs `portfolio` items                          | `contentBlocks.portfolio[]`                              |
+| `gallery` / `testimonials` / `faq` / `badges`       | `contentBlocks.gallery/testimonials/faq/badges`          |
 
 ### PLAN_FIELDS_NOT_YET_MAPPABLE
-| Semantic field | Reason |
-| --- | --- |
-| `PagePlanV1.pageId` | Host identity (UUID / public_id) is host-owned |
-| `PagePlanV1.slug` | Host alias / public_id generation |
-| `PagePlanV1.heroVariant` | Engine V2 owns visual authority |
-| `PagePlanV1.navigation` (`internal_page`) | Future destination resolver |
-| `MiniSitePlanV1.projectId` | Future host fan-out coordinator (no persistence) |
+
+| Semantic field                            | Reason                                           |
+| ----------------------------------------- | ------------------------------------------------ |
+| `PagePlanV1.pageId`                       | Host identity (UUID / public_id) is host-owned   |
+| `PagePlanV1.slug`                         | Host alias / public_id generation                |
+| `PagePlanV1.heroVariant`                  | Engine V2 owns visual authority                  |
+| `PagePlanV1.navigation` (`internal_page`) | Future destination resolver                      |
+| `MiniSitePlanV1.projectId`                | Future host fan-out coordinator (no persistence) |
 
 ### FIELDS_REQUIRING_HOST_CONTENT
+
 contact (phone/email/whatsapp/address/hours/socials), media URLs
 (cover/avatar/gallery/item images), bookingUrl, prices, testimonials,
 ratings - all owner-supplied and never invented.
 
 ### FIELDS_REQUIRING_RETAIL_PHASE
+
 category tiles, featured IDs, real-media banner, secondary collection,
 benefit strip, grid density (from `retail-presentation.ts`, out of scope).
 
 ### FIELDS_REQUIRING_FUTURE_DESTINATION_SUPPORT
+
 `internal_page` pageId resolution, section anchors, and the `checkout` future
 contract (never rendered in V1).
 

@@ -26,10 +26,7 @@ import { Switch } from "../ui/switch";
 import { PlatformPicker } from "../profile/PlatformPicker";
 import { getBrowserSupabaseClient } from "../../lib/supabase/client";
 import { resolveSmartLinkPreviewFn } from "../../lib/smart-link-preview/server";
-import {
-  computeCardEnrichment,
-  type SmartLinkPreviewStatus,
-} from "../../lib/smart-link-preview";
+import { computeCardEnrichment, type SmartLinkPreviewStatus } from "../../lib/smart-link-preview";
 
 interface LinksSectionProps {
   links: Partial<ProfileLink>[];
@@ -92,7 +89,10 @@ export function LinksSection({
       setOpenLinkTarget(null);
       return;
     }
-    if (!openLinkTarget || !links.some((link, index) => getLinkTarget(link, index) === openLinkTarget)) {
+    if (
+      !openLinkTarget ||
+      !links.some((link, index) => getLinkTarget(link, index) === openLinkTarget)
+    ) {
       setOpenLinkTarget(getLinkTarget(links[0], 0));
     }
   }, [links, openLinkTarget]);
@@ -210,7 +210,6 @@ export function LinksSection({
     }
   };
 
-
   const handleCardImageUpload = async (index: number, event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     event.target.value = "";
@@ -277,7 +276,9 @@ export function LinksSection({
     <section className="space-y-5">
       <div className="flex flex-col gap-3 min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-between">
         <div className="space-y-1">
-          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-stone-500">Contenido</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-stone-500">
+            Contenido
+          </p>
           <h2 className="text-xl font-bold tracking-[-0.04em] text-[#1d1d1b]">Enlaces</h2>
           <p className="text-sm text-stone-500">
             {links.length} de {MAX_LINKS} agregados
@@ -301,333 +302,366 @@ export function LinksSection({
           const contentId = `link-editor-${link.id || index}`;
 
           return (
-          <div
-            key={link.id || index}
-            data-tool-target={targetId}
-            className="space-y-4 rounded-2xl border border-stone-200 bg-[#fffefa] p-4 shadow-[0_8px_24px_rgba(29,29,27,0.04)]"
-          >
-            <div className="flex items-center justify-between gap-3">
-              <button
-                type="button"
-                aria-expanded={isOpen}
-                aria-controls={contentId}
-                onClick={() => openLink(targetId)}
-                className="flex min-w-0 flex-1 items-center gap-3 text-left"
-              >
-                <ChevronDown
-                  className={`h-4 w-4 shrink-0 text-stone-500 transition-transform ${isOpen ? "rotate-180" : ""}`}
-                />
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-[#1d1d1b]">{link.label || "Enlace"}</p>
-                  <p className="truncate text-xs text-stone-500">{link.url || "Sin URL"}</p>
-                </div>
-              </button>
-              <div className="flex shrink-0 items-center gap-1">
-                <Button
+            <div
+              key={link.id || index}
+              data-tool-target={targetId}
+              className="space-y-4 rounded-2xl border border-stone-200 bg-[#fffefa] p-4 shadow-[0_8px_24px_rgba(29,29,27,0.04)]"
+            >
+              <div className="flex items-center justify-between gap-3">
+                <button
                   type="button"
-                  variant="ghost"
-                  size="icon"
-                  disabled={index === 0}
-                  onClick={() => moveLink(index, "up")}
-                  aria-label="Mover enlace hacia arriba"
+                  aria-expanded={isOpen}
+                  aria-controls={contentId}
+                  onClick={() => openLink(targetId)}
+                  className="flex min-w-0 flex-1 items-center gap-3 text-left"
                 >
-                  <ArrowUp className="h-4 w-4" />
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  disabled={index === links.length - 1}
-                  onClick={() => moveLink(index, "down")}
-                  aria-label="Mover enlace hacia abajo"
-                >
-                  <ArrowDown className="h-4 w-4" />
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="text-destructive hover:text-destructive"
-                  onClick={() => removeLink(index)}
-                  aria-label="Eliminar enlace"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-
-             {isOpen ? (
-               <div id={contentId} className="space-y-4">
-                 <div className="space-y-2">
-                   <Label htmlFor={`link-platform-${link.id || index}`}>Red o tipo de enlace</Label>
-                    <PlatformPicker
-                      value={normalizeBasicPlatform(link.platform) || "website"}
-                     onChange={(platform) => handlePlatformChange(index, platform)}
-                   />
-                 </div>
-                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor={`link-label-${link.id || index}`}>Texto</Label>
-                    <Input
-                      id={`link-label-${link.id || index}`}
-                      value={link.label || ""}
-                      onChange={(event) => updateLink(index, { label: event.target.value })}
-                      placeholder="Ej: Instagram"
-                      className="h-11 rounded-xl border-stone-200 bg-[#fffefa]"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor={`link-url-${link.id || index}`}>URL</Label>
-                    <Input
-                      id={`link-url-${link.id || index}`}
-                      value={link.url || ""}
-                      onChange={(event) => updateLinkUrl(index, event.target.value)}
-                      placeholder="https://..."
-                      className="h-11 rounded-xl border-stone-200 bg-[#fffefa]"
-                      dir="ltr"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between gap-3 rounded-xl border border-stone-200 bg-[#fffefa] p-3">
+                  <ChevronDown
+                    className={`h-4 w-4 shrink-0 text-stone-500 transition-transform ${isOpen ? "rotate-180" : ""}`}
+                  />
                   <div className="min-w-0">
-                    <p className="text-xs font-medium text-[#1d1d1b]">Vista previa del enlace</p>
-                    <p className="mt-0.5 truncate text-[11px] text-stone-500">
-                      {(() => {
-                        const state = previewState[link.id || `profile-link-${index}`];
-                        if (state === "loading") return "Obteniendo vista previa…";
-                        if (state === "full") return "Vista previa encontrada";
-                        if (state === "partial") return "Vista previa parcial";
-                        if (state === "fallback") return "Enlace reconocido";
-                        if (state === "error")
-                          return "No pudimos obtener una imagen, pero el enlace seguirá funcionando.";
-                        return "Reconoce el destino y rellena la tarjeta automáticamente.";
-                      })()}
+                    <p className="truncate text-sm font-semibold text-[#1d1d1b]">
+                      {link.label || "Enlace"}
                     </p>
+                    <p className="truncate text-xs text-stone-500">{link.url || "Sin URL"}</p>
                   </div>
+                </button>
+                <div className="flex shrink-0 items-center gap-1">
                   <Button
                     type="button"
-                    variant="outline"
-                    onClick={() => handleFetchPreview(index)}
-                    disabled={previewState[link.id || `profile-link-${index}`] === "loading"}
-                    className="h-9 shrink-0 rounded-full border-stone-200"
+                    variant="ghost"
+                    size="icon"
+                    disabled={index === 0}
+                    onClick={() => moveLink(index, "up")}
+                    aria-label="Mover enlace hacia arriba"
                   >
-                    {previewState[link.id || `profile-link-${index}`] === "loading" ? (
-                      <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                    ) : null}
-                    {previewState[link.id || `profile-link-${index}`] === "loading"
-                      ? "Obteniendo…"
-                      : "Obtener vista previa"}
+                    <ArrowUp className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    disabled={index === links.length - 1}
+                    onClick={() => moveLink(index, "down")}
+                    aria-label="Mover enlace hacia abajo"
+                  >
+                    <ArrowDown className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="text-destructive hover:text-destructive"
+                    onClick={() => removeLink(index)}
+                    aria-label="Eliminar enlace"
+                  >
+                    <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
-
-
-                <div className="flex items-center justify-between rounded-xl border border-stone-200 bg-stone-50 p-3">
-                  <Label htmlFor={`link-enabled-${link.id || index}`}>Mostrar enlace</Label>
-                  <Switch
-                    id={`link-enabled-${link.id || index}`}
-                    checked={!!link.enabled}
-                    onCheckedChange={(checked) => updateLink(index, { enabled: checked })}
-                  />
-                </div>
-
-                {cardPresentationEnabled ? (() => {
-                  const presentation = getBasicLinkPresentation(profile, link);
-                  const card = presentation.card;
-                  const isCard = presentation.presentation === "card";
-
-                  return (
-                    <div className="space-y-4 rounded-xl border border-stone-200 bg-[#fffefa] p-3">
-                      <div className="flex items-center justify-between gap-4">
-                        <div className="space-y-1">
-                          <Label htmlFor={`link-card-${link.id || index}`}>Convertir en tarjeta</Label>
-                          <p className="text-xs text-stone-500">
-                            Mantiene este mismo enlace y su destino.
-                          </p>
-                        </div>
-                        <Switch
-                          id={`link-card-${link.id || index}`}
-                          checked={isCard}
-                          onCheckedChange={(checked) =>
-                            updateCardPresentation(index, {
-                              presentation: checked ? "card" : "button",
-                            })
-                          }
-                        />
-                      </div>
-
-                      {isCard ? (
-                        <div className="space-y-4 border-t border-stone-200 pt-4">
-                          <div className="space-y-2">
-                            <Label htmlFor={`card-title-${link.id || index}`}>Título de tarjeta</Label>
-                            <Input
-                              id={`card-title-${link.id || index}`}
-                              value={card.title}
-                              onChange={(event) =>
-                                updateCardPresentation(index, {
-                                  card: { title: event.target.value },
-                                })
-                              }
-                              placeholder="Ej: Reserva tu hora"
-                              maxLength={BASIC_CARD_TITLE_MAX_LENGTH}
-                              className="h-11 rounded-xl border-stone-200 bg-[#fffefa]"
-                            />
-                            <p className="text-right text-xs tabular-nums text-stone-500">
-                              {card.title.length}/{BASIC_CARD_TITLE_MAX_LENGTH}
-                            </p>
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor={`card-description-${link.id || index}`}>Descripción</Label>
-                            <Input
-                              id={`card-description-${link.id || index}`}
-                              value={card.description || ""}
-                              onChange={(event) =>
-                                updateCardPresentation(index, {
-                                  card: { description: event.target.value },
-                                })
-                              }
-                              placeholder="Una descripción breve"
-                              maxLength={BASIC_CARD_DESCRIPTION_MAX_LENGTH}
-                              className="h-11 rounded-xl border-stone-200 bg-[#fffefa]"
-                            />
-                            <p className="text-right text-xs tabular-nums text-stone-500">
-                              {(card.description || "").length}/{BASIC_CARD_DESCRIPTION_MAX_LENGTH}
-                            </p>
-                          </div>
-                          <div className="grid grid-cols-1 gap-4 min-[420px]:grid-cols-2">
-                            <div className="space-y-2">
-                              <Label htmlFor={`card-cta-${link.id || index}`}>Llamada a la acción</Label>
-                              <select
-                                id={`card-cta-${link.id || index}`}
-                                value={card.ctaLabel}
-                                onChange={(event) =>
-                                  updateCardPresentation(index, {
-                                    card: { ctaLabel: event.target.value as CardCtaLabel },
-                                  })
-                                }
-                                className="h-11 w-full rounded-xl border border-stone-200 bg-[#fffefa] px-3 text-sm text-[#1d1d1b]"
-                              >
-                                {BASIC_CARD_CTA_PRESETS.map((cta) => (
-                                  <option key={cta} value={cta}>
-                                    {cta}
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
-                            <div className="space-y-2">
-                              <Label htmlFor={`card-corners-${link.id || index}`}>Esquinas</Label>
-                              <select
-                                id={`card-corners-${link.id || index}`}
-                                value={card.cornerStyle}
-                                onChange={(event) =>
-                                  updateCardPresentation(index, {
-                                    card: { cornerStyle: event.target.value as CardCornerStyle },
-                                  })
-                                }
-                                className="h-11 w-full rounded-xl border border-stone-200 bg-[#fffefa] px-3 text-sm text-[#1d1d1b]"
-                              >
-                                <option value="soft">Suaves</option>
-                                <option value="square">Cuadradas</option>
-                              </select>
-                            </div>
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor={`card-media-${link.id || index}`}>Media de tarjeta</Label>
-                            <select
-                              id={`card-media-${link.id || index}`}
-                              value={card.mediaMode}
-                              onChange={(event) =>
-                                updateCardPresentation(index, {
-                                  card: { mediaMode: event.target.value as CardMediaMode },
-                                })
-                              }
-                              className="h-11 w-full rounded-xl border border-stone-200 bg-[#fffefa] px-3 text-sm text-[#1d1d1b]"
-                            >
-                              <option value="platform_icon">Icono de plataforma</option>
-                              <option value="image">Imagen subida</option>
-                              <option value="none">Sin media</option>
-                            </select>
-                          </div>
-                          {card.mediaMode !== "none" ? (
-                            <div className="space-y-2">
-                              <Label htmlFor={`card-media-position-${link.id || index}`}>
-                                Posición de media
-                              </Label>
-                              <select
-                                id={`card-media-position-${link.id || index}`}
-                                value={card.mediaPosition}
-                                onChange={(event) =>
-                                  updateCardPresentation(index, {
-                                    card: {
-                                      mediaPosition: event.target.value as CardMediaPosition,
-                                    },
-                                  })
-                                }
-                                className="h-11 w-full rounded-xl border border-stone-200 bg-[#fffefa] px-3 text-sm text-[#1d1d1b]"
-                              >
-                                <option value="right">Derecha</option>
-                                <option value="bottom">Abajo</option>
-                              </select>
-                            </div>
-                          ) : null}
-                          {card.mediaMode === "image" ? (
-                            <>
-                              <div className="space-y-2">
-                                <Label htmlFor={`card-image-${link.id || index}`}>Imagen</Label>
-                                <Input
-                                  id={`card-image-${link.id || index}`}
-                                  type="file"
-                                  accept="image/png,image/jpeg,image/webp"
-                                  onChange={(event) => handleCardImageUpload(index, event)}
-                                  disabled={uploadingCardImage === index}
-                                  className="h-11"
-                                />
-                                {uploadingCardImage === index ? (
-                                  <p className="flex items-center gap-2 text-xs text-stone-500" role="status">
-                                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                    Subiendo imagen...
-                                  </p>
-                                ) : card.imageUrl ? (
-                                  <p className="text-xs text-stone-500">Imagen lista para guardar.</p>
-                                ) : (
-                                  <p className="text-xs text-amber-700">Sube una imagen para usar este modo.</p>
-                                )}
-                              </div>
-                              <div className="space-y-2">
-                                <div className="flex items-center justify-between gap-3">
-                                  <Label htmlFor={`card-focal-${link.id || index}`}>Encuadre de imagen</Label>
-                                  <span className="text-xs tabular-nums text-stone-500">{card.focalY}%</span>
-                                </div>
-                                <Input
-                                  id={`card-focal-${link.id || index}`}
-                                  type="range"
-                                  min={0}
-                                  max={100}
-                                  step={1}
-                                  value={card.focalY}
-                                  onChange={(event) =>
-                                    updateCardPresentation(index, {
-                                      card: { focalY: Number(event.target.value) },
-                                    })
-                                  }
-                                  className="h-8 accent-[#1d1d1b]"
-                                />
-                                <div className="flex justify-between text-[11px] text-stone-500">
-                                  <span>Arriba</span>
-                                  <span>Centro</span>
-                                  <span>Abajo</span>
-                                </div>
-                              </div>
-                            </>
-                          ) : null}
-                        </div>
-                      ) : null}
-                    </div>
-                  );
-                })() : null}
               </div>
-            ) : null}
-          </div>
+
+              {isOpen ? (
+                <div id={contentId} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor={`link-platform-${link.id || index}`}>
+                      Red o tipo de enlace
+                    </Label>
+                    <PlatformPicker
+                      value={normalizeBasicPlatform(link.platform) || "website"}
+                      onChange={(platform) => handlePlatformChange(index, platform)}
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor={`link-label-${link.id || index}`}>Texto</Label>
+                      <Input
+                        id={`link-label-${link.id || index}`}
+                        value={link.label || ""}
+                        onChange={(event) => updateLink(index, { label: event.target.value })}
+                        placeholder="Ej: Instagram"
+                        className="h-11 rounded-xl border-stone-200 bg-[#fffefa]"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor={`link-url-${link.id || index}`}>URL</Label>
+                      <Input
+                        id={`link-url-${link.id || index}`}
+                        value={link.url || ""}
+                        onChange={(event) => updateLinkUrl(index, event.target.value)}
+                        placeholder="https://..."
+                        className="h-11 rounded-xl border-stone-200 bg-[#fffefa]"
+                        dir="ltr"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-3 rounded-xl border border-stone-200 bg-[#fffefa] p-3">
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium text-[#1d1d1b]">Vista previa del enlace</p>
+                      <p className="mt-0.5 truncate text-[11px] text-stone-500">
+                        {(() => {
+                          const state = previewState[link.id || `profile-link-${index}`];
+                          if (state === "loading") return "Obteniendo vista previa…";
+                          if (state === "full") return "Vista previa encontrada";
+                          if (state === "partial") return "Vista previa parcial";
+                          if (state === "fallback") return "Enlace reconocido";
+                          if (state === "error")
+                            return "No pudimos obtener una imagen, pero el enlace seguirá funcionando.";
+                          return "Reconoce el destino y rellena la tarjeta automáticamente.";
+                        })()}
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => handleFetchPreview(index)}
+                      disabled={previewState[link.id || `profile-link-${index}`] === "loading"}
+                      className="h-9 shrink-0 rounded-full border-stone-200"
+                    >
+                      {previewState[link.id || `profile-link-${index}`] === "loading" ? (
+                        <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                      ) : null}
+                      {previewState[link.id || `profile-link-${index}`] === "loading"
+                        ? "Obteniendo…"
+                        : "Obtener vista previa"}
+                    </Button>
+                  </div>
+
+                  <div className="flex items-center justify-between rounded-xl border border-stone-200 bg-stone-50 p-3">
+                    <Label htmlFor={`link-enabled-${link.id || index}`}>Mostrar enlace</Label>
+                    <Switch
+                      id={`link-enabled-${link.id || index}`}
+                      checked={!!link.enabled}
+                      onCheckedChange={(checked) => updateLink(index, { enabled: checked })}
+                    />
+                  </div>
+
+                  {cardPresentationEnabled
+                    ? (() => {
+                        const presentation = getBasicLinkPresentation(profile, link);
+                        const card = presentation.card;
+                        const isCard = presentation.presentation === "card";
+
+                        return (
+                          <div className="space-y-4 rounded-xl border border-stone-200 bg-[#fffefa] p-3">
+                            <div className="flex items-center justify-between gap-4">
+                              <div className="space-y-1">
+                                <Label htmlFor={`link-card-${link.id || index}`}>
+                                  Convertir en tarjeta
+                                </Label>
+                                <p className="text-xs text-stone-500">
+                                  Mantiene este mismo enlace y su destino.
+                                </p>
+                              </div>
+                              <Switch
+                                id={`link-card-${link.id || index}`}
+                                checked={isCard}
+                                onCheckedChange={(checked) =>
+                                  updateCardPresentation(index, {
+                                    presentation: checked ? "card" : "button",
+                                  })
+                                }
+                              />
+                            </div>
+
+                            {isCard ? (
+                              <div className="space-y-4 border-t border-stone-200 pt-4">
+                                <div className="space-y-2">
+                                  <Label htmlFor={`card-title-${link.id || index}`}>
+                                    Título de tarjeta
+                                  </Label>
+                                  <Input
+                                    id={`card-title-${link.id || index}`}
+                                    value={card.title}
+                                    onChange={(event) =>
+                                      updateCardPresentation(index, {
+                                        card: { title: event.target.value },
+                                      })
+                                    }
+                                    placeholder="Ej: Reserva tu hora"
+                                    maxLength={BASIC_CARD_TITLE_MAX_LENGTH}
+                                    className="h-11 rounded-xl border-stone-200 bg-[#fffefa]"
+                                  />
+                                  <p className="text-right text-xs tabular-nums text-stone-500">
+                                    {card.title.length}/{BASIC_CARD_TITLE_MAX_LENGTH}
+                                  </p>
+                                </div>
+                                <div className="space-y-2">
+                                  <Label htmlFor={`card-description-${link.id || index}`}>
+                                    Descripción
+                                  </Label>
+                                  <Input
+                                    id={`card-description-${link.id || index}`}
+                                    value={card.description || ""}
+                                    onChange={(event) =>
+                                      updateCardPresentation(index, {
+                                        card: { description: event.target.value },
+                                      })
+                                    }
+                                    placeholder="Una descripción breve"
+                                    maxLength={BASIC_CARD_DESCRIPTION_MAX_LENGTH}
+                                    className="h-11 rounded-xl border-stone-200 bg-[#fffefa]"
+                                  />
+                                  <p className="text-right text-xs tabular-nums text-stone-500">
+                                    {(card.description || "").length}/
+                                    {BASIC_CARD_DESCRIPTION_MAX_LENGTH}
+                                  </p>
+                                </div>
+                                <div className="grid grid-cols-1 gap-4 min-[420px]:grid-cols-2">
+                                  <div className="space-y-2">
+                                    <Label htmlFor={`card-cta-${link.id || index}`}>
+                                      Llamada a la acción
+                                    </Label>
+                                    <select
+                                      id={`card-cta-${link.id || index}`}
+                                      value={card.ctaLabel}
+                                      onChange={(event) =>
+                                        updateCardPresentation(index, {
+                                          card: { ctaLabel: event.target.value as CardCtaLabel },
+                                        })
+                                      }
+                                      className="h-11 w-full rounded-xl border border-stone-200 bg-[#fffefa] px-3 text-sm text-[#1d1d1b]"
+                                    >
+                                      {BASIC_CARD_CTA_PRESETS.map((cta) => (
+                                        <option key={cta} value={cta}>
+                                          {cta}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                  <div className="space-y-2">
+                                    <Label htmlFor={`card-corners-${link.id || index}`}>
+                                      Esquinas
+                                    </Label>
+                                    <select
+                                      id={`card-corners-${link.id || index}`}
+                                      value={card.cornerStyle}
+                                      onChange={(event) =>
+                                        updateCardPresentation(index, {
+                                          card: {
+                                            cornerStyle: event.target.value as CardCornerStyle,
+                                          },
+                                        })
+                                      }
+                                      className="h-11 w-full rounded-xl border border-stone-200 bg-[#fffefa] px-3 text-sm text-[#1d1d1b]"
+                                    >
+                                      <option value="soft">Suaves</option>
+                                      <option value="square">Cuadradas</option>
+                                    </select>
+                                  </div>
+                                </div>
+                                <div className="space-y-2">
+                                  <Label htmlFor={`card-media-${link.id || index}`}>
+                                    Media de tarjeta
+                                  </Label>
+                                  <select
+                                    id={`card-media-${link.id || index}`}
+                                    value={card.mediaMode}
+                                    onChange={(event) =>
+                                      updateCardPresentation(index, {
+                                        card: { mediaMode: event.target.value as CardMediaMode },
+                                      })
+                                    }
+                                    className="h-11 w-full rounded-xl border border-stone-200 bg-[#fffefa] px-3 text-sm text-[#1d1d1b]"
+                                  >
+                                    <option value="platform_icon">Icono de plataforma</option>
+                                    <option value="image">Imagen subida</option>
+                                    <option value="none">Sin media</option>
+                                  </select>
+                                </div>
+                                {card.mediaMode !== "none" ? (
+                                  <div className="space-y-2">
+                                    <Label htmlFor={`card-media-position-${link.id || index}`}>
+                                      Posición de media
+                                    </Label>
+                                    <select
+                                      id={`card-media-position-${link.id || index}`}
+                                      value={card.mediaPosition}
+                                      onChange={(event) =>
+                                        updateCardPresentation(index, {
+                                          card: {
+                                            mediaPosition: event.target.value as CardMediaPosition,
+                                          },
+                                        })
+                                      }
+                                      className="h-11 w-full rounded-xl border border-stone-200 bg-[#fffefa] px-3 text-sm text-[#1d1d1b]"
+                                    >
+                                      <option value="right">Derecha</option>
+                                      <option value="bottom">Abajo</option>
+                                    </select>
+                                  </div>
+                                ) : null}
+                                {card.mediaMode === "image" ? (
+                                  <>
+                                    <div className="space-y-2">
+                                      <Label htmlFor={`card-image-${link.id || index}`}>
+                                        Imagen
+                                      </Label>
+                                      <Input
+                                        id={`card-image-${link.id || index}`}
+                                        type="file"
+                                        accept="image/png,image/jpeg,image/webp"
+                                        onChange={(event) => handleCardImageUpload(index, event)}
+                                        disabled={uploadingCardImage === index}
+                                        className="h-11"
+                                      />
+                                      {uploadingCardImage === index ? (
+                                        <p
+                                          className="flex items-center gap-2 text-xs text-stone-500"
+                                          role="status"
+                                        >
+                                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                          Subiendo imagen...
+                                        </p>
+                                      ) : card.imageUrl ? (
+                                        <p className="text-xs text-stone-500">
+                                          Imagen lista para guardar.
+                                        </p>
+                                      ) : (
+                                        <p className="text-xs text-amber-700">
+                                          Sube una imagen para usar este modo.
+                                        </p>
+                                      )}
+                                    </div>
+                                    <div className="space-y-2">
+                                      <div className="flex items-center justify-between gap-3">
+                                        <Label htmlFor={`card-focal-${link.id || index}`}>
+                                          Encuadre de imagen
+                                        </Label>
+                                        <span className="text-xs tabular-nums text-stone-500">
+                                          {card.focalY}%
+                                        </span>
+                                      </div>
+                                      <Input
+                                        id={`card-focal-${link.id || index}`}
+                                        type="range"
+                                        min={0}
+                                        max={100}
+                                        step={1}
+                                        value={card.focalY}
+                                        onChange={(event) =>
+                                          updateCardPresentation(index, {
+                                            card: { focalY: Number(event.target.value) },
+                                          })
+                                        }
+                                        className="h-8 accent-[#1d1d1b]"
+                                      />
+                                      <div className="flex justify-between text-[11px] text-stone-500">
+                                        <span>Arriba</span>
+                                        <span>Centro</span>
+                                        <span>Abajo</span>
+                                      </div>
+                                    </div>
+                                  </>
+                                ) : null}
+                              </div>
+                            ) : null}
+                          </div>
+                        );
+                      })()
+                    : null}
+                </div>
+              ) : null}
+            </div>
           );
         })}
       </div>

@@ -30,15 +30,27 @@ describe("Autosave / Save Coordinator — revision + dirty state (Phase Autosave
 
   it("markSaved for the current revision clears dirty", () => {
     let state = createInitialState(config);
-    state = templateReducer(state, { type: "patch", path: "theme.colors.primary", value: "#ff0000" });
+    state = templateReducer(state, {
+      type: "patch",
+      path: "theme.colors.primary",
+      value: "#ff0000",
+    });
     state = templateReducer(state, { type: "markSaved", revision: 1 });
     expect(state.dirty).toBe(false);
   });
 
   it("markSaved for a stale revision does not clear dirty when newer edits exist", () => {
     let state = createInitialState(config);
-    state = templateReducer(state, { type: "patch", path: "theme.colors.primary", value: "#ff0000" }); // rev 1
-    state = templateReducer(state, { type: "patch", path: "theme.colors.accent", value: "#00ff00" }); // rev 2
+    state = templateReducer(state, {
+      type: "patch",
+      path: "theme.colors.primary",
+      value: "#ff0000",
+    }); // rev 1
+    state = templateReducer(state, {
+      type: "patch",
+      path: "theme.colors.accent",
+      value: "#00ff00",
+    }); // rev 2
     state = templateReducer(state, { type: "markSaved", revision: 1 }); // stale rev-1 save completes late
     expect(state.dirty).toBe(true); // rev 2 still unsaved
     expect(state.revision).toBe(2);
@@ -46,14 +58,22 @@ describe("Autosave / Save Coordinator — revision + dirty state (Phase Autosave
 
   it("markSaved with no revision (legacy) clears dirty", () => {
     let state = createInitialState(config);
-    state = templateReducer(state, { type: "patch", path: "theme.colors.primary", value: "#ff0000" });
+    state = templateReducer(state, {
+      type: "patch",
+      path: "theme.colors.primary",
+      value: "#ff0000",
+    });
     state = templateReducer(state, { type: "markSaved" });
     expect(state.dirty).toBe(false);
   });
 
   it("undo and redo are document mutations that increment revision and dirty", () => {
     let state = createInitialState(config);
-    state = templateReducer(state, { type: "patch", path: "theme.colors.primary", value: "#ff0000" }); // rev 1
+    state = templateReducer(state, {
+      type: "patch",
+      path: "theme.colors.primary",
+      value: "#ff0000",
+    }); // rev 1
     state = templateReducer(state, { type: "undo" }); // rev 2
     expect(state.dirty).toBe(true);
     expect(state.revision).toBe(2);
@@ -63,7 +83,11 @@ describe("Autosave / Save Coordinator — revision + dirty state (Phase Autosave
 
   it("replaceConfig resetHistory resets revision and dirty (document switch)", () => {
     let state = createInitialState(config);
-    state = templateReducer(state, { type: "patch", path: "theme.colors.primary", value: "#ff0000" }); // rev 1
+    state = templateReducer(state, {
+      type: "patch",
+      path: "theme.colors.primary",
+      value: "#ff0000",
+    }); // rev 1
     state = templateReducer(state, {
       type: "replaceConfig",
       config: createDemoConfig(),

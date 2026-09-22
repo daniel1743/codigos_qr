@@ -25,6 +25,7 @@ the canonical config instead of a durable uploaded asset URL.
 ## TRACE
 
 ### Avatar
+
 1. file selection → `AssetField` input (`Inspector.tsx`, `accept="image/*"`).
 2. `adapters.assets.upload(file)` → `objectUrlAssetAdapter` → `blob:` URL.
 3. `onChange(asset.url)` → `patch("profile.avatarUrl", blobUrl)`.
@@ -32,6 +33,7 @@ the canonical config instead of a durable uploaded asset URL.
 5. reload → `img src="blob:…"` → broken.
 
 ### Banner
+
 Identical path: `patch("profile.banner.imageUrl", blobUrl)`.
 
 ## ANSWERS

@@ -53,4 +53,3 @@ export function createPageStorageAdapter(options: PageStorageAdapterOptions): St
     },
   };
 }
-

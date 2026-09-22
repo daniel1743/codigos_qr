@@ -37,10 +37,7 @@ describe("Power Media Card smart-link bridge", () => {
       imageUrl: "https://example.test/thumb.jpg",
       status: "full",
     };
-    const patch = computePowerMediaCardPatch(
-      { label: "", description: "", imageUrl: "" },
-      preview,
-    );
+    const patch = computePowerMediaCardPatch({ label: "", description: "", imageUrl: "" }, preview);
     expect(patch.label).toBe("Example video");
     expect(patch.imageUrl).toBe("https://example.test/thumb.jpg");
   });
@@ -88,10 +85,7 @@ describe("Power Media Card smart-link bridge", () => {
       title: "Example site",
       status: "partial",
     };
-    const patch = computePowerMediaCardPatch(
-      { label: "", description: "", imageUrl: "" },
-      preview,
-    );
+    const patch = computePowerMediaCardPatch({ label: "", description: "", imageUrl: "" }, preview);
     expect(patch.label).toBe("Example site");
     expect(patch.imageUrl).toBeUndefined();
   });

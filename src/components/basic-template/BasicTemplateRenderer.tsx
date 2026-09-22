@@ -1,8 +1,5 @@
 import type { ComponentType } from "react";
-import type {
-  BasicTemplateRendererProps,
-  TemplateFamily,
-} from "@/types/basic-templates";
+import type { BasicTemplateRendererProps, TemplateFamily } from "@/types/basic-templates";
 import { CorporateRenderer } from "./renderers/CorporateRenderer";
 import { HeroCardsRenderer } from "./renderers/HeroCardsRenderer";
 import { HeroProfileRenderer } from "./renderers/HeroProfileRenderer";

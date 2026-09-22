@@ -1,4 +1,12 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from "react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -373,7 +381,10 @@ export function PremiumOnboardingFlow({
           return updateProduct(current, target.localId, { media: [reference] });
         return updatePortfolioItem(current, target.localId, { media: [reference] });
       });
-      patchDraft((current) => ({ ...current, media: { ...current.media, preference: "own_media" } }));
+      patchDraft((current) => ({
+        ...current,
+        media: { ...current.media, preference: "own_media" },
+      }));
       setMediaUploadState(target, { status: "uploaded", fileName: file.name });
       setFieldError(null);
     } catch (error: unknown) {
@@ -385,15 +396,17 @@ export function PremiumOnboardingFlow({
     }
   };
 
-  const removeMedia = async (target: MediaTarget, reference: Parameters<typeof removeOwnerMediaReference>[1]) => {
+  const removeMedia = async (
+    target: MediaTarget,
+    reference: Parameters<typeof removeOwnerMediaReference>[1],
+  ) => {
     setMediaUploadState(target, { status: "uploading", fileName: "Quitando imagen" });
     try {
       await removeOwnerMediaReference(getBrowserSupabaseClient(), reference, mediaSlot(target));
       setIntake((current) => {
         if (target.kind === "avatar") return setAvatar(current, null);
         if (target.kind === "cover") return setCover(current, null);
-        if (target.kind === "product")
-          return updateProduct(current, target.localId, { media: [] });
+        if (target.kind === "product") return updateProduct(current, target.localId, { media: [] });
         return updatePortfolioItem(current, target.localId, { media: [] });
       });
       setMediaUploadState(target, { status: "idle" });
@@ -434,14 +447,22 @@ export function PremiumOnboardingFlow({
    */
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== "Enter" || event.isComposing || event.shiftKey || event.ctrlKey || event.altKey || event.metaKey)
+      if (
+        event.key !== "Enter" ||
+        event.isComposing ||
+        event.shiftKey ||
+        event.ctrlKey ||
+        event.altKey ||
+        event.metaKey
+      )
         return;
       if (phase !== "onboarding" || inspectorOpen) return;
       if (Object.values(mediaUploads).some((upload) => upload.status === "uploading")) return;
       const target = event.target;
       if (!(target instanceof HTMLElement)) return;
       if (target !== document.body && !target.closest(".premium-onboarding")) return;
-      if (target.closest(".gi-floating-btn, .gi-drawer, [role=dialog], dialog, [aria-modal=true]")) return;
+      if (target.closest(".gi-floating-btn, .gi-drawer, [role=dialog], dialog, [aria-modal=true]"))
+        return;
       if (target.closest(".premium-onboarding__footer")) return;
       if (target instanceof HTMLTextAreaElement || target.isContentEditable) return;
       if (target instanceof HTMLInputElement && target.type === "file") return;
@@ -449,7 +470,9 @@ export function PremiumOnboardingFlow({
       if (step === STEP_LABELS.length - 1) finishRef.current();
       else goNext();
       window.setTimeout(() => {
-        const error = document.querySelector<HTMLElement>('.premium-onboarding__error[role="alert"]');
+        const error = document.querySelector<HTMLElement>(
+          '.premium-onboarding__error[role="alert"]',
+        );
         error?.focus();
       }, 0);
     };
@@ -465,36 +488,30 @@ export function PremiumOnboardingFlow({
     setPersistenceError(null);
     void getBrowserSupabaseClient()
       .auth.getSession()
-      .then(
-        ({
-          data: { session },
-        }: {
-          data: { session: { access_token?: string } | null };
-        }) => {
-          if (!session?.access_token) {
-            throw new Error("Debes iniciar sesión para guardar tu página.");
-          }
-          const pageType = result.plan.experienceType;
-          if (pageType === "listings") {
-            throw new Error("Esta experiencia todavía no puede guardarse como página.");
-          }
-          return persistPremiumOnboardingGeneratedPageFn({
-            data: {
-              profileId: profileId?.trim() ?? "",
-              editorConfig: result.result.editorConfig,
-              title: result.plan.title,
-              pageType,
-              generation: {
-                candidateId: result.result.generation.candidateId,
-                score: result.result.generation.score,
-                family: result.result.generation.family,
-                layout: result.result.generation.layout,
-              },
-              accessToken: session.access_token,
+      .then(({ data: { session } }: { data: { session: { access_token?: string } | null } }) => {
+        if (!session?.access_token) {
+          throw new Error("Debes iniciar sesión para guardar tu página.");
+        }
+        const pageType = result.plan.experienceType;
+        if (pageType === "listings") {
+          throw new Error("Esta experiencia todavía no puede guardarse como página.");
+        }
+        return persistPremiumOnboardingGeneratedPageFn({
+          data: {
+            profileId: profileId?.trim() ?? "",
+            editorConfig: result.result.editorConfig,
+            title: result.plan.title,
+            pageType,
+            generation: {
+              candidateId: result.result.generation.candidateId,
+              score: result.result.generation.score,
+              family: result.result.generation.family,
+              layout: result.result.generation.layout,
             },
-          });
-        },
-      )
+            accessToken: session.access_token,
+          },
+        });
+      })
       .then((persisted: PersistPremiumOnboardingGeneratedPageResult) => {
         if (persisted.status !== "PERSISTED") {
           setPersistenceError(persisted.error);
@@ -567,7 +584,7 @@ export function PremiumOnboardingFlow({
     setTimeout(() => {
       const now = new Date().toISOString();
       const call = enableInspector
-          ? generateSmartPageWithTraceFn({ data: { intent: nextIntent, ownerContent, now } }).then(
+        ? generateSmartPageWithTraceFn({ data: { intent: nextIntent, ownerContent, now } }).then(
             (inspector) => {
               blackBoxTraceId.current = inspector.trace.traceId;
               if (!inspector.generation.ok) {
@@ -1206,11 +1223,7 @@ function MediaUploadField({
   return (
     <div className="premium-onboarding__media-card">
       <div className="premium-onboarding__media-icon">
-        {media ? (
-          <img src={media.url} alt={media.alt ?? label} />
-        ) : (
-          <Upload size={24} />
-        )}
+        {media ? <img src={media.url} alt={media.alt ?? label} /> : <Upload size={24} />}
       </div>
       <div className="premium-onboarding__media-copy">
         <strong>{label}</strong>
@@ -1226,7 +1239,11 @@ function MediaUploadField({
       <div className="premium-onboarding__media-actions">
         <label className="premium-button premium-button--quiet premium-file-button">
           <Upload size={16} />
-          {media ? "Reemplazar" : uploadState?.status === "failed" ? "Reintentar" : "Elegir archivo"}
+          {media
+            ? "Reemplazar"
+            : uploadState?.status === "failed"
+              ? "Reintentar"
+              : "Elegir archivo"}
           <input
             type="file"
             accept={OWNER_MEDIA_ACCEPT}
@@ -1715,7 +1732,8 @@ function OfferCard({
   mediaUpload?: MediaUploadState | undefined;
   mediaTarget?: MediaTarget | undefined;
   onUpload?: ((target: MediaTarget, file: File) => void) | undefined;
-  onMediaRemove?: ((target: MediaTarget, reference: OwnerMediaReference | undefined) => void) | undefined;
+  onMediaRemove?:
+    ((target: MediaTarget, reference: OwnerMediaReference | undefined) => void) | undefined;
   onChange: (patch: OfferPatch) => void;
   onRemove: () => void;
 }) {

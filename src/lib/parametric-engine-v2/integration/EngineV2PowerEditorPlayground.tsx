@@ -171,14 +171,16 @@ function PreviewMeta({ preview }: { preview: EngineV2PlaygroundPreview }) {
       <div>
         <dt className="font-semibold text-slate-100">Top composition</dt>
         <dd>
-          {preview.candidate.recipe.semantics.top_signature} · {preview.candidate.recipe.layout.header} · banner{" "}
+          {preview.candidate.recipe.semantics.top_signature} ·{" "}
+          {preview.candidate.recipe.layout.header} · banner{" "}
           {preview.candidate.recipe.banner.enabled ? "on" : "off"}
         </dd>
       </div>
       <div>
         <dt className="font-semibold text-slate-100">Typography</dt>
         <dd>
-          {preview.candidate.recipe.visual.typography.headingFont} / {preview.candidate.recipe.visual.typography.bodyFont}
+          {preview.candidate.recipe.visual.typography.headingFont} /{" "}
+          {preview.candidate.recipe.visual.typography.bodyFont}
         </dd>
       </div>
       <div>

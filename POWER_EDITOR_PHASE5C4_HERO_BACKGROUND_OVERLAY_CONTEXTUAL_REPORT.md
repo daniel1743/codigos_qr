@@ -247,6 +247,7 @@ New: `src/premium-template-studio/__tests__/heroBackgroundContextual.test.tsx`
 - foreground image click resolves as hero-image, never background
 
 Regression (run, PASS):
+
 - `heroBackgroundContextual` (14)
 - `heroImageContextual` (8)
 - `heroTextContextual` (8)

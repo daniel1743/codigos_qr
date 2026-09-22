@@ -3,6 +3,19 @@ import { SCHEMA_VERSION } from "../types";
 import { BlockRegistry } from "./BlockRegistry";
 import { isValidUrl } from "../utils";
 
+/** Returns stable paths for stock references that must be replaced before publish. */
+export function findReferenceStockImages(config: BioTemplateConfig): string[] {
+  const paths: string[] = [];
+  config.blocks.forEach((block, blockIndex) => {
+    block.content.products?.forEach((product, productIndex) => {
+      if (product.imageProvenance?.origin === "reference_stock") {
+        paths.push(`blocks[${blockIndex}].content.products[${productIndex}].imageUrl`);
+      }
+    });
+  });
+  return paths;
+}
+
 function validateMediaProvenance(
   value: unknown,
   path: string,
@@ -14,17 +27,21 @@ function validateMediaProvenance(
   }
   const provenance = value as Record<string, unknown>;
   const origin = provenance.origin;
-  if (origin !== "owner" && origin !== "contextual_stock" && origin !== "legacy_unknown")
+  if (origin !== "owner" && origin !== "reference_stock" && origin !== "legacy_unknown")
     push("error", `${path}.origin`, "Unknown media provenance origin.");
   const provider = provenance.provider;
   if (provider !== undefined && provider !== "unsplash" && provider !== "pexels")
     push("error", `${path}.provider`, "Unknown contextual media provider.");
-  if (origin === "contextual_stock" && provider !== "unsplash" && provider !== "pexels")
-    push("error", `${path}.provider`, "Contextual stock media requires Unsplash or Pexels.");
+  if (origin === "reference_stock" && provider !== "unsplash" && provider !== "pexels")
+    push("error", `${path}.provider`, "Reference stock media requires Unsplash or Pexels.");
   if (origin === "owner" && provider !== undefined)
     push("error", `${path}.provider`, "Owner media cannot declare a stock provider.");
   for (const key of [
-    "providerAssetId", "sourcePageUrl", "creatorName", "creatorUrl", "attributionText",
+    "providerAssetId",
+    "sourcePageUrl",
+    "creatorName",
+    "creatorUrl",
+    "attributionText",
   ]) {
     if (provenance[key] !== undefined && typeof provenance[key] !== "string")
       push("error", `${path}.${key}`, "Media provenance text fields must be strings.");
@@ -120,6 +137,15 @@ export function validateTemplate(input: unknown): ValidationResult {
       }
       validateHeroMedia(block.content?.bannerImage, `${path}.content.bannerImage`, push);
       validateHeroMedia(block.content?.backgroundImage, `${path}.content.backgroundImage`, push);
+      block.content?.products?.forEach((product, itemIndex) => {
+        if (product.imageProvenance !== undefined) {
+          validateMediaProvenance(
+            product.imageProvenance,
+            `${path}.content.products[${itemIndex}].imageProvenance`,
+            push,
+          );
+        }
+      });
     });
   }
 

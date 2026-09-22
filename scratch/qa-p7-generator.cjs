@@ -74,7 +74,12 @@ async function signIn(context) {
   try {
     await page.waitForSelector("#email", { timeout: 30000 });
   } catch {}
-  if (await page.locator("#email").isVisible().catch(() => false)) {
+  if (
+    await page
+      .locator("#email")
+      .isVisible()
+      .catch(() => false)
+  ) {
     await page.locator("#email").fill(env.QA_EMAIL);
     await page.locator("#password").fill(env.QA_PASSWORD);
     await page.getByRole("button", { name: "Entrar al editor" }).click();
@@ -190,7 +195,7 @@ async function pickObjective(page, objective) {
   await page.waitForTimeout(2500);
 
   const rows = (await rest(`/pages?select=*&title=eq.${encodeURIComponent(QA_TITLE)}`)).payload;
-  const created = Array.isArray(rows) ? rows[0]: null;
+  const created = Array.isArray(rows) ? rows[0] : null;
   createdPageId = created?.id ?? null;
   out.generation = {
     editor_mounted: editorMounted,
@@ -407,8 +412,6 @@ async function pickObjective(page, objective) {
     await mobilePublic.close();
     await mobileContext.close();
   }
-
-
 
   // ------------------------------------------------- 10. regression checks
   const profileAfter = await profileByPublicId(PROFILE_PUBLIC_ID);

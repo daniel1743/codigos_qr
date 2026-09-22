@@ -8,10 +8,10 @@
 
 Secret values were not printed or inspected beyond presence checks.
 
-| Provider | Environment variable | Status |
-|---|---|---|
+| Provider | Environment variable  | Status      |
+| -------- | --------------------- | ----------- |
 | Unsplash | `UNSPLASH_ACCESS_KEY` | `CONNECTED` |
-| Pexels | `PEXELS_API_KEY` | `CONNECTED` |
+| Pexels   | `PEXELS_API_KEY`      | `CONNECTED` |
 
 ## Live provider verification
 

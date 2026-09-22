@@ -96,7 +96,10 @@ export function runEngineSelfCheckV15(): SelfCheckV15Result {
     "future_capabilities_default_off",
     Object.values(DEFAULT_FUTURE_CAPABILITIES).every((v) => v === false),
   );
-  add("responsive_dormant", buildResponsiveStrategy("centered_profile", "balanced", resolved.future) === null);
+  add(
+    "responsive_dormant",
+    buildResponsiveStrategy("centered_profile", "balanced", resolved.future) === null,
+  );
   add("motion_dormant", buildMotionStrategy(r1.meta.family, resolved.future) === null);
 
   /* ------------------------------------------------- 6. palettes contrast */
@@ -164,11 +167,7 @@ export function runEngineSelfCheckV15(): SelfCheckV15Result {
 
   /* ------------------------------------------ 10. controls + capabilities */
   const catalog = getEngineControlCatalog();
-  const available = getAvailableControls(
-    resolveCapabilities(),
-    resolved.content,
-    resolved.future,
-  );
+  const available = getAvailableControls(resolveCapabilities(), resolved.content, resolved.future);
   add(
     "controls_capability_gated",
     catalog.length > available.length && available.every((c) => !c.required_future_capability),

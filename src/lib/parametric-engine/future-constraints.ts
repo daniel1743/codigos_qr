@@ -118,7 +118,8 @@ export const FUTURE_BLOCK_CONSTRAINTS: Partial<Record<FutureBlockType, Constrain
 
   booking_widget: ({ content, signals }) => {
     if (!hasContent(content, "booking")) return fail("constraint:booking_surface_missing");
-    if (signals.conversion_mode !== "booking") return fail("constraint:conversion_mode_not_booking");
+    if (signals.conversion_mode !== "booking")
+      return fail("constraint:conversion_mode_not_booking");
     return ok;
   },
 
@@ -130,7 +131,10 @@ export const FUTURE_BLOCK_CONSTRAINTS: Partial<Record<FutureBlockType, Constrain
 
   contact_form: ({ content, signals }) => {
     if (!hasContent(content, "lead_form")) return fail("constraint:lead_form_missing");
-    if (signals.conversion_mode !== "contact" && signals.conversion_mode !== "portfolio_then_contact") {
+    if (
+      signals.conversion_mode !== "contact" &&
+      signals.conversion_mode !== "portfolio_then_contact"
+    ) {
       return fail("constraint:conversion_mode_not_contact");
     }
     return ok;

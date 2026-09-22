@@ -108,13 +108,13 @@ parcial puede conservar el hecho sin prometer que ya está listo para renderizar
 
 `getOwnerContentReadiness()` es condicional y no impone requisitos globales:
 
-| Experiencia | Diagnóstico mínimo |
-| --- | --- |
-| `services` | al menos un servicio con nombre |
-| `catalog` | al menos un producto con nombre |
-| `menu` | al menos un elemento con nombre |
-| `portfolio` | proyecto con nombre y media del propietario |
-| `landing` | identidad + descripción, o contenido compatible |
+| Experiencia | Diagnóstico mínimo                              |
+| ----------- | ----------------------------------------------- |
+| `services`  | al menos un servicio con nombre                 |
+| `catalog`   | al menos un producto con nombre                 |
+| `menu`      | al menos un elemento con nombre                 |
+| `portfolio` | proyecto con nombre y media del propietario     |
+| `landing`   | identidad + descripción, o contenido compatible |
 
 Estos diagnósticos no escriben en base de datos ni sustituyen la validación
 canónica o la validación específica de `/pages/new`.
@@ -173,7 +173,7 @@ sin export `Route` son warnings del repositorio y no fallaron las pruebas.
   parámetro opcional permite que un host futuro los inyecte sin rediseñar las
   pantallas.
 - No se activó todavía el flujo `Onboarding V2 → PageGenerationRequest →
-  Smart Pages`; únicamente se dejó la proyección pura disponible.
+Smart Pages`; únicamente se dejó la proyección pura disponible.
 - `externalUrl` es un hecho de destino del propietario, pero no se convierte
   automáticamente en una acción primaria; esa decisión continúa bajo la
   política CTA del host.

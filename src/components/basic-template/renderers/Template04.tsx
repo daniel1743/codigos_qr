@@ -6,14 +6,7 @@ import type { StandaloneStyle } from "./standaloneStyle";
 /* Template04 — Link-in-bio claro: banner + avatar sobre curva + botones blancos + galería */
 
 export type Template04SocialType =
-  | "instagram"
-  | "pinterest"
-  | "facebook"
-  | "linkedin"
-  | "twitter"
-  | "youtube"
-  | "tiktok"
-  | "email";
+  "instagram" | "pinterest" | "facebook" | "linkedin" | "twitter" | "youtube" | "tiktok" | "email";
 
 export interface Template04Social {
   type: Template04SocialType;
@@ -220,17 +213,17 @@ export default function Template04({
                 boxShadow: "0 8px 20px rgba(0,0,0,.15)",
               }}
             >
-            <img
-              src={avatarUrl}
-              alt={name}
-              style={{
-                width: "100%",
-                height: "100%",
-                borderRadius: "50%",
-                objectFit: "cover",
-                display: "block",
-              }}
-            />
+              <img
+                src={avatarUrl}
+                alt={name}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  borderRadius: "50%",
+                  objectFit: "cover",
+                  display: "block",
+                }}
+              />
             </div>
           </EditableTarget>
         </div>
@@ -321,7 +314,13 @@ export default function Template04({
         </div>
 
         {/* Botones blancos */}
-        <div style={{ padding: "10px 14px 18px", display: "grid", gap: standaloneStyle?.button.spacing ?? 14 }}>
+        <div
+          style={{
+            padding: "10px 14px 18px",
+            display: "grid",
+            gap: standaloneStyle?.button.spacing ?? 14,
+          }}
+        >
           {links.map((l) => (
             <EditableTarget
               key={l.id}
@@ -334,17 +333,17 @@ export default function Template04({
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
-                display: "block",
-                textAlign: "center",
-                background: standaloneStyle?.button.background ?? "#fff",
-                color: standaloneStyle?.button.textColor ?? primaryColor,
-                border: buttonBorder,
-                borderRadius: standaloneStyle?.button.radius,
-                textDecoration: "none",
-                fontSize: 19,
-                fontWeight: 600,
-                padding: "24px 16px",
-                boxSizing: "border-box",
+                  display: "block",
+                  textAlign: "center",
+                  background: standaloneStyle?.button.background ?? "#fff",
+                  color: standaloneStyle?.button.textColor ?? primaryColor,
+                  border: buttonBorder,
+                  borderRadius: standaloneStyle?.button.radius,
+                  textDecoration: "none",
+                  fontSize: 19,
+                  fontWeight: 600,
+                  padding: "24px 16px",
+                  boxSizing: "border-box",
                 }}
               >
                 {l.label}
@@ -376,17 +375,17 @@ export default function Template04({
                   rel="noopener noreferrer"
                   style={{ display: "block", lineHeight: 0 }}
                 >
-                <img
-                  src={g.imageUrl}
-                  alt={g.alt}
-                  style={{
-                    width: "100%",
-                    height: 110,
-                    objectFit: "cover",
-                    display: "block",
-                    borderRadius: 6,
-                  }}
-                />
+                  <img
+                    src={g.imageUrl}
+                    alt={g.alt}
+                    style={{
+                      width: "100%",
+                      height: 110,
+                      objectFit: "cover",
+                      display: "block",
+                      borderRadius: 6,
+                    }}
+                  />
                 </a>
               </EditableTarget>
             ))}
@@ -416,4 +415,3 @@ export default function Template04({
     </div>
   );
 }
-

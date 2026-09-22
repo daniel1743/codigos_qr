@@ -153,4 +153,3 @@ function LoginPage() {
 - EXISTING_USER_LOGIN_NO_REGRESSION — embedded `<Auth />` usages unchanged.
 
 **CRIPQER_NEW_USER_LOGIN_POST_CONFIRMATION_RUNTIME_PASS_FROZEN**
-

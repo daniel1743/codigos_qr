@@ -22,11 +22,11 @@ Se agregó `profile.showAvatar?: boolean` como control independiente del asset
 
 Los defaults de páginas nuevas quedan definidos así:
 
-| Tipo | `showAvatar` |
-|---|---:|
-| menu, catalog, promotion, campaign, event | `false` |
-| services, portfolio | `true` |
-| landing | sin campo, conserva comportamiento legacy |
+| Tipo                                      |                              `showAvatar` |
+| ----------------------------------------- | ----------------------------------------: |
+| menu, catalog, promotion, campaign, event |                                   `false` |
+| services, portfolio                       |                                    `true` |
+| landing                                   | sin campo, conserva comportamiento legacy |
 
 No se modificaron Publish, routing, `public_id`, Bio, QR, RPC ni la
 propagación previa del título de página.

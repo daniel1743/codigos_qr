@@ -14,10 +14,11 @@ export const Route = createFileRoute("/p/$publicId")({
     const baseUrl = "https://www.cripqer.dev";
     const profileUrl = `${baseUrl}/p/${profile.public_id}`;
     const title = profile.display_name
-      ? `${profile.display_name}${profile.bio ? ' - ' + profile.bio.slice(0, 50) : ''} | Cripqer`
+      ? `${profile.display_name}${profile.bio ? " - " + profile.bio.slice(0, 50) : ""} | Cripqer`
       : `Perfil ${profile.public_id} | Cripqer`;
-    const description = profile.bio?.slice(0, 155) ||
-      `Visita la página personalizada de ${profile.display_name || 'este perfil'}. Enlaces, redes sociales y contacto en un solo lugar con Cripqer.`;
+    const description =
+      profile.bio?.slice(0, 155) ||
+      `Visita la página personalizada de ${profile.display_name || "este perfil"}. Enlaces, redes sociales y contacto en un solo lugar con Cripqer.`;
     const imageUrl = profile.avatar_url || `${baseUrl}/brand-assets/cripqer-icon-512.png`;
 
     return {
@@ -38,9 +39,7 @@ export const Route = createFileRoute("/p/$publicId")({
       ],
       links: [
         { rel: "canonical", href: profileUrl },
-        ...(profile.slug ? [
-          { rel: "alternate", href: `${baseUrl}/${profile.slug}` }
-        ] : []),
+        ...(profile.slug ? [{ rel: "alternate", href: `${baseUrl}/${profile.slug}` }] : []),
       ],
     };
   },
@@ -76,14 +75,19 @@ function PublicProfilePage() {
   const personSchema = {
     "@context": "https://schema.org",
     "@type": "Person",
-    "name": profile.display_name || profile.slug,
-    "description": profile.bio || `Perfil de ${profile.display_name || profile.slug}`,
-    "image": profile.avatar_url,
-    "url": `https://www.cripqer.dev/p/${profile.public_id}`,
-    "sameAs": links
-      .filter(link => link.url && link.url.includes('instagram.com') || link.url?.includes('facebook.com') ||
-                     link.url?.includes('twitter.com') || link.url?.includes('linkedin.com'))
-      .map(link => link.url),
+    name: profile.display_name || profile.slug,
+    description: profile.bio || `Perfil de ${profile.display_name || profile.slug}`,
+    image: profile.avatar_url,
+    url: `https://www.cripqer.dev/p/${profile.public_id}`,
+    sameAs: links
+      .filter(
+        (link) =>
+          (link.url && link.url.includes("instagram.com")) ||
+          link.url?.includes("facebook.com") ||
+          link.url?.includes("twitter.com") ||
+          link.url?.includes("linkedin.com"),
+      )
+      .map((link) => link.url),
   };
 
   return (

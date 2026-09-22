@@ -8,14 +8,14 @@ Producción modificada en este gate: **NO**.
 
 ## Validación
 
-| Gate | Resultado |
-| --- | --- |
+| Gate                                 | Resultado    |
+| ------------------------------------ | ------------ |
 | Focused Smart Editor / handoff tests | PASS — 14/14 |
-| TypeScript (`tsc --noEmit`) | FAIL |
-| Targeted ESLint | PASS |
-| Targeted Prettier | PASS |
-| Build (Vite + SSR + Nitro) | PASS |
-| Runtime | NOT_RUN |
+| TypeScript (`tsc --noEmit`)          | FAIL         |
+| Targeted ESLint                      | PASS         |
+| Targeted Prettier                    | PASS         |
+| Build (Vite + SSR + Nitro)           | PASS         |
+| Runtime                              | NOT_RUN      |
 
 ## Cobertura verificada por tests
 

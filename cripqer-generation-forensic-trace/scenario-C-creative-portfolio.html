@@ -1,477 +1,943 @@
-<!doctype html><html><head><meta charset="utf-8"><style>/*
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      /*
  * CSS ISOLATION
  * Every rule below is namespaced under `.pts-*`. No element selectors,
  * no resets, no global variables — safe to drop into any host application.
  */
 
-.pts-anim-fade,
-.pts-anim-slide,
-.pts-anim-scale,
-.pts-anim-rise,
-.pts-anim-slide-up,
-.pts-anim-scale-in {
-  animation-duration: var(--pts-motion-duration, 0.5s);
-  animation-fill-mode: both;
-  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
-}
-.pts-anim-fade {
-  animation-name: pts-fade;
-}
-.pts-anim-slide {
-  animation-name: pts-slide;
-}
-.pts-anim-scale {
-  animation-name: pts-scale;
-}
-.pts-anim-rise {
-  animation-name: pts-rise;
-}
-.pts-anim-slide-up {
-  animation-name: pts-slide-up;
-}
-.pts-anim-scale-in {
-  animation-name: pts-scale-in;
-}
+      .pts-anim-fade,
+      .pts-anim-slide,
+      .pts-anim-scale,
+      .pts-anim-rise,
+      .pts-anim-slide-up,
+      .pts-anim-scale-in {
+        animation-duration: var(--pts-motion-duration, 0.5s);
+        animation-fill-mode: both;
+        animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      .pts-anim-fade {
+        animation-name: pts-fade;
+      }
+      .pts-anim-slide {
+        animation-name: pts-slide;
+      }
+      .pts-anim-scale {
+        animation-name: pts-scale;
+      }
+      .pts-anim-rise {
+        animation-name: pts-rise;
+      }
+      .pts-anim-slide-up {
+        animation-name: pts-slide-up;
+      }
+      .pts-anim-scale-in {
+        animation-name: pts-scale-in;
+      }
 
-@keyframes pts-fade {
-  from {
-    opacity: 0;
-  }
-}
-@keyframes pts-slide {
-  from {
-    opacity: 0;
-    transform: translateX(-10px);
-  }
-}
-@keyframes pts-scale {
-  from {
-    opacity: 0;
-    transform: scale(0.97);
-  }
-}
-@keyframes pts-rise {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-}
-@keyframes pts-slide-up {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-}
-@keyframes pts-scale-in {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-}
+      @keyframes pts-fade {
+        from {
+          opacity: 0;
+        }
+      }
+      @keyframes pts-slide {
+        from {
+          opacity: 0;
+          transform: translateX(-10px);
+        }
+      }
+      @keyframes pts-scale {
+        from {
+          opacity: 0;
+          transform: scale(0.97);
+        }
+      }
+      @keyframes pts-rise {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+      }
+      @keyframes pts-slide-up {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+      }
+      @keyframes pts-scale-in {
+        from {
+          opacity: 0;
+          transform: scale(0.95);
+        }
+      }
 
-.pts-hoverable {
-  transition:
-    transform 0.18s cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 0.18s ease,
-    filter 0.18s ease;
-}
-.pts-hoverable:hover {
-  transform: translateY(-2px);
-  filter: brightness(1.03);
-}
+      .pts-hoverable {
+        transition:
+          transform 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+          box-shadow 0.18s ease,
+          filter 0.18s ease;
+      }
+      .pts-hoverable:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.03);
+      }
 
-.pts-page a {
-  color: inherit;
-  text-decoration: none;
-  display: block;
-}
+      .pts-page a {
+        color: inherit;
+        text-decoration: none;
+        display: block;
+      }
 
-.pts-block {
-  outline: none;
-  border-radius: 12px;
-  transition: box-shadow 0.15s ease;
-  cursor: default;
-}
-.pts-block:hover {
-  box-shadow: 0 0 0 1px color-mix(in oklab, currentColor 22%, transparent);
-}
-.pts-block--selected {
-  box-shadow: 0 0 0 1.5px var(--pts-accent, #6d5efc);
-}
-.pts-block:focus-visible {
-  box-shadow: 0 0 0 2px var(--pts-accent, #6d5efc);
-}
+      .pts-block {
+        outline: none;
+        border-radius: 12px;
+        transition: box-shadow 0.15s ease;
+        cursor: default;
+      }
+      .pts-block:hover {
+        box-shadow: 0 0 0 1px color-mix(in oklab, currentColor 22%, transparent);
+      }
+      .pts-block--selected {
+        box-shadow: 0 0 0 1.5px var(--pts-accent, #6d5efc);
+      }
+      .pts-block:focus-visible {
+        box-shadow: 0 0 0 2px var(--pts-accent, #6d5efc);
+      }
 
-.pts-block__chrome {
-  position: absolute;
-  top: -11px;
-  left: 6px;
-  right: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  pointer-events: none;
-  z-index: 5;
-}
-.pts-block__label {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  padding: 2px 7px 2px 4px;
-  border-radius: 999px;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: capitalize;
-  color: #fff;
-  background: var(--pts-accent, #6d5efc);
-  pointer-events: none;
-}
-.pts-block__actions {
-  display: inline-flex;
-  gap: 2px;
-  padding: 2px;
-  border-radius: 999px;
-  background: rgba(20, 20, 24, 0.92);
-  backdrop-filter: blur(8px);
-  pointer-events: auto;
-}
-.pts-block__actions button {
-  display: grid;
-  place-items: center;
-  width: 22px;
-  height: 22px;
-  border: 0;
-  border-radius: 999px;
-  background: transparent;
-  color: #f5f5f7;
-  cursor: pointer;
-  transition: background 0.12s ease;
-}
-.pts-block__actions button:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.16);
-}
-.pts-block__actions button:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-}
+      .pts-block__chrome {
+        position: absolute;
+        top: -11px;
+        left: 6px;
+        right: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        pointer-events: none;
+        z-index: 5;
+      }
+      .pts-block__label {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        padding: 2px 7px 2px 4px;
+        border-radius: 999px;
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: capitalize;
+        color: #fff;
+        background: var(--pts-accent, #6d5efc);
+        pointer-events: none;
+      }
+      .pts-block__actions {
+        display: inline-flex;
+        gap: 2px;
+        padding: 2px;
+        border-radius: 999px;
+        background: rgba(20, 20, 24, 0.92);
+        backdrop-filter: blur(8px);
+        pointer-events: auto;
+      }
+      .pts-block__actions button {
+        display: grid;
+        place-items: center;
+        width: 22px;
+        height: 22px;
+        border: 0;
+        border-radius: 999px;
+        background: transparent;
+        color: #f5f5f7;
+        cursor: pointer;
+        transition: background 0.12s ease;
+      }
+      .pts-block__actions button:hover:not(:disabled) {
+        background: rgba(255, 255, 255, 0.16);
+      }
+      .pts-block__actions button:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+      }
 
-/* Studio shell scrollbars */
-.pts-scroll {
-  scrollbar-width: thin;
-  scrollbar-color: color-mix(in oklab, currentColor 25%, transparent) transparent;
-}
-.pts-scroll::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-.pts-scroll::-webkit-scrollbar-thumb {
-  background: color-mix(in oklab, currentColor 22%, transparent);
-  border-radius: 999px;
-}
+      /* Studio shell scrollbars */
+      .pts-scroll {
+        scrollbar-width: thin;
+        scrollbar-color: color-mix(in oklab, currentColor 25%, transparent) transparent;
+      }
+      .pts-scroll::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      .pts-scroll::-webkit-scrollbar-thumb {
+        background: color-mix(in oklab, currentColor 22%, transparent);
+        border-radius: 999px;
+      }
 
-.pts-mobile-sheet-scroll {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-.pts-mobile-sheet-scroll::-webkit-scrollbar {
-  display: none;
-  width: 0;
-  height: 0;
-}
+      .pts-mobile-sheet-scroll {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+      .pts-mobile-sheet-scroll::-webkit-scrollbar {
+        display: none;
+        width: 0;
+        height: 0;
+      }
 
-/* ---- Phase 1 workspace surfaces ---- */
-.pts-desktop-panel {
-  height: 100%;
-  min-height: 0;
-  min-width: 0;
-  overflow: hidden;
-  flex: 0 0 auto;
-}
-.pts-desktop-panel--collapsed {
-  width: 44px;
-}
-.pts-panel-rail {
-  display: flex;
-  height: 100%;
-  width: 44px;
-  align-items: flex-start;
-  justify-content: center;
-  padding-top: 0.75rem;
-}
-.pts-panel-rail--right {
-  margin-left: auto;
-}
-.pts-canvas-workspace {
-  overscroll-behavior: contain;
-}
+      /* ---- Phase 1 workspace surfaces ---- */
+      .pts-desktop-panel {
+        height: 100%;
+        min-height: 0;
+        min-width: 0;
+        overflow: hidden;
+        flex: 0 0 auto;
+      }
+      .pts-desktop-panel--collapsed {
+        width: 44px;
+      }
+      .pts-panel-rail {
+        display: flex;
+        height: 100%;
+        width: 44px;
+        align-items: flex-start;
+        justify-content: center;
+        padding-top: 0.75rem;
+      }
+      .pts-panel-rail--right {
+        margin-left: auto;
+      }
+      .pts-canvas-workspace {
+        overscroll-behavior: contain;
+      }
 
-.pts-power-viewport {
-  scrollbar-width: none;
-}
-.pts-power-viewport::-webkit-scrollbar {
-  display: none;
-}
+      .pts-power-viewport {
+        scrollbar-width: none;
+      }
+      .pts-power-viewport::-webkit-scrollbar {
+        display: none;
+      }
 
-@media (min-width: 1024px) {
-  .pts-power-viewport {
-    scrollbar-width: thin;
-    scrollbar-color: color-mix(in oklab, currentColor 25%, transparent) transparent;
-  }
-  .pts-power-viewport::-webkit-scrollbar {
-    display: block;
-  }
-}
-.pts-power-viewport--pan-ready {
-  cursor: grab;
-}
-.pts-power-viewport--pan-ready .pts-power-camera-layer,
-.pts-power-viewport--panning .pts-power-camera-layer {
-  pointer-events: none;
-}
-.pts-power-viewport--panning {
-  cursor: grabbing;
-  user-select: none;
-}
-.pts-power-camera-layer {
-  will-change: transform;
-}
+      @media (min-width: 1024px) {
+        .pts-power-viewport {
+          scrollbar-width: thin;
+          scrollbar-color: color-mix(in oklab, currentColor 25%, transparent) transparent;
+        }
+        .pts-power-viewport::-webkit-scrollbar {
+          display: block;
+        }
+      }
+      .pts-power-viewport--pan-ready {
+        cursor: grab;
+      }
+      .pts-power-viewport--pan-ready .pts-power-camera-layer,
+      .pts-power-viewport--panning .pts-power-camera-layer {
+        pointer-events: none;
+      }
+      .pts-power-viewport--panning {
+        cursor: grabbing;
+        user-select: none;
+      }
+      .pts-power-camera-layer {
+        will-change: transform;
+      }
 
-@media (prefers-reduced-motion: reduce) {
-  .pts-desktop-panel,
-  .pts-canvas-workspace {
-    scroll-behavior: auto;
-  }
-}
+      @media (prefers-reduced-motion: reduce) {
+        .pts-desktop-panel,
+        .pts-canvas-workspace {
+          scroll-behavior: auto;
+        }
+      }
 
-/* ---- Hover interaction presets ---- */
-.pts-hover-lift {
-  transition:
-    transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 0.2s ease;
-}
-.pts-hover-lift:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-}
+      /* ---- Hover interaction presets ---- */
+      .pts-hover-lift {
+        transition:
+          transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+          box-shadow 0.2s ease;
+      }
+      .pts-hover-lift:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+      }
 
-.pts-hover-scale {
-  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
-}
-.pts-hover-scale:hover {
-  transform: scale(1.025);
-}
+      .pts-hover-scale {
+        transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      .pts-hover-scale:hover {
+        transform: scale(1.025);
+      }
 
-.pts-hover-glow {
-  transition: box-shadow 0.25s ease;
-}
-.pts-hover-glow:hover {
-  box-shadow: 0 0 24px -4px var(--pts-accent, rgba(109, 94, 252, 0.35));
-}
+      .pts-hover-glow {
+        transition: box-shadow 0.25s ease;
+      }
+      .pts-hover-glow:hover {
+        box-shadow: 0 0 24px -4px var(--pts-accent, rgba(109, 94, 252, 0.35));
+      }
 
-.pts-hover-border {
-  transition: border-color 0.2s ease;
-  border-color: transparent;
-}
-.pts-hover-border:hover {
-  border-color: var(--pts-accent, #6d5efc);
-}
+      .pts-hover-border {
+        transition: border-color 0.2s ease;
+        border-color: transparent;
+      }
+      .pts-hover-border:hover {
+        border-color: var(--pts-accent, #6d5efc);
+      }
 
-/* ---- Press / tap feedback ---- */
-.pts-press-feedback:active {
-  transform: scale(0.97);
-  transition: transform 0.08s ease;
-}
+      /* ---- Press / tap feedback ---- */
+      .pts-press-feedback:active {
+        transform: scale(0.97);
+        transition: transform 0.08s ease;
+      }
 
-/* ---- Scroll reveal ---- */
-.pts-reveal {
-  opacity: 0;
-  transition: opacity 0.01s;
-}
-.pts-reveal--visible {
-  opacity: 1;
-}
+      /* ---- Scroll reveal ---- */
+      .pts-reveal {
+        opacity: 0;
+        transition: opacity 0.01s;
+      }
+      .pts-reveal--visible {
+        opacity: 1;
+      }
 
-/* ---- Sticky / floating transition polish ---- */
-.pts-sticky-active {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-  transition: box-shadow 0.3s ease;
-}
+      /* ---- Sticky / floating transition polish ---- */
+      .pts-sticky-active {
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+        transition: box-shadow 0.3s ease;
+      }
 
-.pts-floating-enter {
-  animation: pts-floating-fade-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-@keyframes pts-floating-fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-}
+      .pts-floating-enter {
+        animation: pts-floating-fade-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+      }
+      @keyframes pts-floating-fade-in {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+      }
 
-@media (prefers-reduced-motion: reduce) {
-  .pts-anim-fade,
-  .pts-anim-slide,
-  .pts-anim-scale,
-  .pts-anim-rise,
-  .pts-anim-slide-up,
-  .pts-anim-scale-in,
-  .pts-hoverable,
-  .pts-hover-lift,
-  .pts-hover-scale,
-  .pts-hover-glow,
-  .pts-hover-border,
-  .pts-press-feedback,
-  .pts-floating-enter {
-    animation: none !important;
-    transition: none !important;
-    transform: none !important;
-  }
-  .pts-reveal {
-    opacity: 1 !important;
-  }
-}
+      @media (prefers-reduced-motion: reduce) {
+        .pts-anim-fade,
+        .pts-anim-slide,
+        .pts-anim-scale,
+        .pts-anim-rise,
+        .pts-anim-slide-up,
+        .pts-anim-scale-in,
+        .pts-hoverable,
+        .pts-hover-lift,
+        .pts-hover-scale,
+        .pts-hover-glow,
+        .pts-hover-border,
+        .pts-press-feedback,
+        .pts-floating-enter {
+          animation: none !important;
+          transition: none !important;
+          transform: none !important;
+        }
+        .pts-reveal {
+          opacity: 1 !important;
+        }
+      }
 
-/* ------------------------------------------------------------------ */
-/* Official gold verification badge — metallic shimmer (reduced-motion  */
-/* aware). The highlight sweeps once per cycle then pauses, so it reads */
-/* as polished metal catching light rather than a flashing animation.   */
-/* ------------------------------------------------------------------ */
-.pts-official-gold {
-  border-radius: 999px;
-}
+      /* ------------------------------------------------------------------ */
+      /* Official gold verification badge — metallic shimmer (reduced-motion  */
+      /* aware). The highlight sweeps once per cycle then pauses, so it reads */
+      /* as polished metal catching light rather than a flashing animation.   */
+      /* ------------------------------------------------------------------ */
+      .pts-official-gold {
+        border-radius: 999px;
+      }
 
-.pts-gold-shimmer {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  border-radius: 999px;
-  background: linear-gradient(
-    115deg,
-    transparent 35%,
-    rgba(255, 255, 255, 0.7) 50%,
-    transparent 65%
-  );
-  background-size: 250% 100%;
-  background-position: 130% 0;
-  mix-blend-mode: overlay;
-  animation: pts-gold-shimmer-sweep 4500ms ease-in-out infinite;
-}
+      .pts-gold-shimmer {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        border-radius: 999px;
+        background: linear-gradient(
+          115deg,
+          transparent 35%,
+          rgba(255, 255, 255, 0.7) 50%,
+          transparent 65%
+        );
+        background-size: 250% 100%;
+        background-position: 130% 0;
+        mix-blend-mode: overlay;
+        animation: pts-gold-shimmer-sweep 4500ms ease-in-out infinite;
+      }
 
-@keyframes pts-gold-shimmer-sweep {
-  0% {
-    background-position: 130% 0;
-    opacity: 0;
-  }
-  8% {
-    opacity: 1;
-  }
-  32% {
-    background-position: -130% 0;
-    opacity: 1;
-  }
-  38% {
-    opacity: 0;
-  }
-  100% {
-    background-position: -130% 0;
-    opacity: 0;
-  }
-}
+      @keyframes pts-gold-shimmer-sweep {
+        0% {
+          background-position: 130% 0;
+          opacity: 0;
+        }
+        8% {
+          opacity: 1;
+        }
+        32% {
+          background-position: -130% 0;
+          opacity: 1;
+        }
+        38% {
+          opacity: 0;
+        }
+        100% {
+          background-position: -130% 0;
+          opacity: 0;
+        }
+      }
 
-@media (prefers-reduced-motion: reduce) {
-  .pts-gold-shimmer {
-    animation: none !important;
-    opacity: 0 !important;
-  }
-}
+      @media (prefers-reduced-motion: reduce) {
+        .pts-gold-shimmer {
+          animation: none !important;
+          opacity: 0 !important;
+        }
+      }
 
+      /* ===================================================================== */
+      /* Phase 1 — Approved Lovable visual tokens + Power Editor shell frame.   */
+      /* Scoped to `.pts-scope` (Power Editor only). Does NOT touch the global   */
+      /* theme, Basic Editor, or PlatformNavbar. The page surface (`.pts-page`) */
+      /* re-establishes the host light theme below so the document stays bright  */
+      /* while the surrounding editor chrome is dark.                            */
+      /* ===================================================================== */
 
-/* ===================================================================== */
-/* Phase 1 — Approved Lovable visual tokens + Power Editor shell frame.   */
-/* Scoped to `.pts-scope` (Power Editor only). Does NOT touch the global   */
-/* theme, Basic Editor, or PlatformNavbar. The page surface (`.pts-page`) */
-/* re-establishes the host light theme below so the document stays bright  */
-/* while the surrounding editor chrome is dark.                            */
-/* ===================================================================== */
+      .pts-scope {
+        /* Lovable-approved editor-local tokens (source: Visual Canvas styles.css) */
+        --ed-bg: oklch(0.19 0.012 265);
+        --ed-chrome: oklch(0.235 0.014 265);
+        --ed-chrome-2: oklch(0.275 0.016 265);
+        --ed-elevated: oklch(0.31 0.018 265);
+        --ed-line: oklch(1 0 0 / 9%);
+        --ed-line-strong: oklch(1 0 0 / 18%);
+        --ed-text: oklch(0.965 0.004 265);
+        --ed-muted: oklch(0.68 0.018 265);
+        --ed-faint: oklch(0.53 0.018 265);
+        --ed-accent: oklch(0.82 0.18 172);
+        --ed-accent-ink: oklch(0.22 0.05 172);
+        --ed-select: oklch(0.74 0.16 250);
+        --ed-warn: oklch(0.83 0.16 85);
+        --ed-canvas: oklch(0.14 0.01 265);
+        --ed-page: oklch(0.995 0.002 90);
+        --ed-page-ink: oklch(0.22 0.02 265);
+        --ed-shadow: 0 24px 60px -20px oklch(0 0 0 / 65%);
 
-.pts-scope {
-  /* Lovable-approved editor-local tokens (source: Visual Canvas styles.css) */
-  --ed-bg: oklch(0.19 0.012 265);
-  --ed-chrome: oklch(0.235 0.014 265);
-  --ed-chrome-2: oklch(0.275 0.016 265);
-  --ed-elevated: oklch(0.31 0.018 265);
-  --ed-line: oklch(1 0 0 / 9%);
-  --ed-line-strong: oklch(1 0 0 / 18%);
-  --ed-text: oklch(0.965 0.004 265);
-  --ed-muted: oklch(0.68 0.018 265);
-  --ed-faint: oklch(0.53 0.018 265);
-  --ed-accent: oklch(0.82 0.18 172);
-  --ed-accent-ink: oklch(0.22 0.05 172);
-  --ed-select: oklch(0.74 0.16 250);
-  --ed-warn: oklch(0.83 0.16 85);
-  --ed-canvas: oklch(0.14 0.01 265);
-  --ed-page: oklch(0.995 0.002 90);
-  --ed-page-ink: oklch(0.22 0.02 265);
-  --ed-shadow: 0 24px 60px -20px oklch(0 0 0 / 65%);
-
-  /* Re-map host Tailwind semantic tokens → dark immersive editor values.
+        /* Re-map host Tailwind semantic tokens → dark immersive editor values.
    * Existing utilities (bg-card, bg-background, border-border, text-foreground,
    * text-muted-foreground, bg-muted, hover:bg-accent, …) resolve to these
    * within the editor, so no component or className needs to move. */
-  --background: var(--ed-bg);
-  --foreground: var(--ed-text);
-  --card: var(--ed-chrome);
-  --card-foreground: var(--ed-text);
-  --popover: var(--ed-elevated);
-  --popover-foreground: var(--ed-text);
-  --primary: var(--ed-accent);
-  --primary-foreground: var(--ed-accent-ink);
-  --secondary: var(--ed-chrome-2);
-  --secondary-foreground: var(--ed-text);
-  --muted: var(--ed-chrome-2);
-  --muted-foreground: var(--ed-muted);
-  --accent: var(--ed-chrome-2);
-  --accent-foreground: var(--ed-text);
-  --destructive: oklch(0.704 0.191 22.216);
-  --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: var(--ed-line);
-  --input: var(--ed-line-strong);
-  --ring: var(--ed-select);
-}
+        --background: var(--ed-bg);
+        --foreground: var(--ed-text);
+        --card: var(--ed-chrome);
+        --card-foreground: var(--ed-text);
+        --popover: var(--ed-elevated);
+        --popover-foreground: var(--ed-text);
+        --primary: var(--ed-accent);
+        --primary-foreground: var(--ed-accent-ink);
+        --secondary: var(--ed-chrome-2);
+        --secondary-foreground: var(--ed-text);
+        --muted: var(--ed-chrome-2);
+        --muted-foreground: var(--ed-muted);
+        --accent: var(--ed-chrome-2);
+        --accent-foreground: var(--ed-text);
+        --destructive: oklch(0.704 0.191 22.216);
+        --destructive-foreground: oklch(0.984 0.003 247.858);
+        --border: var(--ed-line);
+        --input: var(--ed-line-strong);
+        --ring: var(--ed-select);
+      }
 
-/* The document surface stays bright. Re-establish the host light theme on
+      /* The document surface stays bright. Re-establish the host light theme on
  * the page so TemplateRenderer / ProfileHeader / blocks / avatar are visually
  * unchanged by the dark chrome. (Renderer is FROZEN — presentation only.) */
-.pts-scope .pts-page {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
-}
+      .pts-scope .pts-page {
+        --background: oklch(1 0 0);
+        --foreground: oklch(0.129 0.042 264.695);
+        --card: oklch(1 0 0);
+        --card-foreground: oklch(0.129 0.042 264.695);
+        --popover: oklch(1 0 0);
+        --popover-foreground: oklch(0.129 0.042 264.695);
+        --primary: oklch(0.208 0.042 265.755);
+        --primary-foreground: oklch(0.984 0.003 247.858);
+        --secondary: oklch(0.968 0.007 247.896);
+        --secondary-foreground: oklch(0.208 0.042 265.755);
+        --muted: oklch(0.968 0.007 247.896);
+        --muted-foreground: oklch(0.554 0.046 257.417);
+        --accent: oklch(0.968 0.007 247.896);
+        --accent-foreground: oklch(0.208 0.042 265.755);
+        --destructive: oklch(0.577 0.245 27.325);
+        --destructive-foreground: oklch(0.984 0.003 247.858);
+        --border: oklch(0.929 0.013 255.508);
+        --input: oklch(0.929 0.013 255.508);
+        --ring: oklch(0.704 0.04 256.788);
+      }
 
-/* Canvas surround — neutral dark backdrop with the approved grid. This only
+      /* Canvas surround — neutral dark backdrop with the approved grid. This only
  * recolors the frozen `.pts-power-viewport` scroll surface; camera, pan, and
  * zoom behavior are untouched. */
-.pts-scope .pts-power-viewport {
-  background-color: var(--ed-canvas);
-  background-image:
-    linear-gradient(to right, oklch(1 0 0 / 4%) 1px, transparent 1px),
-    linear-gradient(to bottom, oklch(1 0 0 / 4%) 1px, transparent 1px);
-  background-size: 32px 32px;
-}
-</style></head><body><div class="pts-page" data-breakpoint="desktop" style="--pts-primary:#38524A;--pts-secondary:#575349;--pts-accent:#38524A;--pts-bg:#FBFAF7;--pts-surface:#F1EEE7;--pts-surface-alt:rgba(241, 238, 231, 0.8);--pts-card:#F1EEE7;--pts-text:#20201D;--pts-muted:#575349;--pts-border:#E0DBD0;--pts-success:#10b981;--pts-warning:#f59e0b;--pts-danger:#ef4444;--pts-radius:10px;--pts-btn-radius:10px;--pts-heading-font:&quot;Times New Roman&quot;, Times, serif;--pts-body-font:&quot;Trebuchet MS&quot;, &quot;Segoe UI&quot;, sans-serif;color:#20201D;font-family:&quot;Trebuchet MS&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:15px;line-height:1.62;letter-spacing:-0.02em;background-color:#FBFAF7;--pts-motion-duration:480ms;min-height:100vh;width:100%;position:relative;overflow-x:clip"><div aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;z-index:1;opacity:0.07;background-repeat:repeat;mix-blend-mode:soft-light;background-image:radial-gradient(rgba(0,0,0,.12) 0.7px, transparent 0.8px), radial-gradient(rgba(255,255,255,.16) 0.6px, transparent 0.8px);background-size:28px 28px, 21px 21px"></div><div style="position:relative;z-index:2;max-width:600px;margin:0 auto;padding:44px 32px 80px;display:grid;gap:40px"><header style="position:relative"><div style="position:relative;height:230px;border-radius:18px;overflow:hidden;background-color:#F1EEE7"><img src="https://cdn.example/luz-cover.jpg" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;object-position:50% 50%"/><div aria-hidden="true" style="position:absolute;inset:0;background:linear-gradient(180deg, rgba(251, 250, 247, 0) 30%, rgba(251, 250, 247, 0.35) 100%)"></div></div><div style="position:relative;z-index:10;display:flex;align-items:stretch;flex-direction:column;gap:14px;margin-top:18px"><div style="display:flex;justify-content:flex-start"><div><div aria-hidden="true" style="width:96px;height:96px;border-radius:999px;background:linear-gradient(140deg, #38524A, #38524A);display:grid;place-items:center;color:#fff;font-size:36.92307692307692px;font-family:&quot;Times New Roman&quot;, Times, serif;flex-shrink:0">L</div></div></div><div style="text-align:left;flex:1;min-width:0"><div style="display:flex;gap:8px;align-items:center;justify-content:flex-start"><h1 style="font-family:&quot;Times New Roman&quot;, Times, serif;font-weight:600;font-size:38px;letter-spacing:-0.02em;line-height:1.1;color:#20201D;margin:0;word-break:break-word;overflow-wrap:anywhere">Luz Norte</h1></div><div style="margin-top:8px;font-size:14px;color:#575349;letter-spacing:0.01em"><span>Fotografía</span></div><div><p style="margin:12px auto 0;max-width:460px;margin-left:0;font-size:15px;color:#575349;line-height:1.62;white-space:pre-wrap">Historias visuales con luz y carácter.</p></div><div style="display:flex;gap:12px;margin-top:12px;font-size:12.5px;color:#575349;justify-content:flex-start;flex-wrap:wrap"><span style="opacity:0.9">@luz-norte</span></div></div></div></header><div style="display:grid;grid-template-columns:repeat(1, minmax(0, 1fr));gap:14px;align-items:start"><section style="grid-column:span 1;order:0"><div class="pts-reveal" style="opacity:0"><div><p style="margin:0;white-space:pre-wrap;color:#20201D;font-family:&quot;Times New Roman&quot;, Times, serif;font-size:20px;line-height:1.62;border-left:2px solid #38524A;padding-left:16px;text-align:center">Historias visuales con luz y carácter.</p></div></div></section><section style="grid-column:span 1;order:1;border:1px solid rgba(56, 82, 74, 0.28)"><div class="pts-reveal" style="opacity:0"><section style="border-radius:10px;padding:24px;border-style:solid;border-width:1px;border-color:#E0DBD0;background-color:rgba(241, 238, 231, 1);box-shadow:none;color:#20201D;transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;display:flex;align-items:center;gap:16px;text-align:left"><div style="flex:1"><h3 style="font-family:&quot;Times New Roman&quot;, Times, serif;font-weight:600;font-size:26px;letter-spacing:-0.02em;line-height:1.1;color:#20201D;margin:0;word-break:break-word;overflow-wrap:anywhere"></h3></div><span role="link" aria-label="Ver mi trabajo" aria-disabled="true" style="display:block;margin-top:0;width:auto;cursor:inherit"><div class="pts-hoverable" style="min-height:54px;border-radius:10px;font-weight:570;border-style:solid;border-width:0;border-color:transparent;box-shadow:0 1px 2px rgba(0,0,0,0.06), 0 4px 14px -8px rgba(0,0,0,0.18);transition:transform .16s ease, box-shadow .16s ease, background-color .16s ease, opacity .16s ease;display:flex;align-items:center;gap:10px;width:auto;padding:0 16px;text-decoration:none;background-color:#38524A;color:#ffffff;justify-content:center;min-width:150px">Ver mi trabajo</div></span></section></div></section><section style="grid-column:span 1;order:2"><div class="pts-reveal" style="opacity:0"><div><div style="display:grid;grid-template-columns:repeat(2, minmax(0, 1fr));gap:10px"><a href="https://luz.example/night" aria-label="Editorial Nocturna" target="_blank" rel="noopener noreferrer"><article class="pts-hoverable" style="border-radius:10px;padding:0;border-style:solid;border-width:1px;border-color:#E0DBD0;background-color:rgba(241, 238, 231, 1);box-shadow:none;color:#20201D;transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;overflow:hidden"><img src="https://cdn.example/night.jpg" alt="" loading="lazy" style="width:100%;aspect-ratio:16 / 9;object-fit:cover;display:block;border-radius:0"/><div style="padding:12px 14px 14px"><div style="font-weight:600;font-size:14.5px;display:flex;align-items:center;gap:6px">Editorial Nocturna<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-up-right" aria-hidden="true" style="color:#575349"><path d="M7 7h10v10"></path><path d="M7 17 17 7"></path></svg></div></div></article></a><a href="https://luz.example/urban" aria-label="Retratos Urbanos" target="_blank" rel="noopener noreferrer"><article class="pts-hoverable" style="border-radius:10px;padding:0;border-style:solid;border-width:1px;border-color:#E0DBD0;background-color:rgba(241, 238, 231, 1);box-shadow:none;color:#20201D;transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;overflow:hidden"><img src="https://cdn.example/urban.jpg" alt="" loading="lazy" style="width:100%;aspect-ratio:16 / 9;object-fit:cover;display:block;border-radius:0"/><div style="padding:12px 14px 14px"><div style="font-weight:600;font-size:14.5px;display:flex;align-items:center;gap:6px">Retratos Urbanos<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-up-right" aria-hidden="true" style="color:#575349"><path d="M7 7h10v10"></path><path d="M7 17 17 7"></path></svg></div></div></article></a></div></div></div></section></div><footer data-testid="cripqer-public-branding" style="display:flex;justify-content:center;padding-top:24px"><a href="/" aria-label="Visitar Cripqer" style="display:inline-flex;align-items:center;min-height:32px;gap:7px"><span aria-hidden="true" style="width:18px;height:18px;background-image:url(/brand-assets/cripqer-mark.png);background-position:center;background-repeat:no-repeat;background-size:contain"></span><span aria-hidden="true" style="color:#0D47A1;font-family:Montserrat, Arial, Helvetica, sans-serif;font-size:13px;font-weight:800;line-height:1">Crip<span style="color:#D4AF37">q</span>er</span></a></footer></div></div></body></html>
+      .pts-scope .pts-power-viewport {
+        background-color: var(--ed-canvas);
+        background-image:
+          linear-gradient(to right, oklch(1 0 0 / 4%) 1px, transparent 1px),
+          linear-gradient(to bottom, oklch(1 0 0 / 4%) 1px, transparent 1px);
+        background-size: 32px 32px;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      class="pts-page"
+      data-breakpoint="desktop"
+      style="
+        --pts-primary: #38524a;
+        --pts-secondary: #575349;
+        --pts-accent: #38524a;
+        --pts-bg: #fbfaf7;
+        --pts-surface: #f1eee7;
+        --pts-surface-alt: rgba(241, 238, 231, 0.8);
+        --pts-card: #f1eee7;
+        --pts-text: #20201d;
+        --pts-muted: #575349;
+        --pts-border: #e0dbd0;
+        --pts-success: #10b981;
+        --pts-warning: #f59e0b;
+        --pts-danger: #ef4444;
+        --pts-radius: 10px;
+        --pts-btn-radius: 10px;
+        --pts-heading-font: &quot;Times New Roman&quot;, Times, serif;
+        --pts-body-font: &quot;Trebuchet MS&quot;, &quot;Segoe UI&quot;, sans-serif;
+        color: #20201d;
+        font-family: &quot;Trebuchet MS&quot;, &quot;Segoe UI&quot;, sans-serif;
+        font-size: 15px;
+        line-height: 1.62;
+        letter-spacing: -0.02em;
+        background-color: #fbfaf7;
+        --pts-motion-duration: 480ms;
+        min-height: 100vh;
+        width: 100%;
+        position: relative;
+        overflow-x: clip;
+      "
+    >
+      <div
+        aria-hidden="true"
+        style="
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          z-index: 1;
+          opacity: 0.07;
+          background-repeat: repeat;
+          mix-blend-mode: soft-light;
+          background-image:
+            radial-gradient(rgba(0, 0, 0, 0.12) 0.7px, transparent 0.8px),
+            radial-gradient(rgba(255, 255, 255, 0.16) 0.6px, transparent 0.8px);
+          background-size:
+            28px 28px,
+            21px 21px;
+        "
+      ></div>
+      <div
+        style="
+          position: relative;
+          z-index: 2;
+          max-width: 600px;
+          margin: 0 auto;
+          padding: 44px 32px 80px;
+          display: grid;
+          gap: 40px;
+        "
+      >
+        <header style="position: relative">
+          <div
+            style="
+              position: relative;
+              height: 230px;
+              border-radius: 18px;
+              overflow: hidden;
+              background-color: #f1eee7;
+            "
+          >
+            <img
+              src="https://cdn.example/luz-cover.jpg"
+              alt=""
+              loading="lazy"
+              style="width: 100%; height: 100%; object-fit: cover; object-position: 50% 50%"
+            />
+            <div
+              aria-hidden="true"
+              style="
+                position: absolute;
+                inset: 0;
+                background: linear-gradient(
+                  180deg,
+                  rgba(251, 250, 247, 0) 30%,
+                  rgba(251, 250, 247, 0.35) 100%
+                );
+              "
+            ></div>
+          </div>
+          <div
+            style="
+              position: relative;
+              z-index: 10;
+              display: flex;
+              align-items: stretch;
+              flex-direction: column;
+              gap: 14px;
+              margin-top: 18px;
+            "
+          >
+            <div style="display: flex; justify-content: flex-start">
+              <div>
+                <div
+                  aria-hidden="true"
+                  style="
+                    width: 96px;
+                    height: 96px;
+                    border-radius: 999px;
+                    background: linear-gradient(140deg, #38524a, #38524a);
+                    display: grid;
+                    place-items: center;
+                    color: #fff;
+                    font-size: 36.92307692307692px;
+                    font-family: &quot;Times New Roman&quot;, Times, serif;
+                    flex-shrink: 0;
+                  "
+                >
+                  L
+                </div>
+              </div>
+            </div>
+            <div style="text-align: left; flex: 1; min-width: 0">
+              <div
+                style="display: flex; gap: 8px; align-items: center; justify-content: flex-start"
+              >
+                <h1
+                  style="
+                    font-family: &quot;Times New Roman&quot;, Times, serif;
+                    font-weight: 600;
+                    font-size: 38px;
+                    letter-spacing: -0.02em;
+                    line-height: 1.1;
+                    color: #20201d;
+                    margin: 0;
+                    word-break: break-word;
+                    overflow-wrap: anywhere;
+                  "
+                >
+                  Luz Norte
+                </h1>
+              </div>
+              <div style="margin-top: 8px; font-size: 14px; color: #575349; letter-spacing: 0.01em">
+                <span>Fotografía</span>
+              </div>
+              <div>
+                <p
+                  style="
+                    margin: 12px auto 0;
+                    max-width: 460px;
+                    margin-left: 0;
+                    font-size: 15px;
+                    color: #575349;
+                    line-height: 1.62;
+                    white-space: pre-wrap;
+                  "
+                >
+                  Historias visuales con luz y carácter.
+                </p>
+              </div>
+              <div
+                style="
+                  display: flex;
+                  gap: 12px;
+                  margin-top: 12px;
+                  font-size: 12.5px;
+                  color: #575349;
+                  justify-content: flex-start;
+                  flex-wrap: wrap;
+                "
+              >
+                <span style="opacity: 0.9">@luz-norte</span>
+              </div>
+            </div>
+          </div>
+        </header>
+        <div
+          style="
+            display: grid;
+            grid-template-columns: repeat(1, minmax(0, 1fr));
+            gap: 14px;
+            align-items: start;
+          "
+        >
+          <section style="grid-column: span 1; order: 0">
+            <div class="pts-reveal" style="opacity: 0">
+              <div>
+                <p
+                  style="
+                    margin: 0;
+                    white-space: pre-wrap;
+                    color: #20201d;
+                    font-family: &quot;Times New Roman&quot;, Times, serif;
+                    font-size: 20px;
+                    line-height: 1.62;
+                    border-left: 2px solid #38524a;
+                    padding-left: 16px;
+                    text-align: center;
+                  "
+                >
+                  Historias visuales con luz y carácter.
+                </p>
+              </div>
+            </div>
+          </section>
+          <section style="grid-column: span 1; order: 1; border: 1px solid rgba(56, 82, 74, 0.28)">
+            <div class="pts-reveal" style="opacity: 0">
+              <section
+                style="
+                  border-radius: 10px;
+                  padding: 24px;
+                  border-style: solid;
+                  border-width: 1px;
+                  border-color: #e0dbd0;
+                  background-color: rgba(241, 238, 231, 1);
+                  box-shadow: none;
+                  color: #20201d;
+                  transition:
+                    transform 0.18s ease,
+                    box-shadow 0.18s ease,
+                    border-color 0.18s ease;
+                  display: flex;
+                  align-items: center;
+                  gap: 16px;
+                  text-align: left;
+                "
+              >
+                <div style="flex: 1">
+                  <h3
+                    style="
+                      font-family: &quot;Times New Roman&quot;, Times, serif;
+                      font-weight: 600;
+                      font-size: 26px;
+                      letter-spacing: -0.02em;
+                      line-height: 1.1;
+                      color: #20201d;
+                      margin: 0;
+                      word-break: break-word;
+                      overflow-wrap: anywhere;
+                    "
+                  ></h3>
+                </div>
+                <span
+                  role="link"
+                  aria-label="Ver mi trabajo"
+                  aria-disabled="true"
+                  style="display: block; margin-top: 0; width: auto; cursor: inherit"
+                  ><div
+                    class="pts-hoverable"
+                    style="
+                      min-height: 54px;
+                      border-radius: 10px;
+                      font-weight: 570;
+                      border-style: solid;
+                      border-width: 0;
+                      border-color: transparent;
+                      box-shadow:
+                        0 1px 2px rgba(0, 0, 0, 0.06),
+                        0 4px 14px -8px rgba(0, 0, 0, 0.18);
+                      transition:
+                        transform 0.16s ease,
+                        box-shadow 0.16s ease,
+                        background-color 0.16s ease,
+                        opacity 0.16s ease;
+                      display: flex;
+                      align-items: center;
+                      gap: 10px;
+                      width: auto;
+                      padding: 0 16px;
+                      text-decoration: none;
+                      background-color: #38524a;
+                      color: #ffffff;
+                      justify-content: center;
+                      min-width: 150px;
+                    "
+                  >
+                    Ver mi trabajo
+                  </div></span
+                >
+              </section>
+            </div>
+          </section>
+          <section style="grid-column: span 1; order: 2">
+            <div class="pts-reveal" style="opacity: 0">
+              <div>
+                <div
+                  style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px"
+                >
+                  <a
+                    href="https://luz.example/night"
+                    aria-label="Editorial Nocturna"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    ><article
+                      class="pts-hoverable"
+                      style="
+                        border-radius: 10px;
+                        padding: 0;
+                        border-style: solid;
+                        border-width: 1px;
+                        border-color: #e0dbd0;
+                        background-color: rgba(241, 238, 231, 1);
+                        box-shadow: none;
+                        color: #20201d;
+                        transition:
+                          transform 0.18s ease,
+                          box-shadow 0.18s ease,
+                          border-color 0.18s ease;
+                        overflow: hidden;
+                      "
+                    >
+                      <img
+                        src="https://cdn.example/night.jpg"
+                        alt=""
+                        loading="lazy"
+                        style="
+                          width: 100%;
+                          aspect-ratio: 16 / 9;
+                          object-fit: cover;
+                          display: block;
+                          border-radius: 0;
+                        "
+                      />
+                      <div style="padding: 12px 14px 14px">
+                        <div
+                          style="
+                            font-weight: 600;
+                            font-size: 14.5px;
+                            display: flex;
+                            align-items: center;
+                            gap: 6px;
+                          "
+                        >
+                          Editorial Nocturna<svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="lucide lucide-arrow-up-right"
+                            aria-hidden="true"
+                            style="color: #575349"
+                          >
+                            <path d="M7 7h10v10"></path>
+                            <path d="M7 17 17 7"></path>
+                          </svg>
+                        </div>
+                      </div></article></a
+                  ><a
+                    href="https://luz.example/urban"
+                    aria-label="Retratos Urbanos"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    ><article
+                      class="pts-hoverable"
+                      style="
+                        border-radius: 10px;
+                        padding: 0;
+                        border-style: solid;
+                        border-width: 1px;
+                        border-color: #e0dbd0;
+                        background-color: rgba(241, 238, 231, 1);
+                        box-shadow: none;
+                        color: #20201d;
+                        transition:
+                          transform 0.18s ease,
+                          box-shadow 0.18s ease,
+                          border-color 0.18s ease;
+                        overflow: hidden;
+                      "
+                    >
+                      <img
+                        src="https://cdn.example/urban.jpg"
+                        alt=""
+                        loading="lazy"
+                        style="
+                          width: 100%;
+                          aspect-ratio: 16 / 9;
+                          object-fit: cover;
+                          display: block;
+                          border-radius: 0;
+                        "
+                      />
+                      <div style="padding: 12px 14px 14px">
+                        <div
+                          style="
+                            font-weight: 600;
+                            font-size: 14.5px;
+                            display: flex;
+                            align-items: center;
+                            gap: 6px;
+                          "
+                        >
+                          Retratos Urbanos<svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="lucide lucide-arrow-up-right"
+                            aria-hidden="true"
+                            style="color: #575349"
+                          >
+                            <path d="M7 7h10v10"></path>
+                            <path d="M7 17 17 7"></path>
+                          </svg>
+                        </div>
+                      </div></article
+                  ></a>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+        <footer
+          data-testid="cripqer-public-branding"
+          style="display: flex; justify-content: center; padding-top: 24px"
+        >
+          <a
+            href="/"
+            aria-label="Visitar Cripqer"
+            style="display: inline-flex; align-items: center; min-height: 32px; gap: 7px"
+            ><span
+              aria-hidden="true"
+              style="
+                width: 18px;
+                height: 18px;
+                background-image: url(/brand-assets/cripqer-mark.png);
+                background-position: center;
+                background-repeat: no-repeat;
+                background-size: contain;
+              "
+            ></span
+            ><span
+              aria-hidden="true"
+              style="
+                color: #0d47a1;
+                font-family: Montserrat, Arial, Helvetica, sans-serif;
+                font-size: 13px;
+                font-weight: 800;
+                line-height: 1;
+              "
+              >Crip<span style="color: #d4af37">q</span>er</span
+            ></a
+          >
+        </footer>
+      </div>
+    </div>
+  </body>
+</html>

@@ -3,9 +3,11 @@
 ## 🎯 POSICIONAMIENTO ESTRATÉGICO CORREGIDO
 
 ### ❌ Posicionamiento Antiguo (Incorrecto)
+
 "Generador de QR con página personalizable"
 
 ### ✅ Posicionamiento Nuevo (Correcto)
+
 **"Plataforma de Conversión Inteligente: De la Atención al Cliente"**
 
 ---
@@ -13,22 +15,28 @@
 ## 📊 CADENA DE VALOR - DIFERENCIACIÓN COMPETITIVA
 
 ### LINKTREE (Competidor)
+
 ```
 Audiencia → Enlaces → Destino externo
 ```
+
 **Propuesta**: Organiza salidas  
 **Debilidad**: Te saca de su plataforma, no mide conversión
 
 ### FIGMA (Analogía de Producto Completo)
+
 ```
 Idea → Diseño → Prototipo → Colaboración → Producto
 ```
+
 **Propuesta**: Crea productos visuales completos
 
 ### CRIPQER (Propuesta Única)
+
 ```
 Audiencia → Intención → Conversión → Cliente → Relación → Crecimiento
 ```
+
 **Propuesta**: **Construye y opera el recorrido completo de conversión**
 
 ---
@@ -36,11 +44,11 @@ Audiencia → Intención → Conversión → Cliente → Relación → Crecimien
 ## 🔄 FLUJO COMPLETO CRIPQER
 
 ```
-CREAR 
+CREAR
   ↓
-PERSONALIZAR 
+PERSONALIZAR
   ↓
-PUBLICAR 
+PUBLICAR
   ↓
 COMPARTIR (QR + Enlaces)
   ↓
@@ -62,24 +70,28 @@ VOLVER A ATRAER (Retención)
 ## 🎯 KEYWORDS ACTUALIZADAS CON NUEVO POSICIONAMIENTO
 
 ### TIER 0: Posicionamiento de Marca (Nuevas)
+
 - **"plataforma de conversión digital"** - 320 búsquedas/mes
 - **"herramienta de conversión para negocios"** - 180 búsquedas/mes
 - **"página de conversión con qr"** - 45 búsquedas/mes
 - **"landing page inteligente con analytics"** - 90 búsquedas/mes
 
 ### TIER 1: Diferenciación vs Linktree (Actualizado)
+
 - **"linktree con analytics"** - 580 búsquedas/mes
 - **"alternativa linktree con conversión"** - 95 búsquedas/mes
 - **"biolink que mide conversiones"** - 110 búsquedas/mes
 - **"página personalizada con seguimiento"** - 150 búsquedas/mes
 
 ### TIER 2: Casos de Uso de Conversión (Nuevas)
+
 - **"aumentar conversiones con qr"** - 210 búsquedas/mes
 - **"qr para captar clientes"** - 170 búsquedas/mes
 - **"página de conversión para negocio"** - 280 búsquedas/mes
 - **"funnel de conversión con qr"** - 85 búsquedas/mes
 
 ### TIER 3: Gestión y Analítica (Nuevas)
+
 - **"analytics para códigos qr"** - 140 búsquedas/mes
 - **"medir conversiones de qr"** - 95 búsquedas/mes
 - **"seguimiento de clientes con qr"** - 65 búsquedas/mes
@@ -91,26 +103,31 @@ VOLVER A ATRAER (Retención)
 ### CATEGORÍA 1: Plataforma de Conversión (5 artículos)
 
 **1. "Más Allá de Linktree: Por Qué Necesitas una Plataforma de Conversión Completa"**
+
 - Keyword: "alternativa linktree con conversión"
 - Ángulo: Diferenciación clara vs competidores
 - CTA: Registro enfocado en conversión
 
 **2. "De la Atención al Cliente: El Recorrido Completo con Cripqer"**
+
 - Keyword: "plataforma de conversión digital"
 - Ángulo: Flujo completo CREAR → MEJORAR
 - CTA: Demo del flujo completo
 
 **3. "Cómo Convertir Tráfico en Clientes (No Solo en Clics)"**
+
 - Keyword: "aumentar conversiones con qr"
 - Ángulo: Conversión real vs métricas vanidad
 - CTA: Calculadora de conversión
 
 **4. "Linktree Organiza Enlaces. Cripqer Construye Tu Negocio"**
+
 - Keyword: "cripqer vs linktree"
 - Ángulo: Comparativa brutal y directa
 - CTA: Migración desde Linktree
 
 **5. "Analytics para QR: Mide Conversión, No Solo Escaneos"**
+
 - Keyword: "analytics para códigos qr"
 - Ángulo: Métricas que importan
 - CTA: Dashboard de analytics
@@ -120,26 +137,31 @@ VOLVER A ATRAER (Retención)
 ### CATEGORÍA 2: Gestión de Conversión (5 artículos)
 
 **6. "Del Escaneo al Cliente: Optimiza Tu Funnel de Conversión"**
+
 - Keyword: "funnel de conversión con qr"
 - Ángulo: Optimización de cada etapa
 - CTA: Análisis de funnel gratis
 
 **7. "Cómo Gestionar Clientes Que Llegan Por QR"**
+
 - Keyword: "gestión de clientes digitales"
 - Ángulo: CRM integrado
 - CTA: Template de gestión
 
 **8. "Retención: Cómo Hacer Que Tus Clientes Vuelvan"**
+
 - Keyword: "retención de clientes digitales"
 - Ángulo: Estrategias de re-engagement
 - CTA: Checklist de retención
 
 **9. "10 Métricas de Conversión Que Debes Medir (Y Cómo)"**
+
 - Keyword: "medir conversiones negocio"
 - Ángulo: Dashboard walkthrough
 - CTA: Template de métricas
 
 **10. "A/B Testing para Páginas QR: Duplica Tu Conversión"**
+
 - Keyword: "optimizar conversión qr"
 - Ángulo: Testing científico
 - CTA: Guía de A/B testing
@@ -149,26 +171,31 @@ VOLVER A ATRAER (Retención)
 ### CATEGORÍA 3: Casos de Uso por Conversión (5 artículos)
 
 **11. "Restaurantes: Del Menú QR a Cliente Frecuente"**
+
 - Keyword: "qr para restaurantes conversión"
 - Ángulo: Flujo completo restaurante
 - CTA: Template restaurante
 
 **12. "Salones de Belleza: Captar + Agendar + Retener"**
+
 - Keyword: "qr para salón de belleza"
 - Ángulo: Sistema de agendamiento
 - CTA: Setup asistido
 
 **13. "Coaches: De Redes Sociales a Programa Vendido"**
+
 - Keyword: "página conversión coaches"
 - Ángulo: Embudo de venta
 - CTA: Funnel template
 
 **14. "Inmobiliarias: Del QR en Anuncio a Lead Calificado"**
+
 - Keyword: "qr inmobiliario conversión"
 - Ángulo: Captación de leads
 - CTA: Lead magnet template
 
 **15. "E-commerce: QR en Tienda Física → Venta Online"**
+
 - Keyword: "qr para tienda física"
 - Ángulo: Omnicanalidad
 - CTA: Bridge físico-digital
@@ -178,26 +205,31 @@ VOLVER A ATRAER (Retención)
 ### CATEGORÍA 4: Vs Competidores (5 artículos)
 
 **16. "Linktree vs Cripqer: Comparativa Completa 2026"**
+
 - Keyword: "linktree vs cripqer"
 - Ángulo: Feature by feature
 - Tabla comparativa brutal
 
 **17. "Por Qué Bio.link No Mide Lo Que Realmente Importa"**
+
 - Keyword: "alternativas bio.link"
 - Ángulo: Analytics profundo
 - CTA: Migración asistida
 
 **18. "Beacons vs Cripqer: ¿Cuál Convierte Mejor?"**
+
 - Keyword: "beacons alternativa"
 - Ángulo: ROI real
 - CTA: Calculadora ROI
 
 **19. "Los 7 Problemas de Linktree Que Cripqer Resuelve"**
+
 - Keyword: "problemas linktree"
 - Ángulo: Pain points específicos
 - CTA: Soluciones específicas
 
 **20. "Genera QR + Convierte: La Ventaja de Tenerlo Todo en Uno"**
+
 - Keyword: "qr y página juntos"
 - Ángulo: Integración nativa
 - CTA: Demo integración
@@ -217,9 +249,11 @@ VOLVER A ATRAER (Retención)
 ## 🎯 META DESCRIPTION ACTUALIZADA (Global)
 
 ### Antes (Incorrecto)
+
 "Crea tu código QR gratis. Reúne tus redes sociales, WhatsApp, enlaces y web en una página profesional personalizable."
 
 ### Después (Correcto)
+
 "Plataforma de conversión completa: Crea tu QR, atrae tráfico, convierte visitantes en clientes y mide resultados. Más que un biolink, es tu sistema de crecimiento."
 
 ---
@@ -227,10 +261,12 @@ VOLVER A ATRAER (Retención)
 ## 🏗️ ARQUITECTURA DE SITIO ACTUALIZADA
 
 ### Landing Principal (/)
+
 **Headline H1**: "La Plataforma de Conversión Inteligente"
 **Sub**: "No solo enlaces. Construye el recorrido completo: De la atención al cliente."
 
 **Sección Hero**:
+
 ```
 [Comparativa Visual]
 
@@ -239,9 +275,11 @@ VOLVER A ATRAER (Retención)
 ```
 
 ### Nueva Página: /plataforma
+
 **URL**: https://www.cripqer.dev/plataforma
 **Título**: "Plataforma de Conversión: Características Completas"
 **Contenido**:
+
 - CREAR (Editor visual)
 - PERSONALIZAR (Plantillas inteligentes)
 - PUBLICAR (QR + Enlaces)
@@ -253,25 +291,29 @@ VOLVER A ATRAER (Retención)
 - MEJORAR (Optimización)
 
 ### Nueva Página: /vs/linktree
+
 **URL**: https://www.cripqer.dev/vs/linktree
 **Título**: "Cripqer vs Linktree: Conversión vs Enlaces"
 
 **Tabla Comparativa**:
-| Feature | Linktree | Cripqer |
-|---------|----------|---------|
-| **Propósito** | Organiza enlaces | Construye conversión |
-| **QR incluido** | ❌ Separado | ✅ Integrado |
-| **Analytics conversión** | ❌ Solo clics | ✅ Funnel completo |
-| **Gestión clientes** | ❌ No | ✅ Sí |
-| **Optimización** | ❌ No | ✅ A/B testing |
-| **Retención** | ❌ No | ✅ Re-engagement |
-| **Precio** | $5-29/mes | Gratis + Premium |
+
+| Feature                  | Linktree         | Cripqer              |
+| ------------------------ | ---------------- | -------------------- |
+| **Propósito**            | Organiza enlaces | Construye conversión |
+| **QR incluido**          | ❌ Separado      | ✅ Integrado         |
+| **Analytics conversión** | ❌ Solo clics    | ✅ Funnel completo   |
+| **Gestión clientes**     | ❌ No            | ✅ Sí                |
+| **Optimización**         | ❌ No            | ✅ A/B testing       |
+| **Retención**            | ❌ No            | ✅ Re-engagement     |
+| **Precio**               | $5-29/mes        | Gratis + Premium     |
 
 ### Nueva Página: /casos-de-uso
+
 **URL**: https://www.cripqer.dev/casos-de-uso
 **Título**: "Casos de Uso: Conversión por Industria"
 
 **Industrias**:
+
 1. 🍽️ Restaurantes
 2. 💇 Salones de belleza
 3. 🏋️ Gimnasios y coaches
@@ -322,9 +364,11 @@ VOLVER A ATRAER (Retención)
 ## 🎯 NUEVO TAGLINE PARA SEO
 
 ### Antes
+
 "Generador de Código QR con Página Personalizada"
 
 ### Después (Opciones)
+
 1. **"La Plataforma de Conversión Inteligente"** ⭐ (Recomendado)
 2. "De la Atención al Cliente en Una Plataforma"
 3. "Más que un Biolink: Tu Sistema de Conversión"
@@ -342,17 +386,17 @@ VOLVER A ATRAER (Retención)
 <section className="hero">
   <h1>La Plataforma de Conversión Inteligente</h1>
   <p className="subtitle">
-    No solo enlaces. Construye el recorrido completo: 
+    No solo enlaces. Construye el recorrido completo:
     De la atención al cliente recurrente.
   </p>
-  
+
   {/* Comparativa Visual */}
   <div className="comparison">
     <div className="competitor">
       <span className="logo">Linktree</span>
       <div className="flow">Audiencia → Enlaces → Te vas</div>
     </div>
-    
+
     <div className="cripqer">
       <span className="logo">Cripqer</span>
       <div className="flow">
@@ -366,9 +410,9 @@ VOLVER A ATRAER (Retención)
 ### 2. Meta Description Global (Actualizar __root.tsx)
 
 ```typescript
-{ 
-  name: "description", 
-  content: "Plataforma de conversión completa: Crea tu QR, atrae tráfico, convierte visitantes en clientes y mide resultados. Más que un biolink, es tu sistema de crecimiento." 
+{
+  name: "description",
+  content: "Plataforma de conversión completa: Crea tu QR, atrae tráfico, convierte visitantes en clientes y mide resultados. Más que un biolink, es tu sistema de crecimiento."
 }
 ```
 
@@ -378,11 +422,11 @@ VOLVER A ATRAER (Retención)
 const structuredData = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  "name": "Cripqer",
-  "applicationCategory": "BusinessApplication",
-  "applicationSubCategory": "Conversion Optimization Platform",
+  name: "Cripqer",
+  applicationCategory: "BusinessApplication",
+  applicationSubCategory: "Conversion Optimization Platform",
   // ... resto del schema actualizado
-}
+};
 ```
 
 ---
@@ -390,12 +434,14 @@ const structuredData = {
 ## 📈 IMPACTO ESPERADO DEL REPOSICIONAMIENTO
 
 ### Antes (Solo "Generador QR")
+
 - **Competencia**: Alta (50+ competidores directos)
 - **Diferenciación**: Baja
 - **Tráfico potencial**: 5,000 visitas/mes
 - **Conversión**: 1-2% (commodity)
 
 ### Después ("Plataforma de Conversión")
+
 - **Competencia**: Media-Baja (nicho específico)
 - **Diferenciación**: MUY Alta
 - **Tráfico potencial**: 15,000 visitas/mes

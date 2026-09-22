@@ -8,12 +8,7 @@
  */
 
 export type ItemType =
-  | "product"
-  | "service"
-  | "menu_item"
-  | "portfolio_item"
-  | "listing"
-  | "project";
+  "product" | "service" | "menu_item" | "portfolio_item" | "listing" | "project";
 
 /** V1 visible modes. `checkout` exists as a future contract only. */
 export type SalesMode = "contact" | "quote" | "booking" | "info" | "checkout";

@@ -6,11 +6,7 @@
  * visual brain.
  */
 
-import type {
-  CatalogV1,
-  NormalizedContentV1,
-  SalesActionV1,
-} from "./catalog.types";
+import type { CatalogV1, NormalizedContentV1, SalesActionV1 } from "./catalog.types";
 import { resolvePreset, type SemanticPreset } from "./business-presets";
 import type { NavItemV1 } from "./ecosystem";
 import { actionHref, defaultLabel } from "./sales-actions";
@@ -55,7 +51,10 @@ const CATALOG_KIND_BY_EXPERIENCE: Record<ExperienceType, CatalogV1["kind"] | nul
   landing: null,
 };
 
-function pickCatalog(content: NormalizedContentV1, experience: ExperienceType): CatalogV1 | undefined {
+function pickCatalog(
+  content: NormalizedContentV1,
+  experience: ExperienceType,
+): CatalogV1 | undefined {
   const wanted = CATALOG_KIND_BY_EXPERIENCE[experience];
   if (wanted) {
     const match = content.catalogs.find((c) => c.kind === wanted && c.items.length > 0);
@@ -126,13 +125,17 @@ function sectionAvailable(
     case "about":
       return Boolean(content.business.about);
     case "missionVision":
-      return Boolean(content.business.mission ?? content.business.vision ?? (content.business.values?.length ?? 0) > 0);
+      return Boolean(
+        content.business.mission ??
+        content.business.vision ??
+        (content.business.values?.length ?? 0) > 0,
+      );
     case "whyUs":
       return (content.business.differentiators?.length ?? 0) > 0;
     case "categoryNav":
       return (catalog?.categories.length ?? 0) > 1;
     case "search":
-      return (request.preferences?.showSearch ?? (catalog?.items.length ?? 0) >= 8);
+      return request.preferences?.showSearch ?? (catalog?.items.length ?? 0) >= 8;
     case "filterBar":
       return (
         (request.preferences?.showFilters ?? false) ||
@@ -256,8 +259,11 @@ function resolveCtas(
     }
   }
   // 3. safe generic contact action (enabled only when it truly resolves).
-  const resolvedPrimary: SalesActionV1 =
-    primary ?? { kind: "contact", label: defaultLabel("contact"), enabled: false };
+  const resolvedPrimary: SalesActionV1 = primary ?? {
+    kind: "contact",
+    label: defaultLabel("contact"),
+    enabled: false,
+  };
 
   // Preset secondaries enrich, never override, the explicit ones.
   const merged = [...secondary];
@@ -419,7 +425,17 @@ export function generateMiniSitePlan(request: PageGenerationRequest): MiniSitePl
 
   const groups: Array<{ kinds: SectionKind[]; title: string; slug: string }> = [
     {
-      kinds: ["categoryNav", "search", "filterBar", "featured", "productGrid", "serviceGrid", "menuSections", "listingGrid", "pricing"],
+      kinds: [
+        "categoryNav",
+        "search",
+        "filterBar",
+        "featured",
+        "productGrid",
+        "serviceGrid",
+        "menuSections",
+        "listingGrid",
+        "pricing",
+      ],
       title: "Catalog",
       slug: "catalog",
     },
@@ -474,8 +490,7 @@ export function generateMiniSitePlan(request: PageGenerationRequest): MiniSitePl
     destination: { mode: "internal_page", pageId: p.pageId },
   }));
   for (const page of pages) {
-    page.navigation =
-      pages.length > 1 ? siteNav : buildNavigation(page.sections);
+    page.navigation = pages.length > 1 ? siteNav : buildNavigation(page.sections);
   }
 
   const business: MiniSitePlanV1["business"] = {

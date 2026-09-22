@@ -6,20 +6,9 @@ import type { StandaloneStyle } from "./standaloneStyle";
 /* Template07 — Link-in-bio fitness dark green: hero, avatar con aro, tarjetas de menú y CTA newsletter */
 
 export type Template07SocialType =
-  | "instagram"
-  | "tiktok"
-  | "youtube"
-  | "email"
-  | "whatsapp"
-  | "website";
+  "instagram" | "tiktok" | "youtube" | "email" | "whatsapp" | "website";
 
-export type Template07CardIcon =
-  | "dumbbell"
-  | "person"
-  | "leaf"
-  | "gift"
-  | "heart"
-  | "star";
+export type Template07CardIcon = "dumbbell" | "person" | "leaf" | "gift" | "heart" | "star";
 
 export interface Template07Social {
   type: Template07SocialType;
@@ -150,16 +139,16 @@ function CardIcon({ icon, color }: { icon: Template07CardIcon; color: string }) 
       return (
         <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
           <rect x="3" y="9" width="18" height="11" rx="2" {...s} />
-          <path d="M3 13h18M12 9v11M12 9S9 3 6.5 5.5 12 9 12 9zm0 0s3-6 5.5-3.5S12 9 12 9z" {...s} />
+          <path
+            d="M3 13h18M12 9v11M12 9S9 3 6.5 5.5 12 9 12 9zm0 0s3-6 5.5-3.5S12 9 12 9z"
+            {...s}
+          />
         </svg>
       );
     case "heart":
       return (
         <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-          <path
-            d="M12 20s-7-4.4-7-9a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 4.6-7 9-7 9z"
-            {...s}
-          />
+          <path d="M12 20s-7-4.4-7-9a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 4.6-7 9-7 9z" {...s} />
         </svg>
       );
     default:
@@ -247,21 +236,23 @@ export default function Template07({
                   boxSizing: "border-box",
                 }}
               >
-              <img
-                src={avatarUrl}
-                alt={name}
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                  display: "block",
-                }}
-              />
+                <img
+                  src={avatarUrl}
+                  alt={name}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                    display: "block",
+                  }}
+                />
               </div>
             </EditableTarget>
           </div>
 
-          <div style={{ textAlign: standaloneStyle?.title.align ?? "center", padding: "14px 20px 0" }}>
+          <div
+            style={{ textAlign: standaloneStyle?.title.align ?? "center", padding: "14px 20px 0" }}
+          >
             <EditableTarget
               id={EDIT_TARGETS.name}
               registry={targetRegistry}
@@ -363,7 +354,13 @@ export default function Template07({
         </div>
 
         {/* Tarjetas */}
-        <div style={{ padding: "6px 14px 0", display: "grid", gap: standaloneStyle?.button.spacing ?? 12 }}>
+        <div
+          style={{
+            padding: "6px 14px 0",
+            display: "grid",
+            gap: standaloneStyle?.button.spacing ?? 12,
+          }}
+        >
           {cards.map((c) => (
             <EditableTarget
               key={c.id}
@@ -376,66 +373,60 @@ export default function Template07({
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 12,
-                padding: "14px 14px",
-                borderRadius: standaloneStyle?.button.radius ?? 14,
-                textDecoration: "none",
-                color: standaloneStyle?.button.textColor ?? (c.highlight ? "#0d1a06" : "#fff"),
-                background: standaloneStyle?.button.background ?? (c.highlight
-                  ? `linear-gradient(90deg, ${primaryColor}, #5fae2f)`
-                  : "rgba(255,255,255,.05)"),
-                border: buttonBorder ?? (c.highlight
-                  ? "none"
-                  : "1px solid rgba(255,255,255,.09)"),
-                boxSizing: "border-box",
-                }}
-              >
-              <span
-                style={{
-                  width: 40,
-                  height: 40,
-                  flex: "0 0 auto",
-                  borderRadius: 12,
-                  background: c.highlight
-                    ? "rgba(0,0,0,.18)"
-                    : "rgba(142,209,79,.12)",
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: "center",
+                  gap: 12,
+                  padding: "14px 14px",
+                  borderRadius: standaloneStyle?.button.radius ?? 14,
+                  textDecoration: "none",
+                  color: standaloneStyle?.button.textColor ?? (c.highlight ? "#0d1a06" : "#fff"),
+                  background:
+                    standaloneStyle?.button.background ??
+                    (c.highlight
+                      ? `linear-gradient(90deg, ${primaryColor}, #5fae2f)`
+                      : "rgba(255,255,255,.05)"),
+                  border:
+                    buttonBorder ?? (c.highlight ? "none" : "1px solid rgba(255,255,255,.09)"),
+                  boxSizing: "border-box",
                 }}
               >
-                <CardIcon
-                  icon={c.icon}
-                  color={c.highlight ? "#0d1a06" : primaryColor}
-                />
-              </span>
-              <span style={{ flex: 1, minWidth: 0 }}>
-                <span style={{ display: "block", fontWeight: 700, fontSize: 16 }}>
-                  {c.title}
-                </span>
                 <span
                   style={{
-                    display: "block",
-                    fontSize: 12.5,
-                    marginTop: 2,
-                    opacity: 0.75,
+                    width: 40,
+                    height: 40,
+                    flex: "0 0 auto",
+                    borderRadius: 12,
+                    background: c.highlight ? "rgba(0,0,0,.18)" : "rgba(142,209,79,.12)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
                   }}
                 >
-                  {c.description}
+                  <CardIcon icon={c.icon} color={c.highlight ? "#0d1a06" : primaryColor} />
                 </span>
-              </span>
-              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-                <path
-                  d="M9 5l7 7-7 7"
-                  fill="none"
-                  stroke={c.highlight ? "#0d1a06" : "#c9d6c2"}
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+                <span style={{ flex: 1, minWidth: 0 }}>
+                  <span style={{ display: "block", fontWeight: 700, fontSize: 16 }}>{c.title}</span>
+                  <span
+                    style={{
+                      display: "block",
+                      fontSize: 12.5,
+                      marginTop: 2,
+                      opacity: 0.75,
+                    }}
+                  >
+                    {c.description}
+                  </span>
+                </span>
+                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                  <path
+                    d="M9 5l7 7-7 7"
+                    fill="none"
+                    stroke={c.highlight ? "#0d1a06" : "#c9d6c2"}
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
               </a>
             </EditableTarget>
           ))}
@@ -453,9 +444,7 @@ export default function Template07({
               boxSizing: "border-box",
             }}
           >
-            <p style={{ margin: 0, fontWeight: 700, fontSize: 17 }}>
-              {newsletterTitle}
-            </p>
+            <p style={{ margin: 0, fontWeight: 700, fontSize: 17 }}>{newsletterTitle}</p>
             <p
               style={{
                 margin: "4px 0 14px",
@@ -473,7 +462,9 @@ export default function Template07({
                 display: "inline-block",
                 padding: "12px 26px",
                 borderRadius: standaloneStyle?.button.radius ?? 10,
-                background: standaloneStyle?.button.background ?? `linear-gradient(90deg, ${primaryColor}, #5fae2f)`,
+                background:
+                  standaloneStyle?.button.background ??
+                  `linear-gradient(90deg, ${primaryColor}, #5fae2f)`,
                 color: standaloneStyle?.button.textColor ?? "#0d1a06",
                 border: buttonBorder,
                 fontWeight: 700,
@@ -507,4 +498,3 @@ export default function Template07({
     </div>
   );
 }
-

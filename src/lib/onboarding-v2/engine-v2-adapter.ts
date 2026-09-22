@@ -323,7 +323,9 @@ export function mapOnboardingIntentV2ToEngineInput(
   pushOnce(result.mappedFields, `business.category -> businessCategory=${engineCategory}`);
   if (category === "retail") {
     pushOnce(result.deferredFields, "business.category=retail");
-    result.warnings.push("The current Engine V2 category vocabulary has no retail value; using other.");
+    result.warnings.push(
+      "The current Engine V2 category vocabulary has no retail value; using other.",
+    );
   }
   if (intent.identity.bio) pushOnce(result.mappedFields, "identity.bio -> content.bio");
   pushOnce(result.mappedFields, "actions.primary -> primaryAction");

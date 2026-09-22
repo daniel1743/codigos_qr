@@ -42,23 +42,23 @@ Call log:
   1  | import { mkdir } from "node:fs/promises";
   2  | import { dirname, resolve } from "node:path";
   3  | import { expect, test as setup } from "@playwright/test";
-  4  | 
+  4  |
   5  | const storageState = resolve("e2e/.auth/qa-storage-state.json");
-  6  | 
+  6  |
   7  | setup("manual login and save local auth state", async ({ page }) => {
   8  |   setup.setTimeout(10 * 60 * 1000);
   9  |   await page.goto("/editor");
-  10 | 
+  10 |
   11 |   // The user completes the real login in the visible browser window.
   12 |   // We only continue after an authenticated editor surface is observable.
   13 |   await expect(
   14 |     page.getByRole("button", { name: /Guardar|Publicar|Exportar/ }).first(),
 > 15 |   ).toBeVisible({ timeout: 9 * 60 * 1000 });
      |     ^ Error: expect(locator).toBeVisible() failed
-  16 | 
+  16 |
   17 |   await mkdir(dirname(storageState), { recursive: true });
   18 |   await page.context().storageState({ path: storageState });
   19 |   console.log("[AUTH_BOOTSTRAP] authenticated surface verified; local storageState saved");
   20 | });
-  21 | 
+  21 |
 ```

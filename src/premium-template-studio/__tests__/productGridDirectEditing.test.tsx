@@ -4,15 +4,15 @@ import { createDemoConfig } from "../templates/definitions";
 import { TemplateRenderer } from "../engine/TemplateRenderer";
 import type { BioTemplateConfig } from "../types";
 
-describe("catalog ProductGrid direct editing", () => {
-  it("exposes direct text targets for product fields in edit mode", () => {
+describe("catalog PremiumProductCardMagicV1 phase 1", () => {
+  it("renders one real catalog item with Magic presentation and no editor wiring", () => {
     const config = {
       ...createDemoConfig(),
       blocks: [
         {
           id: "catalog-products",
           type: "productGrid" as const,
-          variant: "default",
+          variant: "catalog-premium-card-v1",
           style: {},
           layout: { columns: 3 },
           visibility: { desktop: true, tablet: true, mobile: true },
@@ -42,39 +42,23 @@ describe("catalog ProductGrid direct editing", () => {
       />,
     );
 
-    expect(html).toContain('data-pts-inline="blocks.catalog-products.content.products.0.title"');
-    expect(html).toContain(
-      'data-pts-inline="blocks.catalog-products.content.products.0.description"',
-    );
-    expect(html).toContain('data-pts-inline="blocks.catalog-products.content.products.0.price"');
-    expect(html).toContain('data-pts-inline="blocks.catalog-products.content.products.0.ctaLabel"');
-    expect(html).not.toContain("<p><p");
+    expect(html).toContain('data-premium-card="magic-v1"');
+    expect(html).toContain('data-premium-card-image="magic-v1"');
+    expect(html).toContain("Producto uno");
+    expect(html).toContain("Descripción corta");
+    expect(html).toContain("$10");
+    expect(html).toContain("Comprar");
+    expect(html).toContain('aria-disabled="true"');
+    expect(html).not.toContain('data-pts-inline="blocks.catalog-products.content.products.0');
+    expect(html).not.toContain('data-premium-card="true"');
     expect(html).not.toContain("Ver detalle");
     expect(html).not.toContain("Fondo");
-
-    const selectedHtml = renderToStaticMarkup(
-      <TemplateRenderer
-        config={config}
-        mode="edit"
-        breakpoint="desktop"
-        editing={{
-          selectedCollectionItem: {
-            blockId: "catalog-products",
-            collection: "product-grid",
-            itemId: "product-1",
-          },
-          onInlineEdit: () => undefined,
-          onCollectionItemAction: () => undefined,
-        }}
-      />,
-    );
-    expect(selectedHtml).toContain("Ver detalle");
-    expect(selectedHtml).toContain("Fondo");
 
     const publicHtml = renderToStaticMarkup(
       <TemplateRenderer config={config} mode="public" breakpoint="desktop" />,
     );
-    expect(publicHtml).not.toContain("Ver detalle");
+    expect(publicHtml).toContain('data-premium-card="magic-v1"');
     expect(publicHtml).not.toContain("Text styling");
+    expect(publicHtml).not.toContain('data-pts-inline="blocks.catalog-products.content.products.0');
   });
 });

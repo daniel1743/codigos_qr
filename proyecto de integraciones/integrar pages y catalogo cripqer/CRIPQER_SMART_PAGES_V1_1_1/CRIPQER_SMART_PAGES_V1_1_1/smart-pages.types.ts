@@ -5,28 +5,12 @@
  * contract. A host adapter maps OnboardingIntentV2 -> PageGenerationRequest.
  */
 
-import type {
-  NormalizedContentV1,
-  SalesActionV1,
-  SalesMode,
-} from "./catalog.types";
+import type { NormalizedContentV1, SalesActionV1, SalesMode } from "./catalog.types";
 import type { EcosystemContextV1, NavItemV1 } from "./ecosystem";
 
-export type ExperienceType =
-  | "catalog"
-  | "services"
-  | "portfolio"
-  | "menu"
-  | "listings"
-  | "landing";
+export type ExperienceType = "catalog" | "services" | "portfolio" | "menu" | "listings" | "landing";
 
-export type PageGoal =
-  | "sell"
-  | "book"
-  | "quote"
-  | "showcase"
-  | "inform"
-  | "contact";
+export type PageGoal = "sell" | "book" | "quote" | "showcase" | "inform" | "contact";
 
 export type Density = "minimal" | "balanced" | "rich";
 

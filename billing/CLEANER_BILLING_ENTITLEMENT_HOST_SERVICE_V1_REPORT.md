@@ -11,28 +11,28 @@ Task: CRIPQER BILLING — CANONICAL ENTITLEMENT HOST SERVICE V1
 
 ### Files read (exact — nothing else)
 
-| File | Role |
-|---|---|
-| `src/server/billing/auth.ts` | Frozen Auth Boundary (`requireBillingUser().userId` trusted id) |
-| `src/lib/billing/billing.types.ts` | Canonical receiving types (`BillingSubscriptionRecord`) |
-| `src/server/billing/persistence.ts` | Frozen persistence (`getCanonicalSubscriptionForUser`) |
-| `src/server/billing/entitlements.ts` | Frozen Entitlement Resolver Core V1 (`resolveEntitlement`) |
-| `src/lib/entitlements.ts` | READ-ONLY legacy reference (documented, not modified) |
-| `billing/CLEANER_BILLING_ENTITLEMENT_RESOLVER_V1_REPORT.md` | Prior convention reference |
-| `billing/CLEANER_BILLING_FIRST_PURCHASE_LOOKUPS_V1_REPORT.md` | Prior convention reference |
-| `tsconfig.json` | Compiler flags (validation only) |
-| `package.json` | `"type": "module"` + TypeScript/Node versions (validation only) |
+| File                                                          | Role                                                            |
+| ------------------------------------------------------------- | --------------------------------------------------------------- |
+| `src/server/billing/auth.ts`                                  | Frozen Auth Boundary (`requireBillingUser().userId` trusted id) |
+| `src/lib/billing/billing.types.ts`                            | Canonical receiving types (`BillingSubscriptionRecord`)         |
+| `src/server/billing/persistence.ts`                           | Frozen persistence (`getCanonicalSubscriptionForUser`)          |
+| `src/server/billing/entitlements.ts`                          | Frozen Entitlement Resolver Core V1 (`resolveEntitlement`)      |
+| `src/lib/entitlements.ts`                                     | READ-ONLY legacy reference (documented, not modified)           |
+| `billing/CLEANER_BILLING_ENTITLEMENT_RESOLVER_V1_REPORT.md`   | Prior convention reference                                      |
+| `billing/CLEANER_BILLING_FIRST_PURCHASE_LOOKUPS_V1_REPORT.md` | Prior convention reference                                      |
+| `tsconfig.json`                                               | Compiler flags (validation only)                                |
+| `package.json`                                                | `"type": "module"` + TypeScript/Node versions (validation only) |
 
 > A temporary `tsconfig.entitlement-service-check.json` was created for a
 > targeted type-check and then **deleted**. It is not part of the deliverable.
 
 ### Files created (exact — nothing else)
 
-| File | Role |
-|---|---|
-| `src/server/billing/entitlement-service.ts` | Canonical Entitlement Host Service V1 |
-| `src/server/billing/entitlement-service.selfcheck.ts` | Pure-local mocked selfcheck (no network, no DB) |
-| `billing/CLEANER_BILLING_ENTITLEMENT_HOST_SERVICE_V1_REPORT.md` | This report |
+| File                                                            | Role                                            |
+| --------------------------------------------------------------- | ----------------------------------------------- |
+| `src/server/billing/entitlement-service.ts`                     | Canonical Entitlement Host Service V1           |
+| `src/server/billing/entitlement-service.selfcheck.ts`           | Pure-local mocked selfcheck (no network, no DB) |
+| `billing/CLEANER_BILLING_ENTITLEMENT_HOST_SERVICE_V1_REPORT.md` | This report                                     |
 
 ### Files modified
 
@@ -76,11 +76,11 @@ EntitlementResolution`.
 
 ## C. COMPATIBILITY
 
-| Boundary | Compatible without modification? |
-|---|---|
-| Auth Boundary (`auth.ts`) | **YES** — `requireBillingUser().userId` supplies the trusted userId |
-| Persistence (`persistence.ts`) | **YES** — `getCanonicalSubscriptionForUser` is the lookup primitive |
-| Entitlement Resolver (`entitlements.ts`) | **YES** — reused unchanged, no logic duplicated |
+| Boundary                                 | Compatible without modification?                                    |
+| ---------------------------------------- | ------------------------------------------------------------------- |
+| Auth Boundary (`auth.ts`)                | **YES** — `requireBillingUser().userId` supplies the trusted userId |
+| Persistence (`persistence.ts`)           | **YES** — `getCanonicalSubscriptionForUser` is the lookup primitive |
+| Entitlement Resolver (`entitlements.ts`) | **YES** — reused unchanged, no logic duplicated                     |
 
 None of the three frozen modules were modified.
 
@@ -109,21 +109,20 @@ The development email override in the legacy module is **not removed** and is
 **not** made canonical Billing authority; product access behavior is unchanged
 in this phase.
 
-
 ---
 
 ## E. SECURITY (mandatory)
 
-| Check | Result |
-|---|---|
-| Browser userId authoritative | **NO** |
-| Email authoritative | **NO** |
-| Provider redirect authoritative | **NO** |
-| Legacy dev-email override canonical authority | **NO** |
-| Fail closed to free | **YES** (no subscription / blank id / non-qualifying status → free) |
-| Provider calls | **NO** |
-| DB writes / migrations | **NO** |
-| Product features granted | **NO** (feature matrix intentionally NOT implemented) |
+| Check                                         | Result                                                              |
+| --------------------------------------------- | ------------------------------------------------------------------- |
+| Browser userId authoritative                  | **NO**                                                              |
+| Email authoritative                           | **NO**                                                              |
+| Provider redirect authoritative               | **NO**                                                              |
+| Legacy dev-email override canonical authority | **NO**                                                              |
+| Fail closed to free                           | **YES** (no subscription / blank id / non-qualifying status → free) |
+| Provider calls                                | **NO**                                                              |
+| DB writes / migrations                        | **NO**                                                              |
+| Product features granted                      | **NO** (feature matrix intentionally NOT implemented)               |
 
 The only authority is the canonical subscription state, resolved through the
 frozen resolver. Default is FREE.

@@ -150,10 +150,7 @@ describe("Save and Publish Contracts", () => {
       p_profile_id: "profile-1",
       p_editor_config: validConfig,
     });
-    expect(rpc).not.toHaveBeenCalledWith(
-      "publish_profile_canonical_snapshot",
-      expect.anything(),
-    );
+    expect(rpc).not.toHaveBeenCalledWith("publish_profile_canonical_snapshot", expect.anything());
   });
 
   it("canonical publish promotes the exact snapshot through the publish RPC", async () => {

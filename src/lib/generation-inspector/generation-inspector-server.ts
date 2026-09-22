@@ -53,9 +53,8 @@ function validateInput(value: unknown): InspectorInput {
 export const generateSmartPageWithTraceFn = createServerFn({ method: "POST", strict: false })
   .validator(validateInput)
   .handler(async ({ data }): Promise<InspectorResult> => {
-    const { generateSmartPageFromOnboarding } = await import(
-      "@/lib/onboarding-v2/smart-pages-adapter"
-    );
+    const { generateSmartPageFromOnboarding } =
+      await import("@/lib/onboarding-v2/smart-pages-adapter");
     const now = data.now;
     const traceId = data.traceId ?? createTraceId();
 
@@ -89,7 +88,10 @@ export const generateSmartPageWithTraceFn = createServerFn({ method: "POST", str
           });
           strategyFailure = { payload, issues: validateIntent(payload) };
         } catch {
-          strategyFailure = { payload: adapter.engineInput, issues: ["Unable to reconstruct diagnostic payload."] };
+          strategyFailure = {
+            payload: adapter.engineInput,
+            issues: ["Unable to reconstruct diagnostic payload."],
+          };
         }
       }
     }

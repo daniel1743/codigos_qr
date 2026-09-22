@@ -17,7 +17,8 @@ const headers = {
 (async () => {
   const rows = await (
     await fetch(
-      base + "/rest/v1/pages?select=id,public_id,title,published,template_config&title=like." +
+      base +
+        "/rest/v1/pages?select=id,public_id,title,published,template_config&title=like." +
         encodeURIComponent("QA PAGES_7B Link host*"),
       { headers },
     )

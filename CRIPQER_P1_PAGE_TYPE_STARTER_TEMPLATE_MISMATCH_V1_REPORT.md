@@ -20,16 +20,16 @@ creator portfolio in the real editor.
 Added `src/components/power-editor/pageStarterConfig.ts` with one explicit map
 to existing canonical template definitions:
 
-| Page type | Existing starter |
-|---|---|
-| `landing` | Modern Bento |
-| `promotion` | Product Launch |
-| `menu` | Restaurant Visual |
-| `campaign` | Product Launch |
-| `event` | DJ Events |
-| `services` | Professional Trust |
-| `catalog` | Store Bento |
-| `portfolio` | Portfolio Bento |
+| Page type   | Existing starter   |
+| ----------- | ------------------ |
+| `landing`   | Modern Bento       |
+| `promotion` | Product Launch     |
+| `menu`      | Restaurant Visual  |
+| `campaign`  | Product Launch     |
+| `event`     | DJ Events          |
+| `services`  | Professional Trust |
+| `catalog`   | Store Bento        |
+| `portfolio` | Portfolio Bento    |
 
 The form now calls `createPageStarterConfig(title, pageType)` before the
 existing `pageCanonicalService.saveDraft` path. No second template system was

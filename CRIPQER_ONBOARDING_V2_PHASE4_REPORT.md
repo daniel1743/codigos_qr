@@ -71,14 +71,14 @@ RLS-protected RPC without TLS bypass or service-role access.
 
 ## Final gate
 
-| Required result                              | Result                     |
-| -------------------------------------------- | -------------------------- |
-| QA baseline reset                            | YES                        |
-| NEW_BASELINE_SNAPSHOT captured               | YES                        |
-| Final Phase 4 QA                             | PASS                       |
-| QA profile restored to NEW_BASELINE_SNAPSHOT | YES                        |
-| Non-QA profiles modified                     | NO                         |
-| Data loss detected in final run              | NO                         |
-| Commit hash                                  | `ac850b0` — implementation |
+| Required result                              | Result                                                          |
+| -------------------------------------------- | --------------------------------------------------------------- |
+| QA baseline reset                            | YES                                                             |
+| NEW_BASELINE_SNAPSHOT captured               | YES                                                             |
+| Final Phase 4 QA                             | PASS                                                            |
+| QA profile restored to NEW_BASELINE_SNAPSHOT | YES                                                             |
+| Non-QA profiles modified                     | NO                                                              |
+| Data loss detected in final run              | NO                                                              |
+| Commit hash                                  | `ac850b0` — implementation                                      |
 | Push result                                  | PASS — pushed to `origin/feat/basic-editor-editorial-canvas-ui` |
-| `PHASE_4_STATUS`                             | `READY`                    |
+| `PHASE_4_STATUS`                             | `READY`                                                         |

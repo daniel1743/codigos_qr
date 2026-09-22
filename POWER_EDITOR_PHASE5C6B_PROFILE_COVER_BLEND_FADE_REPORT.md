@@ -220,4 +220,3 @@ Pending user runtime confirmation. Key checks:
 Final PASS requires user runtime confirmation that Blend/Fade visibly merges the Cover
 lower edge into the REAL Page Background while preserving every previously approved
 Cover setting and 5C6A geometry.
-

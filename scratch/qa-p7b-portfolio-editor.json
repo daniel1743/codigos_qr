@@ -20,12 +20,7 @@
       "theme_colors": true,
       "theme_typography": true,
       "layout_responsive": true,
-      "blocks": [
-        "text",
-        "cta",
-        "portfolio",
-        "contact"
-      ],
+      "blocks": ["text", "cta", "portfolio", "contact"],
       "block_count": 4
     },
     "published_snapshot_is_canonical": false,

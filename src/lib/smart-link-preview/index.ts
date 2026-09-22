@@ -100,7 +100,10 @@ export function normalizePreviewUrl(input: string): { url: URL; href: string } |
 
 /** Normalize a hostname for matching (lowercase, strip leading/trailing dots). */
 function normalizeHostname(hostname: string): string {
-  return hostname.toLowerCase().replace(/^www\./, "").replace(/\.$/, "");
+  return hostname
+    .toLowerCase()
+    .replace(/^www\./, "")
+    .replace(/\.$/, "");
 }
 
 /**
@@ -113,9 +116,7 @@ export function detectProviderFromUrl(input: string): SmartLinkProvider {
   const parsed = normalizePreviewUrl(input);
   if (!parsed) return "generic-web";
   const host = normalizeHostname(parsed.url.hostname);
-  const rule = PROVIDERS_V1.find((r) =>
-    r.hosts.some((h) => host === h || host.endsWith(`.${h}`)),
-  );
+  const rule = PROVIDERS_V1.find((r) => r.hosts.some((h) => host === h || host.endsWith(`.${h}`)));
   return rule?.id ?? "generic-web";
 }
 
@@ -124,9 +125,30 @@ export function detectProviderFromUrl(input: string): SmartLinkProvider {
 /* ------------------------------------------------------------------ */
 
 const RESERVED_PATH_SEGMENTS = new Set([
-  "p", "reel", "reels", "stories", "explore", "accounts", "share", "tv",
-  "watch", "channel", "user", "c", "results", "search", "settings",
-  "in", "company", "school", "jobs", "feed", "post", "posts", "groups", "pages",
+  "p",
+  "reel",
+  "reels",
+  "stories",
+  "explore",
+  "accounts",
+  "share",
+  "tv",
+  "watch",
+  "channel",
+  "user",
+  "c",
+  "results",
+  "search",
+  "settings",
+  "in",
+  "company",
+  "school",
+  "jobs",
+  "feed",
+  "post",
+  "posts",
+  "groups",
+  "pages",
 ]);
 
 /**
@@ -206,7 +228,8 @@ export function isBlockedPreviewHostname(hostname: string): boolean {
   const host = normalizeHostname(hostname || "");
   if (!host) return true;
   if (host === "localhost" || host.endsWith(".localhost")) return true;
-  if (host === "metadata.google.internal" || host.endsWith(".metadata.google.internal")) return true;
+  if (host === "metadata.google.internal" || host.endsWith(".metadata.google.internal"))
+    return true;
   if (host === "metadata.goog" || host.endsWith(".metadata.goog")) return true;
 
   if (host.includes(":")) {
@@ -359,4 +382,3 @@ export function computeCardEnrichment(
 
   return result;
 }
-

@@ -40,7 +40,8 @@ function PrimaryMediaQuickAdd() {
   const { state, dispatch } = useStudio();
   const { profile } = state.config;
   const fullHeroActive = isFullHeroActive(state.config.blocks);
-  const bannerPresent = !fullHeroActive && Boolean(profile.banner.enabled && profile.banner.imageUrl);
+  const bannerPresent =
+    !fullHeroActive && Boolean(profile.banner.enabled && profile.banner.imageUrl);
   const avatarPresent = !fullHeroActive && Boolean(profile.avatarUrl);
   const hero = state.config.blocks.find((block) => block.type === "hero");
 
@@ -54,7 +55,13 @@ function PrimaryMediaQuickAdd() {
           type="button"
           disabled={bannerPresent || fullHeroActive}
           aria-disabled={bannerPresent || fullHeroActive}
-          title={fullHeroActive ? "Este Hero ya reemplaza el banner." : bannerPresent ? "Ya está añadido a esta página" : "Añadir banner"}
+          title={
+            fullHeroActive
+              ? "Este Hero ya reemplaza el banner."
+              : bannerPresent
+                ? "Ya está añadido a esta página"
+                : "Añadir banner"
+          }
           onClick={() => {
             if (bannerPresent || fullHeroActive) return;
             dispatch({ type: "patch", path: "profile.banner.enabled", value: true });
@@ -69,16 +76,30 @@ function PrimaryMediaQuickAdd() {
         >
           <Icon name="Image" className="h-4 w-4 shrink-0" />
           <span className="min-w-0 flex-1 font-medium">
-            {fullHeroActive ? "✓ Banner reemplazado por Hero" : bannerPresent ? "✓ Banner añadido" : "+ Añadir banner"}
+            {fullHeroActive
+              ? "✓ Banner reemplazado por Hero"
+              : bannerPresent
+                ? "✓ Banner añadido"
+                : "+ Añadir banner"}
           </span>
         </button>
-        {fullHeroActive && <p className="px-1 text-[10px] text-muted-foreground">Este Hero ya reemplaza el banner.</p>}
+        {fullHeroActive && (
+          <p className="px-1 text-[10px] text-muted-foreground">
+            Este Hero ya reemplaza el banner.
+          </p>
+        )}
 
         <button
           type="button"
           disabled={avatarPresent || fullHeroActive}
           aria-disabled={avatarPresent || fullHeroActive}
-          title={fullHeroActive ? "Este Hero ya incluye/controla la foto principal." : avatarPresent ? "Ya está añadido a esta página" : "Añadir avatar"}
+          title={
+            fullHeroActive
+              ? "Este Hero ya incluye/controla la foto principal."
+              : avatarPresent
+                ? "Ya está añadido a esta página"
+                : "Añadir avatar"
+          }
           onClick={() => {
             if (avatarPresent || fullHeroActive) return;
             focusAvatar();
@@ -92,10 +113,18 @@ function PrimaryMediaQuickAdd() {
         >
           <Icon name="UserRound" className="h-4 w-4 shrink-0" />
           <span className="min-w-0 flex-1 font-medium">
-            {fullHeroActive ? "✓ Avatar controlado por Hero" : avatarPresent ? "✓ Avatar añadido" : "+ Añadir avatar"}
+            {fullHeroActive
+              ? "✓ Avatar controlado por Hero"
+              : avatarPresent
+                ? "✓ Avatar añadido"
+                : "+ Añadir avatar"}
           </span>
         </button>
-        {fullHeroActive && <p className="px-1 text-[10px] text-muted-foreground">Este Hero ya incluye/controla la foto principal.</p>}
+        {fullHeroActive && (
+          <p className="px-1 text-[10px] text-muted-foreground">
+            Este Hero ya incluye/controla la foto principal.
+          </p>
+        )}
 
         <button
           type="button"
@@ -361,8 +390,7 @@ function DesignPanel() {
   const { theme, layout } = state.config;
   const motionConfig = getMotionConfig(state.config);
   const typographyLocked = useCapabilityAccess("advanced_typography").state !== "ALLOW";
-  const cardsButtonsLocked =
-    useCapabilityAccess("advanced_card_button_styling").state !== "ALLOW";
+  const cardsButtonsLocked = useCapabilityAccess("advanced_card_button_styling").state !== "ALLOW";
   const textureLocked = useCapabilityAccess("premium_background_effects").state !== "ALLOW";
   const motionLocked = useCapabilityAccess("advanced_motion").state !== "ALLOW";
 
@@ -446,82 +474,85 @@ function DesignPanel() {
       </Section>
 
       <Locked locked={typographyLocked}>
-      <Section title={messages.sidebar.typography} action={typographyLocked ? <ProBadge /> : undefined}>
-        <div className="grid grid-cols-2 gap-2">
-          {TYPOGRAPHY_PRESETS.map((preset) => (
-            <button
-              key={preset.id}
-              type="button"
-              onClick={() =>
+        <Section
+          title={messages.sidebar.typography}
+          action={typographyLocked ? <ProBadge /> : undefined}
+        >
+          <div className="grid grid-cols-2 gap-2">
+            {TYPOGRAPHY_PRESETS.map((preset) => (
+              <button
+                key={preset.id}
+                type="button"
+                onClick={() =>
+                  dispatch({
+                    type: "patch",
+                    path: "theme.typography",
+                    value: {
+                      ...theme.typography,
+                      headingFont: preset.headingFont,
+                      bodyFont: preset.bodyFont,
+                      headingWeight: preset.headingWeight,
+                      headingSize: preset.headingSize,
+                      letterSpacing: preset.letterSpacing,
+                    },
+                  })
+                }
+                className="rounded-lg border border-border p-2 text-left transition hover:bg-accent"
+              >
+                <span
+                  className="block text-sm text-foreground"
+                  style={{ fontFamily: preset.headingFont }}
+                >
+                  {preset.name}
+                </span>
+                <span className="text-[10px] text-muted-foreground">
+                  {preset.headingWeight} · {preset.headingSize}px
+                </span>
+              </button>
+            ))}
+          </div>
+          <Field label={messages.sidebar.headingFont}>
+            <select
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground"
+              value={theme.typography.headingFont}
+              onChange={(e) =>
                 dispatch({
                   type: "patch",
-                  path: "theme.typography",
-                  value: {
-                    ...theme.typography,
-                    headingFont: preset.headingFont,
-                    bodyFont: preset.bodyFont,
-                    headingWeight: preset.headingWeight,
-                    headingSize: preset.headingSize,
-                    letterSpacing: preset.letterSpacing,
-                  },
+                  path: "theme.typography.headingFont",
+                  value: e.target.value,
                 })
               }
-              className="rounded-lg border border-border p-2 text-left transition hover:bg-accent"
             >
-              <span
-                className="block text-sm text-foreground"
-                style={{ fontFamily: preset.headingFont }}
-              >
-                {preset.name}
-              </span>
-              <span className="text-[10px] text-muted-foreground">
-                {preset.headingWeight} · {preset.headingSize}px
-              </span>
-            </button>
-          ))}
-        </div>
-        <Field label={messages.sidebar.headingFont}>
-          <select
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground"
-            value={theme.typography.headingFont}
-            onChange={(e) =>
-              dispatch({
-                type: "patch",
-                path: "theme.typography.headingFont",
-                value: e.target.value,
-              })
-            }
-          >
-            {FONT_OPTIONS.map((font) => (
-              <option key={font.value} value={font.value}>
-                {font.label}
-              </option>
-            ))}
-          </select>
-        </Field>
-        <Field label={messages.sidebar.bodyScale}>
-          <NumberSlider
-            value={theme.typography.bodySize}
-            min={13}
-            max={19}
-            suffix="px"
-            onChange={(v) =>
-              dispatch({ type: "patch", path: "theme.typography.bodySize", value: v })
-            }
-          />
-        </Field>
-        <Field label={messages.sidebar.letterSpacing}>
-          <NumberSlider
-            value={theme.typography.letterSpacing}
-            min={-2}
-            max={4}
-            step={0.5}
-            onChange={(v) =>
-              dispatch({ type: "patch", path: "theme.typography.letterSpacing", value: v })
-            }
-          />
-        </Field>
-      </Section>
+              {FONT_OPTIONS.map((font) => (
+                <option key={font.value} value={font.value}>
+                  {font.label}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label={messages.sidebar.bodyScale}>
+            <NumberSlider
+              value={theme.typography.bodySize}
+              min={13}
+              max={19}
+              suffix="px"
+              onChange={(v) =>
+                dispatch({ type: "patch", path: "theme.typography.bodySize", value: v })
+              }
+            />
+          </Field>
+          <Field label={messages.sidebar.letterSpacing}>
+            <NumberSlider
+              value={theme.typography.letterSpacing}
+              min={-2}
+              max={4}
+              step={0.5}
+              onChange={(v) =>
+                dispatch({ type: "patch", path: "theme.typography.letterSpacing", value: v })
+              }
+            />
+          </Field>
+        </Section>
       </Locked>
 
       <Section title={messages.sidebar.layout}>
@@ -592,173 +623,178 @@ function DesignPanel() {
       </Section>
 
       <Locked locked={cardsButtonsLocked}>
-      <Section title={messages.sidebar.cardsButtons} action={cardsButtonsLocked ? <ProBadge /> : undefined}>
-        <Field label={messages.sidebar.cardPreset}>
-          <Segmented
-            size="sm"
-            value={theme.cards.preset}
-            options={[
-              { value: "minimal", label: messages.options.min },
-              { value: "soft", label: messages.options.soft },
-              { value: "glass", label: messages.options.glass },
-              { value: "elevated", label: messages.options.lift },
-              { value: "luxury", label: messages.options.lux },
-            ]}
-            onChange={(v) => dispatch({ type: "patch", path: "theme.cards.preset", value: v })}
-          />
-        </Field>
-        <Field label={messages.sidebar.cardShadow}>
-          <Segmented
-            size="sm"
-            value={theme.cards.shadow}
-            options={[
-              { value: "none", label: messages.options.none },
-              { value: "soft", label: messages.options.soft },
-              { value: "elevated", label: messages.options.elevated },
-              { value: "floating", label: messages.options.float },
-              { value: "glow", label: messages.options.glow },
-            ]}
-            onChange={(v) => dispatch({ type: "patch", path: "theme.cards.shadow", value: v })}
-          />
-        </Field>
-        <Field label={messages.sidebar.cardBlur}>
-          <NumberSlider
-            value={theme.cards.blur}
-            min={0}
-            max={40}
-            suffix="px"
-            onChange={(v) => dispatch({ type: "patch", path: "theme.cards.blur", value: v })}
-          />
-        </Field>
-        <Field label={messages.sidebar.cardOpacity}>
-          <NumberSlider
-            value={Math.round(theme.cards.opacity * 100)}
-            min={10}
-            max={100}
-            suffix="%"
-            onChange={(v) =>
-              dispatch({ type: "patch", path: "theme.cards.opacity", value: v / 100 })
-            }
-          />
-        </Field>
-        <Field label={messages.sidebar.cardBorder}>
-          <NumberSlider
-            value={theme.cards.borderWidth}
-            min={0}
-            max={4}
-            suffix="px"
-            onChange={(v) => dispatch({ type: "patch", path: "theme.cards.borderWidth", value: v })}
-          />
-        </Field>
-        <Field label={messages.sidebar.buttonStyle}>
-          <Segmented
-            size="sm"
-            value={theme.buttons.variant}
-            options={[
-              { value: "solid", label: messages.options.solid },
-              { value: "outline", label: messages.options.outline },
-              { value: "glass", label: messages.options.glass },
-              { value: "gradient", label: messages.options.grad },
-            ]}
-            onChange={(v) => dispatch({ type: "patch", path: "theme.buttons.variant", value: v })}
-          />
-        </Field>
-        <Field label={messages.sidebar.buttonShadow}>
-          <Segmented
-            size="sm"
-            value={theme.buttons.shadow}
-            options={[
-              { value: "none", label: messages.options.none },
-              { value: "soft", label: messages.options.soft },
-              { value: "elevated", label: messages.options.elevated },
-              { value: "floating", label: messages.options.float },
-              { value: "glow", label: messages.options.glow },
-            ]}
-            onChange={(v) => dispatch({ type: "patch", path: "theme.buttons.shadow", value: v })}
-          />
-        </Field>
-        <Field label={messages.sidebar.buttonRadius}>
-          <NumberSlider
-            value={theme.buttons.radius}
-            min={0}
-            max={999}
-            onChange={(v) => dispatch({ type: "patch", path: "theme.buttons.radius", value: v })}
-          />
-        </Field>
-        <Field label={messages.sidebar.buttonHeight}>
-          <NumberSlider
-            value={theme.buttons.height}
-            min={32}
-            max={72}
-            suffix="px"
-            onChange={(v) => dispatch({ type: "patch", path: "theme.buttons.height", value: v })}
-          />
-        </Field>
-        <Field label={messages.sidebar.buttonBorder}>
-          <NumberSlider
-            value={theme.buttons.borderWidth}
-            min={0}
-            max={4}
-            suffix="px"
-            onChange={(v) =>
-              dispatch({ type: "patch", path: "theme.buttons.borderWidth", value: v })
-            }
-          />
-        </Field>
-      </Section>
+        <Section
+          title={messages.sidebar.cardsButtons}
+          action={cardsButtonsLocked ? <ProBadge /> : undefined}
+        >
+          <Field label={messages.sidebar.cardPreset}>
+            <Segmented
+              size="sm"
+              value={theme.cards.preset}
+              options={[
+                { value: "minimal", label: messages.options.min },
+                { value: "soft", label: messages.options.soft },
+                { value: "glass", label: messages.options.glass },
+                { value: "elevated", label: messages.options.lift },
+                { value: "luxury", label: messages.options.lux },
+              ]}
+              onChange={(v) => dispatch({ type: "patch", path: "theme.cards.preset", value: v })}
+            />
+          </Field>
+          <Field label={messages.sidebar.cardShadow}>
+            <Segmented
+              size="sm"
+              value={theme.cards.shadow}
+              options={[
+                { value: "none", label: messages.options.none },
+                { value: "soft", label: messages.options.soft },
+                { value: "elevated", label: messages.options.elevated },
+                { value: "floating", label: messages.options.float },
+                { value: "glow", label: messages.options.glow },
+              ]}
+              onChange={(v) => dispatch({ type: "patch", path: "theme.cards.shadow", value: v })}
+            />
+          </Field>
+          <Field label={messages.sidebar.cardBlur}>
+            <NumberSlider
+              value={theme.cards.blur}
+              min={0}
+              max={40}
+              suffix="px"
+              onChange={(v) => dispatch({ type: "patch", path: "theme.cards.blur", value: v })}
+            />
+          </Field>
+          <Field label={messages.sidebar.cardOpacity}>
+            <NumberSlider
+              value={Math.round(theme.cards.opacity * 100)}
+              min={10}
+              max={100}
+              suffix="%"
+              onChange={(v) =>
+                dispatch({ type: "patch", path: "theme.cards.opacity", value: v / 100 })
+              }
+            />
+          </Field>
+          <Field label={messages.sidebar.cardBorder}>
+            <NumberSlider
+              value={theme.cards.borderWidth}
+              min={0}
+              max={4}
+              suffix="px"
+              onChange={(v) =>
+                dispatch({ type: "patch", path: "theme.cards.borderWidth", value: v })
+              }
+            />
+          </Field>
+          <Field label={messages.sidebar.buttonStyle}>
+            <Segmented
+              size="sm"
+              value={theme.buttons.variant}
+              options={[
+                { value: "solid", label: messages.options.solid },
+                { value: "outline", label: messages.options.outline },
+                { value: "glass", label: messages.options.glass },
+                { value: "gradient", label: messages.options.grad },
+              ]}
+              onChange={(v) => dispatch({ type: "patch", path: "theme.buttons.variant", value: v })}
+            />
+          </Field>
+          <Field label={messages.sidebar.buttonShadow}>
+            <Segmented
+              size="sm"
+              value={theme.buttons.shadow}
+              options={[
+                { value: "none", label: messages.options.none },
+                { value: "soft", label: messages.options.soft },
+                { value: "elevated", label: messages.options.elevated },
+                { value: "floating", label: messages.options.float },
+                { value: "glow", label: messages.options.glow },
+              ]}
+              onChange={(v) => dispatch({ type: "patch", path: "theme.buttons.shadow", value: v })}
+            />
+          </Field>
+          <Field label={messages.sidebar.buttonRadius}>
+            <NumberSlider
+              value={theme.buttons.radius}
+              min={0}
+              max={999}
+              onChange={(v) => dispatch({ type: "patch", path: "theme.buttons.radius", value: v })}
+            />
+          </Field>
+          <Field label={messages.sidebar.buttonHeight}>
+            <NumberSlider
+              value={theme.buttons.height}
+              min={32}
+              max={72}
+              suffix="px"
+              onChange={(v) => dispatch({ type: "patch", path: "theme.buttons.height", value: v })}
+            />
+          </Field>
+          <Field label={messages.sidebar.buttonBorder}>
+            <NumberSlider
+              value={theme.buttons.borderWidth}
+              min={0}
+              max={4}
+              suffix="px"
+              onChange={(v) =>
+                dispatch({ type: "patch", path: "theme.buttons.borderWidth", value: v })
+              }
+            />
+          </Field>
+        </Section>
       </Locked>
 
       <Locked locked={textureLocked}>
-      <Section title={messages.sidebar.texture} action={textureLocked ? <ProBadge /> : undefined}>
-        <Field label={messages.sidebar.preset}>
-          <select
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground"
-            value={theme.texture?.preset ?? "none"}
-            onChange={(e) =>
-              dispatch({
-                type: "patch",
-                path: "theme.texture",
-                value: {
-                  preset: e.target.value,
-                  opacity: theme.texture?.opacity ?? 0.14,
-                  scale: theme.texture?.scale ?? 24,
-                },
-              })
-            }
-          >
-            <option value="none">{messages.options.none}</option>
-            <option value="grain">{messages.sidebar.grain}</option>
-            <option value="paper">{messages.sidebar.paper}</option>
-            <option value="linen">{messages.sidebar.linen}</option>
-            <option value="mesh">{messages.sidebar.mesh}</option>
-            <option value="frost">{messages.sidebar.frost}</option>
-          </select>
-        </Field>
-        <Field label={messages.sidebar.textureOpacity}>
-          <NumberSlider
-            value={Math.round((theme.texture?.opacity ?? 0.14) * 100)}
-            min={0}
-            max={40}
-            suffix="%"
-            onChange={(v) =>
-              dispatch({
-                type: "patch",
-                path: "theme.texture.opacity",
-                value: v / 100,
-              })
-            }
-          />
-        </Field>
-        <Field label={messages.sidebar.textureScale}>
-          <NumberSlider
-            value={theme.texture?.scale ?? 24}
-            min={8}
-            max={64}
-            suffix="px"
-            onChange={(v) => dispatch({ type: "patch", path: "theme.texture.scale", value: v })}
-          />
-        </Field>
-      </Section>
+        <Section title={messages.sidebar.texture} action={textureLocked ? <ProBadge /> : undefined}>
+          <Field label={messages.sidebar.preset}>
+            <select
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground"
+              value={theme.texture?.preset ?? "none"}
+              onChange={(e) =>
+                dispatch({
+                  type: "patch",
+                  path: "theme.texture",
+                  value: {
+                    preset: e.target.value,
+                    opacity: theme.texture?.opacity ?? 0.14,
+                    scale: theme.texture?.scale ?? 24,
+                  },
+                })
+              }
+            >
+              <option value="none">{messages.options.none}</option>
+              <option value="grain">{messages.sidebar.grain}</option>
+              <option value="paper">{messages.sidebar.paper}</option>
+              <option value="linen">{messages.sidebar.linen}</option>
+              <option value="mesh">{messages.sidebar.mesh}</option>
+              <option value="frost">{messages.sidebar.frost}</option>
+            </select>
+          </Field>
+          <Field label={messages.sidebar.textureOpacity}>
+            <NumberSlider
+              value={Math.round((theme.texture?.opacity ?? 0.14) * 100)}
+              min={0}
+              max={40}
+              suffix="%"
+              onChange={(v) =>
+                dispatch({
+                  type: "patch",
+                  path: "theme.texture.opacity",
+                  value: v / 100,
+                })
+              }
+            />
+          </Field>
+          <Field label={messages.sidebar.textureScale}>
+            <NumberSlider
+              value={theme.texture?.scale ?? 24}
+              min={8}
+              max={64}
+              suffix="px"
+              onChange={(v) => dispatch({ type: "patch", path: "theme.texture.scale", value: v })}
+            />
+          </Field>
+        </Section>
       </Locked>
 
       <Section title={messages.banner.banner}>
@@ -862,73 +898,77 @@ function DesignPanel() {
 
       {/* ---- Motion ---- */}
       <Locked locked={motionLocked}>
-      <Section title={messages.sidebar.motion} action={motionLocked ? <ProBadge /> : undefined}>
-        <Field label={messages.sidebar.preset}>
-          <Segmented
-            value={motionConfig.preset}
-            options={MOTION_PRESET_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
-            onChange={(v) => {
-              const preset = MOTION_PRESETS[v as MotionPresetId];
-              if (preset) {
-                dispatch({ type: "patch", path: "motion", value: { ...preset } });
-              }
-            }}
-            size="sm"
-          />
-        </Field>
-        <Field label={messages.sidebar.entrance}>
-          <Segmented
-            value={motionConfig.entrance}
-            options={ENTRANCE_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
-            onChange={(v) => {
-              dispatch({
-                type: "patch",
-                path: "motion",
-                value: { ...motionConfig, entrance: v as EntrancePreset },
-              });
-            }}
-            size="sm"
-          />
-        </Field>
-        <Field label={messages.sidebar.hover}>
-          <Segmented
-            value={motionConfig.hover}
-            options={HOVER_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
-            onChange={(v) => {
-              dispatch({
-                type: "patch",
-                path: "motion",
-                value: { ...motionConfig, hover: v as HoverPreset },
-              });
-            }}
-            size="sm"
-          />
-        </Field>
-        <Field label={messages.sidebar.speed}>
-          <NumberSlider
-            value={motionConfig.duration}
-            min={0}
-            max={600}
-            step={20}
-            suffix="ms"
-            onChange={(v) => {
-              dispatch({ type: "patch", path: "motion", value: { ...motionConfig, duration: v } });
-            }}
-          />
-        </Field>
-        <Field label={messages.sidebar.stagger}>
-          <NumberSlider
-            value={motionConfig.stagger}
-            min={0}
-            max={120}
-            step={5}
-            suffix="ms"
-            onChange={(v) => {
-              dispatch({ type: "patch", path: "motion", value: { ...motionConfig, stagger: v } });
-            }}
-          />
-        </Field>
-      </Section>
+        <Section title={messages.sidebar.motion} action={motionLocked ? <ProBadge /> : undefined}>
+          <Field label={messages.sidebar.preset}>
+            <Segmented
+              value={motionConfig.preset}
+              options={MOTION_PRESET_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
+              onChange={(v) => {
+                const preset = MOTION_PRESETS[v as MotionPresetId];
+                if (preset) {
+                  dispatch({ type: "patch", path: "motion", value: { ...preset } });
+                }
+              }}
+              size="sm"
+            />
+          </Field>
+          <Field label={messages.sidebar.entrance}>
+            <Segmented
+              value={motionConfig.entrance}
+              options={ENTRANCE_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
+              onChange={(v) => {
+                dispatch({
+                  type: "patch",
+                  path: "motion",
+                  value: { ...motionConfig, entrance: v as EntrancePreset },
+                });
+              }}
+              size="sm"
+            />
+          </Field>
+          <Field label={messages.sidebar.hover}>
+            <Segmented
+              value={motionConfig.hover}
+              options={HOVER_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
+              onChange={(v) => {
+                dispatch({
+                  type: "patch",
+                  path: "motion",
+                  value: { ...motionConfig, hover: v as HoverPreset },
+                });
+              }}
+              size="sm"
+            />
+          </Field>
+          <Field label={messages.sidebar.speed}>
+            <NumberSlider
+              value={motionConfig.duration}
+              min={0}
+              max={600}
+              step={20}
+              suffix="ms"
+              onChange={(v) => {
+                dispatch({
+                  type: "patch",
+                  path: "motion",
+                  value: { ...motionConfig, duration: v },
+                });
+              }}
+            />
+          </Field>
+          <Field label={messages.sidebar.stagger}>
+            <NumberSlider
+              value={motionConfig.stagger}
+              min={0}
+              max={120}
+              step={5}
+              suffix="ms"
+              onChange={(v) => {
+                dispatch({ type: "patch", path: "motion", value: { ...motionConfig, stagger: v } });
+              }}
+            />
+          </Field>
+        </Section>
       </Locked>
     </div>
   );
@@ -951,12 +991,12 @@ function TemplatesPanel() {
           {TEMPLATE_DEFINITIONS.map((definition) => {
             const active = state.config.templateDefinitionId === definition.id;
             const locked = isAssetLocked("template", definition.id, tier);
-          return (
-            <button
-              key={definition.id}
-              type="button"
-              data-tour-template-option={definition.id}
-              data-tour-template-option-active={active ? "true" : "false"}
+            return (
+              <button
+                key={definition.id}
+                type="button"
+                data-tour-template-option={definition.id}
+                data-tour-template-option-active={active ? "true" : "false"}
                 disabled={locked}
                 aria-disabled={locked}
                 onClick={() => {
@@ -1014,8 +1054,7 @@ function SettingsPanel() {
             value={locale}
             options={POWER_EDITOR_LOCALES.map((option) => ({
               value: option,
-              label:
-                option === "es" ? messages.locale.spanish : messages.locale.english,
+              label: option === "es" ? messages.locale.spanish : messages.locale.english,
             }))}
             onChange={(v) => setLocale(v as PowerEditorLocale)}
           />
@@ -1089,12 +1128,12 @@ export function SidebarTabs() {
   return (
     <div className="flex items-center gap-1 border-b border-border px-2 py-2">
       {tabs.map((tab) => (
-      <button
-        key={tab.id}
-        type="button"
-        {...(tab.id === "templates" ? { "data-tour-template-selector": true } : {})}
-        {...(tab.id === "design" ? { "data-tour-style-panel": true } : {})}
-        {...(tab.id === "blocks" ? { "data-tour-tools-panel": true } : {})}
+        <button
+          key={tab.id}
+          type="button"
+          {...(tab.id === "templates" ? { "data-tour-template-selector": true } : {})}
+          {...(tab.id === "design" ? { "data-tour-style-panel": true } : {})}
+          {...(tab.id === "blocks" ? { "data-tour-tools-panel": true } : {})}
           onClick={() => setPanel(tab.id)}
           className={cx(
             "flex flex-1 flex-col items-center gap-1 rounded-lg px-2 py-2 text-[10px] font-medium transition",

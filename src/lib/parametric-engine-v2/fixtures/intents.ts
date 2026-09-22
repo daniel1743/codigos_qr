@@ -45,7 +45,12 @@ export const SAMPLE_INTENTS: { id: string; intent: OnboardingIntentV1 }[] = [
     "belleza",
     "booking",
     "elegant",
-    { name: "Estudio Aurora", profession: "Salón de belleza", bio: "Color y cuidado capilar.", avatar: "https://cdn.example.com/a1.jpg" },
+    {
+      name: "Estudio Aurora",
+      profession: "Salón de belleza",
+      bio: "Color y cuidado capilar.",
+      avatar: "https://cdn.example.com/a1.jpg",
+    },
     { type: "booking", value: "https://calendly.com/aurora" },
   ),
   intent(
@@ -53,7 +58,11 @@ export const SAMPLE_INTENTS: { id: string; intent: OnboardingIntentV1 }[] = [
     "belleza",
     "whatsapp",
     "premium",
-    { name: "Valentina Ruiz", profession: "Estética avanzada", bio: "Tratamientos personalizados." },
+    {
+      name: "Valentina Ruiz",
+      profession: "Estética avanzada",
+      bio: "Tratamientos personalizados.",
+    },
     { type: "whatsapp", value: "+56912345678" },
   ),
   intent(
@@ -61,7 +70,11 @@ export const SAMPLE_INTENTS: { id: string; intent: OnboardingIntentV1 }[] = [
     "profesional",
     "leads",
     "professional",
-    { name: "Estudio Lex", profession: "Abogados corporativos", bio: "Asesoría legal para empresas." },
+    {
+      name: "Estudio Lex",
+      profession: "Abogados corporativos",
+      bio: "Asesoría legal para empresas.",
+    },
     { type: "email", value: "contacto@estudiolex.cl" },
   ),
   intent(
@@ -69,7 +82,11 @@ export const SAMPLE_INTENTS: { id: string; intent: OnboardingIntentV1 }[] = [
     "profesional",
     "portfolio",
     "minimal",
-    { name: "Dra. Paula Soto", profession: "Psicóloga clínica", bio: "Terapia breve y acompañamiento." },
+    {
+      name: "Dra. Paula Soto",
+      profession: "Psicóloga clínica",
+      bio: "Terapia breve y acompañamiento.",
+    },
     { type: "website", value: "https://paulasoto.cl" },
   ),
   intent(
@@ -77,7 +94,12 @@ export const SAMPLE_INTENTS: { id: string; intent: OnboardingIntentV1 }[] = [
     "creador",
     "social",
     "energetic",
-    { name: "Nico Vera", profession: "Creador de contenido", bio: "Video y comunidad.", avatar: "https://cdn.example.com/a2.jpg" },
+    {
+      name: "Nico Vera",
+      profession: "Creador de contenido",
+      bio: "Video y comunidad.",
+      avatar: "https://cdn.example.com/a2.jpg",
+    },
     { type: "instagram", value: "@nicovera" },
   ),
   intent(
@@ -85,7 +107,12 @@ export const SAMPLE_INTENTS: { id: string; intent: OnboardingIntentV1 }[] = [
     "creador",
     "portfolio",
     "modern",
-    { name: "Camila Ossa", profession: "Fotógrafa", bio: "Retrato y editorial.", avatar: "https://cdn.example.com/a3.jpg" },
+    {
+      name: "Camila Ossa",
+      profession: "Fotógrafa",
+      bio: "Retrato y editorial.",
+      avatar: "https://cdn.example.com/a3.jpg",
+    },
     { type: "website", value: "https://camilaossa.com" },
     null,
     { card_media: true },
@@ -95,7 +122,12 @@ export const SAMPLE_INTENTS: { id: string; intent: OnboardingIntentV1 }[] = [
     "restaurante",
     "booking",
     "premium",
-    { name: "Casa Duna", profession: "Restaurante costero", bio: "Cocina de producto.", avatar: "https://cdn.example.com/a4.jpg" },
+    {
+      name: "Casa Duna",
+      profession: "Restaurante costero",
+      bio: "Cocina de producto.",
+      avatar: "https://cdn.example.com/a4.jpg",
+    },
     { type: "booking", value: "https://reservas.casaduna.cl" },
   ),
   intent(
@@ -103,7 +135,11 @@ export const SAMPLE_INTENTS: { id: string; intent: OnboardingIntentV1 }[] = [
     "fitness",
     "leads",
     "energetic",
-    { name: "Box Norte", profession: "Entrenamiento funcional", bio: "Clases grupales y personalizadas." },
+    {
+      name: "Box Norte",
+      profession: "Entrenamiento funcional",
+      bio: "Clases grupales y personalizadas.",
+    },
     { type: "whatsapp", value: "+56987654321" },
   ),
   intent(
@@ -111,7 +147,11 @@ export const SAMPLE_INTENTS: { id: string; intent: OnboardingIntentV1 }[] = [
     "freelancer",
     "portfolio",
     "minimal",
-    { name: "Tomás Rivas", profession: "Diseñador de producto", bio: "Interfaces y sistemas de diseño." },
+    {
+      name: "Tomás Rivas",
+      profession: "Diseñador de producto",
+      bio: "Interfaces y sistemas de diseño.",
+    },
     { type: "website", value: "https://tomasrivas.design" },
   ),
   intent(

@@ -13,10 +13,10 @@ data, email templates or credentials were changed.
 
 Read-only HTTP checks against the requested production host returned:
 
-| URL | Result |
-|---|---|
+| URL                                         | Result          |
+| ------------------------------------------- | --------------- |
 | `https://www.cripqer.dev/correo-confirmado` | `404 Not Found` |
-| `https://www.cripqer.dev/login` | `404 Not Found` |
+| `https://www.cripqer.dev/login`             | `404 Not Found` |
 
 Because the landing route and its login destination are not currently
 reachable in production, the real email confirmation flow was not started.
@@ -43,4 +43,3 @@ credentials or inbox contents were accessed.
    not the static success route directly.
 4. Repeat the new-account confirmation and login smoke, then verify the user
    record has `email_confirmed` set.
-

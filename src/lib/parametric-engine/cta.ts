@@ -16,10 +16,7 @@ const BY_ACTION: Record<PrimaryActionType, CanonicalCtaLabel> = {
  * Goal refines the label only where the canonical set allows it.
  * Deterministic: action type first, goal as a narrow override.
  */
-export function resolveCtaLabel(
-  action: PrimaryActionType,
-  goal: PrimaryGoal,
-): CanonicalCtaLabel {
+export function resolveCtaLabel(action: PrimaryActionType, goal: PrimaryGoal): CanonicalCtaLabel {
   if (goal === "booking") return "Reservar";
   if (goal === "portfolio" && (action === "website" || action === "instagram")) {
     return "Ver mi trabajo";

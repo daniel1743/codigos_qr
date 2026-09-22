@@ -40,8 +40,9 @@ describe("pages nested routing (PAGES_4C)", () => {
   it("wires /pages/$pageId/edit to the PageDetail parent (PAGES_4D)", () => {
     // The generated route registers /pages/$pageId (PageDetail) as the parent
     // of /pages/$pageId/edit, so PageDetail must render <Outlet /> for the child.
-    const parent = (pageEdit?.options as { getParentRoute?: () => { options?: { id?: string } } })
-      ?.getParentRoute?.();
+    const parent = (
+      pageEdit?.options as { getParentRoute?: () => { options?: { id?: string } } }
+    )?.getParentRoute?.();
     expect(parent?.options?.id).toBe("/$pageId");
   });
 });

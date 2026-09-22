@@ -38,7 +38,13 @@ export function variantIndex(intent: NormalizedIntent, variant: number): number 
 function axis(intent: NormalizedIntent, variant: number, name: string): number {
   if (variant === 0) return 0;
   return stableHash(
-    [name, String(variant), intent.business_category, intent.primary_goal, intent.visual_personality].join("|"),
+    [
+      name,
+      String(variant),
+      intent.business_category,
+      intent.primary_goal,
+      intent.visual_personality,
+    ].join("|"),
   );
 }
 
@@ -71,7 +77,13 @@ export function resolveDesign(
     profile.trust_weight >= 75 ? "left" : profile.media_weight >= 70 ? "center" : family.alignment;
   const alignmentAxis = axis(intent, variant, "alignment");
   const alignment: Alignment =
-    variant === 0 ? baseAlignment : (alignmentAxis >>> 4) % 2 === 0 ? baseAlignment : baseAlignment === "left" ? "center" : "left";
+    variant === 0
+      ? baseAlignment
+      : (alignmentAxis >>> 4) % 2 === 0
+        ? baseAlignment
+        : baseAlignment === "left"
+          ? "center"
+          : "left";
 
   const background: RecipeDesign["background"] =
     family.background.type === "linear-gradient"
@@ -82,7 +94,12 @@ export function resolveDesign(
       : family.background.type === "radial-gradient"
         ? {
             type: "radial-gradient",
-            value: { kind: "radial", position: "top", from: palette.surface, to: palette.background },
+            value: {
+              kind: "radial",
+              position: "top",
+              from: palette.surface,
+              to: palette.background,
+            },
           }
         : { type: "solid", value: { kind: "solid", color: palette.background } };
 

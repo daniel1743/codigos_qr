@@ -39,42 +39,42 @@ an already-edited document and promises preservation.
 The matrix uses 83 grouped contract capabilities. A grouped row is counted as
 one capability only when the fields share the same authority and outcome.
 
-| Metric | Count |
-| --- | ---: |
-| `TOTAL_CAPABILITIES_AUDITED` | 83 |
-| `FULLY_ALIGNED_COUNT` | 58 |
-| `ENGINE_GENERATION_GAP_COUNT` | 8 |
-| `ENGINE_PRESERVES_ONLY_COUNT` | 6 |
-| `CANONICAL_GAP_COUNT` | 8 |
-| `RENDERER_GAP_COUNT` | 0 |
-| `EDITOR_GAP_COUNT` | 1 |
-| `GHOST_CONTROL_COUNT` | 0 |
-| `FUTURE_ONLY_COUNT` | 1 |
-| `NOT_VERIFIED_COUNT` | 1 |
-| `P0_COUNT` | 1 |
-| `P1_COUNT` | 4 |
-| `P2_COUNT` | 4 |
-| `P3_COUNT` | 3 |
+| Metric                        | Count |
+| ----------------------------- | ----: |
+| `TOTAL_CAPABILITIES_AUDITED`  |    83 |
+| `FULLY_ALIGNED_COUNT`         |    58 |
+| `ENGINE_GENERATION_GAP_COUNT` |     8 |
+| `ENGINE_PRESERVES_ONLY_COUNT` |     6 |
+| `CANONICAL_GAP_COUNT`         |     8 |
+| `RENDERER_GAP_COUNT`          |     0 |
+| `EDITOR_GAP_COUNT`            |     1 |
+| `GHOST_CONTROL_COUNT`         |     0 |
+| `FUTURE_ONLY_COUNT`           |     1 |
+| `NOT_VERIFIED_COUNT`          |     1 |
+| `P0_COUNT`                    |     1 |
+| `P1_COUNT`                    |     4 |
+| `P2_COUNT`                    |     4 |
+| `P3_COUNT`                    |     3 |
 
 ## CURRENT AUTHORITY MAP
 
-| Concern | Current authority | Finding |
-| --- | --- | --- |
-| Canonical document | `src/premium-template-studio/types/index.ts` — `BioTemplateConfig` | Single document contract for theme, layout, profile, blocks, SEO, settings, and motion. |
-| Canonical validation | `src/premium-template-studio/engine/TemplateValidator.ts` | `validateTemplate()` is the publish/import gate; it validates structure and registered block types and does not strip unknown object keys. |
-| Editor state | `src/premium-template-studio/state/templateReducer.ts` and `state/StudioProvider.tsx` | Reducer patches canonical paths; provider owns history, authorization, save, publish, and validation. |
-| Editor UI | `src/components/power-editor/PowerEditorHost.tsx`, `src/premium-template-studio/components/inspector/Inspector.tsx`, `components/editor/Sidebar.tsx` | Exposes both coarse design controls and detailed profile/block/responsive controls. |
-| Editor persistence | `PowerEditorHost` adapters and `src/services/page.service.ts` / canonical page services | Page mode writes the page canonical document; no Smart Pages storage path was found. |
-| Engine semantic input | `src/lib/parametric-engine-v2/power-editor/content-source.ts`, `types-v2.ts` | Normalized owner facts plus semantic design and content inputs. |
-| Engine capability vocabulary | `src/lib/parametric-engine-v2/power-editor/capabilities-v2.ts` | Declares renderer-backed maximum vocabulary; it is broader than the older V1.5 catalog. |
-| Engine generation | `src/lib/parametric-engine-v2/power-editor/to-recipe-v2.ts`, `resolvers.ts`, `blocks-v2.ts` | Resolves semantics to a fresh recipe and plans current registered blocks. |
-| Engine canonical conversion | `src/lib/parametric-engine-v2/power-editor/to-template-config.ts` | Creates a fresh `BioTemplateConfig`; no existing-config merge/preservation input. |
-| Engine invocation | `src/lib/parametric-engine-v2/internal-entrypoint.ts` | Existing Engine V2 entrypoint remains authoritative. |
-| Block registry | `src/premium-template-studio/engine/BlockRegistry.ts` | 37 current registered block types, each mapped to a renderer component. |
-| Editor/public renderer | `src/premium-template-studio/engine/TemplateRenderer.tsx` | Shared renderer implementation with `mode="edit"` or `mode="public"`. |
-| Published renderer | `src/premium-template-studio/engine/PublicTemplateRenderer.tsx` | Public wrapper; no inspector, drag/drop, history, or editor camera. |
-| Published routes | `src/routes/pg.$publicId.tsx`, `src/routes/pg.a.$slug.tsx`, `src/components/profile/PublicProfileView.tsx` | Published snapshot is resolved to canonical config and rendered by `PublicTemplateRenderer`. |
-| Smart Pages host seam | `src/lib/page-generator/smart-pages-host-map.ts` | Maps transient Smart Pages plans to the existing PAGES_7/Engine V2 seam; it is not a renderer or persistence authority. |
+| Concern                      | Current authority                                                                                                                                    | Finding                                                                                                                                    |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Canonical document           | `src/premium-template-studio/types/index.ts` — `BioTemplateConfig`                                                                                   | Single document contract for theme, layout, profile, blocks, SEO, settings, and motion.                                                    |
+| Canonical validation         | `src/premium-template-studio/engine/TemplateValidator.ts`                                                                                            | `validateTemplate()` is the publish/import gate; it validates structure and registered block types and does not strip unknown object keys. |
+| Editor state                 | `src/premium-template-studio/state/templateReducer.ts` and `state/StudioProvider.tsx`                                                                | Reducer patches canonical paths; provider owns history, authorization, save, publish, and validation.                                      |
+| Editor UI                    | `src/components/power-editor/PowerEditorHost.tsx`, `src/premium-template-studio/components/inspector/Inspector.tsx`, `components/editor/Sidebar.tsx` | Exposes both coarse design controls and detailed profile/block/responsive controls.                                                        |
+| Editor persistence           | `PowerEditorHost` adapters and `src/services/page.service.ts` / canonical page services                                                              | Page mode writes the page canonical document; no Smart Pages storage path was found.                                                       |
+| Engine semantic input        | `src/lib/parametric-engine-v2/power-editor/content-source.ts`, `types-v2.ts`                                                                         | Normalized owner facts plus semantic design and content inputs.                                                                            |
+| Engine capability vocabulary | `src/lib/parametric-engine-v2/power-editor/capabilities-v2.ts`                                                                                       | Declares renderer-backed maximum vocabulary; it is broader than the older V1.5 catalog.                                                    |
+| Engine generation            | `src/lib/parametric-engine-v2/power-editor/to-recipe-v2.ts`, `resolvers.ts`, `blocks-v2.ts`                                                          | Resolves semantics to a fresh recipe and plans current registered blocks.                                                                  |
+| Engine canonical conversion  | `src/lib/parametric-engine-v2/power-editor/to-template-config.ts`                                                                                    | Creates a fresh `BioTemplateConfig`; no existing-config merge/preservation input.                                                          |
+| Engine invocation            | `src/lib/parametric-engine-v2/internal-entrypoint.ts`                                                                                                | Existing Engine V2 entrypoint remains authoritative.                                                                                       |
+| Block registry               | `src/premium-template-studio/engine/BlockRegistry.ts`                                                                                                | 37 current registered block types, each mapped to a renderer component.                                                                    |
+| Editor/public renderer       | `src/premium-template-studio/engine/TemplateRenderer.tsx`                                                                                            | Shared renderer implementation with `mode="edit"` or `mode="public"`.                                                                      |
+| Published renderer           | `src/premium-template-studio/engine/PublicTemplateRenderer.tsx`                                                                                      | Public wrapper; no inspector, drag/drop, history, or editor camera.                                                                        |
+| Published routes             | `src/routes/pg.$publicId.tsx`, `src/routes/pg.a.$slug.tsx`, `src/components/profile/PublicProfileView.tsx`                                           | Published snapshot is resolved to canonical config and rendered by `PublicTemplateRenderer`.                                               |
+| Smart Pages host seam        | `src/lib/page-generator/smart-pages-host-map.ts`                                                                                                     | Maps transient Smart Pages plans to the existing PAGES_7/Engine V2 seam; it is not a renderer or persistence authority.                    |
 
 ## FULL CAPABILITY MATRIX
 
@@ -95,39 +95,39 @@ Classification is mutually exclusive:
   layer; it must not be emitted.
 - **NOT_VERIFIED** — source evidence was insufficient for a production claim.
 
-| Domain | Capability group | Classification | Count | Evidence and consequence |
-| --- | --- | --- | ---: | --- |
-| Typography | Global font family, heading/body size, weights, line height, letter spacing, and theme text/alignment defaults | FULLY_ALIGNED | 6 | `ThemeTypography`, Engine resolvers, style engine, and editor controls agree for global values. |
-| Typography | Per-element/per-field typography route | ENGINE_GENERATION_GAP | 1 | Canonical and Inspector support it, but Engine V2 resolves global typography rather than owner-selected per-field values. |
-| Typography | Text transform, text decoration, and responsive typography | CANONICAL_GAP | 3 | No durable canonical fields for these values; CSS defaults or fixed renderer behavior cannot be reconstructed as document settings. |
-| Typography | Explicit block/profile typography override after generation | ENGINE_PRESERVES_ONLY | 1 | Reducer and renderer preserve it after editor save; fresh Engine conversion does not merge it. |
-| Buttons | Solid, outline, ghost, glass, gradient, soft variants; radius, height, weight, shadow, and border width | FULLY_ALIGNED | 6 | Theme button contract, `buttonStyle`, Editor controls, and Engine resolver agree. |
-| Buttons | Generated CTA sizing/color/padding as theme-level defaults versus independently styled primary/secondary CTAs | ENGINE_GENERATION_GAP | 2 | Engine generates theme defaults; Inspector can write per-CTA `CTAStyle` values not represented in the semantic source recipe. |
-| Buttons | Explicit icon position and durable active/pressed state | CANONICAL_GAP | 2 | Engine design axes contain `button_icon_position`, but canonical CTA/BlockItem has no explicit position; pressed feedback is CSS interaction, not persisted state. |
-| Buttons | Manual primary/secondary CTA style overrides | ENGINE_PRESERVES_ONLY | 1 | `heroCtaStyle` and Inspector prove mutation/render behavior; fresh `toTemplateConfig` does not carry pre-existing overrides. |
-| Cards | Background, border, radius, shadow, media ratio, media position, card layout, and spacing | FULLY_ALIGNED | 8 | `ThemeCards`, `BlockStyle`, `BlockLayout`, style engine, Editor, and V2 block planning cover these values. |
-| Cards | First-class card separator/divider property | CANONICAL_GAP | 1 | A separate `divider` block exists; cards do not have a durable separator field. |
-| Media | Supplied image/cover/avatar, object fit, focal/position handling, overlays, video, and gallery | FULLY_ALIGNED | 7 | Profile banner and registered media blocks are renderer-backed; Engine emits the supported subset and preserves supplied assets. |
-| Media | Generic image crop and persistent image zoom | CANONICAL_GAP | 2 | Banner has focal coordinates, but generic image blocks do not expose a canonical crop/zoom document contract. Canvas zoom is editor camera behavior. |
-| Media | Manual banner full-bleed/blend-fade refinements | ENGINE_PRESERVES_ONLY | 1 | `ProfileBanner` renders `widthMode` and `blendFade`; Engine V2 banner recipe does not emit them, so regeneration can remove them. |
-| Layout | Section spacing, content width, alignment, columns, grid, responsive layout, section order, and visibility | FULLY_ALIGNED | 8 | `TemplateLayout`, responsive rules, `TemplateRenderer`, Editor controls, and V2 layout/block planning agree. |
-| Layout | Manual block ordering/constraints/offset refinement after generation | ENGINE_PRESERVES_ONLY | 1 | Canonical and renderer support order, span, constraints, overlap, offset, sticky, and floating; fresh generation is not a merge. |
-| Decoration | Solid/linear/radial/image background, overlay, supported patterns, supported textures, supported frames, and surface/card tokens | FULLY_ALIGNED | 8 | `POWER_EDITOR_CAPABILITIES`, `pageBackground`, `textureStyle`, `frame`, and `cardStyle` are renderer-backed. |
-| Decoration | Renderer-backed pattern/advanced background selection in the visible editor | EDITOR_GAP | 1 | Older inventory evidence found pattern/type capabilities without a matching visible selector; this is an exposure gap, not a ghost mutation. |
-| Interaction | Entrance/hover animations, duration, delay/stagger, per-block motion, sticky and floating behavior | FULLY_ALIGNED | 5 | Motion config, responsive layout classes, Engine V2 motion fields, and public renderer behavior agree. |
-| Interaction | Semantic tracking intent generated for every CTA/item interaction | ENGINE_GENERATION_GAP | 1 | Renderer exposes `onTrack`, and canonical interaction has `trackingId`, but Engine does not establish a complete event taxonomy for every semantic action. |
-| Interaction | Manual motion overrides | ENGINE_PRESERVES_ONLY | 1 | Editor and renderer use local motion overrides; a fresh Engine recipe re-resolves them. |
-| Interaction | Exact browser/SSR behavior for all animated and sticky combinations | NOT_VERIFIED | 1 | Source implementation is present, but the full browser matrix was not completed in this read-only audit. |
-| Blocks | Identity/profile header, text, heading, links, featured links, CTA/button groups, social, and navigation blocks | FULLY_ALIGNED | 1 | Current registry and V2 planner cover the supported identity/navigation family. |
-| Blocks | Image, gallery, video, and media card blocks | FULLY_ALIGNED | 1 | Current registry, V2 planner, content source, and integration tests cover the visual media family. |
-| Blocks | Portfolio, featured media, and document blocks | FULLY_ALIGNED | 1 | Current registry and V2 planner cover supplied project/media/document content. |
-| Blocks | Trust, stats, services, testimonials, pricing, FAQ, and timeline blocks | FULLY_ALIGNED | 1 | Current registry and V2 block planner emit these canonical block types when owner content is available. |
-| Blocks | Product and product-grid blocks | FULLY_ALIGNED | 1 | Registered renderer components and V2 product content cover owner product presentation. |
-| Blocks | Contact, QR, map, events, music, calendar, booking, carousel, tabs, bottom navigation, divider, and spacer blocks | FULLY_ALIGNED | 1 | Registered renderer components exist; supported Engine content is mapped without inventing owner facts. |
-| Blocks | Team, hours, service-area, category-navigation, secondary-collection, benefit-strip, and rich retail-detail semantics | ENGINE_GENERATION_GAP | 4 | Some can be approximated with existing blocks, but no complete first-class Engine/source/canonical contract was found. |
-| Blocks | Native checkout, stock mutation, quote form, and native contact/booking submission surfaces | FUTURE_ONLY | 1 | Do not infer these from the existence of product or external booking blocks; no current canonical transaction backend is present. |
-| Responsive | Per-breakpoint columns, visibility, order, padding/gap, spans, alignment, and layout overrides | FULLY_ALIGNED | 4 | `getMergedBlock`, `TemplateRenderer`, layout rules, and V2 recipe responsive output agree for supported fields. |
-| Responsive | Manual responsive values added after Engine generation | ENGINE_PRESERVES_ONLY | 1 | Editor save preserves them, but `toBioTemplateConfig` reconstructs responsive data from the new recipe. |
+| Domain      | Capability group                                                                                                                 | Classification        | Count | Evidence and consequence                                                                                                                                           |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------- | --------------------- | ----: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Typography  | Global font family, heading/body size, weights, line height, letter spacing, and theme text/alignment defaults                   | FULLY_ALIGNED         |     6 | `ThemeTypography`, Engine resolvers, style engine, and editor controls agree for global values.                                                                    |
+| Typography  | Per-element/per-field typography route                                                                                           | ENGINE_GENERATION_GAP |     1 | Canonical and Inspector support it, but Engine V2 resolves global typography rather than owner-selected per-field values.                                          |
+| Typography  | Text transform, text decoration, and responsive typography                                                                       | CANONICAL_GAP         |     3 | No durable canonical fields for these values; CSS defaults or fixed renderer behavior cannot be reconstructed as document settings.                                |
+| Typography  | Explicit block/profile typography override after generation                                                                      | ENGINE_PRESERVES_ONLY |     1 | Reducer and renderer preserve it after editor save; fresh Engine conversion does not merge it.                                                                     |
+| Buttons     | Solid, outline, ghost, glass, gradient, soft variants; radius, height, weight, shadow, and border width                          | FULLY_ALIGNED         |     6 | Theme button contract, `buttonStyle`, Editor controls, and Engine resolver agree.                                                                                  |
+| Buttons     | Generated CTA sizing/color/padding as theme-level defaults versus independently styled primary/secondary CTAs                    | ENGINE_GENERATION_GAP |     2 | Engine generates theme defaults; Inspector can write per-CTA `CTAStyle` values not represented in the semantic source recipe.                                      |
+| Buttons     | Explicit icon position and durable active/pressed state                                                                          | CANONICAL_GAP         |     2 | Engine design axes contain `button_icon_position`, but canonical CTA/BlockItem has no explicit position; pressed feedback is CSS interaction, not persisted state. |
+| Buttons     | Manual primary/secondary CTA style overrides                                                                                     | ENGINE_PRESERVES_ONLY |     1 | `heroCtaStyle` and Inspector prove mutation/render behavior; fresh `toTemplateConfig` does not carry pre-existing overrides.                                       |
+| Cards       | Background, border, radius, shadow, media ratio, media position, card layout, and spacing                                        | FULLY_ALIGNED         |     8 | `ThemeCards`, `BlockStyle`, `BlockLayout`, style engine, Editor, and V2 block planning cover these values.                                                         |
+| Cards       | First-class card separator/divider property                                                                                      | CANONICAL_GAP         |     1 | A separate `divider` block exists; cards do not have a durable separator field.                                                                                    |
+| Media       | Supplied image/cover/avatar, object fit, focal/position handling, overlays, video, and gallery                                   | FULLY_ALIGNED         |     7 | Profile banner and registered media blocks are renderer-backed; Engine emits the supported subset and preserves supplied assets.                                   |
+| Media       | Generic image crop and persistent image zoom                                                                                     | CANONICAL_GAP         |     2 | Banner has focal coordinates, but generic image blocks do not expose a canonical crop/zoom document contract. Canvas zoom is editor camera behavior.               |
+| Media       | Manual banner full-bleed/blend-fade refinements                                                                                  | ENGINE_PRESERVES_ONLY |     1 | `ProfileBanner` renders `widthMode` and `blendFade`; Engine V2 banner recipe does not emit them, so regeneration can remove them.                                  |
+| Layout      | Section spacing, content width, alignment, columns, grid, responsive layout, section order, and visibility                       | FULLY_ALIGNED         |     8 | `TemplateLayout`, responsive rules, `TemplateRenderer`, Editor controls, and V2 layout/block planning agree.                                                       |
+| Layout      | Manual block ordering/constraints/offset refinement after generation                                                             | ENGINE_PRESERVES_ONLY |     1 | Canonical and renderer support order, span, constraints, overlap, offset, sticky, and floating; fresh generation is not a merge.                                   |
+| Decoration  | Solid/linear/radial/image background, overlay, supported patterns, supported textures, supported frames, and surface/card tokens | FULLY_ALIGNED         |     8 | `POWER_EDITOR_CAPABILITIES`, `pageBackground`, `textureStyle`, `frame`, and `cardStyle` are renderer-backed.                                                       |
+| Decoration  | Renderer-backed pattern/advanced background selection in the visible editor                                                      | EDITOR_GAP            |     1 | Older inventory evidence found pattern/type capabilities without a matching visible selector; this is an exposure gap, not a ghost mutation.                       |
+| Interaction | Entrance/hover animations, duration, delay/stagger, per-block motion, sticky and floating behavior                               | FULLY_ALIGNED         |     5 | Motion config, responsive layout classes, Engine V2 motion fields, and public renderer behavior agree.                                                             |
+| Interaction | Semantic tracking intent generated for every CTA/item interaction                                                                | ENGINE_GENERATION_GAP |     1 | Renderer exposes `onTrack`, and canonical interaction has `trackingId`, but Engine does not establish a complete event taxonomy for every semantic action.         |
+| Interaction | Manual motion overrides                                                                                                          | ENGINE_PRESERVES_ONLY |     1 | Editor and renderer use local motion overrides; a fresh Engine recipe re-resolves them.                                                                            |
+| Interaction | Exact browser/SSR behavior for all animated and sticky combinations                                                              | NOT_VERIFIED          |     1 | Source implementation is present, but the full browser matrix was not completed in this read-only audit.                                                           |
+| Blocks      | Identity/profile header, text, heading, links, featured links, CTA/button groups, social, and navigation blocks                  | FULLY_ALIGNED         |     1 | Current registry and V2 planner cover the supported identity/navigation family.                                                                                    |
+| Blocks      | Image, gallery, video, and media card blocks                                                                                     | FULLY_ALIGNED         |     1 | Current registry, V2 planner, content source, and integration tests cover the visual media family.                                                                 |
+| Blocks      | Portfolio, featured media, and document blocks                                                                                   | FULLY_ALIGNED         |     1 | Current registry and V2 planner cover supplied project/media/document content.                                                                                     |
+| Blocks      | Trust, stats, services, testimonials, pricing, FAQ, and timeline blocks                                                          | FULLY_ALIGNED         |     1 | Current registry and V2 block planner emit these canonical block types when owner content is available.                                                            |
+| Blocks      | Product and product-grid blocks                                                                                                  | FULLY_ALIGNED         |     1 | Registered renderer components and V2 product content cover owner product presentation.                                                                            |
+| Blocks      | Contact, QR, map, events, music, calendar, booking, carousel, tabs, bottom navigation, divider, and spacer blocks                | FULLY_ALIGNED         |     1 | Registered renderer components exist; supported Engine content is mapped without inventing owner facts.                                                            |
+| Blocks      | Team, hours, service-area, category-navigation, secondary-collection, benefit-strip, and rich retail-detail semantics            | ENGINE_GENERATION_GAP |     4 | Some can be approximated with existing blocks, but no complete first-class Engine/source/canonical contract was found.                                             |
+| Blocks      | Native checkout, stock mutation, quote form, and native contact/booking submission surfaces                                      | FUTURE_ONLY           |     1 | Do not infer these from the existence of product or external booking blocks; no current canonical transaction backend is present.                                  |
+| Responsive  | Per-breakpoint columns, visibility, order, padding/gap, spans, alignment, and layout overrides                                   | FULLY_ALIGNED         |     4 | `getMergedBlock`, `TemplateRenderer`, layout rules, and V2 recipe responsive output agree for supported fields.                                                    |
+| Responsive  | Manual responsive values added after Engine generation                                                                           | ENGINE_PRESERVES_ONLY |     1 | Editor save preserves them, but `toBioTemplateConfig` reconstructs responsive data from the new recipe.                                                            |
 
 The rows sum to 83. The matrix deliberately does not call editor camera zoom,
 undo/redo, preview mode, save/publish, or selection focus document capabilities;
@@ -253,15 +253,15 @@ The following must not be misclassified as ghost controls:
 
 ## ROUND-TRIP PRESERVATION
 
-| Round-trip | Result | Assessment |
-| --- | --- | --- |
-| Editor patch → reducer state | PASS by source inspection | Nested canonical paths are cloned and patched; history and guarded mutation are centralized. |
-| Editor state → save adapter | PASS by source inspection | `StudioProvider` saves the complete current config; page mode uses the page canonical adapter. |
-| Save/load → validator | PASS by source inspection | Validator checks required envelope, IDs, block types, and URL warnings without normalizing away fields. |
-| Published snapshot → public route | PASS by source inspection | `/pg/$publicId` and `/pg/a/$slug` read published canonical snapshots only and call `PublicTemplateRenderer`. |
-| Canonical config → public rendering | PASS for current registered vocabulary | Shared `TemplateRenderer` and `BlockRegistry` consume the fields listed above. |
-| Engine recipe → fresh canonical config | PASS with reset semantics | Deterministic and canonical-valid, but not a preservation merge. |
-| Existing edited config → Engine regeneration | FAIL for preservation promise | No existing-config input or merge exists in `toBioTemplateConfig`. |
+| Round-trip                                   | Result                                 | Assessment                                                                                                   |
+| -------------------------------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Editor patch → reducer state                 | PASS by source inspection              | Nested canonical paths are cloned and patched; history and guarded mutation are centralized.                 |
+| Editor state → save adapter                  | PASS by source inspection              | `StudioProvider` saves the complete current config; page mode uses the page canonical adapter.               |
+| Save/load → validator                        | PASS by source inspection              | Validator checks required envelope, IDs, block types, and URL warnings without normalizing away fields.      |
+| Published snapshot → public route            | PASS by source inspection              | `/pg/$publicId` and `/pg/a/$slug` read published canonical snapshots only and call `PublicTemplateRenderer`. |
+| Canonical config → public rendering          | PASS for current registered vocabulary | Shared `TemplateRenderer` and `BlockRegistry` consume the fields listed above.                               |
+| Engine recipe → fresh canonical config       | PASS with reset semantics              | Deterministic and canonical-valid, but not a preservation merge.                                             |
+| Existing edited config → Engine regeneration | FAIL for preservation promise          | No existing-config input or merge exists in `toBioTemplateConfig`.                                           |
 
 ## RETAIL READINESS
 

@@ -10,11 +10,7 @@ import type {
   ValidationIssue,
 } from "./types";
 import { destinationIssueMessage, isValidDestination } from "./destinations";
-import {
-  PRIMARY_ACTION_TYPES,
-  PRIMARY_GOALS,
-  VISUAL_PERSONALITIES,
-} from "./types";
+import { PRIMARY_ACTION_TYPES, PRIMARY_GOALS, VISUAL_PERSONALITIES } from "./types";
 
 /** Onboarding business ids (and common aliases) -> engine categories. */
 const CATEGORY_MAP: Record<string, BusinessCategory> = {
@@ -69,8 +65,9 @@ export function isPersistableAssetRef(value: string): boolean {
 }
 
 export function isIsoTimestamp(value: string): boolean {
-  const match =
-    /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(\.\d+)?(Z|[+-]\d{2}:\d{2})$/.exec(value);
+  const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(\.\d+)?(Z|[+-]\d{2}:\d{2})$/.exec(
+    value,
+  );
   if (!match) return false;
   if (!Number.isFinite(Date.parse(value))) return false;
   // Date.parse normalizes impossible calendar dates (2026-02-31 -> 2026-03-03).
@@ -84,9 +81,7 @@ export function isIsoTimestamp(value: string): boolean {
   if (hour > 23 || minute > 59 || second > 59) return false;
   const utc = new Date(Date.UTC(year, month - 1, day));
   return (
-    utc.getUTCFullYear() === year &&
-    utc.getUTCMonth() === month - 1 &&
-    utc.getUTCDate() === day
+    utc.getUTCFullYear() === year && utc.getUTCMonth() === month - 1 && utc.getUTCDate() === day
   );
 }
 
@@ -139,7 +134,11 @@ export function validateIntent(intent: unknown): ValidationIssue[] {
       push("identity.name", "required", "identity.name must have at least 2 characters.");
     }
     if (typeof id["profession"] !== "string" || id["profession"].trim().length < MIN_PROFESSION) {
-      push("identity.profession", "required", "identity.profession must have at least 2 characters.");
+      push(
+        "identity.profession",
+        "required",
+        "identity.profession must have at least 2 characters.",
+      );
     }
     if (typeof id["bio"] !== "string") {
       push("identity.bio", "type", "identity.bio must be a string.");

@@ -19,7 +19,13 @@ describe("applyTypographyOverride (inheritance model)", () => {
   it("applies every supported override field", () => {
     const result = applyTypographyOverride(
       { fontSize: 16, color: "red" },
-      { fontFamily: '"DM Sans", sans-serif', fontWeight: 700, fontSize: 24, textAlign: "center", textColor: "blue" },
+      {
+        fontFamily: '"DM Sans", sans-serif',
+        fontWeight: 700,
+        fontSize: 24,
+        textAlign: "center",
+        textColor: "blue",
+      },
     );
     expect(result).toEqual({
       fontSize: 24,
@@ -70,7 +76,9 @@ describe("canonical persistence via patchBlockField", () => {
       path: "style.titleTypography",
       value: undefined,
     });
-    expect(cleared.config.blocks.find((b) => b.id === heroId)!.style.titleTypography).toBeUndefined();
+    expect(
+      cleared.config.blocks.find((b) => b.id === heroId)!.style.titleTypography,
+    ).toBeUndefined();
   });
 
   it("does not mutate unrelated config when adding an override", () => {

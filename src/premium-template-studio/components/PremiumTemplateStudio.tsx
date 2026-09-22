@@ -26,7 +26,11 @@ import { StudioProvider, useStudio } from "../state/StudioProvider";
 import type { StudioAdapters } from "../adapters";
 import { TemplateRenderer } from "../engine/TemplateRenderer";
 import type { SelectedCollectionItem } from "../engine/RenderContext";
-import { BREAKPOINT_WIDTHS } from "../constants/layouts";
+import {
+  canvasModeForDocument,
+  canvasWidthForDocument,
+  type EditorDocumentKind,
+} from "../constants/layouts";
 import { Sidebar, SidebarContent, SidebarTabs } from "./editor/Sidebar";
 import { Inspector, InspectorContent } from "./inspector/Inspector";
 import {
@@ -293,19 +297,27 @@ function BinaryIsolationDiagnostic({
   );
 }
 
-function Canvas() {
-  const { state, dispatch, breakpoint, previewing } = useStudio();
+function Canvas({ documentKind }: { documentKind: EditorDocumentKind }) {
+  const { state, dispatch, breakpoint, previewing, adapters } = useStudio();
   const [selectedCollectionItem, setSelectedCollectionItem] =
     useState<SelectedCollectionItem | null>(null);
-  const frameWidth = BREAKPOINT_WIDTHS[breakpoint];
+  const canvasMode = canvasModeForDocument(documentKind);
+  const frameWidth = canvasWidthForDocument(documentKind, breakpoint);
   const cameraBypass =
     import.meta.env.DEV &&
     typeof window !== "undefined" &&
     new URLSearchParams(window.location.search).get("cameraDebug") === "bypass";
 
+  useEffect(() => {
+    if (state.selectedBlockId === null && selectedCollectionItem !== null) {
+      setSelectedCollectionItem(null);
+    }
+  }, [state.selectedBlockId, selectedCollectionItem]);
+
   const templateRenderer = (
     <TemplateRenderer
       config={state.config}
+      documentKind={documentKind}
       breakpoint={breakpoint}
       mode={previewing ? "public" : "edit"}
       editing={
@@ -355,7 +367,10 @@ function Canvas() {
                 const products = [...(block.content.products ?? [])];
                 const index = products.findIndex((product) => product.id === itemId);
                 if (index < 0) return;
-                if (action === "delete") products.splice(index, 1);
+                if (action === "delete") {
+                  products.splice(index, 1);
+                  setSelectedCollectionItem(null);
+                }
                 if (action === "up" && index > 0) {
                   [products[index - 1], products[index]] = [products[index], products[index - 1]];
                 }
@@ -399,6 +414,42 @@ function Canvas() {
                 });
                 setSelectedCollectionItem({ blockId, collection, itemId: next.id, field: "item" });
                 requestInspectorFocus(collectionTarget(blockId, collection, next.id, "item"));
+              },
+              onUploadCollectionItemImage: (blockId, itemId, file) => {
+                void (async () => {
+                  const block = state.config.blocks.find((candidate) => candidate.id === blockId);
+                  if (!block) return;
+                  const asset = await adapters.assets.upload(file);
+                  dispatch({
+                    type: "patchBlockField",
+                    id: blockId,
+                    path: "content.products",
+                    value: (block.content.products ?? []).map((product) =>
+                      product.id === itemId
+                        ? {
+                            ...product,
+                            imageUrl: asset.url,
+                            imageProvenance: { origin: "owner" as const },
+                          }
+                        : product,
+                    ),
+                  });
+                })();
+              },
+              onListCollectionItemImages: () => adapters.assets.list?.() ?? Promise.resolve([]),
+              onRemoveCollectionItemImage: (blockId, itemId) => {
+                const block = state.config.blocks.find((candidate) => candidate.id === blockId);
+                if (!block) return;
+                dispatch({
+                  type: "patchBlockField",
+                  id: blockId,
+                  path: "content.products",
+                  value: (block.content.products ?? []).map((product) =>
+                    product.id === itemId
+                      ? { ...product, imageUrl: "", imageProvenance: undefined }
+                      : product,
+                  ),
+                });
               },
               onSelectProfileTarget: (target) => {
                 // Generalized Profile contextual selection (cover/avatar/bio).
@@ -505,6 +556,8 @@ function Canvas() {
       >
         <div
           className="mx-auto overflow-hidden rounded-2xl bg-background shadow-xl ring-1 ring-border transition-[max-width] duration-300"
+          data-editor-document-kind={documentKind}
+          data-editor-canvas-mode={canvasMode}
           style={{ maxWidth: frameWidth }}
         >
           {templateRenderer}
@@ -775,7 +828,7 @@ function PreviewHeader({ onBack }: { onBack: () => void }) {
   );
 }
 
-function StudioShell() {
+function StudioShell({ documentKind }: { documentKind: EditorDocumentKind }) {
   const [exporting, setExporting] = useState(false);
   const [toolsCollapsed, setToolsCollapsed] = useState(false);
   const [inspectorCollapsed, setInspectorCollapsed] = useState(false);
@@ -799,7 +852,7 @@ function StudioShell() {
       )}
       {previewing ? (
         <div className="min-h-0 flex-1 overflow-hidden">
-          <Canvas />
+          <Canvas documentKind={documentKind} />
         </div>
       ) : (
         <div className="pts-studio-workspace flex min-h-0 flex-1 overflow-hidden">
@@ -838,7 +891,7 @@ function StudioShell() {
               </div>
             )}
           </div>
-          <Canvas />
+          <Canvas documentKind={documentKind} />
           <div
             className={cx(
               "pts-desktop-panel pts-desktop-panel--inspector hidden lg:block",
@@ -897,6 +950,8 @@ export interface PremiumTemplateStudioProps {
   onSaveStateChange?: ((state: SaveState) => void) | undefined;
   /** Effective product tier from the host boundary. Missing/invalid → "free". */
   tier?: ProductTier | undefined;
+  /** Canonical host target; page uses the wide web-page canvas, profile keeps Bio geometry. */
+  documentKind?: EditorDocumentKind | undefined;
 }
 
 /** Editor entry point. Mount anywhere in the host platform. */
@@ -910,6 +965,7 @@ export function PremiumTemplateStudio({
   documentId,
   onSaveStateChange,
   tier,
+  documentKind = "profile",
 }: PremiumTemplateStudioProps) {
   const initialConfig = useMemo(() => config ?? createDemoConfig(), [config]);
 
@@ -926,7 +982,7 @@ export function PremiumTemplateStudio({
         onSaveStateChange={onSaveStateChange}
         tier={tier}
       >
-        <StudioShell />
+        <StudioShell documentKind={documentKind} />
         {isPersistenceDebugEnabled() ? <PersistenceDebugPanel /> : null}
       </StudioProvider>
     </PowerEditorLocaleProvider>

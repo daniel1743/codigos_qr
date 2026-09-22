@@ -94,7 +94,6 @@ export interface CatalogRegistry {
   planPresentation?: readonly CatalogPlanPresentation[];
 }
 
-
 // ============================================================
 // VALIDATION
 // ============================================================
@@ -298,8 +297,7 @@ export interface ServerBillingCatalog {
  * variant). If this type fails to compile, the catalog is no longer
  * host-compatible and the change must be reverted.
  */
-type _CatalogSatisfiesResolver =
-  ServerBillingCatalog extends BillingCatalogResolver ? true : never;
+type _CatalogSatisfiesResolver = ServerBillingCatalog extends BillingCatalogResolver ? true : never;
 
 function offerKey(planId: string, interval: string, provider: string): string {
   return `${planId}::${interval}::${provider}`;
@@ -312,9 +310,7 @@ function offerKey(planId: string, interval: string, provider: string): string {
  * `resolveOffer` call fails closed (returns null). Validation issues remain
  * available on `catalog.validation` for diagnostics.
  */
-export function createBillingCatalog(
-  registry: CatalogRegistry,
-): ServerBillingCatalog {
+export function createBillingCatalog(registry: CatalogRegistry): ServerBillingCatalog {
   const offers = registry.offers;
   const planPresentation = registry.planPresentation ?? [];
   const validation = validateCatalogOffers(offers);
@@ -334,9 +330,7 @@ export function createBillingCatalog(
     }
   }
 
-  function resolveOffer(
-    input: ValidatedCheckoutRequest,
-  ): ResolvedOffer | null {
+  function resolveOffer(input: ValidatedCheckoutRequest): ResolvedOffer | null {
     // Fail closed: an invalid registry can never produce an offer.
     if (!validation.valid) {
       return null;
@@ -396,4 +390,3 @@ export const EMPTY_CATALOG_REGISTRY: CatalogRegistry = {
  */
 export const DEFAULT_BILLING_CATALOG: ServerBillingCatalog =
   createBillingCatalog(EMPTY_CATALOG_REGISTRY);
-

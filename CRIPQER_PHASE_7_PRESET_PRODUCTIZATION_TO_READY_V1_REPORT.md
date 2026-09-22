@@ -21,37 +21,37 @@ not claimed until save/reload and public parity are exercised in a browser.
 
 ## Preset matrix
 
-| Preset | Family | Text | Media | Collection lifecycle | Contextual selection | Style | CTA | Motion | Persistence | Public parity | Classification |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| Medical Profile Hero | Hero | Ready | Ready | N/A | Ready | Ready | Ready | Ready | Candidate | Candidate | READY candidate |
-| Professional Trust Hero | Hero | Ready | Ready | Button group ready | Ready | Ready | Ready | Candidate | Candidate | READY candidate |
-| Executive Split Hero | Hero | Ready | Ready | N/A | Ready | Ready | Ready | Candidate | Candidate | READY candidate |
-| Creator Editorial | Hero | Ready | N/A | Social ready | Ready | Ready | N/A | Candidate | Candidate | READY candidate |
-| Creator Full Image | Hero | Ready | Ready | N/A | Ready | Ready | N/A | Candidate | Candidate | READY candidate |
-| Creator Bento Intro | Hero | Ready | Ready | Social ready | Ready | Ready | N/A | Candidate | Candidate | READY candidate |
-| Services Bento | Services | Ready | Ready | Add/edit/reorder/delete | Ready | Ready | Ready | Candidate | Candidate | READY candidate |
-| Services Cards | Services | Ready | Ready | Add/edit/reorder/delete | Ready | Ready | Ready | Candidate | Candidate | READY candidate |
-| Services Editorial | Services | Ready | Ready | Add/edit/reorder/delete | Ready | Ready | Ready | Candidate | Candidate | READY candidate |
-| Services Compact | Services | Ready | Ready | Add/edit/reorder/delete | Ready | Ready | Ready | Candidate | Candidate | READY candidate |
-| Portfolio Bento | Portfolio | Ready | Ready | Add/edit/reorder/delete | Ready | Ready | Ready | Candidate | Candidate | READY candidate |
-| Portfolio Gallery | Portfolio | Ready | Ready | Add/edit/reorder/delete | Ready | Ready | Ready | Candidate | Candidate | READY candidate |
-| Portfolio Editorial | Portfolio | Ready | Ready | Add/edit/reorder/delete | Ready | Ready | Ready | Candidate | Candidate | READY candidate |
-| Reviews Cards | Reviews | Ready | Ready | Add/edit/reorder/delete | Ready | Ready | N/A | Candidate | Candidate | READY candidate |
-| Featured Testimonial | Reviews | Ready | Ready | Add/edit/reorder/delete | Ready | Ready | N/A | Candidate | Candidate | READY candidate |
-| Trust Grid | Reviews | Ready | Ready | Add/edit/reorder/delete | Ready | Ready | N/A | Candidate | Candidate | READY candidate |
-| Product Spotlight | Products | Ready | Ready | N/A | Ready | Ready | Ready | Candidate | Candidate | READY candidate |
-| Product Grid Premium | Products | Ready | Ready | Add/edit/reorder/delete | Ready | Ready | Ready | Candidate | Candidate | READY candidate |
-| Product Bento Showcase | Products | Ready | Ready | Add/edit/reorder/delete | Ready | Ready | Ready | Candidate | Candidate | READY candidate |
-| Booking Simple | Booking | Ready | N/A | N/A | Ready | Ready | Ready | Candidate | Candidate | READY candidate |
-| Booking Split | Booking | Ready | N/A | N/A | Ready | Ready | Ready | Candidate | Candidate | READY candidate |
-| Booking Premium Card | Booking | Ready | N/A | N/A | Ready | Ready | Ready | Candidate | Candidate | READY candidate |
-| Featured Video | Media | Ready | Replace/remove | N/A | Ready | Ready | N/A | Candidate | Candidate | READY candidate |
-| Music Spotlight | Media | Ready | Replace/remove | N/A | Ready | Ready | N/A | Candidate | Candidate | READY candidate |
-| Media Bento | Media | Ready | Replace/remove | N/A | Ready | Ready | N/A | Candidate | Candidate | READY candidate |
-| Contact Minimal | Contact | Ready | N/A | Floating actions N/A | Ready | Ready | Ready | Candidate | Candidate | READY candidate |
-| Contact Card | Contact | Ready | N/A | N/A | Ready | Ready | Ready | Candidate | Candidate | READY candidate |
-| Contact + Map | Contact | Ready | N/A | N/A | Ready | Ready | Ready | Candidate | Candidate | READY candidate |
-| Contact + Floating CTA | Contact | Ready | N/A | Floating actions ready | Ready | Ready | Ready | Candidate | Candidate | READY candidate |
+| Preset                  | Family    | Text  | Media          | Collection lifecycle    | Contextual selection | Style | CTA   | Motion    | Persistence | Public parity   | Classification  |
+| ----------------------- | --------- | ----- | -------------- | ----------------------- | -------------------- | ----- | ----- | --------- | ----------- | --------------- | --------------- |
+| Medical Profile Hero    | Hero      | Ready | Ready          | N/A                     | Ready                | Ready | Ready | Ready     | Candidate   | Candidate       | READY candidate |
+| Professional Trust Hero | Hero      | Ready | Ready          | Button group ready      | Ready                | Ready | Ready | Candidate | Candidate   | READY candidate |
+| Executive Split Hero    | Hero      | Ready | Ready          | N/A                     | Ready                | Ready | Ready | Candidate | Candidate   | READY candidate |
+| Creator Editorial       | Hero      | Ready | N/A            | Social ready            | Ready                | Ready | N/A   | Candidate | Candidate   | READY candidate |
+| Creator Full Image      | Hero      | Ready | Ready          | N/A                     | Ready                | Ready | N/A   | Candidate | Candidate   | READY candidate |
+| Creator Bento Intro     | Hero      | Ready | Ready          | Social ready            | Ready                | Ready | N/A   | Candidate | Candidate   | READY candidate |
+| Services Bento          | Services  | Ready | Ready          | Add/edit/reorder/delete | Ready                | Ready | Ready | Candidate | Candidate   | READY candidate |
+| Services Cards          | Services  | Ready | Ready          | Add/edit/reorder/delete | Ready                | Ready | Ready | Candidate | Candidate   | READY candidate |
+| Services Editorial      | Services  | Ready | Ready          | Add/edit/reorder/delete | Ready                | Ready | Ready | Candidate | Candidate   | READY candidate |
+| Services Compact        | Services  | Ready | Ready          | Add/edit/reorder/delete | Ready                | Ready | Ready | Candidate | Candidate   | READY candidate |
+| Portfolio Bento         | Portfolio | Ready | Ready          | Add/edit/reorder/delete | Ready                | Ready | Ready | Candidate | Candidate   | READY candidate |
+| Portfolio Gallery       | Portfolio | Ready | Ready          | Add/edit/reorder/delete | Ready                | Ready | Ready | Candidate | Candidate   | READY candidate |
+| Portfolio Editorial     | Portfolio | Ready | Ready          | Add/edit/reorder/delete | Ready                | Ready | Ready | Candidate | Candidate   | READY candidate |
+| Reviews Cards           | Reviews   | Ready | Ready          | Add/edit/reorder/delete | Ready                | Ready | N/A   | Candidate | Candidate   | READY candidate |
+| Featured Testimonial    | Reviews   | Ready | Ready          | Add/edit/reorder/delete | Ready                | Ready | N/A   | Candidate | Candidate   | READY candidate |
+| Trust Grid              | Reviews   | Ready | Ready          | Add/edit/reorder/delete | Ready                | Ready | N/A   | Candidate | Candidate   | READY candidate |
+| Product Spotlight       | Products  | Ready | Ready          | N/A                     | Ready                | Ready | Ready | Candidate | Candidate   | READY candidate |
+| Product Grid Premium    | Products  | Ready | Ready          | Add/edit/reorder/delete | Ready                | Ready | Ready | Candidate | Candidate   | READY candidate |
+| Product Bento Showcase  | Products  | Ready | Ready          | Add/edit/reorder/delete | Ready                | Ready | Ready | Candidate | Candidate   | READY candidate |
+| Booking Simple          | Booking   | Ready | N/A            | N/A                     | Ready                | Ready | Ready | Candidate | Candidate   | READY candidate |
+| Booking Split           | Booking   | Ready | N/A            | N/A                     | Ready                | Ready | Ready | Candidate | Candidate   | READY candidate |
+| Booking Premium Card    | Booking   | Ready | N/A            | N/A                     | Ready                | Ready | Ready | Candidate | Candidate   | READY candidate |
+| Featured Video          | Media     | Ready | Replace/remove | N/A                     | Ready                | Ready | N/A   | Candidate | Candidate   | READY candidate |
+| Music Spotlight         | Media     | Ready | Replace/remove | N/A                     | Ready                | Ready | N/A   | Candidate | Candidate   | READY candidate |
+| Media Bento             | Media     | Ready | Replace/remove | N/A                     | Ready                | Ready | N/A   | Candidate | Candidate   | READY candidate |
+| Contact Minimal         | Contact   | Ready | N/A            | Floating actions N/A    | Ready                | Ready | Ready | Candidate | Candidate   | READY candidate |
+| Contact Card            | Contact   | Ready | N/A            | N/A                     | Ready                | Ready | Ready | Candidate | Candidate   | READY candidate |
+| Contact + Map           | Contact   | Ready | N/A            | N/A                     | Ready                | Ready | Ready | Candidate | Candidate   | READY candidate |
+| Contact + Floating CTA  | Contact   | Ready | N/A            | Floating actions ready  | Ready                | Ready | Ready | Candidate | Candidate   | READY candidate |
 
 ## Authority mapping
 

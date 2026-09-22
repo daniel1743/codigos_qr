@@ -108,6 +108,8 @@ export function InlineText({
   style,
   className,
   placeholder,
+  onFocus,
+  onBlur,
 }: {
   path: string;
   value: string;

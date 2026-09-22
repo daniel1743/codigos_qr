@@ -587,7 +587,10 @@ export function PowerCanvasViewport({
             {children}
           </div>
         </div>
-        <div className="h-[calc(4rem+env(safe-area-inset-bottom,0px))] w-full shrink-0 lg:hidden" aria-hidden="true" />
+        <div
+          className="h-[calc(4rem+env(safe-area-inset-bottom,0px))] w-full shrink-0 lg:hidden"
+          aria-hidden="true"
+        />
       </div>
 
       {cameraDiagnosticsEnabled ? (

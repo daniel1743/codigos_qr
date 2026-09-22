@@ -212,7 +212,11 @@ export const profileService = {
     if (!updatedProfile) {
       // In cases where only the basic layout is changed, if neither profile nor template_config changed,
       // fetch the existing profile to avoid throwing.
-      return this.getProfileByIdForUser(supabase, profileId, updates.user_id || "") as Promise<Profile>;
+      return this.getProfileByIdForUser(
+        supabase,
+        profileId,
+        updates.user_id || "",
+      ) as Promise<Profile>;
     }
 
     return updatedProfile;

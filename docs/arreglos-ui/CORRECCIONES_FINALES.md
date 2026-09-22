@@ -13,6 +13,7 @@
 **Solución:** Protección permanente del `public_id`
 
 #### Cambios en `editor.tsx`:
+
 ```typescript
 // CRÍTICO: Proteger publicId - nunca cambiar si ya existe
 const publicId = profile.public_id || generatePublicId();
@@ -40,6 +41,7 @@ const identityBackfill = profile.public_id
 **Solución:** Integrados dentro de "Explorar diseños"
 
 #### Estructura de la Galería:
+
 ```
 ┌─────────────────────────────────────┐
 │  Diseños QR                         │
@@ -62,6 +64,7 @@ const identityBackfill = profile.public_id
 ```
 
 #### 14 Efectos Disponibles:
+
 1. **Holográfico Púrpura** - Multi-color shimmer
 2. **Holográfico Azul** - Cyan-purple dinámico
 3. **Oro Metálico** - Dorado brillante
@@ -87,33 +90,32 @@ const identityBackfill = profile.public_id
 **Solución:** Verificación de admin + botón en sidebar
 
 #### Verificación de Admin:
+
 ```typescript
 // Archivo: src/lib/admin-check.ts
-export async function isUserAdmin(
-  supabase: SupabaseClient,
-  userId: string
-): Promise<boolean> {
+export async function isUserAdmin(supabase: SupabaseClient, userId: string): Promise<boolean> {
   // Verifica tabla admin_users
 }
 
 // Fallback hardcoded
-const ADMIN_EMAILS = [
-  "falcondaniel37@gmail.com",
-  "admin@example.com"
-];
+const ADMIN_EMAILS = ["falcondaniel37@gmail.com", "admin@example.com"];
 ```
 
 #### Botón en Sidebar:
+
 ```tsx
-{isAdmin && (
-  <Link to="/admin" className="...">
-    <Shield className="w-5 h-5" />
-    Panel Admin
-  </Link>
-)}
+{
+  isAdmin && (
+    <Link to="/admin" className="...">
+      <Shield className="w-5 h-5" />
+      Panel Admin
+    </Link>
+  );
+}
 ```
 
 **Acceso Admin:**
+
 - Email: `falcondaniel37@gmail.com`
 - Contraseña: `Daniel22.`
 - **Botón visible en sidebar del editor** (fondo dorado)
@@ -123,11 +125,13 @@ const ADMIN_EMAILS = [
 ## 📁 ARCHIVOS MODIFICADOS
 
 ### Nuevos:
+
 1. **`src/lib/admin-check.ts`** - Verificación de admin
 2. **`src/lib/premium-qr-presets.ts`** - 14 gradientes + efectos
 3. **`src/components/editor/PremiumEffectsSelector.tsx`** - Galería (ya no se usa, integrado en QRTemplateGallery)
 
 ### Actualizados:
+
 1. **`src/routes/editor.tsx`**
    - Estado `isAdmin`
    - Verificación en `loadData()`
@@ -159,12 +163,14 @@ const ADMIN_EMAILS = [
 ## 🔐 GARANTÍAS DE PERSISTENCIA
 
 ### QR Permanente:
+
 ✅ El `public_id` **NUNCA** cambia después de creado  
 ✅ Solo se genera UNA VEZ en la primera creación  
 ✅ Actualizaciones solo tocan: colores, logos, diseño, efectos  
 ✅ URL pública es **PERMANENTE**: `https://tudominio.com/p/ABC123`
 
 ### Flujo Protegido:
+
 ```
 1. Usuario crea perfil → se genera public_id
 2. Se guarda en DB con public_id
@@ -179,6 +185,7 @@ const ADMIN_EMAILS = [
 ## 🎨 EXPERIENCIA DE USUARIO
 
 ### Flujo de Diseño QR:
+
 1. Usuario va al editor
 2. Tab "QR & Descarga"
 3. Click en **"Explorar diseños"**
@@ -190,6 +197,7 @@ const ADMIN_EMAILS = [
 7. **URL del QR NUNCA cambia**
 
 ### Flujo Admin:
+
 1. Admin inicia sesión con `falcondaniel37@gmail.com`
 2. Ve botón dorado **"Panel Admin"** en sidebar
 3. Click → va a `/admin`
@@ -208,7 +216,7 @@ ON storage.objects
 FOR INSERT
 TO authenticated
 WITH CHECK (
-  bucket_id = 'avatars' 
+  bucket_id = 'avatars'
   AND auth.uid()::text = (storage.foldername(name))[1]
 );
 
@@ -218,7 +226,7 @@ ON storage.objects
 FOR UPDATE
 TO authenticated
 USING (
-  bucket_id = 'avatars' 
+  bucket_id = 'avatars'
   AND auth.uid()::text = (storage.foldername(name))[1]
 );
 
@@ -228,7 +236,7 @@ ON storage.objects
 FOR DELETE
 TO authenticated
 USING (
-  bucket_id = 'avatars' 
+  bucket_id = 'avatars'
   AND auth.uid()::text = (storage.foldername(name))[1]
 );
 
@@ -265,7 +273,7 @@ USING (bucket_id = 'avatars');
 ✅ Galería integrada con tabs  
 ✅ Panel Admin accesible  
 ✅ Protección total de URLs  
-✅ Preview en tiempo real  
+✅ Preview en tiempo real
 
 **Todo listo para producción excepto el RLS de avatares (SQL pendiente).**
 

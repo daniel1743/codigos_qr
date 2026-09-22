@@ -43,4 +43,3 @@ Use an authenticated browser session with an owned child Page, then execute the
 task's Product Grid, Services, save/reload, template-switch, publication,
 multi-page and mobile checks. Record only screenshots and observations that
 were actually captured.
-

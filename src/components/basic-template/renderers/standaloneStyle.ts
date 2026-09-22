@@ -234,8 +234,7 @@ export function buildStandaloneStyle(config: BasicTemplateConfig): StandaloneSty
       "--standalone-button-font-weight": button.textWeight,
       "--standalone-button-text-align": button.contentAlign,
       "--standalone-button-justify": buttonJustify(button.contentAlign),
-      "--standalone-button-flex-direction":
-        button.iconPosition === "right" ? "row-reverse" : "row",
+      "--standalone-button-flex-direction": button.iconPosition === "right" ? "row-reverse" : "row",
       "--standalone-avatar-radius": avatar.radius,
       "--standalone-avatar-display": avatar.display,
       "--standalone-avatar-ring-color": avatarRing.enabled ? avatarRing.color : undefined,

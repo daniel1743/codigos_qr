@@ -9,12 +9,14 @@ Implementar un sistema completo de generación de QR con efectos Premium (degrad
 ## FASES DE IMPLEMENTACIÓN
 
 ### FASE 1: RENDERER QR AVANZADO (Base técnica)
+
 **Prioridad:** P0 - Bloqueante para todo lo demás  
 **Tiempo estimado:** 3-4 horas
 
 #### Decisión técnica: ¿Qué librería usar?
 
 **Opciones evaluadas:**
+
 1. `qrcode.react` (actual) - ❌ No soporta degradados/efectos
 2. `qr-code-styling` - ✅ Soporta degradados, dots, corners, frames
 3. Custom Canvas - ⚠️ Complejo, mucho desarrollo
@@ -22,6 +24,7 @@ Implementar un sistema completo de generación de QR con efectos Premium (degrad
 **Decisión: Usar `qr-code-styling`**
 
 **Justificación:**
+
 - ✅ Soporta gradientes (linear/radial)
 - ✅ Soporta dots shapes (rounded, dots, classy, extra-rounded)
 - ✅ Soporta corner shapes
@@ -33,6 +36,7 @@ Implementar un sistema completo de generación de QR con efectos Premium (degrad
 #### Tareas Fase 1:
 
 1. **Instalar dependencia**
+
    ```bash
    npm install qr-code-styling
    ```
@@ -44,23 +48,24 @@ Implementar un sistema completo de generación de QR con efectos Premium (degrad
    - Compatibilidad con sistema actual
 
 3. **Extender tipos de template**
+
    ```typescript
    interface QRTemplateAdvanced {
      // Existentes
      qr_foreground_color: string;
      qr_background_color: string;
      qr_logo_enabled: boolean;
-     
+
      // Nuevos
      gradient?: {
-       type: 'linear' | 'radial';
+       type: "linear" | "radial";
        colorStops: Array<{ offset: number; color: string }>;
        rotation?: number; // para linear
      };
-     dotsStyle?: 'square' | 'dots' | 'rounded' | 'extra-rounded' | 'classy';
-     cornersSquareStyle?: 'square' | 'extra-rounded' | 'dot';
-     cornersDotStyle?: 'square' | 'dot';
-     effect?: 'none' | 'neon' | 'glow';
+     dotsStyle?: "square" | "dots" | "rounded" | "extra-rounded" | "classy";
+     cornersSquareStyle?: "square" | "extra-rounded" | "dot";
+     cornersDotStyle?: "square" | "dot";
+     effect?: "none" | "neon" | "glow";
    }
    ```
 
@@ -70,7 +75,7 @@ Implementar un sistema completo de generación de QR con efectos Premium (degrad
    - Fallback a renderer simple si propiedades avanzadas no están
 
 5. **Validación de escaneo**
-   - Función `validateAdvancedQR(options)` 
+   - Función `validateAdvancedQR(options)`
    - Verificar contraste en degradados
    - Verificar que dots/corners no rompan escaneo
    - Retornar warnings si hay riesgo
@@ -78,16 +83,19 @@ Implementar un sistema completo de generación de QR con efectos Premium (degrad
 ---
 
 ### FASE 2: LOGOS INTERNOS EDITABLES (Premium feature)
+
 **Prioridad:** P1  
 **Tiempo estimado:** 2-3 horas
 
 #### Arquitectura de logos
 
 **Storage:**
+
 - Bucket Supabase: `demo-logos`
 - Estructura: `/categories/{category}/{logo-name}.svg`
 
 **Tabla nueva:** `demo_logos`
+
 ```sql
 CREATE TABLE demo_logos (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -101,6 +109,7 @@ CREATE TABLE demo_logos (
 ```
 
 **Logos iniciales a crear:**
+
 - **Business:** briefcase, chart, handshake, star, check (5)
 - **Food:** fork-knife, coffee, cake, wine, chef-hat (5)
 - **Beauty:** sparkles, flower, heart, leaf, scissors (5)
@@ -141,12 +150,14 @@ Usuario Premium en QR Studio:
 ---
 
 ### FASE 3: PLANTILLAS QR AVANZADAS (Actualizar catálogo)
+
 **Prioridad:** P1  
 **Tiempo estimado:** 2 horas
 
 #### Nuevas plantillas Premium con efectos:
 
 **Degradados (6 nuevas):**
+
 1. **Sunset Pro** - Degradado naranja a rosa
 2. **Ocean Deep** - Degradado azul profundo a cyan
 3. **Forest Mist** - Verde bosque a verde claro
@@ -155,12 +166,14 @@ Usuario Premium en QR Studio:
 6. **Ice** - Azul hielo a blanco
 
 **Neón (4 nuevas):**
+
 1. **Neon Pink** - Rosa neón con glow effect
 2. **Cyber Blue** - Azul eléctrico con glow
 3. **Toxic Green** - Verde neón seguro
 4. **Ultraviolet** - Violeta neón con glow
 
 **Elegantes con logo (4 nuevas):**
+
 1. **Minimalist Pro** - Negro + logo business
 2. **Boutique Gold** - Dorado + logo elegante
 3. **Chef Special** - Terracota + logo food
@@ -174,7 +187,7 @@ Usuario Premium en QR Studio:
 interface QRTemplateAdvanced extends QRTemplate {
   gradient?: GradientOptions;
   dotsStyle?: DotsStyle;
-  effect?: 'none' | 'neon' | 'glow';
+  effect?: "none" | "neon" | "glow";
   demoLogoId?: string; // Si viene con logo demo
 }
 ```
@@ -182,6 +195,7 @@ interface QRTemplateAdvanced extends QRTemplate {
 ---
 
 ### FASE 4: ANALYTICS AVANZADOS (Tracking detallado)
+
 **Prioridad:** P0 (crítico para admin)  
 **Tiempo estimado:** 3-4 horas
 
@@ -191,26 +205,26 @@ interface QRTemplateAdvanced extends QRTemplate {
 CREATE TABLE qr_analytics (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   profile_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  
+
   -- Datos del evento
   event_type TEXT NOT NULL, -- 'view' | 'link_click'
   link_id UUID REFERENCES profile_links(id) ON DELETE SET NULL,
-  
+
   -- Geolocalización aproximada (IP-based)
   country TEXT,
   city TEXT,
   latitude NUMERIC(9,6),
   longitude NUMERIC(9,6),
-  
+
   -- Contexto técnico
   user_agent TEXT,
   device_type TEXT, -- 'mobile' | 'desktop' | 'tablet'
   browser TEXT,
   os TEXT,
-  
+
   -- Temporal
   created_at TIMESTAMPTZ DEFAULT NOW(),
-  
+
   -- Metadata adicional
   referrer TEXT,
   session_id TEXT -- Para agrupar clics de misma sesión
@@ -277,7 +291,7 @@ async function getLocationFromIP(ip: string) {
     country: data.country,
     city: data.city,
     lat: data.lat,
-    lon: data.lon
+    lon: data.lon,
   };
 }
 ```
@@ -293,30 +307,32 @@ useEffect(() => {
   // Track view
   analyticsService.trackPageView(profile.id, {
     userAgent: navigator.userAgent,
-    referrer: document.referrer
+    referrer: document.referrer,
   });
 }, [profile.id]);
 
 // En cada link click
 const handleLinkClick = (link: ProfileLink) => {
   analyticsService.trackLinkClick(profile.id, link.id, {
-    userAgent: navigator.userAgent
+    userAgent: navigator.userAgent,
   });
-  
+
   // Abrir link
-  window.open(link.url, '_blank');
+  window.open(link.url, "_blank");
 };
 ```
 
 ---
 
 ### FASE 5: PANEL DE ADMINISTRACIÓN
+
 **Prioridad:** P0 (crítico)  
 **Tiempo estimado:** 4-5 horas
 
 #### Arquitectura de permisos:
 
 **Tabla `admin_users`:**
+
 ```sql
 CREATE TABLE admin_users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -337,18 +353,19 @@ VALUES (
 ```
 
 **Tabla `premium_users`:**
+
 ```sql
 CREATE TABLE premium_users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE UNIQUE,
   email TEXT NOT NULL,
   tier TEXT DEFAULT 'premium', -- 'premium' | 'premium_pro'
-  
+
   -- Origen del premium
   source TEXT DEFAULT 'admin_grant', -- 'admin_grant' | 'invitation' | 'purchase'
   granted_by UUID REFERENCES auth.users(id),
   invitation_code TEXT,
-  
+
   -- Temporal
   expires_at TIMESTAMPTZ, -- NULL = permanente
   created_at TIMESTAMPTZ DEFAULT NOW()
@@ -359,17 +376,18 @@ CREATE INDEX idx_premium_users_email ON premium_users(email);
 ```
 
 **Tabla `invitation_codes`:**
+
 ```sql
 CREATE TABLE invitation_codes (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   code TEXT NOT NULL UNIQUE, -- 'PREMIUM-XXXX-XXXX'
-  
+
   -- Configuración
   max_uses INT DEFAULT 1, -- Cuántas veces se puede usar
   current_uses INT DEFAULT 0,
   tier TEXT DEFAULT 'premium',
   duration_days INT, -- NULL = permanente
-  
+
   -- Metadata
   created_by UUID REFERENCES auth.users(id),
   created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -383,6 +401,7 @@ CREATE INDEX idx_invitation_codes_code ON invitation_codes(code);
 #### Componentes del panel:
 
 **1. `AdminPanel.tsx` (Principal)**
+
 ```
 Tabs:
   - Dashboard (métricas generales)
@@ -394,6 +413,7 @@ Tabs:
 ```
 
 **2. `AdminDashboard.tsx`**
+
 ```
 Métricas:
   - Total usuarios registrados
@@ -405,6 +425,7 @@ Métricas:
 ```
 
 **3. `PremiumUsersPanel.tsx`**
+
 ```
 Features:
   - Lista de usuarios Premium
@@ -416,6 +437,7 @@ Features:
 ```
 
 **4. `InvitationCodesPanel.tsx`**
+
 ```
 Features:
   - Lista de códigos activos/usados
@@ -428,6 +450,7 @@ Features:
 ```
 
 **5. `AnalyticsGlobalPanel.tsx`**
+
 ```
 Visualizaciones:
   - Chart de views por día (últimos 30 días)
@@ -441,26 +464,28 @@ Visualizaciones:
 #### Ruta del panel:
 
 **Nueva ruta: `/admin`**
+
 - Protegida: solo `falcondaniel37@gmail.com`
 - Sidebar con tabs
 - Responsive mobile
 
 **Hook de protección:**
+
 ```typescript
 // src/hooks/useIsAdmin.ts
 export function useIsAdmin() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
-  
+
   useEffect(() => {
     const supabase = getBrowserSupabaseClient();
     supabase.auth.getUser().then(({ data: { user } }) => {
-      const adminEmail = 'falcondaniel37@gmail.com';
+      const adminEmail = "falcondaniel37@gmail.com";
       setIsAdmin(user?.email === adminEmail);
       setLoading(false);
     });
   }, []);
-  
+
   return { isAdmin, loading };
 }
 ```
@@ -468,6 +493,7 @@ export function useIsAdmin() {
 ---
 
 ### FASE 6: SISTEMA DE INVITACIONES (Usuario final)
+
 **Prioridad:** P1  
 **Tiempo estimado:** 2 horas
 
@@ -486,6 +512,7 @@ Usuario en app → Ve badge "Desbloquear Premium"
 ```
 
 **Servicio:**
+
 ```typescript
 // src/services/invitationService.ts
 async redeemInvitationCode(userId: string, code: string) {
@@ -498,6 +525,7 @@ async redeemInvitationCode(userId: string, code: string) {
 ```
 
 **Edge function (opcional pero recomendado):**
+
 ```typescript
 // supabase/functions/redeem-invitation/index.ts
 // Validación server-side para evitar fraude
@@ -506,6 +534,7 @@ async redeemInvitationCode(userId: string, code: string) {
 ---
 
 ### FASE 7: ACTUALIZAR ENTITLEMENTS
+
 **Prioridad:** P0  
 **Tiempo estimado:** 1 hora
 
@@ -514,28 +543,26 @@ async redeemInvitationCode(userId: string, code: string) {
 ```typescript
 export async function getUserEntitlements(userId: string): Promise<UserEntitlements> {
   const supabase = getBrowserSupabaseClient();
-  
+
   // Verificar si es admin
   const { data: adminData } = await supabase
-    .from('admin_users')
-    .select('role')
-    .eq('user_id', userId)
+    .from("admin_users")
+    .select("role")
+    .eq("user_id", userId)
     .single();
-  
+
   // Verificar si es Premium
   const { data: premiumData } = await supabase
-    .from('premium_users')
-    .select('tier, expires_at')
-    .eq('user_id', userId)
+    .from("premium_users")
+    .select("tier, expires_at")
+    .eq("user_id", userId)
     .single();
-  
-  const isPremium = premiumData && (
-    !premiumData.expires_at || 
-    new Date(premiumData.expires_at) > new Date()
-  );
-  
+
+  const isPremium =
+    premiumData && (!premiumData.expires_at || new Date(premiumData.expires_at) > new Date());
+
   return {
-    plan: isPremium ? 'premium' : 'free',
+    plan: isPremium ? "premium" : "free",
     isAdmin: !!adminData,
     canUsePremiumTemplates: isPremium,
     canUseAdvancedQR: isPremium,
@@ -591,15 +618,19 @@ FASE 6 (Invitaciones)
 ## RIESGOS Y MITIGACIONES
 
 **Riesgo 1:** Degradados rompen escaneo
+
 - **Mitigación:** Validación de contraste + tests manuales con múltiples scanners
 
 **Riesgo 2:** Analytics consumen mucho storage
+
 - **Mitigación:** Política de retención (90 días), agregación diaria
 
 **Riesgo 3:** IP geolocation API limits
+
 - **Mitigación:** Cache de IPs, fallback a "Unknown"
 
 **Riesgo 4:** Fraude en códigos de invitación
+
 - **Mitigación:** Edge function server-side, rate limiting
 
 ---
@@ -607,29 +638,34 @@ FASE 6 (Invitaciones)
 ## TESTING REQUERIDO
 
 **Fase 1:**
+
 - [ ] QR con degradado escanea en 5 apps diferentes
 - [ ] QR con neón escanea
 - [ ] QR con dots rounded escanea
 - [ ] Export PNG/SVG funciona
 
 **Fase 2:**
+
 - [ ] Logo demo se aplica correctamente
 - [ ] Logo demo persiste en descarga
 - [ ] Solo Premium puede elegir logo demo
 
 **Fase 4:**
+
 - [ ] View tracking funciona en mobile/desktop
 - [ ] Link click tracking funciona
 - [ ] Geolocation aproximada es correcta
 - [ ] Multiple clics misma sesión se agrupan
 
 **Fase 5:**
+
 - [ ] Solo admin puede acceder a `/admin`
 - [ ] Métricas se ven correctamente
 - [ ] Otorgar Premium funciona
 - [ ] Crear código de invitación funciona
 
 **Fase 6:**
+
 - [ ] Canjear código válido otorga Premium
 - [ ] Código con max_uses se agota
 - [ ] Código expirado no se puede canjear
@@ -641,4 +677,3 @@ FASE 6 (Invitaciones)
 1. **¿Aprobar este plan?**
 2. **¿Alguna modificación o prioridad diferente?**
 3. **¿Comenzar con Fase 1 (Renderer)?**
-

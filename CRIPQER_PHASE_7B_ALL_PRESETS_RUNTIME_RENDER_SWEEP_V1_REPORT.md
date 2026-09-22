@@ -8,12 +8,12 @@ The exposed preset catalog and the three canonical full template definitions
 were executed through the real React renderer. Construction success and render
 success were measured separately.
 
-| Scope | Construction | Real React render | Result |
-|---|---:|---:|---|
-| Exposed presets | 29/29 | 29/29 | PASS |
-| Canonical full templates | 3/3 | 3/3 | PASS |
-| Unhandled render exceptions after repair | — | 0 | PASS |
-| Known undefined runtime helpers in audited renderer files | — | 0 | PASS |
+| Scope                                                     | Construction | Real React render | Result |
+| --------------------------------------------------------- | -----------: | ----------------: | ------ |
+| Exposed presets                                           |        29/29 |             29/29 | PASS   |
+| Canonical full templates                                  |          3/3 |               3/3 | PASS   |
+| Unhandled render exceptions after repair                  |            — |                 0 | PASS   |
+| Known undefined runtime helpers in audited renderer files |            — |                 0 | PASS   |
 
 The preset test mounts each generated preset configuration through
 `TemplateRenderer`; it does not stop at JSON construction or block-type

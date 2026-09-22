@@ -8,18 +8,18 @@
 
 Lectura solo lectura de `public.pages`:
 
-| Campo | Valor |
-|---|---|
-| Page ID | `33b083d9-7387-44cc-ac78-889a91bf0a1a` |
-| Title | `DONDE MI NEGRO` |
-| Page type | `menu` |
-| Template config | presente y parseable |
-| Persisted template identifier | `creator-premium-001` |
-| Metadata name | `Creator Premium` |
-| Theme | `aurora` / `Aurora` |
-| Layout | `centered` / header `overlap` |
-| Avatar | `showAvatar=false`, asset presente |
-| Cover | `full-bleed`, banner habilitado |
+| Campo                         | Valor                                  |
+| ----------------------------- | -------------------------------------- |
+| Page ID                       | `33b083d9-7387-44cc-ac78-889a91bf0a1a` |
+| Title                         | `DONDE MI NEGRO`                       |
+| Page type                     | `menu`                                 |
+| Template config               | presente y parseable                   |
+| Persisted template identifier | `creator-premium-001`                  |
+| Metadata name                 | `Creator Premium`                      |
+| Theme                         | `aurora` / `Aurora`                    |
+| Layout                        | `centered` / header `overlap`          |
+| Avatar                        | `showAvatar=false`, asset presente     |
+| Cover                         | `full-bleed`, banner habilitado        |
 
 La referencia no fue editada, guardada, publicada, normalizada ni usada como
 fixture descartable.

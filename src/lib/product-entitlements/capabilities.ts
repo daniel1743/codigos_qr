@@ -91,10 +91,7 @@ export const PRO_CAPABILITIES = [
 ] as const;
 
 /** Every capability declared by this V1 policy, in canonical order. */
-export const ALL_CAPABILITIES = [
-  ...CORE_FREE_CAPABILITIES,
-  ...PRO_CAPABILITIES,
-] as const;
+export const ALL_CAPABILITIES = [...CORE_FREE_CAPABILITIES, ...PRO_CAPABILITIES] as const;
 
 export type ProductCapability = (typeof ALL_CAPABILITIES)[number];
 
@@ -157,9 +154,7 @@ const CAPABILITY_SET: ReadonlySet<string> = new Set<string>(ALL_CAPABILITIES);
  * business   → every declared capability (same visual matrix as Pro).
  * enterprise → every declared capability (same visual matrix as Pro).
  */
-const CAPABILITY_POLICY: Readonly<
-  Record<ProductTier, ReadonlySet<ProductCapability>>
-> = {
+const CAPABILITY_POLICY: Readonly<Record<ProductTier, ReadonlySet<ProductCapability>>> = {
   free: new Set<ProductCapability>(CORE_FREE_CAPABILITIES),
   pro: new Set<ProductCapability>(ALL_CAPABILITIES),
   business: new Set<ProductCapability>(ALL_CAPABILITIES),
@@ -205,9 +200,7 @@ export interface CapabilityLockedDecision {
   readonly upgradeTarget: UpgradeTarget;
 }
 
-export type CapabilityAccessDecision =
-  | CapabilityAllowDecision
-  | CapabilityLockedDecision;
+export type CapabilityAccessDecision = CapabilityAllowDecision | CapabilityLockedDecision;
 
 /* ============================================================================
  * 5. TYPE GUARDS

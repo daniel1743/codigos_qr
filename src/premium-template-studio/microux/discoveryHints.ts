@@ -59,9 +59,7 @@ export interface SelectedBlockSignal {
  * block. Returns null when no hint applies. Never inspects or mutates the
  * document beyond the block type.
  */
-export function hintForSelection(
-  block: SelectedBlockSignal | null,
-): DiscoveryHintId | null {
+export function hintForSelection(block: SelectedBlockSignal | null): DiscoveryHintId | null {
   if (!block) return null;
   if (BUTTON_LIKE_BLOCKS.has(block.type)) return "button_to_card";
   if (CARD_BLOCKS.has(block.type)) return "card_image";

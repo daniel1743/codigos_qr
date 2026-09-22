@@ -11,35 +11,35 @@ Task: CRIPQER BILLING — PROVIDER HOST BOUNDARY V1
 
 ### Files read (exact — nothing else)
 
-| File | Role |
-|---|---|
-| `src/lib/billing/billing.types.ts` | Canonical types (`BillingProvider`, statuses, intervals) |
-| `src/server/billing/checkout.ts` | `ProviderSessionAdapter` / `ProviderSessionIntent` / `ProviderSessionResult` / `ResolvedOffer` seam |
-| `src/server/billing/webhooks.ts` | `WebhookVerifier` / `ProviderResourceFetcher` / `WebhookLookupInstruction` / `ProviderResourceType` seam |
-| `src/server/billing/catalog.ts` | Server catalog (`ResolvedOffer` authority, prior phase) |
-| `billing/CLEANER_BILLING_PORTABLE_V1_1_1_RECONCILIATION_REPORT.md` | Approved portable baseline |
-| `billing/CLEANER_BILLING_WEBHOOK_CORE_V1_REPORT.md` | Webhook Core conventions (incl. known transitive ts errors) |
-| `billing/CLEANER_BILLING_CHECKOUT_HOST_V1_REPORT.md` | Checkout Host conventions |
-| `billing/CLEANER_BILLING_SERVER_CATALOG_V1_REPORT.md` | Server Catalog conventions |
-| `tsconfig.json` | Compiler flags (validation only) |
-| `package.json` | `"type": "module"` (validation only) |
+| File                                                               | Role                                                                                                     |
+| ------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
+| `src/lib/billing/billing.types.ts`                                 | Canonical types (`BillingProvider`, statuses, intervals)                                                 |
+| `src/server/billing/checkout.ts`                                   | `ProviderSessionAdapter` / `ProviderSessionIntent` / `ProviderSessionResult` / `ResolvedOffer` seam      |
+| `src/server/billing/webhooks.ts`                                   | `WebhookVerifier` / `ProviderResourceFetcher` / `WebhookLookupInstruction` / `ProviderResourceType` seam |
+| `src/server/billing/catalog.ts`                                    | Server catalog (`ResolvedOffer` authority, prior phase)                                                  |
+| `billing/CLEANER_BILLING_PORTABLE_V1_1_1_RECONCILIATION_REPORT.md` | Approved portable baseline                                                                               |
+| `billing/CLEANER_BILLING_WEBHOOK_CORE_V1_REPORT.md`                | Webhook Core conventions (incl. known transitive ts errors)                                              |
+| `billing/CLEANER_BILLING_CHECKOUT_HOST_V1_REPORT.md`               | Checkout Host conventions                                                                                |
+| `billing/CLEANER_BILLING_SERVER_CATALOG_V1_REPORT.md`              | Server Catalog conventions                                                                               |
+| `tsconfig.json`                                                    | Compiler flags (validation only)                                                                         |
+| `package.json`                                                     | `"type": "module"` (validation only)                                                                     |
 
 Portable ZIP entries (read via `tar -xOf`, **no extraction**, reference only):
 
-| Entry | Purpose |
-|---|---|
-| `cripqer-billing-v1/billing.providers.ts` | Provider abstraction reference |
-| `cripqer-billing-v1/billing.webhooks.ts` | Webhook semantics reference |
+| Entry                                           | Purpose                            |
+| ----------------------------------------------- | ---------------------------------- |
+| `cripqer-billing-v1/billing.providers.ts`       | Provider abstraction reference     |
+| `cripqer-billing-v1/billing.webhooks.ts`        | Webhook semantics reference        |
 | `cripqer-billing-v1/billing.server-contract.ts` | Server boundary contract reference |
-| `cripqer-billing-v1/billing.types.ts` | Portable type shapes reference |
+| `cripqer-billing-v1/billing.types.ts`           | Portable type shapes reference     |
 
 ### Files created (exact — nothing else)
 
-| File | Role |
-|---|---|
-| `src/server/billing/providers.ts` | Canonical Provider Host Boundary (contract + registry) |
-| `src/server/billing/providers.selfcheck.ts` | Pure-local selfcheck (no network, no DB, no SDK) |
-| `billing/CLEANER_BILLING_PROVIDER_HOST_V1_REPORT.md` | This report |
+| File                                                 | Role                                                   |
+| ---------------------------------------------------- | ------------------------------------------------------ |
+| `src/server/billing/providers.ts`                    | Canonical Provider Host Boundary (contract + registry) |
+| `src/server/billing/providers.selfcheck.ts`          | Pure-local selfcheck (no network, no DB, no SDK)       |
+| `billing/CLEANER_BILLING_PROVIDER_HOST_V1_REPORT.md` | This report                                            |
 
 ### Files modified
 
@@ -103,22 +103,22 @@ contracts verbatim; `webhookLookupFetchInput(lookup)` bridges a
 
 ## C. AUTHORITY
 
-| Concern | Authority |
-|---|---|
-| Money authority | Server Catalog `ResolvedOffer` only (never browser) |
-| Identity authority | Trusted `userId` (never browser-derived) |
+| Concern                  | Authority                                                    |
+| ------------------------ | ------------------------------------------------------------ |
+| Money authority          | Server Catalog `ResolvedOffer` only (never browser)          |
+| Identity authority       | Trusted `userId` (never browser-derived)                     |
 | Provider-state authority | Provider adapter authoritative lookup (never the return URL) |
 
 ---
 
 ## D. SECURITY (mandatory)
 
-| Check | Result |
-|---|---|
-| Real provider call made | **NO** |
-| Provider secret introduced | **NO** |
-| Browser price authoritative | **NO** |
-| Automatic provider fallback | **NO** |
+| Check                        | Result |
+| ---------------------------- | ------ |
+| Real provider call made      | **NO** |
+| Provider secret introduced   | **NO** |
+| Browser price authoritative  | **NO** |
+| Automatic provider fallback  | **NO** |
 | Return URL grants paid state | **NO** |
 
 ---
@@ -158,4 +158,3 @@ contracts verbatim; `webhookLookupFetchInput(lookup)` bridges a
 
 > The only writes are `src/server/billing/providers.ts`,
 > `src/server/billing/providers.selfcheck.ts`, and this report.
-

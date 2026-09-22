@@ -3,7 +3,13 @@ import { useState } from "react";
 import { useRender } from "../../engine/RenderContext";
 import { applyTypographyOverride, cardStyle, headingStyle } from "../../engine/styleEngine";
 import { videoEmbedUrl } from "../../utils";
-import { BlockTitle, ContextualItemTarget, EmptyBlockState, InlineText, SmartLink } from "./primitives";
+import {
+  BlockTitle,
+  ContextualItemTarget,
+  EmptyBlockState,
+  InlineText,
+  SmartLink,
+} from "./primitives";
 import type { BlockProps } from "./ContentBlocks";
 import { Dialog, DialogContent, DialogTitle } from "../../../components/ui/dialog";
 import { getGalleryColumns, moveGalleryLightboxIndex } from "./galleryImages";
@@ -159,9 +165,15 @@ export function GalleryBlock({ block }: BlockProps) {
   const images = block.content.images ?? [];
   const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null);
   if (images.length === 0) {
-    return mode === "edit" ? <EmptyBlockState label="No images yet. Upload from the Assets panel." /> : null;
+    return mode === "edit" ? (
+      <EmptyBlockState label="No images yet. Upload from the Assets panel." />
+    ) : null;
   }
-  const columns = getGalleryColumns(images.length, block.layout.columns ?? 3, breakpoint === "mobile");
+  const columns = getGalleryColumns(
+    images.length,
+    block.layout.columns ?? 3,
+    breakpoint === "mobile",
+  );
   const activeImage = activeImageIndex === null ? null : images[activeImageIndex];
   const navigate = (direction: -1 | 1) => {
     setActiveImageIndex((index) =>
@@ -194,7 +206,13 @@ export function GalleryBlock({ block }: BlockProps) {
               type="button"
               onClick={() => setActiveImageIndex(i)}
               aria-label={`Open ${image.alt || `gallery image ${i + 1}`}`}
-              style={{ border: 0, padding: 0, background: "transparent", cursor: "zoom-in", minWidth: 0 }}
+              style={{
+                border: 0,
+                padding: 0,
+                background: "transparent",
+                cursor: "zoom-in",
+                minWidth: 0,
+              }}
             >
               {imageElement}
             </button>
@@ -204,16 +222,25 @@ export function GalleryBlock({ block }: BlockProps) {
         })}
       </div>
       {mode === "public" ? (
-        <Dialog open={activeImageIndex !== null} onOpenChange={(open) => !open && setActiveImageIndex(null)}>
+        <Dialog
+          open={activeImageIndex !== null}
+          onOpenChange={(open) => !open && setActiveImageIndex(null)}
+        >
           <DialogContent
             className="max-w-[min(96vw,72rem)] border-0 bg-transparent p-2 shadow-none"
             style={{ width: "min(96vw, 72rem)", maxWidth: "96vw" }}
           >
-            <DialogTitle className="sr-only">
-              {activeImage?.alt || "Gallery image"}
-            </DialogTitle>
+            <DialogTitle className="sr-only">{activeImage?.alt || "Gallery image"}</DialogTitle>
             {activeImage ? (
-              <div style={{ display: "grid", gridTemplateColumns: images.length > 1 ? "auto minmax(0, 1fr) auto" : "minmax(0, 1fr)", alignItems: "center", gap: 8 }}>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns:
+                    images.length > 1 ? "auto minmax(0, 1fr) auto" : "minmax(0, 1fr)",
+                  alignItems: "center",
+                  gap: 8,
+                }}
+              >
                 {images.length > 1 ? (
                   <button
                     type="button"
@@ -227,7 +254,13 @@ export function GalleryBlock({ block }: BlockProps) {
                 <img
                   src={activeImage.url}
                   alt={activeImage.alt ?? ""}
-                  style={{ display: "block", width: "100%", maxHeight: "calc(100dvh - 7rem)", objectFit: "contain", borderRadius: theme.cards.radius }}
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    maxHeight: "calc(100dvh - 7rem)",
+                    objectFit: "contain",
+                    borderRadius: theme.cards.radius,
+                  }}
                 />
                 {images.length > 1 ? (
                   <button
@@ -309,52 +342,52 @@ export function PortfolioBlock({ block }: BlockProps) {
         }}
       >
         {items.map((item) => (
-          <ContextualItemTarget key={item.id} blockId={block.id} collection="portfolio" itemId={item.id}>
-            <SmartLink
-              href={item.url}
-              block={block}
-              newTab={item.newTab}
-              ariaLabel={item.label}
-            >
-            <article
-              className="pts-hoverable"
-              style={{
-                ...cardStyle(theme, block.style),
-                padding: block.variant === "cards" ? theme.cards.padding : 0,
-                overflow: "hidden",
-              }}
-            >
-              <SafeImage
-                src={item.imageUrl}
-                alt=""
-                radius={block.variant === "cards" ? theme.cards.radius - 6 : 0}
-                aspect="video"
-              />
-              <div style={{ padding: block.variant === "cards" ? "12px 0 0" : "12px 14px 14px" }}>
-                <div
-                  style={{
-                    fontWeight: 600,
-                    fontSize: 14.5,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 6,
-                  }}
-                >
-                  {item.label}
-                  <ArrowUpRight size={14} aria-hidden style={{ color: theme.colors.mutedText }} />
-                </div>
-                {item.description ? (
+          <ContextualItemTarget
+            key={item.id}
+            blockId={block.id}
+            collection="portfolio"
+            itemId={item.id}
+          >
+            <SmartLink href={item.url} block={block} newTab={item.newTab} ariaLabel={item.label}>
+              <article
+                className="pts-hoverable"
+                style={{
+                  ...cardStyle(theme, block.style),
+                  padding: block.variant === "cards" ? theme.cards.padding : 0,
+                  overflow: "hidden",
+                }}
+              >
+                <SafeImage
+                  src={item.imageUrl}
+                  alt=""
+                  radius={block.variant === "cards" ? theme.cards.radius - 6 : 0}
+                  aspect="video"
+                />
+                <div style={{ padding: block.variant === "cards" ? "12px 0 0" : "12px 14px 14px" }}>
                   <div
-                    style={applyTypographyOverride(
-                      { fontSize: 12.5, color: theme.colors.mutedText, marginTop: 2 },
-                      item.descriptionTypography,
-                    )}
+                    style={{
+                      fontWeight: 600,
+                      fontSize: 14.5,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 6,
+                    }}
                   >
-                    {item.description}
+                    {item.label}
+                    <ArrowUpRight size={14} aria-hidden style={{ color: theme.colors.mutedText }} />
                   </div>
-                ) : null}
-              </div>
-            </article>
+                  {item.description ? (
+                    <div
+                      style={applyTypographyOverride(
+                        { fontSize: 12.5, color: theme.colors.mutedText, marginTop: 2 },
+                        item.descriptionTypography,
+                      )}
+                    >
+                      {item.description}
+                    </div>
+                  ) : null}
+                </div>
+              </article>
             </SmartLink>
           </ContextualItemTarget>
         ))}

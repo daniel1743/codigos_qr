@@ -23,14 +23,14 @@
 
 ## Authorities reused
 
-| Concern | Authority |
-|---|---|
-| Ownership and child row | `pageService.createPage`, owner-scoped Supabase/RLS |
-| Draft canonical | `pageCanonicalService.saveDraft` → `pages.template_config` |
-| Publish/unpublish | `pageCanonicalService` with `published_revision` concurrency |
-| Child editor | `/pages/$pageId/edit` → `PowerEditorHost` page target |
-| Stable public URL | `getPublicPageUrl(public_id)` → `/pg/{public_id}` |
-| QR | Existing `PageQrPanel` and `pageQrService` |
+| Concern                 | Authority                                                    |
+| ----------------------- | ------------------------------------------------------------ |
+| Ownership and child row | `pageService.createPage`, owner-scoped Supabase/RLS          |
+| Draft canonical         | `pageCanonicalService.saveDraft` → `pages.template_config`   |
+| Publish/unpublish       | `pageCanonicalService` with `published_revision` concurrency |
+| Child editor            | `/pages/$pageId/edit` → `PowerEditorHost` page target        |
+| Stable public URL       | `getPublicPageUrl(public_id)` → `/pg/{public_id}`            |
+| QR                      | Existing `PageQrPanel` and `pageQrService`                   |
 
 ## Lifecycle behavior
 

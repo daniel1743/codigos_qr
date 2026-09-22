@@ -175,6 +175,7 @@ wrapper blocks these controls, so no STOP was required.
 ## TESTS
 
 `profileCoverContextual.test.ts` (6 tests, passing):
+
 - `shouldScrollInspectorToFocus` targeting decision is stable (non-null only)
 - focus signal delivers once and unsubscribes
 - clearing block selection (cover context) does not mutate config/history

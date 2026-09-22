@@ -55,7 +55,7 @@ The Portfolio Gallery preset is represented by GalleryBlock rather than Portfoli
 ## Files changed
 
 - src/premium-template-studio/components/inspector/Inspector.tsx
-- src/premium-template-studio/__tests__/portfolioMediaEditability.test.tsx
+- src/premium-template-studio/**tests**/portfolioMediaEditability.test.tsx
 - CRIPQER_P0_PORTFOLIO_FULL_MEDIA_EDITABILITY_V1_REPORT.md
 
 ## Tests added

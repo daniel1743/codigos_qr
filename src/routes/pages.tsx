@@ -68,12 +68,7 @@ function PageActions({
       const userId = auth.user.id;
       if (page.published) {
         onChange(
-          await pageCanonicalService.unpublish(
-            supabase,
-            page.id,
-            userId,
-            page.published_revision,
-          ),
+          await pageCanonicalService.unpublish(supabase, page.id, userId, page.published_revision),
         );
         toast.success("Página despublicada");
         return;
@@ -142,7 +137,11 @@ function PageActions({
         </Link>
       </Button>
       <Button size="sm" onClick={() => void togglePublication()} disabled={busy}>
-        {busy ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Rocket className="mr-1.5 h-3.5 w-3.5" />}
+        {busy ? (
+          <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+        ) : (
+          <Rocket className="mr-1.5 h-3.5 w-3.5" />
+        )}
         {page.published ? "Despublicar" : "Publicar"}
       </Button>
       <AlertDialog

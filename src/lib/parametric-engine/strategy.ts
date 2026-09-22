@@ -107,15 +107,15 @@ export function buildDesignProfile(
 
   const family =
     forcedFamily ??
-    (variant === 0
-      ? selectFamily(scores)
-      : selectFamilyVariant(scores, variant, intent));
+    (variant === 0 ? selectFamily(scores) : selectFamilyVariant(scores, variant, intent));
 
   return {
     family,
     family_scores: scores,
     visual_energy: clamp(
-      Math.round(ENERGY[intent.visual_personality] * 0.7 + GOAL_PRESSURE[intent.primary_goal] * 0.3),
+      Math.round(
+        ENERGY[intent.visual_personality] * 0.7 + GOAL_PRESSURE[intent.primary_goal] * 0.3,
+      ),
       0,
       100,
     ),
@@ -151,7 +151,13 @@ export function selectFamilyVariant(
   const ranked = [...FAMILY_PRIORITY].sort((a, b) => scores[b] - scores[a]);
   const top = ranked.slice(0, 3);
   const seed = stableHash(
-    ["family", String(variant), intent.business_category, intent.primary_goal, intent.visual_personality].join("|"),
+    [
+      "family",
+      String(variant),
+      intent.business_category,
+      intent.primary_goal,
+      intent.visual_personality,
+    ].join("|"),
   );
   return top[seed % top.length] as FamilyId;
 }

@@ -153,14 +153,7 @@ export interface ProfileLink {
 }
 
 export type PageType =
-  | "landing"
-  | "promotion"
-  | "menu"
-  | "campaign"
-  | "event"
-  | "services"
-  | "catalog"
-  | "portfolio";
+  "landing" | "promotion" | "menu" | "campaign" | "event" | "services" | "catalog" | "portfolio";
 
 /**
  * Page-owned QR customization. Mirrors the existing QR Studio config contract
@@ -185,7 +178,6 @@ export interface PageQrConfig {
   qr_effect?: QREffectType | null;
   qr_demo_logo_id?: string | null;
 }
-
 
 export interface Page {
   id: string;
@@ -213,4 +205,3 @@ export type PageInsert = Omit<Page, "id" | "public_id" | "created_at" | "updated
 };
 
 export type PageUpdate = Partial<PageInsert>;
-

@@ -1,7 +1,16 @@
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../ui/collapsible";
-import { ChevronDown, Wand2, PaintBucket, Palette, Type, Sparkles, ImageIcon, Crown } from "lucide-react";
+import {
+  ChevronDown,
+  Wand2,
+  PaintBucket,
+  Palette,
+  Type,
+  Sparkles,
+  ImageIcon,
+  Crown,
+} from "lucide-react";
 import { useState } from "react";
 import type { Profile, ProfileLink } from "../../types/database";
 import { TemplatePicker } from "./TemplatePicker";

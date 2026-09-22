@@ -147,8 +147,12 @@
   cursor: pointer;
   text-decoration: none;
   white-space: nowrap;
-  transition: transform 0.18s ease, background-color 0.18s ease, border-color 0.18s ease,
-    box-shadow 0.18s ease, opacity 0.18s ease;
+  transition:
+    transform 0.18s ease,
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    opacity 0.18s ease;
 }
 
 .sp-btn:focus-visible {
@@ -264,7 +268,9 @@
   padding: 8px 12px;
   border-radius: var(--sp-radius-sm);
   cursor: pointer;
-  transition: color 0.18s ease, background-color 0.18s ease;
+  transition:
+    color 0.18s ease,
+    background-color 0.18s ease;
 }
 
 .sp-navlink {
@@ -308,7 +314,9 @@
   height: 1.5px;
   background: var(--sp-text);
   border-radius: 2px;
-  transition: transform 0.22s ease, opacity 0.18s ease;
+  transition:
+    transform 0.22s ease,
+    opacity 0.18s ease;
 }
 
 .sp-burger.is-open span:nth-child(1) {
@@ -614,7 +622,10 @@
   font-size: 13px;
   color: var(--sp-muted);
   cursor: pointer;
-  transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+  transition:
+    background-color 0.18s ease,
+    color 0.18s ease,
+    border-color 0.18s ease;
 }
 
 .sp-chip--active {
@@ -668,7 +679,10 @@
   border: 1px solid var(--sp-border);
   border-radius: var(--sp-radius);
   overflow: hidden;
-  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    border-color 0.22s ease;
 }
 
 .sp-card:focus-within {
@@ -697,7 +711,11 @@
 }
 
 .sp-media--empty {
-  background: linear-gradient(135deg, var(--sp-surface-alt), color-mix(in srgb, var(--sp-border) 60%, var(--sp-surface-alt)));
+  background: linear-gradient(
+    135deg,
+    var(--sp-surface-alt),
+    color-mix(in srgb, var(--sp-border) 60%, var(--sp-surface-alt))
+  );
 }
 
 .sp-tag {
@@ -1642,7 +1660,10 @@
   border-radius: var(--sp-radius);
   cursor: pointer;
   text-align: left;
-  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
 }
 
 .sp-root .sp-cattile:hover,

@@ -4,7 +4,7 @@
 > differentiator, the benefits it delivers, the quality of service it must meet, what is already
 > built, what is active, and what remains.
 >
-> **Authority note.** This is an *execution/roadmap synthesis*. It does **not** replace
+> **Authority note.** This is an _execution/roadmap synthesis_. It does **not** replace
 > `CRIPQER_OFFICIAL_PRODUCT_VISION.md` (canonical product vision) nor
 > `CRIPQER_EDITOR_EXPERIENCE_STRATEGY.md` (concurrent editor strategy work). Superseded
 > strategies are recorded here rather than silently deleted.
@@ -33,17 +33,17 @@ quotation, purchase, visit or other measurable business outcome.
 
 ## 2. PRODUCT BENEFITS
 
-| # | Capability | Benefit |
-|---|---|---|
-| 1 | **Create** | Give a small business a professional conversion experience without requiring web-development expertise. |
-| 2 | **Attract** | Let traffic arrive through pages, links, QR codes, campaigns, physical material, social media and referrals. |
-| 3 | **Understand** | Preserve what the visitor was interested in, where they came from, what product/service they viewed and what they wanted to do. |
-| 4 | **Handoff** | Send the visitor toward WhatsApp, booking, calling or payment *with context* instead of forcing the business to restart the conversation from zero. |
-| 5 | **Capture** | Turn anonymous interest into a manageable opportunity whenever the visitor voluntarily identifies or performs a qualifying action. |
-| 6 | **Act** | Tell the business what needs attention now instead of requiring the owner to interpret complicated dashboards. |
-| 7 | **Recover** | Reduce forgotten leads, abandoned quotations, samples without follow-up and opportunities buried inside WhatsApp. |
-| 8 | **Attribute** | Connect campaigns, QR codes, links, products and touchpoints with confirmed outcomes whenever sufficient evidence exists. |
-| 9 | **Learn** | Eventually learn which *source + intent + offer + CTA + handoff* combinations generate real business outcomes. |
+| #   | Capability     | Benefit                                                                                                                                             |
+| --- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **Create**     | Give a small business a professional conversion experience without requiring web-development expertise.                                             |
+| 2   | **Attract**    | Let traffic arrive through pages, links, QR codes, campaigns, physical material, social media and referrals.                                        |
+| 3   | **Understand** | Preserve what the visitor was interested in, where they came from, what product/service they viewed and what they wanted to do.                     |
+| 4   | **Handoff**    | Send the visitor toward WhatsApp, booking, calling or payment _with context_ instead of forcing the business to restart the conversation from zero. |
+| 5   | **Capture**    | Turn anonymous interest into a manageable opportunity whenever the visitor voluntarily identifies or performs a qualifying action.                  |
+| 6   | **Act**        | Tell the business what needs attention now instead of requiring the owner to interpret complicated dashboards.                                      |
+| 7   | **Recover**    | Reduce forgotten leads, abandoned quotations, samples without follow-up and opportunities buried inside WhatsApp.                                   |
+| 8   | **Attribute**  | Connect campaigns, QR codes, links, products and touchpoints with confirmed outcomes whenever sufficient evidence exists.                           |
+| 9   | **Learn**      | Eventually learn which _source + intent + offer + CTA + handoff_ combinations generate real business outcomes.                                      |
 
 ---
 
@@ -62,17 +62,19 @@ SOURCE → TOUCHPOINT → CONTEXT → INTENT → EXPERIENCE / DIRECT HANDOFF
         → LEAD → NEXT ACTION → OUTCOME → ATTRIBUTION → LEARNING
 ```
 
-> **Important:** a PAGE is one *available conversion experience*, not a mandatory step in every
+> **Important:** a PAGE is one _available conversion experience_, not a mandatory step in every
 > future journey.
 
 ### Example journeys
 
 **Page flow**
+
 ```
 QR → Cripqer Page → service → price → intent → WhatsApp → lead → outcome
 ```
 
 **Direct flow**
+
 ```
 Meta Ad / Smart Link / QR → known context → WhatsApp → lead → outcome
 ```
@@ -81,26 +83,28 @@ Meta Ad / Smart Link / QR → known context → WhatsApp → lead → outcome
 
 ## 4. QUALITY OF SERVICE
 
-| Principle | Rule |
-|---|---|
-| **Simplicity** | A small-business owner must receive useful value without learning enterprise CRM terminology. |
-| **Mobile-first** | Core workflows must be practical from a phone; many target users run their business from mobile. |
-| **Low setup** | Minimize API keys, complicated configuration, integrations and technical onboarding. |
-| **Data preservation** | User-created work is never destroyed simply because UI, editor mode or subscription capability changes. |
-| **Truthful attribution** | Never invent certainty; distinguish deterministic, probable, manual and unknown evidence. |
-| **Stable identity** | Public IDs, URLs and QR destinations should remain stable wherever architecture permits. |
+| Principle                       | Rule                                                                                                                |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| **Simplicity**                  | A small-business owner must receive useful value without learning enterprise CRM terminology.                       |
+| **Mobile-first**                | Core workflows must be practical from a phone; many target users run their business from mobile.                    |
+| **Low setup**                   | Minimize API keys, complicated configuration, integrations and technical onboarding.                                |
+| **Data preservation**           | User-created work is never destroyed simply because UI, editor mode or subscription capability changes.             |
+| **Truthful attribution**        | Never invent certainty; distinguish deterministic, probable, manual and unknown evidence.                           |
+| **Stable identity**             | Public IDs, URLs and QR destinations should remain stable wherever architecture permits.                            |
 | **Integration over rebuilding** | Integrate WhatsApp, AgendaPro, Calendly, Mercado Pago, Stripe — don't rebuild them without strategic justification. |
-| **Canonical integrity** | One canonical document, one production renderer, one primary generation architecture. |
-| **Task-driven UX** | Backend may be event-driven; the owner-facing experience should be task-driven. |
-| **Reliability** | Create, edit, save, reopen, preserve, publish and public rendering must be dependable before cosmetic expansion. |
-| **Privacy** | Track first-party context and consented actions without pretending to silently read private WhatsApp conversations. |
+| **Canonical integrity**         | One canonical document, one production renderer, one primary generation architecture.                               |
+| **Task-driven UX**              | Backend may be event-driven; the owner-facing experience should be task-driven.                                     |
+| **Reliability**                 | Create, edit, save, reopen, preserve, publish and public rendering must be dependable before cosmetic expansion.    |
+| **Privacy**                     | Track first-party context and consented actions without pretending to silently read private WhatsApp conversations. |
 
 **Task-driven UX — preferred phrasing:**
+
 - "3 personas necesitan seguimiento hoy."
 - "2 cotizaciones están esperando respuesta."
 - "Este QR produjo 4 compras."
 
 **Avoid:**
+
 - "1,843 events" · "CTR 4.23%" · "927 anonymous sessions"
 
 ---
@@ -129,6 +133,7 @@ CANONICAL DOCUMENT
 - **Quick Edit** → future role: simplified experience over the same Editor Core.
 
 **Permanent rules**
+
 - Quick Edit only performs targeted safe patches.
 - Quick Edit never destructively rewrites the whole document.
 - Unknown advanced properties are preserved.
@@ -152,26 +157,26 @@ TOUCHPOINT → SESSION → INTENT → HANDOFF → LEAD → NEXT ACTION → OUTCO
 
 ### P0
 
-| Component | Status | Purpose |
-|---|---|---|
-| Touchpoint/Event Core | 🆕 NEW / PENDING | identify QR, Smart Link, campaign, location, seller, product, sample, flyer, referral |
-| Intent | ⏳ PLANNED | price, availability, booking, quotation, purchase, information |
-| Contextual Handoff | ⏳ PLANNED | preserve source/product/service/intent when handing to WhatsApp or specialist service |
-| Lead Operating Layer | ⏳ PLANNED | identity, source, intent, status, next action, date, outcome, notes — **NOT a full CRM** |
-| Next Action | 🆕 NEW / PENDING | surface what the owner must do next |
-| Outcome one-tap | 🆕 NEW / PENDING | won/purchased, booked, waiting, lost, visited, redeemed — V1 manual confirmation allowed |
-| Lead Rescue | ⏳ PLANNED | surface opportunities that are cooling down or being forgotten |
+| Component             | Status           | Purpose                                                                                  |
+| --------------------- | ---------------- | ---------------------------------------------------------------------------------------- |
+| Touchpoint/Event Core | 🆕 NEW / PENDING | identify QR, Smart Link, campaign, location, seller, product, sample, flyer, referral    |
+| Intent                | ⏳ PLANNED       | price, availability, booking, quotation, purchase, information                           |
+| Contextual Handoff    | ⏳ PLANNED       | preserve source/product/service/intent when handing to WhatsApp or specialist service    |
+| Lead Operating Layer  | ⏳ PLANNED       | identity, source, intent, status, next action, date, outcome, notes — **NOT a full CRM** |
+| Next Action           | 🆕 NEW / PENDING | surface what the owner must do next                                                      |
+| Outcome one-tap       | 🆕 NEW / PENDING | won/purchased, booked, waiting, lost, visited, redeemed — V1 manual confirmation allowed |
+| Lead Rescue           | ⏳ PLANNED       | surface opportunities that are cooling down or being forgotten                           |
 
 ### P1
 
-| Component | Status |
-|---|---|
-| Outcome Attribution | ⏳ PLANNED |
-| Attribution Confidence | 🆕 NEW (DETERMINISTIC / PROBABLE / MANUAL / UNKNOWN) |
-| Smart Links | 🆕 NEW |
-| QR Campaign Intelligence | ⏳ PLANNED |
-| Sample Follow-up Loop | 🧪 CANDIDATE PILOT #1 |
-| Quotation Lead Rescue | 🧪 CANDIDATE PILOT #2 |
+| Component                | Status                                               |
+| ------------------------ | ---------------------------------------------------- |
+| Outcome Attribution      | ⏳ PLANNED                                           |
+| Attribution Confidence   | 🆕 NEW (DETERMINISTIC / PROBABLE / MANUAL / UNKNOWN) |
+| Smart Links              | 🆕 NEW                                               |
+| QR Campaign Intelligence | ⏳ PLANNED                                           |
+| Sample Follow-up Loop    | 🧪 CANDIDATE PILOT #1                                |
+| Quotation Lead Rescue    | 🧪 CANDIDATE PILOT #2                                |
 
 **Pilot #1 — Sample Follow-up Loop:** SAMPLE/KIT → seller+products+date → UNIQUE QR → scan →
 product info → intent → contextual WhatsApp → lead → next action → outcome. Use cases:
@@ -182,18 +187,17 @@ independent professionals, real estate.
 
 ### FUTURE
 
-| Component | Status | Note |
-|---|---|---|
+| Component             | Status               | Note                                                                             |
+| --------------------- | -------------------- | -------------------------------------------------------------------------------- |
 | Meta CTWA/CAPI Bridge | 🆕 FUTURE HIGH-VALUE | depends on Conversion Core; must not make Cripqer structurally dependent on Meta |
-| Booking integrations | ⏳ PENDING | integrate, do not rebuild |
-| Payment integrations | ⏳ PENDING | integrate, do not become a processor |
-| Intent routing | ⏳ PENDING | — |
-| Vertical Action Packs | FUTURE | prerequisite: real pilot evidence |
-| Conversion Learning | FUTURE | prerequisite: reliable longitudinal outcome history |
-| AI Recommendations | FUTURE / DEFER | prerequisite: sufficient reliable conversion data |
+| Booking integrations  | ⏳ PENDING           | integrate, do not rebuild                                                        |
+| Payment integrations  | ⏳ PENDING           | integrate, do not become a processor                                             |
+| Intent routing        | ⏳ PENDING           | —                                                                                |
+| Vertical Action Packs | FUTURE               | prerequisite: real pilot evidence                                                |
+| Conversion Learning   | FUTURE               | prerequisite: reliable longitudinal outcome history                              |
+| AI Recommendations    | FUTURE / DEFER       | prerequisite: sufficient reliable conversion data                                |
 
 ---
-
 
 ## 7. ADVANCED ANALYTICS POSITION
 
@@ -230,12 +234,14 @@ builder as differentiator · full ecommerce platform.
 PENDIENTE · 🧪 PILOT · 🚫 AVOID · 🔴 BLOQUEADO · ⚪ NOT_VERIFIED
 
 ### Infrastructure
+
 - Supabase baseline — ✅ PASS / FROZEN
 - Billing persistence — ✅ PASS / FROZEN
 - Storage bootstrap — ✅ PASS / FROZEN
 - Analytics security hardening — ⏳ PENDIENTE
 
 ### Pages
+
 - Pages 0 (data contract) — ✅
 - Pages 1 (create/list/detail) — ✅
 - Pages 2 (Power document adapter) — ✅
@@ -248,15 +254,18 @@ PENDIENTE · 🧪 PILOT · 🚫 AVOID · 🔴 BLOQUEADO · ⚪ NOT_VERIFIED
 - Pages 7 (Page Generator integration) — ✅ PASS / FROZEN
 
 ### QR
+
 - QR Studio — implemented/connected, final runtime verification pending
 - Per-page QR — current task
 - QR Campaign Intelligence — future Conversion Core
 
 ### External systems
+
 - Page Generator / Engine V2 package — ✅ INTEGRATED (PAGES_7 PASS / FROZEN)
 - Advanced Analytics package — EXISTS / INTEGRATION PENDING
 
 ### Editor
+
 - Power → future Editor Core
 - Basic → legacy temporary
 - Quick Edit — pending
@@ -266,6 +275,7 @@ PENDIENTE · 🧪 PILOT · 🚫 AVOID · 🔴 BLOQUEADO · ⚪ NOT_VERIFIED
 - Founding Access — approved strategy
 
 ### Conversion
+
 - Touchpoint/Event Core — NEW
 - Intent — planned
 - Contextual Handoff — planned
@@ -292,6 +302,7 @@ PRODUCT MODEL:  CREATE → CONVERT → LEARN
 ```
 
 ### ERA 1 — CREATE
+
 ```
 Pages 5 → Pages 6 → Pages 7 → QR Studio final runtime → Onboarding V2 → Engine V2
 → Power/mobile functional closure
@@ -301,6 +312,7 @@ Pages 5 → Pages 6 → Pages 7 → QR Studio final runtime → Onboarding V2 �
 ```
 
 ### ERA 2 — CONVERT
+
 ```
 Event/Touchpoint Core → Intent → Contextual Handoff → Lead Operating Layer
 → Next Action → Outcome one-tap → Lead Rescue
@@ -311,9 +323,9 @@ Event/Touchpoint Core → Intent → Contextual Handoff → Lead Operating Layer
 ```
 
 ### ERA 3 — LEARN
+
 ```
 Vertical Action Packs → Conversion Learning → AI Recommendations → Optimization loops
 ```
 
 ---
-

@@ -80,24 +80,24 @@ URL yet.
 
 ## Actual Engine decisions
 
-| Signal | Actual runtime value |
-| --- | --- |
-| normalized category | `other` (the activity category still degrades in PAGES_7) |
-| primary goal | `booking` |
-| inferred archetype | `home_service` |
-| family bias | active |
-| selected family | `corporate` |
-| recipe/pattern | `trust_first` |
-| layout | `executive` |
-| media strategy | `minimal-no-media` |
-| hero/banner | enabled as gradient fallback; no image URL invented |
-| hero/banner height | `220px` desktop; mobile derived at approximately `158px` |
-| background | linear gradient, `155°`, `#EEF2F7 → #FBFCFE` |
-| heading typography | system UI, `40px`, weight `600`, line-height `1.55`, letter-spacing `-0.02` |
-| cards | `elevated`, radius `10`, border `1`, shadow `md`, padding `20` |
-| buttons | `solid`, radius `10`, height `54`, weight `650`, shadow `md` |
-| spacing/content width | section `32`, block `14`, content width `640` |
-| canonical blocks | `text/default`, `services/cards`, `cta/panel`, `contact/card` |
+| Signal                | Actual runtime value                                                        |
+| --------------------- | --------------------------------------------------------------------------- |
+| normalized category   | `other` (the activity category still degrades in PAGES_7)                   |
+| primary goal          | `booking`                                                                   |
+| inferred archetype    | `home_service`                                                              |
+| family bias           | active                                                                      |
+| selected family       | `corporate`                                                                 |
+| recipe/pattern        | `trust_first`                                                               |
+| layout                | `executive`                                                                 |
+| media strategy        | `minimal-no-media`                                                          |
+| hero/banner           | enabled as gradient fallback; no image URL invented                         |
+| hero/banner height    | `220px` desktop; mobile derived at approximately `158px`                    |
+| background            | linear gradient, `155°`, `#EEF2F7 → #FBFCFE`                                |
+| heading typography    | system UI, `40px`, weight `600`, line-height `1.55`, letter-spacing `-0.02` |
+| cards                 | `elevated`, radius `10`, border `1`, shadow `md`, padding `20`              |
+| buttons               | `solid`, radius `10`, height `54`, weight `650`, shadow `md`                |
+| spacing/content width | section `32`, block `14`, content width `640`                               |
+| canonical blocks      | `text/default`, `services/cards`, `cta/panel`, `contact/card`               |
 
 Inspector capability capture for this run:
 
@@ -123,17 +123,17 @@ active archetype bias, not a forced archetype name.
 
 ## Expected versus actual
 
-| Requirement | Expected | Actual after repair | Result |
-| --- | --- | --- | --- |
-| Booking semantics | `bookings → book → booking` | `bookings → book → booking` | PASS |
-| Service card material | explicit override > theme.cards > variant default | Engine `elevated` theme reached `services`; `minimal` variant no longer erases it | PASS |
-| Hero without owner media | supported premium gradient/hero | gradient banner enabled, no fabricated image | PASS |
-| Gradient endpoints | distinct deterministic endpoints | `#EEF2F7` and `#FBFCFE` | PASS |
-| Background | archetype-aware supported background | corporate gradient, 155° | PASS |
-| Cards | elevated/soft/minimal by semantic context | `elevated`, border and shadow present | PASS |
-| Buttons | semantic variant | `solid` for booking/service CTA | PASS |
-| Catalog behavior | catalog-first where applicable | unchanged and covered by existing retail tests | PASS |
-| Canonical document | valid and renderer-compatible | `validateTemplate` PASS | PASS |
+| Requirement              | Expected                                          | Actual after repair                                                               | Result |
+| ------------------------ | ------------------------------------------------- | --------------------------------------------------------------------------------- | ------ |
+| Booking semantics        | `bookings → book → booking`                       | `bookings → book → booking`                                                       | PASS   |
+| Service card material    | explicit override > theme.cards > variant default | Engine `elevated` theme reached `services`; `minimal` variant no longer erases it | PASS   |
+| Hero without owner media | supported premium gradient/hero                   | gradient banner enabled, no fabricated image                                      | PASS   |
+| Gradient endpoints       | distinct deterministic endpoints                  | `#EEF2F7` and `#FBFCFE`                                                           | PASS   |
+| Background               | archetype-aware supported background              | corporate gradient, 155°                                                          | PASS   |
+| Cards                    | elevated/soft/minimal by semantic context         | `elevated`, border and shadow present                                             | PASS   |
+| Buttons                  | semantic variant                                  | `solid` for booking/service CTA                                                   | PASS   |
+| Catalog behavior         | catalog-first where applicable                    | unchanged and covered by existing retail tests                                    | PASS   |
+| Canonical document       | valid and renderer-compatible                     | `validateTemplate` PASS                                                           | PASS   |
 
 ## First divergence and root cause
 

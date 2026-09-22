@@ -13,25 +13,25 @@ Task: CRIPQER BILLING — CANONICAL CHECKOUT HOST CORE V1
 
 Canonical host files (authority for identity, types, and persistence):
 
-| File | Role |
-|---|---|
-| `src/server/billing/auth.ts` | Server Auth Boundary V1 (`requireBillingUser`) |
-| `src/lib/billing/billing.types.ts` | Canonical receiving types (plans/providers/interval/checkout) |
+| File                                | Role                                                                                                        |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `src/server/billing/auth.ts`        | Server Auth Boundary V1 (`requireBillingUser`)                                                              |
+| `src/lib/billing/billing.types.ts`  | Canonical receiving types (plans/providers/interval/checkout)                                               |
 | `src/server/billing/persistence.ts` | Canonical persistence (`createBillingCheckout`, `getBillingCheckoutForUser`, `updateBillingCheckoutStatus`) |
 
 Audit reference:
 
-| File | Role |
-|---|---|
-| `billing/CLEANER_BILLING_PORTABLE_V1_1_1_RECONCILIATION_REPORT.md` | Approved portable contract reconciliation baseline |
-| `billing/CLEANER_BILLING_WEBHOOK_CORE_V1_REPORT.md` | Prior Webhook Core pattern reference (selfcheck/run conventions) |
+| File                                                               | Role                                                             |
+| ------------------------------------------------------------------ | ---------------------------------------------------------------- |
+| `billing/CLEANER_BILLING_PORTABLE_V1_1_1_RECONCILIATION_REPORT.md` | Approved portable contract reconciliation baseline               |
+| `billing/CLEANER_BILLING_WEBHOOK_CORE_V1_REPORT.md`                | Prior Webhook Core pattern reference (selfcheck/run conventions) |
 
 Tooling reads (validation-only, not dependency audit):
 
-| File | Purpose |
-|---|---|
-| `tsconfig.json` | Strict compiler flags to reproduce in targeted check |
-| `package.json` | `"type": "module"` + TypeScript version (for `node` type-stripping selfcheck) |
+| File            | Purpose                                                                       |
+| --------------- | ----------------------------------------------------------------------------- |
+| `tsconfig.json` | Strict compiler flags to reproduce in targeted check                          |
+| `package.json`  | `"type": "module"` + TypeScript version (for `node` type-stripping selfcheck) |
 
 > The portable ZIP (`billing/CRIPQER_BILLING_PORTABLE_CORE_V1_1_1.zip`) entries were
 > not extracted nor read: the canonical `billing.types.ts` + the approved
@@ -39,11 +39,11 @@ Tooling reads (validation-only, not dependency audit):
 
 ### Files created (exact — nothing else)
 
-| File | Role |
-|---|---|
-| `src/server/billing/checkout.ts` | Canonical Checkout Host Core (server-authoritative domain) |
-| `src/server/billing/checkout.selfcheck.ts` | Pure-local selfcheck (no network, no DB) |
-| `billing/CLEANER_BILLING_CHECKOUT_HOST_V1_REPORT.md` | This report |
+| File                                                 | Role                                                       |
+| ---------------------------------------------------- | ---------------------------------------------------------- |
+| `src/server/billing/checkout.ts`                     | Canonical Checkout Host Core (server-authoritative domain) |
+| `src/server/billing/checkout.selfcheck.ts`           | Pure-local selfcheck (no network, no DB)                   |
+| `billing/CLEANER_BILLING_CHECKOUT_HOST_V1_REPORT.md` | This report                                                |
 
 ### Files modified
 
@@ -91,12 +91,12 @@ Errors: `CheckoutValidationError` (400), `CheckoutNotFoundError` (404), `Checkou
 
 ## C. TRUST MODEL
 
-| Concern | Authority | Notes |
-|---|---|---|
-| Trusted user source | `requireBillingUser()` (via `CheckoutUserSource`) | Browser-supplied `userId` ignored entirely |
-| Price authority | Server catalog resolver | `amount`/`currency`/`providerOfferReference` come ONLY from `resolveOffer`; no placeholder prices imported |
-| Plan authority | Canonical `BILLING_PLAN_IDS` + catalog resolver | `free` absent from canonical plan ids → fails closed at validation |
-| Checkout ownership | `store.getCheckoutForUser(checkoutId, trustedUserId)` / `updateCheckoutStatus(..., trustedUserId)` | Foreign-user lookup returns not-found |
+| Concern             | Authority                                                                                          | Notes                                                                                                      |
+| ------------------- | -------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Trusted user source | `requireBillingUser()` (via `CheckoutUserSource`)                                                  | Browser-supplied `userId` ignored entirely                                                                 |
+| Price authority     | Server catalog resolver                                                                            | `amount`/`currency`/`providerOfferReference` come ONLY from `resolveOffer`; no placeholder prices imported |
+| Plan authority      | Canonical `BILLING_PLAN_IDS` + catalog resolver                                                    | `free` absent from canonical plan ids → fails closed at validation                                         |
+| Checkout ownership  | `store.getCheckoutForUser(checkoutId, trustedUserId)` / `updateCheckoutStatus(..., trustedUserId)` | Foreign-user lookup returns not-found                                                                      |
 
 ---
 
@@ -122,14 +122,14 @@ Errors: `CheckoutValidationError` (400), `CheckoutNotFoundError` (404), `Checkou
 
 ## E. SECURITY (mandatory)
 
-| Check | Result |
-|---|---|
-| client userId authoritative | **NO** |
-| client amount authoritative | **NO** |
-| free paid checkout possible | **NO** |
+| Check                         | Result |
+| ----------------------------- | ------ |
+| client userId authoritative   | **NO** |
+| client amount authoritative   | **NO** |
+| free paid checkout possible   | **NO** |
 | return URL grants paid access | **NO** |
-| provider call performed | **NO** |
-| entitlement granted | **NO** |
+| provider call performed       | **NO** |
+| entitlement granted           | **NO** |
 
 ---
 

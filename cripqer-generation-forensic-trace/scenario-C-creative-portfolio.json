@@ -176,9 +176,7 @@
               "featured": false,
               "enabled": true,
               "confidence": 1,
-              "review": [
-                "price"
-              ]
+              "review": ["price"]
             },
             {
               "id": "owner-portfolio_item-2",
@@ -209,9 +207,7 @@
               "featured": false,
               "enabled": true,
               "confidence": 1,
-              "review": [
-                "price"
-              ]
+              "review": ["price"]
             }
           ]
         }
@@ -369,10 +365,7 @@
     "profession": "Fotografía",
     "businessOther": "Fotografía",
     "goal": "portfolio",
-    "selectedFeatures": [
-      "portfolio",
-      "contact"
-    ],
+    "selectedFeatures": ["portfolio", "contact"],
     "content": {
       "name": "Luz Norte",
       "bio": "Historias visuales con luz y carácter."
@@ -680,11 +673,7 @@
       "createdAt": "2026-09-15T12:00:00.000Z",
       "updatedAt": "2026-09-15T12:00:00.000Z",
       "author": "Cripqer Parametric Engine",
-      "tags": [
-        "editorial",
-        "editorial_stack",
-        "portfolio"
-      ]
+      "tags": ["editorial", "editorial_stack", "portfolio"]
     },
     "theme": {
       "id": "engine-editorial",

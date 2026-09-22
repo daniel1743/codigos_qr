@@ -6,11 +6,7 @@
  * data supplied by the fixture, never inferred by the system.
  */
 
-import type {
-  CatalogItemV1,
-  CatalogV1,
-  NormalizedContentV1,
-} from "./catalog.types";
+import type { CatalogItemV1, CatalogV1, NormalizedContentV1 } from "./catalog.types";
 import type { PageGenerationRequest } from "./smart-pages.types";
 import { action } from "./sales-actions";
 
@@ -205,12 +201,19 @@ const vetContent = base("Clínica Veterinaria Patitas", "veterinarian", {
       role: "Head veterinarian",
       photo: photo("tm_1_ph", "vet1", "Dra. Camila Rojas"),
     },
-    { id: "tm_2", name: "Dr. Luis Pino", role: "Surgeon", photo: photo("tm_2_ph", "vet2", "Dr. Luis Pino") },
+    {
+      id: "tm_2",
+      name: "Dr. Luis Pino",
+      role: "Surgeon",
+      photo: photo("tm_2_ph", "vet2", "Dr. Luis Pino"),
+    },
   ],
   testimonials: [
     { id: "ts_1", quote: "They saved our dog. Incredibly kind team.", author: "María G." },
   ],
-  faq: [{ id: "fq_1", question: "Do you handle emergencies?", answer: "Yes, during opening hours." }],
+  faq: [
+    { id: "fq_1", question: "Do you handle emergencies?", answer: "Yes, during opening hours." },
+  ],
   contact: {
     whatsapp: "+56922223333",
     phone: "+56922223333",
@@ -355,7 +358,9 @@ const photographerContent = base("Lucía Vera Photography", "photographer", {
       ],
     },
   ],
-  testimonials: [{ id: "ts_p1", quote: "She captured the day exactly as it felt.", author: "Ana M." }],
+  testimonials: [
+    { id: "ts_p1", quote: "She captured the day exactly as it felt.", author: "Ana M." },
+  ],
   contact: { email: "hola@luciavera.cl", whatsapp: "+56955556666", socials: [] },
 });
 

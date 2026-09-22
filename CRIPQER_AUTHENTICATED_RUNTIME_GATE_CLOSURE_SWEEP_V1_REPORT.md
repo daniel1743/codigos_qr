@@ -15,15 +15,15 @@
 
 ## Summary
 
-| # | Gate | close_if_pass | Status |
-|---|---|---|---|
-| 1 | Premium login | `CRIPQER_NEW_USER_LOGIN_POST_CONFIRMATION_RUNTIME_PASS_FROZEN`, `CRIPQER_PREMIUM_LOGIN_RESTORED_RUNTIME_VISUAL_PASS_FROZEN` | `NOT_VERIFIED` |
-| 2 | Email confirmation | `CRIPQER_EMAIL_CONFIRMATION_SUCCESS_PAGE_RUNTIME_PASS_FROZEN` | `NOT_VERIFIED` |
-| 3 | Custom public link | `CRIPQER_POWER_EDITOR_CUSTOM_PUBLIC_LINK_RUNTIME_PASS_FROZEN` | `NOT_VERIFIED` |
-| 4 | Pages hub | `CRIPQER_PAGES_PRODUCT_HUB_LIFECYCLE_RUNTIME_PASS_FROZEN` | `NOT_VERIFIED` |
-| 5 | Catalog + services | `CRIPQER_CATALOG_SERVICES_REAL_PRODUCT_FLOW_RUNTIME_PASS_FROZEN` | `NOT_VERIFIED` |
-| 6 | Safe delete | `CRIPQER_PAGES_SAFE_DELETE_RUNTIME_PASS_FROZEN` | `NOT_VERIFIED` |
-| 7 | Page analytics | `CRIPQER_PAGE_LEVEL_ANALYTICS_PRODUCT_FLOW_RUNTIME_PASS_FROZEN` | `NOT_VERIFIED` |
+| #   | Gate               | close_if_pass                                                                                                               | Status         |
+| --- | ------------------ | --------------------------------------------------------------------------------------------------------------------------- | -------------- |
+| 1   | Premium login      | `CRIPQER_NEW_USER_LOGIN_POST_CONFIRMATION_RUNTIME_PASS_FROZEN`, `CRIPQER_PREMIUM_LOGIN_RESTORED_RUNTIME_VISUAL_PASS_FROZEN` | `NOT_VERIFIED` |
+| 2   | Email confirmation | `CRIPQER_EMAIL_CONFIRMATION_SUCCESS_PAGE_RUNTIME_PASS_FROZEN`                                                               | `NOT_VERIFIED` |
+| 3   | Custom public link | `CRIPQER_POWER_EDITOR_CUSTOM_PUBLIC_LINK_RUNTIME_PASS_FROZEN`                                                               | `NOT_VERIFIED` |
+| 4   | Pages hub          | `CRIPQER_PAGES_PRODUCT_HUB_LIFECYCLE_RUNTIME_PASS_FROZEN`                                                                   | `NOT_VERIFIED` |
+| 5   | Catalog + services | `CRIPQER_CATALOG_SERVICES_REAL_PRODUCT_FLOW_RUNTIME_PASS_FROZEN`                                                            | `NOT_VERIFIED` |
+| 6   | Safe delete        | `CRIPQER_PAGES_SAFE_DELETE_RUNTIME_PASS_FROZEN`                                                                             | `NOT_VERIFIED` |
+| 7   | Page analytics     | `CRIPQER_PAGE_LEVEL_ANALYTICS_PRODUCT_FLOW_RUNTIME_PASS_FROZEN`                                                             | `NOT_VERIFIED` |
 
 ---
 
@@ -92,16 +92,16 @@
 
 ## EVIDENCE
 
-| Required | File | Provided |
-|---|---|---|
-| Premium login | `01-premium-login.png` | ❌ |
-| Power Editor authenticated | `02-power-editor-authenticated.png` | ❌ |
-| Custom friendly URL | `03-custom-friendly-url.png` | ❌ |
-| Pages Hub | `04-pages-hub.png` | ❌ |
-| Catalog / services | `05-catalog-services.png` | ❌ |
-| Published Page | `06-published-page.png` | ❌ |
-| Analytics | `07-analytics.png` | ❌ |
-| Delete confirmation | `08-delete-confirmation.png` | ❌ |
+| Required                   | File                                | Provided |
+| -------------------------- | ----------------------------------- | -------- |
+| Premium login              | `01-premium-login.png`              | ❌       |
+| Power Editor authenticated | `02-power-editor-authenticated.png` | ❌       |
+| Custom friendly URL        | `03-custom-friendly-url.png`        | ❌       |
+| Pages Hub                  | `04-pages-hub.png`                  | ❌       |
+| Catalog / services         | `05-catalog-services.png`           | ❌       |
+| Published Page             | `06-published-page.png`             | ❌       |
+| Analytics                  | `07-analytics.png`                  | ❌       |
+| Delete confirmation        | `08-delete-confirmation.png`        | ❌       |
 
 ## CLASSIFICATION
 

@@ -176,24 +176,24 @@ export function getBasicLinkPresentation(
   return {
     presentation: stored?.presentation === "card" ? "card" : "button",
     card: {
-      title: normalizeCardText(storedCard.title, link.label || "Enlace", BASIC_CARD_TITLE_MAX_LENGTH),
+      title: normalizeCardText(
+        storedCard.title,
+        link.label || "Enlace",
+        BASIC_CARD_TITLE_MAX_LENGTH,
+      ),
       description: hasOwn(storedCard, "description")
         ? normalizeCardDescription(storedCard.description)
         : normalizeCardDescription(link.subtitle || ""),
       ctaLabel: isCardCtaLabel(storedCard.ctaLabel)
         ? storedCard.ctaLabel
         : BASIC_CARD_CTA_PRESETS[0],
-      mediaMode: isCardMediaMode(storedCard.mediaMode)
-        ? storedCard.mediaMode
-        : fallbackMediaMode,
+      mediaMode: isCardMediaMode(storedCard.mediaMode) ? storedCard.mediaMode : fallbackMediaMode,
       mediaPosition: isCardMediaPosition(storedCard.mediaPosition)
         ? storedCard.mediaPosition
         : "right",
       focalY: normalizeCardFocalY(storedCard.focalY),
       imageUrl,
-      cornerStyle: isCardCornerStyle(storedCard.cornerStyle)
-        ? storedCard.cornerStyle
-        : "soft",
+      cornerStyle: isCardCornerStyle(storedCard.cornerStyle) ? storedCard.cornerStyle : "soft",
     },
   };
 }
@@ -220,9 +220,7 @@ export function updateBasicLinkPresentation(
         [linkId]: {
           ...current,
           ...updates,
-          ...(updates.card
-            ? { card: { ...(current.card || {}), ...updates.card } }
-            : {}),
+          ...(updates.card ? { card: { ...(current.card || {}), ...updates.card } } : {}),
         },
       },
     },
@@ -259,11 +257,19 @@ export function detectBasicPlatformFromUrl(value: string): SocialPlatform | null
     const host = url.hostname.toLowerCase().replace(/^www\./, "");
     if (host === "instagram.com" || host.endsWith(".instagram.com")) return "instagram";
     if (host === "tiktok.com" || host.endsWith(".tiktok.com")) return "tiktok";
-    if (host === "youtube.com" || host.endsWith(".youtube.com") || host === "youtu.be") return "youtube";
-    if (host === "wa.me" || host === "whatsapp.com" || host.endsWith(".whatsapp.com")) return "whatsapp";
+    if (host === "youtube.com" || host.endsWith(".youtube.com") || host === "youtu.be")
+      return "youtube";
+    if (host === "wa.me" || host === "whatsapp.com" || host.endsWith(".whatsapp.com"))
+      return "whatsapp";
     if (host === "facebook.com" || host.endsWith(".facebook.com")) return "facebook";
     if (host === "linkedin.com" || host.endsWith(".linkedin.com")) return "linkedin";
-    if (host === "x.com" || host.endsWith(".x.com") || host === "twitter.com" || host.endsWith(".twitter.com")) return "twitter";
+    if (
+      host === "x.com" ||
+      host.endsWith(".x.com") ||
+      host === "twitter.com" ||
+      host.endsWith(".twitter.com")
+    )
+      return "twitter";
   } catch {
     return null;
   }
@@ -350,9 +356,7 @@ function relativeLuminance(value: string): number | null {
 
   const linear = [rgb.r, rgb.g, rgb.b].map((channel) => {
     const normalized = channel / 255;
-    return normalized <= 0.03928
-      ? normalized / 12.92
-      : Math.pow((normalized + 0.055) / 1.055, 2.4);
+    return normalized <= 0.03928 ? normalized / 12.92 : Math.pow((normalized + 0.055) / 1.055, 2.4);
   });
 
   const [red = 0, green = 0, blue = 0] = linear;
@@ -383,7 +387,8 @@ function resolveDefaultButtonBorderColor(
   borderWidth: ButtonCustomizationConfig["borderWidth"],
 ): string {
   if (borderWidth === 0 || style.variant !== "solid") return palette.accent;
-  if (!isHexColor(palette.accent)) return isHexColor(palette.text) ? palette.text : palette.accentText;
+  if (!isHexColor(palette.accent))
+    return isHexColor(palette.text) ? palette.text : palette.accentText;
 
   const accent = normalizeHex(palette.accent);
   const candidates = [
@@ -541,14 +546,14 @@ function resolveButtonStyle(
     buttonStyle === "outline"
       ? "sharp"
       : buttonStyle === "soft"
-      ? "premium-soft"
-      : buttonStyle === "solid" && override.button_radius === "none"
-        ? "sharp"
-        : buttonStyle === "solid" && override.button_radius === "rounded"
-          ? "rounded"
-          : buttonStyle === "solid" && override.button_radius === "full"
-            ? "pill"
-            : null;
+        ? "premium-soft"
+        : buttonStyle === "solid" && override.button_radius === "none"
+          ? "sharp"
+          : buttonStyle === "solid" && override.button_radius === "rounded"
+            ? "rounded"
+            : buttonStyle === "solid" && override.button_radius === "full"
+              ? "pill"
+              : null;
 
   if (!desiredShape) return fallback;
 

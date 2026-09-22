@@ -32,16 +32,16 @@ interactuantes. El revert es de 1 solo archivo (BasicEditorShell.tsx), limpio y 
 
 Phase B tocó UN solo archivo: `src/components/basic-editor-shell/BasicEditorShell.tsx` (+112/−8).
 
-| Cambio | Clasificación |
-|---|---|
-| `activePointers` Map + `pinchStartRef` (multi-touch) | REQUIRED_FOR_PINCH |
-| `getPanBounds` / `clampPan` (360*zoom / 620*zoom) | CONFIRMED_REGRESSION (altura mínima fija) |
-| `getPointerDistance` | REQUIRED_FOR_PINCH |
-| `onPointerDown` reescrito (track + pinch start) | REGRESSION_RISK |
-| `onPointerMove` reescrito (pinch + pan clamp) | REGRESSION_RISK |
-| `stopPan` reescrito (delete + reset) | REGRESSION_RISK |
-| `touchAction: "pan-y"` → `"none"` | **CONFIRMED_REGRESSION** |
-| `onWheel` con `preventDefault` (sin cambio) | UNRELATED (pre-existente) |
+| Cambio                                               | Clasificación                             |
+| ---------------------------------------------------- | ----------------------------------------- |
+| `activePointers` Map + `pinchStartRef` (multi-touch) | REQUIRED_FOR_PINCH                        |
+| `getPanBounds` / `clampPan` (360*zoom / 620*zoom)    | CONFIRMED_REGRESSION (altura mínima fija) |
+| `getPointerDistance`                                 | REQUIRED_FOR_PINCH                        |
+| `onPointerDown` reescrito (track + pinch start)      | REGRESSION_RISK                           |
+| `onPointerMove` reescrito (pinch + pan clamp)        | REGRESSION_RISK                           |
+| `stopPan` reescrito (delete + reset)                 | REGRESSION_RISK                           |
+| `touchAction: "pan-y"` → `"none"`                    | **CONFIRMED_REGRESSION**                  |
+| `onWheel` con `preventDefault` (sin cambio)          | UNRELATED (pre-existente)                 |
 
 ## 4. PASSIVE EVENT LISTENER ERROR
 
@@ -93,6 +93,7 @@ early-return.
 `maxX = max(0, (360*zoom - vw)/2 + 24)` · `maxY = max(0, (620*zoom - vh)/2 + 24)`.
 
 Defectos:
+
 1. Usa `TEMPLATE_MIN_HEIGHT = 620` en vez de la altura real → bounds incorrectos para templates largos.
 2. Calcula contra `viewport.clientWidth/Height` antes de que `ResizeObserver`/`fitZoom` asienten.
 3. Contenido mayor que viewport → `maxY` puede ser 0/negativo → sin pan vertical.
@@ -121,28 +122,28 @@ o `none` SÓLO cuando el gesto propio esté verificado.
 
 ## 13. BEFORE vs AFTER PHASE B
 
-| Aspecto | ANTES (e6d5ea8) | DESPUÉS (aa35f52) |
-|---|---|---|
-| Vertical | nativo pan-y (funciona) | custom (roto) |
-| Horizontal | pan ±96px | custom clamp (bounds mal) |
-| Pinch | no disponible | implementado (roto) |
-| touch-action | pan-y | none |
-| Template visible | sí (scroll nativo) | NO (recortado) |
-| Passive error | sí (pre-existente) | sí (sin cambio) |
+| Aspecto          | ANTES (e6d5ea8)         | DESPUÉS (aa35f52)         |
+| ---------------- | ----------------------- | ------------------------- |
+| Vertical         | nativo pan-y (funciona) | custom (roto)             |
+| Horizontal       | pan ±96px               | custom clamp (bounds mal) |
+| Pinch            | no disponible           | implementado (roto)       |
+| touch-action     | pan-y                   | none                      |
+| Template visible | sí (scroll nativo)      | NO (recortado)            |
+| Passive error    | sí (pre-existente)      | sí (sin cambio)           |
 
 Líneas que cambiaron "limited but usable" → "broken": línea 267 (`pan-y`→`none`) + bloque
 `getPanBounds`/`clampPan` (85-104).
 
 ## 14. BLOCKER MATRIX
 
-| Finding | Severity |
-|---|---|
-| Pinch sin funcionar | BLOCKER |
-| Vertical pan perdido | BLOCKER |
-| Template recortado | BLOCKER |
-| preventDefault pasivo | CRITICAL |
+| Finding                | Severity                    |
+| ---------------------- | --------------------------- |
+| Pinch sin funcionar    | BLOCKER                     |
+| Vertical pan perdido   | BLOCKER                     |
+| Template recortado     | BLOCKER                     |
+| preventDefault pasivo  | CRITICAL                    |
 | Pan bounds incorrectos | BLOCKER (causa del recorte) |
-| fitZoom pelea con zoom | HIGH |
+| fitZoom pelea con zoom | HIGH                        |
 
 ## 15. HOTFIX vs REVERT DECISION
 
@@ -200,4 +201,3 @@ Líneas que cambiaron "limited but usable" → "broken": línea 267 (`pan-y`→`
 - FROZEN CODE VIOLATIONS: NONE
 
 Final status: **AUDIT COMPLETE — PHASE B FULL REVERT RECOMMENDED**
-

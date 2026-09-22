@@ -6,11 +6,7 @@
  * data supplied by the fixture, never inferred by the system.
  */
 
-import type {
-  CatalogItemV1,
-  CatalogV1,
-  NormalizedContentV1,
-} from "./catalog.types";
+import type { CatalogItemV1, CatalogV1, NormalizedContentV1 } from "./catalog.types";
 import type { PageGenerationRequest } from "./smart-pages.types";
 import { action } from "./sales-actions";
 
@@ -215,12 +211,19 @@ const vetContent = base("Clínica Veterinaria Patitas", "veterinarian", {
       role: "Head veterinarian",
       photo: photo("tm_1_ph", "vet1", "Dra. Camila Rojas"),
     },
-    { id: "tm_2", name: "Dr. Luis Pino", role: "Surgeon", photo: photo("tm_2_ph", "vet2", "Dr. Luis Pino") },
+    {
+      id: "tm_2",
+      name: "Dr. Luis Pino",
+      role: "Surgeon",
+      photo: photo("tm_2_ph", "vet2", "Dr. Luis Pino"),
+    },
   ],
   testimonials: [
     { id: "ts_1", quote: "They saved our dog. Incredibly kind team.", author: "María G." },
   ],
-  faq: [{ id: "fq_1", question: "Do you handle emergencies?", answer: "Yes, during opening hours." }],
+  faq: [
+    { id: "fq_1", question: "Do you handle emergencies?", answer: "Yes, during opening hours." },
+  ],
   contact: {
     whatsapp: "+56922223333",
     phone: "+56922223333",
@@ -365,7 +368,9 @@ const photographerContent = base("Lucía Vera Photography", "photographer", {
       ],
     },
   ],
-  testimonials: [{ id: "ts_p1", quote: "She captured the day exactly as it felt.", author: "Ana M." }],
+  testimonials: [
+    { id: "ts_p1", quote: "She captured the day exactly as it felt.", author: "Ana M." },
+  ],
   contact: { email: "hola@luciavera.cl", whatsapp: "+56955556666", socials: [] },
 });
 
@@ -382,10 +387,26 @@ const storeContent = base("Verde Casa", "retail", {
     location: "Santiago, CL",
     cover: photo("m_shopcover", "shopcover", "Verde Casa plant shop interior"),
     differentiators: [
-      { id: "df_s1", title: "Chosen by hand", description: "Every plant is checked in store before it goes on the shelf." },
-      { id: "df_s2", title: "Care advice included", description: "We tell you the light and watering each plant needs." },
-      { id: "df_s3", title: "Repotting on request", description: "Ask us to repot your plant before you take it home." },
-      { id: "df_s4", title: "Local pickup in Santiago", description: "Reserve by WhatsApp and collect at the shop." },
+      {
+        id: "df_s1",
+        title: "Chosen by hand",
+        description: "Every plant is checked in store before it goes on the shelf.",
+      },
+      {
+        id: "df_s2",
+        title: "Care advice included",
+        description: "We tell you the light and watering each plant needs.",
+      },
+      {
+        id: "df_s3",
+        title: "Repotting on request",
+        description: "Ask us to repot your plant before you take it home.",
+      },
+      {
+        id: "df_s4",
+        title: "Local pickup in Santiago",
+        description: "Reserve by WhatsApp and collect at the shop.",
+      },
     ],
   },
   catalogs: [
@@ -393,8 +414,18 @@ const storeContent = base("Verde Casa", "retail", {
       id: "catalog_products",
       kind: "catalog",
       categories: [
-        { id: "cat_plants", name: "Plants", description: "Indoor plants for low and bright light.", order: 0 },
-        { id: "cat_pots", name: "Pots", description: "Ceramic and terracotta pots in everyday sizes.", order: 1 },
+        {
+          id: "cat_plants",
+          name: "Plants",
+          description: "Indoor plants for low and bright light.",
+          order: 0,
+        },
+        {
+          id: "cat_pots",
+          name: "Pots",
+          description: "Ceramic and terracotta pots in everyday sizes.",
+          order: 1,
+        },
         { id: "cat_care", name: "Care & tools", order: 2 },
         { id: "cat_home", name: "Home accents", order: 3 },
       ],
@@ -493,7 +524,11 @@ const storeContent = base("Verde Casa", "retail", {
   ],
   faq: [
     { id: "fq_s1", question: "Do you deliver?", answer: "Yes, within Santiago." },
-    { id: "fq_s2", question: "Can I reserve a plant?", answer: "Write to us on WhatsApp and we hold it for 48 hours." },
+    {
+      id: "fq_s2",
+      question: "Can I reserve a plant?",
+      answer: "Write to us on WhatsApp and we hold it for 48 hours.",
+    },
   ],
   contact: {
     whatsapp: "+56966667777",

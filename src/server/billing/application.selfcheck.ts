@@ -44,14 +44,15 @@ function check(name: string, cond: boolean): void {
 }
 
 function eq(name: string, actual: unknown, expected: unknown): void {
-  check(`${name} (expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)})`, actual === expected);
+  check(
+    `${name} (expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)})`,
+    actual === expected,
+  );
 }
 
 /* ------------------------------- fixtures ------------------------------- */
 
-function makeEvent(
-  overrides: Partial<NormalizedBillingEvent> = {},
-): NormalizedBillingEvent {
+function makeEvent(overrides: Partial<NormalizedBillingEvent> = {}): NormalizedBillingEvent {
   return {
     eventId: "evt_1",
     provider: "stripe",
@@ -93,9 +94,7 @@ function makeStore(initial?: {
     async getSubscriptionByProviderId(provider, providerSubscriptionId) {
       return (
         state.subscriptions.find(
-          (s) =>
-            s.provider === provider &&
-            s.provider_subscription_id === providerSubscriptionId,
+          (s) => s.provider === provider && s.provider_subscription_id === providerSubscriptionId,
         ) ?? null
       );
     },
@@ -120,11 +119,7 @@ function makeStore(initial?: {
       return record;
     },
     async getBillingCustomer(userId, provider) {
-      return (
-        state.customers.find(
-          (c) => c.user_id === userId && c.provider === provider,
-        ) ?? null
-      );
+      return state.customers.find((c) => c.user_id === userId && c.provider === provider) ?? null;
     },
     async upsertBillingCustomer(input) {
       state.customerUpserts += 1;
@@ -297,7 +292,10 @@ async function caseMissingSubscriptionId(): Promise<void> {
 
 async function caseFreeNeverPersisted(): Promise<void> {
   check("free.not_in_plans", !BILLING_PLAN_IDS.includes("free" as BillingPlanId));
-  check("free.not_in_statuses", !BILLING_SUBSCRIPTION_STATUSES.includes("free" as BillingSubscriptionStatus));
+  check(
+    "free.not_in_statuses",
+    !BILLING_SUBSCRIPTION_STATUSES.includes("free" as BillingSubscriptionStatus),
+  );
 
   const { store, state } = makeStore();
   const deps: ApplicationDeps = { store, planResolver: proResolver };
@@ -328,9 +326,7 @@ async function caseOwner(): Promise<void> {
   eq("owner.missing.sub_upserts", st1.subscriptionUpserts, 0);
 
   const { store: s2, state: st2 } = makeStore({
-    subscriptions: [
-      makeSub({ provider_subscription_id: "sub_known", user_id: "user_known" }),
-    ],
+    subscriptions: [makeSub({ provider_subscription_id: "sub_known", user_id: "user_known" })],
   });
   const d2: ApplicationDeps = { store: s2, planResolver: proResolver };
   const r2 = await applyNormalizedEvent(

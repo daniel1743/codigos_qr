@@ -89,16 +89,11 @@ function FontChips({ value, onChange }: { value: string; onChange: (font: string
   );
 }
 
-export function ProfileSection({
-  profile,
-  onChange,
-  userId,
-}: ProfileSectionProps) {
+export function ProfileSection({ profile, onChange, userId }: ProfileSectionProps) {
   const [uploading, setUploading] = useState(false);
   const supabase = getBrowserSupabaseClient();
-  const showProfessionalBadge = getTemplates().find(
-    (template) => template.id === profile.template_id,
-  )?.supportsCards === true;
+  const showProfessionalBadge =
+    getTemplates().find((template) => template.id === profile.template_id)?.supportsCards === true;
 
   useEffect(() => {
     if (profile.title_font_family) loadGoogleFont(profile.title_font_family);
@@ -147,8 +142,12 @@ export function ProfileSection({
   return (
     <section className="space-y-5">
       <div className="space-y-1">
-        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-stone-500">Identidad</p>
-        <h2 className="text-xl font-bold tracking-[-0.04em] text-[#1d1d1b]">Información del perfil</h2>
+        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-stone-500">
+          Identidad
+        </p>
+        <h2 className="text-xl font-bold tracking-[-0.04em] text-[#1d1d1b]">
+          Información del perfil
+        </h2>
         <p className="text-sm text-stone-500">Configura tu avatar y descripción.</p>
       </div>
 
@@ -156,7 +155,12 @@ export function ProfileSection({
         data-tool-target={EDIT_TARGETS.avatar}
         className="space-y-3 rounded-2xl border border-stone-200 bg-[#fffefa] p-4 shadow-[0_8px_24px_rgba(29,29,27,0.04)]"
       >
-        <Label className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500" htmlFor="avatar_upload">Avatar</Label>
+        <Label
+          className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500"
+          htmlFor="avatar_upload"
+        >
+          Avatar
+        </Label>
         <div className="flex flex-col gap-4 min-[420px]:flex-row min-[420px]:items-center">
           {profile.avatar_url ? (
             <img
@@ -206,7 +210,11 @@ export function ProfileSection({
                   : "border-stone-200 text-stone-600"
               }`}
             >
-              {{ circle: "Redondo", rounded: "Suave", square: "Cuadrado", none: "Sin avatar" }[shape]}
+              {
+                { circle: "Redondo", rounded: "Suave", square: "Cuadrado", none: "Sin avatar" }[
+                  shape
+                ]
+              }
             </button>
           ))}
         </div>
@@ -214,7 +222,12 @@ export function ProfileSection({
       <div className="space-y-3 rounded-2xl border border-stone-200 bg-[#fffefa] p-4 shadow-[0_8px_24px_rgba(29,29,27,0.04)]">
         <div className="flex items-center justify-between gap-4">
           <div className="space-y-1">
-            <Label className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500" htmlFor="ring_enabled">Ring del avatar</Label>
+            <Label
+              className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500"
+              htmlFor="ring_enabled"
+            >
+              Ring del avatar
+            </Label>
             <p className="text-xs text-stone-500">Borde decorativo alrededor del avatar.</p>
           </div>
           <Switch
@@ -270,12 +283,16 @@ export function ProfileSection({
         ) : null}
       </div>
 
-
       <div
         data-tool-target={EDIT_TARGETS.name}
         className="space-y-2 rounded-2xl border border-stone-200 bg-[#fffefa] p-4 shadow-[0_8px_24px_rgba(29,29,27,0.04)]"
       >
-        <Label className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500" htmlFor="display_name">Nombre para mostrar</Label>
+        <Label
+          className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500"
+          htmlFor="display_name"
+        >
+          Nombre para mostrar
+        </Label>
         <Input
           id="display_name"
           value={profile.display_name || ""}
@@ -338,7 +355,10 @@ export function ProfileSection({
         data-tool-target={EDIT_TARGETS.subtitle}
         className="space-y-2 rounded-2xl border border-stone-200 bg-[#fffefa] p-4 shadow-[0_8px_24px_rgba(29,29,27,0.04)]"
       >
-        <Label className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500" htmlFor="profession">
+        <Label
+          className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500"
+          htmlFor="profession"
+        >
           Profesión / subtítulo
         </Label>
         <Input
@@ -358,7 +378,9 @@ export function ProfileSection({
             <Switch
               id="professional_badge"
               checked={isBasicProfessionalBadgeEnabled(profile)}
-              onCheckedChange={(checked) => onChange(updateBasicProfessionalBadge(profile, checked))}
+              onCheckedChange={(checked) =>
+                onChange(updateBasicProfessionalBadge(profile, checked))
+              }
             />
           </div>
         ) : null}
@@ -368,7 +390,12 @@ export function ProfileSection({
         data-tool-target={EDIT_TARGETS.bio}
         className="space-y-2 rounded-2xl border border-stone-200 bg-[#fffefa] p-4 shadow-[0_8px_24px_rgba(29,29,27,0.04)]"
       >
-        <Label className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500" htmlFor="bio">Biografía</Label>
+        <Label
+          className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500"
+          htmlFor="bio"
+        >
+          Biografía
+        </Label>
         <Textarea
           id="bio"
           value={profile.bio || ""}
@@ -432,7 +459,10 @@ export function ProfileSection({
       >
         <div className="flex items-center justify-between gap-4">
           <div className="space-y-1">
-            <Label className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500" htmlFor="footer_enabled">
+            <Label
+              className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500"
+              htmlFor="footer_enabled"
+            >
               Pie de página
             </Label>
             <p className="text-xs text-stone-500">Texto al final de tu perfil.</p>
@@ -456,7 +486,12 @@ export function ProfileSection({
       </div>
 
       <div className="space-y-2 rounded-2xl border border-stone-200 bg-[#fffefa] p-4 shadow-[0_8px_24px_rgba(29,29,27,0.04)]">
-        <Label className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500" htmlFor="public_alias">Enlace personalizado</Label>
+        <Label
+          className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500"
+          htmlFor="public_alias"
+        >
+          Enlace personalizado
+        </Label>
         <div className="flex rounded-md shadow-sm">
           <span className="inline-flex items-center rounded-l-xl border border-r-0 border-stone-200 bg-stone-100 px-3 text-sm text-stone-500">
             {CANONICAL_PUBLIC_ORIGIN.replace(/^https?:\/\//, "")}/

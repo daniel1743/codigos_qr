@@ -76,8 +76,16 @@ const scenarios = {
     ),
     content: {
       portfolio: [
-        { label: "Editorial Nocturna", url: "https://example.com/night", imageUrl: "https://example.com/night.jpg" },
-        { label: "Retratos Urbanos", url: "https://example.com/urban", imageUrl: "https://example.com/urban.jpg" },
+        {
+          label: "Editorial Nocturna",
+          url: "https://example.com/night",
+          imageUrl: "https://example.com/night.jpg",
+        },
+        {
+          label: "Retratos Urbanos",
+          url: "https://example.com/urban",
+          imageUrl: "https://example.com/urban.jpg",
+        },
       ],
     } satisfies ContentSourceV2,
     archetype: "portfolio_service" as const,
@@ -175,9 +183,7 @@ describe("Engine V2 premium visual authoring expansion", () => {
 
     for (const config of [services.config, retail.config, portfolio.config]) {
       expect(config.theme.colors.primary).not.toBe(config.theme.colors.accent);
-      expect(config.theme.background.gradient?.from).not.toBe(
-        config.theme.background.gradient?.to,
-      );
+      expect(config.theme.background.gradient?.from).not.toBe(config.theme.background.gradient?.to);
     }
 
     expect(services.config.blocks.some((b) => b.type === "services")).toBe(true);
@@ -209,4 +215,3 @@ describe("Engine V2 premium visual authoring expansion", () => {
     });
   });
 });
-

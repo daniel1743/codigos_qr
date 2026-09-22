@@ -45,7 +45,8 @@ export function buildMediaDiagnostic(input: {
 }): MediaDiagnosticV1 {
   const ownerMediaAvailable = anyOwnerMedia(input.ownerContent) || input.hasUserMedia;
   const ownerMediaPriority = true;
-  const contextualMediaNeeded = !ownerMediaAvailable && VISUAL_ARCHETYPES.has(input.archetype ?? "");
+  const contextualMediaNeeded =
+    !ownerMediaAvailable && VISUAL_ARCHETYPES.has(input.archetype ?? "");
   const contextualMediaAllowed = false; // no production media strategy runs in this generation
   const searchQuery: string | null = null;
   const selectedAsset: string | null = null;
@@ -160,7 +161,9 @@ export function buildSummary(input: {
       field("business category") === "DEGRADED" || field("primary goal") === "DEGRADED"
         ? warn("Category/goal partially collapsed.")
         : ok("Objective/content/media preserved into Engine input."),
-    ENGINE_ARCHETYPE: input.engine ? ok(`Archetype inferred: ${input.engine.archetype}.`) : off("Not captured."),
+    ENGINE_ARCHETYPE: input.engine
+      ? ok(`Archetype inferred: ${input.engine.archetype}.`)
+      : off("Not captured."),
     ENGINE_FAMILY:
       input.engine?.familyBias && Object.keys(input.engine.familyBias).length
         ? ok(`Family bias active; selected ${input.engine.selectedFamily}.`)
@@ -174,8 +177,9 @@ export function buildSummary(input: {
       : input.media.contextualMediaNeeded
         ? off("No contextual hero image (no owner media + no active strategy).")
         : ok("Contextual media not required."),
-    CANONICAL: input.canonicalValid ? ok("Canonical validation passed.") : warn("Canonical validation failed."),
+    CANONICAL: input.canonicalValid
+      ? ok("Canonical validation passed.")
+      : warn("Canonical validation failed."),
     RENDERER: ok("PublicTemplateRenderer faithfully renders the generated config."),
   };
 }
-

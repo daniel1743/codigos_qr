@@ -4,8 +4,8 @@
 
 Two concrete DOM-wiring disconnects (not helper/signal math) broke the runtime
 `event → target → scroll-owner` path. The scroll math, the delta/absolute
-contract, and the scroll owners were all correct; the *identity strings and the
-click event* were not.
+contract, and the scroll owners were all correct; the _identity strings and the
+click event_ were not.
 
 1. **Hero text `data-editor-target` prefix mismatch (Inspector → Canvas).**
    `HeroBlock.tsx` `heroTextClickProps(target)` set
@@ -26,6 +26,7 @@ click event* were not.
 ## WHY_5C2B_TESTS_PASSED_BUT_RUNTIME_FAILED
 
 The 5C2B tests validated only pure units:
+
 - `computeInspectorFocusScroll` (pure positioning math),
 - `requestInspectorFocus` / `requestCanvasFocus` (pub/sub delivery + source separation),
 - `shouldScrollInspectorToFocus` (non-null predicate).
@@ -63,7 +64,7 @@ so an explicit edit-mode click emits `requestInspectorFocus("profile-bio")`
 exactly once → the Inspector listener scrolls to
 `[data-inspector-focus="profile-bio"]` (the "Bio" field).
 
-NOTE (scope boundary): clicking Bio when a *block* is currently selected does
+NOTE (scope boundary): clicking Bio when a _block_ is currently selected does
 not clear `selectedBlockId`, so the Profile inspector will not switch panels in
 that single edge case. Fully resolving it requires a new
 `onSelectProfileBio` callback plumbed through `RenderContext`/`TemplateRenderer`/
@@ -75,6 +76,7 @@ cover path already clears selection via `onSelectProfileCover`.
 
 Contract is consistent — no bug (SUSPECT_B cleared). Both helpers return a
 **delta** and both consumers apply it as `+=`:
+
 - Inspector: `if (delta !== 0) container.scrollTop = container.scrollTop + delta;`
 - Canvas: `if (delta.top !== 0) viewport.scrollTop += delta.top;`
 
@@ -134,6 +136,7 @@ Stage/world mixing. The real failures were identity/wiring, not geometry.
 - **Total: 36 passed / 0 failed**
 
 New integration coverage:
+
 - Hero text elements render `data-editor-target="hero-title|hero-subtitle|hero-description|hero-eyebrow"`
   and never the bare `title`/`subtitle`.
 - Clicking the Bio element emits a `profile-bio` Inspector focus request.
@@ -161,7 +164,7 @@ None.
 ## RUNTIME
 
 Automated tests now prove the actual DOM wiring (identity match + Bio click
-emission), but visible *automatic movement* still requires the manual gate below.
+emission), but visible _automatic movement_ still requires the manual gate below.
 Per the task rule, automated tests alone cannot produce a PASS.
 
 ## FINAL_GATE
@@ -169,6 +172,7 @@ Per the task rule, automated tests alone cannot produce a PASS.
 **NOT_VERIFIED**
 
 Awaiting user runtime confirmation of visible automatic movement:
+
 - REPAIR-01 Bio, REPAIR-02 Hero Title, REPAIR-03 CTA (Canvas→Inspector)
 - REPAIR-04 Bio, REPAIR-05 Hero Title, REPAIR-06 CTA (Inspector→Canvas)
 - REPAIR-07 no-move, REPAIR-08 repeat-edit stability, REPAIR-09 zoom preserved,

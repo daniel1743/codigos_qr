@@ -18,17 +18,17 @@ The canonical read path was used only for a read-only inspection of the open
 page ID. It returned an old/stale Catalog document and is explicitly excluded
 from PASS evidence:
 
-| Field | Observed value | Classification |
-|---|---|---|
-| Page ID | `b3d5eed0-0502-4521-9a8f-1ccd8f898fcb` | stale evidence only |
-| Public ID | `RRNyCJi` | stale evidence only |
-| Slug | `null` | stale evidence only |
-| Title | `fuxion` | stale evidence only |
-| Page type | `catalog` | stale evidence only |
-| Published | `false` | stale evidence only |
-| Published revision | `0` | stale evidence only |
-| Persisted block count | `5` | stale evidence only |
-| Persisted visible signature | `image`, `social`, `productGrid`, `heading`, `contact` | pre-repair document |
+| Field                       | Observed value                                                   | Classification              |
+| --------------------------- | ---------------------------------------------------------------- | --------------------------- |
+| Page ID                     | `b3d5eed0-0502-4521-9a8f-1ccd8f898fcb`                           | stale evidence only         |
+| Public ID                   | `RRNyCJi`                                                        | stale evidence only         |
+| Slug                        | `null`                                                           | stale evidence only         |
+| Title                       | `fuxion`                                                         | stale evidence only         |
+| Page type                   | `catalog`                                                        | stale evidence only         |
+| Published                   | `false`                                                          | stale evidence only         |
+| Published revision          | `0`                                                              | stale evidence only         |
+| Persisted block count       | `5`                                                              | stale evidence only         |
+| Persisted visible signature | `image`, `social`, `productGrid`, `heading`, `contact`           | pre-repair document         |
 | Persisted template metadata | `creator-premium-001` while page instance was `store-bento-demo` | stale/inconsistent document |
 
 The stale config contains `Wireless Mouse`, `Mechanical Keyboard`, creator
@@ -37,37 +37,37 @@ the repaired code because it predates the latest Store Bento transform.
 
 ## Required runtime scenarios
 
-| Scenario | Result | Evidence |
-|---|---|---|
-| Fresh Catalog page creation | PASS | Created through `/pages/new`; page ID `6b01e073-da2a-464c-9c1e-d16c9207fb6d` |
-| Catalog baseline capture | PASS | Canonical `public.pages` row captured before further mutation |
-| Catalog hard reload | BLOCKED | No fresh post-repair fixture |
-| Fresh Portfolio page creation | BLOCKED | Browser DOM automation timed out |
-| Portfolio baseline capture | BLOCKED | No fresh page ID available |
-| Catalog vs Portfolio runtime comparison | BLOCKED | Fresh Portfolio page unavailable |
-| Child Catalog Publish | BLOCKED | Publish action not executed |
-| Published child public route | BLOCKED | No child publication performed |
-| Main Bio isolation runtime check | BLOCKED | No child publication performed |
-| Child QR isolation runtime check | BLOCKED | No QR mutation performed |
+| Scenario                                | Result  | Evidence                                                                     |
+| --------------------------------------- | ------- | ---------------------------------------------------------------------------- |
+| Fresh Catalog page creation             | PASS    | Created through `/pages/new`; page ID `6b01e073-da2a-464c-9c1e-d16c9207fb6d` |
+| Catalog baseline capture                | PASS    | Canonical `public.pages` row captured before further mutation                |
+| Catalog hard reload                     | BLOCKED | No fresh post-repair fixture                                                 |
+| Fresh Portfolio page creation           | BLOCKED | Browser DOM automation timed out                                             |
+| Portfolio baseline capture              | BLOCKED | No fresh page ID available                                                   |
+| Catalog vs Portfolio runtime comparison | BLOCKED | Fresh Portfolio page unavailable                                             |
+| Child Catalog Publish                   | BLOCKED | Publish action not executed                                                  |
+| Published child public route            | BLOCKED | No child publication performed                                               |
+| Main Bio isolation runtime check        | BLOCKED | No child publication performed                                               |
+| Child QR isolation runtime check        | BLOCKED | No QR mutation performed                                                     |
 
 ## Fresh Catalog baseline — `QA Catalog Final`
 
 Creation through `/pages/new` succeeded with type `Catálogo`. The canonical
 persisted row was captured before any further mutation:
 
-| Field | Observed value |
-|---|---|
-| Page ID | `6b01e073-da2a-464c-9c1e-d16c9207fb6d` |
-| `public_id` | `A8LjoRw` |
-| slug | `null` |
-| title | `QA Catalog Final` |
-| page type | `catalog` |
-| published | `false` |
-| published revision | `0` |
-| published at | `null` |
-| template ID | `store-bento` |
-| block count | `4` |
-| block signature | `hero`, `productGrid`, `heading`, `contact` |
+| Field              | Observed value                              |
+| ------------------ | ------------------------------------------- |
+| Page ID            | `6b01e073-da2a-464c-9c1e-d16c9207fb6d`      |
+| `public_id`        | `A8LjoRw`                                   |
+| slug               | `null`                                      |
+| title              | `QA Catalog Final`                          |
+| page type          | `catalog`                                   |
+| published          | `false`                                     |
+| published revision | `0`                                         |
+| published at       | `null`                                      |
+| template ID        | `store-bento`                               |
+| block count        | `4`                                         |
+| block signature    | `hero`, `productGrid`, `heading`, `contact` |
 
 Persisted semantic markers include `Nuestro catálogo`, `Productos y
 soluciones`, `Producto destacado`, `Producto clásico` and `Nueva colección`.
@@ -141,16 +141,16 @@ isolation and QR checks remain **BLOCKED**. No further page mutation occurred.
 The canonical `public.pages` row for `public_id = A8LjoRw` was read before any
 repair or further mutation:
 
-| Field | Observed value |
-|---|---|
-| `public_id` | `A8LjoRw` |
-| `slug` | `null` |
-| `published` | `false` |
-| `published_revision` | `0` |
-| `published_at` | `null` |
+| Field                       | Observed value  |
+| --------------------------- | --------------- |
+| `public_id`                 | `A8LjoRw`       |
+| `slug`                      | `null`          |
+| `published`                 | `false`         |
+| `published_revision`        | `0`             |
+| `published_at`              | `null`          |
 | `published_template_config` | absent / `null` |
-| draft `template_config` | present |
-| draft template | `store-bento` |
+| draft `template_config`     | present         |
+| draft template              | `store-bento`   |
 
 The public RPC `get_public_page_by_public_id({ p_public_id: "A8LjoRw" })`
 returned an empty array, and `GET /pg/A8LjoRw` returned HTTP 404. This matches

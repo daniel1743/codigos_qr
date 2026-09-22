@@ -6,7 +6,10 @@ import { RenderProvider } from "../engine/RenderContext";
 import { createDemoConfig } from "../templates/definitions";
 import type { BlockItem, TemplateBlock } from "../types";
 
-function makeButtonGroup(items: BlockItem[], ctaStyle?: TemplateBlock["style"]["ctaStyle"]): TemplateBlock {
+function makeButtonGroup(
+  items: BlockItem[],
+  ctaStyle?: TemplateBlock["style"]["ctaStyle"],
+): TemplateBlock {
   const block = createBlock("buttonGroup");
   return {
     ...block,

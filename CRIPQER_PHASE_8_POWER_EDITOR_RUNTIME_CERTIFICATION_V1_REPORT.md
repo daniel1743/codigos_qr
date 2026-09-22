@@ -46,17 +46,17 @@ not restore the prior 28-block document; no claim of restoration is made.
 
 ## Controlled fixture baseline — read-only canonical capture
 
-| Field | Observed value | Evidence/status |
-|---|---|---|
-| Title | `prueba` | `public.pages` row |
-| Page type | `menu` | `public.pages` row |
-| Page ID | `7ee36173-67df-45cc-9695-743113a18122` | Authenticated browser tab inventory |
-| Edit route | `/pages/7ee36173-67df-45cc-9695-743113a18122/edit` | Authenticated browser tab inventory |
-| `public_id` | `nP4gSJr` | `public.pages` row |
-| slug | `null` | `public.pages` row |
-| Initial block count | `5` | persisted `template_config.editorConfig.blocks.length` |
-| Draft/published state | draft (`published=false`, revision `0`) | `public.pages` row |
-| Starter identity | `restaurant-visual`, but pre-fix creator signature | persisted `template_config` |
+| Field                 | Observed value                                     | Evidence/status                                        |
+| --------------------- | -------------------------------------------------- | ------------------------------------------------------ |
+| Title                 | `prueba`                                           | `public.pages` row                                     |
+| Page type             | `menu`                                             | `public.pages` row                                     |
+| Page ID               | `7ee36173-67df-45cc-9695-743113a18122`             | Authenticated browser tab inventory                    |
+| Edit route            | `/pages/7ee36173-67df-45cc-9695-743113a18122/edit` | Authenticated browser tab inventory                    |
+| `public_id`           | `nP4gSJr`                                          | `public.pages` row                                     |
+| slug                  | `null`                                             | `public.pages` row                                     |
+| Initial block count   | `5`                                                | persisted `template_config.editorConfig.blocks.length` |
+| Draft/published state | draft (`published=false`, revision `0`)            | `public.pages` row                                     |
+| Starter identity      | `restaurant-visual`, but pre-fix creator signature | persisted `template_config`                            |
 
 No Phase 8 mutation was started after this read. The metadata baseline is
 captured, but the content is stale/pre-fix and must not be treated as a
@@ -64,23 +64,23 @@ post-fix Menu starter PASS.
 
 ## Runtime status matrix
 
-| Area | Status | Evidence |
-|---|---|---|
-| 29 preset render safety | PASS from Phase 7B | Real React SSR sweep |
-| 8 family interactive runtime | BLOCKED | Browser gate ready, but only the 29-preset no-error smoke completed; family save/reload did not |
-| Hero text save/reload | PASS | Edited `Phase 8 Hero QA`, observed `Guardado`, reloaded, and observed the text in the canvas/structure |
-| Page-type Menu starter mapping | BLOCKED | Supplied route `a4114cc7-fd1a-44fd-b01b-a8846728ea87` hard-reloaded, but canonical row is `sofia` and still contains `Shop`/creator copy; not accepted as fresh post-fix evidence |
-| Save/reload across all families | BLOCKED | Browser document was contaminated by autosaved preset insertion before the family matrix completed |
-| 3 full-template end-to-end flows | BLOCKED | Not exercised after the browser gate became ready |
-| Owner-media upload/persistence | BLOCKED | Upload/replace/clear flow not exercised; no adapter-backed evidence |
-| Collection lifecycle save/reload | BLOCKED | No complete browser add/edit/reorder/delete/undo/redo cycle |
-| Desktop contextual selection | BLOCKED | Not exercised as an exact item-to-Inspector matrix |
-| Mobile contextual selection | BLOCKED | Breakpoint button was verified, but 360/390/430px viewport evidence is absent |
-| CTA editor/public parity | BLOCKED | Not exercised against public output |
-| Header mode persistence | BLOCKED | Custom-header ↔ full-Hero save/reload was not exercised |
-| Motion/hover/reduced motion | BLOCKED | No complete visual preference matrix |
-| Keyboard focus | BLOCKED | Not exercised |
-| Public parity | BLOCKED | No public browser comparison |
+| Area                             | Status             | Evidence                                                                                                                                                                          |
+| -------------------------------- | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 29 preset render safety          | PASS from Phase 7B | Real React SSR sweep                                                                                                                                                              |
+| 8 family interactive runtime     | BLOCKED            | Browser gate ready, but only the 29-preset no-error smoke completed; family save/reload did not                                                                                   |
+| Hero text save/reload            | PASS               | Edited `Phase 8 Hero QA`, observed `Guardado`, reloaded, and observed the text in the canvas/structure                                                                            |
+| Page-type Menu starter mapping   | BLOCKED            | Supplied route `a4114cc7-fd1a-44fd-b01b-a8846728ea87` hard-reloaded, but canonical row is `sofia` and still contains `Shop`/creator copy; not accepted as fresh post-fix evidence |
+| Save/reload across all families  | BLOCKED            | Browser document was contaminated by autosaved preset insertion before the family matrix completed                                                                                |
+| 3 full-template end-to-end flows | BLOCKED            | Not exercised after the browser gate became ready                                                                                                                                 |
+| Owner-media upload/persistence   | BLOCKED            | Upload/replace/clear flow not exercised; no adapter-backed evidence                                                                                                               |
+| Collection lifecycle save/reload | BLOCKED            | No complete browser add/edit/reorder/delete/undo/redo cycle                                                                                                                       |
+| Desktop contextual selection     | BLOCKED            | Not exercised as an exact item-to-Inspector matrix                                                                                                                                |
+| Mobile contextual selection      | BLOCKED            | Breakpoint button was verified, but 360/390/430px viewport evidence is absent                                                                                                     |
+| CTA editor/public parity         | BLOCKED            | Not exercised against public output                                                                                                                                               |
+| Header mode persistence          | BLOCKED            | Custom-header ↔ full-Hero save/reload was not exercised                                                                                                                           |
+| Motion/hover/reduced motion      | BLOCKED            | No complete visual preference matrix                                                                                                                                              |
+| Keyboard focus                   | BLOCKED            | Not exercised                                                                                                                                                                     |
+| Public parity                    | BLOCKED            | No public browser comparison                                                                                                                                                      |
 
 ## Runtime continuation blocker
 

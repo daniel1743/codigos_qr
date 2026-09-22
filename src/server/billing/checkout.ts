@@ -170,10 +170,7 @@ export interface BillingCatalogResolver {
  */
 export interface CheckoutStore {
   createCheckout(input: BillingCheckoutInput): Promise<BillingCheckoutRecord>;
-  getCheckoutForUser(
-    checkoutId: string,
-    userId: string,
-  ): Promise<BillingCheckoutRecord | null>;
+  getCheckoutForUser(checkoutId: string, userId: string): Promise<BillingCheckoutRecord | null>;
   updateCheckoutStatus(
     checkoutId: string,
     userId: string,
@@ -254,19 +251,13 @@ function assertCanonicalStatus(status: string): BillingCheckoutStatus {
  * for identity or price.
  */
 export function parseCheckoutRequest(raw: unknown): ValidatedCheckoutRequest {
-  const obj =
-    typeof raw === "object" && raw !== null
-      ? (raw as Record<string, unknown>)
-      : {};
+  const obj = typeof raw === "object" && raw !== null ? (raw as Record<string, unknown>) : {};
 
   const planId = obj["planId"];
   const billingInterval = obj["billingInterval"];
   const provider = obj["provider"];
 
-  if (
-    typeof planId !== "string" ||
-    !(BILLING_PLAN_IDS as readonly string[]).includes(planId)
-  ) {
+  if (typeof planId !== "string" || !(BILLING_PLAN_IDS as readonly string[]).includes(planId)) {
     // Note: "free" is intentionally absent from BILLING_PLAN_IDS, so a
     // `planId: "free"` request fails closed here.
     throw new CheckoutValidationError("Invalid or missing planId.");
@@ -298,10 +289,7 @@ export function parseCheckoutRequest(raw: unknown): ValidatedCheckoutRequest {
  * authoritative for price, but the host still validates the shape so a
  * misconfigured resolver cannot produce a malformed or mismatched offer.
  */
-function validateResolvedOffer(
-  offer: ResolvedOffer,
-  requested: ValidatedCheckoutRequest,
-): void {
+function validateResolvedOffer(offer: ResolvedOffer, requested: ValidatedCheckoutRequest): void {
   if (
     offer.planId !== requested.planId ||
     offer.billingInterval !== requested.billingInterval ||
@@ -312,20 +300,12 @@ function validateResolvedOffer(
     );
   }
 
-  if (
-    typeof offer.amount !== "number" ||
-    !Number.isFinite(offer.amount) ||
-    offer.amount < 0
-  ) {
-    throw new CheckoutOfferUnavailableError(
-      "Resolved offer has an invalid amount.",
-    );
+  if (typeof offer.amount !== "number" || !Number.isFinite(offer.amount) || offer.amount < 0) {
+    throw new CheckoutOfferUnavailableError("Resolved offer has an invalid amount.");
   }
 
   if (typeof offer.currency !== "string" || !offer.currency.trim()) {
-    throw new CheckoutOfferUnavailableError(
-      "Resolved offer has an invalid currency.",
-    );
+    throw new CheckoutOfferUnavailableError("Resolved offer has an invalid currency.");
   }
 }
 
@@ -488,9 +468,7 @@ export async function startProviderSession(
 
   const offer = await deps.catalog.resolveOffer(requested);
   if (!offer) {
-    throw new CheckoutOfferUnavailableError(
-      "No offer available for this checkout.",
-    );
+    throw new CheckoutOfferUnavailableError("No offer available for this checkout.");
   }
   validateResolvedOffer(offer, requested);
 
@@ -526,11 +504,7 @@ export async function markCheckoutPending(
 ): Promise<CheckoutStatusSnapshot> {
   const user = await deps.userSource.requireUser();
 
-  const record = await deps.store.updateCheckoutStatus(
-    checkoutId,
-    user.userId,
-    "pending",
-  );
+  const record = await deps.store.updateCheckoutStatus(checkoutId, user.userId, "pending");
 
   return toStatusSnapshot(record);
 }

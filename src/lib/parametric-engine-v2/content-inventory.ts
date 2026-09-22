@@ -77,9 +77,7 @@ function safeFlag(value: unknown): boolean {
 }
 
 /** Normalizes any partial inventory into a complete, coherent inventory. */
-export function resolveContentInventory(
-  patch?: ContentInventoryPatch,
-): ContentInventoryV1 {
+export function resolveContentInventory(patch?: ContentInventoryPatch): ContentInventoryV1 {
   const b = EMPTY_CONTENT_INVENTORY;
   // Hostile callers may pass null/arrays/primitives despite the type.
   if (!patch || typeof patch !== "object" || Array.isArray(patch)) return structuredClone(b);
@@ -126,4 +124,3 @@ export function contentCount(inventory: ContentInventoryV1, key: ContentKey): nu
   const value = inventory[key] as { count?: number };
   return typeof value?.count === "number" ? value.count : 0;
 }
-

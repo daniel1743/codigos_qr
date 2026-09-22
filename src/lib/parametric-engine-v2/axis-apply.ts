@@ -13,11 +13,7 @@
 
 import { isAllowedAxisValue } from "./design-axes";
 import { isPaletteAccessible } from "./palettes-extended";
-import type {
-  AdvancedSelectionV1,
-  FamilyId,
-  RecipeDesign,
-} from "./types";
+import type { AdvancedSelectionV1, FamilyId, RecipeDesign } from "./types";
 
 /** Applies only family-legal, contrast-safe values. Returns applied axis ids. */
 export function applyAdvancedSelection(

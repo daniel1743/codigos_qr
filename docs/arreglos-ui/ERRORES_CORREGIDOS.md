@@ -8,12 +8,14 @@
 ## 🔴 ERRORES IDENTIFICADOS Y CORREGIDOS
 
 ### Error 1: `ReferenceError: isAdvanced is not defined`
+
 **Ubicación:** `ShareSection.tsx:211`
 
-**Problema:** 
+**Problema:**
 Indentación incorrecta causó que `isAdvanced` se declarara fuera del scope de la función `handleDownload`.
 
 **Solución:**
+
 ```typescript
 // ❌ ANTES (línea 211):
         const isAdvanced = requiresAdvancedRenderer(...)
@@ -27,12 +29,14 @@ Indentación incorrecta causó que `isAdvanced` se declarara fuera del scope de 
 ---
 
 ### Error 2: `TypeError: Cannot read properties of undefined (reading 'hideBackgroundDots')`
+
 **Ubicación:** `QRCodeAdvanced.tsx:33`
 
 **Problema:**
 `imageOptions` estaba condicional a `options.image`, pero `qr-code-styling` requiere que `imageOptions` siempre esté definido para evitar errores internos.
 
 **Solución:**
+
 ```typescript
 // ❌ ANTES:
 imageOptions: options.image
@@ -56,6 +60,7 @@ imageOptions: {
 ---
 
 ### Error 3: `StorageApiError: new row violates row-level security policy`
+
 **Ubicación:** Upload de avatar
 
 **Problema:**
@@ -71,7 +76,7 @@ ON storage.objects
 FOR INSERT
 TO authenticated
 WITH CHECK (
-  bucket_id = 'avatars' 
+  bucket_id = 'avatars'
   AND auth.uid()::text = (storage.foldername(name))[1]
 );
 
@@ -81,7 +86,7 @@ ON storage.objects
 FOR UPDATE
 TO authenticated
 USING (
-  bucket_id = 'avatars' 
+  bucket_id = 'avatars'
   AND auth.uid()::text = (storage.foldername(name))[1]
 );
 
@@ -91,7 +96,7 @@ ON storage.objects
 FOR DELETE
 TO authenticated
 USING (
-  bucket_id = 'avatars' 
+  bucket_id = 'avatars'
   AND auth.uid()::text = (storage.foldername(name))[1]
 );
 
@@ -113,7 +118,7 @@ Actualmente el sistema tiene colores neón básicos. Para hacerlo **Premium Opul
 
 ### Propuesta de Mejoras:
 
-1. **Gradientes Holográficos** 
+1. **Gradientes Holográficos**
    - Degradados multi-color (3-5 colores)
    - Animaciones sutiles
    - Efectos metálicos (oro, plata, cobre)
@@ -137,13 +142,13 @@ Actualmente el sistema tiene colores neón básicos. Para hacerlo **Premium Opul
 
 ## 📊 ESTADO ACTUAL
 
-| Componente | Estado | Errores |
-|-----------|--------|---------|
-| ShareSection | ✅ | 0 |
-| QRCodeAdvanced | ✅ | 0 |
-| Avatar Upload | ⚠️ | 1 (RLS) |
-| Colores Básicos | ✅ | 0 |
-| Efectos Premium | 🟡 | Funcionan pero mejorables |
+| Componente      | Estado | Errores                   |
+| --------------- | ------ | ------------------------- |
+| ShareSection    | ✅     | 0                         |
+| QRCodeAdvanced  | ✅     | 0                         |
+| Avatar Upload   | ⚠️     | 1 (RLS)                   |
+| Colores Básicos | ✅     | 0                         |
+| Efectos Premium | 🟡     | Funcionan pero mejorables |
 
 ---
 

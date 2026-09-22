@@ -71,14 +71,24 @@ function makeUser(userId: string, email: string | null): CheckoutUserSource {
   return { requireUser: async () => ({ userId, email }) };
 }
 
-const PRICES: Record<
-  string,
-  { currency: string; amount: number; providerOfferReference: string }
-> = {
-  "pro|monthly|stripe": { currency: "USD", amount: 2900, providerOfferReference: "price_pro_monthly_stripe" },
-  "business|yearly|mercado_pago": { currency: "USD", amount: 99000, providerOfferReference: "price_business_yearly_mp" },
-  "pro|yearly|paypal": { currency: "USD", amount: 29000, providerOfferReference: "price_pro_yearly_paypal" },
-};
+const PRICES: Record<string, { currency: string; amount: number; providerOfferReference: string }> =
+  {
+    "pro|monthly|stripe": {
+      currency: "USD",
+      amount: 2900,
+      providerOfferReference: "price_pro_monthly_stripe",
+    },
+    "business|yearly|mercado_pago": {
+      currency: "USD",
+      amount: 99000,
+      providerOfferReference: "price_business_yearly_mp",
+    },
+    "pro|yearly|paypal": {
+      currency: "USD",
+      amount: 29000,
+      providerOfferReference: "price_pro_yearly_paypal",
+    },
+  };
 
 function makeCatalog(): BillingCatalogResolver {
   return {
@@ -110,12 +120,19 @@ function makeStore(): CheckoutStore & { rows: Map<string, BillingCheckoutRecord>
       rows.set(id, record);
       return record;
     },
-    async getCheckoutForUser(checkoutId: string, userId: string): Promise<BillingCheckoutRecord | null> {
+    async getCheckoutForUser(
+      checkoutId: string,
+      userId: string,
+    ): Promise<BillingCheckoutRecord | null> {
       const r = rows.get(checkoutId);
       if (!r || r.user_id !== userId) return null;
       return r;
     },
-    async updateCheckoutStatus(checkoutId: string, userId: string, status): Promise<BillingCheckoutRecord> {
+    async updateCheckoutStatus(
+      checkoutId: string,
+      userId: string,
+      status,
+    ): Promise<BillingCheckoutRecord> {
       const r = rows.get(checkoutId);
       if (!r || r.user_id !== userId) throw new Error("Checkout not found for user");
       const updated: BillingCheckoutRecord = { ...r, status, updated_at: new Date().toISOString() };
@@ -166,14 +183,23 @@ function makeSessionAdapter(): {
 async function testTrustedUser(): Promise<void> {
   const store = makeStore();
   const deps = makeDeps("user_a", "a@example.test", store);
-  const d = await createCheckout(deps, { planId: "pro", billingInterval: "monthly", provider: "stripe" });
+  const d = await createCheckout(deps, {
+    planId: "pro",
+    billingInterval: "monthly",
+    provider: "stripe",
+  });
   ok(d.userId === "user_a", "trusted user id becomes checkout owner");
 }
 
 async function testForgedUser(): Promise<void> {
   const store = makeStore();
   const deps = makeDeps("user_a", "a@example.test", store);
-  const d = await createCheckout(deps, { planId: "pro", billingInterval: "monthly", provider: "stripe", userId: "evil_user" });
+  const d = await createCheckout(deps, {
+    planId: "pro",
+    billingInterval: "monthly",
+    provider: "stripe",
+    userId: "evil_user",
+  });
   ok(d.userId === "user_a", "client-supplied userId is ignored");
   ok(d.userId !== "evil_user", "foreign userId never becomes authority");
 }
@@ -182,34 +208,76 @@ async function testValidCheckouts(): Promise<void> {
   const store = makeStore();
   const deps = makeDeps("user_a", "a@example.test", store);
 
-  const a = await createCheckout(deps, { planId: "pro", billingInterval: "monthly", provider: "stripe" });
-  ok(a.planId === "pro" && a.billingInterval === "monthly" && a.provider === "stripe", "Pro monthly Stripe accepted");
+  const a = await createCheckout(deps, {
+    planId: "pro",
+    billingInterval: "monthly",
+    provider: "stripe",
+  });
+  ok(
+    a.planId === "pro" && a.billingInterval === "monthly" && a.provider === "stripe",
+    "Pro monthly Stripe accepted",
+  );
   ok(a.currency === "USD" && a.amount === 2900, "Pro monthly Stripe server price");
   ok(a.status === "processing", "Pro monthly Stripe status=processing");
 
-  const b = await createCheckout(deps, { planId: "business", billingInterval: "yearly", provider: "mercado_pago" });
-  ok(b.planId === "business" && b.billingInterval === "yearly" && b.provider === "mercado_pago", "Business yearly Mercado Pago accepted");
+  const b = await createCheckout(deps, {
+    planId: "business",
+    billingInterval: "yearly",
+    provider: "mercado_pago",
+  });
+  ok(
+    b.planId === "business" && b.billingInterval === "yearly" && b.provider === "mercado_pago",
+    "Business yearly Mercado Pago accepted",
+  );
   ok(b.amount === 99000, "Business yearly MP server price");
 
-  const c = await createCheckout(deps, { planId: "pro", billingInterval: "yearly", provider: "paypal" });
-  ok(c.planId === "pro" && c.billingInterval === "yearly" && c.provider === "paypal", "Pro yearly PayPal accepted");
+  const c = await createCheckout(deps, {
+    planId: "pro",
+    billingInterval: "yearly",
+    provider: "paypal",
+  });
+  ok(
+    c.planId === "pro" && c.billingInterval === "yearly" && c.provider === "paypal",
+    "Pro yearly PayPal accepted",
+  );
   ok(c.amount === 29000, "Pro yearly PayPal server price");
 }
 
 async function testFreeRejected(): Promise<void> {
   const store = makeStore();
   const deps = makeDeps("user_a", "a@example.test", store);
-  await expectThrow(() => createCheckout(deps, { planId: "free", billingInterval: "monthly", provider: "stripe" }), CheckoutValidationError, "free checkout rejected");
+  await expectThrow(
+    () => createCheckout(deps, { planId: "free", billingInterval: "monthly", provider: "stripe" }),
+    CheckoutValidationError,
+    "free checkout rejected",
+  );
   ok(store.rows.size === 0, "free checkout creates no row");
 }
 
 async function testInvalidInputs(): Promise<void> {
   const store = makeStore();
   const deps = makeDeps("user_a", "a@example.test", store);
-  await expectThrow(() => createCheckout(deps, { planId: "agency", billingInterval: "monthly", provider: "stripe" }), CheckoutValidationError, "invalid plan rejected");
-  await expectThrow(() => createCheckout(deps, { planId: "pro", billingInterval: "weekly", provider: "stripe" }), CheckoutValidationError, "invalid interval rejected");
-  await expectThrow(() => createCheckout(deps, { planId: "pro", billingInterval: "monthly", provider: "cash" }), CheckoutValidationError, "invalid provider rejected");
-  await expectThrow(() => createCheckout(deps, { planId: 123, billingInterval: "monthly", provider: "stripe" }), CheckoutValidationError, "non-string plan rejected");
+  await expectThrow(
+    () =>
+      createCheckout(deps, { planId: "agency", billingInterval: "monthly", provider: "stripe" }),
+    CheckoutValidationError,
+    "invalid plan rejected",
+  );
+  await expectThrow(
+    () => createCheckout(deps, { planId: "pro", billingInterval: "weekly", provider: "stripe" }),
+    CheckoutValidationError,
+    "invalid interval rejected",
+  );
+  await expectThrow(
+    () => createCheckout(deps, { planId: "pro", billingInterval: "monthly", provider: "cash" }),
+    CheckoutValidationError,
+    "invalid provider rejected",
+  );
+  await expectThrow(
+    () => createCheckout(deps, { planId: 123, billingInterval: "monthly", provider: "stripe" }),
+    CheckoutValidationError,
+    "non-string plan rejected",
+  );
   ok(store.rows.size === 0, "invalid inputs create no rows");
 }
 
@@ -217,7 +285,16 @@ async function testOfferUnavailable(): Promise<void> {
   const store = makeStore();
   const deps = makeDeps("user_a", "a@example.test", store);
   // "enterprise" is a canonical plan id but has no catalog entry -> fail closed.
-  await expectThrow(() => createCheckout(deps, { planId: "enterprise", billingInterval: "monthly", provider: "stripe" }), CheckoutOfferUnavailableError, "unknown offer fails closed");
+  await expectThrow(
+    () =>
+      createCheckout(deps, {
+        planId: "enterprise",
+        billingInterval: "monthly",
+        provider: "stripe",
+      }),
+    CheckoutOfferUnavailableError,
+    "unknown offer fails closed",
+  );
   ok(store.rows.size === 0, "unavailable offer creates no row");
 }
 
@@ -240,27 +317,46 @@ async function testClientPriceIgnored(): Promise<void> {
 async function testDurableId(): Promise<void> {
   const store = makeStore();
   const deps = makeDeps("user_a", "a@example.test", store);
-  const d = await createCheckout(deps, { planId: "pro", billingInterval: "monthly", provider: "stripe" });
+  const d = await createCheckout(deps, {
+    planId: "pro",
+    billingInterval: "monthly",
+    provider: "stripe",
+  });
   ok(d.checkoutId === "chk_1", "canonical checkout id returned as checkoutId");
-  ok(typeof d.checkoutId === "string" && d.checkoutId.length > 0, "checkoutId is a durable opaque string");
+  ok(
+    typeof d.checkoutId === "string" && d.checkoutId.length > 0,
+    "checkoutId is a durable opaque string",
+  );
 }
 
 async function testOwnership(): Promise<void> {
   const store = makeStore();
   const depsA = makeDeps("user_a", "a@example.test", store);
-  const created = await createCheckout(depsA, { planId: "pro", billingInterval: "monthly", provider: "stripe" });
+  const created = await createCheckout(depsA, {
+    planId: "pro",
+    billingInterval: "monthly",
+    provider: "stripe",
+  });
 
   const snap = await getCheckoutStatus(depsA, created.checkoutId);
   ok(snap.checkoutId === created.checkoutId, "owner can fetch own checkout");
 
   const depsB = makeDeps("user_b", "b@example.test", store);
-  await expectThrow(() => getCheckoutStatus(depsB, created.checkoutId), CheckoutNotFoundError, "USER_A checkout not visible to USER_B");
+  await expectThrow(
+    () => getCheckoutStatus(depsB, created.checkoutId),
+    CheckoutNotFoundError,
+    "USER_A checkout not visible to USER_B",
+  );
 }
 
 async function testReturnFlow(): Promise<void> {
   const store = makeStore();
   const deps = makeDeps("user_a", "a@example.test", store);
-  const created = await createCheckout(deps, { planId: "pro", billingInterval: "monthly", provider: "stripe" });
+  const created = await createCheckout(deps, {
+    planId: "pro",
+    billingInterval: "monthly",
+    provider: "stripe",
+  });
 
   // A return URL is only a read-only status query; `success=true` is never
   // accepted as payment authority and never mutates paid state.
@@ -269,7 +365,10 @@ async function testReturnFlow(): Promise<void> {
   ok(snap.status !== "success", "return flow never sets success");
 
   const stored = store.rows.get(created.checkoutId);
-  ok(stored !== undefined && stored.status === "processing", "return flow leaves persisted status unchanged");
+  ok(
+    stored !== undefined && stored.status === "processing",
+    "return flow leaves persisted status unchanged",
+  );
 }
 
 async function testUiStatesNotPersisted(): Promise<void> {
@@ -282,16 +381,38 @@ async function testUiStatesNotPersisted(): Promise<void> {
 
   const store = makeStore();
   const deps = makeDeps("user_a", "a@example.test", store);
-  const d = await createCheckout(deps, { planId: "pro", billingInterval: "monthly", provider: "stripe" });
-  ok(d.status === "processing", "createCheckout starts at a canonical status, never idle/redirecting");
+  const d = await createCheckout(deps, {
+    planId: "pro",
+    billingInterval: "monthly",
+    provider: "stripe",
+  });
+  ok(
+    d.status === "processing",
+    "createCheckout starts at a canonical status, never idle/redirecting",
+  );
   const stored = store.rows.get(d.checkoutId);
-  ok(stored !== undefined && isPersistableCheckoutStatus(stored.status), "idle/redirecting never persisted");
+  ok(
+    stored !== undefined && isPersistableCheckoutStatus(stored.status),
+    "idle/redirecting never persisted",
+  );
 }
 
 async function testProviderSessionBoundary(): Promise<void> {
   const store = makeStore();
-  const deps = makeDeps("user_a", "a@example.test", store, "https://app.example.test/checkout/return", "https://app.example.test/checkout/cancel");
-  const created = await createCheckout(deps, { planId: "pro", billingInterval: "monthly", provider: "stripe", amount: 1, currency: "XYZ" });
+  const deps = makeDeps(
+    "user_a",
+    "a@example.test",
+    store,
+    "https://app.example.test/checkout/return",
+    "https://app.example.test/checkout/cancel",
+  );
+  const created = await createCheckout(deps, {
+    planId: "pro",
+    billingInterval: "monthly",
+    provider: "stripe",
+    amount: 1,
+    currency: "XYZ",
+  });
 
   const { adapter, captured } = makeSessionAdapter();
   const result = await startProviderSession(deps, created.checkoutId, adapter);
@@ -301,10 +422,16 @@ async function testProviderSessionBoundary(): Promise<void> {
   if (intent) {
     ok(intent.offer.amount === 2900, "adapter receives server-resolved amount, not client amount");
     ok(intent.offer.currency === "USD", "adapter receives server-resolved currency");
-    ok(intent.offer.planId === "pro" && intent.offer.provider === "stripe", "adapter receives server-validated plan/provider");
+    ok(
+      intent.offer.planId === "pro" && intent.offer.provider === "stripe",
+      "adapter receives server-validated plan/provider",
+    );
     ok(intent.userId === "user_a", "adapter receives trusted user id");
     ok(intent.checkoutId === created.checkoutId, "adapter receives canonical checkout id");
-    ok(intent.returnUrl === "https://app.example.test/checkout/return", "adapter receives server return url");
+    ok(
+      intent.returnUrl === "https://app.example.test/checkout/return",
+      "adapter receives server return url",
+    );
   }
   ok(result.providerCheckoutId === "prov_session_1", "adapter result returned");
   ok(result.provider === "stripe", "adapter result provider matches");
@@ -313,7 +440,11 @@ async function testProviderSessionBoundary(): Promise<void> {
 async function testMarkPending(): Promise<void> {
   const store = makeStore();
   const deps = makeDeps("user_a", "a@example.test", store);
-  const created = await createCheckout(deps, { planId: "pro", billingInterval: "monthly", provider: "stripe" });
+  const created = await createCheckout(deps, {
+    planId: "pro",
+    billingInterval: "monthly",
+    provider: "stripe",
+  });
 
   const snap = await markCheckoutPending(deps, created.checkoutId);
   ok(snap.status === "pending", "markCheckoutPending transitions to pending");
@@ -322,7 +453,10 @@ async function testMarkPending(): Promise<void> {
 
 async function testParseStandalone(): Promise<void> {
   const p = parseCheckoutRequest({ planId: "pro", billingInterval: "yearly", provider: "paypal" });
-  ok(p.planId === "pro" && p.billingInterval === "yearly" && p.provider === "paypal", "parseCheckoutRequest returns validated triple");
+  ok(
+    p.planId === "pro" && p.billingInterval === "yearly" && p.provider === "paypal",
+    "parseCheckoutRequest returns validated triple",
+  );
 }
 
 // ---------------------------------------------------------------------------

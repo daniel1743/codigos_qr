@@ -1,7 +1,7 @@
 # CRIPQER — Basic Editor Canvas Behavior & Architecture Forensic Audit V1
 
 > **Mode:** READ-ONLY / RUNTIME-FIRST / MINIMUM-CONTEXT. **Production files modified: 0.**
-> The Basic Editor is treated as a *proven behavioral reference*. This audit reverse-engineers **why** its canvas interaction feels correct, without changing anything, for later reuse in the Power Editor viewport/camera.
+> The Basic Editor is treated as a _proven behavioral reference_. This audit reverse-engineers **why** its canvas interaction feels correct, without changing anything, for later reuse in the Power Editor viewport/camera.
 
 ---
 
@@ -9,12 +9,12 @@
 
 The Basic Editor's reported "correct" feel comes from a **deliberate separation of four independently-owned surfaces** plus a **real-dimension, pointer-anchored camera math model**:
 
-1. **Canvas viewport** = one native `overflow-auto` scroll container with `touch-action: none` and `overscroll-contain`. It owns *native scroll* plus a *custom CSS-transform pan/zoom* that never writes document data.
+1. **Canvas viewport** = one native `overflow-auto` scroll container with `touch-action: none` and `overscroll-contain`. It owns _native scroll_ plus a _custom CSS-transform pan/zoom_ that never writes document data.
 2. **Tools panel** (desktop `aside`, mobile bottom sheet) = a **separate sibling** `overflow-y-auto` container — it never shares scroll state with the canvas.
 3. **Zoom** = CSS `transform: scale()` with `transform-origin: top left`, anchored under the pointer/gesture focal point via explicit world-point compensation. Scale is bounded and derived from a `fitZoom` recomputed from **real measured template dimensions** (`ResizeObserver`).
 4. **Selection** = one canonical `selectedTarget` id (host-owned), synchronized both ways through a **DOM registry** (`Map<targetId, HTMLElement>`) populated by renderer ref callbacks — not `querySelector` in the hot path, and not shared scroll state.
 
-Stability sources: (a) `touch-action: none` applied *narrowly* to the canvas only; (b) `overscroll-contain` preventing scroll chaining; (c) pan bounds clamped against real content size; (d) viewport state (`zoom`/`translate`) fully separated from document state and from browser scroll position; (e) the mobile canvas height is **dynamically reduced** to leave room for the bottom sheet so the sheet never covers the selected element.
+Stability sources: (a) `touch-action: none` applied _narrowly_ to the canvas only; (b) `overscroll-contain` preventing scroll chaining; (c) pan bounds clamped against real content size; (d) viewport state (`zoom`/`translate`) fully separated from document state and from browser scroll position; (e) the mobile canvas height is **dynamically reduced** to leave room for the bottom sheet so the sheet never covers the selected element.
 
 **Runtime status:** the `/editor` route requires an authenticated session; no session was available, so interaction behaviors are **SOURCE-TRACED** and every runtime-only check is marked **NOT_VERIFIED**. No credentials were fabricated; no user data was touched.
 
@@ -22,13 +22,13 @@ Stability sources: (a) `touch-action: none` applied *narrowly* to the canvas onl
 
 ## Runtime Environment
 
-| Item | Result |
-|---|---|
-| Dev server | Running at `http://localhost:8080` |
-| `GET /editor` | Renders SSR loading ("Cargando…") then gates on auth (`loading → !session → Auth → canonical? PowerEditorHost : BasicEditorShell`) |
-| Authenticated Basic Editor session | **Unavailable** (no QA credentials) |
-| Canvas interactions (zoom/pan/pinch/selection/scroll) | **NOT_VERIFIED** — not fabricated |
-| Conclusion | Source-led audit after runtime limitation |
+| Item                                                  | Result                                                                                                                             |
+| ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Dev server                                            | Running at `http://localhost:8080`                                                                                                 |
+| `GET /editor`                                         | Renders SSR loading ("Cargando…") then gates on auth (`loading → !session → Auth → canonical? PowerEditorHost : BasicEditorShell`) |
+| Authenticated Basic Editor session                    | **Unavailable** (no QA credentials)                                                                                                |
+| Canvas interactions (zoom/pan/pinch/selection/scroll) | **NOT_VERIFIED** — not fabricated                                                                                                  |
+| Conclusion                                            | Source-led audit after runtime limitation                                                                                          |
 
 ---
 
@@ -76,6 +76,7 @@ BasicEditorShell (root)
 ```
 
 **Key facts:**
+
 - **Viewport = scroll container = pointer/gesture owner** (`viewportRef`).
 - **Document = `templateRef`** (a single absolutely-positioned, CSS-transformed element).
 - `overflow` is owned by the viewport (`overflow-auto`); the workspace section is `overflow-hidden` to clip.
@@ -85,18 +86,18 @@ BasicEditorShell (root)
 
 ## State Ownership Map
 
-| State | Owner | Purpose |
-|---|---|---|
-| `profile`, `links` (document data) | `editor.tsx` | Domain data; saved via services |
-| `selectedTarget` | `editor.tsx` | Canonical selected-element id (single source of truth) |
-| `activeSection`, `isContextPanelOpen`, `isPreviewMode`, `isGalleryOpen` | `editor.tsx` | Tool routing / panels |
-| `targetsRef: Map<targetId, HTMLElement>` | `editor.tsx` | id → live DOM element (from `EditableTarget` ref callbacks) |
-| `fitZoom`, `userZoom`, `translate` | `CanvasWorkspace` (local) | Camera — never touches document |
-| `templateSize`, `viewportSize` | `CanvasWorkspace` (local) | Measured geometry (ResizeObserver) |
-| `isInteracting`, `panStart`, `pinchStart`, `activePointers` | `CanvasWorkspace` (refs) | Transient gesture state |
-| Tools-panel scroll position | Browser (DOM) | Native `overflow-y-auto` scroll |
-| Canvas scroll position | Browser (DOM) | Native viewport `overflow-auto` scroll |
-| `mobileSheetState` | `BasicEditorShell` | Sheet height state |
+| State                                                                   | Owner                     | Purpose                                                     |
+| ----------------------------------------------------------------------- | ------------------------- | ----------------------------------------------------------- |
+| `profile`, `links` (document data)                                      | `editor.tsx`              | Domain data; saved via services                             |
+| `selectedTarget`                                                        | `editor.tsx`              | Canonical selected-element id (single source of truth)      |
+| `activeSection`, `isContextPanelOpen`, `isPreviewMode`, `isGalleryOpen` | `editor.tsx`              | Tool routing / panels                                       |
+| `targetsRef: Map<targetId, HTMLElement>`                                | `editor.tsx`              | id → live DOM element (from `EditableTarget` ref callbacks) |
+| `fitZoom`, `userZoom`, `translate`                                      | `CanvasWorkspace` (local) | Camera — never touches document                             |
+| `templateSize`, `viewportSize`                                          | `CanvasWorkspace` (local) | Measured geometry (ResizeObserver)                          |
+| `isInteracting`, `panStart`, `pinchStart`, `activePointers`             | `CanvasWorkspace` (refs)  | Transient gesture state                                     |
+| Tools-panel scroll position                                             | Browser (DOM)             | Native `overflow-y-auto` scroll                             |
+| Canvas scroll position                                                  | Browser (DOM)             | Native viewport `overflow-auto` scroll                      |
+| `mobileSheetState`                                                      | `BasicEditorShell`        | Sheet height state                                          |
 
 **Critical:** document data, selection, camera, and both scroll positions are four independent owners.
 
@@ -104,18 +105,18 @@ BasicEditorShell (root)
 
 ## Event Ownership Map
 
-| Event | Element | Handler | Effect | Document? | Canvas? | Tools? |
-|---|---|---|---|---|---|---|
-| `wheel` (plain) | viewport | browser default | native scroll | No | Yes | No |
-| `wheel` + Ctrl/Cmd | viewport | `onWheel` (non-passive) | focal zoom | No | Yes | No |
-| `pointerdown` (mouse bg) | viewport | `onPointerDown` | start pan (capture) | No | Yes | No |
-| `pointerdown` (touch) | viewport | `onPointerDown` | track / pinch at 2 | No | Yes | No |
-| `pointermove` | viewport | `onPointerMove` | pan (6px) / pinch | No | Yes | No |
-| `pointerup`/`pointercancel` | viewport | `onPointerEnd` | end, release | No | No | No |
-| `click` (editable target) | `EditableTarget` | `onClickCapture` → `registry.select` | select + center | No | Yes | Yes |
-| `click` (after pan) | viewport | `onClickCapture` | swallow | No | No | No |
-| `scroll` | tools/viewport | browser | independent | No | No | No |
-| tool focus/click | tools panel | `onSelectTarget`/`onFocusTarget` | select | Yes (edit) | Yes | No |
+| Event                       | Element          | Handler                              | Effect              | Document?  | Canvas? | Tools? |
+| --------------------------- | ---------------- | ------------------------------------ | ------------------- | ---------- | ------- | ------ |
+| `wheel` (plain)             | viewport         | browser default                      | native scroll       | No         | Yes     | No     |
+| `wheel` + Ctrl/Cmd          | viewport         | `onWheel` (non-passive)              | focal zoom          | No         | Yes     | No     |
+| `pointerdown` (mouse bg)    | viewport         | `onPointerDown`                      | start pan (capture) | No         | Yes     | No     |
+| `pointerdown` (touch)       | viewport         | `onPointerDown`                      | track / pinch at 2  | No         | Yes     | No     |
+| `pointermove`               | viewport         | `onPointerMove`                      | pan (6px) / pinch   | No         | Yes     | No     |
+| `pointerup`/`pointercancel` | viewport         | `onPointerEnd`                       | end, release        | No         | No      | No     |
+| `click` (editable target)   | `EditableTarget` | `onClickCapture` → `registry.select` | select + center     | No         | Yes     | Yes    |
+| `click` (after pan)         | viewport         | `onClickCapture`                     | swallow             | No         | No      | No     |
+| `scroll`                    | tools/viewport   | browser                              | independent         | No         | No      | No     |
+| tool focus/click            | tools panel      | `onSelectTarget`/`onFocusTarget`     | select              | Yes (edit) | Yes     | No     |
 
 **Key:** the canvas's custom handlers only mutate camera state; they never write document data. Only editable-target clicks route to `handleTargetSelect` (selection), not a direct data write.
 
@@ -157,7 +158,7 @@ BasicEditorShell (root)
 - **Pan:** single pointer, 6px threshold (tap-vs-drag).
 - **Tap selection:** `onPointerDown` returns early on editable targets, so taps don't become pans.
 - `pointercancel` → `onPointerEnd` cleanup; `resetGestureState` releases all captures on template change.
-- **Key:** the editor *does not* own every gesture — it preserves native scroll as primary "pan" for non-overflowing short templates (`canvasNeedsPan()` false at fit), switching to custom transform pan/pinch only when content overflows or user zoom > 1.
+- **Key:** the editor _does not_ own every gesture — it preserves native scroll as primary "pan" for non-overflowing short templates (`canvasNeedsPan()` false at fit), switching to custom transform pan/pinch only when content overflows or user zoom > 1.
 
 ## Selection Model
 
@@ -178,6 +179,7 @@ Both directions share `selectedTarget`:
 2. `useEffect([selectedTarget])`: `target = targetsRef.get(id)` → `viewport.scrollTo({ top: scrollTop + targetRect.top − viewportRect.top − clientHeight/2 + targetRect.height/2, behavior: "smooth" })` → **vertically centers** the element.
 
 **Direction coverage (verified):**
+
 - **Canvas → centering:** full (any `EditableTarget` click).
 - **Tools → centering:** **PARTIAL** — `LinksSection` wires `selectedTarget` + `onSelectTarget={handleTargetSelect}`; `ProfileSection`/`DesignSection` are rendered **without** selection callbacks in the Basic Editor route, so profile-field tools do not center the canvas element.
 - **Template Lab** (`TemplateLabEditor.tsx`) wires `onFocusTarget` across all controls — a fuller bidirectional model not fully replicated in the Basic Editor route.
@@ -247,34 +249,34 @@ Both directions share `selectedTarget`:
 
 ## Behavioral Invariants (with code mechanism)
 
-| Invariant | Exact mechanism |
-|---|---|
-| Tool scroll never drives canvas scroll | Sibling scroll containers + `overscroll-contain` |
-| Canvas navigation never drives tool scroll | Sibling separation; no shared scroll state |
+| Invariant                                             | Exact mechanism                                                                       |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Tool scroll never drives canvas scroll                | Sibling scroll containers + `overscroll-contain`                                      |
+| Canvas navigation never drives tool scroll            | Sibling separation; no shared scroll state                                            |
 | Selecting a tool target makes canvas target reachable | `selectedTarget` → `viewport.scrollTo(...)` centers (links wired; profile fields not) |
-| Zoom never changes document data | `applyZoomAt` only sets `userZoom`/`translate` |
-| Pan never changes document data | `onPointerMove` only sets `translate` |
-| Selection stable during navigation | id-based `selectedTarget`; camera independent |
-| All content remains reachable | `MIN_VISIBLE_CANVAS` clamp + `CANVAS_OVERSCAN` stage |
-| Long templates not clipped | `scrollHeight`-based fit + overscan stage |
-| Navigation independent from document | camera is local `CanvasWorkspace` state |
+| Zoom never changes document data                      | `applyZoomAt` only sets `userZoom`/`translate`                                        |
+| Pan never changes document data                       | `onPointerMove` only sets `translate`                                                 |
+| Selection stable during navigation                    | id-based `selectedTarget`; camera independent                                         |
+| All content remains reachable                         | `MIN_VISIBLE_CANVAS` clamp + `CANVAS_OVERSCAN` stage                                  |
+| Long templates not clipped                            | `scrollHeight`-based fit + overscan stage                                             |
+| Navigation independent from document                  | camera is local `CanvasWorkspace` state                                               |
 
 ## Reusable Architecture Patterns (for Power Editor evaluation)
 
-| Pattern | Classification | Notes |
-|---|---|---|
-| Separate scroll containers (canvas vs tools) + `overscroll-contain` | DIRECTLY_REUSABLE | Most important scroll-isolation decision |
-| `touch-action: none` scoped narrowly to canvas only | DIRECTLY_REUSABLE | Keeps native touch scroll on tools |
-| Pointer-Events gesture state (single pointer map, pinch/pan one handler) | DIRECTLY_REUSABLE | Avoids Touch Events pitfalls |
-| `fitZoom × userZoom` decomposition + scale clamping | DIRECTLY_REUSABLE | Clean "auto-fit" vs "user intent" |
-| Pointer-anchored zoom (world-point compensation, `transform-origin: top left`) | DIRECTLY_REUSABLE | The anchor math preventing "jump" |
-| Real-dimension measurement via `ResizeObserver` + `scrollWidth/Height` | DIRECTLY_REUSABLE | Bounds match real content |
-| Stage element carrying scaled size (overscan) so transform doesn't collapse layout | DIRECTLY_REUSABLE | Keeps scrollbars valid under transform |
-| Pan bounds clamped to `MIN_VISIBLE_CANVAS` floor | DIRECTLY_REUSABLE | Guarantees reachability |
-| Canonical `selectedTarget` id via `Map<id, HTMLElement>` registry (ref callbacks) | CONCEPTUALLY_REUSABLE | Power: block ids + registry |
-| `scrollIntoView`/`scrollTo(center)` for tool↔canvas focus, honoring reduced-motion | CONCEPTUALLY_REUSABLE | Simple, native |
-| Camera state local, separate from document/history | DIRECTLY_REUSABLE | Core stability principle |
-| Mobile canvas height dynamically reduced to reserve sheet space | CONCEPTUALLY_REUSABLE | Power uses 75vh overlay sheet that can cover content |
+| Pattern                                                                            | Classification        | Notes                                                |
+| ---------------------------------------------------------------------------------- | --------------------- | ---------------------------------------------------- |
+| Separate scroll containers (canvas vs tools) + `overscroll-contain`                | DIRECTLY_REUSABLE     | Most important scroll-isolation decision             |
+| `touch-action: none` scoped narrowly to canvas only                                | DIRECTLY_REUSABLE     | Keeps native touch scroll on tools                   |
+| Pointer-Events gesture state (single pointer map, pinch/pan one handler)           | DIRECTLY_REUSABLE     | Avoids Touch Events pitfalls                         |
+| `fitZoom × userZoom` decomposition + scale clamping                                | DIRECTLY_REUSABLE     | Clean "auto-fit" vs "user intent"                    |
+| Pointer-anchored zoom (world-point compensation, `transform-origin: top left`)     | DIRECTLY_REUSABLE     | The anchor math preventing "jump"                    |
+| Real-dimension measurement via `ResizeObserver` + `scrollWidth/Height`             | DIRECTLY_REUSABLE     | Bounds match real content                            |
+| Stage element carrying scaled size (overscan) so transform doesn't collapse layout | DIRECTLY_REUSABLE     | Keeps scrollbars valid under transform               |
+| Pan bounds clamped to `MIN_VISIBLE_CANVAS` floor                                   | DIRECTLY_REUSABLE     | Guarantees reachability                              |
+| Canonical `selectedTarget` id via `Map<id, HTMLElement>` registry (ref callbacks)  | CONCEPTUALLY_REUSABLE | Power: block ids + registry                          |
+| `scrollIntoView`/`scrollTo(center)` for tool↔canvas focus, honoring reduced-motion | CONCEPTUALLY_REUSABLE | Simple, native                                       |
+| Camera state local, separate from document/history                                 | DIRECTLY_REUSABLE     | Core stability principle                             |
+| Mobile canvas height dynamically reduced to reserve sheet space                    | CONCEPTUALLY_REUSABLE | Power uses 75vh overlay sheet that can cover content |
 
 ---
 
@@ -308,20 +310,20 @@ Both directions share `selectedTarget`:
 
 ## Required Summary Table
 
-| Behavior | Runtime result | Implementation mechanism | State owner | Event owner | Reusable for Power? |
-|---|---|---|---|---|---|
-| Zoom | NOT_VERIFIED | `fitZoom × userZoom` + focal-anchor transform | CanvasWorkspace | wheel(ctrl)/buttons/pinch | Yes |
-| Pan | NOT_VERIFIED | Pointer translation, clamped to real bounds | CanvasWorkspace | viewport pointer | Yes |
-| Touch gestures | NOT_VERIFIED | `touch-action:none`, pointer map, pinch + 6px pan | CanvasWorkspace | viewport pointer | Yes (validate) |
-| Canvas scroll | NOT_VERIFIED | `overflow-auto` stage sized from scaled content | browser + geometry | browser | Yes |
-| Tools-panel scroll | NOT_VERIFIED | Separate `overflow-y-auto` containers | browser | browser | Yes |
-| Scroll isolation | NOT_VERIFIED | Sibling containers + `overscroll-contain` | layout/browser | browser | Yes |
-| Selection | NOT_VERIFIED | `EditableTarget`, stable ids, registry map | `editor.tsx` | click/keyboard | Yes (block registry) |
-| Tool → canvas focus | NOT_VERIFIED | `selectedTarget` → `scrollTo(center)` (links wired, profile not) | `editor.tsx` | selection effect | Partial |
-| Canvas → tools sync | NOT_VERIFIED | `toolFocusTarget` + `[data-tool-target]` + `scrollIntoView` | route + shell | selection effect | Yes |
-| Responsive resizing | NOT_VERIFIED | `ResizeObserver` + dynamic mobile canvas height | CanvasWorkspace | ResizeObserver | Yes |
-| Undo/redo separation | NOT_VERIFIED | No history; camera local/resettable | CanvasWorkspace/route | n/a | Yes (principle) |
-| Content bounds | NOT_VERIFIED | Real scroll/offset measurement + overscan stage | CanvasWorkspace | ResizeObserver/gesture | Yes |
+| Behavior             | Runtime result | Implementation mechanism                                         | State owner           | Event owner               | Reusable for Power?  |
+| -------------------- | -------------- | ---------------------------------------------------------------- | --------------------- | ------------------------- | -------------------- |
+| Zoom                 | NOT_VERIFIED   | `fitZoom × userZoom` + focal-anchor transform                    | CanvasWorkspace       | wheel(ctrl)/buttons/pinch | Yes                  |
+| Pan                  | NOT_VERIFIED   | Pointer translation, clamped to real bounds                      | CanvasWorkspace       | viewport pointer          | Yes                  |
+| Touch gestures       | NOT_VERIFIED   | `touch-action:none`, pointer map, pinch + 6px pan                | CanvasWorkspace       | viewport pointer          | Yes (validate)       |
+| Canvas scroll        | NOT_VERIFIED   | `overflow-auto` stage sized from scaled content                  | browser + geometry    | browser                   | Yes                  |
+| Tools-panel scroll   | NOT_VERIFIED   | Separate `overflow-y-auto` containers                            | browser               | browser                   | Yes                  |
+| Scroll isolation     | NOT_VERIFIED   | Sibling containers + `overscroll-contain`                        | layout/browser        | browser                   | Yes                  |
+| Selection            | NOT_VERIFIED   | `EditableTarget`, stable ids, registry map                       | `editor.tsx`          | click/keyboard            | Yes (block registry) |
+| Tool → canvas focus  | NOT_VERIFIED   | `selectedTarget` → `scrollTo(center)` (links wired, profile not) | `editor.tsx`          | selection effect          | Partial              |
+| Canvas → tools sync  | NOT_VERIFIED   | `toolFocusTarget` + `[data-tool-target]` + `scrollIntoView`      | route + shell         | selection effect          | Yes                  |
+| Responsive resizing  | NOT_VERIFIED   | `ResizeObserver` + dynamic mobile canvas height                  | CanvasWorkspace       | ResizeObserver            | Yes                  |
+| Undo/redo separation | NOT_VERIFIED   | No history; camera local/resettable                              | CanvasWorkspace/route | n/a                       | Yes (principle)      |
+| Content bounds       | NOT_VERIFIED   | Real scroll/offset measurement + overscan stage                  | CanvasWorkspace       | ResizeObserver/gesture    | Yes                  |
 
 ---
 
@@ -356,18 +358,14 @@ Both directions share `selectedTarget`:
 
 ## Scope Evidence
 
-| Scope item | Result |
-|---|---|
-| Production files modified | **0** |
-| Dependencies modified | **0** |
-| Routes modified | **0** |
-| DB modified | **0** |
-| Power Editor modified | **0** |
-| Frozen violations | **0** |
-| Report created | `BASIC_EDITOR_CANVAS_BEHAVIOR_ARCHITECTURE_AUDIT_V1.md` |
+| Scope item                | Result                                                  |
+| ------------------------- | ------------------------------------------------------- |
+| Production files modified | **0**                                                   |
+| Dependencies modified     | **0**                                                   |
+| Routes modified           | **0**                                                   |
+| DB modified               | **0**                                                   |
+| Power Editor modified     | **0**                                                   |
+| Frozen violations         | **0**                                                   |
+| Report created            | `BASIC_EDITOR_CANVAS_BEHAVIOR_ARCHITECTURE_AUDIT_V1.md` |
 
 **Final status: AUDIT COMPLETE — SOURCE-TRACED ARCHITECTURE DOCUMENTED; RUNTIME INTERACTIONS NOT_VERIFIED.**
-
-
-
-

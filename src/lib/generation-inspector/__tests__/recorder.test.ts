@@ -29,7 +29,11 @@ const SCENARIOS: Array<{ id: string; intent: OnboardingIntentV2; owner: OwnerCon
   {
     id: "SERVICE_BOOKING",
     intent: makeIntent({
-      identity: { displayName: "Studio Aura", professionOrActivity: "Peluquería y belleza", bio: "Peluquería." },
+      identity: {
+        displayName: "Studio Aura",
+        professionOrActivity: "Peluquería y belleza",
+        bio: "Peluquería.",
+      },
       business: { category: "beauty", customCategory: "Peluquería y belleza" },
       outcome: { primaryGoal: "bookings", experienceHint: "service_page" },
       contentNeeds: { items: [{ type: "services" }, { type: "booking" }, { type: "contact" }] },
@@ -48,7 +52,11 @@ const SCENARIOS: Array<{ id: string; intent: OnboardingIntentV2; owner: OwnerCon
   {
     id: "RETAIL_CATALOG",
     intent: makeIntent({
-      identity: { displayName: "Norte Concept", professionOrActivity: "Tienda de ropa", bio: "Ropa urbana." },
+      identity: {
+        displayName: "Norte Concept",
+        professionOrActivity: "Tienda de ropa",
+        bio: "Ropa urbana.",
+      },
       business: { category: "retail", customCategory: "Tienda de ropa" },
       outcome: { primaryGoal: "sell", experienceHint: "catalog" },
       contentNeeds: { items: [{ type: "products" }, { type: "contact" }] },
@@ -72,11 +80,18 @@ const SCENARIOS: Array<{ id: string; intent: OnboardingIntentV2; owner: OwnerCon
   {
     id: "CREATIVE_PORTFOLIO",
     intent: makeIntent({
-      identity: { displayName: "Luz Norte", professionOrActivity: "Fotografía", bio: "Fotografía editorial." },
+      identity: {
+        displayName: "Luz Norte",
+        professionOrActivity: "Fotografía",
+        bio: "Fotografía editorial.",
+      },
       business: { category: "creator", customCategory: "Fotografía" },
       outcome: { primaryGoal: "show_portfolio", experienceHint: "professional_landing" },
       contentNeeds: { items: [{ type: "portfolio" }, { type: "contact" }] },
-      actions: { primary: { type: "website", source: "user", value: "https://luznorte.example" }, secondary: [] },
+      actions: {
+        primary: { type: "website", source: "user", value: "https://luznorte.example" },
+        secondary: [],
+      },
       scope: { density: "complete", userSelected: true },
     }),
     owner: {
@@ -128,7 +143,18 @@ describe("generation trace recorder (integration)", () => {
       });
 
       expect(trace.traceId).toBe("CRPQ-TRACE-TEST");
-      expect(trace.stages.map((s) => s.id)).toEqual(["T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8", "T9", "T10"]);
+      expect(trace.stages.map((s) => s.id)).toEqual([
+        "T1",
+        "T2",
+        "T3",
+        "T4",
+        "T5",
+        "T6",
+        "T7",
+        "T8",
+        "T9",
+        "T10",
+      ]);
       expect(trace.engine).not.toBeNull();
       expect(trace.visual).not.toBeNull();
       expect(trace.engine?.archetype).toBeTruthy();

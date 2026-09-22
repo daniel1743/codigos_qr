@@ -29,9 +29,23 @@ export const DEFAULT_RESPONSIVE_STRATEGY: ResponsiveStrategyV1 = {
 
 const PATTERN_RESPONSIVE: Partial<Record<CompositionPattern, Partial<ResponsiveStrategyV1>>> = {
   editorial_stack: { desktop: { layout: "editorial_left" }, content_width: "balanced" },
-  visual_cover: { mobile: { layout: "media_first" }, desktop: { layout: "wide_stack" }, content_width: "wide" },
-  portfolio_first: { mobile: { layout: "media_first" }, desktop: { layout: "wide_stack" }, card_columns: 2, content_width: "wide" },
-  media_story: { mobile: { layout: "media_first" }, desktop: { layout: "split" }, card_columns: 2, content_width: "balanced" },
+  visual_cover: {
+    mobile: { layout: "media_first" },
+    desktop: { layout: "wide_stack" },
+    content_width: "wide",
+  },
+  portfolio_first: {
+    mobile: { layout: "media_first" },
+    desktop: { layout: "wide_stack" },
+    card_columns: 2,
+    content_width: "wide",
+  },
+  media_story: {
+    mobile: { layout: "media_first" },
+    desktop: { layout: "split" },
+    card_columns: 2,
+    content_width: "balanced",
+  },
   conversion_first: { mobile: { layout: "action_first" } },
   compact_action: { mobile: { layout: "action_first" }, content_width: "narrow" },
   service_first: { card_columns: 2, desktop: { layout: "wide_stack" } },
@@ -54,6 +68,7 @@ export function buildResponsiveStrategy(
     desktop: { ...DEFAULT_RESPONSIVE_STRATEGY.desktop, ...(patch.desktop ?? {}) },
     card_columns: patch.card_columns ?? DEFAULT_RESPONSIVE_STRATEGY.card_columns,
     content_width:
-      patch.content_width ?? (density === "spacious" ? "balanced" : DEFAULT_RESPONSIVE_STRATEGY.content_width),
+      patch.content_width ??
+      (density === "spacious" ? "balanced" : DEFAULT_RESPONSIVE_STRATEGY.content_width),
   };
 }

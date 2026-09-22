@@ -125,9 +125,7 @@
               "featured": false,
               "enabled": true,
               "confidence": 1,
-              "review": [
-                "media"
-              ]
+              "review": ["media"]
             },
             {
               "id": "owner-service-2",
@@ -142,9 +140,7 @@
               "featured": false,
               "enabled": true,
               "confidence": 1,
-              "review": [
-                "media"
-              ]
+              "review": ["media"]
             }
           ]
         }
@@ -314,10 +310,7 @@
     "profession": "Peluquería y belleza",
     "businessOther": "Peluquería y belleza",
     "goal": "leads",
-    "selectedFeatures": [
-      "services",
-      "contact"
-    ],
+    "selectedFeatures": ["services", "contact"],
     "content": {
       "name": "Studio Aura",
       "bio": "Cuidado, estilo y atención personalizada."
@@ -664,11 +657,7 @@
       "createdAt": "2026-09-15T12:00:00.000Z",
       "updatedAt": "2026-09-15T12:00:00.000Z",
       "author": "Cripqer Parametric Engine",
-      "tags": [
-        "minimal",
-        "conversion_first",
-        "leads"
-      ]
+      "tags": ["minimal", "conversion_first", "leads"]
     },
     "theme": {
       "id": "engine-minimal",

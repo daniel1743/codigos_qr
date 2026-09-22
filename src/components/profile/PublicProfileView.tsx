@@ -6,7 +6,10 @@ import { getTemplates } from "../../lib/basic-templates/catalog";
 import { buildBasicTemplateContent, buildConfig } from "../../lib/basic-templates/config";
 import { loadGoogleFont } from "../../lib/fonts";
 import { PublicTemplateRenderer } from "../../premium-template-studio/engine/PublicTemplateRenderer";
-import { resolveCanonicalEditorConfig, applyTrustedVerificationVariant } from "./canonicalRenderBridge";
+import {
+  resolveCanonicalEditorConfig,
+  applyTrustedVerificationVariant,
+} from "./canonicalRenderBridge";
 
 interface PublicProfileViewProps {
   profile: Partial<Profile>;

@@ -177,10 +177,6 @@ export function allowedAxisValues<K extends DesignAxis>(
   return FAMILY_AXES[family][axis];
 }
 
-export function isAllowedAxisValue(
-  family: FamilyId,
-  axis: DesignAxis,
-  value: string,
-): boolean {
+export function isAllowedAxisValue(family: FamilyId, axis: DesignAxis, value: string): boolean {
   return (FAMILY_AXES[family][axis] as readonly string[]).includes(value);
 }

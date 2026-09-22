@@ -71,10 +71,7 @@ function TemplatePreview({ template }: { template: PremiumTemplate }) {
             ringColor: template.config.ring_enabled ? ringColor : undefined,
           }}
         />
-        <div
-          className="text-[8px] font-bold text-center px-2"
-          style={{ color: titleColor }}
-        >
+        <div className="text-[8px] font-bold text-center px-2" style={{ color: titleColor }}>
           {template.name}
         </div>
       </div>

@@ -32,19 +32,27 @@ const srH = {
     }
   });
   page.on("console", (message) => {
-    if (message.type() === "error") out.console_errors = (out.console_errors ?? []).concat(message.text());
+    if (message.type() === "error")
+      out.console_errors = (out.console_errors ?? []).concat(message.text());
   });
 
   await page.goto(BASE + "/editor", { waitUntil: "domcontentloaded", timeout: 90000 });
   try {
     await page.waitForSelector("#email", { timeout: 20000 });
   } catch {}
-  if (await page.locator("#email").isVisible().catch(() => false)) {
+  if (
+    await page
+      .locator("#email")
+      .isVisible()
+      .catch(() => false)
+  ) {
     await page.locator("#email").fill(env.QA_EMAIL);
     await page.locator("#password").fill(env.QA_PASSWORD);
     await page.getByRole("button", { name: "Entrar al editor" }).click();
   }
-  await page.waitForFunction(() => document.cookie.includes("sb-"), { timeout: 30000 }).catch(() => {});
+  await page
+    .waitForFunction(() => document.cookie.includes("sb-"), { timeout: 30000 })
+    .catch(() => {});
 
   await page.goto(BASE + "/pages/" + pageId + "/edit", {
     waitUntil: "domcontentloaded",
@@ -78,7 +86,9 @@ const srH = {
   out.requests_after_save = out.requests.slice();
 
   const row = (
-    await (await fetch(base + "/rest/v1/pages?select=template_config&id=eq." + pageId, { headers: srH })).json()
+    await (
+      await fetch(base + "/rest/v1/pages?select=template_config&id=eq." + pageId, { headers: srH })
+    ).json()
   )[0];
   out.db_primary = row?.template_config?.editorConfig?.theme?.colors?.primary ?? null;
 

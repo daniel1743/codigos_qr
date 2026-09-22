@@ -1,5 +1,3 @@
-
-
 import {
   buildFallbackPreview,
   detectProviderFromUrl,
@@ -110,7 +108,8 @@ export async function resolveSmartLinkPreview(inputUrl: string): Promise<SmartLi
 
   const handle = parseHandleFromUrl(parsed.url, provider);
   const siteName =
-    metadata.siteName || (provider !== "generic-web" ? getProviderLabel(provider) : parsed.url.hostname);
+    metadata.siteName ||
+    (provider !== "generic-web" ? getProviderLabel(provider) : parsed.url.hostname);
 
   const result: SmartLinkPreview = {
     url: parsed.href,

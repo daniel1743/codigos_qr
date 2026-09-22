@@ -45,7 +45,12 @@ lines.forEach((line, index) => {
     if (char === "}" || char === ")" || char === "]") depth -= 1;
     previous = char;
   }
-  if (line.includes("function") || line.includes("=>") || line.includes("for (") || line.includes("if (")) {
+  if (
+    line.includes("function") ||
+    line.includes("=>") ||
+    line.includes("for (") ||
+    line.includes("if (")
+  ) {
     report.push(`${index + 1}\t${depth}\t${line.trim().slice(0, 70)}`);
   }
 });

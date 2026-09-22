@@ -282,8 +282,16 @@ describe("Page background contextual editing (Phase 5C5)", () => {
 
     it("Gradient → Solid → Gradient preserves previous gradient configuration", () => {
       const base = makeStateWithBackground();
-      const solid = templateReducer(base, { type: "patch", path: "theme.background.type", value: "solid" });
-      const back = templateReducer(solid, { type: "patch", path: "theme.background.type", value: "gradient" });
+      const solid = templateReducer(base, {
+        type: "patch",
+        path: "theme.background.type",
+        value: "solid",
+      });
+      const back = templateReducer(solid, {
+        type: "patch",
+        path: "theme.background.type",
+        value: "gradient",
+      });
       expect(back.config.theme.background.gradient).toEqual({
         kind: "linear",
         angle: 90,

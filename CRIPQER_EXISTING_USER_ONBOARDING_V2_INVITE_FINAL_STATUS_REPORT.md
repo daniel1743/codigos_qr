@@ -11,6 +11,7 @@
 The Existing User Onboarding V2 Invite feature has been **corrected and pushed** with safe persistence. The original implementation (commit `ed7c123`) contained a **P0 data-loss risk** identical to the Phase 6A regression. A **safe fix** (commit `8117963`) has been implemented and pushed alongside the original feature.
 
 **Current Status:**
+
 - ✅ Safe persistence fix implemented
 - ✅ Both commits pushed to remote (`ed7c123` + `8117963`)
 - ⏸️ Migration pending (manual database update required)
@@ -27,6 +28,7 @@ The Existing User Onboarding V2 Invite feature has been **corrected and pushed**
 **Finding:** Implementation existed locally but was **never pushed** to remote.
 
 **Evidence:**
+
 - Local HEAD: `ed7c123` (contains modal)
 - Remote HEAD: `b9b1986` (does not contain modal)
 - Gap: 1 unpushed commit
@@ -38,14 +40,15 @@ The Existing User Onboarding V2 Invite feature has been **corrected and pushed**
 **Finding:** Implementation used **unsafe full-JSONB-replacement** pattern.
 
 **Risk Identified:**
+
 ```typescript
 // UNSAFE
 const updatedConfig = {
-  ...(profile.template_config || {}),  // Client spread
-  onboarding_v2_invite_status: "accepted"
+  ...(profile.template_config || {}), // Client spread
+  onboarding_v2_invite_status: "accepted",
 };
-await profileService.updateProfile(supabase, profileId, { 
-  template_config: updatedConfig 
+await profileService.updateProfile(supabase, profileId, {
+  template_config: updatedConfig,
 });
 // Result: Full column replacement, loses schemaVersion, editorConfig
 ```
@@ -58,15 +61,14 @@ await profileService.updateProfile(supabase, profileId, {
 
 ```typescript
 // SAFE
-await profileService.patchBasicEditorTemplateConfig(
-  supabase,
-  profileId,
-  { onboarding_v2_invite_status: "accepted" }
-);
+await profileService.patchBasicEditorTemplateConfig(supabase, profileId, {
+  onboarding_v2_invite_status: "accepted",
+});
 // Result: Atomic JSONB merge, preserves all existing keys
 ```
 
 **Implementation:**
+
 - Extended Basic Editor patch contract (`patch.ts`)
 - Updated RPC whitelist (new migration)
 - Refactored both invite handlers (`editor.tsx`)
@@ -78,6 +80,7 @@ await profileService.patchBasicEditorTemplateConfig(
 ## COMMITS PUSHED
 
 ### Commit 1: Original Feature (ed7c123)
+
 ```
 feat: add onboarding v2 invite modal for existing users
 
@@ -89,6 +92,7 @@ Status: Contains unsafe persistence
 ```
 
 ### Commit 2: Safety Fix (8117963)
+
 ```
 fix(invite): use safe RPC patch for onboarding invite persistence
 
@@ -101,6 +105,7 @@ Status: Eliminates data-loss risk
 ```
 
 **Push Result:**
+
 ```
 To https://github.com/daniel1743/codigos_qr
    b9b1986..8117963  feat/basic-editor-editorial-canvas-ui -> feat/basic-editor-editorial-canvas-ui
@@ -117,11 +122,13 @@ To https://github.com/daniel1743/codigos_qr
 **Migration file:** `supabase/migrations/20260906000000_add_onboarding_invite_to_basic_patch.sql`
 
 **Manual steps:**
+
 1. Connect to staging Supabase project
 2. Run migration via Supabase Dashboard → SQL Editor
 3. Or use: `npx supabase db push` (requires DATABASE_URL with correct format)
 
 **Verification:**
+
 ```sql
 -- Test RPC accepts new key
 SELECT patch_profile_basic_template_config(
@@ -135,11 +142,13 @@ SELECT patch_profile_basic_template_config(
 **Environment Variable:** `VITE_ENABLE_ONBOARDING_V2=true`
 
 **Targets:**
+
 - ✅ `codigos-staging-on.vercel.app` (enable)
 - ⏸️ `codigos-staging-off.vercel.app` (keep disabled)
 - ⏸️ Production (hold until staging verified)
 
 **Manual steps via Vercel Dashboard:**
+
 1. Go to project settings → Environment Variables
 2. Add `VITE_ENABLE_ONBOARDING_V2`
 3. Value: `true`
@@ -147,6 +156,7 @@ SELECT patch_profile_basic_template_config(
 5. Save
 
 **Alternative (if CLI works):**
+
 ```bash
 # Navigate to project in Vercel dashboard and add via UI
 # CLI method failed due to syntax requirements
@@ -155,11 +165,13 @@ SELECT patch_profile_basic_template_config(
 ### 3. Verify Staging Deployment
 
 **Expected deployment:**
+
 - Commit: `8117963`
 - Contains: Modal component + safe persistence
 - Feature flag: `VITE_ENABLE_ONBOARDING_V2=true`
 
 **Verification:**
+
 ```bash
 vercel inspect https://codigos-staging-on.vercel.app
 # Check deployed commit SHA matches 8117963
@@ -172,6 +184,7 @@ vercel inspect https://codigos-staging-on.vercel.app
 **Test Sequence:**
 
 **A. Accept Flow:**
+
 1. Ensure invite status is `"unseen"` or missing
 2. Login to staging-on
 3. Verify modal appears with correct Spanish copy
@@ -181,6 +194,7 @@ vercel inspect https://codigos-staging-on.vercel.app
 7. Verify `schemaVersion`, `editorConfig` unchanged
 
 **B. Decline Flow:**
+
 1. Reset invite status to `"unseen"`
 2. Login to staging-on
 3. Click "Ahora no"
@@ -190,10 +204,12 @@ vercel inspect https://codigos-staging-on.vercel.app
 7. Verify canonical config preserved
 
 **C. Flag Off:**
+
 1. Login to staging-off
 2. Verify modal never appears
 
 **Success Criteria:**
+
 - ✅ Modal appears for existing users with unseen status
 - ✅ Accept routes to onboarding
 - ✅ Decline persists and prevents re-showing
@@ -206,34 +222,34 @@ vercel inspect https://codigos-staging-on.vercel.app
 
 ### Code Changes
 
-| Check | Status | Evidence |
-|-------|--------|----------|
-| Unsafe `updateProfile` removed | ✅ YES | Commit `8117963` |
-| Safe RPC used | ✅ YES | `patchBasicEditorTemplateConfig` |
-| Client spread eliminated | ✅ YES | No `...(profile.template_config)` |
-| Minimal patch | ✅ YES | Only invite status in object |
-| RPC whitelist extended | ✅ YES | Migration adds 1 key |
-| Build compiles | ✅ YES | Exit code 0 |
-| TypeScript valid | ✅ YES | No compilation errors |
+| Check                          | Status | Evidence                          |
+| ------------------------------ | ------ | --------------------------------- |
+| Unsafe `updateProfile` removed | ✅ YES | Commit `8117963`                  |
+| Safe RPC used                  | ✅ YES | `patchBasicEditorTemplateConfig`  |
+| Client spread eliminated       | ✅ YES | No `...(profile.template_config)` |
+| Minimal patch                  | ✅ YES | Only invite status in object      |
+| RPC whitelist extended         | ✅ YES | Migration adds 1 key              |
+| Build compiles                 | ✅ YES | Exit code 0                       |
+| TypeScript valid               | ✅ YES | No compilation errors             |
 
 ### Preservation Guarantees
 
-| Item | Before Fix | After Fix | Mechanism |
-|------|-----------|-----------|-----------|
-| `schemaVersion` | ⛔ LOST | ✅ PRESERVED | Not in patch, `\|\|` preserves |
-| `editorConfig` | ⛔ LOST | ✅ PRESERVED | Not in patch, RPC merge |
-| `basic_link_presentations` | ⚠️ CONDITIONAL | ✅ PRESERVED | Not in patch, RPC merge |
-| `professional_badge` | ⚠️ CONDITIONAL | ✅ PRESERVED | Not in patch, RPC merge |
-| Unknown keys | ⛔ LOST | ✅ PRESERVED | `\|\|` operator preserves all |
+| Item                       | Before Fix     | After Fix    | Mechanism                      |
+| -------------------------- | -------------- | ------------ | ------------------------------ |
+| `schemaVersion`            | ⛔ LOST        | ✅ PRESERVED | Not in patch, `\|\|` preserves |
+| `editorConfig`             | ⛔ LOST        | ✅ PRESERVED | Not in patch, RPC merge        |
+| `basic_link_presentations` | ⚠️ CONDITIONAL | ✅ PRESERVED | Not in patch, RPC merge        |
+| `professional_badge`       | ⚠️ CONDITIONAL | ✅ PRESERVED | Not in patch, RPC merge        |
+| Unknown keys               | ⛔ LOST        | ✅ PRESERVED | `\|\|` operator preserves all  |
 
 ### Test Status
 
-| Test | Status | Notes |
-|------|--------|-------|
-| Build | ✅ PASS | Exit code 0 |
+| Test                    | Status        | Notes                               |
+| ----------------------- | ------------- | ----------------------------------- |
+| Build                   | ✅ PASS       | Exit code 0                         |
 | Dual Editor persistence | ⚠️ INFRA FAIL | Test configuration issue (not code) |
-| Phase 6 regression | 🔄 BLOCKED | Requires test infra fix |
-| Runtime modal (staging) | ⏸️ PENDING | Requires deployment |
+| Phase 6 regression      | 🔄 BLOCKED    | Requires test infra fix             |
+| Runtime modal (staging) | ⏸️ PENDING    | Requires deployment                 |
 
 ---
 
@@ -286,16 +302,16 @@ vercel inspect https://codigos-staging-on.vercel.app
 
 ## FINAL DEPLOYMENT AUTHORIZATION
 
-| Gate | Status | Blocker |
-|------|--------|---------|
-| **Code Safety** | ✅ CLEARED | Safe fix implemented |
-| **Push Status** | ✅ CLEARED | Both commits pushed |
-| **Build Status** | ✅ CLEARED | Compiles successfully |
-| **Migration Ready** | ✅ CLEARED | SQL file created |
+| Gate                  | Status         | Blocker                         |
+| --------------------- | -------------- | ------------------------------- |
+| **Code Safety**       | ✅ CLEARED     | Safe fix implemented            |
+| **Push Status**       | ✅ CLEARED     | Both commits pushed             |
+| **Build Status**      | ✅ CLEARED     | Compiles successfully           |
+| **Migration Ready**   | ✅ CLEARED     | SQL file created                |
 | **Migration Applied** | ⏸️ **PENDING** | Manual database update required |
-| **Feature Flag** | ⏸️ **PENDING** | Manual Vercel config required |
-| **Deployment** | ⏸️ **PENDING** | Auto-deploy after push |
-| **Runtime Test** | ⏸️ **PENDING** | Requires deployment |
+| **Feature Flag**      | ⏸️ **PENDING** | Manual Vercel config required   |
+| **Deployment**        | ⏸️ **PENDING** | Auto-deploy after push          |
+| **Runtime Test**      | ⏸️ **PENDING** | Requires deployment             |
 
 ### Authorization Status
 

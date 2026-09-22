@@ -5,8 +5,9 @@
 ### Arquitectura actual del editor (editor.tsx)
 
 **Tabs principales:**
+
 1. **"profile"** → ProfileSection
-2. **"links"** → LinksSection  
+2. **"links"** → LinksSection
 3. **"design"** → DesignSection
 4. **"text"** → TextSection
 5. **"elements"** → ElementsSection
@@ -19,7 +20,9 @@
 ### INVENTARIO DETALLADO POR SECCIÓN
 
 #### 1. ProfileSection (Datos/Perfil)
+
 **Contenido actual:**
+
 - Avatar upload
 - Nombre para mostrar
 - Biografía (con toolbar de negrita)
@@ -31,7 +34,9 @@
 ---
 
 #### 2. LinksSection (Enlaces)
+
 **Contenido actual:**
+
 - Lista de enlaces (accordion con preview)
 - Agregar enlace (botón)
 - Por cada enlace (dentro del accordion):
@@ -52,12 +57,15 @@
 ---
 
 #### 3. DesignSection (Diseño)
+
 **Contenido actual (MUY EXTENSO):**
 
 ##### a) Template Picker (TemplatePicker component)
+
 - Selector de plantillas prediseñadas
 
 ##### b) Social Covers & Hero Social (Premium)
+
 - Toggle: Activar Social Covers
 - Alto premium (slider 48-88px)
 - Modelos premium (12 estilos diferentes):
@@ -68,6 +76,7 @@
 - Hero Social: selector de enlace destacado
 
 ##### c) Portada y Avatar
+
 - Imagen de portada (upload + preview)
 - Forma del avatar (circle/rounded/none)
 - Aro del avatar:
@@ -76,6 +85,7 @@
   - Grosor (thin/medium)
 
 ##### d) Fondo
+
 - Tabs: Sólido vs Degradado
 - **Sólido:**
   - 6 colores rápidos
@@ -87,6 +97,7 @@
   - Galería de 6 presets sugeridos
 
 ##### e) Botones
+
 - Color de botón (6 presets + picker)
 - Texto del botón (3 presets + picker)
 - Alerta de contraste (si aplica)
@@ -101,15 +112,18 @@
 ---
 
 #### 4. TextSection (Texto)
+
 **Contenido actual:**
 
 ##### a) Fuente principal (SectionGroup collapsible)
+
 - Preview de fuente activa
 - Búsqueda
 - Categorías (7): Todas, Neutra, Geométrica, Amigable, Elegante, Impacto, Manuscrita
 - Listado de 39 fuentes con preview
 
 ##### b) Nombre (SectionGroup collapsible)
+
 - Color: Automático vs Personalizado
 - Si personalizado: picker + alerta de contraste
 - Tamaño (S/M/L/XL)
@@ -117,6 +131,7 @@
 - Alineación (left/center/right)
 
 ##### c) Descripción (SectionGroup collapsible)
+
 - Color: Automático vs Personalizado
 - Si personalizado: picker + alerta de contraste
 - Tamaño (S/M/L)
@@ -124,6 +139,7 @@
 - Alineación
 
 ##### d) Botones (SectionGroup collapsible)
+
 - Tamaño de texto (pequeño/medio/grande)
 - Peso (normal/semibold/bold)
 - Alineación del contenido
@@ -134,7 +150,9 @@
 ---
 
 #### 5. ElementsSection (Elementos decorativos)
+
 **Contenido actual:**
+
 - Formas de fondo (5 opciones: none, circles, squares, lines, mixed)
 - Ambiente (4 opciones: plano, cinemático, aura, shadow)
 - Intensidad (subtle/medium/strong)
@@ -145,9 +163,11 @@
 ---
 
 #### 6. ShareSection (QR)
+
 **Contenido actual (MUY EXTENSO):**
 
 ##### a) Estado y publicación
+
 - Badge de estado (publicado/sin publicar)
 - Alerta si no está publicado
 - Guardar borrador
@@ -155,28 +175,34 @@
 - Validación de requisitos
 
 ##### b) Estadísticas
+
 - Card de aperturas/visitas
 
 ##### c) Vista previa del QR
+
 - QR renderizado (advanced/svg/canvas según opciones)
 - Regenerar patrón
 - Copiar enlace
 - Abrir página
 
 ##### d) Diseños QR (Galería)
+
 - Botón para abrir galería de plantillas QR
 
 ##### e) Personalizar QR
+
 - Patrón principal (color picker)
 - Fondo seguro (color picker)
 - Presets: "Seguro" y "3 esquinas"
 - Alerta de contraste
 
 ##### f) Forma del QR
+
 - 4 estilos de puntos (clásico/suave/puntos/sello)
 - Forma de los 3 cuadros (select)
 
 ##### g) Colores de esquinas
+
 - 4 pickers independientes:
   - Arriba izquierda
   - Arriba derecha
@@ -184,24 +210,29 @@
   - Centro de cuadros
 
 ##### h) Marco visual
+
 - 5 opciones de frame (simple/sello/etiqueta/celular/bebida)
 
 ##### i) Efectos Premium
+
 - 6 presets: clásico, neón pink, neón cyan, sunset, galaxy, emerald
 
 ##### j) Logo Central
+
 - Toggle activar/desactivar
 - Preview del logo
 - Subir logo
 - Eliminar logo
 
 ##### k) Exportar
+
 - Formato (PNG/SVG)
 - Resolución (5 opciones)
 - Restaurar QR clásico
 - Descargar
 
 ##### l) Historial de versiones visuales
+
 - Galería horizontal con miniaturas
 - Botón "Usar esta apariencia"
 
@@ -245,9 +276,11 @@
 ### FASE P0 - ALTO IMPACTO INMEDIATO
 
 #### Tarea 1: Renombrar tabs principales
+
 **Archivo:** `src/routes/editor.tsx`
 
 **Cambios:**
+
 ```typescript
 // ANTES:
 const TABS = [
@@ -257,7 +290,7 @@ const TABS = [
   { id: "text", label: "Texto", icon: Type },
   { id: "elements", label: "Elementos", icon: Shapes },
   { id: "qr", label: "QR", icon: QrCode },
-]
+];
 
 // DESPUÉS:
 const TABS = [
@@ -265,10 +298,11 @@ const TABS = [
   { id: "links", label: "Enlaces", icon: LinkIcon },
   { id: "appearance", label: "Apariencia", icon: Palette },
   { id: "qr", label: "QR", icon: QrCode },
-]
+];
 ```
 
 **TypeScript:**
+
 ```typescript
 type TabId = "profile" | "links" | "appearance" | "qr";
 ```
@@ -276,18 +310,20 @@ type TabId = "profile" | "links" | "appearance" | "qr";
 ---
 
 #### Tarea 2: Crear AppearanceSection unificada
+
 **Nuevo archivo:** `src/components/editor/AppearanceSection.tsx`
 
 **Estructura:**
+
 ```tsx
 export function AppearanceSection({ profile, onChange, userId, links, onManageLinkImages }) {
   return (
     <div className="space-y-6">
       <Header />
-      
+
       {/* 1. PLANTILLAS PRIMERO */}
       <TemplatePicker profile={profile} onChange={onChange} />
-      
+
       {/* 2. PERSONALIZACIÓN MANUAL (Collapsible) */}
       <Collapsible defaultOpen={false}>
         <CollapsibleTrigger>
@@ -303,7 +339,7 @@ export function AppearanceSection({ profile, onChange, userId, links, onManageLi
         </CollapsibleContent>
       </Collapsible>
     </div>
-  )
+  );
 }
 ```
 
@@ -347,6 +383,7 @@ export function AppearanceSection({ profile, onChange, userId, links, onManageLi
 ---
 
 #### Tarea 3: Reorganizar ShareSection (QR)
+
 **Archivo:** `src/components/editor/ShareSection.tsx`
 
 **Nueva estructura con collapsibles:**
@@ -362,19 +399,19 @@ export function ShareSection({ ... }) {
         - Publicar ahora
         - Validación
       </PublicarCard>
-      
+
       {/* GRUPO 2: COMPARTIR */}
       {published && (
         <>
           <EstadisticasCard />
-          
+
           <QRPreviewCard>
             - Vista previa QR
             - Regenerar patrón
             - Copiar enlace
             - Abrir página
           </QRPreviewCard>
-          
+
           {/* GRUPO 3: PERSONALIZAR (Collapsibles) */}
           <Collapsible>
             <CollapsibleTrigger>
@@ -384,7 +421,7 @@ export function ShareSection({ ... }) {
               <GaleriaButton />
             </CollapsibleContent>
           </Collapsible>
-          
+
           <Collapsible>
             <CollapsibleTrigger>
               <Palette /> Colores del QR
@@ -396,7 +433,7 @@ export function ShareSection({ ... }) {
               - Alerta contraste
             </CollapsibleContent>
           </Collapsible>
-          
+
           <Collapsible>
             <CollapsibleTrigger>
               <Circle /> Forma y esquinas
@@ -407,7 +444,7 @@ export function ShareSection({ ... }) {
               - Colores de esquinas (4 pickers)
             </CollapsibleContent>
           </Collapsible>
-          
+
           <Collapsible>
             <CollapsibleTrigger>
               <Sparkles /> Efectos Premium
@@ -416,7 +453,7 @@ export function ShareSection({ ... }) {
               - Grid de 6 efectos
             </CollapsibleContent>
           </Collapsible>
-          
+
           <Collapsible>
             <CollapsibleTrigger>
               <Square /> Marco visual
@@ -425,7 +462,7 @@ export function ShareSection({ ... }) {
               - Grid de 5 frames
             </CollapsibleContent>
           </Collapsible>
-          
+
           <Collapsible>
             <CollapsibleTrigger>
               <ImageIcon /> Logo central
@@ -434,14 +471,14 @@ export function ShareSection({ ... }) {
               - Toggle + upload + preview
             </CollapsibleContent>
           </Collapsible>
-          
+
           <ExportarCard>
             - Formato
             - Resolución
             - Restaurar clásico
             - Descargar
           </ExportarCard>
-          
+
           <HistorialVersiones />
         </>
       )}
@@ -453,6 +490,7 @@ export function ShareSection({ ... }) {
 ---
 
 #### Tarea 4: Actualizar renderActiveSection en editor.tsx
+
 **Archivo:** `src/routes/editor.tsx` (líneas 438-489)
 
 ```typescript
@@ -504,46 +542,53 @@ const renderActiveSection = () => {
 ### FASE P1 - MUY RECOMENDABLE
 
 #### Tarea 5: Mejorar tooltips contextuales
+
 **Archivos afectados:** Todos los componentes de secciones
 
 **Agregar tooltips en:**
+
 - Imagen del enlace: "Puedes usar el logo de la red, tu avatar principal o una foto diferente."
 - Preset: "Aplica una combinación lista de colores, fuente y botones."
 - Fondo: "Cambia el fondo de tu página pública."
 - Publicar: "Guarda los cambios y actualiza tu página pública."
 
 **Componente a usar:**
+
 ```tsx
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 ```
 
 ---
 
 #### Tarea 6: Estados vacíos educativos
+
 **Archivo:** `src/components/editor/LinksSection.tsx` (línea 456)
 
 **Ya existe, mejorar:**
+
 ```tsx
-{links.length === 0 && (
-  <div className="...">
-    <LinkIcon />
-    <p>Agrega tu primer enlace</p>
-    <p className="text-xs">
-      Conecta WhatsApp, Instagram, TikTok, tu web y otras redes.
-    </p>
-    <Button onClick={handleAddLink}>
-      <Plus /> Agregar enlace
-    </Button>
-  </div>
-)}
+{
+  links.length === 0 && (
+    <div className="...">
+      <LinkIcon />
+      <p>Agrega tu primer enlace</p>
+      <p className="text-xs">Conecta WhatsApp, Instagram, TikTok, tu web y otras redes.</p>
+      <Button onClick={handleAddLink}>
+        <Plus /> Agregar enlace
+      </Button>
+    </div>
+  );
+}
 ```
 
 ---
 
 #### Tarea 7: Galería visual organizada para estilos premium
+
 **Archivo:** `src/components/editor/AppearanceSection.tsx` (subsección BotonesSection)
 
 **Mejorar grid de estilos:**
+
 ```tsx
 {/* Agrupar por categoría */}
 <div className="space-y-4">
@@ -551,7 +596,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/
   <div className="grid grid-cols-3 gap-2">
     {basicStyles.map(...)}
   </div>
-  
+
   <Label className="text-xs text-muted-foreground flex items-center gap-2">
     <Crown className="w-3 h-3 text-amber-500" />
     Premium
@@ -567,12 +612,15 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/
 ### FASE P2 - DESPUÉS
 
 #### Tarea 8: Busqueda de fuentes mejorada
+
 **Ya existe** en TextSection (líneas 208-217). Mantener.
 
 #### Tarea 9: Onboarding de 3-4 pasos (FUTURO)
+
 No implementar ahora. Dejar documentado para futuras mejoras.
 
 #### Tarea 10: Modo Básico vs Avanzado (FUTURO)
+
 No implementar ahora. La revelación progresiva con collapsibles cumple el mismo objetivo.
 
 ---
@@ -596,6 +644,7 @@ Un usuario nuevo debe poder responder:
 ## ORDEN DE IMPLEMENTACIÓN
 
 ### Sprint 1 (P0 Crítico)
+
 1. ✅ Crear `AppearanceSection.tsx` con estructura base
 2. ✅ Extraer subsecciones de DesignSection/TextSection/ElementsSection
 3. ✅ Reorganizar ShareSection con collapsibles
@@ -605,6 +654,7 @@ Un usuario nuevo debe poder responder:
 7. ✅ Testing manual: Desktop y Mobile
 
 ### Sprint 2 (P1 Mejoras)
+
 8. ✅ Tooltips contextuales
 9. ✅ Estados vacíos mejorados
 10. ✅ Galería de estilos agrupada
@@ -614,6 +664,7 @@ Un usuario nuevo debe poder responder:
 ## ARCHIVOS A MODIFICAR
 
 ### Modificar:
+
 1. ✅ `src/routes/editor.tsx` - Tabs y routing
 2. ✅ `src/components/editor/ShareSection.tsx` - Reorganizar con collapsibles
 3. ⚠️ `src/components/editor/DesignSection.tsx` - Extraer y eliminar (deprecated)
@@ -621,9 +672,11 @@ Un usuario nuevo debe poder responder:
 5. ⚠️ `src/components/editor/ElementsSection.tsx` - Mover a subsección (deprecated)
 
 ### Crear nuevos:
+
 6. ✅ `src/components/editor/AppearanceSection.tsx` - Componente principal unificado
 
 ### Mantener sin cambios:
+
 7. ✅ `src/components/editor/ProfileSection.tsx` - OK
 8. ✅ `src/components/editor/LinksSection.tsx` - OK
 9. ✅ `src/components/editor/TemplatePicker.tsx` - Reutilizar tal cual
@@ -633,6 +686,7 @@ Un usuario nuevo debe poder responder:
 ## REGLAS DE IMPLEMENTACIÓN
 
 ### ✅ PERMITIDO:
+
 - Reorganizar componentes existentes
 - Crear nuevos componentes para mejorar jerarquía
 - Usar Collapsible/Accordion de shadcn/ui
@@ -641,6 +695,7 @@ Un usuario nuevo debe poder responder:
 - Agregar tooltips informativos
 
 ### ❌ NO PERMITIDO:
+
 - Eliminar funcionalidades existentes
 - Modificar QR rendering
 - Modificar auth
@@ -656,12 +711,14 @@ Un usuario nuevo debe poder responder:
 ## NOTAS TÉCNICAS
 
 ### Dependencias necesarias:
+
 ```tsx
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../ui/collapsible"
-import { ChevronDown, Wand2 } from "lucide-react"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../ui/collapsible";
+import { ChevronDown, Wand2 } from "lucide-react";
 ```
 
 ### Pattern de Collapsible a usar:
+
 ```tsx
 <Collapsible defaultOpen={false}>
   <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/30 transition-colors border rounded-xl">
@@ -671,9 +728,7 @@ import { ChevronDown, Wand2 } from "lucide-react"
     </div>
     <ChevronDown className="w-4 h-4 transition-transform ui-open:rotate-180" />
   </CollapsibleTrigger>
-  <CollapsibleContent className="p-4 space-y-4">
-    {/* Contenido */}
-  </CollapsibleContent>
+  <CollapsibleContent className="p-4 space-y-4">{/* Contenido */}</CollapsibleContent>
 </Collapsible>
 ```
 
@@ -682,6 +737,7 @@ import { ChevronDown, Wand2 } from "lucide-react"
 ## TESTING MANUAL REQUERIDO
 
 ### Desktop (md+):
+
 - [ ] Preview visible mientras edito
 - [ ] Panel colapsa y expande correctamente
 - [ ] Tabs funcionan correctamente
@@ -690,6 +746,7 @@ import { ChevronDown, Wand2 } from "lucide-react"
 - [ ] Todos los controles accesibles
 
 ### Mobile (<md):
+
 - [ ] Bottom sheet funciona
 - [ ] Tabs en bottom nav
 - [ ] Collapsibles funcionan en móvil
@@ -697,6 +754,7 @@ import { ChevronDown, Wand2 } from "lucide-react"
 - [ ] No hay elementos cortados
 
 ### Funcional:
+
 - [ ] Guardar borrador funciona
 - [ ] Publicar funciona
 - [ ] Preview actualiza en vivo
@@ -710,9 +768,11 @@ import { ChevronDown, Wand2 } from "lucide-react"
 ## DOCUMENTACIÓN FINAL
 
 Al completar, crear:
+
 - `docs/arreglos-ui/20_SIMPLIFICACION_IMPLEMENTADA.md`
 
 Debe contener:
+
 - Estructura anterior del panel
 - Estructura nueva
 - Componentes modificados

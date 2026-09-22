@@ -20,12 +20,7 @@
       "theme_colors": true,
       "theme_typography": true,
       "layout_responsive": true,
-      "blocks": [
-        "text",
-        "cta",
-        "portfolio",
-        "contact"
-      ],
+      "blocks": ["text", "cta", "portfolio", "contact"],
       "block_count": 4
     },
     "published_snapshot_is_canonical": true,
@@ -35,13 +30,9 @@
     "http": 200,
     "renderer_mounted": true,
     "editor_chrome": false,
-    "content_visible": [
-      "Boda en Valparaíso"
-    ],
+    "content_visible": ["Boda en Valparaíso"],
     "content_missing": [],
-    "host_action_hrefs": [
-      "https://qa-cripqer.example/boda"
-    ],
+    "host_action_hrefs": ["https://qa-cripqer.example/boda"],
     "owner_images": 1,
     "html_bytes": 20521
   },

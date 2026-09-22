@@ -6,13 +6,7 @@ import type { StandaloneStyle } from "./standaloneStyle";
 /* Template06 — Link-in-bio plateado: banner floral, avatar con aro azul, botones píldora metálicos */
 
 export type Template06SocialType =
-  | "youtube"
-  | "facebook"
-  | "tiktok"
-  | "twitter"
-  | "instagram"
-  | "email"
-  | "website";
+  "youtube" | "facebook" | "tiktok" | "twitter" | "instagram" | "email" | "website";
 
 export interface Template06Social {
   type: Template06SocialType;
@@ -135,7 +129,8 @@ export default function Template06({
         ...standaloneStyle?.vars,
         minHeight: "100%",
         width: "100%",
-        background: standaloneStyle?.background ??
+        background:
+          standaloneStyle?.background ??
           "linear-gradient(135deg,#c9ccd4 0%,#eceef2 25%,#b9bec7 50%,#f2f3f6 72%,#c3c7cf 100%)",
         fontFamily: standaloneStyle?.globalFont ?? "'Segoe UI', Arial, Helvetica, sans-serif",
         display: "flex",
@@ -190,16 +185,16 @@ export default function Template06({
                 background: "#fff",
               }}
             >
-            <img
-              src={avatarUrl}
-              alt={name}
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                display: "block",
-              }}
-            />
+              <img
+                src={avatarUrl}
+                alt={name}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  display: "block",
+                }}
+              />
             </div>
           </EditableTarget>
         </div>
@@ -210,11 +205,29 @@ export default function Template06({
             registry={targetRegistry}
             active={highlightedTarget === EDIT_TARGETS.name}
           >
-            <h1 style={{ margin: 0, fontFamily: standaloneStyle?.title.fontFamily, fontSize: standaloneStyle?.title.size ?? 26, fontWeight: standaloneStyle?.title.weight ?? 700, color: standaloneStyle?.title.color ?? "#111", textAlign: standaloneStyle?.title.align }}>
+            <h1
+              style={{
+                margin: 0,
+                fontFamily: standaloneStyle?.title.fontFamily,
+                fontSize: standaloneStyle?.title.size ?? 26,
+                fontWeight: standaloneStyle?.title.weight ?? 700,
+                color: standaloneStyle?.title.color ?? "#111",
+                textAlign: standaloneStyle?.title.align,
+              }}
+            >
               {name}
             </h1>
           </EditableTarget>
-          <p style={{ margin: "2px 0 0", fontFamily: standaloneStyle?.bio.fontFamily, fontSize: standaloneStyle?.bio.size ?? 16, fontWeight: standaloneStyle?.bio.weight, color: standaloneStyle?.bio.color ?? "#3a3a3a", textAlign: standaloneStyle?.bio.align }}>
+          <p
+            style={{
+              margin: "2px 0 0",
+              fontFamily: standaloneStyle?.bio.fontFamily,
+              fontSize: standaloneStyle?.bio.size ?? 16,
+              fontWeight: standaloneStyle?.bio.weight,
+              color: standaloneStyle?.bio.color ?? "#3a3a3a",
+              textAlign: standaloneStyle?.bio.align,
+            }}
+          >
             {profession}
           </p>
           {description ? (
@@ -245,44 +258,50 @@ export default function Template06({
             registry={targetRegistry}
             active={highlightedTarget === EDIT_TARGETS.socials}
           >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              flexWrap: "wrap",
-              gap: 12,
-              padding: "18px 16px 4px",
-            }}
-          >
-            {socials.map((s) => (
-              <a
-                key={s.type + s.url}
-                href={s.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={s.label || s.type}
-                title={s.label || s.type}
-                style={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: "50%",
-                  background: "linear-gradient(180deg,#3b3b3b,#141414)",
-                  border: "2px solid #ffffff",
-                  boxShadow: "0 6px 14px rgba(0,0,0,.25)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  textDecoration: "none",
-                }}
-              >
-                <Icon type={s.type} />
-              </a>
-            ))}
-          </div>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                flexWrap: "wrap",
+                gap: 12,
+                padding: "18px 16px 4px",
+              }}
+            >
+              {socials.map((s) => (
+                <a
+                  key={s.type + s.url}
+                  href={s.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={s.label || s.type}
+                  title={s.label || s.type}
+                  style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: "50%",
+                    background: "linear-gradient(180deg,#3b3b3b,#141414)",
+                    border: "2px solid #ffffff",
+                    boxShadow: "0 6px 14px rgba(0,0,0,.25)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    textDecoration: "none",
+                  }}
+                >
+                  <Icon type={s.type} />
+                </a>
+              ))}
+            </div>
           </EditableTarget>
         </div>
 
-        <div style={{ padding: "26px 18px 0", display: "grid", gap: standaloneStyle?.button.spacing ?? 16 }}>
+        <div
+          style={{
+            padding: "26px 18px 0",
+            display: "grid",
+            gap: standaloneStyle?.button.spacing ?? 16,
+          }}
+        >
           {links.map((l) => (
             <EditableTarget
               key={l.id}
@@ -295,20 +314,20 @@ export default function Template06({
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
-                display: "block",
-                textAlign: "center",
-                padding: "18px 16px",
-                borderRadius: standaloneStyle?.button.radius ?? 999,
-                background: standaloneStyle?.button.background ??
-                  "linear-gradient(180deg,#f4f5f8 0%,#d9dbe1 45%,#c2c5cd 100%)",
-                border: buttonBorder ?? "1px solid rgba(255,255,255,.85)",
-                boxShadow:
-                  "0 8px 16px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.9)",
-                color: standaloneStyle?.button.textColor ?? "#111",
-                fontWeight: 700,
-                fontSize: 17,
-                textDecoration: "none",
-                boxSizing: "border-box",
+                  display: "block",
+                  textAlign: "center",
+                  padding: "18px 16px",
+                  borderRadius: standaloneStyle?.button.radius ?? 999,
+                  background:
+                    standaloneStyle?.button.background ??
+                    "linear-gradient(180deg,#f4f5f8 0%,#d9dbe1 45%,#c2c5cd 100%)",
+                  border: buttonBorder ?? "1px solid rgba(255,255,255,.85)",
+                  boxShadow: "0 8px 16px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.9)",
+                  color: standaloneStyle?.button.textColor ?? "#111",
+                  fontWeight: 700,
+                  fontSize: 17,
+                  textDecoration: "none",
+                  boxSizing: "border-box",
                 }}
               >
                 {l.label}
@@ -339,4 +358,3 @@ export default function Template06({
     </div>
   );
 }
-

@@ -5,15 +5,18 @@ Este documento detalla los cambios de arquitectura y seguridad implementados en 
 ---
 
 ## 1. Arquitectura Anterior (Insegura)
+
 Anteriormente, el flujo público de descarga de archivos cifrados dependía enteramente de permisos directos en el navegador (cliente) usando la clave anónima (`anon` key) de Supabase:
-* El cliente anónimo consultaba la tabla `encrypted_documents` directamente.
-* La política de RLS permitía a cualquier usuario anónimo leer la metadata (incluyendo el `password_hash` SHA-256 y la ruta física del archivo `encrypted_file_path`).
-* El navegador del cliente anónimo intentaba descargar el archivo de forma directa desde el bucket `encrypted-documents`.
-* Si el bucket se configuraba como privado, la descarga fallaba (`Object not found`), y si se abría al público, cualquier persona podía descargar cualquier binario cifrado sin autorización.
+
+- El cliente anónimo consultaba la tabla `encrypted_documents` directamente.
+- La política de RLS permitía a cualquier usuario anónimo leer la metadata (incluyendo el `password_hash` SHA-256 y la ruta física del archivo `encrypted_file_path`).
+- El navegador del cliente anónimo intentaba descargar el archivo de forma directa desde el bucket `encrypted-documents`.
+- Si el bucket se configuraba como privado, la descarga fallaba (`Object not found`), y si se abría al público, cualquier persona podía descargar cualquier binario cifrado sin autorización.
 
 ---
 
 ## 2. Nueva Arquitectura Segura (Server-Side Authorization)
+
 Hemos implementado un flujo de autorización atómico y firma de URLs en el lado del servidor, manteniendo el almacenamiento **100% privado**:
 
 ```text
@@ -35,6 +38,7 @@ QR (con enlace corto /d/{shortUrl})
 ## 3. Hardening de Base de Datos y Políticas
 
 ### Base de Datos (`supabase/migrations/20260821050000_secure_encrypted_document_delivery.sql`):
+
 - **Revocación:** Se añadieron las columnas `revoked` (boolean) y `revoked_at` (timestamptz) a la tabla `encrypted_documents`.
 - **Hardening RLS:** Se eliminaron todas las políticas de lectura pública (`anon SELECT`) sobre las tablas `encrypted_documents` y `document_access_logs`.
 - **Hardening Storage:** Se eliminó la política pública de SELECT sobre el bucket `encrypted-documents`. El bucket queda configurado como **completamente privado**. Solo el propietario autenticado del archivo puede interactuar con sus objetos dentro de su carpeta exclusiva (`auth.uid()::text`).
@@ -47,7 +51,9 @@ QR (con enlace corto /d/{shortUrl})
 ---
 
 ## 4. Flujo de Archivos Sin Contraseña (URL Hash Fragment)
+
 Para mantener el principio de Zero-Knowledge en archivos sin contraseña (donde la llave es generada aleatoriamente y no se guarda en el servidor):
+
 - Al crear el archivo, se genera la URL corta incluyendo la llave de descifrado en el fragmento de la URL (`#key=<llave_base64>`).
 - Este fragmento de la URL **nunca** viaja al servidor en las peticiones HTTP y no queda registrado en la base de datos.
 - El receptor escanea el QR o copia el enlace que incluye el hash, el navegador extrae la llave mediante `window.location.hash`, realiza la autorización de descarga al servidor sin enviar la clave, descarga el archivo cifrado y aplica la clave del hash localmente para descifrar.

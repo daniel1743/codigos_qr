@@ -64,15 +64,15 @@ página, `public_id`, QR ni alias.
 
 ## Field mapping
 
-| Fuente | Destino | Resultado |
-| --- | --- | --- |
-| `identity.professionOrActivity` | `request.businessType` | Mapeo directo, conservando la actividad libre del propietario. |
-| `outcome.primaryGoal` | `request.goal` | `sell → sell`, `bookings → book`, `quote_requests → quote`, `show_portfolio → showcase`; presencia/contacto/servicios y demás objetivos informativos conservan `inform` o `contact` cuando corresponde. |
-| `scope.density` | `request.density` | `simple → minimal`, `complete → rich`, `auto → balanced`. |
-| `commercial.mode` | `request.salesMode` | Se conservan `booking`, `quote`, `contact`; `display_only → info`; `sell` no crea checkout y queda diferido. |
-| `ownerContent` | `request.content` | Se delega en `ownerContentToPageGenerationRequest()` y su proyección existente a `NormalizedContentV1`. |
-| `outcome.experienceHint` + objetivo + contenido real | `request.preferences.experienceType` | Selecciona `services`, `catalog`, `menu`, `portfolio` o `landing`; nunca emite `listings`. |
-| `variant`, `maxPages` | `request.preferences` | Se transportan solo si el caller los entrega. No activan fan-out ni persistencia. |
+| Fuente                                               | Destino                              | Resultado                                                                                                                                                                                               |
+| ---------------------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `identity.professionOrActivity`                      | `request.businessType`               | Mapeo directo, conservando la actividad libre del propietario.                                                                                                                                          |
+| `outcome.primaryGoal`                                | `request.goal`                       | `sell → sell`, `bookings → book`, `quote_requests → quote`, `show_portfolio → showcase`; presencia/contacto/servicios y demás objetivos informativos conservan `inform` o `contact` cuando corresponde. |
+| `scope.density`                                      | `request.density`                    | `simple → minimal`, `complete → rich`, `auto → balanced`.                                                                                                                                               |
+| `commercial.mode`                                    | `request.salesMode`                  | Se conservan `booking`, `quote`, `contact`; `display_only → info`; `sell` no crea checkout y queda diferido.                                                                                            |
+| `ownerContent`                                       | `request.content`                    | Se delega en `ownerContentToPageGenerationRequest()` y su proyección existente a `NormalizedContentV1`.                                                                                                 |
+| `outcome.experienceHint` + objetivo + contenido real | `request.preferences.experienceType` | Selecciona `services`, `catalog`, `menu`, `portfolio` o `landing`; nunca emite `listings`.                                                                                                              |
+| `variant`, `maxPages`                                | `request.preferences`                | Se transportan solo si el caller los entrega. No activan fan-out ni persistencia.                                                                                                                       |
 
 No se añadió una dependencia de UI sobre `scope.density`; se preserva por
 compatibilidad semántica con el request actual.
@@ -136,13 +136,13 @@ números, no transforma handles en URLs y no asigna dominios ficticios.
 adapter traduce sus issues a su propia salida de diagnóstico, pero no crea un
 sistema competidor.
 
-| Experiencia | Requisito aplicado |
-| --- | --- |
-| `services` | Al menos un servicio con nombre válido. |
-| `catalog` | Al menos un producto con nombre; además, el host actual requiere media de imagen real para cada producto que se emita. |
-| `menu` | Al menos un elemento de menú con nombre válido. |
-| `portfolio` | Proyecto con nombre, media de imagen real, destino real y cover global cuando lo exige el host actual. |
-| `landing` | Identidad con nombre y descripción, o contenido compatible del propietario. |
+| Experiencia | Requisito aplicado                                                                                                     |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `services`  | Al menos un servicio con nombre válido.                                                                                |
+| `catalog`   | Al menos un producto con nombre; además, el host actual requiere media de imagen real para cada producto que se emita. |
+| `menu`      | Al menos un elemento de menú con nombre válido.                                                                        |
+| `portfolio` | Proyecto con nombre, media de imagen real, destino real y cover global cuando lo exige el host actual.                 |
+| `landing`   | Identidad con nombre y descripción, o contenido compatible del propietario.                                            |
 
 La ausencia de `ownerContent` en un payload legacy no invalida Onboarding V2;
 solo significa que la ruta Smart Pages puede no estar lista para generar. Los

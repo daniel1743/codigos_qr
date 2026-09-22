@@ -45,7 +45,9 @@ describe("Trust signal validation", () => {
   });
 
   it("valid typed signals pass", () => {
-    expect(isTrustSignalValid({ id: "1", type: "rating", value: 4.8, reviewCount: 126 })).toBe(true);
+    expect(isTrustSignalValid({ id: "1", type: "rating", value: 4.8, reviewCount: 126 })).toBe(
+      true,
+    );
     expect(isTrustSignalValid({ id: "2", type: "experience", value: 8 })).toBe(true);
   });
 });

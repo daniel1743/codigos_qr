@@ -112,7 +112,8 @@ export function mapGeneratedPageToEngineInput(
   const cover = input.coverImageUrl?.trim() ?? "";
   const avatar = input.avatarImageUrl?.trim() ?? "";
   const engineInput: EngineV2HostGenerationInput = { ...mapped.engineInput };
-  const hasOwnVisual = Boolean(cover || avatar) || generatedPageItems(input).some((item) => item.imageUrl);
+  const hasOwnVisual =
+    Boolean(cover || avatar) || generatedPageItems(input).some((item) => item.imageUrl);
   if (cover || avatar) {
     engineInput.userMedia = {
       ...(mapped.engineInput.userMedia ?? {}),

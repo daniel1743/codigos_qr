@@ -17,6 +17,7 @@ Task: `CRIPQER_CANONICAL_PERSISTENCE_ROUNDTRIP_FORENSIC_V1`
 
 Additional (targeted, over the 6-file budget but required for STEP_6 / the
 avatar/banner field trace):
+
 - `src/premium-template-studio/engine/TemplateValidator.ts`
 - `src/premium-template-studio/state/templateReducer.ts`
 - `src/premium-template-studio/entitlements.tsx`
@@ -67,7 +68,7 @@ justifies a Phase 2 repair (see FIRST_BROKEN_STEP).
   - `profile.banner` (object: enabled, imageUrl, blur, focalX/Y, gradient,
     height, mobileHeight, overlay, radius).
 - Mutation path (Inspector) → `dispatch({ type: "patch", path: "profile.avatar.*"
-  | "profile.banner.*", value })` → `templateReducer.setPath` (deep-clone +
+| "profile.banner.*", value })` → `templateReducer.setPath` (deep-clone +
   dotted-path write) → `state.config` updated, `dirty=true`, `revision++`.
 - Guarded dispatch maps these to `EDIT_AVATAR_BANNER`, which owns the `profile`
   domain; for Free tier it is `ALLOW` (capability `avatar_banner` in
@@ -79,13 +80,12 @@ justifies a Phase 2 repair (see FIRST_BROKEN_STEP).
 ## SAVE_PAYLOAD_VALUE
 
 `canonicalPageService.save(supabase, profile.id, nextConfig)`:
+
 - `acceptEngineGeneratedConfig(editorConfig)` wraps the config into
   `{ schemaVersion: 1, editorConfig }` (no normalization/stripping).
 - RPC args: `{ p_profile_id: profile.id, p_editor_config: envelope.editorConfig }`.
 
 **Verdict: the full `editorConfig` (including avatar/banner/rim) is sent verbatim as `p_editor_config`.**
-
-
 
 ---
 
@@ -131,20 +131,19 @@ p_editor_config`, preserving other Basic-owned keys (`onboarding_v2_invite_statu
 
 Live read-only inspection of `profiles.template_config`:
 
-| slug | schemaVersion | editorConfig | keys |
-|---|---|---|---|
-| qa-dual-editor-test | 1 | present | editorConfig, schemaVersion, onboarding_v2_invite_status |
-| xf4lxj8 | 1 | present | editorConfig, schemaVersion |
-| givonik-marrero | — | — | (empty) |
-| wl9jzyg | — | — | (empty) |
-| 8hmj94b | — | — | (empty) |
-| vida-saludable-bienestar | — | — | professional_badge, basic_link_presentations, onboarding_v2_invite_status |
+| slug                     | schemaVersion | editorConfig | keys                                                                      |
+| ------------------------ | ------------- | ------------ | ------------------------------------------------------------------------- |
+| qa-dual-editor-test      | 1             | present      | editorConfig, schemaVersion, onboarding_v2_invite_status                  |
+| xf4lxj8                  | 1             | present      | editorConfig, schemaVersion                                               |
+| givonik-marrero          | —             | —            | (empty)                                                                   |
+| wl9jzyg                  | —             | —            | (empty)                                                                   |
+| 8hmj94b                  | —             | —            | (empty)                                                                   |
+| vida-saludable-bienestar | —             | —            | professional_badge, basic_link_presentations, onboarding_v2_invite_status |
 
 **This proves the SAVE → RPC → DATABASE chain WORKS**: two profiles hold valid
-canonical envelopes with correctly shaped `editorConfig` (avatarUrl, avatar.*,
-banner.* all present; `theme.colors`, `theme.typography`, `layout.responsive`,
+canonical envelopes with correctly shaped `editorConfig` (avatarUrl, avatar._,
+banner._ all present; `theme.colors`, `theme.typography`, `layout.responsive`,
 37/10 blocks).
-
 
 ---
 
@@ -165,15 +164,16 @@ banner.* all present; `theme.colors`, `theme.typography`, `layout.responsive`,
 
 ## SAVE_LOAD_CONTRACT — the key consistency check
 
-| | table | column | format | profile identity |
-|---|---|---|---|---|
-| SAVE_WRITES | profiles | template_config | `{ schemaVersion:1, editorConfig }` + Basic keys | profile.id (UUID) |
-| LOAD_READS | profiles | template_config | `{ schemaVersion:1, editorConfig }` | slug/id + user_id → same UUID |
+|             | table    | column          | format                                           | profile identity              |
+| ----------- | -------- | --------------- | ------------------------------------------------ | ----------------------------- |
+| SAVE_WRITES | profiles | template_config | `{ schemaVersion:1, editorConfig }` + Basic keys | profile.id (UUID)             |
+| LOAD_READS  | profiles | template_config | `{ schemaVersion:1, editorConfig }`              | slug/id + user_id → same UUID |
 
 **SAVE and LOAD use the SAME project, table, column, envelope contract and
 profile identity. There is NO field mismatch.**
 
 Regarding the "KNOWN SUSPICIOUS AREA":
+
 - `canonical_editor_config` — appears ONLY inside the RPC **name**
   `set_profile_canonical_editor_config`. It is **not** a column.
 - `customization` — appears ONLY in the Basic Editor's template-definition
@@ -252,8 +252,8 @@ explanations are runtime-specific and require the live browser gate:
    work while never reaching the new coordinator in the browser).
 2. Testing against a profile that has **no** canonical envelope (4 of 6 live
    profiles have empty/Basic-only `template_config`), so the Power Editor either
-   cannot load or routes to the Basic editor — this is a *profile not yet
-   initialized with a Power envelope*, not a broken save.
+   cannot load or routes to the Basic editor — this is a _profile not yet
+   initialized with a Power envelope_, not a broken save.
 
 ## FIX_APPLIED
 

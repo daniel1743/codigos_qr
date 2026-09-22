@@ -84,9 +84,7 @@ function makeOffer(overrides: Partial<ResolvedOffer> = {}): ResolvedOffer {
   };
 }
 
-function makeIntent(
-  overrides: Partial<ProviderSessionIntent> = {},
-): ProviderSessionIntent {
+function makeIntent(overrides: Partial<ProviderSessionIntent> = {}): ProviderSessionIntent {
   return {
     checkoutId: "chk_canonical_1",
     offer: makeOffer(),
@@ -97,7 +95,6 @@ function makeIntent(
     ...overrides,
   };
 }
-
 
 // ============================================================
 // MOCK ADAPTER
@@ -240,7 +237,10 @@ function testRegistryEmptyFailsClosed(): void {
   assertNull(reg.getAdapter("stripe"), "empty registry: Stripe unavailable");
   assertNull(reg.getAdapter("mercado_pago"), "empty registry: Mercado Pago unavailable");
   assertNull(reg.getAdapter("paypal"), "empty registry: PayPal unavailable");
-  assert(DEFAULT_PROVIDER_REGISTRY.getAdapter("stripe") === null, "default registry has no Stripe adapter");
+  assert(
+    DEFAULT_PROVIDER_REGISTRY.getAdapter("stripe") === null,
+    "default registry has no Stripe adapter",
+  );
 }
 
 function testRegistryResolution(): void {
@@ -261,8 +261,14 @@ function testRegistryResolution(): void {
 
 function testNoFallback(): void {
   const stripeOnly = createProviderRegistry({ stripe: makeMockAdapter("stripe") });
-  assertNull(stripeOnly.getAdapter("paypal"), "missing Stripe does not fallback to PayPal (Stripe-only registry)");
-  assertNull(stripeOnly.getAdapter("mercado_pago"), "missing Mercado Pago does not fallback to Stripe (Stripe-only registry)");
+  assertNull(
+    stripeOnly.getAdapter("paypal"),
+    "missing Stripe does not fallback to PayPal (Stripe-only registry)",
+  );
+  assertNull(
+    stripeOnly.getAdapter("mercado_pago"),
+    "missing Mercado Pago does not fallback to Stripe (Stripe-only registry)",
+  );
 
   const mpOnly = createProviderRegistry({ mercado_pago: makeMockAdapter("mercado_pago") });
   assertNull(mpOnly.getAdapter("stripe"), "missing Stripe does not fallback to Mercado Pago");
@@ -317,7 +323,6 @@ function testMoneySecurity(): void {
   assertEqual(offer.amount, 2500, "amount sourced only from server offer");
   assertEqual(offer.currency, "USD", "currency sourced only from server offer");
 }
-
 
 async function testWebhookCompatibility(): Promise<void> {
   const adapter = makeMockAdapter("stripe");
@@ -380,8 +385,14 @@ async function testIdentifierIntegrity(): Promise<void> {
   await adapter.fetcher.fetchResource("stripe", "invoice", "inv_1");
   const saleCall = adapter.calls.fetchResource.find((c) => c.resourceType === "sale");
   const invoiceCall = adapter.calls.fetchResource.find((c) => c.resourceType === "invoice");
-  assert(saleCall !== undefined && saleCall.resourceId === "sale_1", "sale id fetched as sale, not subscription");
-  assert(invoiceCall !== undefined && invoiceCall.resourceId === "inv_1", "invoice id fetched as invoice, not subscription");
+  assert(
+    saleCall !== undefined && saleCall.resourceId === "sale_1",
+    "sale id fetched as sale, not subscription",
+  );
+  assert(
+    invoiceCall !== undefined && invoiceCall.resourceId === "inv_1",
+    "invoice id fetched as invoice, not subscription",
+  );
 }
 
 function testUnconfiguredFailsClosed(): void {
@@ -460,7 +471,6 @@ async function testNoNetwork(): Promise<void> {
   }
 }
 
-
 // ============================================================
 // RUNNER
 // ============================================================
@@ -500,4 +510,3 @@ async function run(): Promise<void> {
 }
 
 await run();
-

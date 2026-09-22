@@ -25,8 +25,6 @@ describe("template switching owner content preservation", () => {
     expect(switched.templateDefinitionId).toBe("executive-premium-002");
     expect(switched.blocks).toEqual(current.blocks);
     expect(switched.blocks).not.toBe(current.blocks);
-    expect(switched.blocks[0]!.content.products).toEqual(
-      current.blocks[0]!.content.products,
-    );
+    expect(switched.blocks[0]!.content.products).toEqual(current.blocks[0]!.content.products);
   });
 });

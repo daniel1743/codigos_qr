@@ -18,23 +18,24 @@
 
 ## TIMELINE
 
-| Time | Event |
-|------|-------|
-| 02:05 AM | Commit 2aa8132 pushed (original no-CTA fix) |
-| 02:00 AM | Vercel deployed (before or simultaneous with push) |
-| 02:35 AM | User reported staging still shows error |
-| 02:35-02:55 AM | Forensic investigation |
-| 02:55 AM | Bug identified at line 134 |
-| 02:55 AM | Fix applied and tested (18/18 tests pass) |
-| 02:56 AM | Commit bfa9f64 created and pushed |
-| 02:56 AM | Build completed successfully |
-| Now | Awaiting Vercel auto-deploy (~2-3 min) |
+| Time           | Event                                              |
+| -------------- | -------------------------------------------------- |
+| 02:05 AM       | Commit 2aa8132 pushed (original no-CTA fix)        |
+| 02:00 AM       | Vercel deployed (before or simultaneous with push) |
+| 02:35 AM       | User reported staging still shows error            |
+| 02:35-02:55 AM | Forensic investigation                             |
+| 02:55 AM       | Bug identified at line 134                         |
+| 02:55 AM       | Fix applied and tested (18/18 tests pass)          |
+| 02:56 AM       | Commit bfa9f64 created and pushed                  |
+| 02:56 AM       | Build completed successfully                       |
+| Now            | Awaiting Vercel auto-deploy (~2-3 min)             |
 
 ---
 
 ## WHAT WENT WRONG
 
 ### Original Fix (Commit 2aa8132)
+
 - ✅ Made `primary_action` optional through V2→V1 chain
 - ✅ Changed `mapPrimaryAction` to return `null` for missing action
 - ✅ Updated validation to accept `undefined` primary_action
@@ -46,6 +47,7 @@
 **Location:** `src/lib/onboarding-v2/engine-v2-adapter.ts:134`
 
 **Code:**
+
 ```typescript
 case "book":
   if (!value || !isValidHttpUrl(value)) return "NEEDS_INPUT";  // ⛔ BUG
@@ -53,10 +55,11 @@ case "book":
 ```
 
 **All other cases correctly returned `"INVALID_DESTINATION"`:**
+
 ```typescript
 case "whatsapp":
   if (!value || !isValidWhatsApp(value)) return "INVALID_DESTINATION";  // ✅ CORRECT
-  
+
 case "website":
   if (!value || !isValidHttpUrl(value)) return "INVALID_DESTINATION";  // ✅ CORRECT
 ```
@@ -64,6 +67,7 @@ case "website":
 ### Why This Caused the Staging Error
 
 **Scenario:**
+
 1. User previously selected "Reservas" (booking) in an earlier session
 2. User didn't enter booking URL (or entered invalid URL)
 3. Draft persisted to sessionStorage: `{ type: "book" }` (no `value`)
@@ -94,6 +98,7 @@ case "book":
 ```
 
 **Rationale:**
+
 1. **Semantic correctness:** Missing/invalid booking URL is "invalid destination", not "needs input"
 2. **Consistency:** Matches all other action types
 3. **User clarity:** Better error message
@@ -106,15 +111,15 @@ case "book":
 
 ## VERIFICATION STATUS
 
-| Item | Status |
-|------|--------|
-| Bug identified | ✅ Complete |
-| Fix coded | ✅ Complete |
-| Tests passed | ✅ 18/18 |
-| Build passed | ✅ Success |
-| Committed | ✅ bfa9f64 |
-| Pushed | ✅ Success |
-| Vercel redeploy | 🔄 In progress |
+| Item                 | Status              |
+| -------------------- | ------------------- |
+| Bug identified       | ✅ Complete         |
+| Fix coded            | ✅ Complete         |
+| Tests passed         | ✅ 18/18            |
+| Build passed         | ✅ Success          |
+| Committed            | ✅ bfa9f64          |
+| Pushed               | ✅ Success          |
+| Vercel redeploy      | 🔄 In progress      |
 | Staging runtime test | ⏳ Pending redeploy |
 
 ---
@@ -122,6 +127,7 @@ case "book":
 ## COMMITS
 
 ### Commit 1: 2aa8132 (Original Fix)
+
 ```
 fix(onboarding): enable explicit no-CTA for presence-oriented pages
 
@@ -135,6 +141,7 @@ Status: ✅ Deployed, ⚠️ Contains overlooked bug
 ```
 
 ### Commit 2: bfa9f64 (Bug Fix)
+
 ```
 fix(onboarding): correct booking action validation error code
 
@@ -159,15 +166,18 @@ src/lib/onboarding-v2/engine-v2-adapter.ts  (+1/-1)
 ## NEXT ACTIONS
 
 ### Immediate (Automated)
+
 1. ⏳ Vercel detects push of bfa9f64
 2. ⏳ Build starts automatically (~30 seconds)
 3. ⏳ Deploy completes (~2-3 minutes total)
 4. ⏳ Alias updates to new deployment
 
 ### Manual Verification Required
+
 Once Vercel shows new deployment:
 
 1. **Verify deployment commit:**
+
    ```bash
    vercel inspect codigos-staging-on.vercel.app
    # Check deployment includes bfa9f64
@@ -204,13 +214,13 @@ Once Vercel shows new deployment:
 
 ## FINAL STATUS
 
-| Metric | Value |
-|--------|-------|
-| **P1_NO_CTA_BLOCKER** | ✅ **RESOLVED** |
-| **Fix Quality** | ✅ Minimal, targeted, tested |
-| **Regressions** | ❌ None |
-| **Deploy Status** | 🔄 In progress |
-| **Phase 7 Beta** | ✅ Unblocked after deploy |
+| Metric                | Value                        |
+| --------------------- | ---------------------------- |
+| **P1_NO_CTA_BLOCKER** | ✅ **RESOLVED**              |
+| **Fix Quality**       | ✅ Minimal, targeted, tested |
+| **Regressions**       | ❌ None                      |
+| **Deploy Status**     | 🔄 In progress               |
+| **Phase 7 Beta**      | ✅ Unblocked after deploy    |
 
 ---
 

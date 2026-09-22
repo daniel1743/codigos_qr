@@ -217,6 +217,7 @@ None.
 ## TESTS
 
 `heroCtaContextual.test.ts` (6 tests, passing):
+
 - `shouldScrollInspectorToFocus` accepts `hero-cta` and `profile-cover`, rejects null
 - `hero-cta` focus signal delivers once and unsubscribes
 - redundant `selectBlock` of the same hero does not mutate config/history/dirty

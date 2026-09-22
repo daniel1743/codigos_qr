@@ -15,9 +15,11 @@ Se ha implementado un módulo completamente nuevo y separado para **Documentos E
 ## ARCHIVOS CREADOS
 
 ### 1. `src/types/encrypted-documents.ts` (51 líneas)
+
 **Responsabilidad:** TypeScript types para el sistema de documentos encriptados
 
 **Interfaces principales:**
+
 ```typescript
 - EncryptedDocument: Modelo completo del documento
 - DocumentType: 'excel' | 'pdf' | 'image' | 'word' | 'zip'
@@ -27,6 +29,7 @@ Se ha implementado un módulo completamente nuevo y separado para **Documentos E
 ```
 
 **Features modeladas:**
+
 - Encriptación con 3 niveles
 - Control de acceso (expire, max downloads, one-time)
 - IP whitelist
@@ -38,11 +41,13 @@ Se ha implementado un módulo completamente nuevo y separado para **Documentos E
 ---
 
 ### 2. `src/lib/encryption.ts` (252 líneas)
+
 **Responsabilidad:** Servicio de encriptación usando Web Crypto API
 
 **Métodos principales:**
 
 #### Generación y manejo de claves:
+
 ```typescript
 generateKey(): Promise<CryptoKey>
 exportKey(key: CryptoKey): Promise<string>
@@ -51,6 +56,7 @@ deriveKeyFromPassword(password: string, salt: Uint8Array): Promise<CryptoKey>
 ```
 
 #### Encriptación/Desencriptación:
+
 ```typescript
 encryptFile(file: File, password?: string): Promise<{
   encryptedData: ArrayBuffer;
@@ -68,6 +74,7 @@ decryptFile(
 ```
 
 #### Seguridad:
+
 ```typescript
 hashPassword(password: string): Promise<string>
 verifyPassword(password: string, hash: string): Promise<boolean>
@@ -75,6 +82,7 @@ generateDeviceFingerprint(): Promise<string>
 ```
 
 #### Utilities:
+
 ```typescript
 getDocumentType(mimeType: string): DocumentType
 formatFileSize(bytes: number): string
@@ -83,6 +91,7 @@ base64ToArrayBuffer(base64: string): ArrayBuffer
 ```
 
 **Tecnologías:**
+
 - **AES-256-GCM** para encriptación simétrica
 - **PBKDF2** con 100,000 iteraciones para derivación de clave desde password
 - **SHA-256** para hashing
@@ -90,6 +99,7 @@ base64ToArrayBuffer(base64: string): ArrayBuffer
 - **Salt** de 16 bytes para password derivation
 
 **Seguridad garantizada:**
+
 - Zero-knowledge: La clave nunca se envía al servidor sin encriptar
 - End-to-end encryption real
 - Password derivation con salt único por archivo
@@ -98,6 +108,7 @@ base64ToArrayBuffer(base64: string): ArrayBuffer
 ---
 
 ### 3. `src/routes/encrypted-documents.tsx` (700+ líneas)
+
 **Responsabilidad:** Página completa del módulo de Documentos Encriptados
 
 **Estructura de componentes:**
@@ -155,6 +166,7 @@ EncryptedDocumentsPage (Root)
 ```
 
 **Design System:**
+
 - **Colores:** Gradiente azul/cyan para tema de seguridad
 - **Icons:** Lucide React
 - **Layout:** Responsive (3-col desktop, 1-col mobile)
@@ -163,6 +175,7 @@ EncryptedDocumentsPage (Root)
 - **Form:** Multi-step feel con secciones bien delimitadas
 
 **UX Features:**
+
 - Auto-populate nombre del documento desde filename
 - File type detection con iconos específicos
 - File size formatting humano
@@ -176,11 +189,14 @@ EncryptedDocumentsPage (Root)
 ## INTEGRACIÓN CON LA APP PRINCIPAL
 
 ### Header Navigation Update
+
 **Archivo modificado:** `src/routes/index.tsx`
 
 **Cambios:**
+
 1. ✅ Import del icono `Shield` de Lucide
 2. ✅ Nuevo enlace en header desktop:
+
 ```tsx
 <Link
   to="/encrypted-documents"
@@ -282,16 +298,19 @@ Si inválido:
 ## CASOS DE USO EMPRESARIALES
 
 ### 1. Nóminas Confidenciales
+
 **Escenario:** CFO necesita enviar Excel de nómina a gerente
 
 **Setup:**
+
 - Upload Excel de nómina
 - Password: fecha de la empresa
 - Expira en 48 horas
 - 1 sola descarga
 - Nivel: Alto
 
-**Beneficio:** 
+**Beneficio:**
+
 - No pasa por email inseguro
 - Auto-destruye después de lectura
 - Audit log completo
@@ -300,9 +319,11 @@ Si inválido:
 ---
 
 ### 2. Contratos Legales
+
 **Escenario:** Abogado envía PDF de contrato a cliente
 
 **Setup:**
+
 - Upload PDF contrato
 - Password: últimos 4 dígitos del cliente
 - Expira en 7 días
@@ -310,6 +331,7 @@ Si inválido:
 - Nivel: Máximo + 2FA
 
 **Beneficio:**
+
 - Cliente verifica identidad con 2FA
 - No se puede reenviar masivamente
 - Trazabilidad completa
@@ -318,9 +340,11 @@ Si inválido:
 ---
 
 ### 3. Planos Arquitectónicos
+
 **Escenario:** Arquitecto comparte planos con constructor
 
 **Setup:**
+
 - Upload imágenes/PDF de planos
 - Password: código del proyecto
 - No expira
@@ -328,6 +352,7 @@ Si inválido:
 - Nivel: Alto
 
 **Beneficio:**
+
 - Planos no circulan públicamente
 - Constructor puede acceder múltiples veces
 - Watermark invisible para tracking de leaks
@@ -336,9 +361,11 @@ Si inválido:
 ---
 
 ### 4. Investigaciones Médicas
+
 **Escenario:** Hospital comparte resultados sensibles con paciente
 
 **Setup:**
+
 - Upload PDF con resultados
 - Password: fecha de nacimiento del paciente
 - Expira en 30 días
@@ -347,6 +374,7 @@ Si inválido:
 - IP whitelist: solo desde hospital o casa del paciente
 
 **Beneficio:**
+
 - HIPAA compliant
 - Patient verifica identidad
 - No accesible desde ubicaciones sospechosas
@@ -356,17 +384,17 @@ Si inválido:
 
 ## DIFERENCIADORES VS COMPETENCIA
 
-| Feature | Fusion QR | Competidores |
-|---------|-----------|--------------|
-| **Encriptación** | AES-256-GCM client-side | Server-side o ninguna |
-| **Zero-knowledge** | ✅ Real | ❌ Falso marketing |
-| **Password derivation** | PBKDF2 100k iterations | Bcrypt simple |
-| **Auto-destrucción** | ✅ One-time download | ❌ No disponible |
-| **Device fingerprinting** | ✅ | ❌ |
-| **Audit logs** | ✅ Completo | ⚠️ Básico |
-| **IP whitelist** | ✅ | ⚠️ Solo Enterprise |
-| **QR code integration** | ✅ Nativo | ❌ Separado |
-| **Precio** | $19.99/mes | $49-99/mes |
+| Feature                   | Fusion QR               | Competidores          |
+| ------------------------- | ----------------------- | --------------------- |
+| **Encriptación**          | AES-256-GCM client-side | Server-side o ninguna |
+| **Zero-knowledge**        | ✅ Real                 | ❌ Falso marketing    |
+| **Password derivation**   | PBKDF2 100k iterations  | Bcrypt simple         |
+| **Auto-destrucción**      | ✅ One-time download    | ❌ No disponible      |
+| **Device fingerprinting** | ✅                      | ❌                    |
+| **Audit logs**            | ✅ Completo             | ⚠️ Básico             |
+| **IP whitelist**          | ✅                      | ⚠️ Solo Enterprise    |
+| **QR code integration**   | ✅ Nativo               | ❌ Separado           |
+| **Precio**                | $19.99/mes              | $49-99/mes            |
 
 ---
 
@@ -402,7 +430,8 @@ Archivo original
    - access_control settings
 ```
 
-**Clave guardada:** 
+**Clave guardada:**
+
 - Opción A (password): No se guarda, se deriva cada vez
 - Opción B (no password): Se encripta con master key del usuario y se guarda
 
@@ -433,6 +462,7 @@ Usuario autorizado
 ```
 
 **Seguridad garantizada:**
+
 - Archivo nunca existe desencriptado en servidor
 - Password nunca se envía en claro
 - Key derivation ocurre en browser
@@ -443,6 +473,7 @@ Usuario autorizado
 ## PRÓXIMOS PASOS DE IMPLEMENTACIÓN
 
 ### FASE 1: Backend (Pendiente)
+
 **Tiempo estimado:** 4-6 horas
 
 1. ✅ Crear tabla `encrypted_documents` en Supabase
@@ -454,31 +485,32 @@ Usuario autorizado
 7. ✅ QR code generation integration
 
 **Schema SQL:**
+
 ```sql
 CREATE TABLE encrypted_documents (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID NOT NULL REFERENCES auth.users(id),
   name TEXT NOT NULL,
   description TEXT,
-  
+
   -- File info
   original_filename TEXT NOT NULL,
   file_type TEXT NOT NULL,
   file_size_bytes BIGINT NOT NULL,
   mime_type TEXT NOT NULL,
-  
+
   -- Storage
   encrypted_file_path TEXT NOT NULL,
   encryption_key_hash TEXT NOT NULL,
   iv TEXT NOT NULL,
   salt TEXT,
-  
+
   -- Security
   encryption_level TEXT NOT NULL,
   password_required BOOLEAN DEFAULT false,
   password_hash TEXT,
   two_factor_enabled BOOLEAN DEFAULT false,
-  
+
   -- Access Control
   expire_at TIMESTAMPTZ,
   max_downloads INTEGER,
@@ -486,12 +518,12 @@ CREATE TABLE encrypted_documents (
   one_time_download BOOLEAN DEFAULT false,
   ip_whitelist TEXT[],
   revoked BOOLEAN DEFAULT false,
-  
+
   -- QR
   qr_code_id UUID NOT NULL,
   qr_code_url TEXT NOT NULL,
   short_url TEXT NOT NULL UNIQUE,
-  
+
   -- Timestamps
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
@@ -518,6 +550,7 @@ CREATE INDEX idx_access_logs_document ON document_access_logs(document_id);
 ---
 
 ### FASE 2: Access Page (Pendiente)
+
 **Tiempo estimado:** 3-4 horas
 
 1. ✅ Crear ruta `/d/[short_url]` (documento access page)
@@ -531,6 +564,7 @@ CREATE INDEX idx_access_logs_document ON document_access_logs(document_id);
 ---
 
 ### FASE 3: Dashboard & Management (Pendiente)
+
 **Tiempo estimado:** 4-5 horas
 
 1. ✅ Fetch documents desde DB
@@ -553,6 +587,7 @@ CREATE INDEX idx_access_logs_document ON document_access_logs(document_id);
 ---
 
 ### FASE 4: QR Code Integration (Pendiente)
+
 **Tiempo estimado:** 2-3 horas
 
 1. ✅ Generate QR code after document creation
@@ -564,6 +599,7 @@ CREATE INDEX idx_access_logs_document ON document_access_logs(document_id);
 ---
 
 ### FASE 5: Analytics & Insights (Pendiente)
+
 **Tiempo estimado:** 3-4 horas
 
 1. ✅ Real-time stats dashboard
@@ -578,6 +614,7 @@ CREATE INDEX idx_access_logs_document ON document_access_logs(document_id);
 ## PRICING STRATEGY
 
 ### FREE Tier
+
 - 3 documentos encriptados/mes
 - Max 10MB por archivo
 - Nivel estándar solamente
@@ -586,6 +623,7 @@ CREATE INDEX idx_access_logs_document ON document_access_logs(document_id);
 - Marca de agua "Secured by Fusion QR"
 
 ### PRO Tier ($19.99/mes)
+
 - 50 documentos/mes
 - Max 100MB por archivo
 - Todos los niveles de encriptación
@@ -596,6 +634,7 @@ CREATE INDEX idx_access_logs_document ON document_access_logs(document_id);
 - Email notifications
 
 ### ENTERPRISE Tier ($99/mes)
+
 - Documentos ilimitados
 - Max 1GB por archivo
 - Custom encryption (RSA-4096)
@@ -614,24 +653,28 @@ CREATE INDEX idx_access_logs_document ON document_access_logs(document_id);
 ### KPIs a trackear:
 
 **Engagement:**
+
 - % usuarios que visitan página Encrypted Docs
 - % que crean primer documento
 - Documentos creados/usuario/mes
 - Retention rate (vuelven a crear)
 
 **Security:**
+
 - Intentos de acceso bloqueados
 - Average password strength
 - % documentos con 2FA
 - % documentos one-time
 
 **Business:**
+
 - Conversion Free → Pro (target: 5%)
 - MRR desde Encrypted Docs
 - Churn rate
 - NPS score
 
 **Technical:**
+
 - Average upload time
 - Average download time
 - Encryption/decryption performance
@@ -675,6 +718,7 @@ CREATE INDEX idx_access_logs_document ON document_access_logs(document_id);
 ✅ **Módulo Encrypted Documents implementado al 70%**
 
 **Completado:**
+
 - ✅ Types & interfaces
 - ✅ Encryption service (Web Crypto API)
 - ✅ UI completa (create form + empty states)
@@ -683,6 +727,7 @@ CREATE INDEX idx_access_logs_document ON document_access_logs(document_id);
 - ✅ Security controls (password, expiry, max downloads)
 
 **Pendiente (Backend):**
+
 - ⏳ Supabase table creation
 - ⏳ Upload/download endpoints
 - ⏳ Access page (`/d/[short_url]`)

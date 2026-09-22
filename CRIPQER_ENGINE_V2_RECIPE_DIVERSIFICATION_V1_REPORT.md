@@ -34,11 +34,11 @@ cambiar el contrato de arquetipos.
 
 La integración usa exclusivamente los valores existentes:
 
-| Archetype | Existing `family_bias` |
-| --- | --- |
-| `appointment_service` | `luxury +12`, `creator +8`, `corporate +8` |
-| `retail` | `energetic +12`, `corporate +10`, `creator +6` |
-| `portfolio_service` | `editorial +16`, `creator +12`, `minimal +8` |
+| Archetype             | Existing `family_bias`                         |
+| --------------------- | ---------------------------------------------- |
+| `appointment_service` | `luxury +12`, `creator +8`, `corporate +8`     |
+| `retail`              | `energetic +12`, `corporate +10`, `creator +6` |
+| `portfolio_service`   | `editorial +16`, `creator +12`, `minimal +8`   |
 
 El flujo ahora es:
 
@@ -82,11 +82,11 @@ Las puntuaciones **Before** son las producidas por la fórmula anterior sin
 aplicar el bias. Las **After** son las mismas puntuaciones más el
 `family_bias` existente.
 
-| Scenario | Archetype | Before family scores | After family scores | Before selected family | After selected family | Recipe / preset | Canonical valid? |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| A — services | `appointment_service` | `editorial 30, luxury 0, corporate 62, minimal 32, creator 0, energetic 0` | `editorial 30, luxury 12, corporate 70, minimal 32, creator 8, energetic 0` | `minimal` | `minimal` | `engine#2.1` / none | YES |
-| B — catalog | `retail` | `editorial 24, luxury 0, corporate 54, minimal 24, creator 10, energetic 14` | `editorial 24, luxury 0, corporate 64, minimal 24, creator 16, energetic 26` | `minimal` | `editorial` | `engine#2.0` / none | YES |
-| C — portfolio | `portfolio_service` | `editorial 40, luxury 0, corporate 46, minimal 34, creator 10, energetic 0` | `editorial 56, luxury 0, corporate 46, minimal 42, creator 22, energetic 0` | `editorial` | `editorial` | `editorial_calm#2.1` / `editorial_calm` | YES |
+| Scenario      | Archetype             | Before family scores                                                         | After family scores                                                          | Before selected family | After selected family | Recipe / preset                         | Canonical valid? |
+| ------------- | --------------------- | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ---------------------- | --------------------- | --------------------------------------- | ---------------- |
+| A — services  | `appointment_service` | `editorial 30, luxury 0, corporate 62, minimal 32, creator 0, energetic 0`   | `editorial 30, luxury 12, corporate 70, minimal 32, creator 8, energetic 0`  | `minimal`              | `minimal`             | `engine#2.1` / none                     | YES              |
+| B — catalog   | `retail`              | `editorial 24, luxury 0, corporate 54, minimal 24, creator 10, energetic 14` | `editorial 24, luxury 0, corporate 64, minimal 24, creator 16, energetic 26` | `minimal`              | `editorial`           | `engine#2.0` / none                     | YES              |
+| C — portfolio | `portfolio_service`   | `editorial 40, luxury 0, corporate 46, minimal 34, creator 10, energetic 0`  | `editorial 56, luxury 0, corporate 46, minimal 42, creator 22, energetic 0`  | `editorial`            | `editorial`           | `editorial_calm#2.1` / `editorial_calm` | YES              |
 
 ### Why the selected family won
 
@@ -196,16 +196,16 @@ renders the post-fix canonical configurations faithfully.
 
 Observed post-fix recipe differences:
 
-| Property | A services | B catalog | C portfolio |
-| --- | --- | --- | --- |
-| Family | minimal | editorial | editorial |
+| Property         | A services                 | B catalog                  | C portfolio                 |
+| ---------------- | -------------------------- | -------------------------- | --------------------------- |
+| Family           | minimal                    | editorial                  | editorial                   |
 | Layout / pattern | compact / conversion_first | compact / conversion_first | editorial / editorial_stack |
-| Typography | Trebuchet MS, 30/600 | Georgia, 44/700 | Georgia, 44/700 |
-| Cards | minimal | flat | flat |
-| Buttons | solid, 58px | solid, 58px | solid, 54px |
-| Background | solid, green light | solid, white | solid, warm light |
-| Motion | minimal / fade | editorial / slide-up | editorial / slide-up |
-| Content blocks | services | productGrid | portfolio |
+| Typography       | Trebuchet MS, 30/600       | Georgia, 44/700            | Georgia, 44/700             |
+| Cards            | minimal                    | flat                       | flat                        |
+| Buttons          | solid, 58px                | solid, 58px                | solid, 54px                 |
+| Background       | solid, green light         | solid, white               | solid, warm light           |
+| Motion           | minimal / fade             | editorial / slide-up       | editorial / slide-up        |
+| Content blocks   | services                   | productGrid                | portfolio                   |
 
 Compared with the forensic baseline, the catalog now leaves the former
 minimal-family convergence and uses the existing editorial treatment. The
@@ -296,4 +296,3 @@ this order:
 
 **Primary next task:** `SMART_PAGES_6_MINISITE_MULTI_PAGE_FANOUT` only after explicit
 approval.
-

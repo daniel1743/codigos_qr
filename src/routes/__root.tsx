@@ -82,16 +82,34 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
       { title: "Cripqer: Plataforma de Conversión Inteligente | De la Atención al Cliente" },
-      { name: "description", content: "Plataforma de conversión completa: Crea tu QR, atrae tráfico, convierte visitantes en clientes y mide resultados. Más que un biolink, es tu sistema de crecimiento." },
+      {
+        name: "description",
+        content:
+          "Plataforma de conversión completa: Crea tu QR, atrae tráfico, convierte visitantes en clientes y mide resultados. Más que un biolink, es tu sistema de crecimiento.",
+      },
       { property: "og:title", content: "Cripqer: Plataforma de Conversión Inteligente" },
-      { property: "og:description", content: "No solo enlaces. Construye el recorrido completo: De la atención al cliente recurrente. QR + Conversión + Analytics + Gestión." },
+      {
+        property: "og:description",
+        content:
+          "No solo enlaces. Construye el recorrido completo: De la atención al cliente recurrente. QR + Conversión + Analytics + Gestión.",
+      },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://www.cripqer.dev/" },
-      { property: "og:image", content: "https://www.cripqer.dev/brand-assets/cripqer-icon-512.png" },
+      {
+        property: "og:image",
+        content: "https://www.cripqer.dev/brand-assets/cripqer-icon-512.png",
+      },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Cripqer: Plataforma de Conversión Inteligente" },
-      { name: "twitter:description", content: "Más que un biolink. Construye el recorrido completo de conversión de tu negocio en una sola plataforma." },
-      { name: "twitter:image", content: "https://www.cripqer.dev/brand-assets/cripqer-icon-512.png" },
+      {
+        name: "twitter:description",
+        content:
+          "Más que un biolink. Construye el recorrido completo de conversión de tu negocio en una sola plataforma.",
+      },
+      {
+        name: "twitter:image",
+        content: "https://www.cripqer.dev/brand-assets/cripqer-icon-512.png",
+      },
     ],
     links: [
       { rel: "canonical", href: "https://www.cripqer.dev/" },
@@ -100,10 +118,24 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: appCss,
       },
       { rel: "shortcut icon", href: "/brand-assets/cripqer-favicon-32.png", type: "image/png" },
-      { rel: "icon", href: "/brand-assets/cripqer-favicon-16.png", type: "image/png", sizes: "16x16" },
-      { rel: "icon", href: "/brand-assets/cripqer-favicon-32.png", type: "image/png", sizes: "32x32" },
+      {
+        rel: "icon",
+        href: "/brand-assets/cripqer-favicon-16.png",
+        type: "image/png",
+        sizes: "16x16",
+      },
+      {
+        rel: "icon",
+        href: "/brand-assets/cripqer-favicon-32.png",
+        type: "image/png",
+        sizes: "32x32",
+      },
       { rel: "icon", href: "/brand-assets/cripqer-favicon.png", type: "image/png", sizes: "48x48" },
-      { rel: "apple-touch-icon", href: "/brand-assets/cripqer-apple-touch-180.png", sizes: "180x180" },
+      {
+        rel: "apple-touch-icon",
+        href: "/brand-assets/cripqer-apple-touch-180.png",
+        sizes: "180x180",
+      },
       { rel: "manifest", href: "/manifest.json" },
     ],
   }),

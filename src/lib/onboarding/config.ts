@@ -35,12 +35,54 @@ export const PERSONALITIES: {
   radius: number;
   weight: number;
 }[] = [
-  { id: "elegant", label: "Elegante", caption: "Serena y cuidada", swatch: ["#1B2A41", "#C9B37E"], radius: 14, weight: 600 },
-  { id: "minimal", label: "Minimalista", caption: "Aire y silencio", swatch: ["#111827", "#E5E7EB"], radius: 4, weight: 400 },
-  { id: "modern", label: "Moderna", caption: "Limpia y actual", swatch: ["#0D47A1", "#7FB2F0"], radius: 18, weight: 600 },
-  { id: "professional", label: "Profesional", caption: "Confiable y clara", swatch: ["#233044", "#9AA6B2"], radius: 8, weight: 500 },
-  { id: "energetic", label: "Energética", caption: "Directa y viva", swatch: ["#B45309", "#F0B36B"], radius: 20, weight: 700 },
-  { id: "premium", label: "Premium", caption: "Alto valor", swatch: ["#0B1A2E", "#D4AF37"], radius: 12, weight: 700 },
+  {
+    id: "elegant",
+    label: "Elegante",
+    caption: "Serena y cuidada",
+    swatch: ["#1B2A41", "#C9B37E"],
+    radius: 14,
+    weight: 600,
+  },
+  {
+    id: "minimal",
+    label: "Minimalista",
+    caption: "Aire y silencio",
+    swatch: ["#111827", "#E5E7EB"],
+    radius: 4,
+    weight: 400,
+  },
+  {
+    id: "modern",
+    label: "Moderna",
+    caption: "Limpia y actual",
+    swatch: ["#0D47A1", "#7FB2F0"],
+    radius: 18,
+    weight: 600,
+  },
+  {
+    id: "professional",
+    label: "Profesional",
+    caption: "Confiable y clara",
+    swatch: ["#233044", "#9AA6B2"],
+    radius: 8,
+    weight: 500,
+  },
+  {
+    id: "energetic",
+    label: "Energética",
+    caption: "Directa y viva",
+    swatch: ["#B45309", "#F0B36B"],
+    radius: 20,
+    weight: 700,
+  },
+  {
+    id: "premium",
+    label: "Premium",
+    caption: "Alto valor",
+    swatch: ["#0B1A2E", "#D4AF37"],
+    radius: 12,
+    weight: 700,
+  },
 ];
 
 export const ACTIONS: { id: PrimaryActionType; label: string }[] = [

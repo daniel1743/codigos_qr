@@ -170,7 +170,7 @@ La decisión de CTA permanece bajo la política del host.
 
 No se modificaron Engine V2, Smart Pages core/retail/host mapping, renderer,
 `BioTemplateConfig`, Power Editor, Supabase, migraciones, Analytics, QR,
- navegación ni UI.
+navegación ni UI.
 
 ## Verification
 

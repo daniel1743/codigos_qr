@@ -120,7 +120,12 @@ async function signIn(context) {
   try {
     await page.waitForSelector("#email", { timeout: 30000 });
   } catch {}
-  if (await page.locator("#email").isVisible().catch(() => false)) {
+  if (
+    await page
+      .locator("#email")
+      .isVisible()
+      .catch(() => false)
+  ) {
     await page.locator("#email").fill(env.QA_EMAIL);
     await page.locator("#password").fill(env.QA_PASSWORD);
     await page.getByRole("button", { name: "Entrar al editor" }).click();

@@ -67,13 +67,7 @@ function Mark({ className }: { className?: string }) {
   );
 }
 
-function Wordmark({
-  palette,
-  showTagline,
-}: {
-  palette: Palette;
-  showTagline: boolean;
-}) {
+function Wordmark({ palette, showTagline }: { palette: Palette; showTagline: boolean }) {
   return (
     <span
       className="logo-wordmark"
@@ -82,7 +76,7 @@ function Wordmark({
         flexDirection: "column",
         gap: showTagline ? "4px" : 0,
         color: palette.wordmark,
-        fontFamily: 'Montserrat, Arial, Helvetica, sans-serif',
+        fontFamily: "Montserrat, Arial, Helvetica, sans-serif",
         fontSize: "clamp(1.05rem, 3vw, 1.55rem)",
         fontWeight: 800,
         letterSpacing: "0.14em",
@@ -113,13 +107,7 @@ function SymbolMark({ className }: { className?: string }) {
   return <Mark className={className ?? "h-full w-full object-contain"} />;
 }
 
-function HorizontalLockup({
-  palette,
-  showTagline,
-}: {
-  palette: Palette;
-  showTagline: boolean;
-}) {
+function HorizontalLockup({ palette, showTagline }: { palette: Palette; showTagline: boolean }) {
   return (
     <span className="logo-horizontal-lockup hidden min-[420px]:inline-flex items-center gap-2">
       <SymbolMark className="h-9 w-9 shrink-0 object-contain" />

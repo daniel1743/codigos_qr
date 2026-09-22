@@ -160,14 +160,19 @@ export function PremiumAuthModal({
           <div className="relative mx-auto flex w-full max-w-sm flex-col items-center">
             <div className="relative mb-7 flex h-[7.35rem] w-[7.35rem] items-center justify-center rounded-full border border-[#d7f1f2]/75 bg-[#0f5259]/50 shadow-[inset_0_1px_20px_rgba(255,255,255,0.15),0_14px_38px_rgba(0,15,18,0.3)] backdrop-blur-md">
               <div className="absolute inset-2 rounded-full border border-white/15" />
-              <QrCode className="relative h-12 w-12 stroke-[1.35] text-[#e7f8f7]" aria-hidden="true" />
+              <QrCode
+                className="relative h-12 w-12 stroke-[1.35] text-[#e7f8f7]"
+                aria-hidden="true"
+              />
               <span className="absolute -bottom-2 rounded-full border border-[#d7f1f2]/45 bg-[#155e66] px-2.5 py-1 text-[0.55rem] font-bold tracking-[0.22em] text-white shadow-lg">
                 QR
               </span>
             </div>
 
             <div className="text-center">
-              <p className="text-[0.64rem] font-semibold uppercase tracking-[0.3em] text-[#c7e9e9]/80">Cripqer</p>
+              <p className="text-[0.64rem] font-semibold uppercase tracking-[0.3em] text-[#c7e9e9]/80">
+                Cripqer
+              </p>
               <DialogTitle className="mt-2 text-3xl font-light tracking-[0.06em] text-white sm:text-[2rem]">
                 {isLogin ? "Bienvenido" : "Crea tu acceso"}
               </DialogTitle>
@@ -184,7 +189,9 @@ export function PremiumAuthModal({
                   <label className="block" htmlFor={nameId}>
                     <span className="sr-only">Nombre completo</span>
                     <FieldShell>
-                      <FieldIcon><UserRound className="h-5 w-5 stroke-[1.55]" /></FieldIcon>
+                      <FieldIcon>
+                        <UserRound className="h-5 w-5 stroke-[1.55]" />
+                      </FieldIcon>
                       <input
                         id={nameId}
                         required
@@ -200,7 +207,9 @@ export function PremiumAuthModal({
                 <label className="block" htmlFor={emailId}>
                   <span className="sr-only">Correo electrónico</span>
                   <FieldShell>
-                    <FieldIcon><Mail className="h-5 w-5 stroke-[1.55]" /></FieldIcon>
+                    <FieldIcon>
+                      <Mail className="h-5 w-5 stroke-[1.55]" />
+                    </FieldIcon>
                     <input
                       id={emailId}
                       required
@@ -217,7 +226,9 @@ export function PremiumAuthModal({
                 <label className="block" htmlFor={passwordId}>
                   <span className="sr-only">Contraseña</span>
                   <FieldShell>
-                    <FieldIcon><LockKeyhole className="h-5 w-5 stroke-[1.55]" /></FieldIcon>
+                    <FieldIcon>
+                      <LockKeyhole className="h-5 w-5 stroke-[1.55]" />
+                    </FieldIcon>
                     <input
                       id={passwordId}
                       required
@@ -245,7 +256,9 @@ export function PremiumAuthModal({
                   <label className="block" htmlFor={confirmationId}>
                     <span className="sr-only">Repetir contraseña</span>
                     <FieldShell>
-                      <FieldIcon><KeyRound className="h-5 w-5 stroke-[1.55]" /></FieldIcon>
+                      <FieldIcon>
+                        <KeyRound className="h-5 w-5 stroke-[1.55]" />
+                      </FieldIcon>
                       <input
                         id={confirmationId}
                         required
@@ -261,10 +274,18 @@ export function PremiumAuthModal({
                         type="button"
                         onClick={() => setShowConfirmation((visible) => !visible)}
                         className="rounded p-1 text-[#d7ecee]/75 outline-none transition hover:text-white focus-visible:ring-2 focus-visible:ring-white"
-                        aria-label={showConfirmation ? "Ocultar repetición de contraseña" : "Mostrar repetición de contraseña"}
+                        aria-label={
+                          showConfirmation
+                            ? "Ocultar repetición de contraseña"
+                            : "Mostrar repetición de contraseña"
+                        }
                         aria-pressed={showConfirmation}
                       >
-                        {showConfirmation ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                        {showConfirmation ? (
+                          <EyeOff className="h-5 w-5" />
+                        ) : (
+                          <Eye className="h-5 w-5" />
+                        )}
                       </button>
                     </FieldShell>
                   </label>
@@ -272,7 +293,10 @@ export function PremiumAuthModal({
               </div>
 
               <div className="mt-8 flex items-center justify-between gap-4 text-sm">
-                <label className="group flex cursor-pointer items-center gap-2.5 text-[#e1f3f3]" htmlFor={isLogin ? rememberId : termsId}>
+                <label
+                  className="group flex cursor-pointer items-center gap-2.5 text-[#e1f3f3]"
+                  htmlFor={isLogin ? rememberId : termsId}
+                >
                   <input
                     id={isLogin ? rememberId : termsId}
                     type="checkbox"
@@ -284,7 +308,10 @@ export function PremiumAuthModal({
                     className="peer sr-only"
                   />
                   <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-sm border border-[#d3ecee]/70 bg-[#0b434a]/60 transition peer-checked:border-white peer-checked:bg-[#d5edef]">
-                    <Check className="h-3.5 w-3.5 text-[#0a454c] opacity-0 transition peer-checked:opacity-100" strokeWidth={3} />
+                    <Check
+                      className="h-3.5 w-3.5 text-[#0a454c] opacity-0 transition peer-checked:opacity-100"
+                      strokeWidth={3}
+                    />
                   </span>
                   <span className="leading-5">
                     {isLogin ? "Mantener sesión iniciada" : "Acepto los términos y condiciones"}
@@ -309,7 +336,10 @@ export function PremiumAuthModal({
                 </p>
               )}
 
-              <div aria-live="polite" className="mt-5 min-h-5 text-center text-xs leading-5 text-[#d9f1f0]">
+              <div
+                aria-live="polite"
+                className="mt-5 min-h-5 text-center text-xs leading-5 text-[#d9f1f0]"
+              >
                 {error || successMessage || notice}
               </div>
 

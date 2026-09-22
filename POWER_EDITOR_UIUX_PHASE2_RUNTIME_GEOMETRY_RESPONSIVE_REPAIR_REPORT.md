@@ -101,11 +101,11 @@ No reducer, StudioProvider, persistence, or document code was changed. Camera co
 
 ## Desktop/Tablet/Mobile Renderer Identity
 
-| Mode | Renderer | Config source | Result |
-|---|---|---|---|
+| Mode    | Renderer           | Config source  | Result                |
+| ------- | ------------------ | -------------- | --------------------- |
 | Desktop | `TemplateRenderer` | `state.config` | same canonical source |
-| Tablet | `TemplateRenderer` | `state.config` | same canonical source |
-| Mobile | `TemplateRenderer` | `state.config` | same canonical source |
+| Tablet  | `TemplateRenderer` | `state.config` | same canonical source |
+| Mobile  | `TemplateRenderer` | `state.config` | same canonical source |
 
 No mobile fallback, legacy renderer, duplicated config, or alternate template was found in the authorized direct render path.
 

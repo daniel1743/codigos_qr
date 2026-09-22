@@ -2,7 +2,7 @@
 
 > **Scope:** Classify existing Power Editor assets (blocks, layouts, section
 > presets, templates) into STANDARD / PREMIUM and map each to the capability
-> that authorizes *new* selection/insertion/application. Pure metadata only —
+> that authorizes _new_ selection/insertion/application. Pure metadata only —
 > no locks, no UI, no renderer/Billing changes.
 
 ---
@@ -125,13 +125,13 @@ as the classifier because it is inconsistent (every recipe hardcodes
 
 ## 5. Architecture
 
-| Question | Answer |
-|---|---|
-| Pure metadata? | **YES** (0 network, 0 DB, 0 React, 0 Supabase) |
-| Renderer changed? | **NO** |
-| Power Editor changed? | **NO** |
-| Billing changed? | **NO** |
-| Capability Policy Core changed? | **NO** (imports `ProductCapability` *type* only) |
+| Question                        | Answer                                           |
+| ------------------------------- | ------------------------------------------------ |
+| Pure metadata?                  | **YES** (0 network, 0 DB, 0 React, 0 Supabase)   |
+| Renderer changed?               | **NO**                                           |
+| Power Editor changed?           | **NO**                                           |
+| Billing changed?                | **NO**                                           |
+| Capability Policy Core changed? | **NO** (imports `ProductCapability` _type_ only) |
 
 **Decision shape:** `{ classification, requiredCapability }`, where
 `classification ∈ { STANDARD, PREMIUM, UNKNOWN }` and `requiredCapability` is a
@@ -143,11 +143,11 @@ canonical capability id (or `null` for UNKNOWN). Helpers:
 
 ## 6. Safety
 
-| Check | Result |
-|---|---|
-| Unknown asset fails closed (UNKNOWN, never Standard) | **PASS** |
+| Check                                                 | Result                            |
+| ----------------------------------------------------- | --------------------------------- |
+| Unknown asset fails closed (UNKNOWN, never Standard)  | **PASS**                          |
 | Premium existing content remains renderable by policy | **YES** (selection metadata only) |
-| Manifest controls selection, not rendering | **YES** |
+| Manifest controls selection, not rendering            | **YES**                           |
 
 **Preservation:** entitlement controls SELECTION/INSERTION/APPLICATION, never
 rendering or storage. A Free user may render and preserve a premium block/layout/
@@ -158,11 +158,11 @@ merely cannot newly add/select/apply it.
 
 ## 7. Validation
 
-| Check | Result |
-|---|---|
-| TypeScript (targeted, `--strict`) | **PASS** (exit 0) |
-| Selfcheck | **PASS** |
-| Assertion count | **309** (0 failed) |
+| Check                             | Result             |
+| --------------------------------- | ------------------ |
+| TypeScript (targeted, `--strict`) | **PASS** (exit 0)  |
+| Selfcheck                         | **PASS**           |
+| Assertion count                   | **309** (0 failed) |
 
 Selfcheck covered: block/layout/section/template counts + disjointness + no
 duplicates, per-asset capability mapping, mixed-section rule, fail-closed unknown
@@ -175,33 +175,33 @@ arity), and determinism.
 
 ### Files read
 
-- `src/lib/product-entitlements/capabilities.ts` *(READ ONLY — confirmed capability ids)*
+- `src/lib/product-entitlements/capabilities.ts` _(READ ONLY — confirmed capability ids)_
 - `src/premium-template-studio/constants/blockDefinitions.ts`
 - `src/premium-template-studio/constants/layouts.ts`
 - `src/premium-template-studio/constants/sectionPresets.ts`
 - `src/premium-template-studio/templates/definitions.ts`
 - `src/premium-template-studio/templates/recipeRegistry.ts`
 
-*(The `POWER_EDITOR_CAPABILITY_INVENTORY_V1.md` factual inventory from the prior
+_(The `POWER_EDITOR_CAPABILITY_INVENTORY_V1.md` factual inventory from the prior
 task corroborated the "37 block types" figure, re-verified directly here against
-`blockDefinitions.ts`.)*
+`blockDefinitions.ts`.)_
 
 ### Files created
 
 - `src/lib/product-entitlements/asset-manifest.ts`
 - `src/lib/product-entitlements/asset-manifest.selfcheck.ts`
-- `CRIPQER_PRODUCT_ASSET_ENTITLEMENT_MANIFEST_V1_REPORT.md` *(this file)*
+- `CRIPQER_PRODUCT_ASSET_ENTITLEMENT_MANIFEST_V1_REPORT.md` _(this file)_
 
 ### Frozen-scope accounting
 
-| Item | Result |
-|---|---|
-| Existing files modified | **0** |
-| Dependencies changed | **NO** |
-| Routes changed | **NO** |
-| DB changed | **NO** |
-| Frozen violations | **NO** |
-| Commits / staging | **none** (per git-safety) |
+| Item                    | Result                    |
+| ----------------------- | ------------------------- |
+| Existing files modified | **0**                     |
+| Dependencies changed    | **NO**                    |
+| Routes changed          | **NO**                    |
+| DB changed              | **NO**                    |
+| Frozen violations       | **NO**                    |
+| Commits / staging       | **none** (per git-safety) |
 
 ---
 
@@ -211,6 +211,3 @@ No stop conditions triggered: the 37 registered block types matched the factual
 inventory, all asset IDs were uniquely identified within the authorized read
 scope, and no modification to `capabilities.ts`, Power Editor, renderer, Billing,
 DB, routes, or dependencies was required.
-
-
-

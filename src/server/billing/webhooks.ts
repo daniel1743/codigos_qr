@@ -297,19 +297,17 @@ export function intakeMercadoPagoNotification(event: unknown): WebhookIntake {
   const action = String(get(event, "action") ?? "");
   const resourceId =
     str(get(event, "data.id")) ?? str(get(event, "resource")) ?? str(get(event, "id"));
-  const eventId =
-    str(get(event, "id")) ?? (resourceId ? `${topic}:${action}:${resourceId}` : "");
+  const eventId = str(get(event, "id")) ?? (resourceId ? `${topic}:${action}:${resourceId}` : "");
 
-  const resourceType: ProviderResourceType =
-    topic.includes("preapproval_plan")
-      ? "unknown"
-      : topic.includes("preapproval") || topic.includes("subscription")
-        ? "preapproval"
-        : topic.includes("authorized_payment")
-          ? "authorized_payment"
-          : topic.includes("payment")
-            ? "payment"
-            : "unknown";
+  const resourceType: ProviderResourceType = topic.includes("preapproval_plan")
+    ? "unknown"
+    : topic.includes("preapproval") || topic.includes("subscription")
+      ? "preapproval"
+      : topic.includes("authorized_payment")
+        ? "authorized_payment"
+        : topic.includes("payment")
+          ? "payment"
+          : "unknown";
 
   if (!resourceId || resourceType === "unknown") {
     return { kind: "ignored", reason: "unsupported_or_incomplete_notification" };
@@ -335,8 +333,7 @@ export function normalizeMercadoPagoResource(
   resource: unknown,
   lookup: WebhookLookupInstruction,
 ): NormalizedBillingEvent | null {
-  const isPreapproval =
-    lookup.resourceType === "preapproval" || lookup.resourceType === "unknown";
+  const isPreapproval = lookup.resourceType === "preapproval" || lookup.resourceType === "unknown";
   const preapprovalId = isPreapproval
     ? str(get(resource, "id"))
     : str(get(resource, "preapproval_id"));
@@ -373,8 +370,7 @@ export function normalizeMercadoPagoResource(
     provider: "mercado_pago",
     type,
     occurredAt: lookup.occurredAt,
-    providerCustomerId:
-      str(get(resource, "payer_id")) ?? str(get(resource, "payer.id")) ?? null,
+    providerCustomerId: str(get(resource, "payer_id")) ?? str(get(resource, "payer.id")) ?? null,
     providerSubscriptionId: preapprovalId,
     providerPlanId: str(get(resource, "preapproval_plan_id")),
     billingInterval: isPreapproval
@@ -382,8 +378,7 @@ export function normalizeMercadoPagoResource(
         ? "yearly"
         : "monthly"
       : null,
-    currency:
-      str(get(resource, "auto_recurring.currency_id")) ?? str(get(resource, "currency_id")),
+    currency: str(get(resource, "auto_recurring.currency_id")) ?? str(get(resource, "currency_id")),
     status,
     currentPeriodStart: safeIso(get(resource, "last_modified")),
     currentPeriodEnd: safeIso(get(resource, "next_payment_date")),
@@ -617,11 +612,14 @@ export function createCanonicalIdempotencyBridge(deps: {
       await deps.markBillingEventProcessed(provider, eventId);
     },
     release: async (provider, eventId, diagnostic) => {
-      await deps.markBillingEventFailed(provider, eventId, diagnostic ?? {
-        error_code: "WEBHOOK_APPLY_FAILED",
-        diagnostic_reference: eventId,
-      });
+      await deps.markBillingEventFailed(
+        provider,
+        eventId,
+        diagnostic ?? {
+          error_code: "WEBHOOK_APPLY_FAILED",
+          diagnostic_reference: eventId,
+        },
+      );
     },
   };
 }
-

@@ -19,16 +19,16 @@ in this run.
 
 The inspected source currently implements the intended child-page path:
 
-| Stage | Authority | Observed contract |
-|---|---|---|
-| Create form | `src/routes/pages.new.tsx` | Calls `pageService.createPage` with authenticated user/profile, title and page type. |
-| Starter persistence | `src/routes/pages.new.tsx` | Builds `createDemoConfig()`, sets the title, then calls `pageCanonicalService.saveDraft(page.id, ...)`. |
-| Create navigation | `src/routes/pages.new.tsx` | `onDone(page.id)` navigates to `/pages/$pageId/edit`. |
-| Nested route | `src/routes/pages.$pageId.edit.tsx` | Reads `Route.useParams().pageId` and mounts `PowerEditorHost target={{ kind: "page", id: pageId }}`. |
-| Parent route | `src/routes/pages.$pageId.tsx` | Detects nested child matches and returns `<Outlet />`; otherwise it renders page detail. |
-| Page loader | `PowerEditorHost.tsx` | In page mode calls `pageService.getOwnPageById(...)` and resolves `ownedPage.template_config`. |
-| Page document identity | `PowerEditorHost.tsx` | Uses child `page.id` as `documentId`; page storage adapter writes `public.pages`. |
-| Profile isolation | `PowerEditorHost.tsx` | Profile query and profile adapter are in the `else` branch and are not selected when `target.kind === "page"`. |
+| Stage                  | Authority                           | Observed contract                                                                                              |
+| ---------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Create form            | `src/routes/pages.new.tsx`          | Calls `pageService.createPage` with authenticated user/profile, title and page type.                           |
+| Starter persistence    | `src/routes/pages.new.tsx`          | Builds `createDemoConfig()`, sets the title, then calls `pageCanonicalService.saveDraft(page.id, ...)`.        |
+| Create navigation      | `src/routes/pages.new.tsx`          | `onDone(page.id)` navigates to `/pages/$pageId/edit`.                                                          |
+| Nested route           | `src/routes/pages.$pageId.edit.tsx` | Reads `Route.useParams().pageId` and mounts `PowerEditorHost target={{ kind: "page", id: pageId }}`.           |
+| Parent route           | `src/routes/pages.$pageId.tsx`      | Detects nested child matches and returns `<Outlet />`; otherwise it renders page detail.                       |
+| Page loader            | `PowerEditorHost.tsx`               | In page mode calls `pageService.getOwnPageById(...)` and resolves `ownedPage.template_config`.                 |
+| Page document identity | `PowerEditorHost.tsx`               | Uses child `page.id` as `documentId`; page storage adapter writes `public.pages`.                              |
+| Profile isolation      | `PowerEditorHost.tsx`               | Profile query and profile adapter are in the `else` branch and are not selected when `target.kind === "page"`. |
 
 The generated route tree also contains distinct `/pages/new`,
 `/pages/$pageId`, and `/pages/$pageId/edit` entries.

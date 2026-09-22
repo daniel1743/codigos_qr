@@ -105,7 +105,7 @@ export function buildIntent(draft: OnboardingDraft): OnboardingIntentV1 | null {
   return {
     business_type: businessType,
     business_other:
-      businessType === OTHER_BUSINESS_ID ? (draft.business_other?.trim() || null) : null,
+      businessType === OTHER_BUSINESS_ID ? draft.business_other?.trim() || null : null,
     primary_goal: draft.primary_goal!,
     visual_personality: draft.visual_personality!,
     identity: {
@@ -133,10 +133,7 @@ export function toPersistedDraft(draft: OnboardingDraft): PersistedDraft {
   return { ...draft, identity };
 }
 
-export function fromPersistedDraft(
-  raw: unknown,
-  empty: OnboardingDraft,
-): OnboardingDraft {
+export function fromPersistedDraft(raw: unknown, empty: OnboardingDraft): OnboardingDraft {
   // Lightweight manual shape validation — no schema library. Any malformed
   // or incompatible persisted draft falls back to the empty draft instead
   // of risking runtime .trim()/shape errors downstream.
@@ -155,8 +152,7 @@ export function fromPersistedDraft(
   };
 }
 
-const isStringOrNull = (v: unknown): v is string | null =>
-  v === null || typeof v === "string";
+const isStringOrNull = (v: unknown): v is string | null => v === null || typeof v === "string";
 
 function isValidPersistedDraft(raw: unknown): boolean {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return false;

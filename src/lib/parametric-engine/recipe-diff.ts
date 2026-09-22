@@ -29,15 +29,14 @@ function groupOf(path: string): RecipeDiffEntry["group"] {
     : "meta";
 }
 
-function walk(
-  a: unknown,
-  b: unknown,
-  path: string,
-  out: RecipeDiffEntry[],
-): void {
+function walk(a: unknown, b: unknown, path: string, out: RecipeDiffEntry[]): void {
   if (path === "meta.generated_at") return;
   const bothObjects =
-    a && b && typeof a === "object" && typeof b === "object" && Array.isArray(a) === Array.isArray(b);
+    a &&
+    b &&
+    typeof a === "object" &&
+    typeof b === "object" &&
+    Array.isArray(a) === Array.isArray(b);
   if (!bothObjects) {
     if (JSON.stringify(a) !== JSON.stringify(b)) {
       out.push({ path, from: a, to: b, group: groupOf(path) });

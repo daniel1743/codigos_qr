@@ -175,9 +175,7 @@ export const PREMIUM_SECTIONS = [
   "contact-floating",
 ] as const;
 
-export type SectionAssetId =
-  | (typeof STANDARD_SECTIONS)[number]
-  | (typeof PREMIUM_SECTIONS)[number];
+export type SectionAssetId = (typeof STANDARD_SECTIONS)[number] | (typeof PREMIUM_SECTIONS)[number];
 
 /* ============================================================================
  * 6. TEMPLATE MANIFEST (42 templates: 12 base definitions + 30 recipes)
@@ -232,8 +230,7 @@ export const PREMIUM_TEMPLATES = [
 ] as const;
 
 export type TemplateAssetId =
-  | (typeof STANDARD_TEMPLATES)[number]
-  | (typeof PREMIUM_TEMPLATES)[number];
+  (typeof STANDARD_TEMPLATES)[number] | (typeof PREMIUM_TEMPLATES)[number];
 
 /* ============================================================================
  * 7. LOOKUP SETS (runtime fail-closed resolution)
@@ -253,15 +250,11 @@ const UNKNOWN: AssetEntitlement = Object.freeze({
   requiredCapability: null,
 });
 
-function standardEntitlement(
-  capability: AssetRequiredCapability,
-): AssetEntitlement {
+function standardEntitlement(capability: AssetRequiredCapability): AssetEntitlement {
   return { classification: "STANDARD", requiredCapability: capability };
 }
 
-function premiumEntitlement(
-  capability: AssetRequiredCapability,
-): AssetEntitlement {
+function premiumEntitlement(capability: AssetRequiredCapability): AssetEntitlement {
   return { classification: "PREMIUM", requiredCapability: capability };
 }
 
@@ -310,10 +303,7 @@ export function getLayoutEntitlement(layoutId: string): AssetEntitlement {
 }
 
 /** Generic resolver: (kind, assetId) → AssetEntitlement. */
-export function resolveAssetEntitlement(
-  kind: ProductAssetKind,
-  assetId: string,
-): AssetEntitlement {
+export function resolveAssetEntitlement(kind: ProductAssetKind, assetId: string): AssetEntitlement {
   switch (kind) {
     case "block":
       return getBlockEntitlement(assetId);
@@ -325,5 +315,3 @@ export function resolveAssetEntitlement(
       return getLayoutEntitlement(assetId);
   }
 }
-
-

@@ -39,17 +39,14 @@ export function generatePowerEditorCandidates(
   intent: OnboardingIntentV1,
   options: GenerateV2Options = {},
 ): PowerEditorCandidateV2[] {
-  const { content, powerEditorCapabilities, mediaStrategy, bannerProvenance, ...candidateOptions } = options;
+  const { content, powerEditorCapabilities, mediaStrategy, bannerProvenance, ...candidateOptions } =
+    options;
   const set = generateCandidateSet(intent, candidateOptions);
   const normalized = normalizeIntent(intent);
   const archetype = inferArchetype(normalized);
 
   return set.candidates.map((candidate) => {
-    const profile = buildDesignProfile(
-      normalized,
-      candidate.variant,
-      candidate.recipe.meta.family,
-    );
+    const profile = buildDesignProfile(normalized, candidate.variant, candidate.recipe.meta.family);
     const recipe = buildPowerEditorRecipeV2({
       ...(content ? { content } : {}),
       ...(powerEditorCapabilities ? { capabilities: powerEditorCapabilities } : {}),

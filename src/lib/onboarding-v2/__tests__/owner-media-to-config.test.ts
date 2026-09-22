@@ -78,8 +78,7 @@ describe("durable owner media reaches the generated BioTemplateConfig", () => {
 
     const grid = config.blocks.find((block) => block.type === "productGrid");
     expect(grid).toBeTruthy();
-    const products = (grid?.content as { products?: Array<{ imageUrl?: string }> })
-      ?.products ?? [];
+    const products = (grid?.content as { products?: Array<{ imageUrl?: string }> })?.products ?? [];
     expect(products.map((product) => product.imageUrl)).toEqual([
       "https://cdn.example/jacket.jpg",
       "https://cdn.example/shirt.jpg",
@@ -104,8 +103,7 @@ describe("durable owner media reaches the generated BioTemplateConfig", () => {
 
     const portfolio = config.blocks.find((block) => block.type === "portfolio");
     expect(portfolio).toBeTruthy();
-    const items = (portfolio?.content as { items?: Array<{ imageUrl?: string }> })
-      ?.items ?? [];
+    const items = (portfolio?.content as { items?: Array<{ imageUrl?: string }> })?.items ?? [];
     expect(items.map((item) => item.imageUrl)).toEqual([
       "https://cdn.example/night.jpg",
       "https://cdn.example/urban.jpg",

@@ -20,11 +20,7 @@
       "theme_colors": true,
       "theme_typography": true,
       "layout_responsive": true,
-      "blocks": [
-        "text",
-        "cta",
-        "productGrid"
-      ],
+      "blocks": ["text", "cta", "productGrid"],
       "block_count": 3
     },
     "published_snapshot_is_canonical": true,

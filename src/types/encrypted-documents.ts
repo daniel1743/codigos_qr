@@ -1,7 +1,8 @@
 // Types for Encrypted Documents
 // Modified by ChatGPT Work — ENC-DOC-UX-FILE-TYPES-04
-export type DocumentType = 'excel' | 'pdf' | 'image' | 'word' | 'powerpoint' | 'archive' | 'text' | 'generic';
-export type EncryptionLevel = 'standard' | 'high' | 'maximum';
+export type DocumentType =
+  "excel" | "pdf" | "image" | "word" | "powerpoint" | "archive" | "text" | "generic";
+export type EncryptionLevel = "standard" | "high" | "maximum";
 
 export interface EncryptedDocument {
   id: string;
@@ -49,7 +50,7 @@ export interface AccessLog {
   ip_address: string;
   user_agent: string;
   device_fingerprint?: string;
-  action: 'view' | 'download' | 'failed_auth';
+  action: "view" | "download" | "failed_auth";
   location?: {
     country?: string;
     city?: string;

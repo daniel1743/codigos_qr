@@ -1,5 +1,5 @@
 import { createContext, useContext } from "react";
-import type { Breakpoint, TemplateTheme } from "../types";
+import type { Breakpoint, TemplateTheme, UploadedAsset } from "../types";
 import type { ContextualTarget } from "../components/inspector/inspectorFocus";
 
 /** Editable Hero text sub-targets (parent block + Inspector focus, not blocks). */
@@ -52,6 +52,9 @@ export interface RenderContextValue {
       ) => void)
     | undefined;
   onAddCollectionItem?: ((blockId: string, collection: string) => void) | undefined;
+  onUploadCollectionItemImage?: ((blockId: string, itemId: string, file: File) => void) | undefined;
+  onListCollectionItemImages?: (() => Promise<UploadedAsset[]>) | undefined;
+  onRemoveCollectionItemImage?: ((blockId: string, itemId: string) => void) | undefined;
   /** Exposed for block primitives that need a stable target attribute. */
   collectionTarget?:
     | ((blockId: string, collection: string, itemId: string, field?: string) => ContextualTarget)

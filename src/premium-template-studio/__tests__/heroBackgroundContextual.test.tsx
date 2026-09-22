@@ -324,9 +324,7 @@ describe("Hero background/overlay contextual editing (Phase 5C4)", () => {
         expect(ctaContainer).not.toBeNull();
 
         act(() => {
-          ctaContainer!.dispatchEvent(
-            new MouseEvent("click", { bubbles: true, cancelable: true }),
-          );
+          ctaContainer!.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
         });
 
         expect(backgroundIds).toEqual([]);

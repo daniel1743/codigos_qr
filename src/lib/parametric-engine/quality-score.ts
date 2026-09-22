@@ -55,7 +55,8 @@ function businessFit(recipe: PageRecipeV1, ctx: ScoreContext): number {
   let score = 60;
   if (ctx.strategy.preferred_patterns.includes(ctx.pattern)) score += 20;
   const trustLeaning =
-    recipe.structure.hero.identity_alignment === "left" || recipe.structure.hero.show_professional_badge;
+    recipe.structure.hero.identity_alignment === "left" ||
+    recipe.structure.hero.show_professional_badge;
   if (w.trust >= 75) score += trustLeaning ? 12 : -8;
   const visualLeaning =
     recipe.structure.hero.mode !== "avatar_only" || recipe.design.card.media_position !== "none";
@@ -81,10 +82,17 @@ function conversionFit(recipe: PageRecipeV1, ctx: ScoreContext): number {
 function contentFit(recipe: PageRecipeV1, ctx: ScoreContext): number {
   let score = 70;
   const hasVisualContent =
-    ctx.intent.assets.has_banner || ctx.intent.assets.has_card_media || ctx.content.gallery.available;
+    ctx.intent.assets.has_banner ||
+    ctx.intent.assets.has_card_media ||
+    ctx.content.gallery.available;
   if (recipe.structure.hero.mode !== "avatar_only" && !ctx.intent.assets.has_banner) score -= 25;
-  if (recipe.design.card.media_position !== "none" && !ctx.intent.assets.has_card_media) score -= 25;
-  if (hasVisualContent && recipe.structure.hero.mode === "avatar_only" && recipe.design.card.media_position === "none")
+  if (recipe.design.card.media_position !== "none" && !ctx.intent.assets.has_card_media)
+    score -= 25;
+  if (
+    hasVisualContent &&
+    recipe.structure.hero.mode === "avatar_only" &&
+    recipe.design.card.media_position === "none"
+  )
     score -= 8;
   if (!ctx.intent.identity.bio && recipe.structure.hero.show_bio) score -= 10;
   return round(score);
@@ -104,7 +112,8 @@ function hierarchyScore(recipe: PageRecipeV1): number {
 function mobileViability(recipe: PageRecipeV1): number {
   let score = 85;
   if (recipe.design.spacing.horizontal_padding === "compact") score -= 40;
-  if (recipe.design.geometry.density === "compact" && recipe.design.spacing.item_gap === "compact") score -= 10;
+  if (recipe.design.geometry.density === "compact" && recipe.design.spacing.item_gap === "compact")
+    score -= 10;
   if (recipe.design.card.media_position === "right") score -= 5;
   if (recipe.blocks.length > 8) score -= 10;
   return round(score);
@@ -161,5 +170,7 @@ export function scoreRecipe(recipe: PageRecipeV1, ctx: ScoreContext): RecipeQual
 export const MIN_ACCEPTABLE_TOTAL = 45;
 
 export function isAcceptableQuality(score: RecipeQualityScoreV1): boolean {
-  return score.total >= MIN_ACCEPTABLE_TOTAL && score.accessibility > 0 && score.mobile_viability >= 50;
+  return (
+    score.total >= MIN_ACCEPTABLE_TOTAL && score.accessibility > 0 && score.mobile_viability >= 50
+  );
 }

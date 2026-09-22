@@ -11,30 +11,30 @@ Task: CRIPQER BILLING — OWNERSHIP & PLAN RESOLUTION CORE V1
 
 ### Files read (exact — nothing else)
 
-| File | Role |
-|---|---|
-| `src/lib/billing/billing.types.ts` | Canonical receiving types (plans / providers / intervals / records) |
-| `src/server/billing/persistence.ts` | Frozen canonical persistence primitive signatures (mirrored, not modified) |
-| `src/server/billing/webhooks.ts` | Frozen webhook normalization — `NormalizedBillingEvent` contract |
-| `src/server/billing/checkout.ts` | Frozen Checkout Host (reference for DI/selfcheck conventions) |
-| `src/server/billing/catalog.ts` | Frozen Server Catalog (registry/fail-closed pattern reference) |
-| `src/server/billing/application.ts` | Frozen Application Core — `BillingPlanResolver` / `ApplicationContext` seam |
-| `billing/CLEANER_BILLING_CHECKOUT_HOST_V1_REPORT.md` | Prior convention reference |
-| `billing/CLEANER_BILLING_SERVER_CATALOG_V1_REPORT.md` | Prior convention reference |
-| `billing/CLEANER_BILLING_APPLICATION_CORE_V1_REPORT.md` | Prior convention reference |
-| `tsconfig.json` | Compiler flags (validation only) |
-| `package.json` | `"type": "module"` + TypeScript version (validation only) |
+| File                                                    | Role                                                                        |
+| ------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `src/lib/billing/billing.types.ts`                      | Canonical receiving types (plans / providers / intervals / records)         |
+| `src/server/billing/persistence.ts`                     | Frozen canonical persistence primitive signatures (mirrored, not modified)  |
+| `src/server/billing/webhooks.ts`                        | Frozen webhook normalization — `NormalizedBillingEvent` contract            |
+| `src/server/billing/checkout.ts`                        | Frozen Checkout Host (reference for DI/selfcheck conventions)               |
+| `src/server/billing/catalog.ts`                         | Frozen Server Catalog (registry/fail-closed pattern reference)              |
+| `src/server/billing/application.ts`                     | Frozen Application Core — `BillingPlanResolver` / `ApplicationContext` seam |
+| `billing/CLEANER_BILLING_CHECKOUT_HOST_V1_REPORT.md`    | Prior convention reference                                                  |
+| `billing/CLEANER_BILLING_SERVER_CATALOG_V1_REPORT.md`   | Prior convention reference                                                  |
+| `billing/CLEANER_BILLING_APPLICATION_CORE_V1_REPORT.md` | Prior convention reference                                                  |
+| `tsconfig.json`                                         | Compiler flags (validation only)                                            |
+| `package.json`                                          | `"type": "module"` + TypeScript version (validation only)                   |
 
 > A temporary `tsconfig.resolution-check.json` was created for a targeted
 > type-check and then **deleted**. It is not part of the deliverable.
 
 ### Files created (exact — nothing else)
 
-| File | Role |
-|---|---|
-| `src/server/billing/resolution.ts` | Ownership & Plan Resolution Core V1 (server-side domain) |
-| `src/server/billing/resolution.selfcheck.ts` | Pure-local selfcheck (no network, no DB) |
-| `billing/CLEANER_BILLING_RESOLUTION_CORE_V1_REPORT.md` | This report |
+| File                                                   | Role                                                     |
+| ------------------------------------------------------ | -------------------------------------------------------- |
+| `src/server/billing/resolution.ts`                     | Ownership & Plan Resolution Core V1 (server-side domain) |
+| `src/server/billing/resolution.selfcheck.ts`           | Pure-local selfcheck (no network, no DB)                 |
+| `billing/CLEANER_BILLING_RESOLUTION_CORE_V1_REPORT.md` | This report                                              |
 
 ### Files modified
 
@@ -54,12 +54,12 @@ new source files and this report.
 
 ### Sources actually supported (with frozen persistence)
 
-| Priority | Source | Availability |
-|---|---|---|
-| P1 | `TRUSTED_CONTEXT` (trusted server userId from host context) | **Available** |
-| P2 | `EXISTING_SUBSCRIPTION` (`getSubscriptionByProviderId`) | **Available** (frozen persistence) |
-| P3 | `CANONICAL_CUSTOMER` | **BLOCKER** (frozen persistence cannot key by `providerCustomerId`) |
-| P4 | `CANONICAL_CHECKOUT` | **BLOCKER** (frozen persistence cannot key by `providerCheckoutId`) |
+| Priority | Source                                                      | Availability                                                        |
+| -------- | ----------------------------------------------------------- | ------------------------------------------------------------------- |
+| P1       | `TRUSTED_CONTEXT` (trusted server userId from host context) | **Available**                                                       |
+| P2       | `EXISTING_SUBSCRIPTION` (`getSubscriptionByProviderId`)     | **Available** (frozen persistence)                                  |
+| P3       | `CANONICAL_CUSTOMER`                                        | **BLOCKER** (frozen persistence cannot key by `providerCustomerId`) |
+| P4       | `CANONICAL_CHECKOUT`                                        | **BLOCKER** (frozen persistence cannot key by `providerCheckoutId`) |
 
 ### First-purchase ownership path
 
@@ -146,14 +146,14 @@ was not modified.
 
 ## E. SECURITY (mandatory)
 
-| Check | Result |
-|---|---|
-| email used as identity authority | **NO** |
+| Check                              | Result |
+| ---------------------------------- | ------ |
+| email used as identity authority   | **NO** |
 | provider metadata userId authority | **NO** |
-| amount used to infer plan | **NO** |
-| free mapping possible | **NO** |
-| DB writes | **NO** |
-| provider calls | **NO** |
+| amount used to infer plan          | **NO** |
+| free mapping possible              | **NO** |
+| DB writes                          | **NO** |
+| provider calls                     | **NO** |
 
 ---
 
@@ -200,4 +200,3 @@ no_writes, no_network.
 
 > The only writes are `src/server/billing/resolution.ts`,
 > `src/server/billing/resolution.selfcheck.ts`, and this report.
-

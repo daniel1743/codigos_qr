@@ -18,7 +18,13 @@
 import { memo, useMemo } from "react";
 import type { CSSProperties } from "react";
 import { EyeOff, Copy, Trash2, ChevronUp, ChevronDown, GripVertical } from "lucide-react";
-import type { BioTemplateConfig, Breakpoint, MotionConfig, TemplateBlock } from "../types";
+import type {
+  BioTemplateConfig,
+  Breakpoint,
+  MotionConfig,
+  TemplateBlock,
+  UploadedAsset,
+} from "../types";
 import { getBlockComponent } from "./BlockRegistry";
 import {
   RenderProvider,
@@ -45,6 +51,7 @@ import { useScrollReveal } from "../hooks/useScrollReveal";
 import { cx } from "../utils";
 import type { ProductTier } from "../../lib/product-entitlements/capabilities";
 import { canRemoveCripqerBranding } from "../../lib/product-entitlements/mutation-guard";
+import type { EditorDocumentKind } from "../constants/layouts";
 
 export interface EditingHandlers {
   selectedBlockId?: string | null | undefined;
@@ -68,6 +75,9 @@ export interface EditingHandlers {
       ) => void)
     | undefined;
   onAddCollectionItem?: ((blockId: string, collection: string) => void) | undefined;
+  onUploadCollectionItemImage?: ((blockId: string, itemId: string, file: File) => void) | undefined;
+  onListCollectionItemImages?: (() => Promise<UploadedAsset[]>) | undefined;
+  onRemoveCollectionItemImage?: ((blockId: string, itemId: string) => void) | undefined;
   onInlineEdit?: ((path: string, value: unknown) => void) | undefined;
   onMove?: ((id: string, direction: -1 | 1) => void) | undefined;
   onDuplicate?: ((id: string) => void) | undefined;
@@ -78,6 +88,8 @@ export interface EditingHandlers {
 
 export interface TemplateRendererProps {
   config: BioTemplateConfig;
+  /** Canonical editor surface. Page documents may opt into wide section flow. */
+  documentKind?: EditorDocumentKind | undefined;
   breakpoint?: Breakpoint | undefined;
   mode?: "edit" | "public" | undefined;
   /** Trusted owner tier from the entitlement authority; absent values are Free. */
@@ -448,6 +460,7 @@ function BlockFrame({
 
 function TemplateRendererImpl({
   config,
+  documentKind,
   breakpoint = "desktop",
   mode = "public",
   brandingTier,
@@ -515,6 +528,9 @@ function TemplateRendererImpl({
       onSelectCollectionItem: editing?.onSelectCollectionItem,
       onCollectionItemAction: editing?.onCollectionItemAction,
       onAddCollectionItem: editing?.onAddCollectionItem,
+      onUploadCollectionItemImage: editing?.onUploadCollectionItemImage,
+      onListCollectionItemImages: editing?.onListCollectionItemImages,
+      onRemoveCollectionItemImage: editing?.onRemoveCollectionItemImage,
       collectionTarget,
       onInlineEdit: editing?.onInlineEdit,
       onTrack,
@@ -536,12 +552,20 @@ function TemplateRendererImpl({
       editing?.onSelectCollectionItem,
       editing?.onCollectionItemAction,
       editing?.onAddCollectionItem,
+      editing?.onUploadCollectionItemImage,
+      editing?.onListCollectionItemImages,
+      editing?.onRemoveCollectionItemImage,
       editing?.onInlineEdit,
       onTrack,
     ],
   );
 
   const visibleBlocks = mode === "edit" ? blocks : blocks.filter((b) => isVisible(b, breakpoint));
+  // Premium Page needs a wide section authority for collection blocks. Keep
+  // the legacy readable container for Bio and for pages without a wide
+  // collection section (Menu/Portfolio/Services remain unchanged).
+  const hasWideProductGrid =
+    documentKind === "page" && visibleBlocks.some((block) => block.type === "productGrid");
   const motionConfig = getMotionConfig(config);
   const motionVars = motionCssVars(motionConfig.duration);
   const backgroundLayer = backgroundLayerStyle(theme);
@@ -593,7 +617,8 @@ function TemplateRendererImpl({
           style={{
             position: "relative",
             zIndex: 2,
-            maxWidth: contentWidth + (columns > 1 ? 180 : 0),
+            maxWidth: hasWideProductGrid ? "100%" : contentWidth + (columns > 1 ? 180 : 0),
+            boxSizing: hasWideProductGrid ? "border-box" : undefined,
             margin: "0 auto",
             marginTop: fullBleedOverlap ? -profile.avatar.overlap : undefined,
             padding: fullBleedOverlap

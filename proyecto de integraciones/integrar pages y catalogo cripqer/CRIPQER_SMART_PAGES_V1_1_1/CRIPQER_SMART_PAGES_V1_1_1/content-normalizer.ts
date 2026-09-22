@@ -30,10 +30,26 @@ export interface NormalizeOptions {
 }
 
 const NAME_KEYS = ["name", "title", "item", "product", "service", "nombre", "producto", "servicio"];
-const DESC_KEYS = ["description", "desc", "detail", "details", "descripcion", "descripción", "resumen"];
+const DESC_KEYS = [
+  "description",
+  "desc",
+  "detail",
+  "details",
+  "descripcion",
+  "descripción",
+  "resumen",
+];
 const PRICE_KEYS = ["price", "amount", "cost", "value", "precio", "valor"];
 const CURRENCY_KEYS = ["currency", "moneda"];
-const CATEGORY_KEYS = ["category", "categoria", "categoría", "section", "group", "collection", "tipo"];
+const CATEGORY_KEYS = [
+  "category",
+  "categoria",
+  "categoría",
+  "section",
+  "group",
+  "collection",
+  "tipo",
+];
 const IMAGE_KEYS = ["image", "img", "photo", "picture", "imagen", "foto", "media", "thumbnail"];
 const RESERVED = new Set([
   ...NAME_KEYS,
@@ -76,7 +92,13 @@ export function parsePrice(raw: string | undefined, currencyHint?: string): Pric
   if (!raw) return undefined;
   const text = raw.trim();
   if (!text) return undefined;
-  const symbol = /€/.test(text) ? "EUR" : /£/.test(text) ? "GBP" : /\$/.test(text) ? undefined : undefined;
+  const symbol = /€/.test(text)
+    ? "EUR"
+    : /£/.test(text)
+      ? "GBP"
+      : /\$/.test(text)
+        ? undefined
+        : undefined;
   const codeMatch = text.match(/\b(usd|clp|eur|mxn|ars|cop|brl|pen|gbp)\b/i);
   const numeric = text.replace(/[^\d.,]/g, "");
   const cleaned =
@@ -105,7 +127,11 @@ export function normalizeDrafts(
 
   for (const draft of drafts) {
     for (const warning of draft.warnings) {
-      issues.push({ scope: "source", severity: "uncertain", message: `${draft.source}: ${warning}` });
+      issues.push({
+        scope: "source",
+        severity: "uncertain",
+        message: `${draft.source}: ${warning}`,
+      });
     }
     for (const record of draft.records) {
       const name = pick(record, NAME_KEYS);
@@ -146,7 +172,10 @@ export function normalizeDrafts(
       if (media.length === 0) review.push("media");
 
       const attributes = Object.entries(record)
-        .filter(([key, value]) => !RESERVED.has(key.trim().toLowerCase()) && value !== "" && value != null)
+        .filter(
+          ([key, value]) =>
+            !RESERVED.has(key.trim().toLowerCase()) && value !== "" && value != null,
+        )
         .map(([key, value]) => ({
           key: slugify(key) || key,
           label: key.replace(/[_-]+/g, " ").trim(),

@@ -27,7 +27,7 @@ archetype-specific composition.
    has no `imageUrl`, so the engine now authors a **gradient-led hero** for every
    commercial archetype (never a fabricated photograph).
 2. **Retail catalog was silently dropped.** `mediaBlockAllowed("minimal-no-media",
-   "productGrid")` returned `false` and the retail media strategy resolved to
+"productGrid")` returned `false` and the retail media strategy resolved to
    `minimal-no-media`, so the store's own products never reached the renderer.
    A `catalog-first` strategy was added, and products/music are no longer treated
    as a "media decoration" story.
@@ -50,11 +50,11 @@ authors more of the vocabulary they already support.
 Captured from `generatePowerEditorTemplate` for the three golden scenarios before
 the change:
 
-| Scenario | Family / layout | Blocks | Background | Cards | Buttons | Hero |
-|---|---|---|---|---|---|---|
-| A services (booking) | editorial / compact | text, services, cta, contact | solid | flat, no shadow | solid | none |
-| B retail (sell) | editorial / compact | text, cta (**products dropped**) | solid | flat, no shadow | solid | none |
-| C portfolio | editorial / editorial | portfolio, text, cta | solid | flat, no shadow | solid | none |
+| Scenario             | Family / layout       | Blocks                           | Background | Cards           | Buttons | Hero |
+| -------------------- | --------------------- | -------------------------------- | ---------- | --------------- | ------- | ---- |
+| A services (booking) | editorial / compact   | text, services, cta, contact     | solid      | flat, no shadow | solid   | none |
+| B retail (sell)      | editorial / compact   | text, cta (**products dropped**) | solid      | flat, no shadow | solid   | none |
+| C portfolio          | editorial / editorial | portfolio, text, cta             | solid      | flat, no shadow | solid   | none |
 
 All three shared `background_mood: paper`, `surface_mood: flat`, solid background,
 flat cards (radius 10, no shadow), solid buttons (radius 10), no banner, and the
@@ -66,18 +66,18 @@ same `minimal`/`editorial` motion. Two of the three were effectively identical.
 
 Columns: **Canonical / Renderer / Editor / Engine-before / Engine-after**.
 
-| Capability | Canonical | Renderer | Editor | Before | After |
-|---|---|---|---|---|---|
-| Gradient background | ✅ `ThemeBackground.gradient` | ✅ `pageBackground` | ✅ | ❌ solid only | ✅ archetype angles |
-| Texture layer | ✅ `ThemeTexture` | ✅ `textureStyle` | ✅ | ✅ (family) | ✅ (family) |
-| Decorative frame | ✅ `BlockStyle.frame` | ✅ `decorativeFrameStyle` | ✅ | ✅ (CTA) | ✅ (CTA) |
-| Typography scale | ✅ `ThemeTypography` | ✅ `headingStyle` | ✅ | ✅ base | ✅ hero bump |
-| Card presets (elevated/soft/minimal) | ✅ `ThemeCards.preset` | ✅ `cardStyle` | ✅ | ❌ flat only | ✅ archetype |
-| Button presets (gradient/outline/solid) | ✅ `ThemeButtons.variant` | ✅ `buttonStyle` | ✅ | ✅ family | ✅ archetype |
-| Spacing / content width | ✅ `ThemeSpacing` | ✅ container | ✅ | ✅ | ✅ retail/portfolio wider |
-| Banner gradient hero (no image) | ✅ `ProfileBanner` gradient fallback | ✅ | ✅ | ❌ disabled | ✅ gradient hero |
-| Motion presets | ✅ `MotionConfig` | ✅ `motionCssVars` | ✅ | ✅ | ✅ (unchanged) |
-| `productGrid` | ✅ | ✅ `ProductGridBlock` | ✅ | ❌ gated + `items` bug | ✅ `products` |
+| Capability                              | Canonical                            | Renderer                  | Editor | Before                 | After                     |
+| --------------------------------------- | ------------------------------------ | ------------------------- | ------ | ---------------------- | ------------------------- |
+| Gradient background                     | ✅ `ThemeBackground.gradient`        | ✅ `pageBackground`       | ✅     | ❌ solid only          | ✅ archetype angles       |
+| Texture layer                           | ✅ `ThemeTexture`                    | ✅ `textureStyle`         | ✅     | ✅ (family)            | ✅ (family)               |
+| Decorative frame                        | ✅ `BlockStyle.frame`                | ✅ `decorativeFrameStyle` | ✅     | ✅ (CTA)               | ✅ (CTA)                  |
+| Typography scale                        | ✅ `ThemeTypography`                 | ✅ `headingStyle`         | ✅     | ✅ base                | ✅ hero bump              |
+| Card presets (elevated/soft/minimal)    | ✅ `ThemeCards.preset`               | ✅ `cardStyle`            | ✅     | ❌ flat only           | ✅ archetype              |
+| Button presets (gradient/outline/solid) | ✅ `ThemeButtons.variant`            | ✅ `buttonStyle`          | ✅     | ✅ family              | ✅ archetype              |
+| Spacing / content width                 | ✅ `ThemeSpacing`                    | ✅ container              | ✅     | ✅                     | ✅ retail/portfolio wider |
+| Banner gradient hero (no image)         | ✅ `ProfileBanner` gradient fallback | ✅                        | ✅     | ❌ disabled            | ✅ gradient hero          |
+| Motion presets                          | ✅ `MotionConfig`                    | ✅ `motionCssVars`        | ✅     | ✅                     | ✅ (unchanged)            |
+| `productGrid`                           | ✅                                   | ✅ `ProductGridBlock`     | ✅     | ❌ gated + `items` bug | ✅ `products`             |
 
 Every "after" value is representable in `BioTemplateConfig` and rendered by
 `PublicTemplateRenderer`; no schema or renderer change was required.
@@ -107,7 +107,6 @@ materially change the archetype inference used here (`inferArchetype` already
 returns `retail`/`appointment_service`/`portfolio_service` from the free-text
 profession), so no broader semantic repair was required for this visual task.
 
-
 ---
 
 ## ENGINE CHANGES
@@ -120,7 +119,7 @@ profession), so no broader semantic repair was required for this visual task.
    strategy resolution.
 4. **`media-strategy-v2.ts`** — added `catalog-first` (available when products
    exist) and a narrow deterministic `goalAlignedStrategy` (`sell + products →
-   catalog-first`). All other goals keep the deterministic hash selection so
+catalog-first`). All other goals keep the deterministic hash selection so
    rich-media candidates remain structurally diverse (no `Math.random`).
 5. **`blocks-v2.ts`** — `mediaBlockAllowed` no longer treats `product` /
    `productGrid` / `music` as a media-decoration story; `strategyRank` moves the
@@ -242,7 +241,6 @@ The three cases now differ in background angle, card material, button variant,
 heading size, banner height, content width and block composition — not just
 accent color or block type.
 
-
 ---
 
 ## GENERATION INSPECTOR BEFORE/AFTER
@@ -250,18 +248,18 @@ accent color or block type.
 The inspector route (`/onboarding-test`) reflects these changes automatically,
 because it reads the real `PowerEditorRecipeV2`:
 
-| Field | Before | After |
-|---|---|---|
-| business category | `other` (PAGES_7 collapse, unchanged) | unchanged (visual authoring unaffected) |
-| visual personality | `professional` (fallback, unchanged) | unchanged |
-| archetype | `appointment_service` / `retail` / `portfolio_service` | unchanged (now threaded into recipe) |
-| family | `editorial` (all three) | unchanged (family selection is upstream) |
-| media strategy | `minimal-no-media` / `minimal-no-media` / `portfolio-first` | `minimal-no-media` / **`catalog-first`** / `portfolio-first` |
-| hero treatment | none | gradient-led banner (220/240/260) |
-| background treatment | solid | archetype-aware gradient |
-| card treatment | flat | elevated / soft / minimal |
-| CTA treatment | solid | solid / gradient / outline |
-| capabilities_used | few (flat/solid) | adds gradient bg, elevated/soft/minimal cards, gradient/outline buttons, productGrid |
+| Field                | Before                                                      | After                                                                                |
+| -------------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| business category    | `other` (PAGES_7 collapse, unchanged)                       | unchanged (visual authoring unaffected)                                              |
+| visual personality   | `professional` (fallback, unchanged)                        | unchanged                                                                            |
+| archetype            | `appointment_service` / `retail` / `portfolio_service`      | unchanged (now threaded into recipe)                                                 |
+| family               | `editorial` (all three)                                     | unchanged (family selection is upstream)                                             |
+| media strategy       | `minimal-no-media` / `minimal-no-media` / `portfolio-first` | `minimal-no-media` / **`catalog-first`** / `portfolio-first`                         |
+| hero treatment       | none                                                        | gradient-led banner (220/240/260)                                                    |
+| background treatment | solid                                                       | archetype-aware gradient                                                             |
+| card treatment       | flat                                                        | elevated / soft / minimal                                                            |
+| CTA treatment        | solid                                                       | solid / gradient / outline                                                           |
+| capabilities_used    | few (flat/solid)                                            | adds gradient bg, elevated/soft/minimal cards, gradient/outline buttons, productGrid |
 
 The inspector's `VISUAL_AUTHORING` layer now reports fewer "supported capabilities
 not authored", because the engine actually authors the gradient/card/button
@@ -365,4 +363,3 @@ none. This task deliberately did not implement that API integration.
 ---
 
 **SUCCESS GATE:** `CRIPQER_ENGINE_V2_PREMIUM_VISUAL_AUTHORING_RUNTIME_VISUAL_PASS_FROZEN`
-

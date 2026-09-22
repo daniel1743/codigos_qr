@@ -208,20 +208,45 @@ export async function runBillingPersistenceSelfCheck(): Promise<{
   });
 
   // Customer reverse lookup.
-  const custA = await getBillingCustomerByProviderCustomerId("mercado_pago", "mp-cust-a", lookupMock.client);
+  const custA = await getBillingCustomerByProviderCustomerId(
+    "mercado_pago",
+    "mp-cust-a",
+    lookupMock.client,
+  );
   assert(custA !== null);
   assert(custA?.user_id === "user-a");
 
-  const custB = await getBillingCustomerByProviderCustomerId("paypal", "pp-cust-b", lookupMock.client);
+  const custB = await getBillingCustomerByProviderCustomerId(
+    "paypal",
+    "pp-cust-b",
+    lookupMock.client,
+  );
   assert(custB !== null);
   assert(custB?.user_id === "user-b");
 
-  assert((await getBillingCustomerByProviderCustomerId("mercado_pago", "unknown", lookupMock.client)) === null);
-  assert((await getBillingCustomerByProviderCustomerId("mercado_pago", "pp-cust-b", lookupMock.client)) === null);
+  assert(
+    (await getBillingCustomerByProviderCustomerId("mercado_pago", "unknown", lookupMock.client)) ===
+      null,
+  );
+  assert(
+    (await getBillingCustomerByProviderCustomerId(
+      "mercado_pago",
+      "pp-cust-b",
+      lookupMock.client,
+    )) === null,
+  );
 
   // Isolation: same-looking customer IDs across providers stay provider-scoped.
-  const sharedCustMp = await getBillingCustomerByProviderCustomerId("mercado_pago", "shared-cust", lookupMock.client);
-  const sharedCustPp = await getBillingCustomerByProviderCustomerId("paypal", "shared-cust", lookupMock.client);
+  const sharedCustMp = await getBillingCustomerByProviderCustomerId(
+    "mercado_pago",
+    "shared-cust",
+    lookupMock.client,
+  );
+  const sharedCustPp = await getBillingCustomerByProviderCustomerId(
+    "paypal",
+    "shared-cust",
+    lookupMock.client,
+  );
   assert(sharedCustMp?.user_id === "user-a");
   assert(sharedCustPp?.user_id === "user-b");
 
@@ -280,20 +305,48 @@ export async function runBillingPersistenceSelfCheck(): Promise<{
   });
 
   // Checkout reverse lookup.
-  const chkA = await getBillingCheckoutByProviderCheckoutId("mercado_pago", "mp-chk-a", checkoutLookupMock.client);
+  const chkA = await getBillingCheckoutByProviderCheckoutId(
+    "mercado_pago",
+    "mp-chk-a",
+    checkoutLookupMock.client,
+  );
   assert(chkA !== null);
   assert(chkA?.user_id === "user-a");
 
-  const chkB = await getBillingCheckoutByProviderCheckoutId("paypal", "pp-chk-b", checkoutLookupMock.client);
+  const chkB = await getBillingCheckoutByProviderCheckoutId(
+    "paypal",
+    "pp-chk-b",
+    checkoutLookupMock.client,
+  );
   assert(chkB !== null);
   assert(chkB?.user_id === "user-b");
 
-  assert((await getBillingCheckoutByProviderCheckoutId("mercado_pago", "unknown", checkoutLookupMock.client)) === null);
-  assert((await getBillingCheckoutByProviderCheckoutId("paypal", "mp-chk-a", checkoutLookupMock.client)) === null);
+  assert(
+    (await getBillingCheckoutByProviderCheckoutId(
+      "mercado_pago",
+      "unknown",
+      checkoutLookupMock.client,
+    )) === null,
+  );
+  assert(
+    (await getBillingCheckoutByProviderCheckoutId(
+      "paypal",
+      "mp-chk-a",
+      checkoutLookupMock.client,
+    )) === null,
+  );
 
   // Isolation: same-looking checkout IDs across providers stay provider-scoped.
-  const sharedChkMp = await getBillingCheckoutByProviderCheckoutId("mercado_pago", "shared-chk", checkoutLookupMock.client);
-  const sharedChkPp = await getBillingCheckoutByProviderCheckoutId("paypal", "shared-chk", checkoutLookupMock.client);
+  const sharedChkMp = await getBillingCheckoutByProviderCheckoutId(
+    "mercado_pago",
+    "shared-chk",
+    checkoutLookupMock.client,
+  );
+  const sharedChkPp = await getBillingCheckoutByProviderCheckoutId(
+    "paypal",
+    "shared-chk",
+    checkoutLookupMock.client,
+  );
   assert(sharedChkMp?.user_id === "user-a");
   assert(sharedChkPp?.user_id === "user-b");
 

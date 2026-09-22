@@ -14,9 +14,7 @@ export { createPageStorageAdapter, type PageStorageAdapterOptions } from "./page
  * Both share the exact same `BioTemplateConfig` contract; only the persistence
  * and document identity differ.
  */
-export type EditorDocumentTarget =
-  | { kind: "profile"; id: string }
-  | { kind: "page"; id: string };
+export type EditorDocumentTarget = { kind: "profile"; id: string } | { kind: "page"; id: string };
 
 /**
  * Resolve a child page's `template_config` into a valid editable document.
@@ -37,4 +35,3 @@ export function resolvePageEditorConfig(
   }
   return createBlankPageConfig(title, pageType);
 }
-

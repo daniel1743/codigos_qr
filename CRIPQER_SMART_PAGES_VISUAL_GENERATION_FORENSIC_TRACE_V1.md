@@ -78,64 +78,64 @@ Rendered public page (T10)
 
 **Ownership (file → responsibility):**
 
-| Layer | File | Owns |
-|---|---|---|
-| A Onboarding semantics | `onboarding-v2/types.ts`, `smart-pages-adapter.ts` | intent → request |
-| B Owner content | `page-generator/owner-content.ts` | structured owner facts |
-| C Request | `smart-pages/smart-pages.types.ts` | planning DTO |
-| D Plan | `smart-pages/page-orchestrator.ts`, `business-presets.ts` | semantic structure (NO visuals) |
-| E Host map | `page-generator/smart-pages-host-map.ts` | plan → GeneratedPageInput |
-| F PAGES_7 | `page-generator/adapter.ts`, `intent.ts`, `objective-presets.ts` | GeneratedPageInput → Engine input |
-| G Engine input | `onboarding-v2/engine-v2-adapter.ts` | OnboardingIntentV2 → Engine host input |
-| H Engine recipe | `parametric-engine-v2/engine.ts`, `strategy.ts`, `candidates.ts`, `families.ts` | recipe/family/theme selection |
-| H2 Engine visual | `parametric-engine-v2/power-editor/resolvers.ts`, `blocks-v2.ts`, `to-template-config.ts` | visual tokens + blocks |
-| I Renderer | `premium-template-studio/engine/TemplateRenderer.tsx` | faithful config → DOM |
+| Layer                  | File                                                                                      | Owns                                   |
+| ---------------------- | ----------------------------------------------------------------------------------------- | -------------------------------------- |
+| A Onboarding semantics | `onboarding-v2/types.ts`, `smart-pages-adapter.ts`                                        | intent → request                       |
+| B Owner content        | `page-generator/owner-content.ts`                                                         | structured owner facts                 |
+| C Request              | `smart-pages/smart-pages.types.ts`                                                        | planning DTO                           |
+| D Plan                 | `smart-pages/page-orchestrator.ts`, `business-presets.ts`                                 | semantic structure (NO visuals)        |
+| E Host map             | `page-generator/smart-pages-host-map.ts`                                                  | plan → GeneratedPageInput              |
+| F PAGES_7              | `page-generator/adapter.ts`, `intent.ts`, `objective-presets.ts`                          | GeneratedPageInput → Engine input      |
+| G Engine input         | `onboarding-v2/engine-v2-adapter.ts`                                                      | OnboardingIntentV2 → Engine host input |
+| H Engine recipe        | `parametric-engine-v2/engine.ts`, `strategy.ts`, `candidates.ts`, `families.ts`           | recipe/family/theme selection          |
+| H2 Engine visual       | `parametric-engine-v2/power-editor/resolvers.ts`, `blocks-v2.ts`, `to-template-config.ts` | visual tokens + blocks                 |
+| I Renderer             | `premium-template-studio/engine/TemplateRenderer.tsx`                                     | faithful config → DOM                  |
 
 ---
 
 ## SCENARIO A — SERVICES (`SERVICE_BOOKING` · "Studio Aura" · "Peluquería y belleza")
 
-| Trace | Value |
-|---|---|
-| T1 intent | professionOrActivity `Peluquería y belleza`, goal `bookings`, density `complete`, CTA whatsapp |
-| T2 owner | services ×2 (Corte y peinado $18.000, Coloración $35.000), contact whatsapp |
-| T3 request | businessType `Peluquería y belleza`, goal `book`, salesMode `booking`, experienceType `services`, density `rich` |
-| T3 deferred | `visualDirection`, `contentNeeds`, `scope.userSelected`, `business.customCategory` |
-| T4 plan | `page_studio-aura`, experienceType `services`, hero `centered`, sections `[hero, about, serviceGrid, whatsappCta, footer]` |
-| T6 generated input | objective `services`, items ×2, cta whatsapp, **style = undefined** |
-| T7 engine input | profession `Peluquería y belleza`, goal `leads`, features `[services, contact]`, **style undefined**, contentBlocks `{about, services, contact}` |
-| T8 decisions | category `other`, **archetype `appointment_service`**, personality `professional`, goal `leads`, scores `{corporate:62, minimal:32, editorial:30}`, baseline `corporate`, **selected `minimal`**, layout `compact`, pattern `conversion_first`, preset `null`, mediaStrategy `minimal-no-media`, candidate `engine#2.1`, score 88 |
-| T9 blocks | `[text, services(minimal), cta(panel), contact(list)]` |
-| T9 theme | primary `#3F5B32`; typography `Trebuchet MS` 30/600; cards `minimal` r10 no-shadow; buttons `solid` r10; background `solid #FBFCF8`; motion `minimal` fade |
-| T10 | valid, faithful |
+| Trace              | Value                                                                                                                                                                                                                                                                                                                             |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| T1 intent          | professionOrActivity `Peluquería y belleza`, goal `bookings`, density `complete`, CTA whatsapp                                                                                                                                                                                                                                    |
+| T2 owner           | services ×2 (Corte y peinado $18.000, Coloración $35.000), contact whatsapp                                                                                                                                                                                                                                                       |
+| T3 request         | businessType `Peluquería y belleza`, goal `book`, salesMode `booking`, experienceType `services`, density `rich`                                                                                                                                                                                                                  |
+| T3 deferred        | `visualDirection`, `contentNeeds`, `scope.userSelected`, `business.customCategory`                                                                                                                                                                                                                                                |
+| T4 plan            | `page_studio-aura`, experienceType `services`, hero `centered`, sections `[hero, about, serviceGrid, whatsappCta, footer]`                                                                                                                                                                                                        |
+| T6 generated input | objective `services`, items ×2, cta whatsapp, **style = undefined**                                                                                                                                                                                                                                                               |
+| T7 engine input    | profession `Peluquería y belleza`, goal `leads`, features `[services, contact]`, **style undefined**, contentBlocks `{about, services, contact}`                                                                                                                                                                                  |
+| T8 decisions       | category `other`, **archetype `appointment_service`**, personality `professional`, goal `leads`, scores `{corporate:62, minimal:32, editorial:30}`, baseline `corporate`, **selected `minimal`**, layout `compact`, pattern `conversion_first`, preset `null`, mediaStrategy `minimal-no-media`, candidate `engine#2.1`, score 88 |
+| T9 blocks          | `[text, services(minimal), cta(panel), contact(list)]`                                                                                                                                                                                                                                                                            |
+| T9 theme           | primary `#3F5B32`; typography `Trebuchet MS` 30/600; cards `minimal` r10 no-shadow; buttons `solid` r10; background `solid #FBFCF8`; motion `minimal` fade                                                                                                                                                                        |
+| T10                | valid, faithful                                                                                                                                                                                                                                                                                                                   |
 
 ## SCENARIO B — CATALOG (`RETAIL_CATALOG` · "Norte Concept" · "Tienda de ropa")
 
-| Trace | Value |
-|---|---|
-| T3 request | businessType `Tienda de ropa`, goal `sell`, experienceType `catalog`, density `rich` |
-| T4 plan | experienceType `catalog`, sections `[hero, productGrid, whatsappCta, footer]` |
-| T6 generated input | objective `catalog`, items ×2 (media+destination), cta whatsapp, cover set, style undefined |
-| T7 engine input | profession `Tienda de ropa`, goal `sell`, features `[products, contact]`, contentBlocks `{products, featured, about}` |
-| T8 decisions | category `other`, **archetype `retail`**, personality `professional`, goal `sell`, scores `{corporate:54, editorial:24, minimal:24, creator:10, energetic:14}`, baseline `corporate`, **selected `minimal`**, layout `split`, pattern `service_first`, preset `null`, mediaStrategy `banner-first` |
-| T9 blocks | `[text, cta, productGrid, contact]` |
-| T9 theme | primary `#7A3B2E`; typography `Trebuchet MS` 30/600 (**identical to A**); cards `minimal` r10 (**identical to A**); buttons `solid` r10 (**identical to A**); background `solid`; motion `minimal` |
-| T10 | valid, faithful |
+| Trace              | Value                                                                                                                                                                                                                                                                                              |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| T3 request         | businessType `Tienda de ropa`, goal `sell`, experienceType `catalog`, density `rich`                                                                                                                                                                                                               |
+| T4 plan            | experienceType `catalog`, sections `[hero, productGrid, whatsappCta, footer]`                                                                                                                                                                                                                      |
+| T6 generated input | objective `catalog`, items ×2 (media+destination), cta whatsapp, cover set, style undefined                                                                                                                                                                                                        |
+| T7 engine input    | profession `Tienda de ropa`, goal `sell`, features `[products, contact]`, contentBlocks `{products, featured, about}`                                                                                                                                                                              |
+| T8 decisions       | category `other`, **archetype `retail`**, personality `professional`, goal `sell`, scores `{corporate:54, editorial:24, minimal:24, creator:10, energetic:14}`, baseline `corporate`, **selected `minimal`**, layout `split`, pattern `service_first`, preset `null`, mediaStrategy `banner-first` |
+| T9 blocks          | `[text, cta, productGrid, contact]`                                                                                                                                                                                                                                                                |
+| T9 theme           | primary `#7A3B2E`; typography `Trebuchet MS` 30/600 (**identical to A**); cards `minimal` r10 (**identical to A**); buttons `solid` r10 (**identical to A**); background `solid`; motion `minimal`                                                                                                 |
+| T10                | valid, faithful                                                                                                                                                                                                                                                                                    |
 
 **⇒ A and B are the SAME visual family (`minimal`) with identical typography/cards/buttons/motion. Only accent color + block type differ.**
 
 ## SCENARIO C — PORTFOLIO (`CREATIVE_PORTFOLIO` · "Luz Norte" · "Fotografía")
 
-| Trace | Value |
-|---|---|
-| T3 request | businessType `Fotografía`, goal `showcase`, experienceType `portfolio`, density `rich` |
-| T4 plan | experienceType `portfolio`, sections `[hero, about, portfolioGrid, whatsappCta, footer]` |
-| T6 generated input | objective `portfolio`, items ×2 (media+destination), cover set |
-| T7 engine input | profession `Fotografía`, goal `portfolio`, features `[portfolio, contact]`, contentBlocks `{portfolio, about}` |
-| T8 decisions | category `other`, **archetype `portfolio_service`**, personality `professional`, goal `portfolio`, scores `{corporate:46, editorial:40, minimal:34, creator:10}`, baseline `corporate`, **selected `editorial`**, layout `editorial`, pattern `editorial_stack`, preset `editorial_calm`, mediaStrategy `banner-first` |
-| T9 blocks | `[text, cta, portfolio]` |
-| T9 theme | primary `#38524A`; typography `Times New Roman` serif 44/600; cards/buttons/spacing differ from A/B (editorial family) |
-| T10 | valid, faithful |
+| Trace              | Value                                                                                                                                                                                                                                                                                                                  |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| T3 request         | businessType `Fotografía`, goal `showcase`, experienceType `portfolio`, density `rich`                                                                                                                                                                                                                                 |
+| T4 plan            | experienceType `portfolio`, sections `[hero, about, portfolioGrid, whatsappCta, footer]`                                                                                                                                                                                                                               |
+| T6 generated input | objective `portfolio`, items ×2 (media+destination), cover set                                                                                                                                                                                                                                                         |
+| T7 engine input    | profession `Fotografía`, goal `portfolio`, features `[portfolio, contact]`, contentBlocks `{portfolio, about}`                                                                                                                                                                                                         |
+| T8 decisions       | category `other`, **archetype `portfolio_service`**, personality `professional`, goal `portfolio`, scores `{corporate:46, editorial:40, minimal:34, creator:10}`, baseline `corporate`, **selected `editorial`**, layout `editorial`, pattern `editorial_stack`, preset `editorial_calm`, mediaStrategy `banner-first` |
+| T9 blocks          | `[text, cta, portfolio]`                                                                                                                                                                                                                                                                                               |
+| T9 theme           | primary `#38524A`; typography `Times New Roman` serif 44/600; cards/buttons/spacing differ from A/B (editorial family)                                                                                                                                                                                                 |
+| T10                | valid, faithful                                                                                                                                                                                                                                                                                                        |
 
 **⇒ Only the portfolio business escapes `minimal` (to `editorial`), because its `portfolio` goal lifts the editorial score enough for `editorial_calm` to win.**
 
@@ -145,26 +145,26 @@ Rendered public page (T10)
 
 `✓` preserved · `partial` degraded · `✗` lost · `engine` Engine-owned only.
 
-| Semantic signal | Intent | Request | Plan | Host map | Engine input | Config | Rendered | Where lost? | Severity |
-|---|---|---|---|---|---|---|---|---|---|
-| business/activity (free-form) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ role | ✓ | — | — |
-| business **category** | beauty/retail/creator | ✗ | ✗ | ✗ | **`other`** | — | — | `normalizeBusinessCategory` strict | P1 |
-| experience type | ✓ | ✓ expType | ✓ | ✓ obj | ✓ features | ✓ block | ✓ | — | — |
-| primary goal | bookings/sell/portfolio | book/sell/showcase | ✓ | ✗ | **leads/sell/portfolio** | ✓ | ✓ | objective preset hardcodes | P2 |
-| services/catalog/portfolio | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ block | ✓ | — | — |
-| content quantity | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
-| price | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
-| media | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
-| CTA | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
-| contact destination | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
-| density | complete | rich | ✗ | ✗ | deferred | engine | engine | adapter defers | P3 |
-| sales mode | — | booking/contact | ✗ | ✗ | ✗ | engine | engine | dropped at PAGES_7 | P2 |
-| visual emphasis/style | let_decide | ✗ | ✗ | ✗ undefined | ✗ → `professional` | engine | engine | host map never fills `style` | P1 |
-| section ordering | — | — | ✓ | ✗ | ✗ | engine | engine | GeneratedPageInput flat | P3 |
-| layout intent | — | — | heroVariant | ✗ | ✗ | engine | engine | not passed | P3 |
-| theme/palette/typography/cards/buttons/background/motion | — | — | — | — | — | engine (family) | ✓ | engine-owned | — |
+| Semantic signal                                          | Intent                  | Request            | Plan        | Host map    | Engine input             | Config          | Rendered | Where lost?                        | Severity |
+| -------------------------------------------------------- | ----------------------- | ------------------ | ----------- | ----------- | ------------------------ | --------------- | -------- | ---------------------------------- | -------- |
+| business/activity (free-form)                            | ✓                       | ✓                  | ✓           | ✓           | ✓                        | ✓ role          | ✓        | —                                  | —        |
+| business **category**                                    | beauty/retail/creator   | ✗                  | ✗           | ✗           | **`other`**              | —               | —        | `normalizeBusinessCategory` strict | P1       |
+| experience type                                          | ✓                       | ✓ expType          | ✓           | ✓ obj       | ✓ features               | ✓ block         | ✓        | —                                  | —        |
+| primary goal                                             | bookings/sell/portfolio | book/sell/showcase | ✓           | ✗           | **leads/sell/portfolio** | ✓               | ✓        | objective preset hardcodes         | P2       |
+| services/catalog/portfolio                               | ✓                       | ✓                  | ✓           | ✓           | ✓                        | ✓ block         | ✓        | —                                  | —        |
+| content quantity                                         | ✓                       | ✓                  | ✓           | ✓           | ✓                        | ✓               | ✓        | —                                  | —        |
+| price                                                    | ✓                       | ✓                  | ✓           | ✓           | ✓                        | ✓               | ✓        | —                                  | —        |
+| media                                                    | ✓                       | ✓                  | ✓           | ✓           | ✓                        | ✓               | ✓        | —                                  | —        |
+| CTA                                                      | ✓                       | ✓                  | ✓           | ✓           | ✓                        | ✓               | ✓        | —                                  | —        |
+| contact destination                                      | ✓                       | ✓                  | ✓           | ✓           | ✓                        | ✓               | ✓        | —                                  | —        |
+| density                                                  | complete                | rich               | ✗           | ✗           | deferred                 | engine          | engine   | adapter defers                     | P3       |
+| sales mode                                               | —                       | booking/contact    | ✗           | ✗           | ✗                        | engine          | engine   | dropped at PAGES_7                 | P2       |
+| visual emphasis/style                                    | let_decide              | ✗                  | ✗           | ✗ undefined | ✗ → `professional`       | engine          | engine   | host map never fills `style`       | P1       |
+| section ordering                                         | —                       | —                  | ✓           | ✗           | ✗                        | engine          | engine   | GeneratedPageInput flat            | P3       |
+| layout intent                                            | —                       | —                  | heroVariant | ✗           | ✗                        | engine          | engine   | not passed                         | P3       |
+| theme/palette/typography/cards/buttons/background/motion | —                       | —                  | —           | —           | —                        | engine (family) | ✓        | engine-owned                       | —        |
 
-**Key:** all *owner facts* survive to Engine input; the *visual* signals (category,
+**Key:** all _owner facts_ survive to Engine input; the _visual_ signals (category,
 style/personality, density, sales mode) are what collapse. Every theme token is
 engine-owned, derived only from `(category, personality, goal)`.
 
@@ -178,11 +178,11 @@ primaryAction all differ.
 
 **Materially different: YES.**
 
-| | A | B | C |
-|---|---|---|---|
-| experienceType | services | catalog | portfolio |
-| sections | hero, about, **serviceGrid**, whatsappCta, footer | hero, **productGrid**, whatsappCta, footer | hero, about, **portfolioGrid**, whatsappCta, footer |
-| primary CTA | whatsapp | whatsapp | whatsapp |
+|                | A                                                 | B                                          | C                                                   |
+| -------------- | ------------------------------------------------- | ------------------------------------------ | --------------------------------------------------- |
+| experienceType | services                                          | catalog                                    | portfolio                                           |
+| sections       | hero, about, **serviceGrid**, whatsappCta, footer | hero, **productGrid**, whatsappCta, footer | hero, about, **portfolioGrid**, whatsappCta, footer |
+| primary CTA    | whatsapp                                          | whatsapp                                   | whatsapp                                            |
 
 → **Phase 4:** PagePlans are meaningfully different ⇒ continue downstream. Smart
 Pages orchestrator + presets are **not** the root cause.
@@ -209,13 +209,13 @@ Engine receives **different inputs**: profession strings differ, goals differ
 (leads/sell/portfolio), content blocks differ (services/products/portfolio), media
 differs, CTA differs. But the recipe-driving signals collapse:
 
-| Engine signal | A | B | C |
-|---|---|---|---|
-| business_category | `other` | `other` | `other` |
-| visual_personality | `professional` | `professional` | `professional` |
-| primary_goal | `leads` | `sell` | `portfolio` |
-| inferred archetype | `appointment_service` | `retail` | `portfolio_service` |
-| archetype → family_bias | **never applied** | **never applied** | **never applied** |
+| Engine signal           | A                     | B                 | C                   |
+| ----------------------- | --------------------- | ----------------- | ------------------- |
+| business_category       | `other`               | `other`           | `other`             |
+| visual_personality      | `professional`        | `professional`    | `professional`      |
+| primary_goal            | `leads`               | `sell`            | `portfolio`         |
+| inferred archetype      | `appointment_service` | `retail`          | `portfolio_service` |
+| archetype → family_bias | **never applied**     | **never applied** | **never applied**   |
 
 ## ENGINE RECIPE SELECTION (Q5/Q6)
 
@@ -225,14 +225,14 @@ in `archetypes.ts`, never read in `strategy.ts`/`engine.ts`). Baseline family is
 `corporate` for all three. Candidate variant exploration (`selectFamilyVariant`) then
 picks among the top-3 families deterministically:
 
-| | A | B | C |
-|---|---|---|---|
-| family_scores | corporate 62, minimal 32, editorial 30 | corporate 54, editorial 24, minimal 24, energetic 14, creator 10 | corporate 46, editorial 40, minimal 34, creator 10 |
-| baseline family | corporate | corporate | corporate |
-| **selected family** | **minimal** | **minimal** | **editorial** |
-| layout | compact | split | editorial |
-| pattern | conversion_first | service_first | editorial_stack |
-| preset | null | null | editorial_calm |
+|                     | A                                      | B                                                                | C                                                  |
+| ------------------- | -------------------------------------- | ---------------------------------------------------------------- | -------------------------------------------------- |
+| family_scores       | corporate 62, minimal 32, editorial 30 | corporate 54, editorial 24, minimal 24, energetic 14, creator 10 | corporate 46, editorial 40, minimal 34, creator 10 |
+| baseline family     | corporate                              | corporate                                                        | corporate                                          |
+| **selected family** | **minimal**                            | **minimal**                                                      | **editorial**                                      |
+| layout              | compact                                | split                                                            | editorial                                          |
+| pattern             | conversion_first                       | service_first                                                    | editorial_stack                                    |
+| preset              | null                                   | null                                                             | editorial_calm                                     |
 
 **Q6 answer:** Yes — A (services) and B (catalog) fall into the **same `minimal`
 family** (not a hard-coded "default", but a deterministic convergence from the
@@ -275,12 +275,12 @@ not the root cause.**
 
 ## ROOT CAUSES
 
-| # | Classification | Evidence | Severity |
-|---|---|---|---|
-| RC1 | **ENGINE_RECIPE_SELECTION** | `family_bias` (archetype strategy) is defined but never applied; category collapses to `other`; personality fixed to `professional` ⇒ A+B converge on `minimal` family | **P1** |
-| RC2 | **PAGES_7_ADAPTER** (contributing) | `normalizeBusinessCategory` strict table → `other`; `style` dropped → `professional`; `bookings` → `leads` | P2 |
-| RC3 | **SMART_PAGES_HOST_MAPPING** (minor) | `GeneratedPageInput.style` exists but is never filled (ACCIDENTAL_LOSS of visual direction) | P2 |
-| RC4 | EXPECTED_DEFERRED | section order / heroVariant / layout hints intentionally dropped (Engine owns layout) | P3 |
+| #   | Classification                       | Evidence                                                                                                                                                               | Severity |
+| --- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| RC1 | **ENGINE_RECIPE_SELECTION**          | `family_bias` (archetype strategy) is defined but never applied; category collapses to `other`; personality fixed to `professional` ⇒ A+B converge on `minimal` family | **P1**   |
+| RC2 | **PAGES_7_ADAPTER** (contributing)   | `normalizeBusinessCategory` strict table → `other`; `style` dropped → `professional`; `bookings` → `leads`                                                             | P2       |
+| RC3 | **SMART_PAGES_HOST_MAPPING** (minor) | `GeneratedPageInput.style` exists but is never filled (ACCIDENTAL_LOSS of visual direction)                                                                            | P2       |
+| RC4 | EXPECTED_DEFERRED                    | section order / heroVariant / layout hints intentionally dropped (Engine owns layout)                                                                                  | P3       |
 
 **NOT root cause:** Smart Pages orchestrator/presets, renderer, canonical validator.
 
@@ -378,6 +378,7 @@ mapper, PAGES_7, or the renderer.
 ## REGRESSION SAFETY
 
 Only these were added — **no production behavior changed**:
+
 - `src/lib/onboarding-v2/__tests__/cripqer-forensic-trace.test.ts` (new harness)
 - `cripqer-generation-forensic-trace/{scenario-A,scenario-B,scenario-C}.json`
 

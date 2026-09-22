@@ -8,12 +8,7 @@
  * Pure data + pure functions. No AI, no network, no randomness.
  */
 
-import type {
-  BusinessCategory,
-  NormalizedIntent,
-  PrimaryGoal,
-  ValidationIssue,
-} from "./types";
+import type { BusinessCategory, NormalizedIntent, PrimaryGoal, ValidationIssue } from "./types";
 import { EngineError } from "./types";
 
 export const BUSINESS_ARCHETYPES = [
@@ -61,13 +56,7 @@ export type SignalLevel = "low" | "normal" | "high";
 export type Requirement = "low" | "medium" | "high";
 export type Locality = "none" | "local" | "service_area" | "multi_location";
 export type ProofPriority =
-  | "none"
-  | "portfolio"
-  | "reviews"
-  | "before_after"
-  | "certifications"
-  | "results"
-  | "mixed";
+  "none" | "portfolio" | "reviews" | "before_after" | "certifications" | "results" | "mixed";
 export type PriceModel = "none" | "fixed" | "starting_at" | "range" | "quote";
 
 export interface BusinessSignalsV1 {
@@ -126,45 +115,134 @@ const KEYWORDS: { archetype: BusinessArchetype; words: string[] }[] = [
   {
     archetype: "home_service",
     words: [
-      "gasfiter", "fontanero", "plomero", "plumber", "electricista", "electrician",
-      "cerrajero", "locksmith", "limpieza", "cleaning", "aseo", "pintor", "painter",
-      "techo", "roof", "mudanza", "moving", "climatizacion", "hvac", "reparacion",
-      "repair", "mantencion", "mantenimiento", "jardin", "jardinero", "gardener",
-      "landscap", "fumigacion", "pest",
+      "gasfiter",
+      "fontanero",
+      "plomero",
+      "plumber",
+      "electricista",
+      "electrician",
+      "cerrajero",
+      "locksmith",
+      "limpieza",
+      "cleaning",
+      "aseo",
+      "pintor",
+      "painter",
+      "techo",
+      "roof",
+      "mudanza",
+      "moving",
+      "climatizacion",
+      "hvac",
+      "reparacion",
+      "repair",
+      "mantencion",
+      "mantenimiento",
+      "jardin",
+      "jardinero",
+      "gardener",
+      "landscap",
+      "fumigacion",
+      "pest",
     ],
   },
   {
     archetype: "custom_craft",
     words: [
-      "herrero", "blacksmith", "carpinter", "carpenter", "mueble", "furniture",
-      "soldador", "welding", "artesan", "craft", "ceramic", "joyer", "jewel",
-      "sastre", "tailor", "tapicer", "upholster", "vidrier", "forja",
+      "herrero",
+      "blacksmith",
+      "carpinter",
+      "carpenter",
+      "mueble",
+      "furniture",
+      "soldador",
+      "welding",
+      "artesan",
+      "craft",
+      "ceramic",
+      "joyer",
+      "jewel",
+      "sastre",
+      "tailor",
+      "tapicer",
+      "upholster",
+      "vidrier",
+      "forja",
     ],
   },
   {
     archetype: "appointment_service",
     words: [
-      "peluquer", "barber", "barbero", "salon", "estetica", "estética", "manicur",
-      "uñas", "nails", "spa", "masaj", "massage", "dentist", "odontolog", "medic",
-      "doctor", "kinesiolog", "veterinar", "pet groom", "peluquería canina", "tatua",
-      "tattoo", "depilacion", "clinic", "consulta",
+      "peluquer",
+      "barber",
+      "barbero",
+      "salon",
+      "estetica",
+      "estética",
+      "manicur",
+      "uñas",
+      "nails",
+      "spa",
+      "masaj",
+      "massage",
+      "dentist",
+      "odontolog",
+      "medic",
+      "doctor",
+      "kinesiolog",
+      "veterinar",
+      "pet groom",
+      "peluquería canina",
+      "tatua",
+      "tattoo",
+      "depilacion",
+      "clinic",
+      "consulta",
     ],
   },
   {
     archetype: "professional_service",
     words: [
-      "abogad", "lawyer", "legal", "contador", "accountant", "contabilidad",
-      "asesor", "consultor", "consult", "psicolog", "psycholog", "coach ejecutivo",
-      "notari", "arquitect", "ingenier", "engineer", "financ", "seguro", "insurance",
+      "abogad",
+      "lawyer",
+      "legal",
+      "contador",
+      "accountant",
+      "contabilidad",
+      "asesor",
+      "consultor",
+      "consult",
+      "psicolog",
+      "psycholog",
+      "coach ejecutivo",
+      "notari",
+      "arquitect",
+      "ingenier",
+      "engineer",
+      "financ",
+      "seguro",
+      "insurance",
       "tax",
     ],
   },
   {
     archetype: "portfolio_service",
     words: [
-      "fotograf", "photograph", "videograf", "filmmaker", "diseñador", "disenador",
-      "designer", "ilustrador", "illustrator", "editor", "motion", "portfolio",
-      "director de arte", "ux", "ui",
+      "fotograf",
+      "photograph",
+      "videograf",
+      "filmmaker",
+      "diseñador",
+      "disenador",
+      "designer",
+      "ilustrador",
+      "illustrator",
+      "editor",
+      "motion",
+      "portfolio",
+      "director de arte",
+      "ux",
+      "ui",
     ],
   },
   {
@@ -174,54 +252,143 @@ const KEYWORDS: { archetype: BusinessArchetype; words: string[] }[] = [
   {
     archetype: "food_service",
     words: [
-      "restaurant", "restaurante", "cafe", "café", "cafeter", "bar", "pasteler",
-      "panader", "bakery", "food", "comida", "cocina", "catering", "pizzer", "sushi",
+      "restaurant",
+      "restaurante",
+      "cafe",
+      "café",
+      "cafeter",
+      "bar",
+      "pasteler",
+      "panader",
+      "bakery",
+      "food",
+      "comida",
+      "cocina",
+      "catering",
+      "pizzer",
+      "sushi",
       "heladeria",
     ],
   },
   {
     archetype: "retail",
     words: [
-      "tienda", "store", "shop", "boutique", "ferreter", "almacen", "minimarket",
-      "retail", "venta", "distribuidor", "emprendimiento",
+      "tienda",
+      "store",
+      "shop",
+      "boutique",
+      "ferreter",
+      "almacen",
+      "minimarket",
+      "retail",
+      "venta",
+      "distribuidor",
+      "emprendimiento",
     ],
   },
   {
     archetype: "creator",
     words: [
-      "creador", "creator", "influencer", "streamer", "youtuber", "podcast",
-      "contenido", "content", "musico", "músico", "artist", "dj",
+      "creador",
+      "creator",
+      "influencer",
+      "streamer",
+      "youtuber",
+      "podcast",
+      "contenido",
+      "content",
+      "musico",
+      "músico",
+      "artist",
+      "dj",
     ],
   },
   {
     archetype: "wellness",
     words: [
-      "fitness", "entrenador", "trainer", "gym", "gimnasio", "yoga", "pilates",
-      "nutricion", "nutrition", "wellness", "bienestar", "terapia", "holistic",
+      "fitness",
+      "entrenador",
+      "trainer",
+      "gym",
+      "gimnasio",
+      "yoga",
+      "pilates",
+      "nutricion",
+      "nutrition",
+      "wellness",
+      "bienestar",
+      "terapia",
+      "holistic",
     ],
   },
   {
     archetype: "education",
     words: [
-      "profesor", "teacher", "tutor", "clases", "academia", "curso", "course",
-      "escuela", "school", "capacitacion", "training", "idiomas",
+      "profesor",
+      "teacher",
+      "tutor",
+      "clases",
+      "academia",
+      "curso",
+      "course",
+      "escuela",
+      "school",
+      "capacitacion",
+      "training",
+      "idiomas",
     ],
   },
   {
     archetype: "real_estate",
-    words: ["inmobiliar", "corredor de propiedades", "real estate", "propiedades", "realtor", "broker"],
+    words: [
+      "inmobiliar",
+      "corredor de propiedades",
+      "real estate",
+      "propiedades",
+      "realtor",
+      "broker",
+    ],
   },
   {
     archetype: "events",
-    words: ["evento", "event", "wedding", "matrimonio", "produccion de eventos", "banquet", "party", "planner"],
+    words: [
+      "evento",
+      "event",
+      "wedding",
+      "matrimonio",
+      "produccion de eventos",
+      "banquet",
+      "party",
+      "planner",
+    ],
   },
   {
     archetype: "digital_service",
-    words: ["marketing", "agencia", "agency", "software", "desarrollo web", "developer", "saas", "seo", "digital"],
+    words: [
+      "marketing",
+      "agencia",
+      "agency",
+      "software",
+      "desarrollo web",
+      "developer",
+      "saas",
+      "seo",
+      "digital",
+    ],
   },
   {
     archetype: "local_business",
-    words: ["barrio", "local", "vecindario", "kiosco", "lavanderia", "taller", "automotriz", "auto repair", "mecanic"],
+    words: [
+      "barrio",
+      "local",
+      "vecindario",
+      "kiosco",
+      "lavanderia",
+      "taller",
+      "automotriz",
+      "auto repair",
+      "mecanic",
+    ],
   },
 ];
 
@@ -413,15 +580,14 @@ function normalizeText(value: string): string {
  * "auto repair" always beats the generic token "repair" and "real estate"
  * beats "estate". Ties keep registry order, so the result stays deterministic.
  */
-const FLAT_KEYWORDS: { word: string; archetype: BusinessArchetype; rank: number }[] = KEYWORDS
-  .flatMap((entry, group) =>
+const FLAT_KEYWORDS: { word: string; archetype: BusinessArchetype; rank: number }[] =
+  KEYWORDS.flatMap((entry, group) =>
     entry.words.map((word, index) => ({
       word: normalizeText(word),
       archetype: entry.archetype,
       rank: group * 1000 + index,
     })),
-  )
-  .sort((a, b) => b.word.length - a.word.length || a.rank - b.rank);
+  ).sort((a, b) => b.word.length - a.word.length || a.rank - b.rank);
 
 /** Deterministic keyword + category classification. Never AI inference. */
 export function inferArchetype(intent: NormalizedIntent): BusinessArchetype {
@@ -464,10 +630,7 @@ export const BUSINESS_SIGNAL_ENUMS: Record<keyof BusinessSignalsV1, readonly str
 };
 
 /** Runtime enum audit for a caller-supplied partial signal patch. */
-export function businessSignalIssues(
-  explicit: unknown,
-  base = "business",
-): ValidationIssue[] {
+export function businessSignalIssues(explicit: unknown, base = "business"): ValidationIssue[] {
   if (explicit === undefined || explicit === null) return [];
   if (typeof explicit !== "object" || Array.isArray(explicit)) {
     return [{ path: base, code: "not_an_object", message: `${base} must be an object.` }];

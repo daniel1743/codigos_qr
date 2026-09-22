@@ -1,4 +1,10 @@
-import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
 export type InviteStatus = "unseen" | "accepted" | "declined";
@@ -17,11 +23,17 @@ export function ExistingUserOnboardingInviteModal({
   isProcessing = false,
 }: ExistingUserOnboardingInviteModalProps) {
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onDecline(); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) onDecline();
+      }}
+    >
       <DialogContent className="sm:max-w-md">
         <DialogTitle>Nuevo Onboarding disponible</DialogTitle>
         <DialogDescription>
-          Tenemos una nueva experiencia para crear tu página con el nuevo motor de Cripqer. ¿Quieres probar lo que puede hacer con tu perfil?
+          Tenemos una nueva experiencia para crear tu página con el nuevo motor de Cripqer. ¿Quieres
+          probar lo que puede hacer con tu perfil?
         </DialogDescription>
         <DialogFooter className="flex-col gap-2 sm:flex-row sm:justify-end sm:space-x-2 mt-4">
           <Button variant="outline" onClick={onDecline} disabled={isProcessing}>

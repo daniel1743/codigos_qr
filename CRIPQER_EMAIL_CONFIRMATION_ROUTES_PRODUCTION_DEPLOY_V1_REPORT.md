@@ -51,12 +51,11 @@ After deployment:
 
 Read-only GET checks after alias promotion:
 
-| URL | HTTP | Content proof |
-|---|---:|---|
+| URL                                         |  HTTP | Content proof                       |
+| ------------------------------------------- | ----: | ----------------------------------- |
 | `https://www.cripqer.dev/correo-confirmado` | `200` | `Correo confirmado`, `Ir a Cripqer` |
-| `https://www.cripqer.dev/login` | `200` | Existing Supabase-backed Auth UI |
+| `https://www.cripqer.dev/login`             | `200` | Existing Supabase-backed Auth UI    |
 
 No authentication logic, Supabase schema, email template, confirmation
 mechanism, Engine, Smart Pages, Power Editor or database behavior was changed
 by this deployment task.
-

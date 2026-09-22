@@ -12,19 +12,19 @@ Implementación integrada con la siguiente resolución:
 
 ## Matriz de aceptación
 
-| Caso | Resultado |
-| --- | --- |
-| New user → onboarding | PASS |
-| Canonical → Power | PASS |
-| Canonical con `template_id` null/presente | PASS por contrato canónico |
-| Legacy → Basic | PASS |
-| Legacy unseen → invitación | PASS |
-| Legacy declined → Basic | PASS |
-| Legacy accepted sin canonical → Onboarding V2 | PASS |
-| Migración exitosa → Power | PASS |
-| Invalid canonical | PASS: fallback seguro a legacy; no se sobrescribe |
-| Resolución sin escritura | PASS |
-| Ownership/profile selection | PASS: consulta filtrada por `user_id` |
+| Caso                                          | Resultado                                         |
+| --------------------------------------------- | ------------------------------------------------- |
+| New user → onboarding                         | PASS                                              |
+| Canonical → Power                             | PASS                                              |
+| Canonical con `template_id` null/presente     | PASS por contrato canónico                        |
+| Legacy → Basic                                | PASS                                              |
+| Legacy unseen → invitación                    | PASS                                              |
+| Legacy declined → Basic                       | PASS                                              |
+| Legacy accepted sin canonical → Onboarding V2 | PASS                                              |
+| Migración exitosa → Power                     | PASS                                              |
+| Invalid canonical                             | PASS: fallback seguro a legacy; no se sobrescribe |
+| Resolución sin escritura                      | PASS                                              |
+| Ownership/profile selection                   | PASS: consulta filtrada por `user_id`             |
 
 ## Power Editor
 

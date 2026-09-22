@@ -78,9 +78,27 @@ function makeConfig(overrides: Partial<BioTemplateConfig> = {}): BioTemplateConf
         lineHeight: 1.5,
         letterSpacing: 0,
       },
-      background: { type: "gradient", gradient: { kind: "linear", angle: 90, from: "#000000", to: "#333333" } },
-      cards: { preset: "minimal", radius: 12, borderWidth: 1, shadow: "none", blur: 0, padding: 16, opacity: 1 },
-      buttons: { variant: "solid", radius: 8, height: 40, fontWeight: 600, shadow: "none", borderWidth: 0 },
+      background: {
+        type: "gradient",
+        gradient: { kind: "linear", angle: 90, from: "#000000", to: "#333333" },
+      },
+      cards: {
+        preset: "minimal",
+        radius: 12,
+        borderWidth: 1,
+        shadow: "none",
+        blur: 0,
+        padding: 16,
+        opacity: 1,
+      },
+      buttons: {
+        variant: "solid",
+        radius: 8,
+        height: 40,
+        fontWeight: 600,
+        shadow: "none",
+        borderWidth: 0,
+      },
       spacing: { section: 64, block: 24, contentWidth: 720 },
       animation: "none",
     },
@@ -113,7 +131,14 @@ function makeConfig(overrides: Partial<BioTemplateConfig> = {}): BioTemplateConf
     blocks: [makeBlock("block-hero", "hero"), makeBlock("block-stats", "stats")],
     seo: { title: "Ada Lovelace", description: "Profile", index: true },
     settings: { showBranding: true, slug: "ada", animation: "none", language: "en" },
-    motion: { preset: "editorial", entrance: "fade", hover: "lift", duration: 300, delay: 0, stagger: 60 },
+    motion: {
+      preset: "editorial",
+      entrance: "fade",
+      hover: "lift",
+      duration: 300,
+      delay: 0,
+      stagger: 60,
+    },
   };
   return { ...base, ...overrides };
 }
@@ -197,7 +222,8 @@ export function runMutationGuardSelfcheck() {
     "delete existing premium block -> ALLOW",
   );
   check(
-    authorizeCanonicalMutation("free", { kind: "DUPLICATE_BLOCK", blockType: "stats" }).decision === "ALLOW",
+    authorizeCanonicalMutation("free", { kind: "DUPLICATE_BLOCK", blockType: "stats" }).decision ===
+      "ALLOW",
     "duplicate premium block -> ALLOW during Power Editor early access",
   );
   check(
@@ -209,14 +235,14 @@ export function runMutationGuardSelfcheck() {
    * 5. FREE: asset insertion/application gating
    * ========================================================== */
   const assetCases: Array<{ intent: MutationIntent; expected: "ALLOW" | "DENY" }> = [
-    { intent: { kind: "ADD_BLOCK", blockType: "hero" }, expected: "ALLOW" },        // standard block
-    { intent: { kind: "ADD_BLOCK", blockType: "stats" }, expected: "ALLOW" },        // premium block (early access)
+    { intent: { kind: "ADD_BLOCK", blockType: "hero" }, expected: "ALLOW" }, // standard block
+    { intent: { kind: "ADD_BLOCK", blockType: "stats" }, expected: "ALLOW" }, // premium block (early access)
     { intent: { kind: "APPLY_SECTION", assetId: "services-cards" }, expected: "ALLOW" }, // standard section
-    { intent: { kind: "APPLY_SECTION", assetId: "media-bento" }, expected: "ALLOW" },  // premium section (early access)
+    { intent: { kind: "APPLY_SECTION", assetId: "media-bento" }, expected: "ALLOW" }, // premium section (early access)
     { intent: { kind: "APPLY_TEMPLATE", assetId: "creator-premium-001" }, expected: "ALLOW" }, // standard template
-    { intent: { kind: "APPLY_TEMPLATE", assetId: "creator-premium" }, expected: "ALLOW" },  // premium template (early access)
-    { intent: { kind: "APPLY_LAYOUT", assetId: "centered" }, expected: "ALLOW" },   // standard layout
-    { intent: { kind: "APPLY_LAYOUT", assetId: "bento" }, expected: "ALLOW" },       // premium layout (early access)
+    { intent: { kind: "APPLY_TEMPLATE", assetId: "creator-premium" }, expected: "ALLOW" }, // premium template (early access)
+    { intent: { kind: "APPLY_LAYOUT", assetId: "centered" }, expected: "ALLOW" }, // standard layout
+    { intent: { kind: "APPLY_LAYOUT", assetId: "bento" }, expected: "ALLOW" }, // premium layout (early access)
   ];
   for (const { intent, expected } of assetCases) {
     const result = authorizeCanonicalMutation("free", intent);
@@ -229,7 +255,10 @@ export function runMutationGuardSelfcheck() {
   /* ============================================================
    * 6. EXPLICIT AUTHORIZED REPLACEMENT vs unrelated save
    * ========================================================== */
-  const applyStandardTemplate: MutationIntent = { kind: "APPLY_TEMPLATE", assetId: "creator-premium-001" };
+  const applyStandardTemplate: MutationIntent = {
+    kind: "APPLY_TEMPLATE",
+    assetId: "creator-premium-001",
+  };
   const authTemplate = authorizeCanonicalMutation("free", applyStandardTemplate);
   check(authTemplate.decision === "ALLOW", "Free may apply an authorized standard template");
 
@@ -283,29 +312,41 @@ export function runMutationGuardSelfcheck() {
   }
   // Pro preservation: no domain is protected from Pro.
   const proPreserved = verifyMutationPreservation(before, tplNoMotion, "pro", editContent);
-  check(proPreserved.valid === true, "Pro may change any visual domain without preservation failure");
+  check(
+    proPreserved.valid === true,
+    "Pro may change any visual domain without preservation failure",
+  );
 
   /* ============================================================
    * 8. FAIL-CLOSED unknown / invalid behavior
    * ========================================================== */
-  const unknownIntent = authorizeCanonicalMutation("free", { kind: "BOGUS" } as unknown as MutationIntent);
+  const unknownIntent = authorizeCanonicalMutation("free", {
+    kind: "BOGUS",
+  } as unknown as MutationIntent);
   check(unknownIntent.decision === "DENY", "unknown intent -> DENY");
   check(unknownIntent.reason === "UNKNOWN_INTENT", "unknown intent carries UNKNOWN_INTENT reason");
 
-  const unknownAsset = authorizeCanonicalMutation("free", { kind: "ADD_BLOCK", blockType: "not_a_block" });
+  const unknownAsset = authorizeCanonicalMutation("free", {
+    kind: "ADD_BLOCK",
+    blockType: "not_a_block",
+  });
   check(unknownAsset.decision === "DENY", "unknown asset -> DENY");
   check(unknownAsset.reason === "UNKNOWN_ASSET", "unknown asset carries UNKNOWN_ASSET reason");
 
-  const invalidTierPro = authorizeCanonicalMutation(
-    "platinum" as "free",
-    { kind: "REMOVE_CRIPQER_BRANDING" },
+  const invalidTierPro = authorizeCanonicalMutation("platinum" as "free", {
+    kind: "REMOVE_CRIPQER_BRANDING",
+  });
+  check(
+    invalidTierPro.decision === "DENY",
+    "invalid tier receives no non-early-access Pro mutation",
   );
-  check(invalidTierPro.decision === "DENY", "invalid tier receives no non-early-access Pro mutation");
-  const invalidTierCore = authorizeCanonicalMutation(
-    "platinum" as "free",
-    { kind: "EDIT_CONTENT" },
+  const invalidTierCore = authorizeCanonicalMutation("platinum" as "free", {
+    kind: "EDIT_CONTENT",
+  });
+  check(
+    invalidTierCore.decision === "ALLOW",
+    "invalid tier treated no more permissively than Free (core still allowed)",
   );
-  check(invalidTierCore.decision === "ALLOW", "invalid tier treated no more permissively than Free (core still allowed)");
 
   /* ============================================================
    * 9. PURITY: deterministic, 0 network, 0 DB, 0 React, 0 Supabase
@@ -333,8 +374,17 @@ export function runMutationGuardSelfcheck() {
 
   // No external identity / network / runtime authority leaks into decisions.
   const identityKeys = [
-    "email", "provider", "browser", "user_id", "session", "network",
-    "database", "supabase", "react", "fetch", "isPremium",
+    "email",
+    "provider",
+    "browser",
+    "user_id",
+    "session",
+    "network",
+    "database",
+    "supabase",
+    "react",
+    "fetch",
+    "isPremium",
   ] as const;
   const sampleAuth = authorizeCanonicalMutation("free", editContent);
   for (const key of identityKeys) {
@@ -367,6 +417,3 @@ export function runMutationGuardSelfcheck() {
 if (import.meta.url === `file://${process.argv[1]?.replaceAll("\\", "/")}`) {
   console.log(JSON.stringify(runMutationGuardSelfcheck(), null, 2));
 }
-
-
-

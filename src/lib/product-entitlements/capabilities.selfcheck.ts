@@ -16,11 +16,7 @@ import {
   isProductTier,
   resolveCapabilityAccess,
 } from "./capabilities.ts";
-import type {
-  CapabilityAccessDecision,
-  ProductCapability,
-  ProductTier,
-} from "./capabilities.ts";
+import type { CapabilityAccessDecision, ProductCapability, ProductTier } from "./capabilities.ts";
 
 function sameJson(left: unknown, right: unknown): boolean {
   return JSON.stringify(left) === JSON.stringify(right);
@@ -151,8 +147,7 @@ export function runProductCapabilitySelfcheck() {
     "invalid tier must not obtain a non-early-access Pro-only capability",
   );
   check(
-    resolveCapabilityAccess("platinum" as unknown as ProductTier, "publishing").state ===
-      "ALLOW",
+    resolveCapabilityAccess("platinum" as unknown as ProductTier, "publishing").state === "ALLOW",
     "invalid tier must be treated no more permissively than Free (core still allowed)",
   );
 
@@ -168,10 +163,7 @@ export function runProductCapabilitySelfcheck() {
 
   /* ---- no legacy isPremium boolean ---- */
   const sampleDecision: CapabilityAccessDecision = resolveCapabilityAccess("free", "publishing");
-  check(
-    !("isPremium" in sampleDecision),
-    "policy must not depend on a legacy isPremium boolean",
-  );
+  check(!("isPremium" in sampleDecision), "policy must not depend on a legacy isPremium boolean");
   check(
     resolveCapabilityAccess.length === 2,
     "resolver must be a pure function of exactly (tier, capability)",

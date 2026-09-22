@@ -36,14 +36,8 @@
  * reducer, no UI.
  */
 
-import type {
-  ProductCapability,
-  ProductTier,
-} from "./capabilities.ts";
-import {
-  isProductTier,
-  resolveCapabilityAccess,
-} from "./capabilities.ts";
+import type { ProductCapability, ProductTier } from "./capabilities.ts";
+import { isProductTier, resolveCapabilityAccess } from "./capabilities.ts";
 import {
   getBlockEntitlement,
   getLayoutEntitlement,
@@ -127,10 +121,7 @@ export function isMutationIntent(value: unknown): value is MutationIntent {
 export type MutationDecision = "ALLOW" | "DENY";
 
 export type MutationDenyReason =
-  | "UPGRADE_REQUIRED"
-  | "UNKNOWN_CAPABILITY"
-  | "UNKNOWN_ASSET"
-  | "UNKNOWN_INTENT";
+  "UPGRADE_REQUIRED" | "UNKNOWN_CAPABILITY" | "UNKNOWN_ASSET" | "UNKNOWN_INTENT";
 
 export interface MutationAuthorization {
   readonly decision: MutationDecision;
@@ -280,13 +271,7 @@ export function canRemoveCripqerBranding(tier: ProductTier | undefined): boolean
 
 /** Top-level canonical domains whose preservation the guard reasons about. */
 export type PreservationDomain =
-  | "layout"
-  | "motion"
-  | "theme"
-  | "blocks"
-  | "profile"
-  | "settings"
-  | "seo";
+  "layout" | "motion" | "theme" | "blocks" | "profile" | "settings" | "seo";
 
 /** A single protected-domain change detected during an unrelated mutation. */
 export interface PreservationViolation {
@@ -296,9 +281,7 @@ export interface PreservationViolation {
   readonly detail: string;
 }
 
-export type PreservationFailureReason =
-  | "PROTECTED_DOMAIN_CHANGED"
-  | "UNKNOWN_INTENT";
+export type PreservationFailureReason = "PROTECTED_DOMAIN_CHANGED" | "UNKNOWN_INTENT";
 
 export interface PreservationResult {
   readonly valid: boolean;
@@ -425,7 +408,8 @@ function capabilityForDomain(
       const b = beforeVal as BioTemplateConfig["theme"] | null;
       const a = afterVal as BioTemplateConfig["theme"] | null;
       if (!deepEqual(b?.typography ?? null, a?.typography ?? null)) return "advanced_typography";
-      if (!deepEqual(b?.background ?? null, a?.background ?? null)) return "premium_background_effects";
+      if (!deepEqual(b?.background ?? null, a?.background ?? null))
+        return "premium_background_effects";
       if (!deepEqual(b?.cards ?? null, a?.cards ?? null)) return "advanced_card_button_styling";
       if (!deepEqual(b?.buttons ?? null, a?.buttons ?? null)) return "advanced_card_button_styling";
       return "premium_background_effects";
@@ -493,6 +477,3 @@ export function verifyMutationPreservation(
   }
   return { valid: true, reason: null, violations: [] };
 }
-
-
-

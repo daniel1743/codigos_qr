@@ -29,7 +29,9 @@ function renderLinks(items: BlockItem[]): string {
   };
   config.profile.avatarUrl = "";
   config.profile.banner.enabled = false;
-  return renderToStaticMarkup(<TemplateRenderer config={config} breakpoint="mobile" mode="public" />);
+  return renderToStaticMarkup(
+    <TemplateRenderer config={config} breakpoint="mobile" mode="public" />,
+  );
 }
 
 function mediaItem(url: string, extra: Partial<BlockItem> = {}): BlockItem {

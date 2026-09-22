@@ -34,16 +34,16 @@ entered.
 
 ## Runtime checks
 
-| Check | Result |
-|---|---|
-| New Power Editor loaded | NOT RUN — authentication required |
-| New profile id preserved | NOT RUN — authentication required |
-| New canonical config visible | NOT RUN — authentication required |
-| Legacy Basic Editor loaded | NOT RUN — authentication required |
-| Legacy visual page unchanged | NOT RUN — authentication required |
-| Existing canonical Power Editor loaded | NOT RUN — authentication required |
+| Check                                   | Result                            |
+| --------------------------------------- | --------------------------------- |
+| New Power Editor loaded                 | NOT RUN — authentication required |
+| New profile id preserved                | NOT RUN — authentication required |
+| New canonical config visible            | NOT RUN — authentication required |
+| Legacy Basic Editor loaded              | NOT RUN — authentication required |
+| Legacy visual page unchanged            | NOT RUN — authentication required |
+| Existing canonical Power Editor loaded  | NOT RUN — authentication required |
 | Existing canonical profile id preserved | NOT RUN — authentication required |
-| Authenticated redirect loop | NOT RUN — authentication required |
+| Authenticated redirect loop             | NOT RUN — authentication required |
 
 ## Final gate
 
@@ -53,4 +53,3 @@ Deployment and alias promotion are verified. The routing runtime gate remains
 unpassed because the required authenticated new-user, legacy-user, and existing
 canonical-user staging flows could not be run. No application code, editor UX,
 schema, profile, or page data was modified by this validation.
-

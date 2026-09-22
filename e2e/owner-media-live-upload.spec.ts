@@ -91,9 +91,7 @@ test("owner cover: real browser upload reaches Supabase and returns a durable UR
   console.log(`[OWNER_MEDIA] cover_url=${src}`);
 });
 
-test("failure smoke: unsupported file type does not create a fake reference", async ({
-  page,
-}) => {
+test("failure smoke: unsupported file type does not create a fake reference", async ({ page }) => {
   test.setTimeout(240_000);
   await loginToEditor(page);
   await reachImagesStep(page);

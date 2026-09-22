@@ -425,8 +425,12 @@ export interface BlockItem {
   helperText?: string;
   avatarUrl?: string;
   typography?: TypographyOverride | undefined;
+  /** Optional independent typography authority for catalog prices. */
+  priceTypography?: TypographyOverride | undefined;
   descriptionTypography?: TypographyOverride | undefined;
   ctaStyle?: CTAStyle | undefined;
+  /** Provenance for the product image; stock references are never publishable. */
+  imageProvenance?: MediaProvenanceV1 | undefined;
 }
 
 export interface HeroAvatarContent {
@@ -452,7 +456,7 @@ export type ImagePosition =
   | "bottom-left"
   | "bottom-right";
 
-export type MediaProvenanceOrigin = "owner" | "contextual_stock" | "legacy_unknown";
+export type MediaProvenanceOrigin = "owner" | "reference_stock" | "legacy_unknown";
 export type ContextualMediaProvider = "unsplash" | "pexels";
 
 /** Optional canonical provenance; absent provenance means legacy_unknown. */
@@ -494,6 +498,7 @@ export interface CTAStyle {
   radius?: number;
   paddingX?: number;
   paddingY?: number;
+  textAlign?: "left" | "center" | "right";
 }
 
 export interface CTAContent {

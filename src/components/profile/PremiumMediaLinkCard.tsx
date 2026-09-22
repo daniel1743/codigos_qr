@@ -105,9 +105,7 @@ export function PremiumMediaLinkCard({
   const ctaBackground = ctaIsLight ? "rgba(255, 255, 255, 0.92)" : design.accentColor;
   const ctaColor = ctaIsLight ? "#111827" : "#ffffff";
   const mediaBackground = visualIsImage ? "rgba(255, 255, 255, 0.72)" : design.mediaBackground;
-  const mediaBorder = visualIsImage
-    ? "1px solid rgba(255, 255, 255, 0.72)"
-    : design.mediaBorder;
+  const mediaBorder = visualIsImage ? "1px solid rgba(255, 255, 255, 0.72)" : design.mediaBorder;
   const normalizedHeight = Math.min(88, Math.max(48, Number(coverHeight || 64)));
   const normalizedWidth = Math.min(116, Math.max(88, Number(coverWidth || 100)));
   const cardMinHeight = Math.max(132, Math.round(normalizedHeight * 2.3));
@@ -150,7 +148,7 @@ export function PremiumMediaLinkCard({
         <div className="absolute -left-8 top-1/2 -translate-y-1/2 w-[4.5rem] h-[4.5rem] bg-gradient-to-br from-[#FDFCFB] to-[#F2E8E0] rounded-full border border-[#D9BBA0]/40 shadow-[0_4px_15px_rgba(0,0,0,0.15)] flex items-center justify-center text-[#A68A72] z-20 transition-transform duration-300 group-hover:scale-105 overflow-hidden">
           {/* Inner subtle ring */}
           <div className="absolute inset-1 rounded-full border border-[#D9BBA0]/20 z-10 pointer-events-none"></div>
-          
+
           {visualIsImage && visual.url ? (
             <img src={visual.url} alt="" className="w-full h-full object-cover" />
           ) : (
@@ -159,7 +157,7 @@ export function PremiumMediaLinkCard({
 
           {/* Clip edit overlay in preview mode */}
           {isPreview && (
-            <div 
+            <div
               className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-30"
               onClick={(e) => e.stopPropagation()}
             >
@@ -169,10 +167,10 @@ export function PremiumMediaLinkCard({
                 ) : (
                   <Paperclip className="h-3.5 w-3.5" />
                 )}
-                <input 
-                  type="file" 
-                  accept="image/png, image/jpeg, image/webp" 
-                  className="hidden" 
+                <input
+                  type="file"
+                  accept="image/png, image/jpeg, image/webp"
+                  className="hidden"
                   onChange={handleFileChange}
                   disabled={uploading}
                 />
@@ -196,60 +194,66 @@ export function PremiumMediaLinkCard({
         }}
         className="relative group cursor-pointer block w-full mb-6 select-none"
       >
-         {/* Icon floating on left */}
-         <div className="absolute -left-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-xl shadow-md flex items-center justify-center text-[#2D5A60] z-20 border border-gray-100/80 transition-transform duration-200 group-hover:scale-105">
-           <PlatformIcon size={20} strokeWidth={2} />
-         </div>
-         
-         {/* Main Card Container */}
-         <div className="ml-4 bg-[#2D5A60] rounded-[1.5rem] flex overflow-hidden shadow-lg transform transition-all duration-300 group-hover:-translate-y-1 hover:shadow-xl min-h-[140px] text-left">
-           <div className="flex-1 p-5 pr-2 flex flex-col justify-center min-w-0">
-             <h3 className="text-white font-medium tracking-wide mb-1 text-sm truncate">{link.label}</h3>
-             <p className="text-[#F4EBE4] text-xs leading-snug mb-3 opacity-90 line-clamp-3 font-light">
-               {description}
-             </p>
-             <button className="bg-gradient-to-r from-[#f0dfc8] via-[#f7ebd9] to-[#dcc39e] text-[#2D5A60] font-bold text-[0.65rem] uppercase tracking-widest py-1.5 px-4 rounded shadow-sm self-start hover:shadow-md transition-shadow border border-[#dcc39e]/50 cursor-pointer">
-               ACESSAR
-             </button>
-           </div>
-           
-           {/* Image side */}
-            <div className="w-[35%] sm:w-[40%] bg-gray-300 relative overflow-hidden shrink-0">
-              {visualIsImage && visual.url ? (
-                 <img src={visual.url} alt="" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-              ) : (
-                 <>
-                   <div className="absolute inset-0 bg-[#dcc39e] opacity-40"></div>
-                   <div className="absolute inset-0 flex items-center justify-center text-[#2D5A60]/60 text-[0.6rem] text-center px-2 font-medium">
-                     {platform.label}
-                   </div>
-                 </>
-              )}
+        {/* Icon floating on left */}
+        <div className="absolute -left-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-xl shadow-md flex items-center justify-center text-[#2D5A60] z-20 border border-gray-100/80 transition-transform duration-200 group-hover:scale-105">
+          <PlatformIcon size={20} strokeWidth={2} />
+        </div>
 
-              {/* Clip edit overlay in preview mode */}
-              {isPreview && (
-                <div 
-                  className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-30"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <label className="p-2.5 bg-white text-[#2D5A60] rounded-full shadow-lg cursor-pointer hover:scale-110 active:scale-95 transition-transform flex items-center justify-center">
-                    {uploading ? (
-                      <Loader2 className="h-4 w-4 animate-spin text-[#2D5A60]" />
-                    ) : (
-                      <Paperclip className="h-4 w-4" />
-                    )}
-                    <input 
-                      type="file" 
-                      accept="image/png, image/jpeg, image/webp" 
-                      className="hidden" 
-                      onChange={handleFileChange}
-                      disabled={uploading}
-                    />
-                  </label>
+        {/* Main Card Container */}
+        <div className="ml-4 bg-[#2D5A60] rounded-[1.5rem] flex overflow-hidden shadow-lg transform transition-all duration-300 group-hover:-translate-y-1 hover:shadow-xl min-h-[140px] text-left">
+          <div className="flex-1 p-5 pr-2 flex flex-col justify-center min-w-0">
+            <h3 className="text-white font-medium tracking-wide mb-1 text-sm truncate">
+              {link.label}
+            </h3>
+            <p className="text-[#F4EBE4] text-xs leading-snug mb-3 opacity-90 line-clamp-3 font-light">
+              {description}
+            </p>
+            <button className="bg-gradient-to-r from-[#f0dfc8] via-[#f7ebd9] to-[#dcc39e] text-[#2D5A60] font-bold text-[0.65rem] uppercase tracking-widest py-1.5 px-4 rounded shadow-sm self-start hover:shadow-md transition-shadow border border-[#dcc39e]/50 cursor-pointer">
+              ACESSAR
+            </button>
+          </div>
+
+          {/* Image side */}
+          <div className="w-[35%] sm:w-[40%] bg-gray-300 relative overflow-hidden shrink-0">
+            {visualIsImage && visual.url ? (
+              <img
+                src={visual.url}
+                alt=""
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+            ) : (
+              <>
+                <div className="absolute inset-0 bg-[#dcc39e] opacity-40"></div>
+                <div className="absolute inset-0 flex items-center justify-center text-[#2D5A60]/60 text-[0.6rem] text-center px-2 font-medium">
+                  {platform.label}
                 </div>
-              )}
-            </div>
-         </div>
+              </>
+            )}
+
+            {/* Clip edit overlay in preview mode */}
+            {isPreview && (
+              <div
+                className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-30"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <label className="p-2.5 bg-white text-[#2D5A60] rounded-full shadow-lg cursor-pointer hover:scale-110 active:scale-95 transition-transform flex items-center justify-center">
+                  {uploading ? (
+                    <Loader2 className="h-4 w-4 animate-spin text-[#2D5A60]" />
+                  ) : (
+                    <Paperclip className="h-4 w-4" />
+                  )}
+                  <input
+                    type="file"
+                    accept="image/png, image/jpeg, image/webp"
+                    className="hidden"
+                    onChange={handleFileChange}
+                    disabled={uploading}
+                  />
+                </label>
+              </div>
+            )}
+          </div>
+        </div>
       </a>
     );
   }
@@ -341,7 +345,7 @@ export function PremiumMediaLinkCard({
 
           {/* Clip edit overlay in preview mode */}
           {isPreview && (
-            <div 
+            <div
               className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-30"
               onClick={(e) => e.stopPropagation()}
             >
@@ -351,10 +355,10 @@ export function PremiumMediaLinkCard({
                 ) : (
                   <Paperclip className="h-4 w-4" />
                 )}
-                <input 
-                  type="file" 
-                  accept="image/png, image/jpeg, image/webp" 
-                  className="hidden" 
+                <input
+                  type="file"
+                  accept="image/png, image/jpeg, image/webp"
+                  className="hidden"
                   onChange={handleFileChange}
                   disabled={uploading}
                 />

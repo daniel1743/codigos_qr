@@ -35,7 +35,7 @@ export const authorizeDownloadFn = createServerFn()
   .handler(async ({ data }) => {
     const { shortUrl, password } = data;
     const supabase = getPrivilegedSupabaseClient();
-    
+
     // Retrieve user-agent header securely on the server for access logs
     let userAgent = "";
     try {
@@ -45,8 +45,10 @@ export const authorizeDownloadFn = createServerFn()
     }
 
     // 1. Retrieve delivery secret (internal RPC)
-    const { data: secretRows, error: secretError } = await supabase
-      .rpc("get_encrypted_document_delivery_secret", { p_short_url: shortUrl });
+    const { data: secretRows, error: secretError } = await supabase.rpc(
+      "get_encrypted_document_delivery_secret",
+      { p_short_url: shortUrl },
+    );
 
     if (secretError) {
       console.error("Database secret retrieval RPC error:", secretError);
@@ -65,13 +67,17 @@ export const authorizeDownloadFn = createServerFn()
         return { success: false, error: "PASSWORD_REQUIRED" };
       }
 
-      const isValid = await EncryptionService.verifyPassword(password, secret.password_hash, secret.salt);
+      const isValid = await EncryptionService.verifyPassword(
+        password,
+        secret.password_hash,
+        secret.salt,
+      );
       if (!isValid) {
         // Log failed attempt without incrementing downloads
         await supabase.rpc("log_document_access", {
           p_document_id: secret.id,
           p_success: false,
-          p_user_agent: userAgent
+          p_user_agent: userAgent,
         });
 
         return { success: false, error: "INVALID_PASSWORD" };
@@ -79,8 +85,10 @@ export const authorizeDownloadFn = createServerFn()
     }
 
     // 3. Atomically check restrictions and claim download
-    const { data: claimRows, error: claimError } = await supabase
-      .rpc("claim_encrypted_document_download", { p_short_url: shortUrl });
+    const { data: claimRows, error: claimError } = await supabase.rpc(
+      "claim_encrypted_document_download",
+      { p_short_url: shortUrl },
+    );
 
     if (claimError) {
       console.error("Database download claim RPC error:", claimError);
@@ -109,7 +117,7 @@ export const authorizeDownloadFn = createServerFn()
     await supabase.rpc("log_document_access", {
       p_document_id: secret.id,
       p_success: true,
-      p_user_agent: userAgent
+      p_user_agent: userAgent,
     });
 
     // 6. Return payload for client-side decryption (excluding password_hash)
@@ -119,7 +127,7 @@ export const authorizeDownloadFn = createServerFn()
       iv: secret.iv,
       salt: secret.salt,
       originalFilename: secret.original_filename,
-      mimeType: secret.mime_type
+      mimeType: secret.mime_type,
     };
   });
 
@@ -135,7 +143,7 @@ function PublicDownloadPage() {
   const [error, setError] = useState<string | null>(null);
   const [password, setPassword] = useState("");
   const [decrypting, setDecrypting] = useState(false);
-  
+
   const supabase = getBrowserSupabaseClient();
 
   useEffect(() => {
@@ -146,8 +154,9 @@ function PublicDownloadPage() {
     setLoading(true);
     setError(null);
     try {
-      const { data, error: fetchError } = await supabase
-        .rpc("get_encrypted_document_metadata", { p_short_url: shortUrl });
+      const { data, error: fetchError } = await supabase.rpc("get_encrypted_document_metadata", {
+        p_short_url: shortUrl,
+      });
 
       if (fetchError) throw fetchError;
 
@@ -169,7 +178,9 @@ function PublicDownloadPage() {
       }
 
       if (docData.one_time_download && docData.current_downloads >= 1) {
-        setError("Este documento ya ha sido descargado y no está disponible para segundas descargas.");
+        setError(
+          "Este documento ya ha sido descargado y no está disponible para segundas descargas.",
+        );
         return;
       }
 
@@ -250,7 +261,7 @@ function PublicDownloadPage() {
         encryptedBuffer,
         keyOrPassword,
         res.iv,
-        res.salt || undefined
+        res.salt || undefined,
       );
 
       // 5. Create decrypted blob and trigger download
@@ -283,7 +294,9 @@ function PublicDownloadPage() {
       }
     } catch (err: any) {
       console.error(err);
-      toast.error("Error al descargar o descifrar el archivo: " + (err.message || "Error desconocido"));
+      toast.error(
+        "Error al descargar o descifrar el archivo: " + (err.message || "Error desconocido"),
+      );
     } finally {
       setDecrypting(false);
     }
@@ -294,7 +307,9 @@ function PublicDownloadPage() {
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-950 flex items-center justify-center p-4">
         <div className="text-center space-y-4">
           <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-blue-500 border-r-transparent" />
-          <p className="text-sm text-slate-300 font-medium">Verificando seguridad del documento...</p>
+          <p className="text-sm text-slate-300 font-medium">
+            Verificando seguridad del documento...
+          </p>
         </div>
       </div>
     );
@@ -371,7 +386,8 @@ function PublicDownloadPage() {
             <div className="p-3 rounded-lg bg-emerald-950/20 border border-emerald-500/20 text-emerald-400 text-xs flex gap-2">
               <CheckCircle2 className="w-4 h-4 shrink-0" />
               <span>
-                Este enlace contiene la clave de descifrado integrada de forma segura en el navegador.
+                Este enlace contiene la clave de descifrado integrada de forma segura en el
+                navegador.
               </span>
             </div>
           )}
@@ -399,7 +415,8 @@ function PublicDownloadPage() {
         {/* Details Note */}
         <div className="text-center pt-2">
           <p className="text-[10px] text-slate-500 leading-normal">
-            El archivo se descarga encriptado y se descifra localmente en tu dispositivo. Tus contraseñas y llaves nunca son compartidas ni enviadas a nuestros servidores.
+            El archivo se descarga encriptado y se descifra localmente en tu dispositivo. Tus
+            contraseñas y llaves nunca son compartidas ni enviadas a nuestros servidores.
           </p>
         </div>
       </div>

@@ -66,7 +66,14 @@ export function templateReducer(state: StudioState, action: StudioAction): Studi
   switch (action.type) {
     case "replaceConfig":
       return action.resetHistory
-        ? { config: action.config, past: [], future: [], selectedBlockId: null, dirty: false, revision: 0 }
+        ? {
+            config: action.config,
+            past: [],
+            future: [],
+            selectedBlockId: null,
+            dirty: false,
+            revision: 0,
+          }
         : { ...commit(state, action.config), selectedBlockId: null };
 
     case "patchConfig":

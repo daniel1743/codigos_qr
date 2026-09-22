@@ -46,9 +46,7 @@ class MockStore implements EntitlementSubscriptionStore {
     this.records.set(userId, record);
   }
 
-  async getCanonicalSubscriptionForUser(
-    userId: string,
-  ): Promise<BillingSubscriptionRecord | null> {
+  async getCanonicalSubscriptionForUser(userId: string): Promise<BillingSubscriptionRecord | null> {
     this.lastQueriedUserId = userId;
     return this.records.get(userId) ?? null;
   }
@@ -56,9 +54,7 @@ class MockStore implements EntitlementSubscriptionStore {
 
 /* ============================ fixture builder ============================= */
 
-function makeSub(
-  overrides: Partial<BillingSubscriptionRecord> = {},
-): BillingSubscriptionRecord {
+function makeSub(overrides: Partial<BillingSubscriptionRecord> = {}): BillingSubscriptionRecord {
   return {
     id: "sub_1",
     user_id: "user_pro",
@@ -91,7 +87,6 @@ async function run(): Promise<void> {
     check(r.hasPaidAccess === false, "no_subscription → hasPaidAccess false");
     check(r.reason === "NO_SUBSCRIPTION", "no_subscription → reason NO_SUBSCRIPTION");
   }
-
 
   // active pro / business / enterprise
   {
@@ -135,10 +130,7 @@ async function run(): Promise<void> {
   // cancel_at_period_end → still paid
   {
     const store = new MockStore();
-    store.set(
-      "U_CANCELEND",
-      makeSub({ cancel_at_period_end: true, user_id: "U_CANCELEND" }),
-    );
+    store.set("U_CANCELEND", makeSub({ cancel_at_period_end: true, user_id: "U_CANCELEND" }));
     const r = await resolveUserEntitlement(store, "U_CANCELEND");
     check(r.effectiveTier === "pro", "cancel_at_period_end (active) → still pro");
     check(r.hasPaidAccess === true, "cancel_at_period_end → still paid");
@@ -161,10 +153,7 @@ async function run(): Promise<void> {
       "service arity = 2 (store + userId; no email/browser param)",
     );
     const svc = createEntitlementHostService(new MockStore());
-    check(
-      svc.resolveForUser.length === 1,
-      "factory method arity = 1 (userId only)",
-    );
+    check(svc.resolveForUser.length === 1, "factory method arity = 1 (userId only)");
   }
 
   // no_duplicate_resolution: service delegates lifecycle to resolveEntitlement
@@ -195,9 +184,7 @@ async function run(): Promise<void> {
     const store = new MockStore();
     await resolveUserEntitlement(store, "USER_W");
     check(
-      Object.keys(store).every(
-        (k) => !k.startsWith("upsert") && !k.startsWith("insert"),
-      ),
+      Object.keys(store).every((k) => !k.startsWith("upsert") && !k.startsWith("insert")),
       "store exposes no write method; service performs no mutation",
     );
   }
@@ -207,10 +194,7 @@ async function run(): Promise<void> {
     const store = new MockStore();
     store.set("USER_N", makeSub({ plan_id: "pro", user_id: "USER_N" }));
     const r = await resolveUserEntitlement(store, "USER_N");
-    check(
-      r.effectiveTier === "pro",
-      "no_network: local mock resolves without provider call",
-    );
+    check(r.effectiveTier === "pro", "no_network: local mock resolves without provider call");
   }
 
   // empty/blank trusted id → fail closed to free without store access
@@ -221,9 +205,7 @@ async function run(): Promise<void> {
     check(store.lastQueriedUserId === null, "blank trusted id → store not queried");
   }
 
-  console.log(
-    `\nEntitlement Host Service Selfcheck: ${passed} passed, ${failed} failed`,
-  );
+  console.log(`\nEntitlement Host Service Selfcheck: ${passed} passed, ${failed} failed`);
 
   if (failed > 0) {
     console.error("SELFCHECK FAILED");

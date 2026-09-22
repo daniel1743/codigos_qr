@@ -49,9 +49,7 @@ async function checkMobile(page, publicId) {
     const html = await page.evaluate(() => document.body.innerHTML);
     out[`${viewport.width}x${viewport.height}`] = {
       http: response ? response.status() : null,
-      overflow: await page.evaluate(
-        () => document.documentElement.scrollWidth - window.innerWidth,
-      ),
+      overflow: await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth),
       cta_reachable: html.includes(WHATSAPP) || html.includes("qa-cripqer.example"),
     };
   }

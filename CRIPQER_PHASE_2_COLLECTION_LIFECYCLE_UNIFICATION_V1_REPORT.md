@@ -16,25 +16,25 @@ The controls operate on the existing canonical arrays through the existing patch
 
 ## Collection inventory
 
-| Collection/block | Lifecycle result |
-|---|---|
-| Links | Add/edit/delete/reorder |
-| Button group | Add/edit/delete/reorder |
-| Social | Add/edit/delete/reorder |
-| Gallery | Existing lifecycle preserved and normalized to shared controls |
-| Portfolio | Phase 1 media editor preserved; add/edit/delete/reorder |
-| Stats | Add/edit/delete/reorder |
-| Services | Existing reorder behavior moved to shared controls |
-| Testimonials | Add/edit/delete/reorder |
-| Pricing | Add/edit/delete/reorder |
-| FAQ | Add/edit/delete/reorder |
-| Timeline | Add/edit/delete/reorder |
-| Floating actions | Add/edit/delete/reorder |
-| Product grid | Existing reorder behavior moved to shared controls |
-| Events | Add/edit/delete/reorder |
-| Carousel | Add/edit/delete/reorder |
-| Tabs | Add/edit/delete/reorder |
-| Bottom navigation | Add/edit/delete/reorder |
+| Collection/block  | Lifecycle result                                               |
+| ----------------- | -------------------------------------------------------------- |
+| Links             | Add/edit/delete/reorder                                        |
+| Button group      | Add/edit/delete/reorder                                        |
+| Social            | Add/edit/delete/reorder                                        |
+| Gallery           | Existing lifecycle preserved and normalized to shared controls |
+| Portfolio         | Phase 1 media editor preserved; add/edit/delete/reorder        |
+| Stats             | Add/edit/delete/reorder                                        |
+| Services          | Existing reorder behavior moved to shared controls             |
+| Testimonials      | Add/edit/delete/reorder                                        |
+| Pricing           | Add/edit/delete/reorder                                        |
+| FAQ               | Add/edit/delete/reorder                                        |
+| Timeline          | Add/edit/delete/reorder                                        |
+| Floating actions  | Add/edit/delete/reorder                                        |
+| Product grid      | Existing reorder behavior moved to shared controls             |
+| Events            | Add/edit/delete/reorder                                        |
+| Carousel          | Add/edit/delete/reorder                                        |
+| Tabs              | Add/edit/delete/reorder                                        |
+| Bottom navigation | Add/edit/delete/reorder                                        |
 
 Pricing features remain a comma-separated field and Booking dates/times remain their existing string/list model. No unrelated domain model was redesigned.
 
@@ -99,14 +99,14 @@ Required runtime scenario:
 
 ## Tests added
 
-- src/premium-template-studio/__tests__/collectionLifecycle.test.ts
+- src/premium-template-studio/**tests**/collectionLifecycle.test.ts
   - shared reorder boundary behavior;
   - all 17 collection types in the task inventory;
   - add, reorder, atomic delete, undo, redo and JSON save/reload serialization.
 
 The earlier Portfolio media tests remain in:
 
-- src/premium-template-studio/__tests__/portfolioMediaEditability.test.tsx
+- src/premium-template-studio/**tests**/portfolioMediaEditability.test.tsx
 
 ## Verification status
 

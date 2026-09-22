@@ -213,11 +213,7 @@ export const pageService = {
       slug: null,
     };
 
-    const { data, error } = await supabase
-      .from("pages")
-      .insert(payload)
-      .select()
-      .single();
+    const { data, error } = await supabase.from("pages").insert(payload).select().single();
 
     if (error) throw error;
     return data;

@@ -43,7 +43,13 @@ export function DesktopSidebar() {
     <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-border bg-white lg:flex">
       <div className="flex h-16 shrink-0 items-center border-b border-border px-5">
         <Link to="/profile" aria-label="Cripqer" className="flex items-center">
-          <Logo variant="horizontal" theme="default" responsiveSymbol showTagline={false} className="h-7" />
+          <Logo
+            variant="horizontal"
+            theme="default"
+            responsiveSymbol
+            showTagline={false}
+            className="h-7"
+          />
         </Link>
       </div>
 

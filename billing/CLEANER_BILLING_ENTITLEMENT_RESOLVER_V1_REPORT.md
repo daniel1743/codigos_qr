@@ -11,29 +11,29 @@ Task: CRIPQER BILLING — CANONICAL ENTITLEMENT RESOLVER CORE V1
 
 ### Files read (exact — nothing else)
 
-| File | Role |
-|---|---|
-| `src/lib/billing/billing.types.ts` | Canonical receiving types (authority for statuses/plans/records) |
-| `src/server/billing/application.ts` | Frozen Application Core (status/plan guard conventions, seams) |
-| `src/server/billing/resolution.ts` | Frozen Resolution Core (fail-closed plan mapping posture) |
-| `src/server/billing/persistence.ts` | Frozen persistence (confirmed resolver takes a supplied record; no query here) |
-| `src/lib/entitlements.ts` | READ-ONLY reference — existing application entitlement API |
-| `billing/CLEANER_BILLING_APPLICATION_CORE_V1_REPORT.md` | Prior convention reference |
-| `billing/CLEANER_BILLING_RESOLUTION_CORE_V1_REPORT.md` | Prior convention reference |
-| `billing/CLEANER_BILLING_FIRST_PURCHASE_LOOKUPS_V1_REPORT.md` | Prior convention reference |
-| `tsconfig.json` | Compiler flags (validation only) |
-| `package.json` | `"type": "module"` + TypeScript/Node versions (validation only) |
+| File                                                          | Role                                                                           |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `src/lib/billing/billing.types.ts`                            | Canonical receiving types (authority for statuses/plans/records)               |
+| `src/server/billing/application.ts`                           | Frozen Application Core (status/plan guard conventions, seams)                 |
+| `src/server/billing/resolution.ts`                            | Frozen Resolution Core (fail-closed plan mapping posture)                      |
+| `src/server/billing/persistence.ts`                           | Frozen persistence (confirmed resolver takes a supplied record; no query here) |
+| `src/lib/entitlements.ts`                                     | READ-ONLY reference — existing application entitlement API                     |
+| `billing/CLEANER_BILLING_APPLICATION_CORE_V1_REPORT.md`       | Prior convention reference                                                     |
+| `billing/CLEANER_BILLING_RESOLUTION_CORE_V1_REPORT.md`        | Prior convention reference                                                     |
+| `billing/CLEANER_BILLING_FIRST_PURCHASE_LOOKUPS_V1_REPORT.md` | Prior convention reference                                                     |
+| `tsconfig.json`                                               | Compiler flags (validation only)                                               |
+| `package.json`                                                | `"type": "module"` + TypeScript/Node versions (validation only)                |
 
 > A temporary `tsconfig.entitlements-check.json` was created for a targeted
 > type-check and then **deleted**. It is not part of the deliverable.
 
 ### Files created (exact — nothing else)
 
-| File | Role |
-|---|---|
-| `src/server/billing/entitlements.ts` | Canonical Entitlement Resolver Core V1 |
-| `src/server/billing/entitlements.selfcheck.ts` | Pure-local selfcheck (no network, no DB) |
-| `billing/CLEANER_BILLING_ENTITLEMENT_RESOLVER_V1_REPORT.md` | This report |
+| File                                                        | Role                                     |
+| ----------------------------------------------------------- | ---------------------------------------- |
+| `src/server/billing/entitlements.ts`                        | Canonical Entitlement Resolver Core V1   |
+| `src/server/billing/entitlements.selfcheck.ts`              | Pure-local selfcheck (no network, no DB) |
+| `billing/CLEANER_BILLING_ENTITLEMENT_RESOLVER_V1_REPORT.md` | This report                              |
 
 ### Files modified
 
@@ -54,14 +54,14 @@ From `src/lib/billing/billing.types.ts`
 
 ### Which statuses grant paid access
 
-| Status | Grants paid access | Effective tier |
-|---|---|---|
-| `active` | **YES** | canonical paid plan (pro / business / enterprise) |
-| `pending` | NO | free |
-| `past_due` | NO | free |
-| `paused` | NO | free |
-| `cancelled` | NO | free |
-| `expired` | NO | free |
+| Status      | Grants paid access | Effective tier                                    |
+| ----------- | ------------------ | ------------------------------------------------- |
+| `active`    | **YES**            | canonical paid plan (pro / business / enterprise) |
+| `pending`   | NO                 | free                                              |
+| `past_due`  | NO                 | free                                              |
+| `paused`    | NO                 | free                                              |
+| `cancelled` | NO                 | free                                              |
+| `expired`   | NO                 | free                                              |
 
 Only `"active"` clearly represents currently-active paid access.
 
@@ -123,7 +123,6 @@ entitlement/effective-tier result.
   no feature grants. The only authority is the supplied canonical subscription
   record.
 
-
 ---
 
 ## D. COMPATIBILITY — EXISTING `src/lib/entitlements.ts`
@@ -139,6 +138,7 @@ entitlement/effective-tier result.
 ### Compatible with new resolver: **NO** (directly)
 
 Differences:
+
 1. **Plan vocabulary** — existing uses `"premium"`; resolver emits
    `free | pro | business | enterprise`. A mapping is required.
 2. **Input** — existing takes a `userId` and (in the future) queries a DB; the
@@ -166,16 +166,16 @@ Neither `src/lib/entitlements.ts` nor the resolver is modified by that bridge.
 
 ## E. SECURITY (mandatory)
 
-| Check | Result |
-|---|---|
-| Browser premium flag authoritative | **NO** (not an input; ignored) |
-| Provider redirect/return state authoritative | **NO** (not an input) |
-| Legacy/manual premium flag as canonical authority | **NO** |
-| Email allowlist as production authority | **NO** (not consulted) |
-| Unknown state grants paid access | **NO** (fail closed to free) |
-| Provider calls | **NO** |
-| DB calls / writes | **NO** |
-| Product features granted | **NO** (feature matrix intentionally NOT implemented) |
+| Check                                             | Result                                                |
+| ------------------------------------------------- | ----------------------------------------------------- |
+| Browser premium flag authoritative                | **NO** (not an input; ignored)                        |
+| Provider redirect/return state authoritative      | **NO** (not an input)                                 |
+| Legacy/manual premium flag as canonical authority | **NO**                                                |
+| Email allowlist as production authority           | **NO** (not consulted)                                |
+| Unknown state grants paid access                  | **NO** (fail closed to free)                          |
+| Provider calls                                    | **NO**                                                |
+| DB calls / writes                                 | **NO**                                                |
+| Product features granted                          | **NO** (feature matrix intentionally NOT implemented) |
 
 The ONLY authority is the supplied canonical subscription state. Default is
 FREE.

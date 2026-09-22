@@ -71,9 +71,7 @@ export interface ActionContextV1 {
 }
 
 function mailtoHref(email: string, ctx: ActionContextV1): string {
-  const subject = ctx.item
-    ? `Enquiry: ${ctx.item.name}`
-    : `Enquiry \u2014 ${ctx.businessName}`;
+  const subject = ctx.item ? `Enquiry: ${ctx.item.name}` : `Enquiry \u2014 ${ctx.businessName}`;
   return `mailto:${email}?subject=${encodeURIComponent(subject)}`;
 }
 
@@ -112,7 +110,8 @@ export function actionHref(
         if (explicit.includes("@")) return mailtoHref(explicit, ctx);
         if (isSafeUrl(explicit)) return explicit;
       }
-      if (ctx.contactEmail && ctx.contactEmail.includes("@")) return mailtoHref(ctx.contactEmail, ctx);
+      if (ctx.contactEmail && ctx.contactEmail.includes("@"))
+        return mailtoHref(ctx.contactEmail, ctx);
       if (ctx.contactWhatsapp) return whatsappFor(action, ctx.contactWhatsapp, ctx);
       const phone = sanitizePhone(ctx.contactPhone);
       return phone ? `tel:+${phone}` : undefined;
@@ -170,10 +169,16 @@ export interface ResolvedActionV1 {
 export function resolveItemAction(
   item: CatalogItemV1,
   ctx: ActionContextV1,
-  defaults: { sectionAction?: SalesActionV1 | undefined; globalAction?: SalesActionV1 | undefined } = {},
+  defaults: {
+    sectionAction?: SalesActionV1 | undefined;
+    globalAction?: SalesActionV1 | undefined;
+  } = {},
 ): ResolvedActionV1 {
   const itemCtx: ActionContextV1 = { ...ctx, item };
-  const candidates: Array<{ action: SalesActionV1 | undefined; source: ResolvedActionV1["source"] }> = [];
+  const candidates: Array<{
+    action: SalesActionV1 | undefined;
+    source: ResolvedActionV1["source"];
+  }> = [];
 
   if (item.action && item.action.enabled && item.action.kind !== "checkout") {
     candidates.push({ action: item.action, source: "item_action" });

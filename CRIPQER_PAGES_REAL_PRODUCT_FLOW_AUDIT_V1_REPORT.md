@@ -32,13 +32,13 @@ Authenticated profile
 
 ## Page model
 
-| Question | Current answer | Classification |
-|---|---|---|
+| Question                      | Current answer                                                                                                                                                                                    | Classification       |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
 | Primary profile vs child Page | The primary page is the authenticated owner’s `profiles` row and its profile canonical fields. A child Page is a separate `public.pages` row linked by `profile_id` and owned by `owner_user_id`. | `WORKING_PRODUCT_UI` |
-| Page count | No application quota or count limit was found. Each successful `createPage` inserts another child row; practical database/entitlement limits were not found in this code path. | `BACKEND_ONLY` |
-| Storage | Profile document: `profiles.template_config` / published snapshot. Child document: `pages.template_config` draft and `pages.published_template_config` published snapshot. | `WORKING_PRODUCT_UI` |
-| Canonical document | Every child owns one canonical `BioTemplateConfig` envelope. A newly simple-created child starts with `template_config = null`; the first editor save creates its draft document. | `WORKING_PRODUCT_UI` |
-| Independent templates | A child opens an independent Power Editor document and stores its own config. | `WORKING_PRODUCT_UI` |
+| Page count                    | No application quota or count limit was found. Each successful `createPage` inserts another child row; practical database/entitlement limits were not found in this code path.                    | `BACKEND_ONLY`       |
+| Storage                       | Profile document: `profiles.template_config` / published snapshot. Child document: `pages.template_config` draft and `pages.published_template_config` published snapshot.                        | `WORKING_PRODUCT_UI` |
+| Canonical document            | Every child owns one canonical `BioTemplateConfig` envelope. A newly simple-created child starts with `template_config = null`; the first editor save creates its draft document.                 | `WORKING_PRODUCT_UI` |
+| Independent templates         | A child opens an independent Power Editor document and stores its own config.                                                                                                                     | `WORKING_PRODUCT_UI` |
 
 ## Creation and editing
 
@@ -65,13 +65,13 @@ is `PARTIAL`, not a guaranteed product behavior.
 
 ## Catalog and services
 
-| Capability | Current implementation | User-facing? | Verified? | Problem / boundary | Next action |
-|---|---|---:|---:|---|---|
-| Create catalog | `/pages/new` → Catálogo; requires owner cover URL and product image URLs. | Yes | Static | Creation is form-based and Engine-backed. | Human test with two real products. |
-| Product fields | Product form supports name, price, image URL and destination URL. It does not expose a product description field. | Partial | Static | No dedicated post-creation catalog CRUD screen found. | Decide whether Power Editor block editing is the intended catalog UX. |
-| Product reorder | Generic editor block reorder exists; no product-row reorder control or catalog manager found. | Partial | Static | Product-level ordering UX is not explicit. | Add only if required by product workflow. |
-| Public catalog | Published child canonical snapshot is rendered by `PublicTemplateRenderer`; Engine maps owner products into product blocks. | Yes after publish | Not live | Requires successful publish and public RPC. | Human publish/URL check. |
-| Create/edit services | `/pages/new` supports service name, description and price; a page-level CTA can be supplied. | Partial | Static | No dedicated service management screen after generation. | Human test and decide whether editor controls are sufficient. |
+| Capability           | Current implementation                                                                                                      |      User-facing? | Verified? | Problem / boundary                                       | Next action                                                           |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------- | ----------------: | --------: | -------------------------------------------------------- | --------------------------------------------------------------------- |
+| Create catalog       | `/pages/new` → Catálogo; requires owner cover URL and product image URLs.                                                   |               Yes |    Static | Creation is form-based and Engine-backed.                | Human test with two real products.                                    |
+| Product fields       | Product form supports name, price, image URL and destination URL. It does not expose a product description field.           |           Partial |    Static | No dedicated post-creation catalog CRUD screen found.    | Decide whether Power Editor block editing is the intended catalog UX. |
+| Product reorder      | Generic editor block reorder exists; no product-row reorder control or catalog manager found.                               |           Partial |    Static | Product-level ordering UX is not explicit.               | Add only if required by product workflow.                             |
+| Public catalog       | Published child canonical snapshot is rendered by `PublicTemplateRenderer`; Engine maps owner products into product blocks. | Yes after publish |  Not live | Requires successful publish and public RPC.              | Human publish/URL check.                                              |
+| Create/edit services | `/pages/new` supports service name, description and price; a page-level CTA can be supplied.                                |           Partial |    Static | No dedicated service management screen after generation. | Human test and decide whether editor controls are sufficient.         |
 
 Product images are owner-supplied URLs mapped through the existing owner-content
 contract; the Page Generator does not upload or invent them.
@@ -124,27 +124,27 @@ are profile-oriented. Page-specific QR analytics are therefore not established.
 
 ## Persistence and deletion
 
-| Capability | Current implementation | Classification |
-|---|---|---|
-| Draft save | Page-mode Power Editor writes `pages.template_config` after canonical validation; autosave and manual Save are available. | `WORKING_PRODUCT_UI` |
-| Published snapshot | Publish writes `pages.published_template_config`, flag, timestamp and revision. Public routes never fall back to draft. | `WORKING_PRODUCT_UI` |
-| Reload | Child editor reload reads the owned page and its draft config. | `NOT_VERIFIED` live; statically covered |
-| Delete Page | Database has `owner_delete_page` RLS policy, but no page-service delete method or visible delete action was found. | `BACKEND_ONLY` |
-| Deleted-page URL / QR | No application cleanup workflow exists. A QR image still encodes its old stable URL; after deletion the public lookup should return not found. | `NOT_VERIFIED` |
+| Capability            | Current implementation                                                                                                                         | Classification                          |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| Draft save            | Page-mode Power Editor writes `pages.template_config` after canonical validation; autosave and manual Save are available.                      | `WORKING_PRODUCT_UI`                    |
+| Published snapshot    | Publish writes `pages.published_template_config`, flag, timestamp and revision. Public routes never fall back to draft.                        | `WORKING_PRODUCT_UI`                    |
+| Reload                | Child editor reload reads the owned page and its draft config.                                                                                 | `NOT_VERIFIED` live; statically covered |
+| Delete Page           | Database has `owner_delete_page` RLS policy, but no page-service delete method or visible delete action was found.                             | `BACKEND_ONLY`                          |
+| Deleted-page URL / QR | No application cleanup workflow exists. A QR image still encodes its old stable URL; after deletion the public lookup should return not found. | `NOT_VERIFIED`                          |
 
 ## Capability summary
 
-| Capability | Current implementation | User-facing? | Verified? | Problem | Next action |
-|---|---|---:|---:|---|---|
-| Multiple child Pages | `/pages` list + `/pages/new` + owner-scoped service | Yes | Static/tests | No quota surfaced | Human create-second-Page test |
-| Child Power Editor | `/pages/{pageId}/edit` → `PowerEditorHost` page target | Yes | Static/tests | Live session not run | Human edit/save/reload test |
-| Template library | Power Editor Templates panel and definitions | Yes | Static | Keep-content does not preserve blocks | Product decision/follow-up task |
-| Draft/publish | Canonical child service + toolbar | Yes | Static/tests | Unpublish missing | Add explicit unpublish requirement if needed |
-| Stable public URL | `/pg/{public_id}` via safe published RPC | Yes | Static/tests | Live publish not run | Human public URL test |
-| Custom alias | `/pg/a/{slug}` with unique alias save UI | Yes | Static/tests | Convenience-only, no slug fallback | Human alias collision/public test |
-| Per-page QR | Detail page QR panel, style persistence/download | Yes | Static/tests | Destination cannot be switched; page analytics absent | Define QR routing/analytics product scope |
-| Catalog management | Initial generated form and canonical renderer mapping | Partial | Static/tests | No post-create CRUD, description/reorder gaps | Product workflow decision |
-| Page deletion | Owner RLS only | No | Static | No safe UI/service lifecycle | Define deletion semantics and audit trail |
+| Capability           | Current implementation                                 | User-facing? |    Verified? | Problem                                               | Next action                                  |
+| -------------------- | ------------------------------------------------------ | -----------: | -----------: | ----------------------------------------------------- | -------------------------------------------- |
+| Multiple child Pages | `/pages` list + `/pages/new` + owner-scoped service    |          Yes | Static/tests | No quota surfaced                                     | Human create-second-Page test                |
+| Child Power Editor   | `/pages/{pageId}/edit` → `PowerEditorHost` page target |          Yes | Static/tests | Live session not run                                  | Human edit/save/reload test                  |
+| Template library     | Power Editor Templates panel and definitions           |          Yes |       Static | Keep-content does not preserve blocks                 | Product decision/follow-up task              |
+| Draft/publish        | Canonical child service + toolbar                      |          Yes | Static/tests | Unpublish missing                                     | Add explicit unpublish requirement if needed |
+| Stable public URL    | `/pg/{public_id}` via safe published RPC               |          Yes | Static/tests | Live publish not run                                  | Human public URL test                        |
+| Custom alias         | `/pg/a/{slug}` with unique alias save UI               |          Yes | Static/tests | Convenience-only, no slug fallback                    | Human alias collision/public test            |
+| Per-page QR          | Detail page QR panel, style persistence/download       |          Yes | Static/tests | Destination cannot be switched; page analytics absent | Define QR routing/analytics product scope    |
+| Catalog management   | Initial generated form and canonical renderer mapping  |      Partial | Static/tests | No post-create CRUD, description/reorder gaps         | Product workflow decision                    |
+| Page deletion        | Owner RLS only                                         |           No |       Static | No safe UI/service lifecycle                          | Define deletion semantics and audit trail    |
 
 ## Simple human QA path
 

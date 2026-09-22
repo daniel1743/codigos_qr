@@ -175,9 +175,12 @@ describe("Engine V2 -> frozen Power Editor integration", () => {
         TOP_SIGNATURES_V2.includes(preview.candidate.recipe.semantics.top_signature),
       ),
     ).toBe(true);
-    expect(new Set(previews.map((preview) => preview.candidate.recipe.semantics.media_strategy)).size)
-      .toBeGreaterThanOrEqual(5);
-    expect(previews.some((preview) => preview.candidate.recipe.visual.background.type === "image")).toBe(true);
+    expect(
+      new Set(previews.map((preview) => preview.candidate.recipe.semantics.media_strategy)).size,
+    ).toBeGreaterThanOrEqual(5);
+    expect(
+      previews.some((preview) => preview.candidate.recipe.visual.background.type === "image"),
+    ).toBe(true);
     expect(
       previews.some((preview) =>
         preview.candidate.recipe.structure.blocks.some((block) => block.type === "gallery"),
@@ -455,7 +458,10 @@ describe("Engine V2 -> frozen Power Editor integration", () => {
   });
 
   it("emits existing per-block responsive overrides with mobile-safe spans", () => {
-    const recipe = recipeWithMediaStrategy("banner-first", baseCandidate.recipe.source_recipe.identity.banner);
+    const recipe = recipeWithMediaStrategy(
+      "banner-first",
+      baseCandidate.recipe.source_recipe.identity.banner,
+    );
     const config = toBioTemplateConfig(recipe);
 
     expect(config.blocks.length).toBeGreaterThan(0);
@@ -465,9 +471,15 @@ describe("Engine V2 -> frozen Power Editor integration", () => {
   });
 
   it("uses deterministic semantic Lucide aliases without adding icons to every item", () => {
-    expect(resolveSemanticActionIcon({ label: "WhatsApp", url: "https://wa.me/1" })).toBe("whatsapp");
-    expect(resolveSemanticActionIcon({ label: "Reserva", url: "https://cal.com/demo" })).toBe("calendar");
-    expect(resolveSemanticActionIcon({ label: "Contacto", url: "https://example.com/contacto" })).toBeUndefined();
+    expect(resolveSemanticActionIcon({ label: "WhatsApp", url: "https://wa.me/1" })).toBe(
+      "whatsapp",
+    );
+    expect(resolveSemanticActionIcon({ label: "Reserva", url: "https://cal.com/demo" })).toBe(
+      "calendar",
+    );
+    expect(
+      resolveSemanticActionIcon({ label: "Contacto", url: "https://example.com/contacto" }),
+    ).toBeUndefined();
     expect(resolveProfessionIcon("Manicurista", "luxury", 0)).toBe("sparkles");
     expect(resolveProfessionIcon("Manicurista", "luxury", 1)).toBeUndefined();
     expect(resolveProfessionIcon("Fitness trainer", "energetic", 0)).toBe("clock");
@@ -482,10 +494,7 @@ describe("Engine V2 -> frozen Power Editor integration", () => {
       pattern: "service_first",
       score: baseCandidate.recipe.meta.quality,
       content: {
-        services: [
-          { title: "Ritual facial" },
-          { title: "Coloración" },
-        ],
+        services: [{ title: "Ritual facial" }, { title: "Coloración" }],
         quickActions: [{ label: "WhatsApp", url: "https://wa.me/1" }],
       },
       candidateId: "semantic-icons-p0",
@@ -507,24 +516,27 @@ describe("Engine V2 -> frozen Power Editor integration", () => {
     expect(bannerRecipe.banner.overlay).toBeLessThanOrEqual(0.4);
     expect(bannerRecipe.banner.blur).toBeLessThanOrEqual(2);
 
-    const typographyValues = FONT_TOKENS.map((heading_family) =>
-      resolveTypography(
-        {
-          ...baseCandidate.recipe.source_recipe,
-          design: {
-            ...baseCandidate.recipe.source_recipe.design,
-            typography: {
-              ...baseCandidate.recipe.source_recipe.design.typography,
-              heading_family,
+    const typographyValues = FONT_TOKENS.map(
+      (heading_family) =>
+        resolveTypography(
+          {
+            ...baseCandidate.recipe.source_recipe,
+            design: {
+              ...baseCandidate.recipe.source_recipe.design,
+              typography: {
+                ...baseCandidate.recipe.source_recipe.design.typography,
+                heading_family,
+              },
             },
           },
-        },
-        baseCandidate.recipe.semantics,
-      ).headingFont,
+          baseCandidate.recipe.semantics,
+        ).headingFont,
     );
 
     expect(new Set(typographyValues).size).toBe(FONT_TOKENS.length);
-    expect(typographyValues.join(" ")).not.toMatch(/Space Grotesk|Inter|DM Sans|Playfair Display|Instrument Serif/);
+    expect(typographyValues.join(" ")).not.toMatch(
+      /Space Grotesk|Inter|DM Sans|Playfair Display|Instrument Serif/,
+    );
   });
 
   it("keeps the diagnostic top compositions deterministic and meaningfully varied", () => {
@@ -541,12 +553,18 @@ describe("Engine V2 -> frozen Power Editor integration", () => {
     });
 
     expect(new Set(signatures).size).toBeGreaterThanOrEqual(3);
-    expect(buildVisualQaScenarioPreviews({ scenarioId: "banner-manicurist", candidateCount: 1 })[0]!
-      .candidate.recipe.semantics.media_strategy).toBe("banner-first");
-    expect(buildVisualQaScenarioPreviews({ scenarioId: "immersive-creator", candidateCount: 1 })[0]!
-      .candidate.recipe.semantics.media_strategy).toBe("immersive-background");
-    expect(buildVisualQaScenarioPreviews({ scenarioId: "minimal-typographic", candidateCount: 1 })[0]!
-      .candidate.recipe.semantics.media_strategy).toBe("minimal-no-media");
+    expect(
+      buildVisualQaScenarioPreviews({ scenarioId: "banner-manicurist", candidateCount: 1 })[0]!
+        .candidate.recipe.semantics.media_strategy,
+    ).toBe("banner-first");
+    expect(
+      buildVisualQaScenarioPreviews({ scenarioId: "immersive-creator", candidateCount: 1 })[0]!
+        .candidate.recipe.semantics.media_strategy,
+    ).toBe("immersive-background");
+    expect(
+      buildVisualQaScenarioPreviews({ scenarioId: "minimal-typographic", candidateCount: 1 })[0]!
+        .candidate.recipe.semantics.media_strategy,
+    ).toBe("minimal-no-media");
   });
 
   it("keeps top signatures deterministic and independent from cosmetic palette changes", () => {

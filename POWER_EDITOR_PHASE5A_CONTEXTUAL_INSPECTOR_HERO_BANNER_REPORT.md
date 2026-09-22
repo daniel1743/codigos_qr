@@ -75,28 +75,44 @@ Repository: `daniel1743/codigos_qr`
 ---
 
 ## IMAGE_CHANGE_SUPPORTED: YES
-## IMAGE_UPLOAD_SUPPORTED: YES  (existing `AssetField` via `adapters.assets`; no new media library)
 
-## SOLID_BACKGROUND_SUPPORTED: YES  (`style.background` → `cardStyle` backgroundColor)
-## GRADIENT_SUPPORTED: NO  (no block-level gradient field; only overlay `type=gradient` scrim)
-## BACKGROUND_IMAGE_SUPPORTED: YES  (`content.backgroundImage.url` + blur)
-## FULL_BLEED_SUPPORTED: PARTIAL  (`layout.width=full` maps to renderer grid span, not true viewport bleed)
-## INSET_SUPPORTED: PARTIAL  (`layout.width=content/wide`)
-## IMAGE_FIT_SUPPORTED: NO  (hardcoded `cover`)
-## IMAGE_POSITION_SUPPORTED: NO  (hardcoded `center`)
-## FIXED_BACKGROUND_SUPPORTED: NO  (no `background-attachment`/behavior field)
-## OVERLAY_SUPPORTED: YES  (`style.overlay{type,opacity,direction}`)
-## OVERLAY_OPACITY_SUPPORTED: YES  (0..1)
+## IMAGE_UPLOAD_SUPPORTED: YES (existing `AssetField` via `adapters.assets`; no new media library)
+
+## SOLID_BACKGROUND_SUPPORTED: YES (`style.background` → `cardStyle` backgroundColor)
+
+## GRADIENT_SUPPORTED: NO (no block-level gradient field; only overlay `type=gradient` scrim)
+
+## BACKGROUND_IMAGE_SUPPORTED: YES (`content.backgroundImage.url` + blur)
+
+## FULL_BLEED_SUPPORTED: PARTIAL (`layout.width=full` maps to renderer grid span, not true viewport bleed)
+
+## INSET_SUPPORTED: PARTIAL (`layout.width=content/wide`)
+
+## IMAGE_FIT_SUPPORTED: NO (hardcoded `cover`)
+
+## IMAGE_POSITION_SUPPORTED: NO (hardcoded `center`)
+
+## FIXED_BACKGROUND_SUPPORTED: NO (no `background-attachment`/behavior field)
+
+## OVERLAY_SUPPORTED: YES (`style.overlay{type,opacity,direction}`)
+
+## OVERLAY_OPACITY_SUPPORTED: YES (0..1)
+
 ## BLEND_WITH_PAGE_SUPPORTED: NO
 
 ---
 
 ## SCHEMA_CHANGES: NONE
+
 ## RENDERER_CHANGES: NONE
+
 ## CAMERA_CHANGES: NONE
+
 ## PHASE4_CHANGES: NONE
+
 ## PERSISTENCE_CHANGES: NONE
-## ENTITLEMENT_CHANGES: NONE  (no locks added/removed; `<Locked>`/`<ProBadge>` untouched)
+
+## ENTITLEMENT_CHANGES: NONE (no locks added/removed; `<Locked>`/`<ProBadge>` untouched)
 
 ---
 

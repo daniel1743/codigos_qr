@@ -1,4 +1,5 @@
 # CRIPQER SMART PAGES V1.1.1 + RETAIL PREMIUM
+
 ## Instructivo de corrección, aplicación y migración a Cripqer
 
 **Documento de handoff para integración futura con Codex**  
@@ -97,7 +98,7 @@ Tratar como baseline aprobado:
 Existe:
 
 ```ts
-deriveRetailPresentation(content)
+deriveRetailPresentation(content);
 ```
 
 y `MasterPageRuntime` acepta:
@@ -190,7 +191,7 @@ No todos los bloques son obligatorios: mostrar únicamente contenido real.
 Actualmente `RetailPresentationV1` calcula:
 
 ```ts
-gridDensity: "standard" | "dense"
+gridDensity: "standard" | "dense";
 ```
 
 pero no debe quedar como metadata muerta.
@@ -230,7 +231,7 @@ Implementar **un page view lógico por `pageId`**, evitando duplicados por re-re
 `RuntimeThemeV1` declara:
 
 ```ts
-buttonStyle: "solid" | "soft" | "outline"
+buttonStyle: "solid" | "soft" | "outline";
 ```
 
 pero debe afectar realmente la presentación.

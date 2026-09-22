@@ -13,7 +13,7 @@
 
 ```text
 POWER EDITOR ARCHITECTURE:     YELLOW
-WORKSPACE/CAMERA:              YELLOW  
+WORKSPACE/CAMERA:              YELLOW
 RESPONSIVE:                    GREEN
 RENDERER:                      GREEN
 ENGINE V2:                     GREEN
@@ -172,18 +172,18 @@ TOTAL:            45
 
 ## STATE OWNERSHIP MAP
 
-| State                  | Owner                | Writers                  | Persistence | Undo  | Should Persist |
-|------------------------|----------------------|--------------------------|-------------|-------|----------------|
-| `config`               | templateReducer      | All commit() actions     | YES         | YES   | YES            |
-| `past` (undo stack)    | templateReducer      | commit()                 | NO          | N/A   | NO             |
-| `future` (redo stack)  | templateReducer      | commit(), undo, redo     | NO          | N/A   | NO             |
-| `selectedBlockId`      | templateReducer      | selectBlock action       | NO          | NO    | NO             |
-| `dirty`                | templateReducer      | commit(), markSaved      | NO          | NO    | NO             |
-| `breakpoint`           | StudioProvider       | setBreakpoint            | NO          | NO    | NO             |
-| `panel`                | StudioProvider       | setPanel                 | NO          | NO    | NO             |
-| `previewing`           | StudioProvider       | setPreviewing            | NO          | NO    | NO             |
-| `saveState`            | StudioProvider       | save/publish flow        | NO          | NO    | NO             |
-| Camera (fitZoom/etc)   | usePowerCanvasCamera | ResizeObserver, controls | NO          | NO    | NO             |
+| State                 | Owner                | Writers                  | Persistence | Undo | Should Persist |
+| --------------------- | -------------------- | ------------------------ | ----------- | ---- | -------------- |
+| `config`              | templateReducer      | All commit() actions     | YES         | YES  | YES            |
+| `past` (undo stack)   | templateReducer      | commit()                 | NO          | N/A  | NO             |
+| `future` (redo stack) | templateReducer      | commit(), undo, redo     | NO          | N/A  | NO             |
+| `selectedBlockId`     | templateReducer      | selectBlock action       | NO          | NO   | NO             |
+| `dirty`               | templateReducer      | commit(), markSaved      | NO          | NO   | NO             |
+| `breakpoint`          | StudioProvider       | setBreakpoint            | NO          | NO   | NO             |
+| `panel`               | StudioProvider       | setPanel                 | NO          | NO   | NO             |
+| `previewing`          | StudioProvider       | setPreviewing            | NO          | NO   | NO             |
+| `saveState`           | StudioProvider       | save/publish flow        | NO          | NO   | NO             |
+| Camera (fitZoom/etc)  | usePowerCanvasCamera | ResizeObserver, controls | NO          | NO   | NO             |
 
 ### Ownership Risks Identified
 
@@ -238,6 +238,7 @@ TOTAL:            45
 **Finding**: No mutex/lock between autosave timer and manual save. Both call the same `save()` function. User can trigger manual save (Cmd+S or publish button) while autosave timer is pending or in-flight.
 
 **Code Evidence**:
+
 ```tsx
 // Autosave timer (line 196)
 timer.current = setTimeout(() => void save(), 900);
@@ -251,6 +252,7 @@ const save = useCallback(async () => {
 ```
 
 **Failure Scenario**:
+
 1. User edits block → dirty, autosave timer starts (900ms)
 2. After 500ms, user presses Cmd+S → manual save starts
 3. After 400ms more, autosave timer fires → second save starts
@@ -276,6 +278,7 @@ const save = useCallback(async () => {
 **Finding**: `selectedBlockId` is cleared when deleting the selected block, but NOT cleared when undo restores a state where that block doesn't exist.
 
 **Code Evidence**:
+
 ```tsx
 case "deleteBlock": {
   return {
@@ -299,6 +302,7 @@ case "undo": {
 ```
 
 **Failure Scenario**:
+
 1. Page has blocks A, B, C
 2. Select block C
 3. Add block D → `selectedBlockId = "D"`
@@ -325,11 +329,13 @@ case "undo": {
 **Finding**: User can undo while autosave RPC is in-flight. Save completes with old config, then undo changes current state. No version checking or optimistic locking exists.
 
 **Code Evidence**:
+
 - Autosave is async: `await adapters.storage.save(state.config)`
 - Undo is synchronous: immediately updates state
 - No CAS (compare-and-set) in RPC
 
 **Failure Scenario**:
+
 1. State A (saved)
 2. Edit → State B → autosave starts (in-flight)
 3. User immediately undoes → State A displayed
@@ -356,23 +362,25 @@ case "undo": {
 **Finding**: Effect watches `initialConfig` and replaces state if structurally different. Uses `JSON.stringify` for comparison, which is expensive and can cause flicker if parent passes new reference frequently.
 
 **Code Evidence**:
+
 ```tsx
 useEffect(() => {
   if (mountedConfig.current === initialConfig) return;
   mountedConfig.current = initialConfig;
-  
+
   const isIdentical =
     initialConfig === state.config ||
     initialConfig === lastEmittedConfig.current ||
     JSON.stringify(initialConfig) === JSON.stringify(state.config);
-  
+
   if (isIdentical) return;
-  
+
   dispatch({ type: "replaceConfig", config: initialConfig, resetHistory: true });
 }, [initialConfig, state.config]);
 ```
 
 **Failure Scenario**:
+
 1. PowerEditorHost passes `config` from useState
 2. Host re-renders frequently (e.g., auth state changes)
 3. Each render creates new `config` reference (even if structurally same)
@@ -398,6 +406,7 @@ useEffect(() => {
 **Finding**: RPC has no `updatedAt` version check or CAS. Pure last-write-wins. Multiple browser tabs or rapid saves can silently overwrite.
 
 **Code Evidence**:
+
 ```sql
 CREATE OR REPLACE FUNCTION set_profile_canonical_editor_config(
   p_profile_id uuid,
@@ -413,6 +422,7 @@ WHERE id = p_profile_id AND user_id = auth.uid();
 ```
 
 **Failure Scenario**:
+
 1. Tab A: edit → save starts
 2. Tab B: different edit → save starts
 3. Both writes succeed, last one wins
@@ -437,6 +447,7 @@ WHERE id = p_profile_id AND user_id = auth.uid();
 **Finding**: TemplateRenderer is pure component with no error boundary. A malformed block, invalid content, or missing block type will throw and unmount the entire editor.
 
 **Code Evidence**:
+
 ```tsx
 // TemplateRenderer.tsx line ~120
 const BlockComponent = getBlockComponent(block.type);
@@ -444,6 +455,7 @@ const BlockComponent = getBlockComponent(block.type);
 ```
 
 **Failure Scenario**:
+
 1. Engine V2 generates unknown block type
 2. User loads in Power Editor
 3. Renderer throws "Component not found"
@@ -471,12 +483,14 @@ const BlockComponent = getBlockComponent(block.type);
 **Finding**: ResizeObserver watches both viewport and content. Content height changes (e.g., adding blocks, expanding text) trigger re-measurement, which changes stage height, which could trigger another resize if stage expansion affects viewport scroll geometry.
 
 **Code Evidence**:
+
 ```tsx
 observer.observe(viewport);
 observer.observe(content);
 ```
 
 **Failure Scenario**:
+
 1. Page with 100 blocks, very tall
 2. User adds block → content height increases
 3. ResizeObserver fires → stage height recalculated
@@ -503,11 +517,13 @@ observer.observe(content);
 **Finding**: `breakpoint` is local useState in StudioProvider, NOT in reducer. After undo/redo, displayed breakpoint may not match the config's responsive overrides.
 
 **Code Evidence**:
+
 ```tsx
 const [breakpoint, setBreakpoint] = useState<Breakpoint>("desktop");
 ```
 
 **Failure Scenario**:
+
 1. Switch to mobile breakpoint
 2. Edit block visibility (desktop:true, mobile:false)
 3. Switch back to desktop
@@ -534,6 +550,7 @@ const [breakpoint, setBreakpoint] = useState<Breakpoint>("desktop");
 **Finding**: Undo and redo unconditionally set `dirty: true`, even if the resulting config is identical to the last saved state.
 
 **Code Evidence**:
+
 ```tsx
 case "undo": {
   return {
@@ -545,6 +562,7 @@ case "undo": {
 ```
 
 **Failure Scenario**:
+
 1. Save (dirty=false)
 2. Edit A (dirty=true)
 3. Undo (config back to saved, but dirty=true)
@@ -559,4 +577,3 @@ case "undo": {
 **When to Fix**: BEFORE Phase 3 (RECOMMENDED)
 
 ---
-

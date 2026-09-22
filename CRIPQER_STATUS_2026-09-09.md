@@ -41,20 +41,20 @@ Date: 2026-09-09.
 The percentages below originated from the Creation Core readiness audit. They
 are readiness indicators, NOT claims of production readiness.
 
-| System | Audit Estimate |
-| --- | ---: |
-| Overall Creation Core | 58% |
-| Power Editor | 72% |
-| Persistence / autosave audit before runtime fix | 65% |
-| Desktop workflow | 68% |
-| Mobile functional | 42% |
-| Mobile visual polish | 55% |
-| Onboarding | 60% |
-| Engine V2 | 63% |
-| Page System host readiness | 35% |
-| Publication / public runtime | 52% |
-| SEO public infrastructure | 58% |
-| Analytics foundation | 30% |
+| System                                          | Audit Estimate |
+| ----------------------------------------------- | -------------: |
+| Overall Creation Core                           |            58% |
+| Power Editor                                    |            72% |
+| Persistence / autosave audit before runtime fix |            65% |
+| Desktop workflow                                |            68% |
+| Mobile functional                               |            42% |
+| Mobile visual polish                            |            55% |
+| Onboarding                                      |            60% |
+| Engine V2                                       |            63% |
+| Page System host readiness                      |            35% |
+| Publication / public runtime                    |            52% |
+| SEO public infrastructure                       |            58% |
+| Analytics foundation                            |            30% |
 
 ## IMPORTANT RUNTIME UPDATES AFTER THE AUDIT
 

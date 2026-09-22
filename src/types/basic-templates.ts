@@ -11,7 +11,8 @@ import type { ComponentType } from "react";
  * drop, no canvas, no per-element geometry.
  */
 
-export type TemplateFamily = "hero_profile" | "hero_cards" | "professional_corporate" | "standalone";
+export type TemplateFamily =
+  "hero_profile" | "hero_cards" | "professional_corporate" | "standalone";
 
 export type HeroStyle = "curved" | "fusion" | "straight";
 

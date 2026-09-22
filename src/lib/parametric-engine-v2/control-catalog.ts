@@ -182,7 +182,9 @@ export function getAvailableControls(
       : undefined,
   );
   const inv = resolveContentInventory(
-    content && typeof content === "object" && !Array.isArray(content) ? (content as never) : undefined,
+    content && typeof content === "object" && !Array.isArray(content)
+      ? (content as never)
+      : undefined,
   );
   const fut = resolveFutureCapabilities(
     future && typeof future === "object" && !Array.isArray(future) ? future : undefined,

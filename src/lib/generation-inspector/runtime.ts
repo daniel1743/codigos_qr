@@ -33,7 +33,11 @@ export function findBlackBoxTraceForPage(pageId: string): GenerationTraceV1 | nu
     if (!key?.startsWith(STORAGE_PREFIX)) continue;
     const trace = readBlackBoxTrace(key.slice(STORAGE_PREFIX.length));
     const readback = trace?.stages.find((stage) => stage.id === "E19")?.data;
-    if (readback && typeof readback === "object" && (readback as { pageId?: unknown }).pageId === pageId) {
+    if (
+      readback &&
+      typeof readback === "object" &&
+      (readback as { pageId?: unknown }).pageId === pageId
+    ) {
       return trace;
     }
   }
@@ -105,13 +109,16 @@ export function captureEffectiveDomSnapshot() {
   const hero = document.querySelector<HTMLElement>(
     '[data-editor-target="hero"], [data-editor-target="profile-cover"], .pts-page > div',
   );
-  const cta = document.querySelector<HTMLElement>('[data-block-id][data-block-type="cta"], a, button');
+  const cta = document.querySelector<HTMLElement>(
+    '[data-block-id][data-block-type="cta"], a, button',
+  );
   return {
     viewport: { width: window.innerWidth, height: window.innerHeight },
     page: computed(page),
     hero: computed(hero),
     profile: computed(document.querySelector("[data-editor-target='profile']")),
-    serviceCards: blocks.filter((block) => block.textContent?.toLowerCase().includes("servicio")).length,
+    serviceCards: blocks.filter((block) => block.textContent?.toLowerCase().includes("servicio"))
+      .length,
     blocks: blocks.map((block) => ({
       id: block.dataset.blockId ?? null,
       computed: computed(block),

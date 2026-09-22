@@ -31,7 +31,9 @@ export function MobileBottomNav() {
             to={item.href}
             aria-current={active ? "page" : undefined}
             className="relative flex min-h-14 flex-col items-center justify-center gap-1 px-1 text-[10px] font-medium transition-colors"
-            style={{ color: active ? PLATFORM_BRAND.colors.blue : PLATFORM_BRAND.colors.textSecondary }}
+            style={{
+              color: active ? PLATFORM_BRAND.colors.blue : PLATFORM_BRAND.colors.textSecondary,
+            }}
           >
             <Icon className="h-5 w-5" aria-hidden />
             <span className="truncate">{item.label}</span>

@@ -7,10 +7,7 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { ColorControl } from "./ColorControl";
-import {
-  BASIC_EDITOR_FONTS,
-  normalizeBasicButtonStyle,
-} from "../../lib/basic-templates/config";
+import { BASIC_EDITOR_FONTS, normalizeBasicButtonStyle } from "../../lib/basic-templates/config";
 
 interface DesignSectionProps {
   profile: Partial<Profile>;
@@ -113,15 +110,19 @@ export function DesignSection({ profile, onChange, userId }: DesignSectionProps)
   return (
     <section className="space-y-5">
       <div className="space-y-1">
-        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-stone-500">Apariencia</p>
+        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-stone-500">
+          Apariencia
+        </p>
         <h2 className="text-xl font-bold tracking-[-0.04em] text-[#1d1d1b]">Diseño</h2>
         <p className="text-sm text-stone-500">Personaliza colores y portada.</p>
       </div>
 
       <div className="space-y-3 rounded-2xl border border-stone-200 bg-[#fffefa] p-4 shadow-[0_8px_24px_rgba(29,29,27,0.04)]">
-        <Label className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500">Tipografía</Label>
+        <Label className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500">
+          Tipografía
+        </Label>
         <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {BASIC_EDITOR_FONTS.map(font => (
+          {BASIC_EDITOR_FONTS.map((font) => (
             <Button
               key={font}
               variant={profile.font_family === font ? "default" : "outline"}
@@ -135,39 +136,148 @@ export function DesignSection({ profile, onChange, userId }: DesignSectionProps)
         </div>
       </div>
 
-      <div data-tool-target="button-style" className="space-y-4 rounded-2xl border border-stone-200 bg-[#fffefa] p-4 shadow-[0_8px_24px_rgba(29,29,27,0.04)]">
-        <Label className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500">Botones</Label>
+      <div
+        data-tool-target="button-style"
+        className="space-y-4 rounded-2xl border border-stone-200 bg-[#fffefa] p-4 shadow-[0_8px_24px_rgba(29,29,27,0.04)]"
+      >
+        <Label className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500">
+          Botones
+        </Label>
         <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <Button variant={profile.button_radius === "none" && basicButtonStyle !== "soft" && basicButtonStyle !== "outline" ? "default" : "outline"} onClick={() => onChange({ button_radius: "none", button_style: "solid" })} className="h-10 shrink-0 rounded-md border-stone-200 px-4 text-xs">Cuadrado</Button>
-          <Button variant={profile.button_radius === "rounded" && basicButtonStyle !== "soft" && basicButtonStyle !== "outline" ? "default" : "outline"} onClick={() => onChange({ button_radius: "rounded", button_style: "solid" })} className="h-10 shrink-0 rounded-xl border-stone-200 px-4 text-xs">Redondeado</Button>
-          <Button variant={profile.button_radius === "full" && basicButtonStyle !== "soft" && basicButtonStyle !== "outline" ? "default" : "outline"} onClick={() => onChange({ button_radius: "full", button_style: "solid" })} className="h-10 shrink-0 rounded-full border-stone-200 px-4 text-xs">Píldora</Button>
+          <Button
+            variant={
+              profile.button_radius === "none" &&
+              basicButtonStyle !== "soft" &&
+              basicButtonStyle !== "outline"
+                ? "default"
+                : "outline"
+            }
+            onClick={() => onChange({ button_radius: "none", button_style: "solid" })}
+            className="h-10 shrink-0 rounded-md border-stone-200 px-4 text-xs"
+          >
+            Cuadrado
+          </Button>
+          <Button
+            variant={
+              profile.button_radius === "rounded" &&
+              basicButtonStyle !== "soft" &&
+              basicButtonStyle !== "outline"
+                ? "default"
+                : "outline"
+            }
+            onClick={() => onChange({ button_radius: "rounded", button_style: "solid" })}
+            className="h-10 shrink-0 rounded-xl border-stone-200 px-4 text-xs"
+          >
+            Redondeado
+          </Button>
+          <Button
+            variant={
+              profile.button_radius === "full" &&
+              basicButtonStyle !== "soft" &&
+              basicButtonStyle !== "outline"
+                ? "default"
+                : "outline"
+            }
+            onClick={() => onChange({ button_radius: "full", button_style: "solid" })}
+            className="h-10 shrink-0 rounded-full border-stone-200 px-4 text-xs"
+          >
+            Píldora
+          </Button>
           {hasOutlineStyle ? (
-            <Button variant={basicButtonStyle === "outline" ? "default" : "outline"} onClick={() => onChange({ button_radius: "none", button_style: "outline" })} className="h-10 shrink-0 rounded-md border-stone-200 px-4 text-xs">Contorno</Button>
+            <Button
+              variant={basicButtonStyle === "outline" ? "default" : "outline"}
+              onClick={() => onChange({ button_radius: "none", button_style: "outline" })}
+              className="h-10 shrink-0 rounded-md border-stone-200 px-4 text-xs"
+            >
+              Contorno
+            </Button>
           ) : null}
           {hasPremiumStyle ? (
-            <Button variant={basicButtonStyle === "soft" ? "default" : "outline"} onClick={() => onChange({ button_radius: "full", button_style: "soft" })} className="h-10 shrink-0 rounded-full border border-transparent px-4 text-xs shadow-sm">Premium</Button>
+            <Button
+              variant={basicButtonStyle === "soft" ? "default" : "outline"}
+              onClick={() => onChange({ button_radius: "full", button_style: "soft" })}
+              className="h-10 shrink-0 rounded-full border border-transparent px-4 text-xs shadow-sm"
+            >
+              Premium
+            </Button>
           ) : null}
         </div>
 
-        <Label className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500">Separación</Label>
+        <Label className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500">
+          Separación
+        </Label>
         <div className="flex gap-2 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <Button variant={profile.theme_spacing === "compact" ? "default" : "outline"} onClick={() => onChange({ theme_spacing: "compact" })} className="h-10 shrink-0 rounded-lg border-stone-200 px-4 text-xs">Compacto</Button>
-          <Button variant={!profile.theme_spacing || profile.theme_spacing === "standard" ? "default" : "outline"} onClick={() => onChange({ theme_spacing: "standard" })} className="h-10 shrink-0 rounded-lg border-stone-200 px-4 text-xs">Normal</Button>
-          <Button variant={profile.theme_spacing === "generous" ? "default" : "outline"} onClick={() => onChange({ theme_spacing: "generous" })} className="h-10 shrink-0 rounded-lg border-stone-200 px-4 text-xs">Amplio</Button>
+          <Button
+            variant={profile.theme_spacing === "compact" ? "default" : "outline"}
+            onClick={() => onChange({ theme_spacing: "compact" })}
+            className="h-10 shrink-0 rounded-lg border-stone-200 px-4 text-xs"
+          >
+            Compacto
+          </Button>
+          <Button
+            variant={
+              !profile.theme_spacing || profile.theme_spacing === "standard" ? "default" : "outline"
+            }
+            onClick={() => onChange({ theme_spacing: "standard" })}
+            className="h-10 shrink-0 rounded-lg border-stone-200 px-4 text-xs"
+          >
+            Normal
+          </Button>
+          <Button
+            variant={profile.theme_spacing === "generous" ? "default" : "outline"}
+            onClick={() => onChange({ theme_spacing: "generous" })}
+            className="h-10 shrink-0 rounded-lg border-stone-200 px-4 text-xs"
+          >
+            Amplio
+          </Button>
         </div>
 
-        <Label className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500">Grosor de borde</Label>
+        <Label className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500">
+          Grosor de borde
+        </Label>
         <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <Button variant={!profile.button_border_thickness || profile.button_border_thickness === "none" ? "default" : "outline"} onClick={() => onChange({ button_border_thickness: "none" })} className="h-10 shrink-0 rounded-lg border-stone-200 px-4 text-xs">Ninguno</Button>
-          <Button variant={profile.button_border_thickness === "thin" ? "default" : "outline"} onClick={() => onChange({ button_border_thickness: "thin" })} className="h-10 shrink-0 rounded-lg border-stone-200 px-4 text-xs">Fino</Button>
-          <Button variant={profile.button_border_thickness === "medium" ? "default" : "outline"} onClick={() => onChange({ button_border_thickness: "medium" })} className="h-10 shrink-0 rounded-lg border-stone-200 px-4 text-xs">Medio</Button>
-          <Button variant={profile.button_border_thickness === "strong" ? "default" : "outline"} onClick={() => onChange({ button_border_thickness: "strong" })} className="h-10 shrink-0 rounded-lg border-stone-200 px-4 text-xs">Marcado</Button>
+          <Button
+            variant={
+              !profile.button_border_thickness || profile.button_border_thickness === "none"
+                ? "default"
+                : "outline"
+            }
+            onClick={() => onChange({ button_border_thickness: "none" })}
+            className="h-10 shrink-0 rounded-lg border-stone-200 px-4 text-xs"
+          >
+            Ninguno
+          </Button>
+          <Button
+            variant={profile.button_border_thickness === "thin" ? "default" : "outline"}
+            onClick={() => onChange({ button_border_thickness: "thin" })}
+            className="h-10 shrink-0 rounded-lg border-stone-200 px-4 text-xs"
+          >
+            Fino
+          </Button>
+          <Button
+            variant={profile.button_border_thickness === "medium" ? "default" : "outline"}
+            onClick={() => onChange({ button_border_thickness: "medium" })}
+            className="h-10 shrink-0 rounded-lg border-stone-200 px-4 text-xs"
+          >
+            Medio
+          </Button>
+          <Button
+            variant={profile.button_border_thickness === "strong" ? "default" : "outline"}
+            onClick={() => onChange({ button_border_thickness: "strong" })}
+            className="h-10 shrink-0 rounded-lg border-stone-200 px-4 text-xs"
+          >
+            Marcado
+          </Button>
         </div>
-        
+
         {profile.button_border_thickness && profile.button_border_thickness !== "none" && (
           <div className="mt-4">
             <Label className="text-xs mb-2 block">Color del borde</Label>
-            <ColorControl value={profile.button_border_color || "#000000"} onChange={(v) => onChange({ button_border_color: v })} compact />
+            <ColorControl
+              value={profile.button_border_color || "#000000"}
+              onChange={(v) => onChange({ button_border_color: v })}
+              compact
+            />
           </div>
         )}
 
@@ -191,7 +301,9 @@ export function DesignSection({ profile, onChange, userId }: DesignSectionProps)
             {(["normal", "semibold", "bold"] as const).map((weight) => (
               <Button
                 key={weight}
-                variant={(profile.button_text_weight || "semibold") === weight ? "default" : "outline"}
+                variant={
+                  (profile.button_text_weight || "semibold") === weight ? "default" : "outline"
+                }
                 onClick={() => onChange({ button_text_weight: weight })}
                 className="h-9 flex-1 rounded-lg border-stone-200 text-xs"
               >
@@ -221,7 +333,9 @@ export function DesignSection({ profile, onChange, userId }: DesignSectionProps)
                 {(["left", "right"] as const).map((position) => (
                   <Button
                     key={position}
-                    variant={(profile.button_icon_position || "left") === position ? "default" : "outline"}
+                    variant={
+                      (profile.button_icon_position || "left") === position ? "default" : "outline"
+                    }
                     onClick={() => onChange({ button_icon_position: position })}
                     className="h-9 flex-1 rounded-lg border-stone-200 text-xs"
                   >
@@ -239,96 +353,200 @@ export function DesignSection({ profile, onChange, userId }: DesignSectionProps)
           <div>
             <Label>Fondo</Label>
             <div className="flex gap-2 mt-2 mb-4">
-              <Button variant={!isBgGradient ? "default" : "outline"} onClick={() => onChange({ background_color: "#ffffff" })} className="flex-1 h-9 text-xs">Sólido</Button>
-              <Button variant={isBgGradient ? "default" : "outline"} onClick={() => onChange({ background_color: buildGradient("180deg", "#ffffff", "#f0f0f0") })} className="flex-1 h-9 text-xs">Degradado</Button>
+              <Button
+                variant={!isBgGradient ? "default" : "outline"}
+                onClick={() => onChange({ background_color: "#ffffff" })}
+                className="flex-1 h-9 text-xs"
+              >
+                Sólido
+              </Button>
+              <Button
+                variant={isBgGradient ? "default" : "outline"}
+                onClick={() =>
+                  onChange({ background_color: buildGradient("180deg", "#ffffff", "#f0f0f0") })
+                }
+                className="flex-1 h-9 text-xs"
+              >
+                Degradado
+              </Button>
             </div>
           </div>
-          
+
           {!isBgGradient ? (
-             <div>
-               <Label className="text-xs mb-2 block text-muted-foreground">Color de fondo</Label>
-               <ColorControl value={profile.background_color || "#ffffff"} onChange={(v) => onChange({ background_color: v })} compact />
-             </div>
+            <div>
+              <Label className="text-xs mb-2 block text-muted-foreground">Color de fondo</Label>
+              <ColorControl
+                value={profile.background_color || "#ffffff"}
+                onChange={(v) => onChange({ background_color: v })}
+                compact
+              />
+            </div>
           ) : (
-             <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label className="text-xs mb-2 block text-muted-foreground">Color 1</Label>
-                    <ColorControl value={bgGradient?.start || "#ffffff"} onChange={(v) => onChange({ background_color: buildGradient(bgGradient?.dir || "180deg", v, bgGradient?.end || "#f0f0f0") })} compact />
-                  </div>
-                  <div>
-                    <Label className="text-xs mb-2 block text-muted-foreground">Color 2</Label>
-                    <ColorControl value={bgGradient?.end || "#f0f0f0"} onChange={(v) => onChange({ background_color: buildGradient(bgGradient?.dir || "180deg", bgGradient?.start || "#ffffff", v) })} compact />
-                  </div>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-xs mb-2 block text-muted-foreground">Color 1</Label>
+                  <ColorControl
+                    value={bgGradient?.start || "#ffffff"}
+                    onChange={(v) =>
+                      onChange({
+                        background_color: buildGradient(
+                          bgGradient?.dir || "180deg",
+                          v,
+                          bgGradient?.end || "#f0f0f0",
+                        ),
+                      })
+                    }
+                    compact
+                  />
                 </div>
                 <div>
-                  <Label className="text-xs mb-2 block text-muted-foreground">Dirección</Label>
-                  <select
-                    className="w-full rounded-lg border border-stone-200 bg-[#fffefa] p-2 text-sm"
-                    value={bgGradient?.dir || "180deg"}
-                    onChange={(e) => onChange({ background_color: buildGradient(e.target.value, bgGradient?.start || "#ffffff", bgGradient?.end || "#f0f0f0") })}
-                  >
-                    <option value="180deg">Vertical</option>
-                    <option value="90deg">Horizontal</option>
-                    <option value="135deg">Diagonal</option>
-                    <option value="45deg">Diagonal inversa</option>
-                    <option value="radial">Radial</option>
-                  </select>
+                  <Label className="text-xs mb-2 block text-muted-foreground">Color 2</Label>
+                  <ColorControl
+                    value={bgGradient?.end || "#f0f0f0"}
+                    onChange={(v) =>
+                      onChange({
+                        background_color: buildGradient(
+                          bgGradient?.dir || "180deg",
+                          bgGradient?.start || "#ffffff",
+                          v,
+                        ),
+                      })
+                    }
+                    compact
+                  />
                 </div>
-             </div>
+              </div>
+              <div>
+                <Label className="text-xs mb-2 block text-muted-foreground">Dirección</Label>
+                <select
+                  className="w-full rounded-lg border border-stone-200 bg-[#fffefa] p-2 text-sm"
+                  value={bgGradient?.dir || "180deg"}
+                  onChange={(e) =>
+                    onChange({
+                      background_color: buildGradient(
+                        e.target.value,
+                        bgGradient?.start || "#ffffff",
+                        bgGradient?.end || "#f0f0f0",
+                      ),
+                    })
+                  }
+                >
+                  <option value="180deg">Vertical</option>
+                  <option value="90deg">Horizontal</option>
+                  <option value="135deg">Diagonal</option>
+                  <option value="45deg">Diagonal inversa</option>
+                  <option value="radial">Radial</option>
+                </select>
+              </div>
+            </div>
           )}
         </div>
 
         <div className="space-y-4 mt-4 border-t pt-4">
-           <Label>Color del botón</Label>
-           <div className="flex gap-2 mt-2 mb-4">
-              <Button variant={!isBtnGradient ? "default" : "outline"} onClick={() => onChange({ button_color: "#111111" })} className="flex-1 h-9 text-xs">Sólido</Button>
-              <Button variant={isBtnGradient ? "default" : "outline"} onClick={() => onChange({ button_color: buildGradient("180deg", "#333333", "#111111") })} className="flex-1 h-9 text-xs">Degradado</Button>
-           </div>
+          <Label>Color del botón</Label>
+          <div className="flex gap-2 mt-2 mb-4">
+            <Button
+              variant={!isBtnGradient ? "default" : "outline"}
+              onClick={() => onChange({ button_color: "#111111" })}
+              className="flex-1 h-9 text-xs"
+            >
+              Sólido
+            </Button>
+            <Button
+              variant={isBtnGradient ? "default" : "outline"}
+              onClick={() =>
+                onChange({ button_color: buildGradient("180deg", "#333333", "#111111") })
+              }
+              className="flex-1 h-9 text-xs"
+            >
+              Degradado
+            </Button>
+          </div>
 
-           {!isBtnGradient ? (
-             <div>
-               <Label className="text-xs mb-2 block text-muted-foreground">Color principal</Label>
-               <ColorControl value={profile.button_color || "#111111"} onChange={(v) => onChange({ button_color: v })} compact />
-             </div>
+          {!isBtnGradient ? (
+            <div>
+              <Label className="text-xs mb-2 block text-muted-foreground">Color principal</Label>
+              <ColorControl
+                value={profile.button_color || "#111111"}
+                onChange={(v) => onChange({ button_color: v })}
+                compact
+              />
+            </div>
           ) : (
-             <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label className="text-xs mb-2 block text-muted-foreground">Color 1</Label>
-                    <ColorControl value={btnGradient?.start || "#333333"} onChange={(v) => onChange({ button_color: buildGradient(btnGradient?.dir || "180deg", v, btnGradient?.end || "#111111") })} compact />
-                  </div>
-                  <div>
-                    <Label className="text-xs mb-2 block text-muted-foreground">Color 2</Label>
-                    <ColorControl value={btnGradient?.end || "#111111"} onChange={(v) => onChange({ button_color: buildGradient(btnGradient?.dir || "180deg", btnGradient?.start || "#333333", v) })} compact />
-                  </div>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-xs mb-2 block text-muted-foreground">Color 1</Label>
+                  <ColorControl
+                    value={btnGradient?.start || "#333333"}
+                    onChange={(v) =>
+                      onChange({
+                        button_color: buildGradient(
+                          btnGradient?.dir || "180deg",
+                          v,
+                          btnGradient?.end || "#111111",
+                        ),
+                      })
+                    }
+                    compact
+                  />
                 </div>
                 <div>
-                  <Label className="text-xs mb-2 block text-muted-foreground">Dirección</Label>
-                  <select
-                    className="w-full rounded-lg border border-stone-200 bg-[#fffefa] p-2 text-sm"
-                    value={btnGradient?.dir || "180deg"}
-                    onChange={(e) => onChange({ button_color: buildGradient(e.target.value, btnGradient?.start || "#333333", btnGradient?.end || "#111111") })}
-                  >
-                    <option value="180deg">Vertical</option>
-                    <option value="90deg">Horizontal</option>
-                    <option value="135deg">Diagonal</option>
-                    <option value="45deg">Diagonal inversa</option>
-                    <option value="radial">Radial</option>
-                  </select>
+                  <Label className="text-xs mb-2 block text-muted-foreground">Color 2</Label>
+                  <ColorControl
+                    value={btnGradient?.end || "#111111"}
+                    onChange={(v) =>
+                      onChange({
+                        button_color: buildGradient(
+                          btnGradient?.dir || "180deg",
+                          btnGradient?.start || "#333333",
+                          v,
+                        ),
+                      })
+                    }
+                    compact
+                  />
                 </div>
-             </div>
+              </div>
+              <div>
+                <Label className="text-xs mb-2 block text-muted-foreground">Dirección</Label>
+                <select
+                  className="w-full rounded-lg border border-stone-200 bg-[#fffefa] p-2 text-sm"
+                  value={btnGradient?.dir || "180deg"}
+                  onChange={(e) =>
+                    onChange({
+                      button_color: buildGradient(
+                        e.target.value,
+                        btnGradient?.start || "#333333",
+                        btnGradient?.end || "#111111",
+                      ),
+                    })
+                  }
+                >
+                  <option value="180deg">Vertical</option>
+                  <option value="90deg">Horizontal</option>
+                  <option value="135deg">Diagonal</option>
+                  <option value="45deg">Diagonal inversa</option>
+                  <option value="radial">Radial</option>
+                </select>
+              </div>
+            </div>
           )}
         </div>
-        
+
         <div className="space-y-2 mt-4 border-t pt-4">
           <Label htmlFor="button_text_color">Texto del botón</Label>
           <div className="mt-2">
-            <ColorControl value={profile.button_text_color || "#ffffff"} onChange={(v) => onChange({ button_text_color: v })} compact />
+            <ColorControl
+              value={profile.button_text_color || "#ffffff"}
+              onChange={(v) => onChange({ button_text_color: v })}
+              compact
+            />
           </div>
         </div>
       </div>
-      
+
       {/* Portada section moved to bottom to fit logical layout of Colors > Banner */}
       <div className="space-y-4 rounded-2xl border border-stone-200 bg-[#fffefa] p-4 shadow-[0_8px_24px_rgba(29,29,27,0.04)]">
         <Label className="flex items-center gap-2">
@@ -371,7 +589,9 @@ export function DesignSection({ profile, onChange, userId }: DesignSectionProps)
           <div className="mt-4">
             <div className="mb-2 flex items-center justify-between gap-4">
               <Label htmlFor="banner_fusion_strength">{intensityLabel}</Label>
-              <span className="text-sm font-medium tabular-nums text-[#1d1d1b]">{fusionStrength}</span>
+              <span className="text-sm font-medium tabular-nums text-[#1d1d1b]">
+                {fusionStrength}
+              </span>
             </div>
             <Input
               id="banner_fusion_strength"

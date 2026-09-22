@@ -44,13 +44,7 @@ export const RECIPE_V2_VERSION = "2" as const;
 /* ------------------------------------------------------------ level 1 */
 
 export type SurfaceMood = "minimal" | "soft" | "glass" | "elevated" | "flat" | "luxury";
-export type BackgroundMood =
-  | "paper"
-  | "clean"
-  | "tinted"
-  | "premium-dark"
-  | "vivid"
-  | "textured";
+export type BackgroundMood = "paper" | "clean" | "tinted" | "premium-dark" | "vivid" | "textured";
 
 /** The semantic decisions the Engine actually reasons about. */
 export interface RecipeSemanticsV2 {

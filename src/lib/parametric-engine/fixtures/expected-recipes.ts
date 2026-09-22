@@ -103,7 +103,15 @@ export const EXPECTED_RECIPES: Record<string, ExpectedRecipeSummary> = {
     cards_enabled: true,
     presentation: "professional_card",
     cta_label: "Ver mi trabajo",
-    blocks: ["hero", "identity", "professional_card", "social_links", "link_list", "media", "footer"],
+    blocks: [
+      "hero",
+      "identity",
+      "professional_card",
+      "social_links",
+      "link_list",
+      "media",
+      "footer",
+    ],
   },
   "food-booking-premium": {
     family: "luxury",

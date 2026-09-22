@@ -34,13 +34,14 @@ export function classifyTransformation(
   output: unknown,
   note?: string,
 ): TransformationV1 {
-  const status: DiagnosticStatus = isMissing(input) && !isMissing(output)
-    ? "FALLBACK"
-    : !isMissing(input) && isMissing(output)
-      ? "LOST"
-      : sameText(input, output)
-        ? "PRESERVED"
-        : "DEGRADED";
+  const status: DiagnosticStatus =
+    isMissing(input) && !isMissing(output)
+      ? "FALLBACK"
+      : !isMissing(input) && isMissing(output)
+        ? "LOST"
+        : sameText(input, output)
+          ? "PRESERVED"
+          : "DEGRADED";
   return { field, input, output, status, ...(note ? { note } : {}) };
 }
 

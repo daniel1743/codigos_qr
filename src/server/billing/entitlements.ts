@@ -106,9 +106,7 @@ export interface EntitlementPolicyAdapter {
 
 /* ============================= runtime guards ============================ */
 
-function isCanonicalSubscriptionStatus(
-  value: unknown,
-): value is BillingSubscriptionStatus {
+function isCanonicalSubscriptionStatus(value: unknown): value is BillingSubscriptionStatus {
   return (
     typeof value === "string" &&
     (BILLING_SUBSCRIPTION_STATUSES as readonly string[]).includes(value)
@@ -116,12 +114,8 @@ function isCanonicalSubscriptionStatus(
 }
 
 function isCanonicalPlanId(value: unknown): value is BillingPlanId {
-  return (
-    typeof value === "string" &&
-    (BILLING_PLAN_IDS as readonly string[]).includes(value)
-  );
+  return typeof value === "string" && (BILLING_PLAN_IDS as readonly string[]).includes(value);
 }
-
 
 /* ============================= status policy ============================= */
 
@@ -131,14 +125,10 @@ function isCanonicalPlanId(value: unknown): value is BillingPlanId {
  * subscription early (no premature downgrade before the canonical paid state
  * actually expires). All other statuses fail closed to free.
  */
-const PAID_GRANTING_STATUS: ReadonlySet<BillingSubscriptionStatus> = new Set([
-  "active",
-]);
+const PAID_GRANTING_STATUS: ReadonlySet<BillingSubscriptionStatus> = new Set(["active"]);
 
 /** Map each non-granting canonical status to a stable reason code. */
-function reasonForNonActiveStatus(
-  status: BillingSubscriptionStatus,
-): EntitlementReason {
+function reasonForNonActiveStatus(status: BillingSubscriptionStatus): EntitlementReason {
   switch (status) {
     case "pending":
       return "PENDING";
@@ -190,9 +180,7 @@ export function resolveEntitlement(
   const status = subscription.status;
   const cancelAtPeriodEnd = subscription.cancel_at_period_end === true;
   const currentPeriodEnd =
-    typeof subscription.current_period_end === "string"
-      ? subscription.current_period_end
-      : null;
+    typeof subscription.current_period_end === "string" ? subscription.current_period_end : null;
 
   // 2. Unknown / non-canonical status → fail closed to free.
   if (!isCanonicalSubscriptionStatus(status)) {

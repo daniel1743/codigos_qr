@@ -20,9 +20,9 @@ export default defineConfig({
         "qr-code-styling",
         "qrcode.react",
         "zod",
-        "react-hook-form"
-      ]
-    }
+        "react-hook-form",
+      ],
+    },
   },
   nitro: {
     preset: "vercel",

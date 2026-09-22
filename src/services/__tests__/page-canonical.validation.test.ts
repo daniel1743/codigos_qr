@@ -148,9 +148,9 @@ describe("pageCanonicalService canonical validation (PAGES_3B)", () => {
   it("publish cannot persist a malformed canonical snapshot", async () => {
     const invalid = cloneWithout(validEnvelope().editorConfig, ["theme", "colors"]);
     const fake = createFakeSupabase(() => ({ data: null, error: null }));
-    await expect(
-      pageCanonicalService.publish(fake, PAGE_ID, USER_ID, invalid, 0),
-    ).rejects.toThrow(/no es válido/);
+    await expect(pageCanonicalService.publish(fake, PAGE_ID, USER_ID, invalid, 0)).rejects.toThrow(
+      /no es válido/,
+    );
     expect(fake.allCalls.some((c) => c.method === "update")).toBe(false);
   });
 
@@ -208,4 +208,3 @@ describe("pageCanonicalService canonical validation (PAGES_3B)", () => {
     expect(fake.allCalls.every((c) => c.table === "pages")).toBe(true);
   });
 });
-

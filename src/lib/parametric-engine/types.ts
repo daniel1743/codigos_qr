@@ -266,8 +266,7 @@ export const RESERVED_BLOCK_TYPES = [
 ] as const;
 
 export type BlockType =
-  | (typeof SUPPORTED_BLOCK_TYPES)[number]
-  | (typeof RESERVED_BLOCK_TYPES)[number];
+  (typeof SUPPORTED_BLOCK_TYPES)[number] | (typeof RESERVED_BLOCK_TYPES)[number];
 
 export interface RecipeBlock {
   id: string;
@@ -429,10 +428,7 @@ export interface EngineOptions {
 }
 
 export type EngineErrorCode =
-  | "INVALID_INTENT"
-  | "INVALID_RECIPE"
-  | "INVALID_CONTEXT"
-  | "INVALID_OPTIONS";
+  "INVALID_INTENT" | "INVALID_RECIPE" | "INVALID_CONTEXT" | "INVALID_OPTIONS";
 
 export class EngineError extends Error {
   readonly code: EngineErrorCode;

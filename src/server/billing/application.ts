@@ -94,10 +94,7 @@ export interface ApplicationStore {
  * `null` fails closed as `PLAN_MAPPING_REQUIRED`.
  */
 export interface BillingPlanResolver {
-  resolvePlan(
-    provider: BillingProvider,
-    providerPlanId: string | null,
-  ): BillingPlanId | null;
+  resolvePlan(provider: BillingProvider, providerPlanId: string | null): BillingPlanId | null;
 }
 
 export interface ApplicationDeps {
@@ -126,15 +123,10 @@ export const EMPTY_PLAN_RESOLVER: BillingPlanResolver = {
 /* ============================ runtime guards ============================= */
 
 function isCanonicalProvider(value: unknown): value is BillingProvider {
-  return (
-    typeof value === "string" &&
-    (BILLING_PROVIDERS as readonly string[]).includes(value)
-  );
+  return typeof value === "string" && (BILLING_PROVIDERS as readonly string[]).includes(value);
 }
 
-function isCanonicalSubscriptionStatus(
-  value: unknown,
-): value is BillingSubscriptionStatus {
+function isCanonicalSubscriptionStatus(value: unknown): value is BillingSubscriptionStatus {
   return (
     typeof value === "string" &&
     (BILLING_SUBSCRIPTION_STATUSES as readonly string[]).includes(value)
@@ -142,10 +134,7 @@ function isCanonicalSubscriptionStatus(
 }
 
 function isCanonicalPlanId(value: unknown): value is BillingPlanId {
-  return (
-    typeof value === "string" &&
-    (BILLING_PLAN_IDS as readonly string[]).includes(value)
-  );
+  return typeof value === "string" && (BILLING_PLAN_IDS as readonly string[]).includes(value);
 }
 
 /* ========================== ownership resolution ========================= */
@@ -168,19 +157,9 @@ async function resolveOwner(
     return trustedUserId;
   }
 
-  if (
-    typeof providerSubscriptionId === "string" &&
-    providerSubscriptionId.length > 0
-  ) {
-    const existing = await deps.store.getSubscriptionByProviderId(
-      provider,
-      providerSubscriptionId,
-    );
-    if (
-      existing &&
-      typeof existing.user_id === "string" &&
-      existing.user_id.length > 0
-    ) {
+  if (typeof providerSubscriptionId === "string" && providerSubscriptionId.length > 0) {
+    const existing = await deps.store.getSubscriptionByProviderId(provider, providerSubscriptionId);
+    if (existing && typeof existing.user_id === "string" && existing.user_id.length > 0) {
       return existing.user_id;
     }
   }
@@ -250,10 +229,7 @@ export async function applyNormalizedEvent(
 
   if (hasSubscriptionState) {
     // 4. Subscription identity required for subscription state.
-    if (
-      typeof providerSubscriptionId !== "string" ||
-      providerSubscriptionId.length === 0
-    ) {
+    if (typeof providerSubscriptionId !== "string" || providerSubscriptionId.length === 0) {
       return result("REJECTED", "MISSING_SUBSCRIPTION_ID", null);
     }
 
@@ -265,10 +241,7 @@ export async function applyNormalizedEvent(
     statusToApply = status;
 
     // 6. Plan resolution — never inferred from amount/currency/event name.
-    const resolved = deps.planResolver.resolvePlan(
-      provider,
-      event.providerPlanId,
-    );
+    const resolved = deps.planResolver.resolvePlan(provider, event.providerPlanId);
     if (!isCanonicalPlanId(resolved)) {
       return result("PLAN_MAPPING_REQUIRED", "PLAN_MAPPING_REQUIRED", null);
     }
@@ -319,5 +292,3 @@ export async function applyNormalizedEvent(
 
   return result("APPLIED", "APPLIED", userId);
 }
-
-

@@ -16,7 +16,7 @@ export class EncryptionService {
         length: 256,
       },
       true,
-      ["encrypt", "decrypt"]
+      ["encrypt", "decrypt"],
     );
   }
 
@@ -41,7 +41,7 @@ export class EncryptionService {
         length: 256,
       },
       true,
-      ["encrypt", "decrypt"]
+      ["encrypt", "decrypt"],
     );
   }
 
@@ -55,7 +55,7 @@ export class EncryptionService {
       encoder.encode(password),
       { name: "PBKDF2" },
       false,
-      ["deriveBits", "deriveKey"]
+      ["deriveBits", "deriveKey"],
     );
 
     return await crypto.subtle.deriveKey(
@@ -68,14 +68,17 @@ export class EncryptionService {
       passwordKey,
       { name: "AES-GCM", length: 256 },
       true,
-      ["encrypt", "decrypt"]
+      ["encrypt", "decrypt"],
     );
   }
 
   /**
    * Encrypt file with AES-256-GCM
    */
-  static async encryptFile(file: File, password?: string): Promise<{
+  static async encryptFile(
+    file: File,
+    password?: string,
+  ): Promise<{
     encryptedData: ArrayBuffer;
     key: string;
     iv: string;
@@ -108,7 +111,7 @@ export class EncryptionService {
         iv: iv,
       },
       key,
-      fileData
+      fileData,
     );
 
     const keyString = await this.exportKey(key);
@@ -131,7 +134,7 @@ export class EncryptionService {
     encryptedData: ArrayBuffer,
     keyOrPassword: string,
     iv: string,
-    salt?: string
+    salt?: string,
   ): Promise<ArrayBuffer> {
     const ivData = this.base64ToArrayBuffer(iv);
 
@@ -154,7 +157,7 @@ export class EncryptionService {
           iv: new Uint8Array(ivData),
         },
         key,
-        encryptedData
+        encryptedData,
       );
 
       return decryptedData;
@@ -175,7 +178,7 @@ export class EncryptionService {
       encoder.encode(password),
       { name: "PBKDF2" },
       false,
-      ["deriveBits"]
+      ["deriveBits"],
     );
     const derivedBits = await crypto.subtle.deriveBits(
       {
@@ -185,7 +188,7 @@ export class EncryptionService {
         hash: "SHA-256",
       },
       passwordKey,
-      256
+      256,
     );
     return this.arrayBufferToBase64(derivedBits);
   }

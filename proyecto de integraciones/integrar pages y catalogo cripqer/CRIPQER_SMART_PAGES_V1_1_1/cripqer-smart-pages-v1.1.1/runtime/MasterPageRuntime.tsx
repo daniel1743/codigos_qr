@@ -218,7 +218,12 @@ export function MasterPageRuntime({
       return;
     }
     track({ type: "external_link_click", action: item.destination.url });
-    const href = destinationHref(item.destination, ecosystem ? { ...(ecosystem.publicBaseUrl ? { publicBaseUrl: ecosystem.publicBaseUrl } : {}) } : undefined);
+    const href = destinationHref(
+      item.destination,
+      ecosystem
+        ? { ...(ecosystem.publicBaseUrl ? { publicBaseUrl: ecosystem.publicBaseUrl } : {}) }
+        : undefined,
+    );
     if (onNavigate) onNavigate(item);
     else if (href && typeof window !== "undefined") window.open(href, "_blank", "noopener");
   };
@@ -479,7 +484,12 @@ export function MasterPageRuntime({
       />
       {plan.sections.map(renderSection)}
       {detail && detailAction ? (
-        <ItemDetail item={detail} action={detailAction} onAct={actOnItem} onClose={() => setDetail(null)} />
+        <ItemDetail
+          item={detail}
+          action={detailAction}
+          onAct={actOnItem}
+          onClose={() => setDetail(null)}
+        />
       ) : null}
     </div>
   );

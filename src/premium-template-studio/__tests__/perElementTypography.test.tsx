@@ -146,9 +146,7 @@ describe("Per-element typography overrides (inheritance model)", () => {
 
   describe("item description typography", () => {
     it("keeps the existing card description defaults when the override is absent", () => {
-      const markup = render(
-        blockWithItems("links", [descriptionItem({ presentation: "card" })]),
-      );
+      const markup = render(blockWithItems("links", [descriptionItem({ presentation: "card" })]));
       expect(markup).toContain("font-size:12.5px;color:");
       expect(markup).not.toContain("font-family:Arial");
     });
@@ -239,7 +237,9 @@ describe("Per-element typography overrides (inheritance model)", () => {
         path: "style.titleTypography",
         value: undefined,
       });
-      expect(cleared.config.blocks.find((b) => b.id === heroId)!.style.titleTypography).toBeUndefined();
+      expect(
+        cleared.config.blocks.find((b) => b.id === heroId)!.style.titleTypography,
+      ).toBeUndefined();
     });
 
     it("persists an item description typography override independently", () => {

@@ -16,12 +16,42 @@ export interface TypographyPair {
 
 /** Only these pairings are considered visually compatible in V1. */
 export const APPROVED_PAIRS: TypographyPair[] = [
-  { heading_family: "serif-display", body_family: "sans-neutral", heading_weight: 700, body_weight: 400 },
-  { heading_family: "serif-text", body_family: "sans-humanist", heading_weight: 600, body_weight: 400 },
-  { heading_family: "sans-geometric", body_family: "sans-neutral", heading_weight: 700, body_weight: 400 },
-  { heading_family: "sans-neutral", body_family: "sans-neutral", heading_weight: 600, body_weight: 400 },
-  { heading_family: "sans-humanist", body_family: "sans-humanist", heading_weight: 600, body_weight: 400 },
-  { heading_family: "sans-geometric", body_family: "sans-humanist", heading_weight: 700, body_weight: 500 },
+  {
+    heading_family: "serif-display",
+    body_family: "sans-neutral",
+    heading_weight: 700,
+    body_weight: 400,
+  },
+  {
+    heading_family: "serif-text",
+    body_family: "sans-humanist",
+    heading_weight: 600,
+    body_weight: 400,
+  },
+  {
+    heading_family: "sans-geometric",
+    body_family: "sans-neutral",
+    heading_weight: 700,
+    body_weight: 400,
+  },
+  {
+    heading_family: "sans-neutral",
+    body_family: "sans-neutral",
+    heading_weight: 600,
+    body_weight: 400,
+  },
+  {
+    heading_family: "sans-humanist",
+    body_family: "sans-humanist",
+    heading_weight: 600,
+    body_weight: 400,
+  },
+  {
+    heading_family: "sans-geometric",
+    body_family: "sans-humanist",
+    heading_weight: 700,
+    body_weight: 500,
+  },
 ];
 
 export const FAMILY_PAIRS: Record<FamilyId, TypographyPair[]> = {

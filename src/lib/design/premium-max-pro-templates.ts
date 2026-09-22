@@ -372,7 +372,8 @@ export const PREMIUM_MAX_PRO_TEMPLATES: PremiumTemplate[] = [
     id: "barbara_elite",
     name: "Premium Max Pro ELITE",
     category: "elegant",
-    description: "Diseño refinado en verde esmeralda y crema con cabecera integrada y tarjetas con foto",
+    description:
+      "Diseño refinado en verde esmeralda y crema con cabecera integrada y tarjetas con foto",
     config: {
       background_color: "#F4EBE4",
       button_color: "#2D5A60",
@@ -402,7 +403,8 @@ export const PREMIUM_MAX_PRO_TEMPLATES: PremiumTemplate[] = [
     id: "larissa_luxury",
     name: "Premium Max Pro LUXURY",
     category: "elegant",
-    description: "Diseño Larissa de alta costura con monograma, doble fondo fotográfico y tarjetas satinadas",
+    description:
+      "Diseño Larissa de alta costura con monograma, doble fondo fotográfico y tarjetas satinadas",
     config: {
       background_color: "#0A0A0A",
       button_color: "#D9BBA0",

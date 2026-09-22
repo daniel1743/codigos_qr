@@ -17,14 +17,14 @@ El estado representa de forma explícita el fallo al crear el perfil owned reque
 
 ## Validación
 
-| Gate | Resultado |
-| --- | --- |
+| Gate                                            | Resultado    |
+| ----------------------------------------------- | ------------ |
 | Focused Smart Editor / onboarding handoff tests | PASS — 14/14 |
-| Targeted TypeScript | PASS |
-| ESLint, archivo modificado | PASS |
-| Prettier, archivo modificado | PASS |
-| Build (Vite + SSR + Nitro) | PASS |
-| Runtime | NOT_RUN |
+| Targeted TypeScript                             | PASS         |
+| ESLint, archivo modificado                      | PASS         |
+| Prettier, archivo modificado                    | PASS         |
+| Build (Vite + SSR + Nitro)                      | PASS         |
+| Runtime                                         | NOT_RUN      |
 
 El TypeScript dirigido ejecutó el chequeo del proyecto y confirmó cero diagnósticos en `basic-editor-handoff.ts` y su test enfocado. El chequeo global continúa con 72 diagnósticos en áreas no relacionadas y congeladas; es informativo y no forma parte del gate local autorizado.
 

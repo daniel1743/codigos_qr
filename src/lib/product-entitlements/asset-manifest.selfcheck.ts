@@ -43,7 +43,10 @@ export function runAssetManifestSelfcheck() {
   };
 
   /* ---- BLOCKS: 37 total, 23 standard + 14 premium, disjoint, no dup ---- */
-  check(STANDARD_BLOCKS.length === 23, `standard blocks must be 23 (got ${STANDARD_BLOCKS.length})`);
+  check(
+    STANDARD_BLOCKS.length === 23,
+    `standard blocks must be 23 (got ${STANDARD_BLOCKS.length})`,
+  );
   check(PREMIUM_BLOCKS.length === 14, `premium blocks must be 14 (got ${PREMIUM_BLOCKS.length})`);
   check(STANDARD_BLOCKS.length + PREMIUM_BLOCKS.length === 37, "total blocks must be 37");
   check(!hasDuplicates(STANDARD_BLOCKS), "standard blocks must have no duplicates");
@@ -61,7 +64,10 @@ export function runAssetManifestSelfcheck() {
   }
 
   /* ---- LAYOUTS: 9 total, 3 standard + 6 premium ---- */
-  check(STANDARD_LAYOUTS.length === 3, `standard layouts must be 3 (got ${STANDARD_LAYOUTS.length})`);
+  check(
+    STANDARD_LAYOUTS.length === 3,
+    `standard layouts must be 3 (got ${STANDARD_LAYOUTS.length})`,
+  );
   check(PREMIUM_LAYOUTS.length === 6, `premium layouts must be 6 (got ${PREMIUM_LAYOUTS.length})`);
   check(!hasDuplicates(STANDARD_LAYOUTS), "standard layouts must have no duplicates");
   check(!hasDuplicates(PREMIUM_LAYOUTS), "premium layouts must have no duplicates");
@@ -69,7 +75,10 @@ export function runAssetManifestSelfcheck() {
   for (const id of STANDARD_LAYOUTS) {
     const e = getLayoutEntitlement(id);
     check(e.classification === "STANDARD", `layout ${id} must be STANDARD`);
-    check(e.requiredCapability === "basic_layout_selection", `layout ${id} must map to basic_layout_selection`);
+    check(
+      e.requiredCapability === "basic_layout_selection",
+      `layout ${id} must map to basic_layout_selection`,
+    );
   }
   for (const id of PREMIUM_LAYOUTS) {
     const e = getLayoutEntitlement(id);
@@ -78,8 +87,14 @@ export function runAssetManifestSelfcheck() {
   }
 
   /* ---- SECTIONS: 29 total, 16 standard + 13 premium ---- */
-  check(STANDARD_SECTIONS.length === 16, `standard sections must be 16 (got ${STANDARD_SECTIONS.length})`);
-  check(PREMIUM_SECTIONS.length === 13, `premium sections must be 13 (got ${PREMIUM_SECTIONS.length})`);
+  check(
+    STANDARD_SECTIONS.length === 16,
+    `standard sections must be 16 (got ${STANDARD_SECTIONS.length})`,
+  );
+  check(
+    PREMIUM_SECTIONS.length === 13,
+    `premium sections must be 13 (got ${PREMIUM_SECTIONS.length})`,
+  );
   check(STANDARD_SECTIONS.length + PREMIUM_SECTIONS.length === 29, "total sections must be 29");
   check(!hasDuplicates(STANDARD_SECTIONS), "standard sections must have no duplicates");
   check(!hasDuplicates(PREMIUM_SECTIONS), "premium sections must have no duplicates");
@@ -87,12 +102,18 @@ export function runAssetManifestSelfcheck() {
   for (const id of STANDARD_SECTIONS) {
     const e = getSectionEntitlement(id);
     check(e.classification === "STANDARD", `section ${id} must be STANDARD`);
-    check(e.requiredCapability === "standard_sections", `section ${id} must map to standard_sections`);
+    check(
+      e.requiredCapability === "standard_sections",
+      `section ${id} must map to standard_sections`,
+    );
   }
   for (const id of PREMIUM_SECTIONS) {
     const e = getSectionEntitlement(id);
     check(e.classification === "PREMIUM", `section ${id} must be PREMIUM`);
-    check(e.requiredCapability === "premium_sections", `section ${id} must map to premium_sections`);
+    check(
+      e.requiredCapability === "premium_sections",
+      `section ${id} must map to premium_sections`,
+    );
   }
 
   /* ---- mixed-section rule: premium-block-containing presets must be PREMIUM ---- */
@@ -123,8 +144,14 @@ export function runAssetManifestSelfcheck() {
   }
 
   /* ---- TEMPLATES: 42 total, 7 standard + 35 premium ---- */
-  check(STANDARD_TEMPLATES.length === 7, `standard templates must be 7 (got ${STANDARD_TEMPLATES.length})`);
-  check(PREMIUM_TEMPLATES.length === 35, `premium templates must be 35 (got ${PREMIUM_TEMPLATES.length})`);
+  check(
+    STANDARD_TEMPLATES.length === 7,
+    `standard templates must be 7 (got ${STANDARD_TEMPLATES.length})`,
+  );
+  check(
+    PREMIUM_TEMPLATES.length === 35,
+    `premium templates must be 35 (got ${PREMIUM_TEMPLATES.length})`,
+  );
   check(STANDARD_TEMPLATES.length + PREMIUM_TEMPLATES.length === 42, "total templates must be 42");
   check(!hasDuplicates(STANDARD_TEMPLATES), "standard templates must have no duplicates");
   check(!hasDuplicates(PREMIUM_TEMPLATES), "premium templates must have no duplicates");
@@ -132,12 +159,18 @@ export function runAssetManifestSelfcheck() {
   for (const id of STANDARD_TEMPLATES) {
     const e = getTemplateEntitlement(id);
     check(e.classification === "STANDARD", `template ${id} must be STANDARD`);
-    check(e.requiredCapability === "standard_templates", `template ${id} must map to standard_templates`);
+    check(
+      e.requiredCapability === "standard_templates",
+      `template ${id} must map to standard_templates`,
+    );
   }
   for (const id of PREMIUM_TEMPLATES) {
     const e = getTemplateEntitlement(id);
     check(e.classification === "PREMIUM", `template ${id} must be PREMIUM`);
-    check(e.requiredCapability === "premium_templates", `template ${id} must map to premium_templates`);
+    check(
+      e.requiredCapability === "premium_templates",
+      `template ${id} must map to premium_templates`,
+    );
   }
 
   /* ---- fail closed: unknown assets are UNKNOWN (not Standard) ---- */
@@ -153,15 +186,33 @@ export function runAssetManifestSelfcheck() {
     check(e.requiredCapability === null, `unknown ${kind} "${id}" must have null capability`);
   }
   check(getBlockEntitlement("").classification === "UNKNOWN", "empty block id must fail closed");
-  check(getTemplateEntitlement("").classification === "UNKNOWN", "empty template id must fail closed");
-  check(getSectionEntitlement("").classification === "UNKNOWN", "empty section id must fail closed");
+  check(
+    getTemplateEntitlement("").classification === "UNKNOWN",
+    "empty template id must fail closed",
+  );
+  check(
+    getSectionEntitlement("").classification === "UNKNOWN",
+    "empty section id must fail closed",
+  );
   check(getLayoutEntitlement("").classification === "UNKNOWN", "empty layout id must fail closed");
 
   /* ---- generic resolver dispatch ---- */
-  check(resolveAssetEntitlement("block", "hero").classification === "STANDARD", "generic block dispatch");
-  check(resolveAssetEntitlement("section", "media-bento").classification === "PREMIUM", "generic section dispatch");
-  check(resolveAssetEntitlement("template", "creator-premium").classification === "PREMIUM", "generic template dispatch");
-  check(resolveAssetEntitlement("layout", "centered").classification === "STANDARD", "generic layout dispatch");
+  check(
+    resolveAssetEntitlement("block", "hero").classification === "STANDARD",
+    "generic block dispatch",
+  );
+  check(
+    resolveAssetEntitlement("section", "media-bento").classification === "PREMIUM",
+    "generic section dispatch",
+  );
+  check(
+    resolveAssetEntitlement("template", "creator-premium").classification === "PREMIUM",
+    "generic template dispatch",
+  );
+  check(
+    resolveAssetEntitlement("layout", "centered").classification === "STANDARD",
+    "generic layout dispatch",
+  );
 
   /* ---- purity: decision shape carries no identity authority ---- */
   const sample = getTemplateEntitlement("creator-premium");
@@ -173,7 +224,10 @@ export function runAssetManifestSelfcheck() {
     );
   }
   check(getBlockEntitlement.length === 1, "getBlockEntitlement must be a pure arity-1 function");
-  check(resolveAssetEntitlement.length === 2, "resolveAssetEntitlement must be a pure arity-2 function");
+  check(
+    resolveAssetEntitlement.length === 2,
+    "resolveAssetEntitlement must be a pure arity-2 function",
+  );
 
   /* ---- determinism ---- */
   check(
@@ -198,4 +252,3 @@ export function runAssetManifestSelfcheck() {
 if (import.meta.url === `file://${process.argv[1]?.replaceAll("\\", "/")}`) {
   console.log(JSON.stringify(runAssetManifestSelfcheck(), null, 2));
 }
-

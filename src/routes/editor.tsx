@@ -489,11 +489,14 @@ function EditorPage() {
   };
 
   if (loading) return <div className="flex justify-center p-12">Cargando...</div>;
-  if (!session) return <div className="flex min-h-screen items-center justify-center">Redirigiendo a iniciar sesión…</div>;
-  if (canonicalProfileId)
+  if (!session)
     return (
-      <PowerEditorHost profileId={canonicalProfileId} guidedOnboarding={guidedPowerEditor} />
+      <div className="flex min-h-screen items-center justify-center">
+        Redirigiendo a iniciar sesión…
+      </div>
     );
+  if (canonicalProfileId)
+    return <PowerEditorHost profileId={canonicalProfileId} guidedOnboarding={guidedPowerEditor} />;
 
   const publicId = profile.public_id || savedPublicId || "";
   const isValid = validate();

@@ -9,16 +9,20 @@ import { env } from "../env";
  * be imported or exposed to the browser.
  */
 export function getPrivilegedSupabaseClient() {
-  const serviceRoleKey = 
-    (typeof process !== 'undefined' && process.env ? process.env['SUPABASE_SERVICE_ROLE_KEY'] : '') || 
-    (import.meta.env ? import.meta.env['SUPABASE_SERVICE_ROLE_KEY'] : '') || 
+  const serviceRoleKey =
+    (typeof process !== "undefined" && process.env
+      ? process.env["SUPABASE_SERVICE_ROLE_KEY"]
+      : "") ||
+    (import.meta.env ? import.meta.env["SUPABASE_SERVICE_ROLE_KEY"] : "") ||
     "";
-  
+
   if (!serviceRoleKey) {
-    console.warn("WARNING: SUPABASE_SERVICE_ROLE_KEY is missing on the server. Signed URLs may fail. Falling back to anon client.");
+    console.warn(
+      "WARNING: SUPABASE_SERVICE_ROLE_KEY is missing on the server. Signed URLs may fail. Falling back to anon client.",
+    );
     return createClient(env.supabaseUrl, env.supabaseAnonKey);
   }
-  
+
   return createClient(env.supabaseUrl, serviceRoleKey, {
     auth: {
       persistSession: false,

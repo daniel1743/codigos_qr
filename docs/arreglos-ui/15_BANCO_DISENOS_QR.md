@@ -27,7 +27,7 @@ Crear la infraestructura y UX de una galería/banco de diseños QR con plantilla
 ```
 Usuario en QR Studio → "Explorar diseños" → Galería
   ├─ Free: Aplicar inmediatamente
-  └─ Premium: 
+  └─ Premium:
       ├─ Usuario Premium: Aplicar
       └─ Usuario Free: Vista previa + CTA Premium
 ```
@@ -37,12 +37,14 @@ Usuario en QR Studio → "Explorar diseños" → Galería
 ## FREE VS PREMIUM
 
 ### Free (6 plantillas)
+
 - **Badge:** "Gratis"
 - **Ejemplos:** Clásico, Minimal, Business, Natural, Elegante, Cálido
 - **Acceso:** Todos los usuarios
 - **Acción:** Botón "Usar diseño"
 
 ### Premium (12 plantillas)
+
 - **Badge:** "Premium" con corona dorada
 - **Ejemplos:** Executive, Luxury, Beauty, Creator, Restaurant, Event, Ocean, Midnight, Modern Tech, Boutique, Neon, Gold Edition
 - **Acceso:** Solo usuarios Premium
@@ -81,6 +83,7 @@ interface QRTemplate {
 **Total:** 18 plantillas
 
 Todas las plantillas pasan contraste/scan safety:
+
 - Foreground oscuro
 - Background claro
 - Contraste suficiente para escaneo confiable
@@ -113,10 +116,12 @@ canUsePremiumTemplates(userId?: string): boolean
 ```
 
 **Estado actual:**
+
 - Siempre retorna `false` (todos son Free por defecto)
 - Interfaz estructural lista para integración futura
 
 **Pendiente:**
+
 - [ ] Tabla de suscripciones en Supabase
 - [ ] Integración con Stripe/sistema de pagos
 - [ ] Verificación server-side via RLS
@@ -137,15 +142,18 @@ canUsePremiumTemplates(userId?: string): boolean
 ### Características
 
 **Header:**
+
 - Título: "Diseños QR"
 - Subtítulo: "Elige un diseño listo y personalízalo después si quieres"
 - Stats: Contador de plantillas (Free/Premium/Mostrando)
 
 **Filtros:**
+
 - Tier: Todos | Gratis | Premium
 - Categorías: 11 opciones
 
 **Cards:**
+
 - Preview QR en tiempo real
 - Nombre y descripción
 - Badge de tier (Free o Premium con corona)
@@ -154,6 +162,7 @@ canUsePremiumTemplates(userId?: string): boolean
 - Acciones según permisos
 
 **Footer:**
+
 - Mensaje: "Los diseños solo cambian la apariencia visual. Tu QR seguirá apuntando a la misma página"
 
 ---
@@ -172,6 +181,7 @@ canUsePremiumTemplates(userId?: string): boolean
    - "Desbloquear Premium" → CTA (placeholder por ahora)
 
 **Reglas:**
+
 - ❌ No persiste automáticamente
 - ❌ No sobrescribe configuración guardada
 - ❌ No permite descargar como Premium sin permiso
@@ -184,6 +194,7 @@ canUsePremiumTemplates(userId?: string): boolean
 ### Propiedades que cambian
 
 Al aplicar una plantilla, se actualizan:
+
 - `qr_foreground_color`
 - `qr_background_color`
 - `qr_logo_enabled`
@@ -191,6 +202,7 @@ Al aplicar una plantilla, se actualizan:
 ### Propiedades que NO cambian
 
 **CRÍTICO - Preservado siempre:**
+
 - ✅ `public_id` (unchanged)
 - ✅ `profile.id` (unchanged)
 - ✅ QR encoded URL (unchanged)
@@ -207,7 +219,7 @@ handleApplyTemplate(template) {
     setPreviewTemplate(template);
     return;
   }
-  
+
   // Aplicar cambios visuales
   onChange({
     qr_foreground_color: template.qr_foreground_color,
@@ -224,6 +236,7 @@ handleApplyTemplate(template) {
 **Comportamiento:** Después de aplicar un preset, el usuario puede continuar modificándolo desde QR Studio.
 
 **Ejemplo:**
+
 1. Elegir "Executive"
 2. Cambiar azul por verde
 3. Añadir logo propio
@@ -238,6 +251,7 @@ handleApplyTemplate(template) {
 ### Validación de contraste
 
 Todas las plantillas pasan:
+
 - ✅ Contraste suficiente (ratio > 4.5:1)
 - ✅ Foreground oscuro
 - ✅ Background claro (o validado)
@@ -269,11 +283,13 @@ Todas las plantillas pasan:
 ### Responsividad
 
 **Probado en:**
+
 - 360px (móviles pequeños)
 - 390px (iPhone estándar)
 - 430px (iPhone Pro Max)
 
 **Gallery:**
+
 - Columnas: 2 en mobile, 3 en desktop (min-[480px]:grid-cols-2 lg:grid-cols-3)
 - Cards legibles
 - Corona legible
@@ -288,14 +304,17 @@ Todas las plantillas pasan:
 ### Estrategia
 
 **Gallery preview:**
+
 - Resolución: moderada (120px por QR)
 - No renderiza 18 QR de alta resolución simultáneamente
 - Preview usa QRCodeSVG (ligero)
 
 **Export:**
+
 - Alta resolución solo on-demand (al descargar)
 
 **Futuro:**
+
 - Lazy rendering si catálogo crece >30 plantillas
 - Virtualización solo si necesario
 
@@ -329,7 +348,7 @@ Todas las plantillas pasan:
 ✅ Historial visual intacto  
 ✅ Página pública intacta  
 ✅ Alias intacto  
-✅ Mobile UX intacto  
+✅ Mobile UX intacto
 
 ---
 
@@ -346,6 +365,7 @@ npx tsc --noEmit # Ejecutando (background)
 **Estado:** ⏳ En verificación
 
 **Esperado:**
+
 - lint: exit 0 o INCONCLUSIVE_ENVIRONMENT documentado
 - build: exit 0
 - tsc: exit 0
@@ -377,26 +397,21 @@ npx tsc --noEmit # Ejecutando (background)
 ### Cuando se implemente el sistema de pagos
 
 **Backend:**
+
 1. Crear tabla `subscriptions` en Supabase
 2. Implementar RLS para validar acceso Premium
 3. Webhook de Stripe para sincronizar estado
 
-**Frontend:**
-4. Actualizar `getUserEntitlements()` para consultar DB
-5. Implementar página/modal de checkout
-6. Conectar botón "Desbloquear Premium" a checkout
-7. Añadir indicador de plan en UI del usuario
+**Frontend:** 4. Actualizar `getUserEntitlements()` para consultar DB 5. Implementar página/modal de checkout 6. Conectar botón "Desbloquear Premium" a checkout 7. Añadir indicador de plan en UI del usuario
 
-**Admin:**
-8. Panel para otorgar/revocar acceso Premium manualmente
-9. Ver lista de usuarios Premium
-10. Métricas de conversión
+**Admin:** 8. Panel para otorgar/revocar acceso Premium manualmente 9. Ver lista de usuarios Premium 10. Métricas de conversión
 
 ---
 
 ## ANALYTICS (FUTURO)
 
 **Eventos útiles:**
+
 - `template_viewed` - Usuario ve galería
 - `template_applied` - Usuario aplica plantilla
 - `premium_template_clicked` - Usuario Free intenta Premium
@@ -417,30 +432,30 @@ npx tsc --noEmit # Ejecutando (background)
 ✅ Alias  
 ✅ Profile links  
 ✅ Counter  
-✅ Visual history  
+✅ Visual history
 
 ---
 
 ## ACCEPTANCE CRITERIA
 
-| Criterio | Estado |
-|----------|--------|
-| Existe galería QR | ✅ |
-| Free/Premium diferenciados | ✅ |
-| Corona Premium visible | ✅ |
-| 4+ presets gratis | ✅ (6) |
-| 8+ presets Premium | ✅ (12) |
-| Filtros funcionan | ✅ |
-| Free puede aplicarse | ✅ |
-| Premium puede previsualizarse sin persistir | ✅ |
-| No existe checkout falso | ✅ |
-| Preset puede seguir editándose | ✅ |
-| QR URL unchanged | ✅ |
-| public_id unchanged | ✅ |
-| QR Studio manual no se rompe | ✅ |
-| Mobile usable | ✅ |
-| build PASS | ⏳ |
-| tsc PASS | ⏳ |
+| Criterio                                    | Estado  |
+| ------------------------------------------- | ------- |
+| Existe galería QR                           | ✅      |
+| Free/Premium diferenciados                  | ✅      |
+| Corona Premium visible                      | ✅      |
+| 4+ presets gratis                           | ✅ (6)  |
+| 8+ presets Premium                          | ✅ (12) |
+| Filtros funcionan                           | ✅      |
+| Free puede aplicarse                        | ✅      |
+| Premium puede previsualizarse sin persistir | ✅      |
+| No existe checkout falso                    | ✅      |
+| Preset puede seguir editándose              | ✅      |
+| QR URL unchanged                            | ✅      |
+| public_id unchanged                         | ✅      |
+| QR Studio manual no se rompe                | ✅      |
+| Mobile usable                               | ✅      |
+| build PASS                                  | ⏳      |
+| tsc PASS                                    | ⏳      |
 
 ---
 
@@ -449,6 +464,7 @@ npx tsc --noEmit # Ejecutando (background)
 ✅ Implementada solamente la infraestructura y primera versión del Banco de Diseños QR.
 
 **NO implementado (según spec):**
+
 - ❌ Pagos
 - ❌ Stripe
 - ❌ Suscripciones reales
@@ -463,6 +479,7 @@ npx tsc --noEmit # Ejecutando (background)
 **Estado:** ✅ IMPLEMENTACIÓN COMPLETA (pendiente gates técnicos)
 
 **Entregables:**
+
 1. ✅ Catálogo tipado con 18 plantillas
 2. ✅ Sistema de entitlements estructural
 3. ✅ Galería responsive con filtros
@@ -472,6 +489,7 @@ npx tsc --noEmit # Ejecutando (background)
 7. ⏳ Gates técnicos (en verificación)
 
 **Próximos pasos:**
+
 1. Verificar que build/lint/tsc pasen
 2. Testing manual en navegador
 3. Validar flujo completo Free/Premium

@@ -47,7 +47,7 @@ re-centers the near-top-edge target toward the 45% anchor.
 
 ## WHY_OLD_EXPECTATION_WAS_ZERO
 
-The fixture `{ top: 100, bottom: 180 }` is fully *visible* (all within 0–600).
+The fixture `{ top: 100, bottom: 180 }` is fully _visible_ (all within 0–600).
 The old expectation encoded the pre-5C2D rule "target is visible ⇒ do not scroll
 (return 0)". Phase 5C2D tightened this to a **comfortable band**: a target that
 is merely "visible" but sits near the top/bottom edge is now re-centered, while
@@ -82,10 +82,10 @@ approved 5C2D contract.
 Updated only the stale test expectation — no runtime code changed:
 
 1. Renamed the stale case to `"re-centers a visible-but-edge target into the
-   35%–55% band (5C2D)"` and changed its expectation to `toBe(-130)`, with a
+35%–55% band (5C2D)"` and changed its expectation to `toBe(-130)`, with a
    comment documenting why 5C2D superseded the old "visible ⇒ no scroll" rule.
 2. Added a complementary `"returns 0 when the target center is already within
-   the 35%–55% band"` case with an in-band fixture (`{ top: 240, bottom: 300 }`,
+the 35%–55% band"` case with an in-band fixture (`{ top: 240, bottom: 300 }`,
    center 270 = 45%) so the "no unnecessary scroll" contract remains covered.
 
 ## RUNTIME_CODE_CHANGED

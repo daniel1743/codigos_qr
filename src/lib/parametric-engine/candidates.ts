@@ -19,7 +19,12 @@ import { generateWithTrace } from "./engine";
 import { fingerprintRecipe } from "./fingerprint";
 import { normalizeIntent, validateIntent } from "./normalize";
 import { paletteBankFor } from "./palettes-extended";
-import { DESIGN_PRESETS_IDS, getPreset, mergePresetOverrides, type DesignPresetId } from "./presets";
+import {
+  DESIGN_PRESETS_IDS,
+  getPreset,
+  mergePresetOverrides,
+  type DesignPresetId,
+} from "./presets";
 import { isAcceptableQuality, scoreRecipe, type RecipeQualityScoreV1 } from "./quality-score";
 import {
   assertValidEngineContext,
@@ -39,7 +44,6 @@ import type {
   OnboardingIntentV1,
   PageRecipeV1,
 } from "./types";
-
 
 export interface RecipeCandidateV1 {
   id: string;
@@ -248,12 +252,11 @@ export function generateCandidateSet(
   }
 
   // Deterministic ranking: score desc, then stable id order.
-  evaluated.sort((a, b) => (b.score.total - a.score.total) || a.id.localeCompare(b.id));
+  evaluated.sort((a, b) => b.score.total - a.score.total || a.id.localeCompare(b.id));
 
   const candidates = selectDistinctCandidates(evaluated, count, minimumDistance);
   return { candidates, evaluated, rejected };
 }
-
 
 /** Convenience: the single best-scoring candidate recipe. */
 export function generateBestRecipe(

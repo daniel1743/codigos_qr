@@ -9,12 +9,12 @@
 
 ## 1. PHASE_0 — verification (all PASS)
 
-| Check | Result |
-|---|---|
-| `Auth.tsx` contains `navigateAfterLogin` | PASS (lines 25/28, plus `useNavigate`, `navigate({ to: "/editor" })`, `data.session` guard) |
-| `login.tsx` uses `<Auth showPlatformMenu navigateAfterLogin />` | PASS (line 7) |
-| Embedded `Auth` uses unchanged | PASS — `editor.tsx:491` `<Auth showPlatformMenu />`, `encrypted-documents.tsx:99` `<Auth />` (no `navigateAfterLogin`) |
-| Production did not yet omit the change | PASS — prior production deploy was 1h old and pre-fix |
+| Check                                                           | Result                                                                                                                 |
+| --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `Auth.tsx` contains `navigateAfterLogin`                        | PASS (lines 25/28, plus `useNavigate`, `navigate({ to: "/editor" })`, `data.session` guard)                            |
+| `login.tsx` uses `<Auth showPlatformMenu navigateAfterLogin />` | PASS (line 7)                                                                                                          |
+| Embedded `Auth` uses unchanged                                  | PASS — `editor.tsx:491` `<Auth showPlatformMenu />`, `encrypted-documents.tsx:99` `<Auth />` (no `navigateAfterLogin`) |
+| Production did not yet omit the change                          | PASS — prior production deploy was 1h old and pre-fix                                                                  |
 
 ## 2. Deployment
 
@@ -35,11 +35,11 @@
 Fetched the deployed `Auth` chunk (`/assets/Auth-Bhu0200F.js`) from the new
 production deployment:
 
-| Check | Result |
-|---|---|
+| Check                                           | Result  |
+| ----------------------------------------------- | ------- |
 | New error string `"No se pudo iniciar sesión…"` | PRESENT |
-| `navigateAfterLogin` prop | PRESENT |
-| `/editor` navigation target | PRESENT |
+| `navigateAfterLogin` prop                       | PRESENT |
+| `/editor` navigation target                     | PRESENT |
 
 `https://www.cripqer.dev/login` returns HTTP 200 with the login UI markers.
 
@@ -59,6 +59,7 @@ newly confirmed account, no email/Supabase dashboard access). They remain
 `NOT_VERIFIED`, not passes.
 
 **TEST_1 — Correct credentials (newly confirmed account)**
+
 1. Open `https://www.cripqer.dev/login`.
 2. Use the newly confirmed account; enter correct email/password; click
    **Ingresar** ("Entrar al editor").
@@ -67,13 +68,16 @@ newly confirmed account, no email/Supabase dashboard access). They remain
    Editor opens.
 
 **TEST_2 — Invalid password**
+
 - Expected: visible error, no silent stall, button becomes usable again.
 
 **TEST_3 — Reload**
+
 - Expected: authenticated session remains usable; user does not return to a
   static/stuck login.
 
 **TEST_4 — Existing account regression**
+
 - Expected: existing user can still log in normally.
 
 ## 6. Success gate
@@ -90,4 +94,3 @@ newly confirmed account, no email/Supabase dashboard access). They remain
 **UNFROZEN** until the human runtime checks above pass. The related
 `CRIPQER_EMAIL_CONFIRMATION_SUCCESS_PAGE_RUNTIME_PASS_FROZEN` gate likewise
 requires the same human email/Supabase flow and is not closed here.
-

@@ -175,15 +175,15 @@ Cripqer puede evolucionar hacia un sistema operativo ligero de adquisicion y con
 
 Modelo conceptual:
 
-| Element | Role |
-| --- | --- |
-| Page | La cara |
-| QR | La puerta |
-| Editor | La herramienta de creacion |
-| CRM | La memoria |
-| Analytics | El cerebro |
-| Campaigns | El motor de adquisicion |
-| AI | El asistente que conecta y optimiza el sistema |
+| Element   | Role                                           |
+| --------- | ---------------------------------------------- |
+| Page      | La cara                                        |
+| QR        | La puerta                                      |
+| Editor    | La herramienta de creacion                     |
+| CRM       | La memoria                                     |
+| Analytics | El cerebro                                     |
+| Campaigns | El motor de adquisicion                        |
+| AI        | El asistente que conecta y optimiza el sistema |
 
 La vision no es construir todas las herramientas del mercado. La vision es conectar las piezas necesarias para que un negocio pierda menos oportunidades y convierta mas interes en clientes.
 
@@ -230,19 +230,19 @@ Cripqer debe integrar herramientas especialistas cuando convenga, no reconstruir
 
 Este documento no elimina ni reescribe la historia del proyecto. Ordena la autoridad estrategica vigente.
 
-| Document | Purpose | Overlap | Status | Authority |
-| --- | --- | --- | --- | --- |
-| `CRIPQER_PRODUCT_NORTH_STAR.md` | Referencia estrategica previa sobre intent leakage, conversion loop y boundaries. | STRONG_OVERLAP | COMPLEMENTARY, superseded only where this file defines official product vision. | Alta referencia estrategica; este documento es canonico para proposito, dolor, propuesta de valor y filtro de pertenencia. |
-| `README_PRODUCT_STRATEGY.md` | Estrategia de packaging, Free/Pro/Business/Enterprise, Engine V2 y monetizacion. | PARTIAL_OVERLAP | COMPLEMENTARY | Canonico para hipotesis de packaging mientras no contradiga esta vision. |
-| `CRIPQER_MARKET_VALIDATION_AND_STRATEGIC_BETS_2026-09-09.md` | Evidencia de mercado, apuestas estrategicas y pains validados/hipoteticos. | PARTIAL_OVERLAP | COMPLEMENTARY | Soporte de mercado; no reemplaza definicion de producto. |
-| `SEO_STRATEGY_CRIPQER_CONVERSION_PLATFORM.md` | Estrategia SEO y posicionamiento de contenido para plataforma de conversion. | PARTIAL_OVERLAP | COMPLEMENTARY | Util para SEO/messaging; este documento fija la identidad oficial. |
-| `CRIPQER_MASTER_PRODUCT_MAP.md` | Arqueologia de producto y mapa de estado tangible del repositorio en una etapa anterior. | PARTIAL_OVERLAP | HISTORICAL | Evidencia historica/estado; no es vision oficial vigente. |
-| `CRIPQER_ESTUDIO_ARQUITECTURA_EJECUTIVO.md` | Estudio ejecutivo de arquitectura, estado tecnico y valoracion. | PARTIAL_OVERLAP | COMPLEMENTARY | Auditoria/valoracion; no reemplaza vision canonica. |
-| `CRIPQER_STATUS_2026-09-09.md` | Snapshot fechado de readiness, gaps y orden de ejecucion. | LOW_OVERLAP | COMPLEMENTARY | Autoridad sobre estado fechado; no sobre identidad de producto. |
-| `CRIPQER_ONBOARDING_V2_TARGET_ARCHITECTURE.md` | Arquitectura objetivo del onboarding semantico. | PARTIAL_OVERLAP | COMPLEMENTARY | Autoridad tecnica de onboarding target; subordinado a esta vision. |
-| `CRIPQER_EDITOR_EXPERIENCE_STRATEGY.md` | Estrategia canonica del sistema de edicion y experiencia Quick/Advanced. | PARTIAL_OVERLAP | COMPLEMENTARY_CANONICAL_DOMAIN | Autoridad canonica para estrategia de editor, Quick/Advanced, Founding Access, Free/Pro UX y preservacion; subordinado a este documento para identidad general del producto. |
-| `CRIPQER_DUAL_EDITOR_ARCHITECTURE.md` | Arquitectura de ownership canonical y dual editor. | LOW_OVERLAP | TECHNICAL_ONLY | Autoridad tecnica historica/especifica; no define producto. |
-| `CRIPQER_PRODUCT_CAPABILITY_POLICY_CORE_V1_REPORT.md` | Politica declarativa de capacidades por tier. | LOW_OVERLAP | TECHNICAL_ONLY | Autoridad de policy tecnica; no define vision. |
+| Document                                                     | Purpose                                                                                  | Overlap         | Status                                                                          | Authority                                                                                                                                                                    |
+| ------------------------------------------------------------ | ---------------------------------------------------------------------------------------- | --------------- | ------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CRIPQER_PRODUCT_NORTH_STAR.md`                              | Referencia estrategica previa sobre intent leakage, conversion loop y boundaries.        | STRONG_OVERLAP  | COMPLEMENTARY, superseded only where this file defines official product vision. | Alta referencia estrategica; este documento es canonico para proposito, dolor, propuesta de valor y filtro de pertenencia.                                                   |
+| `README_PRODUCT_STRATEGY.md`                                 | Estrategia de packaging, Free/Pro/Business/Enterprise, Engine V2 y monetizacion.         | PARTIAL_OVERLAP | COMPLEMENTARY                                                                   | Canonico para hipotesis de packaging mientras no contradiga esta vision.                                                                                                     |
+| `CRIPQER_MARKET_VALIDATION_AND_STRATEGIC_BETS_2026-09-09.md` | Evidencia de mercado, apuestas estrategicas y pains validados/hipoteticos.               | PARTIAL_OVERLAP | COMPLEMENTARY                                                                   | Soporte de mercado; no reemplaza definicion de producto.                                                                                                                     |
+| `SEO_STRATEGY_CRIPQER_CONVERSION_PLATFORM.md`                | Estrategia SEO y posicionamiento de contenido para plataforma de conversion.             | PARTIAL_OVERLAP | COMPLEMENTARY                                                                   | Util para SEO/messaging; este documento fija la identidad oficial.                                                                                                           |
+| `CRIPQER_MASTER_PRODUCT_MAP.md`                              | Arqueologia de producto y mapa de estado tangible del repositorio en una etapa anterior. | PARTIAL_OVERLAP | HISTORICAL                                                                      | Evidencia historica/estado; no es vision oficial vigente.                                                                                                                    |
+| `CRIPQER_ESTUDIO_ARQUITECTURA_EJECUTIVO.md`                  | Estudio ejecutivo de arquitectura, estado tecnico y valoracion.                          | PARTIAL_OVERLAP | COMPLEMENTARY                                                                   | Auditoria/valoracion; no reemplaza vision canonica.                                                                                                                          |
+| `CRIPQER_STATUS_2026-09-09.md`                               | Snapshot fechado de readiness, gaps y orden de ejecucion.                                | LOW_OVERLAP     | COMPLEMENTARY                                                                   | Autoridad sobre estado fechado; no sobre identidad de producto.                                                                                                              |
+| `CRIPQER_ONBOARDING_V2_TARGET_ARCHITECTURE.md`               | Arquitectura objetivo del onboarding semantico.                                          | PARTIAL_OVERLAP | COMPLEMENTARY                                                                   | Autoridad tecnica de onboarding target; subordinado a esta vision.                                                                                                           |
+| `CRIPQER_EDITOR_EXPERIENCE_STRATEGY.md`                      | Estrategia canonica del sistema de edicion y experiencia Quick/Advanced.                 | PARTIAL_OVERLAP | COMPLEMENTARY_CANONICAL_DOMAIN                                                  | Autoridad canonica para estrategia de editor, Quick/Advanced, Founding Access, Free/Pro UX y preservacion; subordinado a este documento para identidad general del producto. |
+| `CRIPQER_DUAL_EDITOR_ARCHITECTURE.md`                        | Arquitectura de ownership canonical y dual editor.                                       | LOW_OVERLAP     | TECHNICAL_ONLY                                                                  | Autoridad tecnica historica/especifica; no define producto.                                                                                                                  |
+| `CRIPQER_PRODUCT_CAPABILITY_POLICY_CORE_V1_REPORT.md`        | Politica declarativa de capacidades por tier.                                            | LOW_OVERLAP     | TECHNICAL_ONLY                                                                  | Autoridad de policy tecnica; no define vision.                                                                                                                               |
 
 ## 14. Historical Context
 

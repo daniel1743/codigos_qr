@@ -204,15 +204,15 @@ Cripqer puede evolucionar hacia un sistema operativo ligero de adquisicion y con
 
 Modelo conceptual:
 
-| Element | Role |
-| --- | --- |
-| Page | La cara |
-| QR | La puerta |
-| Editor | La herramienta de creacion |
-| CRM | La memoria |
-| Analytics | El cerebro |
-| Campaigns | El motor de adquisicion |
-| AI | El asistente que conecta y optimiza el sistema |
+| Element   | Role                                           |
+| --------- | ---------------------------------------------- |
+| Page      | La cara                                        |
+| QR        | La puerta                                      |
+| Editor    | La herramienta de creacion                     |
+| CRM       | La memoria                                     |
+| Analytics | El cerebro                                     |
+| Campaigns | El motor de adquisicion                        |
+| AI        | El asistente que conecta y optimiza el sistema |
 
 La vision no es construir todas las herramientas del mercado. La vision es conectar las piezas necesarias para que un negocio pierda menos oportunidades y convierta mas interes en clientes.
 
@@ -259,18 +259,18 @@ Cripqer debe integrar herramientas especialistas cuando convenga, no reconstruir
 
 Este documento no elimina ni reescribe la historia del proyecto. Ordena la autoridad estrategica vigente.
 
-| Document | Purpose | Overlap | Status | Authority |
-| --- | --- | --- | --- | --- |
-| `CRIPQER_PRODUCT_NORTH_STAR.md` | Referencia estrategica previa sobre intent leakage, conversion loop y boundaries. | STRONG_OVERLAP | COMPLEMENTARY, superseded only where this file defines official product vision. | Alta referencia estrategica; este documento es canonico para proposito, dolor, propuesta de valor y filtro de pertenencia. |
-| `README_PRODUCT_STRATEGY.md` | Estrategia de packaging, Free/Pro/Business/Enterprise, Engine V2 y monetizacion. | PARTIAL_OVERLAP | COMPLEMENTARY | Canonico para hipotesis de packaging mientras no contradiga esta vision. |
-| `CRIPQER_MARKET_VALIDATION_AND_STRATEGIC_BETS_2026-09-09.md` | Evidencia de mercado, apuestas estrategicas y pains validados/hipoteticos. | PARTIAL_OVERLAP | COMPLEMENTARY | Soporte de mercado; no reemplaza definicion de producto. |
-| `SEO_STRATEGY_CRIPQER_CONVERSION_PLATFORM.md` | Estrategia SEO y posicionamiento de contenido para plataforma de conversion. | PARTIAL_OVERLAP | COMPLEMENTARY | Util para SEO/messaging; este documento fija la identidad oficial. |
-| `CRIPQER_MASTER_PRODUCT_MAP.md` | Arqueologia de producto y mapa de estado tangible del repositorio en una etapa anterior. | PARTIAL_OVERLAP | HISTORICAL | Evidencia historica/estado; no es vision oficial vigente. |
-| `CRIPQER_ESTUDIO_ARQUITECTURA_EJECUTIVO.md` | Estudio ejecutivo de arquitectura, estado tecnico y valoracion. | PARTIAL_OVERLAP | COMPLEMENTARY | Auditoria/valoracion; no reemplaza vision canonica. |
-| `CRIPQER_STATUS_2026-09-09.md` | Snapshot fechado de readiness, gaps y orden de ejecucion. | LOW_OVERLAP | COMPLEMENTARY | Autoridad sobre estado fechado; no sobre identidad de producto. |
-| `CRIPQER_ONBOARDING_V2_TARGET_ARCHITECTURE.md` | Arquitectura objetivo del onboarding semantico. | PARTIAL_OVERLAP | COMPLEMENTARY | Autoridad tecnica de onboarding target; subordinado a esta vision. |
-| `CRIPQER_DUAL_EDITOR_ARCHITECTURE.md` | Arquitectura de ownership canonical y dual editor. | LOW_OVERLAP | TECHNICAL_ONLY | Autoridad tecnica historica/especifica; no define producto. |
-| `CRIPQER_PRODUCT_CAPABILITY_POLICY_CORE_V1_REPORT.md` | Politica declarativa de capacidades por tier. | LOW_OVERLAP | TECHNICAL_ONLY | Autoridad de policy tecnica; no define vision. |
+| Document                                                     | Purpose                                                                                  | Overlap         | Status                                                                          | Authority                                                                                                                  |
+| ------------------------------------------------------------ | ---------------------------------------------------------------------------------------- | --------------- | ------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `CRIPQER_PRODUCT_NORTH_STAR.md`                              | Referencia estrategica previa sobre intent leakage, conversion loop y boundaries.        | STRONG_OVERLAP  | COMPLEMENTARY, superseded only where this file defines official product vision. | Alta referencia estrategica; este documento es canonico para proposito, dolor, propuesta de valor y filtro de pertenencia. |
+| `README_PRODUCT_STRATEGY.md`                                 | Estrategia de packaging, Free/Pro/Business/Enterprise, Engine V2 y monetizacion.         | PARTIAL_OVERLAP | COMPLEMENTARY                                                                   | Canonico para hipotesis de packaging mientras no contradiga esta vision.                                                   |
+| `CRIPQER_MARKET_VALIDATION_AND_STRATEGIC_BETS_2026-09-09.md` | Evidencia de mercado, apuestas estrategicas y pains validados/hipoteticos.               | PARTIAL_OVERLAP | COMPLEMENTARY                                                                   | Soporte de mercado; no reemplaza definicion de producto.                                                                   |
+| `SEO_STRATEGY_CRIPQER_CONVERSION_PLATFORM.md`                | Estrategia SEO y posicionamiento de contenido para plataforma de conversion.             | PARTIAL_OVERLAP | COMPLEMENTARY                                                                   | Util para SEO/messaging; este documento fija la identidad oficial.                                                         |
+| `CRIPQER_MASTER_PRODUCT_MAP.md`                              | Arqueologia de producto y mapa de estado tangible del repositorio en una etapa anterior. | PARTIAL_OVERLAP | HISTORICAL                                                                      | Evidencia historica/estado; no es vision oficial vigente.                                                                  |
+| `CRIPQER_ESTUDIO_ARQUITECTURA_EJECUTIVO.md`                  | Estudio ejecutivo de arquitectura, estado tecnico y valoracion.                          | PARTIAL_OVERLAP | COMPLEMENTARY                                                                   | Auditoria/valoracion; no reemplaza vision canonica.                                                                        |
+| `CRIPQER_STATUS_2026-09-09.md`                               | Snapshot fechado de readiness, gaps y orden de ejecucion.                                | LOW_OVERLAP     | COMPLEMENTARY                                                                   | Autoridad sobre estado fechado; no sobre identidad de producto.                                                            |
+| `CRIPQER_ONBOARDING_V2_TARGET_ARCHITECTURE.md`               | Arquitectura objetivo del onboarding semantico.                                          | PARTIAL_OVERLAP | COMPLEMENTARY                                                                   | Autoridad tecnica de onboarding target; subordinado a esta vision.                                                         |
+| `CRIPQER_DUAL_EDITOR_ARCHITECTURE.md`                        | Arquitectura de ownership canonical y dual editor.                                       | LOW_OVERLAP     | TECHNICAL_ONLY                                                                  | Autoridad tecnica historica/especifica; no define producto.                                                                |
+| `CRIPQER_PRODUCT_CAPABILITY_POLICY_CORE_V1_REPORT.md`        | Politica declarativa de capacidades por tier.                                            | LOW_OVERLAP     | TECHNICAL_ONLY                                                                  | Autoridad de policy tecnica; no define vision.                                                                             |
 
 ## 14. Historical Context
 
@@ -722,16 +722,16 @@ Free solves the underlying user need, but does not automatically receive every a
 
 When a Free user requests a Pro capability, the underlying need should receive a Core fallback where practical instead of being ignored.
 
-| Pro capability | Free fallback |
-| --- | --- |
-| Integrated booking | CTA, booking URL or WhatsApp |
-| Product catalog | Basic cards or links |
-| Embedded video block | External video link or card |
-| Advanced pricing | Simple service cards with price |
-| Advanced portfolio | Limited media or cards |
-| Floating or sticky CTA | Normal CTA |
-| Advanced gallery | Limited media or gallery |
-| Motion and animation | Static presentation |
+| Pro capability         | Free fallback                   |
+| ---------------------- | ------------------------------- |
+| Integrated booking     | CTA, booking URL or WhatsApp    |
+| Product catalog        | Basic cards or links            |
+| Embedded video block   | External video link or card     |
+| Advanced pricing       | Simple service cards with price |
+| Advanced portfolio     | Limited media or cards          |
+| Floating or sticky CTA | Normal CTA                      |
+| Advanced gallery       | Limited media or gallery        |
+| Motion and animation   | Static presentation             |
 
 ## Pro
 
@@ -808,11 +808,11 @@ Cripqer reportedly has three security or encryption modes, but their real techni
 
 Recommended packaging:
 
-| Plan | Product name | Value |
-| --- | --- | --- |
-| Free | Secure Basic | Essential protection and simple use |
-| Pro | Secure Advanced | Additional expiry, use and management controls |
-| Business | Secure Control | Team policies, traceability and centralized administration |
+| Plan       | Product name      | Value                                                          |
+| ---------- | ----------------- | -------------------------------------------------------------- |
+| Free       | Secure Basic      | Essential protection and simple use                            |
+| Pro        | Secure Advanced   | Additional expiry, use and management controls                 |
+| Business   | Secure Control    | Team policies, traceability and centralized administration     |
 | Enterprise | Secure Governance | Corporate identity, audit, policy, integrations and compliance |
 
 Monetize administration, governance, traceability and enterprise controls—not unsafe cryptography.
@@ -821,12 +821,12 @@ Monetize administration, governance, traceability and enterprise controls—not 
 
 Pricing is not final. It must later be validated against the market, costs, usage and willingness to pay.
 
-| Plan | Working hypothesis |
-| --- | --- |
-| Free | USD 0 |
-| Pro | Approximately USD 10–25/month |
-| Business | Approximately USD 50–150/month, depending on pages, seats and usage |
-| Enterprise | Approximately USD 250–500+/month or custom |
+| Plan       | Working hypothesis                                                  |
+| ---------- | ------------------------------------------------------------------- |
+| Free       | USD 0                                                               |
+| Pro        | Approximately USD 10–25/month                                       |
+| Business   | Approximately USD 50–150/month, depending on pages, seats and usage |
+| Enterprise | Approximately USD 250–500+/month or custom                          |
 
 These are working hypotheses, not launch commitments.
 
@@ -1389,9 +1389,11 @@ SELL:
 ## 🎯 POSICIONAMIENTO ESTRATÉGICO CORREGIDO
 
 ### ❌ Posicionamiento Antiguo (Incorrecto)
+
 "Generador de QR con página personalizable"
 
 ### ✅ Posicionamiento Nuevo (Correcto)
+
 **"Plataforma de Conversión Inteligente: De la Atención al Cliente"**
 
 ---
@@ -1399,22 +1401,28 @@ SELL:
 ## 📊 CADENA DE VALOR - DIFERENCIACIÓN COMPETITIVA
 
 ### LINKTREE (Competidor)
+
 ```
 Audiencia → Enlaces → Destino externo
 ```
+
 **Propuesta**: Organiza salidas  
 **Debilidad**: Te saca de su plataforma, no mide conversión
 
 ### FIGMA (Analogía de Producto Completo)
+
 ```
 Idea → Diseño → Prototipo → Colaboración → Producto
 ```
+
 **Propuesta**: Crea productos visuales completos
 
 ### CRIPQER (Propuesta Única)
+
 ```
 Audiencia → Intención → Conversión → Cliente → Relación → Crecimiento
 ```
+
 **Propuesta**: **Construye y opera el recorrido completo de conversión**
 
 ---
@@ -1422,11 +1430,11 @@ Audiencia → Intención → Conversión → Cliente → Relación → Crecimien
 ## 🔄 FLUJO COMPLETO CRIPQER
 
 ```
-CREAR 
+CREAR
   ↓
-PERSONALIZAR 
+PERSONALIZAR
   ↓
-PUBLICAR 
+PUBLICAR
   ↓
 COMPARTIR (QR + Enlaces)
   ↓
@@ -1448,24 +1456,28 @@ VOLVER A ATRAER (Retención)
 ## 🎯 KEYWORDS ACTUALIZADAS CON NUEVO POSICIONAMIENTO
 
 ### TIER 0: Posicionamiento de Marca (Nuevas)
+
 - **"plataforma de conversión digital"** - 320 búsquedas/mes
 - **"herramienta de conversión para negocios"** - 180 búsquedas/mes
 - **"página de conversión con qr"** - 45 búsquedas/mes
 - **"landing page inteligente con analytics"** - 90 búsquedas/mes
 
 ### TIER 1: Diferenciación vs Linktree (Actualizado)
+
 - **"linktree con analytics"** - 580 búsquedas/mes
 - **"alternativa linktree con conversión"** - 95 búsquedas/mes
 - **"biolink que mide conversiones"** - 110 búsquedas/mes
 - **"página personalizada con seguimiento"** - 150 búsquedas/mes
 
 ### TIER 2: Casos de Uso de Conversión (Nuevas)
+
 - **"aumentar conversiones con qr"** - 210 búsquedas/mes
 - **"qr para captar clientes"** - 170 búsquedas/mes
 - **"página de conversión para negocio"** - 280 búsquedas/mes
 - **"funnel de conversión con qr"** - 85 búsquedas/mes
 
 ### TIER 3: Gestión y Analítica (Nuevas)
+
 - **"analytics para códigos qr"** - 140 búsquedas/mes
 - **"medir conversiones de qr"** - 95 búsquedas/mes
 - **"seguimiento de clientes con qr"** - 65 búsquedas/mes
@@ -1477,26 +1489,31 @@ VOLVER A ATRAER (Retención)
 ### CATEGORÍA 1: Plataforma de Conversión (5 artículos)
 
 **1. "Más Allá de Linktree: Por Qué Necesitas una Plataforma de Conversión Completa"**
+
 - Keyword: "alternativa linktree con conversión"
 - Ángulo: Diferenciación clara vs competidores
 - CTA: Registro enfocado en conversión
 
 **2. "De la Atención al Cliente: El Recorrido Completo con Cripqer"**
+
 - Keyword: "plataforma de conversión digital"
 - Ángulo: Flujo completo CREAR → MEJORAR
 - CTA: Demo del flujo completo
 
 **3. "Cómo Convertir Tráfico en Clientes (No Solo en Clics)"**
+
 - Keyword: "aumentar conversiones con qr"
 - Ángulo: Conversión real vs métricas vanidad
 - CTA: Calculadora de conversión
 
 **4. "Linktree Organiza Enlaces. Cripqer Construye Tu Negocio"**
+
 - Keyword: "cripqer vs linktree"
 - Ángulo: Comparativa brutal y directa
 - CTA: Migración desde Linktree
 
 **5. "Analytics para QR: Mide Conversión, No Solo Escaneos"**
+
 - Keyword: "analytics para códigos qr"
 - Ángulo: Métricas que importan
 - CTA: Dashboard de analytics
@@ -1506,26 +1523,31 @@ VOLVER A ATRAER (Retención)
 ### CATEGORÍA 2: Gestión de Conversión (5 artículos)
 
 **6. "Del Escaneo al Cliente: Optimiza Tu Funnel de Conversión"**
+
 - Keyword: "funnel de conversión con qr"
 - Ángulo: Optimización de cada etapa
 - CTA: Análisis de funnel gratis
 
 **7. "Cómo Gestionar Clientes Que Llegan Por QR"**
+
 - Keyword: "gestión de clientes digitales"
 - Ángulo: CRM integrado
 - CTA: Template de gestión
 
 **8. "Retención: Cómo Hacer Que Tus Clientes Vuelvan"**
+
 - Keyword: "retención de clientes digitales"
 - Ángulo: Estrategias de re-engagement
 - CTA: Checklist de retención
 
 **9. "10 Métricas de Conversión Que Debes Medir (Y Cómo)"**
+
 - Keyword: "medir conversiones negocio"
 - Ángulo: Dashboard walkthrough
 - CTA: Template de métricas
 
 **10. "A/B Testing para Páginas QR: Duplica Tu Conversión"**
+
 - Keyword: "optimizar conversión qr"
 - Ángulo: Testing científico
 - CTA: Guía de A/B testing
@@ -1535,26 +1557,31 @@ VOLVER A ATRAER (Retención)
 ### CATEGORÍA 3: Casos de Uso por Conversión (5 artículos)
 
 **11. "Restaurantes: Del Menú QR a Cliente Frecuente"**
+
 - Keyword: "qr para restaurantes conversión"
 - Ángulo: Flujo completo restaurante
 - CTA: Template restaurante
 
 **12. "Salones de Belleza: Captar + Agendar + Retener"**
+
 - Keyword: "qr para salón de belleza"
 - Ángulo: Sistema de agendamiento
 - CTA: Setup asistido
 
 **13. "Coaches: De Redes Sociales a Programa Vendido"**
+
 - Keyword: "página conversión coaches"
 - Ángulo: Embudo de venta
 - CTA: Funnel template
 
 **14. "Inmobiliarias: Del QR en Anuncio a Lead Calificado"**
+
 - Keyword: "qr inmobiliario conversión"
 - Ángulo: Captación de leads
 - CTA: Lead magnet template
 
 **15. "E-commerce: QR en Tienda Física → Venta Online"**
+
 - Keyword: "qr para tienda física"
 - Ángulo: Omnicanalidad
 - CTA: Bridge físico-digital
@@ -1564,26 +1591,31 @@ VOLVER A ATRAER (Retención)
 ### CATEGORÍA 4: Vs Competidores (5 artículos)
 
 **16. "Linktree vs Cripqer: Comparativa Completa 2026"**
+
 - Keyword: "linktree vs cripqer"
 - Ángulo: Feature by feature
 - Tabla comparativa brutal
 
 **17. "Por Qué Bio.link No Mide Lo Que Realmente Importa"**
+
 - Keyword: "alternativas bio.link"
 - Ángulo: Analytics profundo
 - CTA: Migración asistida
 
 **18. "Beacons vs Cripqer: ¿Cuál Convierte Mejor?"**
+
 - Keyword: "beacons alternativa"
 - Ángulo: ROI real
 - CTA: Calculadora ROI
 
 **19. "Los 7 Problemas de Linktree Que Cripqer Resuelve"**
+
 - Keyword: "problemas linktree"
 - Ángulo: Pain points específicos
 - CTA: Soluciones específicas
 
 **20. "Genera QR + Convierte: La Ventaja de Tenerlo Todo en Uno"**
+
 - Keyword: "qr y página juntos"
 - Ángulo: Integración nativa
 - CTA: Demo integración
@@ -1603,9 +1635,11 @@ VOLVER A ATRAER (Retención)
 ## 🎯 META DESCRIPTION ACTUALIZADA (Global)
 
 ### Antes (Incorrecto)
+
 "Crea tu código QR gratis. Reúne tus redes sociales, WhatsApp, enlaces y web en una página profesional personalizable."
 
 ### Después (Correcto)
+
 "Plataforma de conversión completa: Crea tu QR, atrae tráfico, convierte visitantes en clientes y mide resultados. Más que un biolink, es tu sistema de crecimiento."
 
 ---
@@ -1613,10 +1647,12 @@ VOLVER A ATRAER (Retención)
 ## 🏗️ ARQUITECTURA DE SITIO ACTUALIZADA
 
 ### Landing Principal (/)
+
 **Headline H1**: "La Plataforma de Conversión Inteligente"
 **Sub**: "No solo enlaces. Construye el recorrido completo: De la atención al cliente."
 
 **Sección Hero**:
+
 ```
 [Comparativa Visual]
 
@@ -1625,9 +1661,11 @@ VOLVER A ATRAER (Retención)
 ```
 
 ### Nueva Página: /plataforma
+
 **URL**: https://www.cripqer.dev/plataforma
 **Título**: "Plataforma de Conversión: Características Completas"
 **Contenido**:
+
 - CREAR (Editor visual)
 - PERSONALIZAR (Plantillas inteligentes)
 - PUBLICAR (QR + Enlaces)
@@ -1639,25 +1677,29 @@ VOLVER A ATRAER (Retención)
 - MEJORAR (Optimización)
 
 ### Nueva Página: /vs/linktree
+
 **URL**: https://www.cripqer.dev/vs/linktree
 **Título**: "Cripqer vs Linktree: Conversión vs Enlaces"
 
 **Tabla Comparativa**:
-| Feature | Linktree | Cripqer |
-|---------|----------|---------|
-| **Propósito** | Organiza enlaces | Construye conversión |
-| **QR incluido** | ❌ Separado | ✅ Integrado |
-| **Analytics conversión** | ❌ Solo clics | ✅ Funnel completo |
-| **Gestión clientes** | ❌ No | ✅ Sí |
-| **Optimización** | ❌ No | ✅ A/B testing |
-| **Retención** | ❌ No | ✅ Re-engagement |
-| **Precio** | $5-29/mes | Gratis + Premium |
+
+| Feature                  | Linktree         | Cripqer              |
+| ------------------------ | ---------------- | -------------------- |
+| **Propósito**            | Organiza enlaces | Construye conversión |
+| **QR incluido**          | ❌ Separado      | ✅ Integrado         |
+| **Analytics conversión** | ❌ Solo clics    | ✅ Funnel completo   |
+| **Gestión clientes**     | ❌ No            | ✅ Sí                |
+| **Optimización**         | ❌ No            | ✅ A/B testing       |
+| **Retención**            | ❌ No            | ✅ Re-engagement     |
+| **Precio**               | $5-29/mes        | Gratis + Premium     |
 
 ### Nueva Página: /casos-de-uso
+
 **URL**: https://www.cripqer.dev/casos-de-uso
 **Título**: "Casos de Uso: Conversión por Industria"
 
 **Industrias**:
+
 1. 🍽️ Restaurantes
 2. 💇 Salones de belleza
 3. 🏋️ Gimnasios y coaches
@@ -1708,9 +1750,11 @@ VOLVER A ATRAER (Retención)
 ## 🎯 NUEVO TAGLINE PARA SEO
 
 ### Antes
+
 "Generador de Código QR con Página Personalizada"
 
 ### Después (Opciones)
+
 1. **"La Plataforma de Conversión Inteligente"** ⭐ (Recomendado)
 2. "De la Atención al Cliente en Una Plataforma"
 3. "Más que un Biolink: Tu Sistema de Conversión"
@@ -1728,17 +1772,17 @@ VOLVER A ATRAER (Retención)
 <section className="hero">
   <h1>La Plataforma de Conversión Inteligente</h1>
   <p className="subtitle">
-    No solo enlaces. Construye el recorrido completo: 
+    No solo enlaces. Construye el recorrido completo:
     De la atención al cliente recurrente.
   </p>
-  
+
   {/* Comparativa Visual */}
   <div className="comparison">
     <div className="competitor">
       <span className="logo">Linktree</span>
       <div className="flow">Audiencia → Enlaces → Te vas</div>
     </div>
-    
+
     <div className="cripqer">
       <span className="logo">Cripqer</span>
       <div className="flow">
@@ -1752,9 +1796,9 @@ VOLVER A ATRAER (Retención)
 ### 2. Meta Description Global (Actualizar __root.tsx)
 
 ```typescript
-{ 
-  name: "description", 
-  content: "Plataforma de conversión completa: Crea tu QR, atrae tráfico, convierte visitantes en clientes y mide resultados. Más que un biolink, es tu sistema de crecimiento." 
+{
+  name: "description",
+  content: "Plataforma de conversión completa: Crea tu QR, atrae tráfico, convierte visitantes en clientes y mide resultados. Más que un biolink, es tu sistema de crecimiento."
 }
 ```
 
@@ -1764,11 +1808,11 @@ VOLVER A ATRAER (Retención)
 const structuredData = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  "name": "Cripqer",
-  "applicationCategory": "BusinessApplication",
-  "applicationSubCategory": "Conversion Optimization Platform",
+  name: "Cripqer",
+  applicationCategory: "BusinessApplication",
+  applicationSubCategory: "Conversion Optimization Platform",
   // ... resto del schema actualizado
-}
+};
 ```
 
 ---
@@ -1776,12 +1820,14 @@ const structuredData = {
 ## 📈 IMPACTO ESPERADO DEL REPOSICIONAMIENTO
 
 ### Antes (Solo "Generador QR")
+
 - **Competencia**: Alta (50+ competidores directos)
 - **Diferenciación**: Baja
 - **Tráfico potencial**: 5,000 visitas/mes
 - **Conversión**: 1-2% (commodity)
 
 ### Después ("Plataforma de Conversión")
+
 - **Competencia**: Media-Baja (nicho específico)
 - **Diferenciación**: MUY Alta
 - **Tráfico potencial**: 15,000 visitas/mes
@@ -1829,8 +1875,9 @@ const structuredData = {
 ### Contenido completo
 
 # CRIPQER MASTER DISCOVERY MAP
-*Fecha del Informe:* Agosto 2026
-*Modo:* `READ_ONLY_PRODUCT_ARCHAEOLOGY`
+
+_Fecha del Informe:_ Agosto 2026
+_Modo:_ `READ_ONLY_PRODUCT_ARCHAEOLOGY`
 
 Este documento consolida el estado real y tangible del repositorio, disipando la niebla entre lo "proyectado" en documentos y lo "implementado" en código.
 
@@ -1839,8 +1886,10 @@ Este documento consolida el estado real y tangible del repositorio, disipando la
 ## 🗺️ PARTE 1: LA SUPERFICIE REAL DE LA APLICACIÓN
 
 ### Phase 1: Mapa exacto de rutas existentes
+
 Enrutamiento basado en `@tanstack/react-router` (`routeTree.gen.ts`).
 **Rutas 100% conectadas y activas:**
+
 1. `/` -> Landing page pública (`CripqerLanding.tsx`).
 2. `/$alias` -> Perfil público por alias (ej. `/juan`).
 3. `/admin` -> Panel de administración global.
@@ -1853,94 +1902,116 @@ Enrutamiento basado en `@tanstack/react-router` (`routeTree.gen.ts`).
 10. `/template-lab` -> Entorno de desarrollo para pruebas de plantillas.
 
 ### Phase 2: Funcionalidades "Shadow" (Rutas perdidas)
-* ¿Existen rutas sin interfaz para llegar a ellas?
+
+- ¿Existen rutas sin interfaz para llegar a ellas?
   - La ruta `/template-lab` es un endpoint puramente interno/dev, no accesible desde la navegación del usuario regular, diseñado para crear y probar nuevos "Basic Templates".
   - Las rutas para legacy fallback de perfiles (`p/$publicId`) están activas pero el onboarding promueve fuertemente el `/$alias`.
 
 ### Phase 3: Componentes Zombi (Desconectados)
-* No se detectaron componentes zombi en este análisis superficial del directorio `basic-template/renderers`. Las 14 plantillas allí presentes (`Corporate`, `Template03`, `TemplateAmanda`, etc.) están interconectadas a través de `StandaloneRenderer.tsx`.
-* Componentes de Premium (ej. `PremiumEffectsSelector.tsx` y `PremiumMaxProPicker.tsx`) se encuentran integrados en el Editor Shell pero detrás de un paywall lógico (`isPremium`).
+
+- No se detectaron componentes zombi en este análisis superficial del directorio `basic-template/renderers`. Las 14 plantillas allí presentes (`Corporate`, `Template03`, `TemplateAmanda`, etc.) están interconectadas a través de `StandaloneRenderer.tsx`.
+- Componentes de Premium (ej. `PremiumEffectsSelector.tsx` y `PremiumMaxProPicker.tsx`) se encuentran integrados en el Editor Shell pero detrás de un paywall lógico (`isPremium`).
 
 ### Phase 4: Banderas de desarrollo (Feature Flags)
-* **`isAdmin`**: Totalmente implementado. Verifica roles vía tabla `admin_users` y lista de correos permitidos en `admin-check.ts`. Desbloquea `/admin` y vistas avanzadas en `/profile`.
-* **`isPremium`**: Implementado de forma "Soft". En `src/lib/entitlements.ts` actualmente está hardcodeado (`const isPremium = false;`) o depende de lógica incompleta. Otorga acceso a plantillas y efectos premium en el UI, pero carece de suscripción real en backend (Stripe).
-* **`experimental`**: Ausente en el código fuente actual.
+
+- **`isAdmin`**: Totalmente implementado. Verifica roles vía tabla `admin_users` y lista de correos permitidos en `admin-check.ts`. Desbloquea `/admin` y vistas avanzadas en `/profile`.
+- **`isPremium`**: Implementado de forma "Soft". En `src/lib/entitlements.ts` actualmente está hardcodeado (`const isPremium = false;`) o depende de lógica incompleta. Otorga acceso a plantillas y efectos premium en el UI, pero carece de suscripción real en backend (Stripe).
+- **`experimental`**: Ausente en el código fuente actual.
 
 ### Phase 5: Falso Positivo Documental vs Realidad
-* **Power Editor**: Extensamente documentado en archivos legacy (`BASIC_PUBLIC_EDITOR_RESTORATION_EVIDENCE.md`), pero **físicamente inexistente** en la rama `main`. Fue un experimento aislado en otra rama (`feat/power-editor-v6`).
-* **OnlyFans QR / Gamification / gamified capture**: Documentado a gran escala en `EXPANSION_QR_MULTIFUNCIONAL.md` (roadmap futuro). Nada implementado.
+
+- **Power Editor**: Extensamente documentado en archivos legacy (`BASIC_PUBLIC_EDITOR_RESTORATION_EVIDENCE.md`), pero **físicamente inexistente** en la rama `main`. Fue un experimento aislado en otra rama (`feat/power-editor-v6`).
+- **OnlyFans QR / Gamification / gamified capture**: Documentado a gran escala en `EXPANSION_QR_MULTIFUNCIONAL.md` (roadmap futuro). Nada implementado.
 
 ### Phase 6: Herencias y Comentarios "Future"
-* `entitlements.ts` (L37): `TODO: Consultar base de datos cuando exista tabla de suscripciones` -> Confirma la falta de Billing.
-* `QRTemplateCard.tsx` (L103): `TODO: Navegar a página de Premium cuando exista` -> Confirma que no hay embudo de pagos activo.
-* `MyProfilePage.tsx` (L620): "Próximamente: gráficos de actividad y analytics detallados" -> Confirma la carencia de UI analítico para el usuario final.
+
+- `entitlements.ts` (L37): `TODO: Consultar base de datos cuando exista tabla de suscripciones` -> Confirma la falta de Billing.
+- `QRTemplateCard.tsx` (L103): `TODO: Navegar a página de Premium cuando exista` -> Confirma que no hay embudo de pagos activo.
+- `MyProfilePage.tsx` (L620): "Próximamente: gráficos de actividad y analytics detallados" -> Confirma la carencia de UI analítico para el usuario final.
 
 ---
 
 ## 🧠 PARTE 2: EL ECOSISTEMA DE DATOS Y CAPACIDADES
 
 ### Phase 7: Capacidades de BD Ocultas
+
 El esquema de la BD está sobredimensionado frente al UI actual.
 En `profiles`:
-* `qr_gradient`, `qr_dots_type`, `qr_corners_square_type`, `qr_effect`, `qr_demo_logo_id`: Están listos en la BD para almacenar capacidades de QR premium.
-* Tabla `qr_visual_versions`: Almacena un historial local (10 versiones por perfil) de estilos estéticos de los QR.
+
+- `qr_gradient`, `qr_dots_type`, `qr_corners_square_type`, `qr_effect`, `qr_demo_logo_id`: Están listos en la BD para almacenar capacidades de QR premium.
+- Tabla `qr_visual_versions`: Almacena un historial local (10 versiones por perfil) de estilos estéticos de los QR.
 
 ### Phase 8: Orfandad de UI
-* **Analytics Backend**: Existen triggers y tablas (`qr_analytics`, `increment_scan_count`) que capturan datos (Location, device, time, total views, unique visitors). Sin embargo, el **usuario final** no tiene interfaz visual (gráficos) para consumirlos (a excepción del scan count básico). Sólo el Admin tiene dashboard completo (`AnalyticsGlobalPanel.tsx`).
+
+- **Analytics Backend**: Existen triggers y tablas (`qr_analytics`, `increment_scan_count`) que capturan datos (Location, device, time, total views, unique visitors). Sin embargo, el **usuario final** no tiene interfaz visual (gráficos) para consumirlos (a excepción del scan count básico). Sólo el Admin tiene dashboard completo (`AnalyticsGlobalPanel.tsx`).
 
 ### Phase 9: El laberinto de generadores QR
+
 Existen **dos** motores/contextos de generación de QR independientes:
+
 1. **QR Advanced (`QRCodeAdvanced.tsx`)**: Integrado con el Basic Editor y perfiles, soporta custom dots, efectos y marcas visuales (Premium fields).
 2. **QR Seguro (`ThemedDocumentQr`)**: Acoplado a `encrypted-documents.tsx`, con un fin puramente transaccional/funcional (Compartir URL).
 
 ### Phase 10: La Verdad sobre los Templates (Basic vs Power)
-* **Basic Editor**: Único motor vivo en el código. Implementa ~14 plantillas renderizadas condicionalmente.
-* **Power Editor**: Inexistente.
+
+- **Basic Editor**: Único motor vivo en el código. Implementa ~14 plantillas renderizadas condicionalmente.
+- **Power Editor**: Inexistente.
 
 ### Phase 11: Inventario Físico de Templates
+
 Existen físicamente 14 `Renderers` (Plantillas básicas) dentro de `src/components/basic-template/renderers/`:
-* `CorporateRenderer`, `HeroCardsRenderer`, `HeroProfileRenderer`, `StandaloneRenderer`.
-* Clásicos numerados: `Template03` al `Template08`.
-* Nombres propios: `TemplateAdriana`, `TemplateAmanda`, `TemplateBarbara`, `TemplateEudora`.
+
+- `CorporateRenderer`, `HeroCardsRenderer`, `HeroProfileRenderer`, `StandaloneRenderer`.
+- Clásicos numerados: `Template03` al `Template08`.
+- Nombres propios: `TemplateAdriana`, `TemplateAmanda`, `TemplateBarbara`, `TemplateEudora`.
 
 ### Phase 12: Ecosistema Premium / Auth / Billing
-* **Auth**: 100% funcional y obligatorio (`Supabase Auth`).
-* **Premium (UI/DB)**: Existente en BD (`premium_users` table), implementado en UI con candados lógicos.
-* **Billing (Stripe/Paypal)**: **Cero implementación**. Entitlements mockeados/incompletos.
+
+- **Auth**: 100% funcional y obligatorio (`Supabase Auth`).
+- **Premium (UI/DB)**: Existente en BD (`premium_users` table), implementado en UI con candados lógicos.
+- **Billing (Stripe/Paypal)**: **Cero implementación**. Entitlements mockeados/incompletos.
 
 ### Phase 13: La realidad de Analytics
-* **Nivel Backend**: Captura eventos y cuenta descargas.
-* **Nivel Admin**: Dashboard avanzado con gráficas (`Recharts`), breakdown de dispositivos, top países y CTR.
-* **Nivel Usuario**: **NO IMPLEMENTADO** (sólo un contador general de visitas crudas en el dashboard).
+
+- **Nivel Backend**: Captura eventos y cuenta descargas.
+- **Nivel Admin**: Dashboard avanzado con gráficas (`Recharts`), breakdown de dispositivos, top países y CTR.
+- **Nivel Usuario**: **NO IMPLEMENTADO** (sólo un contador general de visitas crudas en el dashboard).
 
 ### Phase 14: Domains & URLs Infrastructure
-* Manejo estandarizado en formato SaaS vía `slugs` (rutas `/$alias` y `/p/$publicId`).
-* Documentos vía ShortUrls (`/d/$shortUrl`).
-* NO existe código activo para Custom Domains (`CNAME` mapping para dominios propios del cliente).
+
+- Manejo estandarizado en formato SaaS vía `slugs` (rutas `/$alias` y `/p/$publicId`).
+- Documentos vía ShortUrls (`/d/$shortUrl`).
+- NO existe código activo para Custom Domains (`CNAME` mapping para dominios propios del cliente).
 
 ### Phase 15: Storage Bucket Architecture
+
 3 Buckets reales controlados vía RLS en Supabase:
+
 1. `avatars` (Público, lectura abierta).
 2. `banners` (Público, lectura abierta).
 3. `encrypted-documents` (Estrictamente PRIVADO). Se expone únicamente vía `Signed URLs` generadas en servidor tras validación (60s vigencia).
 
 ### Phase 16: Embeds y Widgets Reales
-* Solo hay soporte puro de CSS/Links (enlaces sociales vía iconos como `whatsapp`).
-* **Ausentes**: No hay reproductores de video incrustados (`<iframe>` de YouTube), mapas o widgets de Spotify funcionando en las vistas públicas.
+
+- Solo hay soporte puro de CSS/Links (enlaces sociales vía iconos como `whatsapp`).
+- **Ausentes**: No hay reproductores de video incrustados (`<iframe>` de YouTube), mapas o widgets de Spotify funcionando en las vistas públicas.
 
 ### Phase 17: Herramientas Internas / Admin Tools
-* **Template Lab**: (`/template-lab`). Herramienta WYSIWYG interna para probar nuevos layouts CSS.
-* **Admin Panel**: Dashboard global (`/admin`) con capacidad para gestionar usuarios, forzar/conceder estado `Premium`, subir `Logos` premium e interrogar la métrica global.
-* **Invitation Codes**: Panel en Admin para generar tickets de registro cerrados.
+
+- **Template Lab**: (`/template-lab`). Herramienta WYSIWYG interna para probar nuevos layouts CSS.
+- **Admin Panel**: Dashboard global (`/admin`) con capacidad para gestionar usuarios, forzar/conceder estado `Premium`, subir `Logos` premium e interrogar la métrica global.
+- **Invitation Codes**: Panel en Admin para generar tickets de registro cerrados.
 
 ### Phase 18: Sistemas Legacy Superpuestos
-* El renderizador legacy sobrevive físicamente dentro de `PublicProfileView.tsx` como método "fallback". Entra en acción solo si se proporciona un `template_id` no reconocido, renderizando botones estándar CSS (estilo Linktree primitivo).
+
+- El renderizador legacy sobrevive físicamente dentro de `PublicProfileView.tsx` como método "fallback". Entra en acción solo si se proporciona un `template_id` no reconocido, renderizando botones estándar CSS (estilo Linktree primitivo).
 
 ---
 
 ## 🛸 PARTE 3: MATRIZ DE MADUREZ & PARKING LOT
 
 ### Phase 19: Matriz de Madurez del Producto
+
 1. **Gestión de Identidad & Links (Link-in-bio)**: Nivel 4 (Maduro). ~14 templates, colores avanzados, slugs en tiempo real.
 2. **Generación QR Avanzada**: Nivel 4 (Maduro). Integración de logos, formas, dots.
 3. **Documentos Seguros (Encrypted QR)**: Nivel 5 (Seguridad Grado Militar). E2EE AES-GCM 256, Zero-Knowledge en PDFs/Excel, control de acceso atómico `FOR UPDATE`, descargas de 1 solo uso, autodestrucción lógica.
@@ -1948,13 +2019,16 @@ Existen físicamente 14 `Renderers` (Plantillas básicas) dentro de `src/compone
 5. **Analytics para usuarios**: Nivel 2 (Recolectando pero no visualizando).
 
 ### Phase 20: Tareas a un click de distancia (Quick Wins Mapeados)
-* Habilitar la visibilidad de los datos analíticos para usuarios finales (todo el dashboard de `AnalyticsGlobalPanel` puede derivarse para un usuario específico con muy bajo costo de tiempo, ya que los endpoints y los componentes `Recharts` ya existen).
-* Terminar el `TODO: Consultar base de datos cuando exista tabla de suscripciones` mediante Stripe Checkout básico, el UI `PremiumAuthModal` ya está modelado.
+
+- Habilitar la visibilidad de los datos analíticos para usuarios finales (todo el dashboard de `AnalyticsGlobalPanel` puede derivarse para un usuario específico con muy bajo costo de tiempo, ya que los endpoints y los componentes `Recharts` ya existen).
+- Terminar el `TODO: Consultar base de datos cuando exista tabla de suscripciones` mediante Stripe Checkout básico, el UI `PremiumAuthModal` ya está modelado.
 
 ### Phase 21: El PARKING LOT de funcionalidades planeadas
+
 De acuerdo con la documentación de estrategia ( `EXPANSION_QR_MULTIFUNCIONAL.md` y `ESTRATEGIA_MONETIZACION_TEMPLATES.md`), las siguientes ideas **NO IMPLEMENTADAS** quedan aparcadas:
+
 1. Gamificación (Scratch cards, spin the wheel, lead capture avanzado).
-2. Protección DRM en PDF (Prevent screenshot, prevent print) - *Diferenciar de E2EE que sí existe*.
+2. Protección DRM en PDF (Prevent screenshot, prevent print) - _Diferenciar de E2EE que sí existe_.
 3. Smart Routing WhatsApp / Lead Magnets.
 4. "OnlyFans" Premium adult content protection (Paywall por QR).
 5. Certificados Verificables en Blockchain.
@@ -1966,7 +2040,9 @@ De acuerdo con la documentación de estrategia ( `EXPANSION_QR_MULTIFUNCIONAL.md
 ---
 
 ### 🏆 Phase 22, 23, 24, 25: RESUMEN EJECUTIVO (VEREDICTO FINAL)
+
 CRIPQER actualmente es una plataforma bifurcada con dos "Killers Features" altamente funcionales:
+
 1. **Un Creador Estético de Links Bio (Linktree Killer)**: Basado estrictamente en 14 "Basic Templates" renderizados de forma eficiente, con un Editor Shell robusto y personalización estética (no drag&drop).
 2. **Un Fort Knox de Documentos (Zero-Knowledge Doc Sharing)**: Un flujo extremo de cifrado local en el navegador (AES-GCM 256) antes de tocar almacenamiento, ideal para transmisión de archivos sensibles empresariales de un solo uso.
 
@@ -1998,20 +2074,22 @@ La seguridad base (Auth y RLS) es impecable. El punto de inflexión del reposito
 El producto tiene **dos funcionalidades estrella (killers) ya maduras y operativas**, un **stack tecnológico de primer nivel**, pero un **hueco crítico en monetización (Billing) y en visualización analítica para el cliente final**, que es lo que le impide ser hoy un SaaS monetizable.
 
 ### Veredicto arquitectónico en una línea
+
 > **Arquitectura sólida y sobre-dimensionada respecto al UI visible: hay más "músculo técnico" ya construido que el que la documentación de marketing sugiere. El producto está a semanas de ser monetizable, pero aún no está listo para un beta privado.**
 
 ---
 
 ## 2. ¿Qué es Cripqer? (Posicionamiento)
 
-| Dimensión | Antes | Ahora (aprobado) |
-|---|---|---|
-| Posicionamiento | "Generador de QR con página personalizable" | "Plataforma de Conversión Inteligente" |
-| Competidor | Linktree (organizar enlaces) | Combate la "fuga de intención" (intent leakage) |
-| Cadena de valor | Audiencia → Enlaces → Destino | Audiencia → Intención → Conversión → Cliente → Relación → Crecimiento |
-| Foso (moat) objetivo | Templates / botones / editor | Datos históricos de conversión + atribución de resultados |
+| Dimensión            | Antes                                       | Ahora (aprobado)                                                      |
+| -------------------- | ------------------------------------------- | --------------------------------------------------------------------- |
+| Posicionamiento      | "Generador de QR con página personalizable" | "Plataforma de Conversión Inteligente"                                |
+| Competidor           | Linktree (organizar enlaces)                | Combate la "fuga de intención" (intent leakage)                       |
+| Cadena de valor      | Audiencia → Enlaces → Destino               | Audiencia → Intención → Conversión → Cliente → Relación → Crecimiento |
+| Foso (moat) objetivo | Templates / botones / editor                | Datos históricos de conversión + atribución de resultados             |
 
 **Flujo estratégico validado por mercado (2026-09-09):**
+
 ```
 SOCIAL / QR / GOOGLE / ADS → VISITA → INTENCIÓN → PÁGINA/OFFERTA → CTA
 → HANDOFF → OUTCOME → ATRIBUCIÓN → FOLLOW-UP → APRENDIZAJE
@@ -2028,50 +2106,50 @@ El estudio "Master Product Map" distingue con rigor entre lo **documentado** y l
 
 ### 3.1 Rutas activas (conectadas al router)
 
-| Ruta | Función | Estado |
-|---|---|---|
-| `/` | Landing pública (`CripqerLanding`) | ✅ Activa |
-| `/$alias` | Perfil público por alias (ej. `/juan`) | ✅ Activa |
-| `/p/$publicId` | Perfil público (fallback/UUID) | ✅ Activa |
-| `/admin` | Panel de administración global | ✅ Activa |
-| `/editor` | Editor principal de QR y perfil | ✅ Activa |
-| `/encrypted-documents` | Dashboard de documentos cifrados | ✅ Activa |
-| `/d/$shortUrl` | Descarga pública de documento seguro | ✅ Activa |
-| `/profile` | Dashboard del usuario | ✅ Activa |
-| `/plataforma` · `/page` · `/pages` | Páginas / sistema de páginas | ✅ Activa |
-| `/template-lab` · `/engine-lab` · `/onboarding-preview` · `/power-editor` · `/power-editor-phase4-qa` · `/internal.power-editor` · `/pages.new` · `/pages.$pageId.edit` | Entornos de desarrollo / internos | 🔒 Dev/interno |
+| Ruta                                                                                                                                                                    | Función                                | Estado         |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- | -------------- |
+| `/`                                                                                                                                                                     | Landing pública (`CripqerLanding`)     | ✅ Activa      |
+| `/$alias`                                                                                                                                                               | Perfil público por alias (ej. `/juan`) | ✅ Activa      |
+| `/p/$publicId`                                                                                                                                                          | Perfil público (fallback/UUID)         | ✅ Activa      |
+| `/admin`                                                                                                                                                                | Panel de administración global         | ✅ Activa      |
+| `/editor`                                                                                                                                                               | Editor principal de QR y perfil        | ✅ Activa      |
+| `/encrypted-documents`                                                                                                                                                  | Dashboard de documentos cifrados       | ✅ Activa      |
+| `/d/$shortUrl`                                                                                                                                                          | Descarga pública de documento seguro   | ✅ Activa      |
+| `/profile`                                                                                                                                                              | Dashboard del usuario                  | ✅ Activa      |
+| `/plataforma` · `/page` · `/pages`                                                                                                                                      | Páginas / sistema de páginas           | ✅ Activa      |
+| `/template-lab` · `/engine-lab` · `/onboarding-preview` · `/power-editor` · `/power-editor-phase4-qa` · `/internal.power-editor` · `/pages.new` · `/pages.$pageId.edit` | Entornos de desarrollo / internos      | 🔒 Dev/interno |
 
 ### 3.2 Funcionalidades maduras (Nivel de madurez)
 
-| Dominio | Nivel | Detalle |
-|---|---|---|
-| **Link-in-bio (Identidad & Links)** | **4 (Maduro)** | ~14 "Basic Templates", colores avanzados, slugs en tiempo real. |
-| **Generación QR Avanzada** | **4 (Maduro)** | Logos, formas, dots, colores de esquina, marcos, gradientes, corrección de error. |
-| **Documentos Seguros (Encrypted QR)** | **5 (Grado militar)** | E2EE AES-GCM 256, Zero-Knowledge, `FOR UPDATE` atómico, descarga 1 solo uso, autodestrucción, URLs firmadas de 60 s. |
-| **Autenticación + RLS** | **Impecable** | Auth de Supabase y políticas RLS correctas. |
-| **Monetización / Billing** | **1 (Mock)** | `isPremium` hardcodeado a `false`; sin pasarela real (Stripe). |
-| **Analytics para usuario final** | **2 (Recolecta, no visualiza)** | Endpoints y gráficos (Recharts) existen, pero no se muestran al cliente. |
+| Dominio                               | Nivel                           | Detalle                                                                                                              |
+| ------------------------------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| **Link-in-bio (Identidad & Links)**   | **4 (Maduro)**                  | ~14 "Basic Templates", colores avanzados, slugs en tiempo real.                                                      |
+| **Generación QR Avanzada**            | **4 (Maduro)**                  | Logos, formas, dots, colores de esquina, marcos, gradientes, corrección de error.                                    |
+| **Documentos Seguros (Encrypted QR)** | **5 (Grado militar)**           | E2EE AES-GCM 256, Zero-Knowledge, `FOR UPDATE` atómico, descarga 1 solo uso, autodestrucción, URLs firmadas de 60 s. |
+| **Autenticación + RLS**               | **Impecable**                   | Auth de Supabase y políticas RLS correctas.                                                                          |
+| **Monetización / Billing**            | **1 (Mock)**                    | `isPremium` hardcodeado a `false`; sin pasarela real (Stripe).                                                       |
+| **Analytics para usuario final**      | **2 (Recolecta, no visualiza)** | Endpoints y gráficos (Recharts) existen, pero no se muestran al cliente.                                             |
 
 ### 3.3 Falso positivo documental vs. realidad
 
 - **Power Editor V6 (drag & drop):** muy documentado, pero **físicamente inexistente en `main`**; fue un experimento en otra rama (`feat/power-editor-v6`).
 - **OnlyFans QR, Gamificación, lead capture avanzado:** documentado a gran escala en el roadmap, **nada implementado**.
-- **Onboarding V2:** la *arquitectura objetivo* está diseñada (`CRIPQER_ONBOARDING_V2_TARGET_ARCHITECTURE.md`), pero marcada como **"DESIGN ONLY — NOT IMPLEMENTED"**.
+- **Onboarding V2:** la _arquitectura objetivo_ está diseñada (`CRIPQER_ONBOARDING_V2_TARGET_ARCHITECTURE.md`), pero marcada como **"DESIGN ONLY — NOT IMPLEMENTED"**.
 
 ### 3.4 Estado de preparación (Readiness) — último gate
 
 El reporte de **Phase 6 Product Readiness (2026-09-05)** concluye:
 
-| Gate | Resultado |
-|---|---|
-| Disponibilidad local (`/onboarding-preview`, `/editor`, Power Editor) | ✅ PASS |
-| Build / ESLint / Prettier / `git diff --check` | ✅ PASS |
-| Flag / kill-switch de Onboarding V2 | ❌ BLOCKED (no existe feature flag) |
-| Cross-profile RLS (segundo usuario QA) | ❌ BLOCKED |
-| Staging privado / preview HTTPS | ❌ BLOCKED (no provisionado) |
-| Logout autenticado (queda en `/editor`) | ❌ BLOCKED |
-| `npx tsc --noEmit` | ❌ FAIL (diagnósticos preexistentes) |
-| **ONBOARDING_V2_PRODUCT_READINESS** | ❌ **No listo para beta privado** |
+| Gate                                                                  | Resultado                            |
+| --------------------------------------------------------------------- | ------------------------------------ |
+| Disponibilidad local (`/onboarding-preview`, `/editor`, Power Editor) | ✅ PASS                              |
+| Build / ESLint / Prettier / `git diff --check`                        | ✅ PASS                              |
+| Flag / kill-switch de Onboarding V2                                   | ❌ BLOCKED (no existe feature flag)  |
+| Cross-profile RLS (segundo usuario QA)                                | ❌ BLOCKED                           |
+| Staging privado / preview HTTPS                                       | ❌ BLOCKED (no provisionado)         |
+| Logout autenticado (queda en `/editor`)                               | ❌ BLOCKED                           |
+| `npx tsc --noEmit`                                                    | ❌ FAIL (diagnósticos preexistentes) |
+| **ONBOARDING_V2_PRODUCT_READINESS**                                   | ❌ **No listo para beta privado**    |
 
 ---
 
@@ -2079,36 +2157,36 @@ El reporte de **Phase 6 Product Readiness (2026-09-05)** concluye:
 
 ### 4.1 Frontend
 
-| Capa | Tecnología |
-|---|---|
-| Framework / SSR | **TanStack Start 1.168** + **React 19.2** |
-| Enrutamiento | **TanStack Router 1.170** (type-safe) |
-| Estado/servidor | TanStack React Query 5 |
-| Estilos | **Tailwind CSS v4** + tw-animate-css |
-| Componentes | shadcn/ui + Radix UI (30+ primitivas) |
-| Formularios/validación | react-hook-form 7 + zod 3 |
-| Gráficos | recharts 2 |
-| QR | qr-code-styling, qrcode.react, qrcode-generator |
-| Partículas/efectos | tsparticles (engine/react/slim) |
-| Carrousel | embla-carousel-react |
-| Otros | cmdk, vaul, input-otp, react-resizable-panels, date-fns, sonner, lucide-react, browser-image-compression |
+| Capa                   | Tecnología                                                                                               |
+| ---------------------- | -------------------------------------------------------------------------------------------------------- |
+| Framework / SSR        | **TanStack Start 1.168** + **React 19.2**                                                                |
+| Enrutamiento           | **TanStack Router 1.170** (type-safe)                                                                    |
+| Estado/servidor        | TanStack React Query 5                                                                                   |
+| Estilos                | **Tailwind CSS v4** + tw-animate-css                                                                     |
+| Componentes            | shadcn/ui + Radix UI (30+ primitivas)                                                                    |
+| Formularios/validación | react-hook-form 7 + zod 3                                                                                |
+| Gráficos               | recharts 2                                                                                               |
+| QR                     | qr-code-styling, qrcode.react, qrcode-generator                                                          |
+| Partículas/efectos     | tsparticles (engine/react/slim)                                                                          |
+| Carrousel              | embla-carousel-react                                                                                     |
+| Otros                  | cmdk, vaul, input-otp, react-resizable-panels, date-fns, sonner, lucide-react, browser-image-compression |
 
 ### 4.2 Backend / Plataforma
 
-| Capa | Tecnología |
-|---|---|
-| Base de datos / Auth / Storage | **Supabase** (Postgres + Auth + RLS + Storage + RPC) |
-| Cliente | `@supabase/supabase-js 2.112`, `@supabase/ssr 0.12` |
-| Server runtime | **Nitro 3** (beta) |
-| Hosting / deploy | **Vercel** (build funcional `.vercel/output`), Cloudflare (wrangler), conectado a **Lovable** |
+| Capa                           | Tecnología                                                                                    |
+| ------------------------------ | --------------------------------------------------------------------------------------------- |
+| Base de datos / Auth / Storage | **Supabase** (Postgres + Auth + RLS + Storage + RPC)                                          |
+| Cliente                        | `@supabase/supabase-js 2.112`, `@supabase/ssr 0.12`                                           |
+| Server runtime                 | **Nitro 3** (beta)                                                                            |
+| Hosting / deploy               | **Vercel** (build funcional `.vercel/output`), Cloudflare (wrangler), conectado a **Lovable** |
 
 ### 4.3 Calidad / Testing
 
-| Herramienta | Uso |
-|---|---|
-| Playwright 1.62 | E2E (`e2e/onboarding-v2-phase5.spec.ts`, etc.) |
-| Vitest 4 + happy-dom | Tests unitarios (`src/lib/__tests__`) |
-| ESLint 9 + Prettier 3 + TypeScript 5.8 | Calidad de código |
+| Herramienta                            | Uso                                            |
+| -------------------------------------- | ---------------------------------------------- |
+| Playwright 1.62                        | E2E (`e2e/onboarding-v2-phase5.spec.ts`, etc.) |
+| Vitest 4 + happy-dom                   | Tests unitarios (`src/lib/__tests__`)          |
+| ESLint 9 + Prettier 3 + TypeScript 5.8 | Calidad de código                              |
 
 ### 4.4 Módulos de dominio (`src/lib`)
 
@@ -2132,6 +2210,7 @@ supabase · encryption.ts                     ← E2EE
 - **El esquema está sobre-dimensionado frente al UI actual** — hay capacidades de BD (gradientes QR, `qr_studio`, `qr_stats_and_history`, fuentes independientes, etc.) que aún no se exponen por completo en la interfaz.
 
 ### RLS y seguridad de acceso
+
 - RLS aplicado a lo largo de las migraciones (`fix_avatar_storage_policies`, `secure_document_access_rpcs`, `fix_constraints_and_admin_rls`).
 - Control de acceso atómico para documentos con `SELECT ... FOR UPDATE`.
 - Endpoints privilegiados aislados en `src/lib/supabase/server-privileged`.
@@ -2147,26 +2226,29 @@ Es el segundo pilar "killer" del producto y el activo arquitectónico **mejor va
 1. **Encriptación 100% en el navegador (Zero-Knowledge):** el archivo se cifra **antes** de subir a Supabase Storage. El servidor nunca ve la contraseña ni la clave.
 2. **Algoritmo:** AES-256-GCM (cifrado autenticado) con IV aleatorio de 12 bytes.
 3. **Derivación de clave:** PBKDF2 con SHA-256 (100.000 iteraciones para cifrado; 10.000 para hash de contraseña) + salt aleatorio de 16 bytes.
-4. **Almacenamiento:** se guarda el *ciphertext* (`.bin`); el hash de la contraseña y el salt se guardan por separado.
+4. **Almacenamiento:** se guarda el _ciphertext_ (`.bin`); el hash de la contraseña y el salt se guardan por separado.
 5. **Entrega:** RPC valida la contraseña, genera **Signed URL temporal (60 s)** en Storage y registra el acceso; el navegador descifra localmente y dispara la descarga con el nombre/tipo original.
 6. **Controles:** expiración por horas, descargas de **1 solo uso**, autodestrucción lógica, tamaño máximo 50 MB, tipos de documento etiquetados.
 
 ### Principios de estrategia (congelados)
+
 - La fortaleza criptográfica **nunca se debilita** para planes baratos.
 - Se monetiza la **administración, gobernanza, trazabilidad y controles empresariales** — no la criptografía insegura.
 - Packaging recomendado: Free=Secure Basic · Pro=Secure Advanced · Business=Secure Control · Enterprise=Secure Governance.
-- ⚠️ *Open decision:* el README señala que existen **tres modos de encriptación/seguridad reportados** cuyo comportamiento técnico real **debe auditarse** antes de asignarlos comercialmente.
+- ⚠️ _Open decision:_ el README señala que existen **tres modos de encriptación/seguridad reportados** cuyo comportamiento técnico real **debe auditarse** antes de asignarlos comercialmente.
 
 ---
 
 ## 7. Motor de Generación (Engine V2) y Onboarding
 
 ### Engine V2 (motor paramétrico)
+
 - Es el motor de generación **para todos los usuarios** (Free y Pro comparten el mismo motor; Free no usa un motor debilitado deliberadamente).
 - Genera páginas mínimas o ricas según la **intención real** y el contenido disponible; no fuerza bloques ricos sobre contenido escaso.
 - Incluye política de acciones de host, validación de templates, familias visuales, paletas, tipografías y composición.
 
 ### Onboarding (descubre necesidad, no disposición a pagar)
+
 ```
 Onboarding → Engine V2 (entiende profesión, objetivo, contenido, estilo)
    → Essential/Free  → Quick/Basic Editor → Publicar Free
@@ -2174,11 +2256,13 @@ Onboarding → Engine V2 (entiende profesión, objetivo, contenido, estilo)
 ```
 
 ### Arquitectura objetivo Onboarding V2 (solo diseño)
+
 ```
 Usuario → Onboarding V2 (preguntas semánticas) → OnboardingIntentV2
 → Page/Business Orchestrator → Engine V2 → BioTemplateConfig
 → sobre canónico (schemaVersion: 1) → Basic Editor ↔ Power Editor V2
 ```
+
 - Estado: **diseñada, no implementada** (fuentes sin modificar).
 - Rama futura condicional: Commerce Intake → Catálogo / Smart Mini-Site → Commerce Runtime (costura de extensión futura).
 
@@ -2187,6 +2271,7 @@ Usuario → Onboarding V2 (preguntas semánticas) → OnboardingIntentV2
 ## 8. Planes Futuros (Roadmap y Parking Lot)
 
 ### 8.1 Prioridad de ejecución vigente (no alterada por la investigación de mercado)
+
 1. Terminar **Creation Core**.
 2. Verificar **Publish runtime** real.
 3. Terminar **Mobile Power**.
@@ -2199,14 +2284,17 @@ Usuario → Onboarding V2 (preguntas semánticas) → OnboardingIntentV2
 > Solo **después** de Creation Core se abordará el **Conversion Core** (futuro).
 
 ### 8.2 Parking Lot — documentado, NO implementado
+
 Gamificación · Protección DRM en PDF · Smart Routing WhatsApp/Lead Magnets · Paywall OnlyFans · Certificados en Blockchain · Power Editor V6 (drag & drop) · Custom Domains · Widgets/Embeds (Spotify/YouTube/countdown) · Asset Tracking & Employee IDs.
 
 ### 8.3 Conversion Core (futuro, sin implementar)
+
 Outcome attribution · Analytics avanzados · Mini CRM · Conversation Context Engine · Conversion Learning · Capa operativa de leads.
 
 ### 8.4 "Do NOT chase" (descartado estratégicamente)
+
 No competir por: más templates, más controles de color, más iconos, email marketing, ecommerce completo, CRM completo, calendario, web builder genérico, marketplace de creadores, etc.
-**Filtro de feature:** *"¿Reduce esto la fuga de intención, el trabajo operativo o la incertidumbre del negocio?"*
+**Filtro de feature:** _"¿Reduce esto la fuga de intención, el trabajo operativo o la incertidumbre del negocio?"_
 
 ---
 
@@ -2214,14 +2302,15 @@ No competir por: más templates, más controles de color, más iconos, email mar
 
 ### 9.1 Precios (hipótesis de trabajo, no compromiso de lanzamiento)
 
-| Plan | Hipótesis (README estrategia) | Hipótesis (doc. monetización templates) |
-|---|---|---|
-| Free | USD 0 | USD 0 (3-4 templates básicos) |
-| Pro | ~USD 10–25/mes | USD 9.99/mes |
-| Business | ~USD 50–150/mes | — |
-| Enterprise | ~USD 250–500+/mes o custom | USD 24.99/mes ("Elite") |
+| Plan       | Hipótesis (README estrategia) | Hipótesis (doc. monetización templates) |
+| ---------- | ----------------------------- | --------------------------------------- |
+| Free       | USD 0                         | USD 0 (3-4 templates básicos)           |
+| Pro        | ~USD 10–25/mes                | USD 9.99/mes                            |
+| Business   | ~USD 50–150/mes               | —                                       |
+| Enterprise | ~USD 250–500+/mes o custom    | USD 24.99/mes ("Elite")                 |
 
 ### 9.2 Metas de ingresos aspiracionales (doc. de monetización)
+
 - Mes 3-4: **$5k MRR** · Mes 5-6: **$15k MRR** · Mes 7-12: **$50k+ MRR / $600k ARR**.
 - (Nota: metas de plan de negocio, no reflejo del estado técnico actual.)
 
@@ -2231,26 +2320,28 @@ No competir por: más templates, más controles de color, más iconos, email mar
 
 Evaluación cualitativa del **activo técnico** por dominio, en escala de madurez:
 
-| Dominio arquitectónico | Nivel | Lectura para inversión/ejecutivos |
-|---|---|---|
-| Stack frontend (TanStack Start + React 19 + Tailwind v4) | ⭐⭐⭐⭐⭐ | Vanguardista, escalable, SSR type-safe. Activo fuerte. |
-| Seguridad / E2EE (AES-256-GCM + PBKDF2, Zero-Knowledge) | ⭐⭐⭐⭐⭐ | Diferenciador defensible, "grado militar". El mayor activo. |
-| Motor de generación (Engine V2 paramétrico) | ⭐⭐⭐⭐ | Arquitectura de generación semántica sólida, en evolución. |
-| Capa de datos (Supabase + RLS + 40 migraciones) | ⭐⭐⭐⭐ | Robusta y sobre-dimensionada; capacidades por exponer. |
-| Link-in-bio / QR avanzado | ⭐⭐⭐⭐ | Producto funcional y completo. |
-| Editor dual (Basic ↔ Power) | ⭐⭐⭐ | Basic maduro; Power V6 (drag&drop) **fuera de `main`**. |
-| Onboarding | ⭐⭐⭐ | Shell V1 funcional; V2 solo diseñado. |
-| **Monetización / Billing** | ⭐ | **Mock.** Sin Stripe, `isPremium=false`. **El bloqueante #1.** |
-| Analytics usuario final | ⭐⭐ | Recolecta pero no visualiza. Quick-win cercano. |
-| Madurez DevOps (staging, flags, CI gate) | ⭐⭐ | Falta staging privado, feature flags, kill-switches. |
+| Dominio arquitectónico                                   | Nivel      | Lectura para inversión/ejecutivos                              |
+| -------------------------------------------------------- | ---------- | -------------------------------------------------------------- |
+| Stack frontend (TanStack Start + React 19 + Tailwind v4) | ⭐⭐⭐⭐⭐ | Vanguardista, escalable, SSR type-safe. Activo fuerte.         |
+| Seguridad / E2EE (AES-256-GCM + PBKDF2, Zero-Knowledge)  | ⭐⭐⭐⭐⭐ | Diferenciador defensible, "grado militar". El mayor activo.    |
+| Motor de generación (Engine V2 paramétrico)              | ⭐⭐⭐⭐   | Arquitectura de generación semántica sólida, en evolución.     |
+| Capa de datos (Supabase + RLS + 40 migraciones)          | ⭐⭐⭐⭐   | Robusta y sobre-dimensionada; capacidades por exponer.         |
+| Link-in-bio / QR avanzado                                | ⭐⭐⭐⭐   | Producto funcional y completo.                                 |
+| Editor dual (Basic ↔ Power)                              | ⭐⭐⭐     | Basic maduro; Power V6 (drag&drop) **fuera de `main`**.        |
+| Onboarding                                               | ⭐⭐⭐     | Shell V1 funcional; V2 solo diseñado.                          |
+| **Monetización / Billing**                               | ⭐         | **Mock.** Sin Stripe, `isPremium=false`. **El bloqueante #1.** |
+| Analytics usuario final                                  | ⭐⭐       | Recolecta pero no visualiza. Quick-win cercano.                |
+| Madurez DevOps (staging, flags, CI gate)                 | ⭐⭐       | Falta staging privado, feature flags, kill-switches.           |
 
 ### Síntesis de valor arquitectónico
+
 1. **Lo que ya vale:** la base técnica (stack), la **criptografía E2EE** y los dos productos funcionales (link-in-bio + QR avanzado) constituyen un activo arquitectónico **real y defendible**, no un mockup.
 2. **La deuda que frena la monetización:** falta **Billing real** (Stripe) y **visualización analítica** para el cliente. Son los dos "quick wins" explícitamente mapeados como "a un clic".
 3. **El riesgo de valoración:** la documentación futurista (Onboarding V2, Conversion Core, Power V6, gamificación) **infló artificialmente** la percepción del producto. El estudio de arqueología lo limpia: **mucho está solo diseñado o en otra rama**, no en `main`.
-4. **Readiness:** el gate de QA está **BLOQUEADO** para beta privado por ausencia de staging, flags y validación cross-profile RLS — riesgos de *proceso*, no de *código*.
+4. **Readiness:** el gate de QA está **BLOQUEADO** para beta privado por ausencia de staging, flags y validación cross-profile RLS — riesgos de _proceso_, no de _código_.
 
 ### Valoración arquitectónica de resumen
+
 > **Madurez arquitectónica global: ~75–80% de lo necesario para ser un SaaS monetizable.** El núcleo (creación, publicación, seguridad) está construido y funcionando; lo que separa al producto del mercado es **la capa comercial (Billing) y el cierre operativo (DevOps/staging)**, no el músculo de ingeniería.
 
 ---
@@ -2276,7 +2367,7 @@ Evaluación cualitativa del **activo técnico** por dominio, en escala de madure
 
 ---
 
-*Estudio consolidado a partir de: `README.md`, `README_PRODUCT_STRATEGY.md`, `CRIPQER_MASTER_PRODUCT_MAP.md`, `CRIPQER_MARKET_VALIDATION_AND_STRATEGIC_BETS_2026-09-09.md`, `CRIPQER_ONBOARDING_V2_TARGET_ARCHITECTURE.md`, `CRIPQER_ONBOARDING_V2_PHASE6_PRODUCT_READINESS_REPORT.md`, `SEO_STRATEGY_CRIPQER_CONVERSION_PLATFORM.md`, `docs/ESTRATEGIA_MONETIZACION_TEMPLATES.md`, `docs/EXPANSION_QR_MULTIFUNCIONAL.md`, `package.json`, migraciones de `supabase/` y código de `src/`.*
+_Estudio consolidado a partir de: `README.md`, `README_PRODUCT_STRATEGY.md`, `CRIPQER_MASTER_PRODUCT_MAP.md`, `CRIPQER_MARKET_VALIDATION_AND_STRATEGIC_BETS_2026-09-09.md`, `CRIPQER_ONBOARDING_V2_TARGET_ARCHITECTURE.md`, `CRIPQER_ONBOARDING_V2_PHASE6_PRODUCT_READINESS_REPORT.md`, `SEO_STRATEGY_CRIPQER_CONVERSION_PLATFORM.md`, `docs/ESTRATEGIA_MONETIZACION_TEMPLATES.md`, `docs/EXPANSION_QR_MULTIFUNCIONAL.md`, `package.json`, migraciones de `supabase/` y código de `src/`._
 
 ---
 
@@ -2329,20 +2420,20 @@ Date: 2026-09-09.
 The percentages below originated from the Creation Core readiness audit. They
 are readiness indicators, NOT claims of production readiness.
 
-| System | Audit Estimate |
-| --- | ---: |
-| Overall Creation Core | 58% |
-| Power Editor | 72% |
-| Persistence / autosave audit before runtime fix | 65% |
-| Desktop workflow | 68% |
-| Mobile functional | 42% |
-| Mobile visual polish | 55% |
-| Onboarding | 60% |
-| Engine V2 | 63% |
-| Page System host readiness | 35% |
-| Publication / public runtime | 52% |
-| SEO public infrastructure | 58% |
-| Analytics foundation | 30% |
+| System                                          | Audit Estimate |
+| ----------------------------------------------- | -------------: |
+| Overall Creation Core                           |            58% |
+| Power Editor                                    |            72% |
+| Persistence / autosave audit before runtime fix |            65% |
+| Desktop workflow                                |            68% |
+| Mobile functional                               |            42% |
+| Mobile visual polish                            |            55% |
+| Onboarding                                      |            60% |
+| Engine V2                                       |            63% |
+| Page System host readiness                      |            35% |
+| Publication / public runtime                    |            52% |
+| SEO public infrastructure                       |            58% |
+| Analytics foundation                            |            30% |
 
 ## IMPORTANT RUNTIME UPDATES AFTER THE AUDIT
 
@@ -3711,20 +3802,20 @@ ALLOW every one of the 21 declared capabilities — identical visual matrix to P
 Differentiation will come later from governance, integrations, security and scale
 (SSO, audit logs, API, SLA), not additional visual effects.
 
-> **Power Editor access is public to all tiers.** This policy gates *mutation of
-> capabilities*, not entry into the Power Editor.
+> **Power Editor access is public to all tiers.** This policy gates _mutation of
+> capabilities_, not entry into the Power Editor.
 
 ---
 
 ## 2. Architecture
 
-| Question | Answer |
-|---|---|
-| Pure product policy? | **YES** (0 network, 0 DB, 0 filesystem runtime calls) |
-| Server dependency? | **NO** (no import of `src/server/billing/**`) |
-| React dependency? | **NO** |
-| Billing modified? | **NO** |
-| Power Editor modified? | **NO** |
+| Question               | Answer                                                |
+| ---------------------- | ----------------------------------------------------- |
+| Pure product policy?   | **YES** (0 network, 0 DB, 0 filesystem runtime calls) |
+| Server dependency?     | **NO** (no import of `src/server/billing/**`)         |
+| React dependency?      | **NO**                                                |
+| Billing modified?      | **NO**                                                |
+| Power Editor modified? | **NO**                                                |
 
 **Boundary documented:** The canonical tier vocabulary (`free | pro | business |
 enterprise`) is declared **locally** in `capabilities.ts` (`PRODUCT_TIERS` →
@@ -3742,11 +3833,11 @@ duplicated switch, no `isPremium` boolean, no email/provider/browser checks.
 
 ## 3. Safety
 
-| Check | Result |
-|---|---|
-| Unknown capability fails closed | **PASS** (LOCKED, `UNKNOWN_CAPABILITY`, no upgrade target) |
-| Invalid tier cannot receive Pro capability | **PASS** (treated no more permissively than Free) |
-| LOCKED = mutation blocked, not config deletion | **YES** (documented in code + report) |
+| Check                                          | Result                                                     |
+| ---------------------------------------------- | ---------------------------------------------------------- |
+| Unknown capability fails closed                | **PASS** (LOCKED, `UNKNOWN_CAPABILITY`, no upgrade target) |
+| Invalid tier cannot receive Pro capability     | **PASS** (treated no more permissively than Free)          |
+| LOCKED = mutation blocked, not config deletion | **YES** (documented in code + report)                      |
 
 **LOCKED semantics:** `visible: true`, `editable: false`. LOCKED means the future
 UI shows the capability but prevents mutation. It does **not** remove stored
@@ -3758,11 +3849,11 @@ not implemented here (this is a pure decision core, not a preservation guard).
 
 ## 4. Validation
 
-| Check | Result |
-|---|---|
-| TypeScript (targeted, `--strict`) | **PASS** (exit 0) |
-| Selfcheck | **PASS** |
-| Assertion count | **158** (0 failed) |
+| Check                             | Result             |
+| --------------------------------- | ------------------ |
+| TypeScript (targeted, `--strict`) | **PASS** (exit 0)  |
+| Selfcheck                         | **PASS**           |
+| Assertion count                   | **158** (0 failed) |
 
 Selfcheck covered: tier/capability vocabulary integrity, Free core ALLOW, Free
 advanced LOCKED, Pro/Business/Enterprise allow-all, Business/Enterprise = Pro
@@ -3777,10 +3868,12 @@ authority, and deterministic purity.
 ### 5.1 Files read
 
 **Authorized reads (within read_scope):**
-- `src/server/billing/entitlements.ts` *(READ ONLY — confirmed `EffectiveTier` = `free | pro | business | enterprise`)*
-- `POWER_EDITOR_CAPABILITY_INVENTORY_V1.md` *(factual capability basis)*
+
+- `src/server/billing/entitlements.ts` _(READ ONLY — confirmed `EffectiveTier` = `free | pro | business | enterprise`)_
+- `POWER_EDITOR_CAPABILITY_INVENTORY_V1.md` _(factual capability basis)_
 
 **Authorized optional validation reads:**
+
 - `tsconfig.json`
 - `package.json`
 
@@ -3803,21 +3896,21 @@ files were written as a result.
 
 - `src/lib/product-entitlements/capabilities.ts`
 - `src/lib/product-entitlements/capabilities.selfcheck.ts`
-- `CRIPQER_PRODUCT_CAPABILITY_POLICY_CORE_V1_REPORT.md` *(this file)*
+- `CRIPQER_PRODUCT_CAPABILITY_POLICY_CORE_V1_REPORT.md` _(this file)_
 
 ### 5.3 Frozen-scope accounting
 
-| Item | Result |
-|---|---|
-| Existing source files modified | **0** |
-| Frozen write-scope violations | **0** |
-| Unauthorized read-scope expansions | **3** |
-| Implementation impact from those reads | **none** |
-| Additional files written | **none** |
-| Dependencies changed | **NO** |
-| Routes changed | **NO** |
-| DB changed | **NO** |
-| Commits / staging | **none** (per git-safety) |
+| Item                                   | Result                    |
+| -------------------------------------- | ------------------------- |
+| Existing source files modified         | **0**                     |
+| Frozen write-scope violations          | **0**                     |
+| Unauthorized read-scope expansions     | **3**                     |
+| Implementation impact from those reads | **none**                  |
+| Additional files written               | **none**                  |
+| Dependencies changed                   | **NO**                    |
+| Routes changed                         | **NO**                    |
+| DB changed                             | **NO**                    |
+| Commits / staging                      | **none** (per git-safety) |
 
 ---
 

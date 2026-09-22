@@ -37,17 +37,12 @@ function expectTier(
   label: string,
 ): void {
   check(result.effectiveTier === tier, `${label} → effectiveTier = ${tier}`);
-  check(
-    result.hasPaidAccess === hasPaidAccess,
-    `${label} → hasPaidAccess = ${hasPaidAccess}`,
-  );
+  check(result.hasPaidAccess === hasPaidAccess, `${label} → hasPaidAccess = ${hasPaidAccess}`);
 }
 
 /* ============================ fixture builder ============================= */
 
-function makeSub(
-  overrides: Partial<BillingSubscriptionRecord> = {},
-): BillingSubscriptionRecord {
+function makeSub(overrides: Partial<BillingSubscriptionRecord> = {}): BillingSubscriptionRecord {
   return {
     id: "sub_1",
     user_id: "user_1",
@@ -139,9 +134,7 @@ expectTier(
 
 // invalid plan → fail closed to free
 {
-  const r = resolveEntitlement(
-    makeSub({ plan_id: "premium" as unknown as BillingPlanId }),
-  );
+  const r = resolveEntitlement(makeSub({ plan_id: "premium" as unknown as BillingPlanId }));
   expectTier(r, "free", false, "invalid_plan");
   check(r.reason === "INVALID_PLAN", "invalid_plan reason = INVALID_PLAN");
 }
@@ -160,9 +153,7 @@ expectTier(
 // provider cannot determine tier (same plan_id, different provider)
 {
   const a = resolveEntitlement(makeSub({ plan_id: "pro", provider: "stripe" }));
-  const b = resolveEntitlement(
-    makeSub({ plan_id: "pro", provider: "mercado_pago" }),
-  );
+  const b = resolveEntitlement(makeSub({ plan_id: "pro", provider: "mercado_pago" }));
   check(a.effectiveTier === b.effectiveTier, "provider-neutral: same tier");
 }
 
@@ -180,10 +171,7 @@ expectTier(
 {
   const a = resolveEntitlement(makeSub({ provider_subscription_id: "sub_1" }));
   const b = resolveEntitlement(makeSub({ provider_subscription_id: "sub_2" }));
-  check(
-    a.effectiveTier === b.effectiveTier,
-    "provider_subscription_id never determines tier",
-  );
+  check(a.effectiveTier === b.effectiveTier, "provider_subscription_id never determines tier");
 }
 
 /* ==================== browser / return-state authority ==================== */
@@ -196,10 +184,7 @@ expectTier(
     "resolver arity = 1 (no browser flag / return state parameter)",
   );
   const r = resolveEntitlement(makeSub({ status: "active", plan_id: "pro" }));
-  check(
-    !(r instanceof Promise),
-    "resolver is synchronous (pure) — no async side channel",
-  );
+  check(!(r instanceof Promise), "resolver is synchronous (pure) — no async side channel");
 }
 
 /* ============================ determinism ================================= */
@@ -233,4 +218,3 @@ if (failed > 0) {
 } else {
   console.log("SELFCHECK PASS");
 }
-

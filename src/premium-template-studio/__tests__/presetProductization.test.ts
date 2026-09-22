@@ -12,7 +12,10 @@ describe("Phase 7 preset productization contract", () => {
 
       expect(blocks.length, preset.name).toBeGreaterThan(0);
       expect(new Set(ids).size, preset.name).toBe(ids.length);
-      expect(blocks.every((block) => getBlockDefinition(block.type)), preset.name).toBe(true);
+      expect(
+        blocks.every((block) => getBlockDefinition(block.type)),
+        preset.name,
+      ).toBe(true);
       expect(JSON.parse(JSON.stringify(blocks)), preset.name).toEqual(blocks);
     }
   });

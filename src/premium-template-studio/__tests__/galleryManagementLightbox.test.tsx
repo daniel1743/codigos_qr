@@ -82,7 +82,11 @@ describe("Power Gallery management and lightbox", () => {
     expect(getGalleryColumns(3, 3, true)).toBe(2);
 
     const twoImageMarkup = renderToStaticMarkup(
-      <TemplateRenderer config={galleryConfig([image("one"), image("two")])} mode="public" breakpoint="desktop" />,
+      <TemplateRenderer
+        config={galleryConfig([image("one"), image("two")])}
+        mode="public"
+        breakpoint="desktop"
+      />,
     );
     const fourImageMarkup = renderToStaticMarkup(
       <TemplateRenderer

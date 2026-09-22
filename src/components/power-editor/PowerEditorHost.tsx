@@ -134,7 +134,11 @@ function createDurableAssetAdapter(
   };
 }
 
-export function PowerEditorHost({ profileId, target, guidedOnboarding = false }: PowerEditorHostProps) {
+export function PowerEditorHost({
+  profileId,
+  target,
+  guidedOnboarding = false,
+}: PowerEditorHostProps) {
   const targetKind = target?.kind ?? null;
   const targetPageId = target?.kind === "page" ? target.id : null;
   const isPageMode = targetKind === "page";
@@ -208,7 +212,9 @@ export function PowerEditorHost({ profileId, target, guidedOnboarding = false }:
 
           const { data, error: profileError } = await browserSupabase
             .from("profiles")
-            .select("id,user_id,slug,public_id,display_name,bio,verification_variant,template_config")
+            .select(
+              "id,user_id,slug,public_id,display_name,bio,verification_variant,template_config",
+            )
             .eq(requested.key, requested.value)
             .eq("user_id", currentSession.user.id)
             .maybeSingle();
@@ -234,7 +240,10 @@ export function PowerEditorHost({ profileId, target, guidedOnboarding = false }:
           // Trusted DB verification_variant is authoritative; the canonical JSON
           // can never grant official-gold on its own.
           setConfig(
-            applyTrustedVerificationVariant(envelope.editorConfig, ownedProfile.verification_variant),
+            applyTrustedVerificationVariant(
+              envelope.editorConfig,
+              ownedProfile.verification_variant,
+            ),
           );
           setError(null);
         }
@@ -328,7 +337,7 @@ export function PowerEditorHost({ profileId, target, guidedOnboarding = false }:
   useEffect(() => {
     if (!profile || !supabase || !isPersistenceDebugEnabled()) return;
 
-    let active = true;
+    const active = true;
     const readBack = async (event: PersistenceDebugEvent, kind: "draft" | "published") => {
       try {
         const envelope =
@@ -517,6 +526,7 @@ export function PowerEditorHost({ profileId, target, guidedOnboarding = false }:
         <div className="min-h-0 flex-1">
           <PremiumTemplateStudio
             config={config ?? undefined}
+            documentKind={isPageMode ? "page" : "profile"}
             adapters={adapters}
             autoSave
             documentId={documentId}

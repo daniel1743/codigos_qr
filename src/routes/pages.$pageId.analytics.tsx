@@ -31,7 +31,9 @@ function MetricCard({ label, value, icon }: { label: string; value: number; icon
       <CardContent className="flex items-center justify-between gap-4 py-5">
         <div>
           <p className="text-sm text-muted-foreground">{label}</p>
-          <p className="mt-1 text-3xl font-semibold tracking-tight">{value.toLocaleString("es-CL")}</p>
+          <p className="mt-1 text-3xl font-semibold tracking-tight">
+            {value.toLocaleString("es-CL")}
+          </p>
         </div>
         <div className="rounded-full bg-primary/10 p-3 text-primary">{icon}</div>
       </CardContent>
@@ -62,7 +64,10 @@ function PageAnalytics() {
         setSummary(analytics);
         setError(null);
       } catch (reason) {
-        if (active) setError(reason instanceof Error ? reason.message : "No se pudieron cargar las estadísticas.");
+        if (active)
+          setError(
+            reason instanceof Error ? reason.message : "No se pudieron cargar las estadísticas.",
+          );
       } finally {
         if (active) setLoading(false);
       }
@@ -119,15 +124,37 @@ function PageAnalytics() {
             </div>
 
             <section className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label="Resumen">
-              <MetricCard label="Visitas" value={summary.visits} icon={<Eye className="h-5 w-5" />} />
-              <MetricCard label="Clics en botones" value={summary.buttonClicks} icon={<MousePointerClick className="h-5 w-5" />} />
-              <MetricCard label="Clics en WhatsApp" value={summary.whatsappClicks} icon={<span className="text-sm font-bold">WA</span>} />
-              <MetricCard label="Interés en productos/servicios" value={summary.productClicks + summary.serviceClicks} icon={<span className="text-sm font-bold">{summary.productClicks + summary.serviceClicks}</span>} />
+              <MetricCard
+                label="Visitas"
+                value={summary.visits}
+                icon={<Eye className="h-5 w-5" />}
+              />
+              <MetricCard
+                label="Clics en botones"
+                value={summary.buttonClicks}
+                icon={<MousePointerClick className="h-5 w-5" />}
+              />
+              <MetricCard
+                label="Clics en WhatsApp"
+                value={summary.whatsappClicks}
+                icon={<span className="text-sm font-bold">WA</span>}
+              />
+              <MetricCard
+                label="Interés en productos/servicios"
+                value={summary.productClicks + summary.serviceClicks}
+                icon={
+                  <span className="text-sm font-bold">
+                    {summary.productClicks + summary.serviceClicks}
+                  </span>
+                }
+              />
             </section>
 
             {!hasEvents ? (
               <Card className="mt-6">
-                <CardHeader><CardTitle>Todavía no hay visitas</CardTitle></CardHeader>
+                <CardHeader>
+                  <CardTitle>Todavía no hay visitas</CardTitle>
+                </CardHeader>
                 <CardContent className="text-sm text-muted-foreground">
                   Comparte tu página o tu QR y aquí podrás ver cómo interactúan las personas.
                 </CardContent>
@@ -135,7 +162,9 @@ function PageAnalytics() {
             ) : (
               <div className="mt-6 grid gap-6 lg:grid-cols-2">
                 <Card>
-                  <CardHeader><CardTitle>Visitas por día</CardTitle></CardHeader>
+                  <CardHeader>
+                    <CardTitle>Visitas por día</CardTitle>
+                  </CardHeader>
                   <CardContent className="space-y-2">
                     {summary.dailyVisits.map((item) => (
                       <div key={item.date} className="flex items-center justify-between text-sm">
@@ -147,14 +176,20 @@ function PageAnalytics() {
                 </Card>
                 {(summary.topProducts.length > 0 || summary.topServices.length > 0) && (
                   <Card>
-                    <CardHeader><CardTitle>Interés por producto o servicio</CardTitle></CardHeader>
+                    <CardHeader>
+                      <CardTitle>Interés por producto o servicio</CardTitle>
+                    </CardHeader>
                     <CardContent className="space-y-4 text-sm">
                       {summary.topProducts.length > 0 && (
                         <div>
                           <p className="mb-2 font-medium">Productos</p>
                           {summary.topProducts.map((item) => (
-                            <div key={`product-${item.label}`} className="flex justify-between gap-4 py-1">
-                              <span className="text-muted-foreground">{item.label}</span><span>{item.count}</span>
+                            <div
+                              key={`product-${item.label}`}
+                              className="flex justify-between gap-4 py-1"
+                            >
+                              <span className="text-muted-foreground">{item.label}</span>
+                              <span>{item.count}</span>
                             </div>
                           ))}
                         </div>
@@ -163,8 +198,12 @@ function PageAnalytics() {
                         <div>
                           <p className="mb-2 font-medium">Servicios</p>
                           {summary.topServices.map((item) => (
-                            <div key={`service-${item.label}`} className="flex justify-between gap-4 py-1">
-                              <span className="text-muted-foreground">{item.label}</span><span>{item.count}</span>
+                            <div
+                              key={`service-${item.label}`}
+                              className="flex justify-between gap-4 py-1"
+                            >
+                              <span className="text-muted-foreground">{item.label}</span>
+                              <span>{item.count}</span>
                             </div>
                           ))}
                         </div>

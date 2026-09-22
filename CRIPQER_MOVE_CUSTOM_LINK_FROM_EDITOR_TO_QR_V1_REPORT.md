@@ -28,8 +28,8 @@ immediately.
 - New: `src/components/qr/CustomPublicLinkControl.tsx` (relocated from
   `src/components/power-editor/CustomPublicLinkControl.tsx`, which was deleted).
 - The control now renders as a compact card (`rounded-2xl border bg-card p-4
-  shadow-sm`) titled **"Personaliza tu enlace"** with helper *"Elige un enlace
-  fácil de recordar y compartir."* and prefix `cripqer.dev/`.
+shadow-sm`) titled **"Personaliza tu enlace"** with helper _"Elige un enlace
+  fácil de recordar y compartir."_ and prefix `cripqer.dev/`.
 - It exposes: editable slug, live availability state
   (available / in-use / invalid), friendly public URL, **Guardar enlace**,
   **Copiar**, and **Abrir** (new) actions.

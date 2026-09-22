@@ -62,7 +62,11 @@ export const DESIGN_PRESETS: Record<DesignPresetId, DesignPresetV1> = {
     description: "Work-first, media-led cards.",
     family: "creator",
     preferred_pattern: "portfolio_first",
-    overrides: { visual_family: "creator", links_presentation: "cards", hero_mode: "banner_avatar" },
+    overrides: {
+      visual_family: "creator",
+      links_presentation: "cards",
+      hero_mode: "banner_avatar",
+    },
   },
   premium_dark: {
     id: "premium_dark",
@@ -86,7 +90,11 @@ export const DESIGN_PRESETS: Record<DesignPresetId, DesignPresetV1> = {
     description: "Social-led navigation with a light CTA.",
     family: "creator",
     preferred_pattern: "social_first",
-    overrides: { visual_family: "creator", identity_alignment: "center", links_presentation: "mixed" },
+    overrides: {
+      visual_family: "creator",
+      identity_alignment: "center",
+      links_presentation: "mixed",
+    },
   },
   minimal_focus: {
     id: "minimal_focus",

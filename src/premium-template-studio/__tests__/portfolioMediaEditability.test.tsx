@@ -30,8 +30,20 @@ describe("Portfolio item media editability", () => {
   it("exposes every existing item image with a preview and replacement authority", () => {
     const markup = renderInspector(
       portfolioBlock([
-        { id: "one", label: "Nova Rebrand", description: "Identity", url: "/nova", imageUrl: "/nova.jpg" },
-        { id: "two", label: "Atlas App", description: "Product", url: "/atlas", imageUrl: "/atlas.jpg" },
+        {
+          id: "one",
+          label: "Nova Rebrand",
+          description: "Identity",
+          url: "/nova",
+          imageUrl: "/nova.jpg",
+        },
+        {
+          id: "two",
+          label: "Atlas App",
+          description: "Product",
+          url: "/atlas",
+          imageUrl: "/atlas.jpg",
+        },
       ]),
     );
 
@@ -97,7 +109,7 @@ describe("Portfolio item media editability", () => {
       if (preset.category === "Portfolio") expect(mediaBlocks.length).toBeGreaterThan(0);
       for (const block of mediaBlocks) {
         const mediaItems =
-          block.type === "portfolio" ? block.content.items ?? [] : block.content.images ?? [];
+          block.type === "portfolio" ? (block.content.items ?? []) : (block.content.images ?? []);
         expect(mediaItems.length).toBeGreaterThan(0);
       }
     }

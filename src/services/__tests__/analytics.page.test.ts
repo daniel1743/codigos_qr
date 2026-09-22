@@ -35,8 +35,20 @@ describe("analyticsService.getPageAnalytics", () => {
       { ...EVENT_BASE, id: "view-a", event_type: "view" },
       { ...EVENT_BASE, id: "button-a", event_type: "link_click", interaction_type: "button" },
       { ...EVENT_BASE, id: "wa-a", event_type: "link_click", interaction_type: "whatsapp" },
-      { ...EVENT_BASE, id: "product-a", event_type: "link_click", interaction_type: "product", item_label: "Corte" },
-      { ...EVENT_BASE, id: "service-a", event_type: "link_click", interaction_type: "service", item_label: "Color" },
+      {
+        ...EVENT_BASE,
+        id: "product-a",
+        event_type: "link_click",
+        interaction_type: "product",
+        item_label: "Corte",
+      },
+      {
+        ...EVENT_BASE,
+        id: "service-a",
+        event_type: "link_click",
+        interaction_type: "service",
+        item_label: "Color",
+      },
       { ...EVENT_BASE, id: "view-b", page_id: "page-b", event_type: "view" },
     ]);
 

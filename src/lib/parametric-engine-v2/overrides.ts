@@ -73,8 +73,7 @@ export function applyOverrides(
     structure.hero.mode = overrides.hero_mode;
     // Composition intent is expressed even when the asset is missing;
     // actual asset presence stays in show_avatar / show_banner.
-    structure.hero.show_avatar =
-      overrides.hero_mode !== "banner_only" && intent.assets.has_avatar;
+    structure.hero.show_avatar = overrides.hero_mode !== "banner_only" && intent.assets.has_avatar;
     structure.hero.show_banner = overrides.hero_mode !== "avatar_only" && intent.assets.has_banner;
     applied.push("override:hero_mode");
   }

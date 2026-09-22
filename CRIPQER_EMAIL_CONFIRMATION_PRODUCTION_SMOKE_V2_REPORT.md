@@ -13,10 +13,10 @@ email template or authentication state was changed.
 
 Read-only checks against production passed:
 
-| URL | HTTP |
-|---|---:|
+| URL                                         |  HTTP |
+| ------------------------------------------- | ----: |
 | `https://www.cripqer.dev/correo-confirmado` | `200` |
-| `https://www.cripqer.dev/login` | `200` |
+| `https://www.cripqer.dev/login`             | `200` |
 
 ## Not verified
 
@@ -41,4 +41,3 @@ Use a new disposable email account and the Supabase dashboard, verify that the
 email button retains Supabase's generated confirmation URL, then execute the
 full registration → email CTA → `/correo-confirmado` → `/login` flow and record
 only screenshots actually captured.
-

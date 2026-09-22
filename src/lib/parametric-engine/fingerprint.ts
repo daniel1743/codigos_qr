@@ -9,7 +9,10 @@ import { stableHash } from "./utils";
  * V1.5.1 — these helpers are PUBLIC and expected to receive stored JSON, so
  * they validate the minimal recipe shape before dereferencing anything.
  */
-export function assertRecipeShape(recipe: unknown, label = "recipe"): asserts recipe is PageRecipeV1 {
+export function assertRecipeShape(
+  recipe: unknown,
+  label = "recipe",
+): asserts recipe is PageRecipeV1 {
   const r = recipe as Record<string, unknown> | null;
   const ok =
     !!r &&
@@ -84,12 +87,17 @@ export function checkRecipeRendererCompatibility(
   };
 
   if (recipe.design.card.enabled) need(capabilities.professional_cards, "professional_cards");
-  if (recipe.design.card.media_position === "right") need(capabilities.card_media_right, "card_media_right");
-  if (recipe.design.card.media_position === "bottom") need(capabilities.card_media_bottom, "card_media_bottom");
+  if (recipe.design.card.media_position === "right")
+    need(capabilities.card_media_right, "card_media_right");
+  if (recipe.design.card.media_position === "bottom")
+    need(capabilities.card_media_bottom, "card_media_bottom");
   if (recipe.design.card.style === "elevated") need(capabilities.elevated_cards, "elevated_cards");
-  if (recipe.design.background.type === "radial-gradient") need(capabilities.radial_background, "radial_background");
-  if (recipe.design.background.type === "linear-gradient") need(capabilities.gradient_background, "gradient_background");
-  if (recipe.structure.hero.show_professional_badge) need(capabilities.professional_badge, "professional_badge");
+  if (recipe.design.background.type === "radial-gradient")
+    need(capabilities.radial_background, "radial_background");
+  if (recipe.design.background.type === "linear-gradient")
+    need(capabilities.gradient_background, "gradient_background");
+  if (recipe.structure.hero.show_professional_badge)
+    need(capabilities.professional_badge, "professional_badge");
   if (recipe.structure.social_row.enabled) need(capabilities.social_links, "social_links");
   if (recipe.structure.hero.mode !== "avatar_only") need(capabilities.hero_banner, "hero_banner");
   if (recipe.blocks.some((b) => b.type === "media")) need(capabilities.media_block, "media_block");

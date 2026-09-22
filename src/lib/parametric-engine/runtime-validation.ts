@@ -99,9 +99,7 @@ export function validateContentInventoryPatch(patch: unknown, base = "content"):
     if (value["count"] !== undefined) {
       const count = value["count"];
       if (typeof count !== "number" || !Number.isFinite(count) || Math.trunc(count) < 0) {
-        issues.push(
-          issue(`${base}.${key}.count`, "count", "count must be a finite integer >= 0."),
-        );
+        issues.push(issue(`${base}.${key}.count`, "count", "count must be a finite integer >= 0."));
       } else if (Math.trunc(count) > MAX_CONTENT_COUNT) {
         issues.push(
           issue(
@@ -121,7 +119,10 @@ export function validateContentInventoryPatch(patch: unknown, base = "content"):
 
 /* ------------------------------------------------------------ capabilities */
 
-export function validateFutureCapabilities(patch: unknown, base = "future_capabilities"): ValidationIssue[] {
+export function validateFutureCapabilities(
+  patch: unknown,
+  base = "future_capabilities",
+): ValidationIssue[] {
   if (patch === undefined || patch === null) return [];
   if (!isPlainObject(patch)) {
     return [issue(base, "not_an_object", `${base} must be an object.`)];
@@ -140,7 +141,10 @@ export function validateFutureCapabilities(patch: unknown, base = "future_capabi
   return issues;
 }
 
-export function validateRendererCapabilities(patch: unknown, base = "capabilities"): ValidationIssue[] {
+export function validateRendererCapabilities(
+  patch: unknown,
+  base = "capabilities",
+): ValidationIssue[] {
   if (patch === undefined || patch === null) return [];
   if (!isPlainObject(patch)) {
     return [issue(base, "not_an_object", `${base} must be an object.`)];

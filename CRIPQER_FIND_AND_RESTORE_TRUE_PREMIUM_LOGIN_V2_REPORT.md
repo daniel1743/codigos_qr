@@ -8,12 +8,12 @@
 
 ## 1. Forensic result — all historical login candidates found
 
-| # | Commit | Date | File | Structure | Verdict |
-|---|--------|------|------|-----------|---------|
-| 1 | `03bc945` "primer deploy a github" | 2026-08-17 | `src/components/Auth.tsx` | **Compact centered** `Card` with `max-w-sm` (≈384 px). "Iniciar Sesión" / "Crear Cuenta", email + password, error/success alerts, submit + toggle. **No split, no mock preview. Real Supabase auth** (`signInWithPassword` / `signUp`). | ✅ **TRUE historical premium login** |
-| 2 | `ed97bf3` "qr premium" | 2026-08-19 | `src/components/Auth.tsx` | Wide split-screen `lg:grid-cols-[1.05fr_0.95fr]`, `max-w-6xl`, `lg:min-h-[680px]`. Left "QR Links / Tu Marca" mock profile (WhatsApp / Portafolio / Reservar hora), right "Iniciar sesión" card. | ❌ WRONG / LEGACY |
-| 3 | `2084989` "qr premium" | 2026-08-19 | `src/components/Auth.tsx` | Same split-screen. | ❌ WRONG / LEGACY |
-| 4 | `c9eb7b0` "feat(auth): add standalone premium access modal" | 2026-08-28 | `PremiumAuthModal.tsx` | Teal **Dialog modal** (`max-w-[31rem]` ≈ 496 px), QR seal + "Cripqer". Presentation-only, no Supabase. Handoff doc explicitly states it is a reusable modal, **not** the login page. | ❌ Rejected candidate |
+| #   | Commit                                                      | Date       | File                      | Structure                                                                                                                                                                                                                               | Verdict                              |
+| --- | ----------------------------------------------------------- | ---------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ |
+| 1   | `03bc945` "primer deploy a github"                          | 2026-08-17 | `src/components/Auth.tsx` | **Compact centered** `Card` with `max-w-sm` (≈384 px). "Iniciar Sesión" / "Crear Cuenta", email + password, error/success alerts, submit + toggle. **No split, no mock preview. Real Supabase auth** (`signInWithPassword` / `signUp`). | ✅ **TRUE historical premium login** |
+| 2   | `ed97bf3` "qr premium"                                      | 2026-08-19 | `src/components/Auth.tsx` | Wide split-screen `lg:grid-cols-[1.05fr_0.95fr]`, `max-w-6xl`, `lg:min-h-[680px]`. Left "QR Links / Tu Marca" mock profile (WhatsApp / Portafolio / Reservar hora), right "Iniciar sesión" card.                                        | ❌ WRONG / LEGACY                    |
+| 3   | `2084989` "qr premium"                                      | 2026-08-19 | `src/components/Auth.tsx` | Same split-screen.                                                                                                                                                                                                                      | ❌ WRONG / LEGACY                    |
+| 4   | `c9eb7b0` "feat(auth): add standalone premium access modal" | 2026-08-28 | `PremiumAuthModal.tsx`    | Teal **Dialog modal** (`max-w-[31rem]` ≈ 496 px), QR seal + "Cripqer". Presentation-only, no Supabase. Handoff doc explicitly states it is a reusable modal, **not** the login page.                                                    | ❌ Rejected candidate                |
 
 ## 2. Why the previous `PremiumAuthModal` candidate was incorrect
 
@@ -69,10 +69,12 @@ No new Supabase client, no duplicate session listener, no obsolete auth logic wa
 ## 6. Acceptance dimensions
 
 **Desktop (1366×768 / 1440×900 / 1920×1080)**
+
 - Login surface capped at `max-w-md` (448 px), centered via flexbox.
 - No growth with viewport width, no giant side illustration, no full-width composition.
 
 **Mobile (360×800 / 390×844 / 430×932)**
+
 - `px-4 py-8` outer padding, `w-full` card, `w-full` inputs/buttons, no fixed widths that could
   overflow horizontally; vertical centering with `min-h-[calc(100vh-4rem)]`.
 
@@ -106,4 +108,3 @@ a browser before freezing the success gate.
 - `COMPACT_DESKTOP_LOGIN_PASS` — ✅ structurally (max-w-md, centered, no split)
 - `CURRENT_SUPABASE_AUTH_PRESERVED` — ✅ (`submitAuth` authority untouched)
 - `MOBILE_RESPONSIVE_PASS` — ✅ structurally (fluid widths, margins, no overflow)
-

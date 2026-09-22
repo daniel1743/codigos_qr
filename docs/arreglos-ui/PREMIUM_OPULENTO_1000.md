@@ -29,41 +29,39 @@
 ## 🔥 CARACTERÍSTICAS IMPLEMENTADAS
 
 ### Gradientes Multi-Color (3-5 colores)
+
 ```typescript
 holographicPurple: {
   colorStops: [
-    { offset: 0, color: "#8B5CF6" },    // Violeta
+    { offset: 0, color: "#8B5CF6" }, // Violeta
     { offset: 0.25, color: "#EC4899" }, // Rosa
-    { offset: 0.5, color: "#3B82F6" },  // Azul
+    { offset: 0.5, color: "#3B82F6" }, // Azul
     { offset: 0.75, color: "#10B981" }, // Verde
-    { offset: 1, color: "#F59E0B" },    // Ámbar
-  ]
+    { offset: 1, color: "#F59E0B" }, // Ámbar
+  ];
 }
 ```
 
 ### Efectos CSS Avanzados
+
 - **Holographic Shimmer**: Animación 3s con hue-rotate y multi-shadow
 - **Rainbow Rotate**: Rotación continua de hue 360°
 - **Aurora Pulse**: Pulsación suave de brillo
 - **Metallic Shine**: Drop-shadow con contrast y brightness
 
 ### Filtros CSS Premium
+
 ```css
 /* Holográfico */
-filter: drop-shadow(0 0 12px rgba(139, 92, 246, 0.6)) 
-        drop-shadow(0 0 24px rgba(236, 72, 153, 0.4)) 
-        brightness(1.2);
+filter: drop-shadow(0 0 12px rgba(139, 92, 246, 0.6)) drop-shadow(0 0 24px rgba(236, 72, 153, 0.4))
+  brightness(1.2);
 
 /* Oro Metálico */
-filter: drop-shadow(0 4px 8px rgba(255, 215, 0, 0.5)) 
-        contrast(1.1) 
-        brightness(1.1);
+filter: drop-shadow(0 4px 8px rgba(255, 215, 0, 0.5)) contrast(1.1) brightness(1.1);
 
 /* Cristal */
-filter: drop-shadow(0 0 20px rgba(14, 165, 233, 0.4)) 
-        blur(0.5px) 
-        brightness(1.3);
-backdropFilter: blur(8px);
+filter: drop-shadow(0 0 20px rgba(14, 165, 233, 0.4)) blur(0.5px) brightness(1.3);
+backdropfilter: blur(8px);
 ```
 
 ---
@@ -81,6 +79,7 @@ backdropFilter: blur(8px);
 ## 🎯 UI/UX PREMIUM
 
 ### Selector de Efectos
+
 - **Grid responsivo** 2-4 columnas
 - **Preview visual** de cada gradiente (80x80px)
 - **Badge Premium** con icono Crown
@@ -89,6 +88,7 @@ backdropFilter: blur(8px);
 - **Alert informativo** sobre acceso Premium
 
 ### Botón CTA Principal
+
 ```jsx
 <Button className="bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-500">
   <Sparkles /> Ver Efectos Opulentos Premium <Crown />
@@ -100,14 +100,22 @@ backdropFilter: blur(8px);
 ## 🔧 INTEGRACIÓN TÉCNICA
 
 ### 1. Tipos Extendidos
+
 ```typescript
-export type QREffectType = 
-  | "none" | "neon" | "glow" 
-  | "holographic" | "metallic-gold" | "metallic-silver" 
-  | "crystal" | "rainbow" | "aurora";
+export type QREffectType =
+  | "none"
+  | "neon"
+  | "glow"
+  | "holographic"
+  | "metallic-gold"
+  | "metallic-silver"
+  | "crystal"
+  | "rainbow"
+  | "aurora";
 ```
 
 ### 2. Aplicación de Efectos
+
 ```typescript
 if (canvas && options.effect !== "none") {
   const effectStyle = PREMIUM_EFFECTS[options.effect];
@@ -117,6 +125,7 @@ if (canvas && options.effect !== "none") {
 ```
 
 ### 3. Keyframes CSS Inyectados
+
 Los keyframes se inyectan dinámicamente al DOM en `useEffect` para soporte de animaciones.
 
 ---
@@ -138,11 +147,13 @@ Los keyframes se inyectan dinámicamente al DOM en `useEffect` para soporte de a
 ## 🎨 ANTES vs DESPUÉS
 
 ### ❌ ANTES (Básico)
+
 - 2 colores sólidos (neón pink, neón cyan)
 - Degradados simples (2 colores)
 - Efectos básicos (glow simple)
 
 ### ✅ DESPUÉS (Opulento 1000%)
+
 - **14 efectos holográficos y metálicos**
 - **Gradientes 3-5 colores** con transiciones suaves
 - **Animaciones CSS avanzadas** (shimmer, pulse, rotate)
@@ -205,7 +216,7 @@ Los keyframes se inyectan dinámicamente al DOM en `useEffect` para soporte de a
 ✅ Animaciones CSS avanzadas  
 ✅ Galería interactiva Premium  
 ✅ UI/UX de lujo  
-✅ Totalmente funcional  
+✅ Totalmente funcional
 
 **¡Opulento 1000% alcanzado! 💎**
 

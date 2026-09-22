@@ -25,30 +25,30 @@ Highest product risks:
 
 ## Devices/Viewports Tested
 
-| Viewport/device | Result |
-| --- | --- |
-| Desktop Chrome | Runtime entry observed; Power UI NOT_VERIFIED |
-| 320 / 360 / 390 / 430 | NOT_VERIFIED at runtime |
-| 768 / 1024 | NOT_VERIFIED at runtime |
-| Landscape | NOT_VERIFIED |
-| Real touch device | NOT_VERIFIED_ON_REAL_DEVICE |
+| Viewport/device       | Result                                        |
+| --------------------- | --------------------------------------------- |
+| Desktop Chrome        | Runtime entry observed; Power UI NOT_VERIFIED |
+| 320 / 360 / 390 / 430 | NOT_VERIFIED at runtime                       |
+| 768 / 1024            | NOT_VERIFIED at runtime                       |
+| Landscape             | NOT_VERIFIED                                  |
+| Real touch device     | NOT_VERIFIED_ON_REAL_DEVICE                   |
 
 ## PASS Matrix
 
-| Area | Desktop | Mobile | Severity | Status |
-| --- | --- | --- | --- | --- |
-| Navigation | PARTIAL | PARTIAL | P2 | Source-traced responsive panels; runtime unavailable |
-| Zoom | NOT_IMPLEMENTED | NOT_IMPLEMENTED | P1 | No camera/zoom surface traced |
-| Pan | NOT_IMPLEMENTED | NOT_IMPLEMENTED | P1 | No pan gesture surface traced |
-| Selection | PARTIAL | PARTIAL | P2 | Semantic block selection exists; visual usability unverified |
-| Editing | PARTIAL | PARTIAL | P2 | Block/inspector actions exist; runtime unavailable |
-| Responsive layout | PARTIAL | PARTIAL | P2 | Breakpoint and mobile dock exist; matrix unverified |
-| Touch | NOT_IMPLEMENTED | NOT_IMPLEMENTED | P1 | No Pointer/Touch handlers traced |
-| Keyboard | PASS | PARTIAL | P3 | Shortcuts and block keyboard selection traced |
-| Accessibility | PARTIAL | PARTIAL | P2 | Good semantics; small action targets and runtime gaps |
-| Save/recovery | PARTIAL | PARTIAL | P2 | State/error path traced; failure state untested |
-| History | PASS | PASS | P3 | Document-only reducer history traced |
-| Performance | NOT_VERIFIED | NOT_VERIFIED | P3 | No canonical runtime fixture available |
+| Area              | Desktop         | Mobile          | Severity | Status                                                       |
+| ----------------- | --------------- | --------------- | -------- | ------------------------------------------------------------ |
+| Navigation        | PARTIAL         | PARTIAL         | P2       | Source-traced responsive panels; runtime unavailable         |
+| Zoom              | NOT_IMPLEMENTED | NOT_IMPLEMENTED | P1       | No camera/zoom surface traced                                |
+| Pan               | NOT_IMPLEMENTED | NOT_IMPLEMENTED | P1       | No pan gesture surface traced                                |
+| Selection         | PARTIAL         | PARTIAL         | P2       | Semantic block selection exists; visual usability unverified |
+| Editing           | PARTIAL         | PARTIAL         | P2       | Block/inspector actions exist; runtime unavailable           |
+| Responsive layout | PARTIAL         | PARTIAL         | P2       | Breakpoint and mobile dock exist; matrix unverified          |
+| Touch             | NOT_IMPLEMENTED | NOT_IMPLEMENTED | P1       | No Pointer/Touch handlers traced                             |
+| Keyboard          | PASS            | PARTIAL         | P3       | Shortcuts and block keyboard selection traced                |
+| Accessibility     | PARTIAL         | PARTIAL         | P2       | Good semantics; small action targets and runtime gaps        |
+| Save/recovery     | PARTIAL         | PARTIAL         | P2       | State/error path traced; failure state untested              |
+| History           | PASS            | PASS            | P3       | Document-only reducer history traced                         |
+| Performance       | NOT_VERIFIED    | NOT_VERIFIED    | P3       | No canonical runtime fixture available                       |
 
 ## Desktop Layout
 

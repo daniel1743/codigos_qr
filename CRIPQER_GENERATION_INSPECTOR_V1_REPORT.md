@@ -23,10 +23,11 @@ It instruments existing values at boundaries (a single non-behavioral Engine sea
 rather than re-implementing generation logic.
 
 The three target deviations are all detectable at runtime:
+
 - `CATEGORY_COLLAPSE` — `"Tienda de ropa" → "other"` (DEGRADED)
 - `STYLE_FALLBACK` — `undefined → professional` (FALLBACK)
 - `BOOKING_GOAL_DEGRADATION` — `bookings → leads` (DEGRADED)
-plus `ARCHETYPE`, `FAMILY_BIAS` (now active), `VISUAL_AUTHORING_LIMIT`.
+  plus `ARCHETYPE`, `FAMILY_BIAS` (now active), `VISUAL_AUTHORING_LIMIT`.
 
 ## TRACE ARCHITECTURE
 
@@ -56,6 +57,7 @@ runs the real generation chain and returns `{ generation, trace }`.
 ## FILES CHANGED
 
 New (QA-owned, non-production):
+
 - `src/lib/generation-inspector/types.ts` — trace contracts (`GenerationTraceV1`).
 - `src/lib/generation-inspector/classify.ts` — transformation classifier.
 - `src/lib/generation-inspector/diagnose.ts` — auto-diagnosis + summary + media.
@@ -68,6 +70,7 @@ New (QA-owned, non-production):
 - `src/components/generation-inspector/generation-inspector.css` — inspector styles.
 
 Minimal instrumentation (non-behavioral, additive):
+
 - `src/lib/parametric-engine-v2/internal-entrypoint.ts` — added
   `EngineV2StrategyTrace` + `generateCripqerPageWithEngineV2Traced` (imports + one
   new exported function; existing `generateCripqerPageWithEngineV2` unchanged).
@@ -88,18 +91,18 @@ Minimal instrumentation (non-behavioral, additive):
 
 ## TRACE STAGES T1–T10
 
-| Stage | Name | Contract | Captured value |
-|---|---|---|---|
-| T1 | ONBOARDING INTENT | OnboardingIntentV2 | identity/business/outcome/visualDirection/contentNeeds/actions/scope |
-| T2 | OWNER CONTENT | OwnerContentInput | identity/services/products/menu/portfolio/events/contact/media |
-| T3 | SMART PAGES REQUEST | PageGenerationRequest | businessType/goal/density/salesMode/experienceType/primaryAction |
-| T4 | PAGE PLAN | PagePlanV1 | experienceType/heroVariant/sections/CTA |
-| T5 | HOST MAPPING | GeneratedPageInput | objective/title/activity/style/cover/cta/items |
-| T6 | PAGES_7 / ENGINE INPUT | EngineV2HostGenerationInput | profession/goal/style/selectedFeatures/cardMedia/contentBlocks |
-| T7 | ENGINE STRATEGY | EngineV2StrategyTrace | category/personality/goal/archetype/family_bias/family_scores/family |
-| T8 | VISUAL AUTHORING | PowerEditorRecipeV2 | typography/colors/background/cards/buttons/spacing/motion/blocks |
-| T9 | CANONICAL OUTPUT | BioTemplateConfig | theme/blocks/generation/media + validateTemplate |
-| T10 | RENDERER | PublicTemplateRenderer | renderer used, properties applied, unsupported list |
+| Stage | Name                   | Contract                    | Captured value                                                       |
+| ----- | ---------------------- | --------------------------- | -------------------------------------------------------------------- |
+| T1    | ONBOARDING INTENT      | OnboardingIntentV2          | identity/business/outcome/visualDirection/contentNeeds/actions/scope |
+| T2    | OWNER CONTENT          | OwnerContentInput           | identity/services/products/menu/portfolio/events/contact/media       |
+| T3    | SMART PAGES REQUEST    | PageGenerationRequest       | businessType/goal/density/salesMode/experienceType/primaryAction     |
+| T4    | PAGE PLAN              | PagePlanV1                  | experienceType/heroVariant/sections/CTA                              |
+| T5    | HOST MAPPING           | GeneratedPageInput          | objective/title/activity/style/cover/cta/items                       |
+| T6    | PAGES_7 / ENGINE INPUT | EngineV2HostGenerationInput | profession/goal/style/selectedFeatures/cardMedia/contentBlocks       |
+| T7    | ENGINE STRATEGY        | EngineV2StrategyTrace       | category/personality/goal/archetype/family_bias/family_scores/family |
+| T8    | VISUAL AUTHORING       | PowerEditorRecipeV2         | typography/colors/background/cards/buttons/spacing/motion/blocks     |
+| T9    | CANONICAL OUTPUT       | BioTemplateConfig           | theme/blocks/generation/media + validateTemplate                     |
+| T10   | RENDERER               | PublicTemplateRenderer      | renderer used, properties applied, unsupported list                  |
 
 ## PRESERVED / DEGRADED / LOST / FALLBACK CLASSIFICATION
 
@@ -280,23 +283,21 @@ meaningful deviation to fix (per the trace) is the **visual personality threadin
 
 ## ARCHITECTURE GATES
 
-| Gate | Value |
-|---|---|
-| QA_ONLY | ✅ true |
-| PRODUCTION_GENERATION_CHANGED | ✅ false |
-| SMART_PAGES_CHANGED | ✅ false |
-| ENGINE_BEHAVIOR_CHANGED | ✅ false (additive export only) |
-| PAGES_7_BEHAVIOR_CHANGED | ✅ false |
-| CANONICAL_CHANGED | ✅ false |
-| RENDERER_CHANGED | ✅ false |
-| DB_CHANGED | ✅ false |
-| MIGRATION_CREATED | ✅ false |
-| UNSPLASH_BEHAVIOR_CHANGED | ✅ false |
-| PEXELS_BEHAVIOR_CHANGED | ✅ false |
-| AUTO_FIX_ENABLED | ✅ false |
+| Gate                          | Value                           |
+| ----------------------------- | ------------------------------- |
+| QA_ONLY                       | ✅ true                         |
+| PRODUCTION_GENERATION_CHANGED | ✅ false                        |
+| SMART_PAGES_CHANGED           | ✅ false                        |
+| ENGINE_BEHAVIOR_CHANGED       | ✅ false (additive export only) |
+| PAGES_7_BEHAVIOR_CHANGED      | ✅ false                        |
+| CANONICAL_CHANGED             | ✅ false                        |
+| RENDERER_CHANGED              | ✅ false                        |
+| DB_CHANGED                    | ✅ false                        |
+| MIGRATION_CREATED             | ✅ false                        |
+| UNSPLASH_BEHAVIOR_CHANGED     | ✅ false                        |
+| PEXELS_BEHAVIOR_CHANGED       | ✅ false                        |
+| AUTO_FIX_ENABLED              | ✅ false                        |
 
 ---
 
 **SUCCESS GATE:** `CRIPQER_GENERATION_INSPECTOR_RUNTIME_PASS_FROZEN`
-
-

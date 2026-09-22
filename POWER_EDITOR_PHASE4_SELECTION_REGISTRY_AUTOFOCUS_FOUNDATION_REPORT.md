@@ -11,6 +11,7 @@ was re-run to confirm a green baseline.
 ---
 
 FILES_READ:
+
 - src/premium-template-studio/components/workspace/PowerCanvasViewport.tsx
 - src/premium-template-studio/components/workspace/usePowerCanvasCamera.ts
 - src/premium-template-studio/state/StudioProvider.tsx
@@ -19,9 +20,11 @@ FILES_READ:
 - src/premium-template-studio/components/PremiumTemplateStudio.tsx (reference — needed to trace selection ownership)
 
 FILES_MODIFIED:
+
 - (none)
 
 CURRENT_SELECTION_OWNER:
+
 - StudioState.selectedBlockId (single source of truth), produced/updated by
   templateReducer via the `selectBlock` action, and consumed by
   PremiumTemplateStudio → TemplateRenderer `editing.selectedBlockId`.
@@ -45,6 +48,7 @@ HISTORY_UNCHANGED: YES (no change)
 MOBILE_UNCHANGED: YES (no change)
 
 TESTS:
+
 - `npx vitest run src/premium-template-studio/components/workspace/__tests__/powerCanvasCameraMath.test.ts`
   → PASS (1 file, 17 tests). Frozen camera math remains green.
 - No new Phase 4 tests were added (blocked — no logic to test).
@@ -82,6 +86,7 @@ Consequently there is no explicit, non-fragile way to associate a rendered
 `register(blockId, element)` / `unregister(blockId)` API has no caller.
 
 Minimal expansion required (single attribute, no behavior change):
+
 ```tsx
 <section
   data-block-id={block.id}
@@ -98,6 +103,7 @@ File: `src/premium-template-studio/components/PremiumTemplateStudio.tsx`
 Symbol: `<PowerCanvasViewport>` invocation (~line 307)
 
 `PowerCanvasViewport` currently receives only:
+
 ```tsx
 interface PowerCanvasViewportProps {
   children: ReactNode;
@@ -117,6 +123,7 @@ Note: the reverse direction (Canvas→selection, SELECT-07) already works today 
 and Tools/Inspector reflect it. Only the selection→Canvas direction is missing.
 
 Minimal expansion required (one prop + one interface field):
+
 ```tsx
 <PowerCanvasViewport
   contentWidth={frameWidth}
@@ -170,6 +177,7 @@ implements the minimal selection→Canvas autofocus flow. No code beyond the
 authorized WRITE SCOPE was touched.
 
 FILES_READ:
+
 - src/premium-template-studio/components/workspace/PowerCanvasViewport.tsx
 - src/premium-template-studio/components/workspace/usePowerCanvasCamera.ts (reference)
 - src/premium-template-studio/state/StudioProvider.tsx (reference)
@@ -177,14 +185,15 @@ FILES_READ:
 - src/premium-template-studio/engine/TemplateRenderer.tsx
 - src/premium-template-studio/components/PremiumTemplateStudio.tsx
 - src/premium-template-studio/utils/index.ts (uid format)
-- src/premium-template-studio/components/workspace/__tests__/powerCanvasCameraMath.test.ts
+- src/premium-template-studio/components/workspace/**tests**/powerCanvasCameraMath.test.ts
 
 FILES_MODIFIED:
+
 - src/premium-template-studio/engine/TemplateRenderer.tsx (added `data-block-id={block.id}`)
 - src/premium-template-studio/components/PremiumTemplateStudio.tsx (pass `selectedBlockId`)
 - src/premium-template-studio/components/workspace/PowerCanvasViewport.tsx (prop + scoped autofocus)
 - src/premium-template-studio/components/workspace/powerCanvasAutofocus.ts (NEW — pure helper)
-- src/premium-template-studio/components/workspace/__tests__/powerCanvasAutofocus.test.ts (NEW)
+- src/premium-template-studio/components/workspace/**tests**/powerCanvasAutofocus.test.ts (NEW)
 
 SELECTION_SINGLE_SOURCE_OF_TRUTH: StudioState.selectedBlockId (unchanged, no mirror)
 BLOCK_DOM_IDENTITY_ADDED: YES — `data-block-id={block.id}` on BlockFrame `<section>`
@@ -222,5 +231,3 @@ SCOPE_EXPANSION_REQUIRED: NO
 
 POWER_EDITOR_PHASE4_SELECTION_REGISTRY_AUTOFOCUS_FOUNDATION_GATE:
 NOT_VERIFIED
-
-

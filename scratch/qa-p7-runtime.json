@@ -37,12 +37,7 @@
     "theme_colors": true,
     "theme_typography": true,
     "layout_responsive": true,
-    "blocks": [
-      "text",
-      "services",
-      "cta",
-      "contact"
-    ],
+    "blocks": ["text", "services", "cta", "contact"],
     "carries_owner_item": true,
     "carries_owner_price": true,
     "carries_owner_cta": true

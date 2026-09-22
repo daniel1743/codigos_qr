@@ -13,31 +13,31 @@ no field-specific typography (not yet supported by the canonical model).
 HERO_TEXT_RENDER_OWNER: `src/premium-template-studio/components/blocks/HeroBlock.tsx`
 
 TEXT_FIELDS:
-  EYEBROW:     `<span>` — `content.eyebrow` (hardcoded 12px / 700 / 0.05em / uppercase)
-  TITLE:       `<h1>`  — `content.title` (headingStyle(theme, scale))
-  SUBTITLE:    `<p>`   — `content.subtitle` (hardcoded 16px / 500)
-  DESCRIPTION: `<p>`   — `content.description` (hardcoded 14px / lineHeight 1.5)
+EYEBROW: `<span>` — `content.eyebrow` (hardcoded 12px / 700 / 0.05em / uppercase)
+TITLE: `<h1>` — `content.title` (headingStyle(theme, scale))
+SUBTITLE: `<p>` — `content.subtitle` (hardcoded 16px / 500)
+DESCRIPTION: `<p>` — `content.description` (hardcoded 14px / lineHeight 1.5)
 
 CURRENT_CONTENT_PATHS:
-  content.eyebrow, content.title, content.subtitle, content.description
+content.eyebrow, content.title, content.subtitle, content.description
 
 CURRENT_STYLE_SUPPORT (all NON-field-specific):
-  COLOR:           title = theme.colors.text (headingStyle) / #fff on full-image;
-                   subtitle = theme.colors.text; description/eyebrow = theme.colors.mutedText.
-  FONT_FAMILY:     title = theme.typography.headingFont; others inherit body font.
-  FONT_SIZE:       title = headingSize*scale; subtitle 16, description 14, eyebrow 12.
-  FONT_WEIGHT:     title = headingWeight; subtitle 500, eyebrow 700 (hardcoded).
-  ALIGNMENT:       block-level (block.layout.align / responsive). Not per-field.
-  LINE_HEIGHT:     title = 1.1 (headingStyle); description = 1.5 (hardcoded).
-  LETTER_SPACING:  title = theme.typography.letterSpacing; eyebrow = 0.05em.
+COLOR: title = theme.colors.text (headingStyle) / #fff on full-image;
+subtitle = theme.colors.text; description/eyebrow = theme.colors.mutedText.
+FONT_FAMILY: title = theme.typography.headingFont; others inherit body font.
+FONT_SIZE: title = headingSize*scale; subtitle 16, description 14, eyebrow 12.
+FONT_WEIGHT: title = headingWeight; subtitle 500, eyebrow 700 (hardcoded).
+ALIGNMENT: block-level (block.layout.align / responsive). Not per-field.
+LINE_HEIGHT: title = 1.1 (headingStyle); description = 1.5 (hardcoded).
+LETTER_SPACING: title = theme.typography.letterSpacing; eyebrow = 0.05em.
 
 FIELD_SPECIFIC_STYLE_SUPPORTED:
-  TITLE: NO, SUBTITLE: NO, DESCRIPTION: NO.
+TITLE: NO, SUBTITLE: NO, DESCRIPTION: NO.
 
 CONTEXT_CALLBACK_STRATEGY:
-  Single generalized `onSelectHeroText(blockId, target)` (target ∈
-  title|subtitle|description|eyebrow) — avoids 4× callback proliferation, reuses
-  the existing one-shot `requestInspectorFocus` signal + `InspectorFocusTarget`.
+Single generalized `onSelectHeroText(blockId, target)` (target ∈
+title|subtitle|description|eyebrow) — avoids 4× callback proliferation, reuses
+the existing one-shot `requestInspectorFocus` signal + `InspectorFocusTarget`.
 
 SCHEMA_EXPANSION_REQUIRED: None (content editing already canonical).
 RENDERER_EXPANSION_REQUIRED: Yes (edit-mode onClick on Hero text elements).
@@ -121,6 +121,7 @@ None. No locks, no ProBadge, no Engine V2 changes.
 ## TESTS
 
 `heroTextContextual.test.tsx` (8 tests):
+
 - `shouldScrollInspectorToFocus` accepts all Hero text targets, rejects null
 - CTA + Profile Cover targets still work
 - hero-title focus signal delivers once and unsubscribes

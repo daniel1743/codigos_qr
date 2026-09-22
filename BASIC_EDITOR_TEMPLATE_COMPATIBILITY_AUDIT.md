@@ -24,12 +24,12 @@ footer en las templates.
 
 ## 2. WORKTREE / BRANCH / HEAD AUDITED
 
-| Field | Value |
-|---|---|
-| AUDITED WORKTREE | `C:/Users/Lenovo/Desktop/proyectos desplegados importante/generador de QR` |
-| AUDITED BRANCH | `feat/mobile-gallery-template-integration` |
-| AUDITED HEAD | `f33f83be2ef95a9106258823543ed32af5228902` |
-| WORKTREE STATUS | Sucio (12 modificados + 1 untracked dir `src/components/basic-editor-shell/`) |
+| Field            | Value                                                                         |
+| ---------------- | ----------------------------------------------------------------------------- |
+| AUDITED WORKTREE | `C:/Users/Lenovo/Desktop/proyectos desplegados importante/generador de QR`    |
+| AUDITED BRANCH   | `feat/mobile-gallery-template-integration`                                    |
+| AUDITED HEAD     | `f33f83be2ef95a9106258823543ed32af5228902`                                    |
+| WORKTREE STATUS  | Sucio (12 modificados + 1 untracked dir `src/components/basic-editor-shell/`) |
 
 Nota: este worktree contiene la integración más reciente (commit `313c784` trae el Template Lab;
 `f33f83b` "se cambia a editor sencillo de momento"). Los otros worktrees (restore-basic =
@@ -50,6 +50,7 @@ Nota: este worktree contiene la integración más reciente (commit `313c784` tra
 - `src/components/editor/{ProfileSection,DesignSection,LinksSection,ShareSection}.tsx` — secciones legadas.
 
 Single source of truth:
+
 - Profile: estado `profile` en `editor.tsx`. Links: estado `links`. Template: `profile.template_id`.
 - Customization: campos del profile (`button_radius/button_style/button_border_thickness/button_border_color/theme_spacing/font_family/background_color/button_color/button_text_color`).
 - Config: `buildConfig(template, content, { buttonCustomization: profile })`.
@@ -106,41 +107,41 @@ Canvas visible (grid 1.55fr/0.85fr), panel derecho scroll independiente, preview
 
 Leyenda: PASS / PARTIAL / FAIL / NOT_SUPPORTED_BY_TEMPLATE / UI_NOT_CONNECTED / HARDCODED / NOT_IMPLEMENTED
 
-| EDITOR CONTROL | Beauty Curve | Luxury Fusion | Beauty Catalog | Executive Straight |
-|---|---|---|---|---|
-| Avatar | PASS | PASS | PASS | PASS |
-| Hero/banner | PASS | PASS | PASS | PASS |
-| Nombre | PASS | PASS | PASS | PASS |
-| Bio | PASS | PASS | PASS | PASS |
-| Subtítulo | NOT_IMPLEMENTED | NOT_IMPLEMENTED | NOT_IMPLEMENTED | NOT_IMPLEMENTED |
-| Fuente (10) | UI_NOT_CONNECTED | UI_NOT_CONNECTED | UI_NOT_CONNECTED | UI_NOT_CONNECTED |
-| Background color | UI_NOT_CONNECTED | UI_NOT_CONNECTED | UI_NOT_CONNECTED | UI_NOT_CONNECTED |
-| Background gradient | UI_NOT_CONNECTED | UI_NOT_CONNECTED | UI_NOT_CONNECTED | UI_NOT_CONNECTED |
-| Button color | UI_NOT_CONNECTED | UI_NOT_CONNECTED | UI_NOT_CONNECTED | UI_NOT_CONNECTED |
-| Button gradient | UI_NOT_CONNECTED | UI_NOT_CONNECTED | UI_NOT_CONNECTED | UI_NOT_CONNECTED |
-| Button text color | UI_NOT_CONNECTED | UI_NOT_CONNECTED | UI_NOT_CONNECTED | UI_NOT_CONNECTED |
-| Cuadrado | PASS | PASS | PASS | PASS |
-| Redondeado | PASS | PASS | PASS | PASS |
-| Píldora | PASS | PASS | PASS | PASS |
-| Premium | PASS | PASS | PASS | PASS |
-| Border width | PASS | PASS | PASS | PASS |
-| Border color | PASS | PASS | PASS | PASS |
-| Button spacing | PASS | PASS | PASS | PASS |
-| Button→Card mode | NOT_IMPLEMENTED | NOT_IMPLEMENTED | NOT_IMPLEMENTED | NOT_IMPLEMENTED |
-| 75/25 reference image | NOT_IMPLEMENTED | NOT_IMPLEMENTED | NOT_IMPLEMENTED | NOT_IMPLEMENTED |
-| Links | PASS | PASS | FAIL (no se renderizan) | PASS |
-| Cards (Catalog) | NOT_SUPPORTED | NOT_SUPPORTED | UI_NOT_CONNECTED | NOT_SUPPORTED |
-| Contacto (Executive) | NOT_SUPPORTED | NOT_SUPPORTED | NOT_SUPPORTED | UI_NOT_CONNECTED |
-| Socials | PARTIAL | PARTIAL | PARTIAL | NOT_SUPPORTED |
-| Footer | NOT_IMPLEMENTED | NOT_IMPLEMENTED | NOT_IMPLEMENTED | NOT_IMPLEMENTED |
-| Difuminación hero | UI_NOT_CONNECTED | UI_NOT_CONNECTED | UI_NOT_CONNECTED | UI_NOT_CONNECTED |
-
+| EDITOR CONTROL        | Beauty Curve     | Luxury Fusion    | Beauty Catalog          | Executive Straight |
+| --------------------- | ---------------- | ---------------- | ----------------------- | ------------------ |
+| Avatar                | PASS             | PASS             | PASS                    | PASS               |
+| Hero/banner           | PASS             | PASS             | PASS                    | PASS               |
+| Nombre                | PASS             | PASS             | PASS                    | PASS               |
+| Bio                   | PASS             | PASS             | PASS                    | PASS               |
+| Subtítulo             | NOT_IMPLEMENTED  | NOT_IMPLEMENTED  | NOT_IMPLEMENTED         | NOT_IMPLEMENTED    |
+| Fuente (10)           | UI_NOT_CONNECTED | UI_NOT_CONNECTED | UI_NOT_CONNECTED        | UI_NOT_CONNECTED   |
+| Background color      | UI_NOT_CONNECTED | UI_NOT_CONNECTED | UI_NOT_CONNECTED        | UI_NOT_CONNECTED   |
+| Background gradient   | UI_NOT_CONNECTED | UI_NOT_CONNECTED | UI_NOT_CONNECTED        | UI_NOT_CONNECTED   |
+| Button color          | UI_NOT_CONNECTED | UI_NOT_CONNECTED | UI_NOT_CONNECTED        | UI_NOT_CONNECTED   |
+| Button gradient       | UI_NOT_CONNECTED | UI_NOT_CONNECTED | UI_NOT_CONNECTED        | UI_NOT_CONNECTED   |
+| Button text color     | UI_NOT_CONNECTED | UI_NOT_CONNECTED | UI_NOT_CONNECTED        | UI_NOT_CONNECTED   |
+| Cuadrado              | PASS             | PASS             | PASS                    | PASS               |
+| Redondeado            | PASS             | PASS             | PASS                    | PASS               |
+| Píldora               | PASS             | PASS             | PASS                    | PASS               |
+| Premium               | PASS             | PASS             | PASS                    | PASS               |
+| Border width          | PASS             | PASS             | PASS                    | PASS               |
+| Border color          | PASS             | PASS             | PASS                    | PASS               |
+| Button spacing        | PASS             | PASS             | PASS                    | PASS               |
+| Button→Card mode      | NOT_IMPLEMENTED  | NOT_IMPLEMENTED  | NOT_IMPLEMENTED         | NOT_IMPLEMENTED    |
+| 75/25 reference image | NOT_IMPLEMENTED  | NOT_IMPLEMENTED  | NOT_IMPLEMENTED         | NOT_IMPLEMENTED    |
+| Links                 | PASS             | PASS             | FAIL (no se renderizan) | PASS               |
+| Cards (Catalog)       | NOT_SUPPORTED    | NOT_SUPPORTED    | UI_NOT_CONNECTED        | NOT_SUPPORTED      |
+| Contacto (Executive)  | NOT_SUPPORTED    | NOT_SUPPORTED    | NOT_SUPPORTED           | UI_NOT_CONNECTED   |
+| Socials               | PARTIAL          | PARTIAL          | PARTIAL                 | NOT_SUPPORTED      |
+| Footer                | NOT_IMPLEMENTED  | NOT_IMPLEMENTED  | NOT_IMPLEMENTED         | NOT_IMPLEMENTED    |
+| Difuminación hero     | UI_NOT_CONNECTED | UI_NOT_CONNECTED | UI_NOT_CONNECTED        | UI_NOT_CONNECTED   |
 
 ---
 
 ## 9. BEAUTY CURVE FULL AUDIT
 
 Family `hero_profile`, heroStyle `curved`. Renderer `HeroProfileRenderer.tsx`.
+
 - Avatar ✅, Nombre ✅, Bio ✅, Hero (curva) ✅, Links ✅.
 - Subtítulo ❌ (hardcode `""`), Socials ⚠️ (editor `[]`, público derivado).
 - Fuente/colores/degradados ❌ (paleta/font hardcode). Difuminación ❌ (mask hardcode en `Hero.tsx`).
@@ -149,12 +150,14 @@ Family `hero_profile`, heroStyle `curved`. Renderer `HeroProfileRenderer.tsx`.
 ## 10. LUXURY FUSION FULL AUDIT
 
 Family `hero_profile`, heroStyle `fusion`. Renderer `HeroProfileRenderer.tsx`.
+
 - Avatar ✅ opaco separado (`Identity.tsx` opacity:1), Hero fusion ✅ (mask hardcode).
 - Subtítulo ❌, Socials ⚠️, Fuente/colores/degradados ❌, Difuminación ❌, Footer ❌.
 
 ## 11. BEAUTY CATALOG FULL AUDIT
 
 Family `hero_cards`. Renderer `HeroCardsRenderer.tsx`.
+
 - Avatar ✅, Nombre ✅, Bio ✅, Hero ✅.
 - **CRÍTICO:** renderiza CARDS, no links. `content.cards = []` (hardcode). Resultado: los links del
   usuario NO aparecen y NO hay cards. Perfil queda casi vacío.
@@ -164,6 +167,7 @@ Family `hero_cards`. Renderer `HeroCardsRenderer.tsx`.
 ## 12. EXECUTIVE STRAIGHT FULL AUDIT
 
 Family `professional_corporate`. Renderer `CorporateRenderer.tsx`.
+
 - Avatar ✅, Nombre ✅, Bio ✅, Hero ✅, Links ✅.
 - Contacto ❌ (`content.contact = {phone:"",email:"",whatsapp:""}` hardcode → `ContactBlock` retorna null).
 - Subtítulo ❌, Fuente/colores ❌, Footer ❌, Socials NOT_SUPPORTED.
@@ -258,7 +262,6 @@ Family `professional_corporate`. Renderer `CorporateRenderer.tsx`.
   derivados de links por platform. Editor preview ≠ página pública en socials.
 - QR: la ruta pública usa el mismo `PublicProfileView`, por lo que QR == página pública.
 
-
 ---
 
 ## 25. FALSE-PROMISE CONTROLS
@@ -294,30 +297,25 @@ Controles visibles que el usuario cambia pero NO alteran la template:
 ## 28. BUGS AND RISKS BY SEVERITY
 
 **CRITICAL**
+
 1. Font/colores/gradientes = FALSE PROMISE (UI muestra, renderer ignora).
 2. Beauty Catalog pierde links (renderiza cards, cards=[]).
 3. Contenido específico (subtítulo/cards/contacto/socials) no cableado.
 
-**HIGH**
-4. Paridad editor vs público en socials (adaptador distinto: `editor.tsx:73` vs `PublicProfileView.tsx:43`).
-5. Footer no renderizado en templates.
-6. Difuminación no conectada (mask hardcode).
+**HIGH** 4. Paridad editor vs público en socials (adaptador distinto: `editor.tsx:73` vs `PublicProfileView.tsx:43`). 5. Footer no renderizado en templates. 6. Difuminación no conectada (mask hardcode).
 
-**MEDIUM**
-7. `template_config` campo muerto.
-8. Sin control de subtítulo/cargo.
+**MEDIUM** 7. `template_config` campo muerto. 8. Sin control de subtítulo/cargo.
 
-**LOW**
-9. Worktree sucio sin commit.
+**LOW** 9. Worktree sucio sin commit.
 
 ## 29. PER-TEMPLATE SCORE /100
 
-| Template | Score | Clasificación |
-|---|---|---|
-| Beauty Curve | 60 | incomplete |
-| Luxury Fusion | 60 | incomplete |
-| Beauty Catalog | 45 | not_ready |
-| Executive Straight | 55 | incomplete |
+| Template           | Score | Clasificación |
+| ------------------ | ----- | ------------- |
+| Beauty Curve       | 60    | incomplete    |
+| Luxury Fusion      | 60    | incomplete    |
+| Beauty Catalog     | 45    | not_ready     |
+| Executive Straight | 55    | incomplete    |
 
 ## 30. EDITOR OVERALL SCORE /100
 
@@ -350,7 +348,6 @@ template_config real; más templates; keyboard avanzado.
 3. (HIGH) unificar socials, footer en renderers, difuminación en Hero.
 4. (MED) button→card + 75/25 (o retirar de la UI).
 5. (LOW) commit del worktree.
-
 
 ---
 
@@ -400,4 +397,3 @@ template_config real; más templates; keyboard avanzado.
 - FROZEN CODE VIOLATIONS: NONE
 
 Final status: **AUDIT COMPLETE — FIXES REQUIRED**
-

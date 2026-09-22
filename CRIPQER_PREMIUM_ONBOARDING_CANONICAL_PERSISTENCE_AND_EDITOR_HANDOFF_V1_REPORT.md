@@ -64,13 +64,13 @@ coordinador y se verifica server-side antes de crear la página.
 
 ## State machine
 
-| Estado | Significado |
-| --- | --- |
-| `onboarding` | Edición local del draft y del intake. |
-| `generating` | Smart Pages 5 + Engine V2 están generando el documento. |
-| `persisting` | El documento validado se está guardando y verificando. |
-| `ready` | Existe una página persistida y verificada; el renderer muestra ese snapshot. |
-| `failure` | Generación, auth, ownership, persistencia o handoff falló. |
+| Estado       | Significado                                                                  |
+| ------------ | ---------------------------------------------------------------------------- |
+| `onboarding` | Edición local del draft y del intake.                                        |
+| `generating` | Smart Pages 5 + Engine V2 están generando el documento.                      |
+| `persisting` | El documento validado se está guardando y verificando.                       |
+| `ready`      | Existe una página persistida y verificada; el renderer muestra ese snapshot. |
+| `failure`    | Generación, auth, ownership, persistencia o handoff falló.                   |
 
 El botón final queda protegido por un `ref` de envío en curso. Un doble clic no
 crea una segunda generación ni una segunda petición de persistencia. Un fallo

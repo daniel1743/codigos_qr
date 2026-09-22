@@ -1,4 +1,10 @@
-import { ACTIONS, BUSINESS_TYPES, GOALS, OTHER_BUSINESS_ID, PERSONALITIES } from "@/lib/onboarding/config";
+import {
+  ACTIONS,
+  BUSINESS_TYPES,
+  GOALS,
+  OTHER_BUSINESS_ID,
+  PERSONALITIES,
+} from "@/lib/onboarding/config";
 import type { OnboardingDraft } from "@/lib/onboarding/types";
 import { cn } from "@/lib/utils";
 import { StepHeading, focusRing } from "./primitives";

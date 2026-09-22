@@ -30,6 +30,7 @@ import { hexToRgba, safeUrl } from "../../utils";
 import type { BlockItem, TemplateBlock } from "../../types";
 import { ContextualItemTarget, InlineText } from "./primitives";
 import { ContextualEditingToolbar } from "../ContextualEditingToolbar";
+import { PremiumProductCardMagicV1 } from "./PremiumProductCardMagicV1";
 
 // Dynamic Icon resolver
 function SmartIcon({
@@ -138,13 +139,32 @@ export function ProductCardBlock({
     inline(field === "description" ? "descriptionTypography" : "typography");
   const activeTypography =
     selectedTextField === "description" ? c.descriptionTypography : c.typography;
+  const isCatalogPremium = variant === "catalog-premium-card-v1";
+  const selectField = (field: string) => {
+    setSelectedTextField(field);
+    setImageSelected(false);
+    if (collectionBlockId && collectionItemId) {
+      onSelectCollectionItem?.(collectionBlockId, "product-grid", collectionItemId, field);
+    }
+  };
 
   const isMinimal = variant === "minimal";
   const isImageFirst = variant === "image-first";
   const isFeatured = variant === "featured";
 
-  const wrapperStyle =
-    variant === "card" || isImageFirst || isFeatured
+  const wrapperStyle = isCatalogPremium
+    ? {
+        ...cardStyle(theme, {
+          ...block.style,
+          background: block.style.background ?? "#ffffff",
+          radius: block.style.radius ?? 22,
+          borderWidth: block.style.borderWidth ?? 1,
+          shadow: block.style.shadow ?? "sm",
+        }),
+        padding: 16,
+        overflow: "visible",
+      }
+    : variant === "card" || isImageFirst || isFeatured
       ? { ...cardStyle(theme, block.style), padding: 0, overflow: "hidden" }
       : { padding: 12 };
 
@@ -160,10 +180,33 @@ export function ProductCardBlock({
         outline: isSelected ? "2px solid #2563eb" : undefined,
         outlineOffset: isSelected ? 2 : undefined,
       }}
+      data-premium-card={isCatalogPremium ? "true" : undefined}
+      data-card-selected={isSelected ? "true" : undefined}
       onClick={() => {
         if (mode === "public") onOpenDetail?.();
       }}
     >
+      {isCatalogPremium && isSelected && (
+        <span
+          data-selection-label="card"
+          style={{
+            position: "absolute",
+            top: -13,
+            left: 0,
+            zIndex: 30,
+            transform: "translateY(-100%)",
+            borderRadius: 6,
+            background: "#2f6fed",
+            color: "#fff",
+            padding: "3px 8px",
+            fontSize: 10.5,
+            fontWeight: 600,
+            letterSpacing: ".02em",
+          }}
+        >
+          Tarjeta
+        </span>
+      )}
       {mode === "edit" && isSelected && inlinePathPrefix && selectedTextField && onInlineEdit && (
         <ContextualEditingToolbar
           aria-label="Text styling"
@@ -360,11 +403,7 @@ export function ProductCardBlock({
             c.typography,
           )}
         >
-          <InlineText
-            path={inline("badge")}
-            value={c.badge}
-            onFocus={() => setSelectedTextField("badge")}
-          />
+          <InlineText path={inline("badge")} value={c.badge} onFocus={() => selectField("badge")} />
         </span>
       )}
 
@@ -374,16 +413,43 @@ export function ProductCardBlock({
           onClick={(event) => {
             if (mode !== "edit" || !collectionBlockId || !collectionItemId) return;
             event.stopPropagation();
+            setSelectedTextField(null);
             setImageSelected(true);
             onSelectCollectionItem?.(collectionBlockId, "product-grid", collectionItemId, "image");
           }}
-          style={{ width: "100%", height: isFeatured ? 220 : 160, overflow: "hidden" }}
+          style={{
+            width: "100%",
+            height: isCatalogPremium ? "auto" : isFeatured ? 220 : 160,
+            aspectRatio: isCatalogPremium ? "4 / 3" : undefined,
+            borderRadius: isCatalogPremium ? 14 : undefined,
+            position: "relative",
+            overflow: "hidden",
+            background: isCatalogPremium ? "#efebe5" : undefined,
+          }}
         >
           <img
             src={c.imageUrl}
             alt={c.title ?? "Product Image"}
             style={{ width: "100%", height: "100%", objectFit: "cover" }}
           />
+          {isCatalogPremium && c.imageProvenance?.origin === "reference_stock" && (
+            <span
+              style={{
+                position: "absolute",
+                left: 12,
+                bottom: 12,
+                borderRadius: 999,
+                background: "rgba(23,20,15,.62)",
+                color: "rgba(255,255,255,.95)",
+                padding: "3px 8px",
+                fontSize: 10.5,
+                fontWeight: 500,
+                backdropFilter: "blur(2px)",
+              }}
+            >
+              Imagen de referencia
+            </span>
+          )}
         </div>
       )}
 
@@ -394,6 +460,7 @@ export function ProductCardBlock({
           flexDirection: "column",
           flex: 1,
           gap: 8,
+          ...(isCatalogPremium ? { padding: 0, marginTop: 20, gap: 12 } : {}),
         }}
       >
         <h3
@@ -406,7 +473,7 @@ export function ProductCardBlock({
             path={inline("title")}
             value={c.title ?? ""}
             placeholder="Product Title"
-            onFocus={() => setSelectedTextField("title")}
+            onFocus={() => selectField("title")}
           />
         </h3>
 
@@ -421,7 +488,7 @@ export function ProductCardBlock({
               as="p"
               path={inline("description")}
               value={c.description ?? ""}
-              onFocus={() => setSelectedTextField("description")}
+              onFocus={() => selectField("description")}
             />
           </div>
         )}
@@ -437,7 +504,7 @@ export function ProductCardBlock({
               path={inline("price")}
               value={c.price ?? ""}
               placeholder="$0.00"
-              onFocus={() => setSelectedTextField("price")}
+              onFocus={() => selectField("price")}
             />
           </span>
           {c.comparePrice && (
@@ -459,14 +526,15 @@ export function ProductCardBlock({
             type="button"
             onClick={(event) => {
               event.stopPropagation();
+              if (mode === "edit") selectField("cta");
               handleCTA();
             }}
             style={applyCTAStyle(
               applyTypographyOverride(
                 {
                   width: "100%",
-                  padding: "8px 14px",
-                  borderRadius: theme.buttons.radius,
+                  padding: isCatalogPremium ? "10px 20px" : "8px 14px",
+                  borderRadius: isCatalogPremium ? 999 : theme.buttons.radius,
                   backgroundColor: theme.colors.primary,
                   color: "#ffffff",
                   fontWeight: 600,
@@ -487,7 +555,7 @@ export function ProductCardBlock({
             <InlineText
               path={inline("ctaLabel")}
               value={c.ctaLabel ?? ""}
-              onFocus={() => setSelectedTextField("ctaLabel")}
+              onFocus={() => selectField("ctaLabel")}
             />
           </button>
         )}
@@ -513,22 +581,30 @@ export function ProductGridBlock({ block }: { block: TemplateBlock }) {
   const gridColumns =
     breakpoint === "mobile" ? 1 : breakpoint === "tablet" ? Math.min(3, columns) : columns;
   const [detailProduct, setDetailProduct] = useState<BlockItem | null>(null);
+  const isCatalogPremium = block.variant === "catalog-premium-card-v1";
+  // Phase 1 intentionally proves one faithful Magic card at the same desktop
+  // grid-cell width it will occupy when the full catalog grid is introduced.
+  const productsForPhase = isCatalogPremium ? products.slice(0, 1) : products;
 
   return (
     <div
       style={{
         display: "grid",
         gridTemplateColumns: `repeat(${Math.max(1, gridColumns)}, minmax(0, 1fr))`,
-        gap: 16,
+        gap: isCatalogPremium ? 20 : 16,
         width: "100%",
       }}
     >
-      {products.map((prod: BlockItem, idx: number) => {
+      {productsForPhase.map((prod: BlockItem, idx: number) => {
         // Build a mock child block definition to render child cards
         const prodBlock: TemplateBlock = {
           id: prod.id ?? `prod-${idx}`,
           type: "product",
-          variant: block.variant === "minimal" ? "minimal" : "card",
+          variant: isCatalogPremium
+            ? "catalog-premium-card-v1"
+            : block.variant === "minimal"
+              ? "minimal"
+              : "card",
           content: (() => {
             const { location: ignoredLocation, ...productContent } = prod;
             void ignoredLocation;
@@ -540,21 +616,41 @@ export function ProductGridBlock({ block }: { block: TemplateBlock }) {
           interaction: block.interaction,
         };
         return (
-          <div key={prodBlock.id} style={{ position: "relative", minWidth: 0 }}>
-            <ContextualItemTarget
-              blockId={block.id}
-              collection="product-grid"
-              itemId={prod.id ?? `prod-${idx}`}
-            >
-              <ProductCardBlock
-                block={prodBlock}
+          <div
+            key={prodBlock.id}
+            style={{
+              position: "relative",
+              minWidth: 0,
+              paddingTop: isCatalogPremium ? 4 : 0,
+            }}
+          >
+            {isCatalogPremium ? (
+              <PremiumProductCardMagicV1
+                product={prod}
+                blockId={block.id}
+                itemId={prod.id ?? `prod-${idx}`}
                 inlinePathPrefix={`blocks.${block.id}.content.products.${idx}`}
-                collectionBlockId={block.id}
-                collectionItemId={prodBlock.id}
-                isSelected={selectedCollectionItem?.itemId === prodBlock.id}
-                onOpenDetail={() => setDetailProduct(prod)}
+                blockStyle={block.style}
               />
-            </ContextualItemTarget>
+            ) : (
+              <ContextualItemTarget
+                blockId={block.id}
+                collection="product-grid"
+                itemId={prod.id ?? `prod-${idx}`}
+              >
+                <ProductCardBlock
+                  block={prodBlock}
+                  inlinePathPrefix={`blocks.${block.id}.content.products.${idx}`}
+                  collectionBlockId={block.id}
+                  collectionItemId={prodBlock.id}
+                  isSelected={
+                    selectedCollectionItem?.blockId === block.id &&
+                    selectedCollectionItem?.itemId === prodBlock.id
+                  }
+                  onOpenDetail={() => setDetailProduct(prod)}
+                />
+              </ContextualItemTarget>
+            )}
             {mode === "edit" &&
               selectedCollectionItem?.blockId === block.id &&
               selectedCollectionItem.itemId === prodBlock.id &&
@@ -674,7 +770,14 @@ export function ProductGridBlock({ block }: { block: TemplateBlock }) {
         <button
           type="button"
           onClick={() => onAddCollectionItem(block.id, "product-grid")}
-          style={{ minHeight: 48, border: "1px dashed currentColor", borderRadius: 12 }}
+          style={{
+            minHeight: isCatalogPremium ? 180 : 48,
+            border: "1px dashed currentColor",
+            borderRadius: isCatalogPremium ? 18 : 12,
+            background: "transparent",
+            color: "inherit",
+            fontWeight: 600,
+          }}
         >
           + Añadir producto
         </button>
@@ -723,7 +826,7 @@ export function ProductGridBlock({ block }: { block: TemplateBlock }) {
               />
             )}
             <h2 style={{ marginTop: 16 }}>{detailProduct.title}</h2>
-            {detailProduct.badge && <p>{String(detailProduct.badge)}</p>}
+            {detailProduct.badge && <div>{String(detailProduct.badge)}</div>}
             <p>{detailProduct.description}</p>
             <strong>{detailProduct.price}</strong>
             {detailProduct.ctaLabel && detailProduct.ctaUrl && (

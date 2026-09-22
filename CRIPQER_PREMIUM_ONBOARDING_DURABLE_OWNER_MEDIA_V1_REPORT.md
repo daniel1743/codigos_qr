@@ -189,6 +189,7 @@ The implementation was already present and green. This session added the
 remaining compile-level and evidence gaps:
 
 ### Type-correctness fixes
+
 `PremiumOnboardingFlow.tsx` had six `tsc --noEmit` errors that `npm run build`
 (vite/esbuild) does not surface. All were fixed without behavior change:
 
@@ -204,6 +205,7 @@ remaining compile-level and evidence gaps:
 `components/**` / `routes/**` code.
 
 ### End-to-end evidence (media → canonical config)
+
 New regression test `owner-media-to-config.test.ts` proves, through the real
 `generateSmartPageFromOnboarding` path, that:
 
@@ -213,6 +215,7 @@ New regression test `owner-media-to-config.test.ts` proves, through the real
 - `validateTemplate` PASS in both cases.
 
 ### Regression run
+
 - `src/lib/onboarding-v2` + `src/lib/page-generator` +
   `src/components/onboarding-v2`: **157 passed, 1 skipped, 0 failed**.
 - New `owner-media-to-config.test.ts`: **2/2 passed**.

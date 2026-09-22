@@ -76,7 +76,10 @@ function contentDensityOf(
   recipe: PageRecipeV1,
   content: ContentSourceV2,
 ): RecipeSemanticsV2["density"] {
-  const actionCount = (content.links?.length ?? 0) + (content.socials?.length ?? 0) + (content.quickActions?.length ?? 0);
+  const actionCount =
+    (content.links?.length ?? 0) +
+    (content.socials?.length ?? 0) +
+    (content.quickActions?.length ?? 0);
   const richSections = [
     content.featured,
     content.image,
@@ -235,7 +238,8 @@ export function buildPowerEditorRecipeV2(input: BuildRecipeV2Input): PowerEditor
       reason: "renderer_always_composes_profile_header",
     });
   if (!content.stats) skipped.push({ capability: "block_stats", reason: "no_stats_content" });
-  if (!content.services) skipped.push({ capability: "block_services", reason: "no_services_content" });
+  if (!content.services)
+    skipped.push({ capability: "block_services", reason: "no_services_content" });
   if (!content.testimonials)
     skipped.push({ capability: "block_testimonials", reason: "no_testimonials_content" });
   if (!content.pricing) skipped.push({ capability: "block_pricing", reason: "no_pricing_content" });
@@ -284,7 +288,11 @@ export function buildPowerEditorRecipeV2(input: BuildRecipeV2Input): PowerEditor
         label: recipe.conversion.primary_cta.label,
         destination: recipe.conversion.primary_cta.destination,
         emphasis:
-          semantics.cta_pressure >= 62 ? "strong" : semantics.cta_pressure >= 38 ? "medium" : "soft",
+          semantics.cta_pressure >= 62
+            ? "strong"
+            : semantics.cta_pressure >= 38
+              ? "medium"
+              : "soft",
       },
       secondary_cta: null,
       media_position:

@@ -254,8 +254,10 @@ export function calculatePinchCamera(
   // centroid-movement (two-finger pan) contribution.
   const scroll = clampScrollPosition(
     {
-      scrollLeft: (startScroll.scrollLeft + gesture.startCentroid.x) * scaleRatio - gesture.currentCentroid.x,
-      scrollTop: (startScroll.scrollTop + gesture.startCentroid.y) * scaleRatio - gesture.currentCentroid.y,
+      scrollLeft:
+        (startScroll.scrollLeft + gesture.startCentroid.x) * scaleRatio - gesture.currentCentroid.x,
+      scrollTop:
+        (startScroll.scrollTop + gesture.startCentroid.y) * scaleRatio - gesture.currentCentroid.y,
     },
     dimensions,
     nextStage,

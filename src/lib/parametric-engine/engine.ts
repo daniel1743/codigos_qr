@@ -152,7 +152,6 @@ function run(intent: OnboardingIntentV1, rawOptions: EngineOptions = {}): Intern
       : // Baseline stays pattern-free when no context and no usable hint.
         null;
 
-
   const overrides = pattern
     ? mergeOverrides(patternOverrides(pattern, normalized), options.overrides)
     : options.overrides;
@@ -203,7 +202,11 @@ function run(intent: OnboardingIntentV1, rawOptions: EngineOptions = {}): Intern
 
   const validation = validatePageRecipe(recipe);
   if (!validation.valid) {
-    throw new EngineError("INVALID_RECIPE", "Generated recipe failed validation.", validation.issues);
+    throw new EngineError(
+      "INVALID_RECIPE",
+      "Generated recipe failed validation.",
+      validation.issues,
+    );
   }
 
   const trace: GenerationTrace = {
@@ -234,7 +237,10 @@ export function tryGeneratePageRecipe(
     return { ok: true, value: run(intent, options).recipe };
   } catch (error) {
     if (error instanceof EngineError) {
-      return { ok: false, error: { code: error.code, message: error.message, issues: error.issues } };
+      return {
+        ok: false,
+        error: { code: error.code, message: error.message, issues: error.issues },
+      };
     }
     return {
       ok: false,
@@ -256,7 +262,10 @@ export function generateWithTrace(
     return { ok: true, value: run(intent, options) };
   } catch (error) {
     if (error instanceof EngineError) {
-      return { ok: false, error: { code: error.code, message: error.message, issues: error.issues } };
+      return {
+        ok: false,
+        error: { code: error.code, message: error.message, issues: error.issues },
+      };
     }
     throw error;
   }

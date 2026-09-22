@@ -6,13 +6,7 @@ import type { StandaloneStyle } from "./standaloneStyle";
 /* Template03 — Studio beauty nude/gold con hero lateral y tarjetas de menú */
 
 export type Template03IconType =
-  | "calendar"
-  | "document"
-  | "gallery"
-  | "location"
-  | "whatsapp"
-  | "instagram"
-  | "website";
+  "calendar" | "document" | "gallery" | "location" | "whatsapp" | "instagram" | "website";
 
 export interface Template03Card {
   id: string;
@@ -144,7 +138,8 @@ export default function Template03({
         ...standaloneStyle?.vars,
         minHeight: "100%",
         width: "100%",
-        background: standaloneStyle?.background ?? `linear-gradient(180deg, ${secondaryColor}, #efe4dc)`,
+        background:
+          standaloneStyle?.background ?? `linear-gradient(180deg, ${secondaryColor}, #efe4dc)`,
         fontFamily: standaloneStyle?.globalFont ?? "'Segoe UI', Arial, Helvetica, sans-serif",
         display: "flex",
         justifyContent: "center",
@@ -293,7 +288,13 @@ export default function Template03({
         </div>
 
         {/* Tarjetas de menú */}
-        <div style={{ padding: "16px 14px 6px", display: "grid", gap: standaloneStyle?.button.spacing ?? 14 }}>
+        <div
+          style={{
+            padding: "16px 14px 6px",
+            display: "grid",
+            gap: standaloneStyle?.button.spacing ?? 14,
+          }}
+        >
           {cards.map((c) => (
             <EditableTarget
               key={c.id}
@@ -306,76 +307,70 @@ export default function Template03({
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 14,
-                padding: "16px 14px",
-                borderRadius: standaloneStyle?.button.radius ?? 18,
-                background: standaloneStyle?.button.background ?? "#fffaf6",
-                border: buttonBorder,
-                boxShadow: "0 6px 16px rgba(150,120,95,.18)",
-                textDecoration: "none",
-                color: standaloneStyle?.button.textColor ?? "inherit",
-                boxSizing: "border-box",
-                }}
-              >
-              <span
-                style={{
-                  flex: "0 0 auto",
-                  width: 52,
-                  height: 52,
-                  borderRadius: "50%",
-                  background: "#fff",
-                  boxShadow: "inset 0 0 0 1px rgba(156,123,63,.25)",
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: "center",
+                  gap: 14,
+                  padding: "16px 14px",
+                  borderRadius: standaloneStyle?.button.radius ?? 18,
+                  background: standaloneStyle?.button.background ?? "#fffaf6",
+                  border: buttonBorder,
+                  boxShadow: "0 6px 16px rgba(150,120,95,.18)",
+                  textDecoration: "none",
+                  color: standaloneStyle?.button.textColor ?? "inherit",
+                  boxSizing: "border-box",
                 }}
               >
-                <Icon type={c.icon} color={gold} size={24} />
-              </span>
-              <span style={{ flex: 1, minWidth: 0 }}>
                 <span
                   style={{
-                    display: "block",
-                    fontFamily: "Georgia, serif",
-                    fontSize: 17,
-                    letterSpacing: 0.5,
-                    color: standaloneStyle?.button.textColor ?? "#6d5636",
-                    textTransform: "uppercase",
+                    flex: "0 0 auto",
+                    width: 52,
+                    height: 52,
+                    borderRadius: "50%",
+                    background: "#fff",
+                    boxShadow: "inset 0 0 0 1px rgba(156,123,63,.25)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
                   }}
                 >
-                  {c.title}
+                  <Icon type={c.icon} color={gold} size={24} />
                 </span>
-                <span
-                  style={{
-                    display: "block",
-                    fontSize: 12.5,
-                    lineHeight: 1.4,
-                    color: standaloneStyle?.button.textColor ?? "#8a7768",
-                    marginTop: 3,
-                  }}
-                >
-                  {c.description}
+                <span style={{ flex: 1, minWidth: 0 }}>
+                  <span
+                    style={{
+                      display: "block",
+                      fontFamily: "Georgia, serif",
+                      fontSize: 17,
+                      letterSpacing: 0.5,
+                      color: standaloneStyle?.button.textColor ?? "#6d5636",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    {c.title}
+                  </span>
+                  <span
+                    style={{
+                      display: "block",
+                      fontSize: 12.5,
+                      lineHeight: 1.4,
+                      color: standaloneStyle?.button.textColor ?? "#8a7768",
+                      marginTop: 3,
+                    }}
+                  >
+                    {c.description}
+                  </span>
                 </span>
-              </span>
-              <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true">
-                <circle
-                  cx="12"
-                  cy="12"
-                  r="11"
-                  fill="none"
-                  stroke={`${gold}55`}
-                />
-                <path
-                  d="M10 7l5 5-5 5"
-                  fill="none"
-                  stroke={gold}
-                  strokeWidth="1.6"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+                <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true">
+                  <circle cx="12" cy="12" r="11" fill="none" stroke={`${gold}55`} />
+                  <path
+                    d="M10 7l5 5-5 5"
+                    fill="none"
+                    stroke={gold}
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
               </a>
             </EditableTarget>
           ))}
@@ -383,54 +378,51 @@ export default function Template03({
 
         {/* Footer conecte-se */}
         {footerText ? (
-        <EditableTarget
-          id={EDIT_TARGETS.footer}
-          registry={targetRegistry}
-          active={highlightedTarget === EDIT_TARGETS.footer}
-        >
-        <div style={{ padding: "22px 16px 28px", textAlign: "center" }}>
-          <p
-            style={{
-              margin: 0,
-              letterSpacing: 4,
-              fontSize: 13,
-              color: "#7d6647",
-              fontFamily: "Georgia, serif",
-            }}
+          <EditableTarget
+            id={EDIT_TARGETS.footer}
+            registry={targetRegistry}
+            active={highlightedTarget === EDIT_TARGETS.footer}
           >
-            CONECTE-SE
-          </p>
-          <div
-            style={{
-              margin: "10px auto",
-              height: 1,
-              width: 180,
-              background: `linear-gradient(90deg, transparent, ${gold}, transparent)`,
-            }}
-          />
-          <div style={{ display: "flex", justifyContent: "center", gap: 22 }}>
-            {socials.map((s) => (
-              <a
-                key={"f" + s.type + s.url}
-                href={s.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={s.label || s.type}
-                title={s.label || s.type}
-                style={{ textDecoration: "none" }}
+            <div style={{ padding: "22px 16px 28px", textAlign: "center" }}>
+              <p
+                style={{
+                  margin: 0,
+                  letterSpacing: 4,
+                  fontSize: 13,
+                  color: "#7d6647",
+                  fontFamily: "Georgia, serif",
+                }}
               >
-                <Icon type={s.type} color={gold} size={22} />
-              </a>
-            ))}
-          </div>
-          <p style={{ margin: "18px 0 0", fontSize: 11.5, color: "#8a7768" }}>
-            {footerText}
-          </p>
-        </div>
-        </EditableTarget>
+                CONECTE-SE
+              </p>
+              <div
+                style={{
+                  margin: "10px auto",
+                  height: 1,
+                  width: 180,
+                  background: `linear-gradient(90deg, transparent, ${gold}, transparent)`,
+                }}
+              />
+              <div style={{ display: "flex", justifyContent: "center", gap: 22 }}>
+                {socials.map((s) => (
+                  <a
+                    key={"f" + s.type + s.url}
+                    href={s.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={s.label || s.type}
+                    title={s.label || s.type}
+                    style={{ textDecoration: "none" }}
+                  >
+                    <Icon type={s.type} color={gold} size={22} />
+                  </a>
+                ))}
+              </div>
+              <p style={{ margin: "18px 0 0", fontSize: 11.5, color: "#8a7768" }}>{footerText}</p>
+            </div>
+          </EditableTarget>
         ) : null}
       </div>
     </div>
   );
 }
-

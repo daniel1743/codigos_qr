@@ -14,18 +14,18 @@ QR o configuración.
 
 `public.pages.id = 6b01e073-da2a-464c-9c1e-d16c9207fb6d`
 
-| Campo | Resultado | Esperado | Estado |
-|---|---:|---:|---|
-| `title` | `QA Catalog Final` | igual | PASS |
-| `page_type` | `catalog` | — | PASS |
-| `public_id` | `A8LjoRw` | `A8LjoRw` | PASS |
-| `slug` | `null` | — | INFO |
-| `published` | `true` | `true` | PASS |
-| `published_revision` | `4` | `1` | **MISMATCH** |
-| `published_at` | `2026-09-21T18:21:43.347-03:00` | no nulo | PASS |
-| `published_template_config` | presente | presente | PASS |
-| `template_config` | presente | presente | PASS |
-| `qr_config` | `null` | — | INFO |
+| Campo                       |                       Resultado |  Esperado | Estado       |
+| --------------------------- | ------------------------------: | --------: | ------------ |
+| `title`                     |              `QA Catalog Final` |     igual | PASS         |
+| `page_type`                 |                       `catalog` |         — | PASS         |
+| `public_id`                 |                       `A8LjoRw` | `A8LjoRw` | PASS         |
+| `slug`                      |                          `null` |         — | INFO         |
+| `published`                 |                          `true` |    `true` | PASS         |
+| `published_revision`        |                             `4` |       `1` | **MISMATCH** |
+| `published_at`              | `2026-09-21T18:21:43.347-03:00` |   no nulo | PASS         |
+| `published_template_config` |                        presente |  presente | PASS         |
+| `template_config`           |                        presente |  presente | PASS         |
+| `qr_config`                 |                          `null` |         — | INFO         |
 
 ## Ruta pública
 

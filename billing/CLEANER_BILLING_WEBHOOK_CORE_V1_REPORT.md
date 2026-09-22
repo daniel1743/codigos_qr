@@ -13,26 +13,26 @@ Task: CRIPQER BILLING — CANONICAL WEBHOOK NORMALIZATION CORE V1
 
 Portable input (inside `billing/CRIPQER_BILLING_PORTABLE_CORE_V1_1_1.zip` → `cripqer-billing-v1/`):
 
-| Entry | Purpose |
-|---|---|
-| `billing.types.ts` | Portable domain types (source-of-truth reference) |
-| `billing.webhooks.ts` | Approved provider normalization logic (adapted) |
+| Entry                 | Purpose                                           |
+| --------------------- | ------------------------------------------------- |
+| `billing.types.ts`    | Portable domain types (source-of-truth reference) |
+| `billing.webhooks.ts` | Approved provider normalization logic (adapted)   |
 
-(All ZIP entries were *listed* to identify the two allowed entries; only the two
+(All ZIP entries were _listed_ to identify the two allowed entries; only the two
 above were read. `README_INTEGRATION.md` was not needed.)
 
 Canonical host files:
 
-| File | Role |
-|---|---|
-| `src/lib/billing/billing.types.ts` | Canonical receiving types (authority) |
-| `src/server/billing/persistence.ts` | Canonical persistence + idempotency primitives |
-| `supabase/migrations/20260903000001_create_canonical_billing_persistence.sql` | Canonical SQL schema |
+| File                                                                          | Role                                           |
+| ----------------------------------------------------------------------------- | ---------------------------------------------- |
+| `src/lib/billing/billing.types.ts`                                            | Canonical receiving types (authority)          |
+| `src/server/billing/persistence.ts`                                           | Canonical persistence + idempotency primitives |
+| `supabase/migrations/20260903000001_create_canonical_billing_persistence.sql` | Canonical SQL schema                           |
 
 Audit reference:
 
-| File | Role |
-|---|---|
+| File                                                               | Role                    |
+| ------------------------------------------------------------------ | ----------------------- |
 | `billing/CLEANER_BILLING_PORTABLE_V1_1_1_RECONCILIATION_REPORT.md` | Approved audit baseline |
 
 Tooling reads (necessary for validation only, not dependency audit):
@@ -42,11 +42,11 @@ selfcheck. No dependency audit was performed.
 
 ### Files created (exact — nothing else)
 
-| File | Role |
-|---|---|
-| `src/server/billing/webhooks.ts` | Canonical webhook normalization core + idempotency bridge |
-| `src/server/billing/webhooks.selfcheck.ts` | Pure-local selfcheck (no network, no DB) |
-| `billing/CLEANER_BILLING_WEBHOOK_CORE_V1_REPORT.md` | This report |
+| File                                                | Role                                                      |
+| --------------------------------------------------- | --------------------------------------------------------- |
+| `src/server/billing/webhooks.ts`                    | Canonical webhook normalization core + idempotency bridge |
+| `src/server/billing/webhooks.selfcheck.ts`          | Pure-local selfcheck (no network, no DB)                  |
+| `billing/CLEANER_BILLING_WEBHOOK_CORE_V1_REPORT.md` | This report                                               |
 
 ### Confirmation
 
@@ -101,13 +101,13 @@ No provider network call is performed in this phase.
 
 ### Idempotency mapping (portable → canonical)
 
-| Portable | Canonical |
-|---|---|
-| `claim` | `claimBillingEvent` (atomic, provider-scoped RPC) |
-| `markProcessed` | `markBillingEventProcessed` |
-| `release` | `markBillingEventFailed` (with `error_code: "WEBHOOK_APPLY_FAILED"`) |
+| Portable        | Canonical                                                            |
+| --------------- | -------------------------------------------------------------------- |
+| `claim`         | `claimBillingEvent` (atomic, provider-scoped RPC)                    |
+| `markProcessed` | `markBillingEventProcessed`                                          |
+| `release`       | `markBillingEventFailed` (with `error_code: "WEBHOOK_APPLY_FAILED"`) |
 
-`createCanonicalIdempotencyBridge(deps)` is a thin adapter over the *actual*
+`createCanonicalIdempotencyBridge(deps)` is a thin adapter over the _actual_
 canonical persistence function signatures (`typeof import("./persistence.ts").*`).
 No second event store is introduced; no persistence write occurs in this phase.
 
@@ -115,14 +115,14 @@ No second event store is introduced; no persistence write occurs in this phase.
 
 ## C. SECURITY
 
-| Check | Result |
-|---|---|
-| Invoice ID used as subscription ID | **NO** |
-| Sale/payment ID used as subscription ID | **NO** |
-| Raw payload persisted | **NO** (raw is transient input only; not in normalized output; canonical `billing_events` has no raw column) |
-| "free" subscription row introduced | **NO** (Free = absence of a paid row; no "free" status emitted) |
-| Client-authoritative identity introduced | **NO** |
-| Provider secrets introduced | **NO** |
+| Check                                    | Result                                                                                                       |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Invoice ID used as subscription ID       | **NO**                                                                                                       |
+| Sale/payment ID used as subscription ID  | **NO**                                                                                                       |
+| Raw payload persisted                    | **NO** (raw is transient input only; not in normalized output; canonical `billing_events` has no raw column) |
+| "free" subscription row introduced       | **NO** (Free = absence of a paid row; no "free" status emitted)                                              |
+| Client-authoritative identity introduced | **NO**                                                                                                       |
+| Provider secrets introduced              | **NO**                                                                                                       |
 
 ---
 
@@ -143,6 +143,7 @@ out-of-scope errors in frozen files pulled in transitively
 **PASS — 35/35 checks.** Run via `node src/server/billing/webhooks.selfcheck.ts`.
 
 Assertions:
+
 1. Stripe subscription: normalizes / provider=stripe / correct subscription id / canonical paid status / billing interval.
 2. Stripe invoice: normalizes / uses subscription reference / invoice id NOT used as subscription id.
 3. Stripe invoice (no sub): normalizes / no subscription id / requires authoritative lookup.
@@ -171,5 +172,3 @@ confirms the two new source files (`webhooks.ts`, `webhooks.selfcheck.ts`) are
 the only additions from this task (the pre-existing dirty working tree —
 `.gitignore`, `src/routes/internal.power-editor.tsx`, `test-results/*`,
 `PROYECTO PARA INTEGRA A QR` submodule — was untouched by this task).
-
-

@@ -28,10 +28,10 @@ This is **exactly the same data-loss pattern** that Phase 6A fixed for Basic Edi
 const handleInviteAccept = async () => {
   const updatedConfig = {
     ...(profile.template_config || {}),
-    onboarding_v2_invite_status: "accepted"
+    onboarding_v2_invite_status: "accepted",
   };
-  await profileService.updateProfile(supabase, profile.id, { 
-    template_config: updatedConfig 
+  await profileService.updateProfile(supabase, profile.id, {
+    template_config: updatedConfig,
   });
 };
 ```
@@ -54,12 +54,14 @@ async updateProfile(supabase, profileId, updates) {
 ```
 
 **What `toWritableProfilePayload` does (lines 86-97):**
+
 - Iterates through `PROFILE_WRITABLE_COLUMNS`
 - If `template_config` is in `updates`, passes it through AS-IS
 - Does NOT deep-merge JSONB
 - Does NOT call any RPC
 
 **What Supabase `.update()` does:**
+
 - Sends: `UPDATE profiles SET template_config = $1 WHERE id = $2`
 - PostgreSQL replaces the **entire JSONB column** with the new value
 - Does NOT use `||` (JSONB merge operator)
@@ -72,6 +74,7 @@ async updateProfile(supabase, profileId, updates) {
 ### Test Case: Existing Profile with Power Editor State
 
 **Before invite write:**
+
 ```json
 {
   "schemaVersion": 1,
@@ -88,6 +91,7 @@ async updateProfile(supabase, profileId, updates) {
 ```
 
 **Client state loaded in editor.tsx (line 312-316):**
+
 ```typescript
 const currentProfile = await profileService.getProfileByUserId(supabase, userId);
 setProfile({
@@ -100,16 +104,18 @@ setProfile({
 **What happens if user clicks Accept:**
 
 1. Client spreads `profile.template_config`:
+
    ```javascript
    const updatedConfig = {
-     ...(profile.template_config || {}),  // Whatever was in memory
-     onboarding_v2_invite_status: "accepted"
-   }
+     ...(profile.template_config || {}), // Whatever was in memory
+     onboarding_v2_invite_status: "accepted",
+   };
    ```
 
 2. `updateProfile` sends full replacement:
+
    ```sql
-   UPDATE profiles 
+   UPDATE profiles
    SET template_config = '{"basic_link_presentations": {...}, "professional_badge": true, "onboarding_v2_invite_status": "accepted"}'
    WHERE id = $1
    ```
@@ -137,7 +143,7 @@ setProfile({
 ```typescript
 async updateBasicEditorProfile(supabase, profileId, updates) {
   const patch = createBasicEditorPatch(updates);
-  
+
   if (updates.template_config) {
     return this.patchBasicEditorTemplateConfig(supabase, profileId, patch.templateConfig);
   }
@@ -155,6 +161,7 @@ WHERE id = p_profile_id AND user_id = auth.uid()
 ```
 
 **Key difference:** Uses `||` (JSONB merge operator), which:
+
 - Preserves all existing keys
 - Only overwrites keys present in `p_patch`
 - Atomic server-side operation (no stale client state)
@@ -172,6 +179,7 @@ WHERE id = p_profile_id AND user_id = auth.uid()
 **Question:** Is `onboarding_v2_invite_status` Basic-owned metadata?
 
 **Analysis:**
+
 - Invite modal appears in Basic Editor (editor.tsx)
 - Invite status controls whether to show modal in Basic Editor
 - Invite accept navigates to onboarding (creates new page via Engine V2)
@@ -188,22 +196,24 @@ WHERE id = p_profile_id AND user_id = auth.uid()
 
 ### Static Analysis Evidence
 
-| Evidence | Status | Details |
-|----------|--------|---------|
-| `updateProfile` uses `.update()` | ✅ CONFIRMED | Line 232-236 |
-| `.update()` replaces full JSONB column | ✅ CONFIRMED | Standard Supabase/PostgreSQL behavior |
-| `toWritableProfilePayload` does NOT merge | ✅ CONFIRMED | Lines 86-97, passes value AS-IS |
-| Client spreads in-memory `template_config` | ✅ CONFIRMED | Lines 183-186, 201-204 |
-| No server-side merge operator used | ✅ CONFIRMED | No `\|\|` in updateProfile path |
-| `schemaVersion` preservation NOT guaranteed | ⛔ **FAIL** | Will be erased if not in client state |
-| `editorConfig` preservation NOT guaranteed | ⛔ **FAIL** | Will be erased if not in client state |
+| Evidence                                    | Status       | Details                               |
+| ------------------------------------------- | ------------ | ------------------------------------- |
+| `updateProfile` uses `.update()`            | ✅ CONFIRMED | Line 232-236                          |
+| `.update()` replaces full JSONB column      | ✅ CONFIRMED | Standard Supabase/PostgreSQL behavior |
+| `toWritableProfilePayload` does NOT merge   | ✅ CONFIRMED | Lines 86-97, passes value AS-IS       |
+| Client spreads in-memory `template_config`  | ✅ CONFIRMED | Lines 183-186, 201-204                |
+| No server-side merge operator used          | ✅ CONFIRMED | No `\|\|` in updateProfile path       |
+| `schemaVersion` preservation NOT guaranteed | ⛔ **FAIL**  | Will be erased if not in client state |
+| `editorConfig` preservation NOT guaranteed  | ⛔ **FAIL**  | Will be erased if not in client state |
 
 ### Comparison with Phase 6A Data Loss
 
 **Phase 6A Root Cause (Fixed):**
+
 > "editor.tsx was correctly calling updateBasicEditorProfile, but... it left the envelope vulnerable... leading to situations where the DB was updated with missing properties."
 
 **Current Invite Implementation:**
+
 - Does NOT call `updateBasicEditorProfile`
 - Does NOT route through `patchBasicEditorTemplateConfig`
 - Uses raw `updateProfile` with client-side spread
@@ -221,13 +231,13 @@ WHERE id = p_profile_id AND user_id = auth.uid()
 export const BASIC_EDITOR_TEMPLATE_CONFIG_KEYS = [
   "basic_link_presentations",
   "professional_badge",
-  "onboarding_v2_invite_status",  // ADD THIS
+  "onboarding_v2_invite_status", // ADD THIS
 ] as const;
 
 export interface BasicEditorTemplateConfigPatchV1 {
   basic_link_presentations?: Record<string, unknown>;
   professional_badge?: boolean;
-  onboarding_v2_invite_status?: "unseen" | "accepted" | "declined";  // ADD THIS
+  onboarding_v2_invite_status?: "unseen" | "accepted" | "declined"; // ADD THIS
 }
 ```
 
@@ -235,7 +245,7 @@ export interface BasicEditorTemplateConfigPatchV1 {
 
 ```sql
 WHERE key_name NOT IN (
-  'basic_link_presentations', 
+  'basic_link_presentations',
   'professional_badge',
   'onboarding_v2_invite_status'  -- ADD THIS
 )
@@ -248,13 +258,9 @@ const handleInviteAccept = async () => {
   setIsProcessingInvite(true);
   try {
     const patch: BasicEditorTemplateConfigPatchV1 = {
-      onboarding_v2_invite_status: "accepted"
+      onboarding_v2_invite_status: "accepted",
     };
-    await profileService.patchBasicEditorTemplateConfig(
-      supabase, 
-      profile.id as string, 
-      patch
-    );
+    await profileService.patchBasicEditorTemplateConfig(supabase, profile.id as string, patch);
     setShowInviteModal(false);
     navigate({ to: "/onboarding-preview" });
   } catch (e) {
@@ -267,6 +273,7 @@ const handleInviteAccept = async () => {
 ```
 
 **Why this is safe:**
+
 - Uses existing Phase 6A-validated RPC
 - Atomic server-side `||` merge
 - Preserves ALL existing `template_config` keys
@@ -306,7 +313,7 @@ BEGIN
     SELECT 1
     FROM jsonb_object_keys(p_patch) AS patch_keys(key_name)
     WHERE key_name NOT IN (
-      'basic_link_presentations', 
+      'basic_link_presentations',
       'professional_badge',
       'onboarding_v2_invite_status'
     )
@@ -361,6 +368,7 @@ $$;
 9. ✅ ESLint PASS
 
 **Test execution:**
+
 ```bash
 npx playwright test e2e/dual-editor-persistence.spec.ts
 npx playwright test e2e/onboarding-v2-phase5.spec.ts
@@ -373,46 +381,48 @@ npm run lint
 
 ## EVIDENCE TABLE
 
-| Evidence Item | Observed | Evidence | Status |
-|---------------|----------|----------|--------|
-| `updateProfile` replaces full `template_config` | YES | `supabase.from("profiles").update(payload)` | ⛔ **UNSAFE** |
-| `toWritableProfilePayload` deep-merges JSONB | NO | Passes value AS-IS (lines 86-97) | ⛔ **UNSAFE** |
-| `schemaVersion` preserved | NO | Not in client spread if missing | ⛔ **FAIL** |
-| `editorConfig` preserved | NO | Not in client spread if missing | ⛔ **FAIL** |
-| Basic namespaces preserved | CONDITIONAL | Only if in client memory | ⛔ **UNSAFE** |
-| Unknown namespaces preserved | NO | Full column replacement | ⛔ **FAIL** |
-| Accept changes only invite status | NO | Changes entire column | ⛔ **FAIL** |
-| Decline changes only invite status | NO | Changes entire column | ⛔ **FAIL** |
-| Concurrent newer canonical state preserved | NO | Stale client overwrites | ⛔ **FAIL** |
-| Safe RPC available | YES | `patch_profile_basic_template_config` | ✅ AVAILABLE |
+| Evidence Item                                   | Observed    | Evidence                                    | Status        |
+| ----------------------------------------------- | ----------- | ------------------------------------------- | ------------- |
+| `updateProfile` replaces full `template_config` | YES         | `supabase.from("profiles").update(payload)` | ⛔ **UNSAFE** |
+| `toWritableProfilePayload` deep-merges JSONB    | NO          | Passes value AS-IS (lines 86-97)            | ⛔ **UNSAFE** |
+| `schemaVersion` preserved                       | NO          | Not in client spread if missing             | ⛔ **FAIL**   |
+| `editorConfig` preserved                        | NO          | Not in client spread if missing             | ⛔ **FAIL**   |
+| Basic namespaces preserved                      | CONDITIONAL | Only if in client memory                    | ⛔ **UNSAFE** |
+| Unknown namespaces preserved                    | NO          | Full column replacement                     | ⛔ **FAIL**   |
+| Accept changes only invite status               | NO          | Changes entire column                       | ⛔ **FAIL**   |
+| Decline changes only invite status              | NO          | Changes entire column                       | ⛔ **FAIL**   |
+| Concurrent newer canonical state preserved      | NO          | Stale client overwrites                     | ⛔ **FAIL**   |
+| Safe RPC available                              | YES         | `patch_profile_basic_template_config`       | ✅ AVAILABLE  |
 
 ---
 
 ## FINAL VERDICT
 
-| Field | Value |
-|-------|-------|
-| **UPDATE_PROFILE_TEMPLATE_CONFIG_BEHAVIOR** | `FULL_REPLACEMENT` |
-| **INVITE_WRITE_SAFETY** | ⛔ **UNSAFE** |
-| **CANONICAL_EDITORCONFIG_PRESERVED** | ⛔ **NO** |
-| **STALE_STATE_OVERWRITE_RISK** | ⛔ **YES** |
-| **SAFE_RPC_AVAILABLE** | ✅ YES (`patch_profile_basic_template_config`) |
-| **CODE_CHANGE_REQUIRED_BEFORE_PUSH** | ⛔ **YES** |
-| **SAFE_TO_PUSH_ED7C123** | ⛔ **NO** |
-| **SAFE_TO_DEPLOY_STAGING** | ⛔ **NO** |
-| **ROOT_RECOMMENDATION** | **FIX PERSISTENCE PATH BEFORE PUSH** |
+| Field                                       | Value                                          |
+| ------------------------------------------- | ---------------------------------------------- |
+| **UPDATE_PROFILE_TEMPLATE_CONFIG_BEHAVIOR** | `FULL_REPLACEMENT`                             |
+| **INVITE_WRITE_SAFETY**                     | ⛔ **UNSAFE**                                  |
+| **CANONICAL_EDITORCONFIG_PRESERVED**        | ⛔ **NO**                                      |
+| **STALE_STATE_OVERWRITE_RISK**              | ⛔ **YES**                                     |
+| **SAFE_RPC_AVAILABLE**                      | ✅ YES (`patch_profile_basic_template_config`) |
+| **CODE_CHANGE_REQUIRED_BEFORE_PUSH**        | ⛔ **YES**                                     |
+| **SAFE_TO_PUSH_ED7C123**                    | ⛔ **NO**                                      |
+| **SAFE_TO_DEPLOY_STAGING**                  | ⛔ **NO**                                      |
+| **ROOT_RECOMMENDATION**                     | **FIX PERSISTENCE PATH BEFORE PUSH**           |
 
 ---
 
 ## REQUIRED ACTIONS BEFORE PUSH/DEPLOY
 
 ### DO NOT:
+
 - ❌ Push commit `ed7c123` as-is
 - ❌ Deploy to staging
 - ❌ Configure `VITE_ENABLE_ONBOARDING_V2` in Vercel
 - ❌ Test with production/non-QA profiles
 
 ### DO:
+
 1. ✅ Extend `BASIC_EDITOR_TEMPLATE_CONFIG_KEYS` to include `onboarding_v2_invite_status`
 2. ✅ Update `BasicEditorTemplateConfigPatchV1` interface
 3. ✅ Create migration to update RPC whitelist
@@ -429,6 +439,7 @@ npm run lint
 **Time:** 15-30 minutes  
 **Risk:** LOW (reusing proven Phase 6A pattern)  
 **Files to modify:** 3
+
 - `src/lib/basic-editor-persistence/patch.ts` (3 lines)
 - `src/routes/editor.tsx` (10 lines)
 - `supabase/migrations/YYYYMMDDHHMMSS_*.sql` (new file, 60 lines)

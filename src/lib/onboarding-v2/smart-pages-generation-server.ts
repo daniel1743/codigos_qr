@@ -70,7 +70,9 @@ export const generateSmartPageFromOnboardingFn = createServerFn({
         profession: data.intent.identity.professionOrActivity,
         style: data.intent.visualDirection.preference ?? undefined,
         goal: data.intent.outcome.primaryGoal,
-        ownerCoverAvailable: Boolean(ownerContent.media?.cover || data.intent.identity.bannerAssetRef),
+        ownerCoverAvailable: Boolean(
+          ownerContent.media?.cover || data.intent.identity.bannerAssetRef,
+        ),
       });
       return generateSmartPageFromOnboarding(data.intent, {
         ...(data.ownerContent ? { ownerContent: data.ownerContent } : {}),

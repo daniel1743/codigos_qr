@@ -31,7 +31,10 @@ import type {
   VisualPersonality,
 } from "@/lib/parametric-engine-v2/types";
 import { generatePagePlan } from "@/lib/smart-pages/page-orchestrator";
-import { generateSmartPageFromOnboarding, mapOnboardingIntentV2ToSmartPagesRequest } from "../smart-pages-adapter";
+import {
+  generateSmartPageFromOnboarding,
+  mapOnboardingIntentV2ToSmartPagesRequest,
+} from "../smart-pages-adapter";
 import type { OwnerContentInput } from "@/lib/page-generator/owner-content";
 import type { OnboardingIntentV2 } from "../types";
 
@@ -213,9 +216,14 @@ function toEngineIntentForTrace(
   const selectedFeatures = (input.selectedFeatures ?? []).map(normalized);
   const hasCardMedia =
     input.cardMedia === true ||
-    selectedFeatures.some((f) => ["gallery", "portfolio", "media-card", "image", "video"].includes(f));
+    selectedFeatures.some((f) =>
+      ["gallery", "portfolio", "media-card", "image", "video"].includes(f),
+    );
   const action = input.primaryAction
-    ? { type: input.primaryAction.type as OnboardingIntentV1["primary_action"]["type"], value: input.primaryAction.value }
+    ? {
+        type: input.primaryAction.type as OnboardingIntentV1["primary_action"]["type"],
+        value: input.primaryAction.value,
+      }
     : content.links?.[0]
       ? { type: "website" as const, value: content.links[0].url }
       : null;
@@ -473,4 +481,3 @@ describe("CRIPQER forensic trace — three businesses through the full generatio
     expect(true).toBe(true);
   });
 });
-

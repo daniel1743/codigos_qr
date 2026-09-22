@@ -54,11 +54,17 @@ export function applyCompatibility(
 
   /* ------------------------------------------------------ background */
   if (design.background.type === "radial-gradient" && !capabilities.radial_background) {
-    design.background = { type: "solid", value: { kind: "solid", color: design.palette.background } };
+    design.background = {
+      type: "solid",
+      value: { kind: "solid", color: design.palette.background },
+    };
     downgrades.push("background:radial_unsupported");
   }
   if (design.background.type === "linear-gradient" && !capabilities.gradient_background) {
-    design.background = { type: "solid", value: { kind: "solid", color: design.palette.background } };
+    design.background = {
+      type: "solid",
+      value: { kind: "solid", color: design.palette.background },
+    };
     downgrades.push("background:gradient_unsupported");
   }
 
@@ -168,13 +174,19 @@ export function applyCompatibility(
   if (!hasConversion) {
     // Restored at the semantic conversion slot: after identity, before any
     // navigation/media block.
-    const cta: RecipeBlock = { id: "primary_cta", type: "primary_cta", order: 0, role: "conversion" };
-    let at = blocks.findIndex((b) => b.role === "navigation" || b.role === "media" || b.role === "meta");
+    const cta: RecipeBlock = {
+      id: "primary_cta",
+      type: "primary_cta",
+      order: 0,
+      role: "conversion",
+    };
+    let at = blocks.findIndex(
+      (b) => b.role === "navigation" || b.role === "media" || b.role === "meta",
+    );
     if (at < 0) at = blocks.length;
     blocks = [...blocks.slice(0, at), cta, ...blocks.slice(at)];
     downgrades.push("block:primary_cta_restored");
   }
-
 
   blocks = blocks.map((b, i) => ({ ...b, order: i }));
 

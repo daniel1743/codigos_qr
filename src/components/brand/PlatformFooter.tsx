@@ -28,7 +28,9 @@ export function PlatformFooter({
           className={logoClassName}
         />
         {children}
-        {copyright ?? <small>© {new Date().getFullYear()} Cripqer. Todos los derechos reservados.</small>}
+        {copyright ?? (
+          <small>© {new Date().getFullYear()} Cripqer. Todos los derechos reservados.</small>
+        )}
       </div>
     </footer>
   );

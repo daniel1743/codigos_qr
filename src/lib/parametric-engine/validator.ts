@@ -28,12 +28,20 @@ export function validatePageRecipe(recipe: PageRecipeV1): ValidationResult {
     issues.push({ path, code, message });
 
   if (!recipe || typeof recipe !== "object") {
-    return { valid: false, issues: [{ path: "recipe", code: "type", message: "Recipe must be an object." }] };
+    return {
+      valid: false,
+      issues: [{ path: "recipe", code: "type", message: "Recipe must be an object." }],
+    };
   }
 
   /* ------------------------------------------------------------- meta */
   const m = recipe.meta;
-  if (!m || m.recipe_version !== "1" || m.engine_version !== "1" || m.source_intent_version !== "1") {
+  if (
+    !m ||
+    m.recipe_version !== "1" ||
+    m.engine_version !== "1" ||
+    m.source_intent_version !== "1"
+  ) {
     fail("meta", "version", "Recipe/engine/intent versions must all be '1'.");
   }
   if (!m || typeof m.generated_at !== "string" || Number.isNaN(Date.parse(m.generated_at))) {
@@ -52,7 +60,8 @@ export function validatePageRecipe(recipe: PageRecipeV1): ValidationResult {
   if (!id || typeof id.name !== "string" || id.name.trim().length < 2) {
     fail("identity.name", "required", "identity.name is required.");
   }
-  if (!id || typeof id.profession !== "string") fail("identity.profession", "type", "Must be a string.");
+  if (!id || typeof id.profession !== "string")
+    fail("identity.profession", "type", "Must be a string.");
   if (!id || typeof id.bio !== "string") fail("identity.bio", "type", "Must be a string.");
   if (id && id.avatar !== null && typeof id.avatar !== "string") {
     fail("identity.avatar", "type", "Must be a string or null.");
@@ -75,7 +84,8 @@ export function validatePageRecipe(recipe: PageRecipeV1): ValidationResult {
   }
 
   for (const [key, value] of Object.entries(d.palette ?? {})) {
-    if (!isHex(value as string)) fail(`design.palette.${key}`, "color", "Must be a #rrggbb hex value.");
+    if (!isHex(value as string))
+      fail(`design.palette.${key}`, "color", "Must be a #rrggbb hex value.");
   }
   const p = d.palette;
   if (p && isHex(p.text) && isHex(p.background)) {
@@ -97,34 +107,49 @@ export function validatePageRecipe(recipe: PageRecipeV1): ValidationResult {
   }
 
   const t = d.typography;
-  if (!FONT_TOKENS.includes(t?.heading_family as never) || !FONT_TOKENS.includes(t?.body_family as never)) {
+  if (
+    !FONT_TOKENS.includes(t?.heading_family as never) ||
+    !FONT_TOKENS.includes(t?.body_family as never)
+  ) {
     fail("design.typography", "font_token", "Only approved renderer-safe font tokens are allowed.");
   }
-  if (!FONT_WEIGHTS.includes(t?.heading_weight as never) || !FONT_WEIGHTS.includes(t?.body_weight as never)) {
+  if (
+    !FONT_WEIGHTS.includes(t?.heading_weight as never) ||
+    !FONT_WEIGHTS.includes(t?.body_weight as never)
+  ) {
     fail("design.typography", "weight", "Font weight not allowed.");
   }
   if (t && !isApprovedPair(t)) {
     fail("design.typography", "pair", "Heading/body pairing is not approved.");
   }
 
-  if (!RADII.includes(d.geometry?.radius)) fail("design.geometry.radius", "enum", "Unknown radius.");
-  if (!DENSITIES.includes(d.geometry?.density)) fail("design.geometry.density", "enum", "Unknown density.");
+  if (!RADII.includes(d.geometry?.radius))
+    fail("design.geometry.radius", "enum", "Unknown radius.");
+  if (!DENSITIES.includes(d.geometry?.density))
+    fail("design.geometry.density", "enum", "Unknown density.");
   if (d.button?.style === "outline" && d.geometry?.border_style === "none") {
     fail("design.button.style", "invalid_combo", "Outline buttons require a visible border style.");
   }
   if ((d.button as unknown as { style: string })?.style === "card") {
-    fail("design.button.style", "deprecated", "button_style=card is deprecated; card is a presentation mode.");
+    fail(
+      "design.button.style",
+      "deprecated",
+      "button_style=card is deprecated; card is a presentation mode.",
+    );
   }
 
   const bg = d.background;
   if (!bg || !["solid", "linear-gradient", "radial-gradient"].includes(bg.type)) {
     fail("design.background.type", "enum", "Unknown background type.");
   } else if (typeof bg.value !== "object" || bg.value === null) {
-    fail("design.background.value", "type", "Background value must be structured, never a raw CSS string.");
+    fail(
+      "design.background.value",
+      "type",
+      "Background value must be structured, never a raw CSS string.",
+    );
   } else {
     const v = bg.value as Record<string, unknown>;
-    const colors =
-      v["kind"] === "solid" ? [v["color"]] : [v["from"], v["to"]];
+    const colors = v["kind"] === "solid" ? [v["color"]] : [v["from"], v["to"]];
     for (const c of colors) {
       if (typeof c !== "string" || !isHex(c)) {
         fail("design.background.value", "color", "Background colors must be hex values.");
@@ -139,10 +164,18 @@ export function validatePageRecipe(recipe: PageRecipeV1): ValidationResult {
     fail("design.card.image_focal_y", "range", "image_focal_y must be between 0 and 100.");
   }
   if (d.card && !["right", "bottom", "none"].includes(d.card.media_position)) {
-    fail("design.card.media_position", "enum", "Card media position must be right, bottom or none.");
+    fail(
+      "design.card.media_position",
+      "enum",
+      "Card media position must be right, bottom or none.",
+    );
   }
   if (d.spacing?.horizontal_padding === "compact") {
-    fail("design.spacing.horizontal_padding", "viability_320", "Compact horizontal padding breaks 320px viability.");
+    fail(
+      "design.spacing.horizontal_padding",
+      "viability_320",
+      "Compact horizontal padding breaks 320px viability.",
+    );
   }
 
   /* -------------------------------------------------------- structure */
@@ -157,12 +190,21 @@ export function validatePageRecipe(recipe: PageRecipeV1): ValidationResult {
   if (s?.hero?.mode === "banner_only" && s.hero.show_avatar) {
     fail("structure.hero.show_avatar", "invalid_combo", "banner_only hero cannot show an avatar.");
   }
-  if (!s?.primary_action?.enabled) fail("structure.primary_action.enabled", "required", "Primary action required.");
+  if (!s?.primary_action?.enabled)
+    fail("structure.primary_action.enabled", "required", "Primary action required.");
   if (!CANONICAL_CTA_LABELS.includes(s?.primary_action?.cta_label as never)) {
-    fail("structure.primary_action.cta_label", "canonical", "CTA label is not in the canonical set.");
+    fail(
+      "structure.primary_action.cta_label",
+      "canonical",
+      "CTA label is not in the canonical set.",
+    );
   }
   if (s?.primary_action?.presentation === "professional_card" && !d.card?.enabled) {
-    fail("structure.primary_action.presentation", "invalid_combo", "Professional card requires cards enabled.");
+    fail(
+      "structure.primary_action.presentation",
+      "invalid_combo",
+      "Professional card requires cards enabled.",
+    );
   }
   if (s && s.links.max_primary_cards > 0 && s.links.presentation === "buttons") {
     fail("structure.links", "invalid_combo", "Button presentation cannot declare primary cards.");
@@ -177,18 +219,24 @@ export function validatePageRecipe(recipe: PageRecipeV1): ValidationResult {
     const ids = new Set<string>();
     blocks.forEach((b, i) => {
       if ((RESERVED_BLOCK_TYPES as readonly string[]).includes(b.type)) {
-        fail(`blocks[${i}].type`, "reserved", `Reserved block "${b.type}" must not be emitted in V1.`);
+        fail(
+          `blocks[${i}].type`,
+          "reserved",
+          `Reserved block "${b.type}" must not be emitted in V1.`,
+        );
       } else if (!(SUPPORTED_BLOCK_TYPES as readonly string[]).includes(b.type)) {
         fail(`blocks[${i}].type`, "enum", "Unknown block type.");
       }
-      if (b.order !== i) fail(`blocks[${i}].order`, "order", "Block order must be contiguous and ascending.");
+      if (b.order !== i)
+        fail(`blocks[${i}].order`, "order", "Block order must be contiguous and ascending.");
       if (ids.has(b.id)) fail(`blocks[${i}].id`, "duplicate", "Duplicate block id.");
       ids.add(b.id);
     });
     if (!blocks.some((b) => b.type === "primary_cta" || b.type === "professional_card")) {
       fail("blocks", "missing_conversion", "A conversion block is required.");
     }
-    if (!blocks.some((b) => b.type === "footer")) fail("blocks", "missing_footer", "Footer block is required.");
+    if (!blocks.some((b) => b.type === "footer"))
+      fail("blocks", "missing_footer", "Footer block is required.");
   }
 
   /* ------------------------------------------------------- conversion */
@@ -216,7 +264,11 @@ export function validatePageRecipe(recipe: PageRecipeV1): ValidationResult {
 
   /* ---------------------------------------------------- serialization */
   if (!isJsonSerializable(recipe)) {
-    fail("recipe", "serialization", "Recipe must be plain JSON (no functions, DOM nodes or blob URLs).");
+    fail(
+      "recipe",
+      "serialization",
+      "Recipe must be plain JSON (no functions, DOM nodes or blob URLs).",
+    );
   }
 
   return { valid: issues.length === 0, issues };
@@ -229,7 +281,8 @@ export function isJsonSerializable(value: unknown): boolean {
     const type = typeof v;
     if (type === "string" || type === "boolean") return true;
     if (type === "number") return Number.isFinite(v as number);
-    if (type === "function" || type === "symbol" || type === "undefined" || type === "bigint") return false;
+    if (type === "function" || type === "symbol" || type === "undefined" || type === "bigint")
+      return false;
     if (type === "object") {
       const obj = v as object;
       if (seen.has(obj)) return false;

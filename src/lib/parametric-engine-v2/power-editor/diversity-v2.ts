@@ -25,12 +25,18 @@ function buttonCardStrategy(recipe: PowerEditorRecipeV2): string {
   const buttons = recipe.visual.buttons.variant;
   const cards = recipe.visual.cards.preset;
   const blockPresentation = recipe.structure.blocks
-    .filter((block) => block.type === "buttonGroup" || block.type === "links" || block.type === "mediaCard")
+    .filter(
+      (block) =>
+        block.type === "buttonGroup" || block.type === "links" || block.type === "mediaCard",
+    )
     .map((block) => {
       const columns = block.layout.columns ?? 1;
       const items = block.content.items;
       const presentations = Array.isArray(items)
-        ? items.map((item) => (typeof item === "object" && item ? item.presentation : undefined)).filter(Boolean).join(",")
+        ? items
+            .map((item) => (typeof item === "object" && item ? item.presentation : undefined))
+            .filter(Boolean)
+            .join(",")
         : "";
       return `${block.type}:${block.variant}:${columns}:${presentations}`;
     })
@@ -94,7 +100,7 @@ export function selectStructurallyDiverseCandidates(
   maxSameComposition = 2,
 ): PowerEditorCandidateV2[] {
   const ranked = [...candidates].sort(
-    (a, b) => (b.total_score - a.total_score) || a.id.localeCompare(b.id),
+    (a, b) => b.total_score - a.total_score || a.id.localeCompare(b.id),
   );
   const selected: PowerEditorCandidateV2[] = [];
   const selectedKeys = new Set<string>();

@@ -31,13 +31,13 @@ was mocked, no storage URL was injected, and the service-role key was never used
 
 ## ENVIRONMENT (verified preconditions)
 
-| Precondition | Evidence |
-|---|---|
-| Real authenticated browser session | Supabase `auth.getSession()` returned the QA session |
-| Real owned profile | gate resolved profile `qa-dual-editor-test` (`8b1f25ff-ec0a-4cf2-93e2-f67c62a5a165`) |
-| Supabase available | real uploads returned 200 + public URLs |
-| `avatars`/`banners` buckets | cover→`banners`, item→`avatars` |
-| Real local QA file | `public/brand-assets/cripqer-mark.png` |
+| Precondition                       | Evidence                                                                             |
+| ---------------------------------- | ------------------------------------------------------------------------------------ |
+| Real authenticated browser session | Supabase `auth.getSession()` returned the QA session                                 |
+| Real owned profile                 | gate resolved profile `qa-dual-editor-test` (`8b1f25ff-ec0a-4cf2-93e2-f67c62a5a165`) |
+| Supabase available                 | real uploads returned 200 + public URLs                                              |
+| `avatars`/`banners` buckets        | cover→`banners`, item→`avatars`                                                      |
+| Real local QA file                 | `public/brand-assets/cripqer-mark.png`                                               |
 
 Dev server: `http://localhost:8080` (`vite dev`). Playwright `1.62.1` + installed
 Chromium.
@@ -47,6 +47,7 @@ Chromium.
 ## RESULTS (Playwright, 4/4 passed)
 
 ### TEST 1 — Owner cover
+
 Uploaded the cover slot and observed the durable reference:
 
 ```
@@ -58,16 +59,19 @@ https://mlinfiuhkxdhlveflbkj.supabase.co/storage/v1/object/public/banners/
 - not `blob:` / `data:` ✅; rendered as `<img src=...>` after `Imagen subida` ✅.
 
 ### TEST 3 — Product media (catalog item)
+
 ```
 .../avatars/8b1f25ff-.../power-editor/item-1789585237136-cripqer-mark.png
 ```
 
 ### TEST 4 — Portfolio media
+
 ```
 .../avatars/8b1f25ff-.../power-editor/item-1789585252540-cripqer-mark.png
 ```
 
 ### Failure smoke
+
 `image/gif` rejected by MIME validation → `role="alert"` error shown, no
 `Imagen subida`, no rendered `<img>`, no fake `OwnerMediaReference`.
 
@@ -75,14 +79,14 @@ https://mlinfiuhkxdhlveflbkj.supabase.co/storage/v1/object/public/banners/
 
 ## SECURITY VERIFICATION
 
-| Requirement | Verified |
-|---|---|
-| Authenticated upload | userId derived from `auth.getSession()` server-side, never client-supplied |
-| User-owned storage path | first path segment `8b1f25ff-...` = `auth.uid()` (Storage RLS) |
-| No service-role exposed | browser uses anon key + user session; no `SUPABASE_SERVICE_ROLE_KEY` |
-| No arbitrary foreign path | `removeOwnerMediaReference` rejects paths not under `{userId}/` |
-| Existing MIME validation | jpeg/png/webp accepted; gif rejected |
-| Existing size limits | 3 MB avatar/item, 4 MB cover (enforced in `owner-media-upload.ts`) |
+| Requirement               | Verified                                                                   |
+| ------------------------- | -------------------------------------------------------------------------- |
+| Authenticated upload      | userId derived from `auth.getSession()` server-side, never client-supplied |
+| User-owned storage path   | first path segment `8b1f25ff-...` = `auth.uid()` (Storage RLS)             |
+| No service-role exposed   | browser uses anon key + user session; no `SUPABASE_SERVICE_ROLE_KEY`       |
+| No arbitrary foreign path | `removeOwnerMediaReference` rejects paths not under `{userId}/`            |
+| Existing MIME validation  | jpeg/png/webp accepted; gif rejected                                       |
+| Existing size limits      | 3 MB avatar/item, 4 MB cover (enforced in `owner-media-upload.ts`)         |
 
 ---
 

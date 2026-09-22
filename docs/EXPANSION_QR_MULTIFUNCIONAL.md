@@ -10,20 +10,20 @@
 
 ### Competidores Enterprise y sus precios:
 
-| Plataforma | Precio | Casos de Uso | Limitaciones |
-|-----------|--------|--------------|--------------|
-| **QR Code Generator PRO** | $12-85/mes | URLs, vCards, PDF, WiFi | Sin encriptación avanzada |
-| **Beaconstac** | $49-249/mes | Enterprise, Analytics | Complejo, caro |
-| **Flowcode** | $99-499/mes | Marketing, Tracking | Sin seguridad avanzada |
-| **QR Tiger** | $7-49/mes | Multi-propósito | UI anticuada |
-| **Uniqode** | $29-199/mes | Business focus | Sin features únicos |
+| Plataforma                | Precio      | Casos de Uso            | Limitaciones              |
+| ------------------------- | ----------- | ----------------------- | ------------------------- |
+| **QR Code Generator PRO** | $12-85/mes  | URLs, vCards, PDF, WiFi | Sin encriptación avanzada |
+| **Beaconstac**            | $49-249/mes | Enterprise, Analytics   | Complejo, caro            |
+| **Flowcode**              | $99-499/mes | Marketing, Tracking     | Sin seguridad avanzada    |
+| **QR Tiger**              | $7-49/mes   | Multi-propósito         | UI anticuada              |
+| **Uniqode**               | $29-199/mes | Business focus          | Sin features únicos       |
 
 ### Oportunidades Identificadas:
 
 ✅ **Gap de seguridad:** Nadie ofrece encriptación end-to-end real  
 ✅ **Gap de versatilidad:** Todos se enfocan en marketing, ignoran seguridad corporativa  
 ✅ **Gap de integración:** Nadie integra con WhatsApp Business, OnlyFans, etc.  
-✅ **Gap de privacidad:** Códigos QR desechables/temporales poco comunes  
+✅ **Gap de privacidad:** Códigos QR desechables/temporales poco comunes
 
 ---
 
@@ -34,6 +34,7 @@
 #### **1.1 Documentos Excel Encriptados**
 
 **Problema:**
+
 - Empresas necesitan compartir hojas de cálculo sensibles (nóminas, finanzas, inventarios)
 - Email no es seguro
 - USB se pierden
@@ -66,6 +67,7 @@ Configuración:
 ```
 
 **Flujo de Usuario:**
+
 1. Empresario sube Excel de nómina
 2. Configura: Password + expire en 48h + 1 download max
 3. Genera QR
@@ -76,6 +78,7 @@ Configuración:
 **Pricing Tier:** PRO ($19.99/mes) o ENTERPRISE ($99/mes para equipos)
 
 **Casos de uso:**
+
 - Nóminas confidenciales
 - Reports financieros trimestrales
 - Inventarios sensibles
@@ -87,6 +90,7 @@ Configuración:
 #### **1.2 PDFs Protegidos con DRM**
 
 **Problema:**
+
 - PDFs se comparten sin control
 - Una vez descargado, circula libremente
 - No hay forma de "revocar" acceso
@@ -121,6 +125,7 @@ Configuración:
 ```
 
 **Casos de uso:**
+
 - Propuestas comerciales confidenciales
 - Contratos pre-firma
 - Manuales técnicos propietarios
@@ -135,6 +140,7 @@ Configuración:
 #### **1.3 Imágenes Confidenciales con Marca de Agua**
 
 **Problema:**
+
 - Fotos de productos pre-lanzamiento se filtran
 - Blueprints/planos se roban
 - Identidad visual se copia
@@ -166,6 +172,7 @@ Configuración:
 ```
 
 **Casos de uso:**
+
 - Diseños de productos pre-lanzamiento
 - Planos arquitectónicos confidenciales
 - Fotografías de prensa embargadas
@@ -180,6 +187,7 @@ Configuración:
 #### **2.1 Mensajes Secretos con Auto-Destrucción**
 
 **Problema:**
+
 - WhatsApp/Telegram no garantizan privacidad real
 - Mensajes se pueden screenshot
 - Conversaciones quedan en servidores
@@ -220,6 +228,7 @@ Configuración:
 ```
 
 **Flujo de Usuario:**
+
 1. Usuario escribe mensaje secreto
 2. Configura: Password + auto-destruir después de 1 lectura
 3. Genera QR
@@ -229,6 +238,7 @@ Configuración:
 7. Sender recibe notificación "Mensaje leído y destruido"
 
 **Casos de uso:**
+
 - Comunicación confidencial CEO → CFO
 - Whistleblowers (denunciantes)
 - Periodistas con fuentes protegidas
@@ -243,6 +253,7 @@ Configuración:
 #### **2.2 Códigos de Acceso Temporales**
 
 **Problema:**
+
 - Contraseñas WiFi se comparten descontroladamente
 - Invitados tienen acceso permanente
 - Difícil rotar credenciales
@@ -273,6 +284,7 @@ Tipos:
 ```
 
 **Casos de uso:**
+
 - Airbnb: WiFi temporal para huéspedes
 - Oficinas: Acceso visitantes por 1 día
 - Hoteles: Código de habitación digital
@@ -285,6 +297,7 @@ Tipos:
 #### **2.3 WhatsApp Business Integration**
 
 **Problema:**
+
 - QR de WhatsApp estándar solo abre chat vacío
 - No hay contexto de por qué el cliente te contacta
 - Difícil trackear origen del lead
@@ -318,6 +331,7 @@ Configuración:
 ```
 
 **Casos de uso:**
+
 - Restaurantes: QR en cada mesa con "Solicitar mesero"
 - Real Estate: QR en letrero "Info de esta propiedad"
 - Retail: QR en producto "Consultar disponibilidad"
@@ -331,6 +345,7 @@ Configuración:
 #### **3.1 OnlyFans / Contenido Adulto Protegido**
 
 **Problema:**
+
 - Contenido se filtra fácilmente
 - Suscriptores comparten accesos
 - Difícil verificar identidad del viewer
@@ -376,6 +391,7 @@ Configuración:
 ```
 
 **Casos de uso:**
+
 - Creadores de OnlyFans → QR en bio de Twitter/Instagram
 - Modelos → QR en photosets físicos
 - Performers → QR en eventos privados
@@ -385,6 +401,7 @@ Configuración:
 **Pricing:** PRO ($29.99/mes) + 5% de transacción
 
 **Features Únicos:**
+
 - **Leak Insurance:** Si tu contenido se filtra, rastreamos el origen
 - **Automated DMCA:** Sistema automático de takedown
 - **Identity Protection:** Nunca exponemos tu número real o email
@@ -394,6 +411,7 @@ Configuración:
 #### **3.2 YouTube Premium Links**
 
 **Problema:**
+
 - Links de YouTube se pierden en bio
 - No hay forma de destacar video específico
 - Difícil trackear conversiones
@@ -433,6 +451,7 @@ Configuración:
 ```
 
 **Casos de uso:**
+
 - YouTubers: QR en mercancía
 - Educadores: QR en presentaciones → video explicativo
 - Músicos: QR en posters → music video
@@ -444,6 +463,7 @@ Configuración:
 #### **3.3 Lead Magnet con Captura de Email**
 
 **Problema:**
+
 - Difícil capturar emails en eventos físicos
 - Forms largos disuaden a usuarios
 - Bajo conversion rate
@@ -489,6 +509,7 @@ Configuración:
 ```
 
 **Casos de uso:**
+
 - Ferias/expos: QR en booth
 - Conferencias: QR en slides
 - Restaurantes: QR para newsletter
@@ -502,6 +523,7 @@ Configuración:
 #### **4.1 QR para Obtener Seguidores en Redes**
 
 **Problema:**
+
 - "Sígueme en Instagram" no es accionable
 - Usuarios olvidan buscarte después
 - Bajo conversion rate
@@ -548,6 +570,7 @@ Configuración:
 ```
 
 **Casos de uso:**
+
 - Influencers: QR en mercancía
 - Local business: QR en ventana
 - Eventos: QR en entrada
@@ -561,6 +584,7 @@ Configuración:
 #### **4.2 Review Request QR**
 
 **Problema:**
+
 - Clientes satisfechos no dejan reviews
 - Links de Google/Yelp son largos y feos
 - Bajo % de reviews positivos
@@ -606,6 +630,7 @@ Configuración:
 ```
 
 **Casos de uso:**
+
 - Restaurantes: QR en recibo
 - Hoteles: QR en check-out
 - Retail: QR en bolsa de compra
@@ -619,6 +644,7 @@ Configuración:
 #### **5.1 Employee ID Badge QR**
 
 **Problema:**
+
 - Badges plásticos se pierden
 - Información desactualizada
 - No hay tracking de accesos
@@ -664,6 +690,7 @@ Configuración:
 ```
 
 **Casos de uso:**
+
 - Corporativos: Badge digital
 - Hospitales: Staff ID + patient access
 - Universidades: Student ID
@@ -677,6 +704,7 @@ Configuración:
 #### **5.2 Inventory & Asset Tracking**
 
 **Problema:**
+
 - Inventario se pierde o se roba
 - Difícil hacer auditorías
 - Tracking manual es lento
@@ -722,6 +750,7 @@ Configuración:
 ```
 
 **Casos de uso:**
+
 - Warehouses: Inventory tracking
 - IT Departments: Laptop/equipment tracking
 - Hospitales: Medical equipment
@@ -734,6 +763,7 @@ Configuración:
 #### **5.3 Certificate Verification (Anti-Fraud)**
 
 **Problema:**
+
 - Certificados falsos abundan
 - Difícil verificar autenticidad
 - Diplomas se falsifican fácilmente
@@ -779,6 +809,7 @@ Configuración:
 ```
 
 **Casos de uso:**
+
 - Universidades: Diplomas verificables
 - Cursos online: Certificados Udemy/Coursera
 - Profesiones reguladas: Licencias médicas, legales
@@ -822,6 +853,7 @@ Features:
 ```
 
 **Casos de uso:**
+
 - Cartas de amor
 - Propuestas de matrimonio (QR en anillo)
 - Aniversarios
@@ -868,6 +900,7 @@ Configuración:
 ```
 
 **Casos de uso:**
+
 - Escape rooms
 - City tours interactivos
 - Museum experiences
@@ -916,6 +949,7 @@ Features:
 ```
 
 **Casos de uso:**
+
 - Estate planning
 - Crypto inheritance
 - Digital legacy management
@@ -935,19 +969,19 @@ interface UniversalQRCode {
   id: string;
   user_id: string;
   type: QRType; // 30+ tipos
-  
+
   // Metadata
   name: string;
   description?: string;
   created_at: timestamp;
   updated_at: timestamp;
-  
+
   // Configuration (dynamic por tipo)
   config: QRConfig; // JSON flexible
-  
+
   // Security
   security: {
-    encryption_level: 'none' | 'standard' | 'high' | 'maximum';
+    encryption_level: "none" | "standard" | "high" | "maximum";
     password_protected: boolean;
     password_hash?: string;
     two_factor_enabled: boolean;
@@ -955,7 +989,7 @@ interface UniversalQRCode {
     ip_whitelist?: string[];
     device_fingerprinting: boolean;
   };
-  
+
   // Access Control
   access_control: {
     expire_at?: timestamp;
@@ -968,7 +1002,7 @@ interface UniversalQRCode {
       blocked_countries?: string[];
     };
   };
-  
+
   // Analytics
   analytics: {
     total_scans: number;
@@ -977,15 +1011,15 @@ interface UniversalQRCode {
     conversion_rate?: number;
     revenue_generated?: number;
   };
-  
+
   // Content (encrypted storage)
   content: {
-    type: 'url' | 'file' | 'text' | 'media';
+    type: "url" | "file" | "text" | "media";
     data: string; // URL, file path, encrypted content
     mime_type?: string;
     size_bytes?: number;
   };
-  
+
   // Integrations
   integrations?: {
     whatsapp?: WhatsAppConfig;
@@ -994,7 +1028,7 @@ interface UniversalQRCode {
     crm?: CRMConfig;
     blockchain?: BlockchainConfig;
   };
-  
+
   // Template (si aplica)
   template_id?: string;
   template_config?: any;
@@ -1007,41 +1041,46 @@ interface UniversalQRCode {
 
 ```typescript
 enum EncryptionLevel {
-  NONE = 'none',           // Público, sin protección
-  STANDARD = 'standard',   // AES-256
-  HIGH = 'high',          // RSA-4096 + AES-256
-  MAXIMUM = 'maximum'     // RSA-4096 + AES-256 + 2FA + Device binding
+  NONE = "none", // Público, sin protección
+  STANDARD = "standard", // AES-256
+  HIGH = "high", // RSA-4096 + AES-256
+  MAXIMUM = "maximum", // RSA-4096 + AES-256 + 2FA + Device binding
 }
 
 class EncryptionService {
   async encrypt(data: any, level: EncryptionLevel, userKey: string) {
-    switch(level) {
-      case 'standard':
+    switch (level) {
+      case "standard":
         return aes256Encrypt(data, userKey);
-      
-      case 'high':
+
+      case "high":
         const aesEncrypted = aes256Encrypt(data, userKey);
         return rsaEncrypt(aesEncrypted, publicKey);
-      
-      case 'maximum':
+
+      case "maximum":
         const aes = aes256Encrypt(data, userKey);
         const rsa = rsaEncrypt(aes, publicKey);
         const deviceBound = bindToDevice(rsa, deviceFingerprint);
         return deviceBound;
     }
   }
-  
-  async decrypt(encryptedData: string, level: EncryptionLevel, userKey: string, context: DecryptContext) {
+
+  async decrypt(
+    encryptedData: string,
+    level: EncryptionLevel,
+    userKey: string,
+    context: DecryptContext,
+  ) {
     // Verify 2FA if required
-    if (level === 'maximum' && !context.twoFactorVerified) {
-      throw new Error('2FA required');
+    if (level === "maximum" && !context.twoFactorVerified) {
+      throw new Error("2FA required");
     }
-    
+
     // Verify device if required
-    if (level === 'maximum' && !verifyDevice(context.deviceFingerprint)) {
-      throw new Error('Unrecognized device');
+    if (level === "maximum" && !verifyDevice(context.deviceFingerprint)) {
+      throw new Error("Unrecognized device");
     }
-    
+
     // Decrypt in reverse
     // ...
   }
@@ -1124,7 +1163,7 @@ Dashboard Principal
 interface Integration {
   id: string;
   name: string;
-  category: 'crm' | 'email' | 'payment' | 'analytics' | 'storage' | 'messaging';
+  category: "crm" | "email" | "payment" | "analytics" | "storage" | "messaging";
   config: any;
   webhooks?: WebhookConfig[];
 }
@@ -1134,36 +1173,36 @@ const AVAILABLE_INTEGRATIONS = {
   hubspot: { oauth: true, api_key: true },
   salesforce: { oauth: true },
   pipedrive: { api_key: true },
-  
+
   // Email Marketing
   mailchimp: { oauth: true, api_key: true },
   convertkit: { api_key: true },
   activecampaign: { api_key: true },
-  
+
   // Payment
   stripe: { oauth: true },
   paypal: { oauth: true },
   mercadopago: { oauth: true },
-  
+
   // Storage
   dropbox: { oauth: true },
   google_drive: { oauth: true },
   aws_s3: { api_key: true },
-  
+
   // Messaging
   whatsapp_business: { api_key: true },
   twilio: { api_key: true },
   telegram: { bot_token: true },
-  
+
   // Analytics
   google_analytics: { tracking_id: true },
   mixpanel: { api_key: true },
   amplitude: { api_key: true },
-  
+
   // Blockchain
   ethereum: { wallet_address: true },
   polygon: { wallet_address: true },
-  
+
   // Social Media
   instagram_business: { oauth: true },
   tiktok_business: { oauth: true },
@@ -1186,12 +1225,14 @@ const AVAILABLE_INTEGRATIONS = {
 5. ✅ Lead Magnet
 
 **Tecnologías:**
+
 - Frontend: React actual
 - Backend: Supabase + Edge Functions
 - Encryption: SubtleCrypto API (browser) + Node crypto
 - Storage: Supabase Storage con encryption at rest
 
 **Entregables:**
+
 - UI para crear 5 tipos de QR
 - Sistema de encriptación básico (AES-256)
 - Analytics básicas
@@ -1210,12 +1251,14 @@ const AVAILABLE_INTEGRATIONS = {
 5. ✅ Audit Logs completos
 
 **Tecnologías:**
+
 - Blockchain: Polygon (barato, rápido)
 - 2FA: TOTP (Google Authenticator)
 - Device fingerprinting: FingerprintJS
 - Geofencing: IP geolocation API
 
 **Entregables:**
+
 - Panel de seguridad avanzado
 - Integración blockchain
 - White label para Enterprise
@@ -1234,12 +1277,14 @@ const AVAILABLE_INTEGRATIONS = {
 5. ✅ Affiliate system
 
 **Tecnologías:**
+
 - DRM: Encrypted HLS streaming
 - Watermarking: Dynamic canvas watermarks
 - Payment: Stripe Connect
 - Anti-piracy: Reverse image search API
 
 **Entregables:**
+
 - Creator dashboard
 - Revenue analytics
 - Payout system
@@ -1258,12 +1303,14 @@ const AVAILABLE_INTEGRATIONS = {
 5. ✅ UTM tracking automático
 
 **Tecnologías:**
+
 - Social APIs: Instagram Basic Display, TikTok, YouTube Data
 - Review APIs: Google My Business, Yelp
 - A/B Testing: Custom implementation
 - Attribution: UTM + server-side tracking
 
 **Entregables:**
+
 - Marketing suite completa
 - Template gallery para campañas
 - ROI calculator
@@ -1282,12 +1329,14 @@ const AVAILABLE_INTEGRATIONS = {
 5. ✅ API access
 
 **Tecnologías:**
+
 - SSO: SAML 2.0
 - API: REST + GraphQL
 - Webhooks: Event-driven architecture
 - Multi-tenancy: Row-level security (Supabase)
 
 **Entregables:**
+
 - Enterprise tier ($299/mes)
 - API documentation
 - SDK (JavaScript, Python)
@@ -1306,12 +1355,14 @@ const AVAILABLE_INTEGRATIONS = {
 5. ✅ Marketplace (templates + QR types)
 
 **Tecnologías:**
+
 - AR: WebXR API
 - Marketplace: Commission system
 - Geolocation: GPS + AR compass
 - AI: GPT-4 para content suggestions
 
 **Entregables:**
+
 - Creative suite
 - Template marketplace
 - Community features
@@ -1322,7 +1373,9 @@ const AVAILABLE_INTEGRATIONS = {
 ## MODELO DE PRICING COMPLETO
 
 ### 🆓 FREE TIER
+
 **$0/mes**
+
 - 3 QR codes activos
 - Link in Bio básico
 - Analytics básicas
@@ -1332,9 +1385,11 @@ const AVAILABLE_INTEGRATIONS = {
 ---
 
 ### 💎 PRO TIER
+
 **$19.99/mes o $199/año (17% off)**
 
 Incluye FREE +
+
 - ✅ 50 QR codes activos
 - ✅ Todos los tipos de QR (excepto Enterprise)
 - ✅ Encrypted Documents (hasta 100MB)
@@ -1356,9 +1411,11 @@ Incluye FREE +
 ---
 
 ### 👑 ELITE TIER
+
 **$49.99/mes o $499/año (17% off)**
 
 Incluye PRO +
+
 - ✨ 200 QR codes activos
 - ✨ Maximum encryption
 - ✨ Premium Content (3% fee - menor comisión)
@@ -1376,9 +1433,11 @@ Incluye PRO +
 ---
 
 ### 🏢 ENTERPRISE TIER
+
 **$299/mes o $2,999/año (Custom)**
 
 Incluye ELITE +
+
 - 🔥 QR codes ilimitados
 - 🔥 Employee ID Badges (hasta 100)
 - 🔥 Inventory Management ilimitado
@@ -1400,14 +1459,14 @@ Incluye ELITE +
 
 ### Escenario Base (12 meses):
 
-| Métrica | Mes 3 | Mes 6 | Mes 12 |
-|---------|-------|-------|--------|
-| Free users | 1,000 | 5,000 | 25,000 |
-| Pro users | 50 | 250 | 1,250 |
-| Elite users | 10 | 75 | 375 |
-| Enterprise | 2 | 8 | 25 |
-| **MRR** | **$1,598** | **$9,967** | **$44,728** |
-| **ARR** | **$19,176** | **$119,604** | **$536,736** |
+| Métrica     | Mes 3       | Mes 6        | Mes 12       |
+| ----------- | ----------- | ------------ | ------------ |
+| Free users  | 1,000       | 5,000        | 25,000       |
+| Pro users   | 50          | 250          | 1,250        |
+| Elite users | 10          | 75           | 375          |
+| Enterprise  | 2           | 8            | 25           |
+| **MRR**     | **$1,598**  | **$9,967**   | **$44,728**  |
+| **ARR**     | **$19,176** | **$119,604** | **$536,736** |
 
 ### Revenue Breakdown Mes 12:
 
@@ -1442,21 +1501,25 @@ Profit Margin: 31%
 ### 🎯 Target Audiences por Caso de Uso:
 
 **1. Documentos Corporativos:**
+
 - Target: CFOs, HR managers, Legal departments
 - Canal: LinkedIn Ads, Industry conferences
 - Mensaje: "Compartir documentos confidenciales nunca fue tan seguro"
 
 **2. Contenido Premium:**
+
 - Target: OnlyFans creators, YouTubers, Coaches
 - Canal: Instagram, TikTok, Creator communities
 - Mensaje: "Protege tu contenido y monetiza sin miedo"
 
 **3. Marketing & Growth:**
+
 - Target: Digital marketers, Small business owners
 - Canal: Facebook Ads, Google Ads, SEO
 - Mensaje: "Más seguidores, más reviews, más ventas"
 
 **4. Enterprise:**
+
 - Target: CIOs, Operations managers
 - Canal: Sales outreach, Partnerships
 - Mensaje: "Gestión de activos y empleados en un solo lugar"
@@ -1466,17 +1529,20 @@ Profit Margin: 31%
 ### 📢 Content Marketing:
 
 **Blog posts:**
+
 - "10 Ways to Use QR Codes Beyond Menus"
 - "How to Protect Your Company's Confidential Documents"
 - "Case Study: How [Company] Increased Reviews by 300%"
 - "The Complete Guide to QR Code Security"
 
 **YouTube videos:**
+
 - Tutorial: "Create an Encrypted Document QR in 2 Minutes"
 - Behind the scenes: "How Our Encryption Works"
 - Customer stories
 
 **Podcasts:**
+
 - Guest on marketing podcasts
 - Guest on tech/security podcasts
 
@@ -1485,12 +1551,14 @@ Profit Margin: 31%
 ## CONCLUSIÓN: VISIÓN A 3 AÑOS
 
 ### Año 1: Product-Market Fit
+
 - Lanzar 30+ tipos de QR
 - Alcanzar 1,000 paying customers
 - $500k ARR
 - Team de 5 personas
 
 ### Año 2: Scale & Expansion
+
 - Marketplace de templates
 - International expansion (LATAM, Europe)
 - Partnerships con enterprise
@@ -1498,6 +1566,7 @@ Profit Margin: 31%
 - Team de 20 personas
 
 ### Año 3: Market Leader
+
 - Adquisición de competidores pequeños
 - Lanzar API pública
 - White label a gran escala
@@ -1509,18 +1578,21 @@ Profit Margin: 31%
 ## NEXT STEPS INMEDIATOS
 
 ### Esta Semana:
+
 1. ✅ Diseñar UI para "Encrypted Document QR"
 2. ✅ Implementar encriptación AES-256 básica
 3. ✅ Crear landing page de casos de uso
 4. ✅ Pricing page con 4 tiers
 
 ### Este Mes:
+
 1. ✅ Lanzar MVP de 5 tipos de QR
 2. ✅ Onboarding de primeros 10 beta users
 3. ✅ Implementar analytics básicas
 4. ✅ Marketing content (3 blog posts)
 
 ### Este Trimestre:
+
 1. ✅ Alcanzar $5k MRR
 2. ✅ 500 usuarios registrados
 3. ✅ Integrar Stripe para pagos
@@ -1531,6 +1603,7 @@ Profit Margin: 31%
 **¿Empezamos con la implementación técnica?** 🚀
 
 Puedo crear:
+
 1. Schema de base de datos para QR universal
 2. Componente UI "Create QR" con selector de tipo
 3. Sistema de encriptación modular

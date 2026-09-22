@@ -8,15 +8,7 @@
  * Adapters never invent data. They only report what the source contains.
  */
 
-export type IntakeSourceKind =
-  | "json"
-  | "csv"
-  | "text"
-  | "pdf"
-  | "docx"
-  | "xlsx"
-  | "image"
-  | "url";
+export type IntakeSourceKind = "json" | "csv" | "text" | "pdf" | "docx" | "xlsx" | "image" | "url";
 
 /** A loose, pre-normalization record extracted from any source. */
 export interface DraftRecord {
@@ -193,17 +185,24 @@ export const textAdapter: IntakeAdapter = {
     for (const raw of input.value.split(/\r?\n/)) {
       const line = raw.trim();
       if (!line) continue;
-      if (/:$/.test(line) || (line === line.toUpperCase() && !/[|\-–]/.test(line) && line.length < 40)) {
+      if (
+        /:$/.test(line) ||
+        (line === line.toUpperCase() && !/[|\-–]/.test(line) && line.length < 40)
+      ) {
         category = line.replace(/:$/, "").trim();
         continue;
       }
-      const parts = line.split(/\s*[|]\s*|\s+[-–—]\s+/).map((p) => p.trim()).filter(Boolean);
+      const parts = line
+        .split(/\s*[|]\s*|\s+[-–—]\s+/)
+        .map((p) => p.trim())
+        .filter(Boolean);
       if (parts.length === 0) continue;
       const record: DraftRecord = { name: parts[0] ?? line };
       if (category) record["category"] = category;
       for (const part of parts.slice(1)) {
         if (looksLikePrice(part) && record["price"] === undefined) record["price"] = part;
-        else record["description"] = record["description"] ? `${record["description"]} ${part}` : part;
+        else
+          record["description"] = record["description"] ? `${record["description"]} ${part}` : part;
       }
       draft.records.push(record);
     }

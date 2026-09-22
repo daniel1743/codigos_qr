@@ -8,19 +8,19 @@
 
 La referencia fue leída en modo solo lectura desde `public.pages`:
 
-| Campo | Valor |
-|---|---|
-| Page ID | `0d1ad73e-bedb-4250-a5ff-c33c2c55eaa7` |
-| Title | `Catalogo Fuxion` |
-| Page type | `catalog` |
+| Campo                      | Valor                                                                  |
+| -------------------------- | ---------------------------------------------------------------------- |
+| Page ID                    | `0d1ad73e-bedb-4250-a5ff-c33c2c55eaa7`                                 |
+| Title                      | `Catalogo Fuxion`                                                      |
+| Page type                  | `catalog`                                                              |
 | Template source identifier | `beauty-studio` en metadata persistida; `store-bento-demo` en instance |
-| Theme | `warm` / `Warm Editorial` |
-| Layout | `centered` / header `overlap` |
-| Block count | `3` |
-| Block signature | `productGrid -> heading -> contact` |
-| Product count | `3` |
-| Avatar | `showAvatar=false`, asset conservado |
-| Cover | `full-bleed`, banner habilitado |
+| Theme                      | `warm` / `Warm Editorial`                                              |
+| Layout                     | `centered` / header `overlap`                                          |
+| Block count                | `3`                                                                    |
+| Block signature            | `productGrid -> heading -> contact`                                    |
+| Product count              | `3`                                                                    |
+| Avatar                     | `showAvatar=false`, asset conservado                                   |
+| Cover                      | `full-bleed`, banner habilitado                                        |
 
 La página aprobada no fue editada, guardada, publicada ni usada como fixture.
 

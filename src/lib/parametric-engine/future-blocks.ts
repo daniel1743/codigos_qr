@@ -67,8 +67,16 @@ export const FUTURE_BLOCKS: Record<FutureBlockType, FutureBlockStrategy> = {
     constraints: ["Never emitted without at least one service.", "Prices only when has_prices."],
     fallback: "Keep the primary CTA and link list as the offer surface.",
     archetypes: [
-      "home_service", "appointment_service", "professional_service", "custom_craft",
-      "wellness", "education", "digital_service", "retail", "local_business", "events",
+      "home_service",
+      "appointment_service",
+      "professional_service",
+      "custom_craft",
+      "wellness",
+      "education",
+      "digital_service",
+      "retail",
+      "local_business",
+      "events",
     ],
   }),
   service_area: B({
@@ -93,7 +101,15 @@ export const FUTURE_BLOCKS: Record<FutureBlockType, FutureBlockStrategy> = {
     allowed_variants: ["grid", "carousel", "masonry"],
     constraints: ["Never uses the identity avatar as gallery media."],
     fallback: "Card media in the current recipe, when supported.",
-    archetypes: ["appointment_service", "hospitality", "food_service", "creator", "custom_craft", "events", "retail"],
+    archetypes: [
+      "appointment_service",
+      "hospitality",
+      "food_service",
+      "creator",
+      "custom_craft",
+      "events",
+      "retail",
+    ],
   }),
   portfolio_grid: B({
     type: "portfolio_grid",
@@ -130,8 +146,15 @@ export const FUTURE_BLOCKS: Record<FutureBlockType, FutureBlockStrategy> = {
     constraints: ["Never generated or paraphrased by the engine."],
     fallback: "trust_badges when available, otherwise nothing.",
     archetypes: [
-      "home_service", "professional_service", "appointment_service", "wellness",
-      "real_estate", "education", "local_business", "retail", "hospitality",
+      "home_service",
+      "professional_service",
+      "appointment_service",
+      "wellness",
+      "real_estate",
+      "education",
+      "local_business",
+      "retail",
+      "hospitality",
     ],
   }),
   social_proof: B({
@@ -156,7 +179,13 @@ export const FUTURE_BLOCKS: Record<FutureBlockType, FutureBlockStrategy> = {
     allowed_variants: ["accordion", "list"],
     constraints: ["Never above the primary conversion block."],
     fallback: "Omit.",
-    archetypes: ["professional_service", "home_service", "education", "wellness", "digital_service"],
+    archetypes: [
+      "professional_service",
+      "home_service",
+      "education",
+      "wellness",
+      "digital_service",
+    ],
   }),
   hours: B({
     type: "hours",
@@ -180,7 +209,14 @@ export const FUTURE_BLOCKS: Record<FutureBlockType, FutureBlockStrategy> = {
     allowed_variants: ["address", "address_map", "multi_list"],
     constraints: ["Map rendering is a renderer concern, never engine CSS."],
     fallback: "Omit.",
-    archetypes: ["food_service", "local_business", "retail", "hospitality", "appointment_service", "real_estate"],
+    archetypes: [
+      "food_service",
+      "local_business",
+      "retail",
+      "hospitality",
+      "appointment_service",
+      "real_estate",
+    ],
   }),
   pricing: B({
     type: "pricing",
@@ -192,7 +228,14 @@ export const FUTURE_BLOCKS: Record<FutureBlockType, FutureBlockStrategy> = {
     allowed_variants: ["list", "tiers"],
     constraints: ["Never emitted when price_model is quote or none."],
     fallback: "Quote CTA.",
-    archetypes: ["appointment_service", "wellness", "education", "retail", "digital_service", "hospitality"],
+    archetypes: [
+      "appointment_service",
+      "wellness",
+      "education",
+      "retail",
+      "digital_service",
+      "hospitality",
+    ],
   }),
   trust_badges: B({
     type: "trust_badges",
@@ -292,21 +335,19 @@ export const FUTURE_BLOCKS: Record<FutureBlockType, FutureBlockStrategy> = {
   }),
 };
 
-export function contentSatisfied(
-  block: FutureBlockStrategy,
-  content: ContentInventoryV1,
-): boolean {
+export function contentSatisfied(block: FutureBlockStrategy, content: ContentInventoryV1): boolean {
   return block.required_content.every(
     (key) => (content[key] as { available: boolean }).available === true,
   );
 }
 
-export function signalsFavor(
-  block: FutureBlockStrategy,
-  signals: BusinessSignalsV1,
-): boolean {
+export function signalsFavor(block: FutureBlockStrategy, signals: BusinessSignalsV1): boolean {
   if (block.type === "pricing") {
-    return signals.price_model === "fixed" || signals.price_model === "starting_at" || signals.price_model === "range";
+    return (
+      signals.price_model === "fixed" ||
+      signals.price_model === "starting_at" ||
+      signals.price_model === "range"
+    );
   }
   if (block.type === "service_area") {
     return signals.locality === "service_area" || signals.locality === "multi_location";

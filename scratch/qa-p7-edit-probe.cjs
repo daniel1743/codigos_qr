@@ -24,18 +24,25 @@ const FIELD = process.argv[3] ?? "qa-p7-seo-probe";
   const browser = await chromium.launch();
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
   const page = await context.newPage();
-  page.on("pageerror", (e) => out.pageerror = (out.pageerror ?? []).concat(e.message));
+  page.on("pageerror", (e) => (out.pageerror = (out.pageerror ?? []).concat(e.message)));
 
   await page.goto(BASE + "/editor", { waitUntil: "domcontentloaded", timeout: 90000 });
   try {
     await page.waitForSelector("#email", { timeout: 20000 });
   } catch {}
-  if (await page.locator("#email").isVisible().catch(() => false)) {
+  if (
+    await page
+      .locator("#email")
+      .isVisible()
+      .catch(() => false)
+  ) {
     await page.locator("#email").fill(env.QA_EMAIL);
     await page.locator("#password").fill(env.QA_PASSWORD);
     await page.getByRole("button", { name: "Entrar al editor" }).click();
   }
-  await page.waitForFunction(() => document.cookie.includes("sb-"), { timeout: 30000 }).catch(() => {});
+  await page
+    .waitForFunction(() => document.cookie.includes("sb-"), { timeout: 30000 })
+    .catch(() => {});
 
   await page.goto(BASE + "/pages/" + pageId + "/edit", {
     waitUntil: "domcontentloaded",
@@ -80,13 +87,16 @@ const FIELD = process.argv[3] ?? "qa-p7-seo-probe";
     await page.waitForTimeout(1000);
     out[`status_${attempt}`] = await page.evaluate(
       () =>
-        document.querySelector('[data-testid="power-editor-save-status"]')?.textContent?.trim() ?? null,
+        document.querySelector('[data-testid="power-editor-save-status"]')?.textContent?.trim() ??
+        null,
     );
   }
   out.after_save_input = await target.inputValue();
 
   const row = (
-    await (await fetch(base + "/rest/v1/pages?select=template_config&id=eq." + pageId, { headers: srH })).json()
+    await (
+      await fetch(base + "/rest/v1/pages?select=template_config&id=eq." + pageId, { headers: srH })
+    ).json()
   )[0];
   out.db_seo_title = row?.template_config?.editorConfig?.seo?.title ?? null;
 

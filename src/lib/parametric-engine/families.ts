@@ -5,14 +5,7 @@
  * values that rules.ts then modulates with the design profile.
  */
 
-import type {
-  Alignment,
-  BorderStyle,
-  Density,
-  FamilyId,
-  RadiusToken,
-  Scale,
-} from "./types";
+import type { Alignment, BorderStyle, Density, FamilyId, RadiusToken, Scale } from "./types";
 
 export interface FamilyDefinition {
   id: FamilyId;

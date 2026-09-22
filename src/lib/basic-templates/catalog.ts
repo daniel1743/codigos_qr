@@ -301,7 +301,8 @@ const ALL_TEMPLATES: TemplateDefinition[] = [
     id: "amanda",
     name: "Amanda",
     family: "standalone",
-    description: "Hero con avatar circular superpuesto, CTA principal y botones sociales en dos columnas.",
+    description:
+      "Hero con avatar circular superpuesto, CTA principal y botones sociales en dos columnas.",
     visualDirection: [
       "hero fotográfico",
       "avatar circular superpuesto",
@@ -369,7 +370,8 @@ const ALL_TEMPLATES: TemplateDefinition[] = [
     id: "eudora",
     name: "Eudora",
     family: "standalone",
-    description: "Fondo orgánico malva/rosa, identidad superior, avatar circular y botones en dos columnas.",
+    description:
+      "Fondo orgánico malva/rosa, identidad superior, avatar circular y botones en dos columnas.",
     visualDirection: [
       "fondo orgánico",
       "identidad superior",
@@ -404,7 +406,8 @@ const ALL_TEMPLATES: TemplateDefinition[] = [
     id: "barbara",
     name: "Barbara",
     family: "standalone",
-    description: "Hero teal con persona, branding y redes; fondo crema y cards de servicios 72% contenido / 28% imagen.",
+    description:
+      "Hero teal con persona, branding y redes; fondo crema y cards de servicios 72% contenido / 28% imagen.",
     visualDirection: [
       "hero teal con persona",
       "branding y redes",
@@ -439,8 +442,20 @@ const ALL_TEMPLATES: TemplateDefinition[] = [
     name: "Studio",
     family: "standalone",
     description: "Hero dividido, branding, tarjetas de menú y redes sociales.",
-    visualDirection: ["hero dividido", "branding", "descripción", "social links", "cards de menú", "footer"],
-    structure: { family: "standalone", heroStyle: "straight", layout: "locked", locked: ["layout", "diseño"] },
+    visualDirection: [
+      "hero dividido",
+      "branding",
+      "descripción",
+      "social links",
+      "cards de menú",
+      "footer",
+    ],
+    structure: {
+      family: "standalone",
+      heroStyle: "straight",
+      layout: "locked",
+      locked: ["layout", "diseño"],
+    },
     editable: [
       { key: "name", label: "Nombre", type: "name" },
       { key: "bio", label: "Descripción", type: "bio" },
@@ -462,8 +477,20 @@ const ALL_TEMPLATES: TemplateDefinition[] = [
     name: "Classic Bio",
     family: "standalone",
     description: "Banner, avatar superpuesto, botones blancos y galería opcional.",
-    visualDirection: ["banner", "avatar superpuesto", "social icons", "botones blancos", "galería", "footer"],
-    structure: { family: "standalone", heroStyle: "curved", layout: "locked", locked: ["layout", "diseño"] },
+    visualDirection: [
+      "banner",
+      "avatar superpuesto",
+      "social icons",
+      "botones blancos",
+      "galería",
+      "footer",
+    ],
+    structure: {
+      family: "standalone",
+      heroStyle: "curved",
+      layout: "locked",
+      locked: ["layout", "diseño"],
+    },
     editable: [
       { key: "avatar", label: "Avatar", type: "avatar" },
       { key: "name", label: "Nombre", type: "name" },
@@ -485,8 +512,20 @@ const ALL_TEMPLATES: TemplateDefinition[] = [
     name: "Sage",
     family: "standalone",
     description: "Banner tropical, curva, avatar superpuesto y botones blancos.",
-    visualDirection: ["banner tropical", "curva", "avatar superpuesto", "social icons", "botones blancos", "fondo verde salvia"],
-    structure: { family: "standalone", heroStyle: "curved", layout: "locked", locked: ["layout", "diseño"] },
+    visualDirection: [
+      "banner tropical",
+      "curva",
+      "avatar superpuesto",
+      "social icons",
+      "botones blancos",
+      "fondo verde salvia",
+    ],
+    structure: {
+      family: "standalone",
+      heroStyle: "curved",
+      layout: "locked",
+      locked: ["layout", "diseño"],
+    },
     editable: [
       { key: "avatar", label: "Avatar", type: "avatar" },
       { key: "name", label: "Nombre", type: "name" },
@@ -508,8 +547,19 @@ const ALL_TEMPLATES: TemplateDefinition[] = [
     name: "Silver",
     family: "standalone",
     description: "Banner, avatar, redes circulares y botones pill metálicos.",
-    visualDirection: ["banner", "avatar", "social icons circulares", "botones pill metálicos", "fondo plateado"],
-    structure: { family: "standalone", heroStyle: "straight", layout: "locked", locked: ["layout", "diseño"] },
+    visualDirection: [
+      "banner",
+      "avatar",
+      "social icons circulares",
+      "botones pill metálicos",
+      "fondo plateado",
+    ],
+    structure: {
+      family: "standalone",
+      heroStyle: "straight",
+      layout: "locked",
+      locked: ["layout", "diseño"],
+    },
     editable: [
       { key: "avatar", label: "Avatar", type: "avatar" },
       { key: "name", label: "Nombre", type: "name" },
@@ -531,8 +581,20 @@ const ALL_TEMPLATES: TemplateDefinition[] = [
     name: "Fitness",
     family: "standalone",
     description: "Hero dark green, avatar, cards, CTA newsletter y footer.",
-    visualDirection: ["hero dark green", "avatar", "social icons", "cards", "CTA newsletter", "footer"],
-    structure: { family: "standalone", heroStyle: "straight", layout: "locked", locked: ["layout", "diseño"] },
+    visualDirection: [
+      "hero dark green",
+      "avatar",
+      "social icons",
+      "cards",
+      "CTA newsletter",
+      "footer",
+    ],
+    structure: {
+      family: "standalone",
+      heroStyle: "straight",
+      layout: "locked",
+      locked: ["layout", "diseño"],
+    },
     editable: [
       { key: "avatar", label: "Avatar", type: "avatar" },
       { key: "name", label: "Nombre", type: "name" },
@@ -555,8 +617,20 @@ const ALL_TEMPLATES: TemplateDefinition[] = [
     name: "Neon",
     family: "standalone",
     description: "Dark purple/neon, avatar con aro degradado, cards y highlight card.",
-    visualDirection: ["dark purple/neon", "avatar con aro degradado", "verified opcional", "social icons", "cards", "footer"],
-    structure: { family: "standalone", heroStyle: "straight", layout: "locked", locked: ["layout", "diseño"] },
+    visualDirection: [
+      "dark purple/neon",
+      "avatar con aro degradado",
+      "verified opcional",
+      "social icons",
+      "cards",
+      "footer",
+    ],
+    structure: {
+      family: "standalone",
+      heroStyle: "straight",
+      layout: "locked",
+      locked: ["layout", "diseño"],
+    },
     editable: [
       { key: "avatar", label: "Avatar", type: "avatar" },
       { key: "name", label: "Nombre", type: "name" },

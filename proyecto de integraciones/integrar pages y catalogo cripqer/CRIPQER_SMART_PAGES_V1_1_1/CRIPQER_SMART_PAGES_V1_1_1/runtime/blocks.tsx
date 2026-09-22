@@ -55,7 +55,13 @@ export function Section({
   );
 }
 
-export function SectionHeading({ title, subtitle }: { title: string; subtitle?: string | undefined }) {
+export function SectionHeading({
+  title,
+  subtitle,
+}: {
+  title: string;
+  subtitle?: string | undefined;
+}) {
   return (
     <header className="sp-heading">
       <h2 className="sp-heading__title">{title}</h2>
@@ -115,7 +121,11 @@ function Media({
   const style = ratio ? ({ aspectRatio: ratio } as const) : undefined;
   if (!media)
     return (
-      <div className={`sp-media sp-media--empty ${className ?? ""}`} style={style} aria-hidden="true" />
+      <div
+        className={`sp-media sp-media--empty ${className ?? ""}`}
+        style={style}
+        aria-hidden="true"
+      />
     );
   return (
     <img
@@ -486,13 +496,16 @@ export function ItemCard({
   onAct: (item: CatalogItemV1) => void;
 }) {
   const price = formatPrice(item);
-  const showMedia =
-    item.media.length > 0 || variant === "portfolio" || variant === "listing";
+  const showMedia = item.media.length > 0 || variant === "portfolio" || variant === "listing";
   return (
     <article className={`sp-card sp-card--${variant}${featured ? " sp-card--featured" : ""}`}>
       {showMedia ? (
         <button type="button" className="sp-card__mediabtn" onClick={() => onOpen(item)}>
-          <Media media={item.media[0]} className="sp-card__media" ratio={RATIO_BY_VARIANT[variant]} />
+          <Media
+            media={item.media[0]}
+            className="sp-card__media"
+            ratio={RATIO_BY_VARIANT[variant]}
+          />
           {item.featured ? <span className="sp-tag">Featured</span> : null}
           <span className="sp-sr">View details for {item.name}</span>
         </button>
@@ -653,7 +666,11 @@ export function FeaturedShowcase({
                 {action.label}
               </a>
             ) : (
-              <button type="button" className="sp-btn sp-btn--secondary" onClick={() => onOpen(lead)}>
+              <button
+                type="button"
+                className="sp-btn sp-btn--secondary"
+                onClick={() => onOpen(lead)}
+              >
                 Details
               </button>
             )}
@@ -728,7 +745,11 @@ export function MenuSections({
                   ) : null}
                   <div className="sp-menuitem__body">
                     <div className="sp-menuitem__row">
-                      <button type="button" className="sp-menuitem__name" onClick={() => onOpen(item)}>
+                      <button
+                        type="button"
+                        className="sp-menuitem__name"
+                        onClick={() => onOpen(item)}
+                      >
                         {item.name}
                       </button>
                       <span className="sp-menuitem__dots" aria-hidden="true" />
@@ -736,7 +757,9 @@ export function MenuSections({
                         {price ?? "On request"}
                       </span>
                     </div>
-                    {item.description ? <p className="sp-menuitem__desc">{item.description}</p> : null}
+                    {item.description ? (
+                      <p className="sp-menuitem__desc">{item.description}</p>
+                    ) : null}
                     {action.href ? (
                       <a
                         className="sp-btn sp-btn--ghost sp-btn--sm"
@@ -918,7 +941,12 @@ export function Location({ contact }: { contact: ContactInfoV1 }) {
         {contact.hours ? <p className="sp-location__hours">{contact.hours}</p> : null}
       </div>
       {contact.mapUrl ? (
-        <a className="sp-btn sp-btn--secondary" href={contact.mapUrl} target="_blank" rel="noopener noreferrer">
+        <a
+          className="sp-btn sp-btn--secondary"
+          href={contact.mapUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           Open in maps
         </a>
       ) : null}
@@ -928,8 +956,14 @@ export function Location({ contact }: { contact: ContactInfoV1 }) {
 
 export function ContactBlock({ contact }: { contact: ContactInfoV1 }) {
   const rows: Array<{ label: string; value: string; href?: string }> = [];
-  if (contact.phone) rows.push({ label: "Phone", value: contact.phone, href: `tel:${contact.phone.replace(/[^\d+]/g, "")}` });
-  if (contact.email) rows.push({ label: "Email", value: contact.email, href: `mailto:${contact.email}` });
+  if (contact.phone)
+    rows.push({
+      label: "Phone",
+      value: contact.phone,
+      href: `tel:${contact.phone.replace(/[^\d+]/g, "")}`,
+    });
+  if (contact.email)
+    rows.push({ label: "Email", value: contact.email, href: `mailto:${contact.email}` });
   if (contact.address) rows.push({ label: "Address", value: contact.address });
   if (contact.hours) rows.push({ label: "Hours", value: contact.hours });
   return (
@@ -1016,7 +1050,9 @@ export function Footer({
 
         <div className="sp-footer__col">
           <h4>Contact</h4>
-          {contact.phone ? <a href={`tel:${contact.phone.replace(/[^\d+]/g, "")}`}>{contact.phone}</a> : null}
+          {contact.phone ? (
+            <a href={`tel:${contact.phone.replace(/[^\d+]/g, "")}`}>{contact.phone}</a>
+          ) : null}
           {contact.email ? <a href={`mailto:${contact.email}`}>{contact.email}</a> : null}
           {contact.address ? <span>{contact.address}</span> : null}
           {contact.socials.map((social) => (
@@ -1064,9 +1100,19 @@ export function ItemDetail({
 
   return (
     <div className="sp-detail" role="dialog" aria-modal="true" aria-label={item.name}>
-      <button type="button" className="sp-detail__backdrop" aria-label="Close details" onClick={onClose} />
+      <button
+        type="button"
+        className="sp-detail__backdrop"
+        aria-label="Close details"
+        onClick={onClose}
+      />
       <div className="sp-detail__panel" ref={panelRef}>
-        <button type="button" className="sp-detail__close" onClick={onClose} aria-label="Close details">
+        <button
+          type="button"
+          className="sp-detail__close"
+          onClick={onClose}
+          aria-label="Close details"
+        >
           <span aria-hidden="true">×</span>
         </button>
         {item.media.length > 0 ? (
@@ -1091,7 +1137,11 @@ export function ItemDetail({
         ) : null}
         <div className="sp-detail__body">
           <h2 className="sp-detail__title">{item.name}</h2>
-          {price ? <p className="sp-price">{price}</p> : <p className="sp-price sp-price--muted">Price on request</p>}
+          {price ? (
+            <p className="sp-price">{price}</p>
+          ) : (
+            <p className="sp-price sp-price--muted">Price on request</p>
+          )}
           {item.description ? <p className="sp-detail__desc">{item.description}</p> : null}
           {item.attributes.length > 0 ? (
             <dl className="sp-detail__attrs">
@@ -1139,7 +1189,12 @@ export function CategoryShowcase({
   activeId,
   onSelect,
 }: {
-  tiles: Array<{ categoryId: string; label: string; itemCount: number; media?: MediaAssetV1 | undefined }>;
+  tiles: Array<{
+    categoryId: string;
+    label: string;
+    itemCount: number;
+    media?: MediaAssetV1 | undefined;
+  }>;
   activeId: string | null;
   onSelect: (id: string | null) => void;
 }) {

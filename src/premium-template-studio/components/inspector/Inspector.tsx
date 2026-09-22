@@ -1130,7 +1130,9 @@ function TypographyOverrideEditor({
             { value: "center", label: "Centro" },
             { value: "right", label: "Der" },
           ]}
-          onChange={(v) => set("textAlign", v === "" ? undefined : (v as any))}
+          onChange={(v) =>
+            set("textAlign", v === "" ? undefined : (v as "left" | "center" | "right"))
+          }
         />
       </Field>
     </div>
@@ -3454,6 +3456,14 @@ function ProductGridBlockInspector({ block }: { block: TemplateBlock }) {
               }
             />
           </Field>
+          <Field label="Price typography">
+            <TypographyOverrideEditor
+              value={prod.priceTypography}
+              onChange={(priceTypography) =>
+                update(products.map((p) => (p.id === prod.id ? { ...p, priceTypography } : p)))
+              }
+            />
+          </Field>
           <Field label="Description">
             <TextArea
               value={prod.description ?? ""}
@@ -3470,7 +3480,17 @@ function ProductGridBlockInspector({ block }: { block: TemplateBlock }) {
             deleteAssetOnRemove={false}
             cleanupPreviousAssetOnReplace={false}
             onChange={(v) =>
-              update(products.map((p) => (p.id === prod.id ? { ...p, imageUrl: v } : p)))
+              update(
+                products.map((p) =>
+                  p.id === prod.id
+                    ? {
+                        ...p,
+                        imageUrl: v,
+                        imageProvenance: v ? { origin: "owner" as const } : undefined,
+                      }
+                    : p,
+                ),
+              )
             }
           />
           <Field label="CTA Label">

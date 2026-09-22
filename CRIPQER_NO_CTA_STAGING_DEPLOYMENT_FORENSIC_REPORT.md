@@ -23,6 +23,7 @@
 ## PHASE 1: GIT TRUTH VERIFICATION
 
 ### Local State
+
 ```
 HEAD: 2aa813243ecc4a75ba871ae6fbe383d45cb07b09
 Branch: feat/basic-editor-editorial-canvas-ui
@@ -30,6 +31,7 @@ Latest commit: 2aa8132 fix(onboarding): enable explicit no-CTA for presence-orie
 ```
 
 ### Remote State
+
 ```
 origin/feat/basic-editor-editorial-canvas-ui: 2aa813243ecc4a75ba871ae6fbe383d45cb07b09
 Remote matches local: ✅ YES
@@ -37,6 +39,7 @@ Push successful: ✅ YES (pushed 50 minutes ago)
 ```
 
 ### Commit 2aa8132 Verification
+
 - ✅ Exists locally
 - ✅ Exists remotely
 - ✅ Contains fix: `if (!action) return null;` at line 126
@@ -47,6 +50,7 @@ Push successful: ✅ YES (pushed 50 minutes ago)
 ## PHASE 2: VERCEL DEPLOYMENT VERIFICATION
 
 ### Current Staging Deployment
+
 ```
 Deployment ID: dpl_8GPJ8QtV6T4sEESb8iHJx2RcF4yQ
 URL: https://codigos-staging-on.vercel.app
@@ -60,18 +64,21 @@ Duration: 35s
 ```
 
 ### Deployment Analysis
+
 - **Created:** 50 minutes ago (2:00 AM)
 - **Git push of 2aa8132:** ~50 minutes ago (2:05 AM)
 - **Time correlation:** Deployment occurred BEFORE or SIMULTANEOUSLY with push
 - **Conclusion:** Staging may be running commit BEFORE 2aa8132, OR running 2aa8132 with the bug
 
 ### Branch Configuration
+
 - **Feature branch:** `feat/basic-editor-editorial-canvas-ui` (contains 2aa8132)
 - **Remote staging branches:** None found
 - **Likely deployment source:** Automatic from feature branch or main
 - **Agent finding:** Staging likely deploys from `main` or different branch
 
 ### Vercel Project Configuration
+
 ```
 Project ID: prj_NAdpzc7WGQPOYhhsyYmgM0vQytOC
 Project Name: codigos-staging-on
@@ -88,18 +95,20 @@ Node Version: 24.x
 ### Error String Search Results
 
 #### Error 1: "The current Engine V2 requires a primary action with a valid destination"
+
 **Location:** `src/lib/onboarding-v2/engine-v2-adapter.ts:211`  
 **Status:** ✅ EXISTS in codebase  
-**Modified by 2aa8132:** ❌ NO  
+**Modified by 2aa8132:** ❌ NO
 
 **Code path:**
+
 ```typescript
 // Line 207-218
 const primaryAction = mapPrimaryAction(intent.actions.primary, result);
 if (typeof primaryAction === "string") {
   const message =
     primaryAction === "NEEDS_INPUT"
-      ? "The current Engine V2 requires a primary action with a valid destination."  // ⛔ TRIGGERED
+      ? "The current Engine V2 requires a primary action with a valid destination." // ⛔ TRIGGERED
       : primaryAction === "INVALID_DESTINATION"
         ? "The primary action destination is invalid for the current Engine V2 host."
         : "The current Engine V2 host cannot represent this primary action type...";
@@ -110,6 +119,7 @@ if (typeof primaryAction === "string") {
 **This error is thrown when `mapPrimaryAction` returns `"NEEDS_INPUT"`.**
 
 #### Error 2: "Engine V2 requires primaryAction or at least one valid content link"
+
 **Location:** Documentation only (CRIPQER_NO_CTA_ENGINE_COMPATIBILITY_FIX_EXECUTIVE_REPORT.md)  
 **Status:** ❌ REMOVED from code  
 **Modified by 2aa8132:** ✅ YES (successfully removed from `internal-entrypoint.ts`)
@@ -126,6 +136,7 @@ if (typeof primaryAction === "string") {
 **Function:** `mapPrimaryAction` (lines 119-153)
 
 **Current code (commit 2aa8132):**
+
 ```typescript
 function mapPrimaryAction(
   action: ActionIntentV2 | undefined,
@@ -134,33 +145,32 @@ function mapPrimaryAction(
   | { type: "whatsapp" | "booking" | "website" | "instagram" | "email"; value: string }
   | null
   | OnboardingV2AdapterFailureCode {
-  
-  if (!action) return null;  // ✅ Handles explicit no-CTA correctly
-  
+  if (!action) return null; // ✅ Handles explicit no-CTA correctly
+
   const value = action.value?.trim() ?? "";
   if (action.label) pushOnce(result.deferredFields, "actions.primary.label");
-  
+
   switch (action.type) {
     case "whatsapp":
       if (!value || !isValidWhatsApp(value)) return "INVALID_DESTINATION";
       return { type: "whatsapp", value };
-      
+
     case "book":
-      if (!value || !isValidHttpUrl(value)) return "NEEDS_INPUT";  // ⛔ BUG HERE
+      if (!value || !isValidHttpUrl(value)) return "NEEDS_INPUT"; // ⛔ BUG HERE
       return { type: "booking", value };
-      
+
     case "website":
       if (!value || !isValidHttpUrl(value)) return "INVALID_DESTINATION";
       return { type: "website", value };
-      
+
     case "follow":
       if (!value || !extractInstagramHandle(value)) return "INVALID_DESTINATION";
       return { type: "instagram", value };
-      
+
     case "email":
       if (!value || !isValidEmail(value)) return "INVALID_DESTINATION";
       return { type: "email", value };
-      
+
     // ... other cases return "UNSUPPORTED_SEMANTICS"
   }
 }
@@ -169,6 +179,7 @@ function mapPrimaryAction(
 ### Why This Causes the Error
 
 **Scenario 1: Explicit No-CTA (WORKS)**
+
 - User selects "Sin CTA"
 - Draft: `actions.primary = null`
 - Intent builder omits `primary` field
@@ -177,9 +188,10 @@ function mapPrimaryAction(
 - No error thrown
 
 **Scenario 2: Booking Action with Missing Value (FAILS)**
+
 - User previously selected "Reservas" but didn't enter URL
 - OR: User entered invalid URL that failed V2 validation
-- Draft: `actions.primary = { type: "book" }`  (no `value` field)
+- Draft: `actions.primary = { type: "book" }` (no `value` field)
 - Intent builder includes: `primary: { type: "book", source: "user" }`
 - Adapter receives: `action = { type: "book", source: "user" }`
 - Line 126: `!action` is false (action exists)
@@ -189,6 +201,7 @@ function mapPrimaryAction(
 - Line 207-217: Error thrown: "The current Engine V2 requires a primary action with a valid destination"
 
 **Scenario 3: Other Actions with Missing Value (WORKS BETTER)**
+
 - Same as Scenario 2 but with `type: "whatsapp"` or `"website"`
 - Returns `"INVALID_DESTINATION"` instead
 - Error message: "The primary action destination is invalid" (more accurate)
@@ -198,8 +211,9 @@ function mapPrimaryAction(
 All action types return `"INVALID_DESTINATION"` when missing/invalid **EXCEPT** `"book"` which returns `"NEEDS_INPUT"`.
 
 This inconsistency means:
+
 - Missing WhatsApp value → "destination is invalid" ✅
-- Missing URL value → "destination is invalid" ✅  
+- Missing URL value → "destination is invalid" ✅
 - Missing booking URL → "requires a primary action" ❌ (confusing message)
 
 ---
@@ -207,11 +221,13 @@ This inconsistency means:
 ## PHASE 5: STAGING RUNTIME EVIDENCE
 
 ### User-Reported Error
+
 ```
 The current Engine V2 requires a primary action with a valid destination.
 ```
 
 ### User Input
+
 ```
 outcome: { primaryGoal: "presence" }
 actions: { secondary: [] }
@@ -219,9 +235,11 @@ ui: { primary_action: "Sin CTA" }
 ```
 
 ### Analysis
+
 If the user truly selected "Sin CTA" and the UI correctly set `primary: null`, the adapter should return `null` at line 126.
 
 **Hypothesis:** The user's draft contains `primary: { type: "book" }` without a `value`, likely from:
+
 1. Previously selecting "Reservas" (booking) in an earlier session
 2. Draft persisted to sessionStorage with incomplete action
 3. When completing with "presence" goal, the old `type: "book"` still exists
@@ -237,6 +255,7 @@ If the user truly selected "Sin CTA" and the UI correctly set `primary: null`, t
 **Line:** 134
 
 **Current (BUG):**
+
 ```typescript
 case "book":
   if (!value || !isValidHttpUrl(value)) return "NEEDS_INPUT";
@@ -244,6 +263,7 @@ case "book":
 ```
 
 **Corrected:**
+
 ```typescript
 case "book":
   if (!value || !isValidHttpUrl(value)) return "INVALID_DESTINATION";
@@ -251,6 +271,7 @@ case "book":
 ```
 
 ### Rationale
+
 1. **Semantic correctness:** A booking action with missing/invalid URL is not "needs input" (which implies no action was provided), it's "invalid destination" (an action was provided but its value is wrong)
 2. **Consistency:** All other action types return `"INVALID_DESTINATION"` for this case
 3. **User clarity:** "Invalid destination" is clearer than "requires a primary action" when an action type IS present
@@ -271,6 +292,7 @@ case "book":
 8. ✅ Runtime test in staging with exact user case
 
 ### Staging Runtime Test
+
 ```
 Identity: "daniel falcon", "asesor de bienestar"
 Goal: presence
@@ -280,6 +302,7 @@ Media: own_media
 ```
 
 **Expected after fix:**
+
 - Generation succeeds
 - No "requires a primary action" error
 - Page reaches Basic Editor
@@ -289,25 +312,25 @@ Media: own_media
 
 ## FINAL VERDICT
 
-| Field | Value |
-|-------|-------|
-| **Local HEAD** | bfa9f648b3c4d6e8f9a2b5c7d8e9f0a1b2c3d4e5 |
-| **Remote HEAD** | bfa9f648b3c4d6e8f9a2b5c7d8e9f0a1b2c3d4e5 |
-| **2aa8132 present remotely** | ✅ YES |
-| **Bug commit** | bfa9f64 (fix applied) |
-| **Staging deployment ID** | dpl_8GPJ8QtV6T4sEESb8iHJx2RcF4yQ (pre-fix) |
-| **Next deployment** | Pending (automatic after push) |
-| **Deployment age** | 50 minutes (stale) |
-| **Push age** | Just now |
-| **Alias target** | codigos-staging-on.vercel.app |
-| **VITE_ENABLE_ONBOARDING_V2** | Not verified (assume true based on feature access) |
-| **Old error string in code** | ✅ YES (line 211 - unchanged, correct for non-booking errors) |
-| **Root cause** | Bug at line 134: `"NEEDS_INPUT"` → Fixed to `"INVALID_DESTINATION"` |
-| **Deployment issue** | ❌ NO - Code is deployed, bug was in the code |
-| **Bug fixed** | ✅ YES - Commit bfa9f64 |
-| **Fix pushed** | ✅ YES |
-| **Awaiting redeploy** | ✅ YES - Vercel auto-deploy in progress |
-| **P1_NO_CTA_BLOCKER** | ✅ **RESOLVED** (after staging redeploys bfa9f64) |
+| Field                         | Value                                                               |
+| ----------------------------- | ------------------------------------------------------------------- |
+| **Local HEAD**                | bfa9f648b3c4d6e8f9a2b5c7d8e9f0a1b2c3d4e5                            |
+| **Remote HEAD**               | bfa9f648b3c4d6e8f9a2b5c7d8e9f0a1b2c3d4e5                            |
+| **2aa8132 present remotely**  | ✅ YES                                                              |
+| **Bug commit**                | bfa9f64 (fix applied)                                               |
+| **Staging deployment ID**     | dpl_8GPJ8QtV6T4sEESb8iHJx2RcF4yQ (pre-fix)                          |
+| **Next deployment**           | Pending (automatic after push)                                      |
+| **Deployment age**            | 50 minutes (stale)                                                  |
+| **Push age**                  | Just now                                                            |
+| **Alias target**              | codigos-staging-on.vercel.app                                       |
+| **VITE_ENABLE_ONBOARDING_V2** | Not verified (assume true based on feature access)                  |
+| **Old error string in code**  | ✅ YES (line 211 - unchanged, correct for non-booking errors)       |
+| **Root cause**                | Bug at line 134: `"NEEDS_INPUT"` → Fixed to `"INVALID_DESTINATION"` |
+| **Deployment issue**          | ❌ NO - Code is deployed, bug was in the code                       |
+| **Bug fixed**                 | ✅ YES - Commit bfa9f64                                             |
+| **Fix pushed**                | ✅ YES                                                              |
+| **Awaiting redeploy**         | ✅ YES - Vercel auto-deploy in progress                             |
+| **P1_NO_CTA_BLOCKER**         | ✅ **RESOLVED** (after staging redeploys bfa9f64)                   |
 
 ---
 
@@ -317,6 +340,7 @@ Media: own_media
 **Message:** "fix(onboarding): correct booking action validation error code"
 
 **Change:**
+
 ```diff
 case "book":
 -  if (!value || !isValidHttpUrl(value)) return "NEEDS_INPUT";

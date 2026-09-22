@@ -23,7 +23,13 @@ import {
 } from "../../engine/styleEngine";
 import { hexToRgba, prettyUrl, readableOn } from "../../utils";
 import type { BlockItem, TemplateBlock } from "../../types";
-import { BlockTitle, ContextualItemTarget, EmptyBlockState, InlineText, SmartLink } from "./primitives";
+import {
+  BlockTitle,
+  ContextualItemTarget,
+  EmptyBlockState,
+  InlineText,
+  SmartLink,
+} from "./primitives";
 import type { BlockProps } from "./ContentBlocks";
 import { getPlatformDef } from "../../../constants/platforms";
 import { detectProviderFromUrl } from "../../../lib/smart-link-preview";
@@ -166,68 +172,140 @@ export function LinksBlock({ block }: BlockProps) {
           };
 
           if (hasImage && size === "100") {
-              return (
-              <ContextualItemTarget key={item.id} blockId={block.id} collection="links" itemId={item.id} field="media">
-              <SmartLink
-                href={href}
-                block={block}
-                newTab={item.newTab}
-                ariaLabel={label}
-                style={{ display: "block", minWidth: 0 }}
+            return (
+              <ContextualItemTarget
+                key={item.id}
+                blockId={block.id}
+                collection="links"
+                itemId={item.id}
+                field="media"
               >
-                <article
-                  className="pts-hoverable"
-                  data-media-size="100"
-                  data-media-position="overlay"
-                  style={{
-                    ...cardStyle(theme, block.style),
-                    padding: 0,
-                    overflow: "hidden",
-                    position: "relative",
-                    display: "block",
-                    minWidth: 0,
-                  }}
+                <SmartLink
+                  href={href}
+                  block={block}
+                  newTab={item.newTab}
+                  ariaLabel={label}
+                  style={{ display: "block", minWidth: 0 }}
                 >
-                  <img
-                    src={item.imageUrl}
-                    alt=""
-                    loading="lazy"
+                  <article
+                    className="pts-hoverable"
+                    data-media-size="100"
+                    data-media-position="overlay"
                     style={{
-                      width: "100%",
-                      aspectRatio: "16 / 10",
-                      objectFit: "cover",
+                      ...cardStyle(theme, block.style),
+                      padding: 0,
+                      overflow: "hidden",
+                      position: "relative",
                       display: "block",
-                    }}
-                  />
-                  <span
-                    style={{
-                      position: "absolute",
-                      right: 10,
-                      bottom: 10,
-                      maxWidth: "calc(100% - 20px)",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 6,
-                      padding: "6px 10px",
-                      borderRadius: 8,
-                      background: "rgba(0,0,0,0.55)",
-                      color: "#fff",
-                      fontSize: 13,
-                      fontWeight: 600,
+                      minWidth: 0,
                     }}
                   >
-                    <span style={titleClamp}>{label}</span>
-                    <ArrowUpRight size={14} aria-hidden />
-                  </span>
-                </article>
-              </SmartLink>
+                    <img
+                      src={item.imageUrl}
+                      alt=""
+                      loading="lazy"
+                      style={{
+                        width: "100%",
+                        aspectRatio: "16 / 10",
+                        objectFit: "cover",
+                        display: "block",
+                      }}
+                    />
+                    <span
+                      style={{
+                        position: "absolute",
+                        right: 10,
+                        bottom: 10,
+                        maxWidth: "calc(100% - 20px)",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 6,
+                        padding: "6px 10px",
+                        borderRadius: 8,
+                        background: "rgba(0,0,0,0.55)",
+                        color: "#fff",
+                        fontSize: 13,
+                        fontWeight: 600,
+                      }}
+                    >
+                      <span style={titleClamp}>{label}</span>
+                      <ArrowUpRight size={14} aria-hidden />
+                    </span>
+                  </article>
+                </SmartLink>
               </ContextualItemTarget>
             );
           }
 
           if (hasImage && position === "bottom") {
             return (
-              <ContextualItemTarget key={item.id} blockId={block.id} collection="links" itemId={item.id}>
+              <ContextualItemTarget
+                key={item.id}
+                blockId={block.id}
+                collection="links"
+                itemId={item.id}
+              >
+                <SmartLink
+                  href={href}
+                  block={block}
+                  newTab={item.newTab}
+                  ariaLabel={label}
+                  style={{ display: "block", minWidth: 0 }}
+                >
+                  <article
+                    className="pts-hoverable"
+                    data-media-size={size}
+                    data-media-position="bottom"
+                    style={{
+                      ...cardStyle(theme, block.style),
+                      padding: 0,
+                      overflow: "hidden",
+                      display: "flex",
+                      flexDirection: "column",
+                      minWidth: 0,
+                    }}
+                  >
+                    <span
+                      style={{
+                        minWidth: 0,
+                        padding: theme.cards.padding,
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 3,
+                      }}
+                    >
+                      <span style={titleClamp}>{label}</span>
+                      <span style={applyTypographyOverride(descClamp, item.descriptionTypography)}>
+                        {item.description || prettyUrl(href)}
+                      </span>
+                    </span>
+                    <img
+                      src={item.imageUrl}
+                      alt=""
+                      loading="lazy"
+                      style={{
+                        width: "100%",
+                        height: size === "50" ? 160 : 112,
+                        objectFit: "cover",
+                        display: "block",
+                      }}
+                    />
+                  </article>
+                </SmartLink>
+              </ContextualItemTarget>
+            );
+          }
+
+          const mediaLeft = position === "left";
+          const mediaGrid = size === "50" ? "1fr 1fr" : mediaLeft ? "1fr 3fr" : "3fr 1fr";
+          return (
+            <ContextualItemTarget
+              key={item.id}
+              blockId={block.id}
+              collection="links"
+              itemId={item.id}
+              field="media"
+            >
               <SmartLink
                 href={href}
                 block={block}
@@ -238,23 +316,31 @@ export function LinksBlock({ block }: BlockProps) {
                 <article
                   className="pts-hoverable"
                   data-media-size={size}
-                  data-media-position="bottom"
+                  data-media-position={mediaLeft ? "left" : "right"}
                   style={{
                     ...cardStyle(theme, block.style),
                     padding: 0,
                     overflow: "hidden",
-                    display: "flex",
-                    flexDirection: "column",
+                    display: "grid",
+                    gridTemplateColumns: mediaGrid,
                     minWidth: 0,
                   }}
                 >
+                  <MediaCardMedia
+                    item={item}
+                    mediaLeft={mediaLeft}
+                    size={size}
+                    textColor={theme.colors.text}
+                  />
                   <span
                     style={{
                       minWidth: 0,
                       padding: theme.cards.padding,
                       display: "flex",
                       flexDirection: "column",
+                      justifyContent: "center",
                       gap: 3,
+                      order: mediaLeft ? 1 : 0,
                     }}
                   >
                     <span style={titleClamp}>{label}</span>
@@ -262,180 +348,119 @@ export function LinksBlock({ block }: BlockProps) {
                       {item.description || prettyUrl(href)}
                     </span>
                   </span>
-                  <img
-                    src={item.imageUrl}
-                    alt=""
-                    loading="lazy"
-                    style={{
-                      width: "100%",
-                      height: size === "50" ? 160 : 112,
-                      objectFit: "cover",
-                      display: "block",
-                    }}
-                  />
                 </article>
               </SmartLink>
-              </ContextualItemTarget>
-            );
-          }
-
-          const mediaLeft = position === "left";
-          const mediaGrid = size === "50" ? "1fr 1fr" : mediaLeft ? "1fr 3fr" : "3fr 1fr";
-          return (
-            <ContextualItemTarget key={item.id} blockId={block.id} collection="links" itemId={item.id} field="media">
-            <SmartLink
-              href={href}
-              block={block}
-              newTab={item.newTab}
-              ariaLabel={label}
-              style={{ display: "block", minWidth: 0 }}
-            >
-              <article
-                className="pts-hoverable"
-                data-media-size={size}
-                data-media-position={mediaLeft ? "left" : "right"}
-                style={{
-                  ...cardStyle(theme, block.style),
-                  padding: 0,
-                  overflow: "hidden",
-                  display: "grid",
-                  gridTemplateColumns: mediaGrid,
-                  minWidth: 0,
-                }}
-              >
-                <MediaCardMedia
-                  item={item}
-                  mediaLeft={mediaLeft}
-                  size={size}
-                  textColor={theme.colors.text}
-                />
-                <span
-                  style={{
-                    minWidth: 0,
-                    padding: theme.cards.padding,
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    gap: 3,
-                    order: mediaLeft ? 1 : 0,
-                  }}
-                >
-                  <span style={titleClamp}>{label}</span>
-                  <span style={applyTypographyOverride(descClamp, item.descriptionTypography)}>
-                    {item.description || prettyUrl(href)}
-                  </span>
-                </span>
-              </article>
-            </SmartLink>
             </ContextualItemTarget>
           );
         }
 
         if (presentation === "card") {
           return (
-            <ContextualItemTarget key={item.id} blockId={block.id} collection="links" itemId={item.id}>
-            <SmartLink
-              href={href}
-              block={block}
-              newTab={item.newTab}
-              ariaLabel={label}
+            <ContextualItemTarget
+              key={item.id}
+              blockId={block.id}
+              collection="links"
+              itemId={item.id}
             >
-              <div
-                style={{
-                  ...cardStyle(theme, block.style),
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 14,
-                }}
-              >
-                {item.imageUrl ? (
-                  <img
-                    src={item.imageUrl}
-                    alt=""
-                    loading="lazy"
-                    style={{
-                      width: 46,
-                      height: 46,
-                      borderRadius: 12,
-                      objectFit: "cover",
-                      flexShrink: 0,
-                    }}
-                  />
-                ) : null}
-                <span style={{ flex: 1, minWidth: 0 }}>
-                  <span style={{ display: "block", fontWeight: 600, fontSize: 15 }}>
-                    {item.label}
+              <SmartLink href={href} block={block} newTab={item.newTab} ariaLabel={label}>
+                <div
+                  style={{
+                    ...cardStyle(theme, block.style),
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 14,
+                  }}
+                >
+                  {item.imageUrl ? (
+                    <img
+                      src={item.imageUrl}
+                      alt=""
+                      loading="lazy"
+                      style={{
+                        width: 46,
+                        height: 46,
+                        borderRadius: 12,
+                        objectFit: "cover",
+                        flexShrink: 0,
+                      }}
+                    />
+                  ) : null}
+                  <span style={{ flex: 1, minWidth: 0 }}>
+                    <span style={{ display: "block", fontWeight: 600, fontSize: 15 }}>
+                      {item.label}
+                    </span>
+                    <span
+                      style={applyTypographyOverride(
+                        { display: "block", fontSize: 12.5, color: theme.colors.mutedText },
+                        item.descriptionTypography,
+                      )}
+                    >
+                      {item.description || prettyUrl(href)}
+                    </span>
                   </span>
-                  <span
-                    style={applyTypographyOverride(
-                      { display: "block", fontSize: 12.5, color: theme.colors.mutedText },
-                      item.descriptionTypography,
-                    )}
-                  >
-                    {item.description || prettyUrl(href)}
-                  </span>
-                </span>
-                <ArrowUpRight size={16} aria-hidden style={{ color: theme.colors.mutedText }} />
-              </div>
-            </SmartLink>
+                  <ArrowUpRight size={16} aria-hidden style={{ color: theme.colors.mutedText }} />
+                </div>
+              </SmartLink>
             </ContextualItemTarget>
           );
         }
         if (variant === "list" && !item.presentation) {
           return (
-            <ContextualItemTarget key={item.id} blockId={block.id} collection="links" itemId={item.id}>
-            <SmartLink
-              href={href}
-              block={block}
-              newTab={item.newTab}
-              ariaLabel={label}
+            <ContextualItemTarget
+              key={item.id}
+              blockId={block.id}
+              collection="links"
+              itemId={item.id}
             >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  padding: "12px 0",
-                  borderBottom: `1px solid ${theme.colors.border}`,
-                }}
-              >
-                <span style={{ fontSize: 15 }}>{label}</span>
-                <ArrowUpRight size={15} aria-hidden style={{ color: theme.colors.mutedText }} />
-              </div>
-            </SmartLink>
+              <SmartLink href={href} block={block} newTab={item.newTab} ariaLabel={label}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    padding: "12px 0",
+                    borderBottom: `1px solid ${theme.colors.border}`,
+                  }}
+                >
+                  <span style={{ fontSize: 15 }}>{label}</span>
+                  <ArrowUpRight size={15} aria-hidden style={{ color: theme.colors.mutedText }} />
+                </div>
+              </SmartLink>
             </ContextualItemTarget>
           );
         }
         const glass = variant === "glass";
         return (
-          <ContextualItemTarget key={item.id} blockId={block.id} collection="links" itemId={item.id} field="button">
-          <SmartLink
-            href={href}
-            block={block}
-            newTab={item.newTab}
-            ariaLabel={label}
+          <ContextualItemTarget
+            key={item.id}
+            blockId={block.id}
+            collection="links"
+            itemId={item.id}
+            field="button"
           >
-            <div
-              className="pts-hoverable pts-press-feedback"
-              style={applyTypographyOverride({
-                ...buttonStyle(theme, block.style),
-                ...(glass
-                  ? {
-                      backgroundColor: hexToRgba(theme.colors.text, 0.07),
-                      color: theme.colors.text,
-                      borderColor: hexToRgba(theme.colors.text, 0.12),
-                      backdropFilter: "blur(12px)",
-                    }
-                  : {}),
-                justifyContent: "space-between",
-              }, item.typography)}
-            >
-              <span style={{ fontWeight: theme.buttons.fontWeight, fontSize: 15 }}>
-                {label}
-              </span>
-              <ArrowUpRight size={16} aria-hidden style={{ opacity: 0.65 }} />
-            </div>
-          </SmartLink>
+            <SmartLink href={href} block={block} newTab={item.newTab} ariaLabel={label}>
+              <div
+                className="pts-hoverable pts-press-feedback"
+                style={applyTypographyOverride(
+                  {
+                    ...buttonStyle(theme, block.style),
+                    ...(glass
+                      ? {
+                          backgroundColor: hexToRgba(theme.colors.text, 0.07),
+                          color: theme.colors.text,
+                          borderColor: hexToRgba(theme.colors.text, 0.12),
+                          backdropFilter: "blur(12px)",
+                        }
+                      : {}),
+                    justifyContent: "space-between",
+                  },
+                  item.typography,
+                )}
+              >
+                <span style={{ fontWeight: theme.buttons.fontWeight, fontSize: 15 }}>{label}</span>
+                <ArrowUpRight size={16} aria-hidden style={{ opacity: 0.65 }} />
+              </div>
+            </SmartLink>
           </ContextualItemTarget>
         );
       })}
@@ -537,35 +562,50 @@ export function ButtonGroupBlock({ block }: BlockProps) {
         const primary = index === 0;
         const style = buttonStyle(theme, block.style);
         return (
-          <ContextualItemTarget key={item.id} blockId={block.id} collection="button-group" itemId={item.id} field="button">
-          <SmartLink
-            href={item.url}
-            block={block}
-            newTab={item.newTab}
-            ariaLabel={item.label}
-            style={{ display: "block", minWidth: 0, width: "100%" }}
+          <ContextualItemTarget
+            key={item.id}
+            blockId={block.id}
+            collection="button-group"
+            itemId={item.id}
+            field="button"
           >
-            <div
-              className="pts-hoverable"
-              style={applyTypographyOverride(applyCTAStyle(applyCTAStyle({
-                ...style,
-                minHeight: theme.buttons.height - 4,
-                justifyContent: "center",
-                ...(primary
-                  ? {}
-                  : {
-                      backgroundColor: "transparent",
-                      backgroundImage: "none",
-                      color: theme.colors.text,
-                      borderColor: theme.colors.border,
-                      borderWidth: 1,
-                      boxShadow: "none",
-                    }),
-              }, block.style.ctaStyle), item.ctaStyle), item.typography)}
+            <SmartLink
+              href={item.url}
+              block={block}
+              newTab={item.newTab}
+              ariaLabel={item.label}
+              style={{ display: "block", minWidth: 0, width: "100%" }}
             >
-              {item.label ?? (mode === "edit" ? "Button" : "")}
-            </div>
-          </SmartLink>
+              <div
+                className="pts-hoverable"
+                style={applyTypographyOverride(
+                  applyCTAStyle(
+                    applyCTAStyle(
+                      {
+                        ...style,
+                        minHeight: theme.buttons.height - 4,
+                        justifyContent: "center",
+                        ...(primary
+                          ? {}
+                          : {
+                              backgroundColor: "transparent",
+                              backgroundImage: "none",
+                              color: theme.colors.text,
+                              borderColor: theme.colors.border,
+                              borderWidth: 1,
+                              boxShadow: "none",
+                            }),
+                      },
+                      block.style.ctaStyle,
+                    ),
+                    item.ctaStyle,
+                  ),
+                  item.typography,
+                )}
+              >
+                {item.label ?? (mode === "edit" ? "Button" : "")}
+              </div>
+            </SmartLink>
           </ContextualItemTarget>
         );
       })}
@@ -674,30 +714,32 @@ export function SocialBlock({ block }: BlockProps) {
             collection="social"
             itemId={social.id}
           >
-          <SmartLink href={social.url} block={block} ariaLabel={social.platform}>
-            <span
-              className="pts-hoverable"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 8,
-                height: 44,
-                padding: pills ? "0 16px" : 0,
-                width: pills ? undefined : 44,
-                justifyContent: "center",
-                borderRadius: pills ? 999 : theme.cards.radius,
-                border:
-                  outline || pills ? `1px solid ${theme.colors.border}` : "1px solid transparent",
-                background: outline ? "transparent" : hexToRgba(theme.colors.text, 0.06),
-                color: theme.colors.text,
-              }}
-            >
-              <Icon size={18} aria-hidden />
-              {pills ? (
-                <span style={{ fontSize: 13, textTransform: "capitalize" }}>{social.platform}</span>
-              ) : null}
-            </span>
-          </SmartLink>
+            <SmartLink href={social.url} block={block} ariaLabel={social.platform}>
+              <span
+                className="pts-hoverable"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 8,
+                  height: 44,
+                  padding: pills ? "0 16px" : 0,
+                  width: pills ? undefined : 44,
+                  justifyContent: "center",
+                  borderRadius: pills ? 999 : theme.cards.radius,
+                  border:
+                    outline || pills ? `1px solid ${theme.colors.border}` : "1px solid transparent",
+                  background: outline ? "transparent" : hexToRgba(theme.colors.text, 0.06),
+                  color: theme.colors.text,
+                }}
+              >
+                <Icon size={18} aria-hidden />
+                {pills ? (
+                  <span style={{ fontSize: 13, textTransform: "capitalize" }}>
+                    {social.platform}
+                  </span>
+                ) : null}
+              </span>
+            </SmartLink>
           </ContextualItemTarget>
         );
       })}

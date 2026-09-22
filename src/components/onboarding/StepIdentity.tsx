@@ -103,7 +103,11 @@ export function StepIdentity({
             className={focusRing}
           />
         </Field>
-        <Field label="Sobre ti" hint="Opcional." counter={`${identity.bio.length}/${IDENTITY_LIMITS.bio}`}>
+        <Field
+          label="Sobre ti"
+          hint="Opcional."
+          counter={`${identity.bio.length}/${IDENTITY_LIMITS.bio}`}
+        >
           <textarea
             rows={3}
             maxLength={IDENTITY_LIMITS.bio}

@@ -115,7 +115,8 @@ function planFor(
     const constraint = evaluateBlockConstraints(block.type, { content, signals });
 
     const reasons: string[] = [];
-    if (priorityIndex >= 0) reasons.push(`archetype:${signals.archetype}:priority_${priorityIndex}`);
+    if (priorityIndex >= 0)
+      reasons.push(`archetype:${signals.archetype}:priority_${priorityIndex}`);
     if (favored) reasons.push("signals_favor");
     if (!hasCapability) {
       reasons.push("capability_missing");
@@ -133,10 +134,7 @@ function planFor(
     const priorityScore = priorityIndex >= 0 ? 60 - priorityIndex * 5 : 0;
     const score = Math.max(
       0,
-      Math.min(
-        100,
-        priorityScore + (favored ? 25 : 0) + (hasContentAvailable ? 15 : 0),
-      ),
+      Math.min(100, priorityScore + (favored ? 25 : 0) + (hasContentAvailable ? 15 : 0)),
     );
 
     if (!constraint.satisfied) reasons.push(...constraint.reasons);
@@ -165,7 +163,7 @@ function planFor(
   });
 
   const sorted = [...evaluated].sort((a, b) =>
-    a.order === b.order ? (b.score - a.score || a.type.localeCompare(b.type)) : a.order - b.order,
+    a.order === b.order ? b.score - a.score || a.type.localeCompare(b.type) : a.order - b.order,
   );
 
   // Mutually exclusive blocks: keep the deterministically higher-value one.

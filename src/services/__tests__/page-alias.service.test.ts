@@ -8,10 +8,7 @@ const ALIAS = "promo-septiembre";
 
 type Call = { method: string; args: unknown[] };
 
-function makeBuilder(
-  record: (c: Call) => void,
-  terminal: () => { data: unknown; error: unknown },
-) {
+function makeBuilder(record: (c: Call) => void, terminal: () => { data: unknown; error: unknown }) {
   const builder: Record<string, unknown> = {
     select: (...args: unknown[]) => {
       record({ method: "select", args });

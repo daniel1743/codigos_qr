@@ -9,12 +9,7 @@
  */
 
 export type DiagnosticStatus =
-  | "PRESERVED"
-  | "DEGRADED"
-  | "LOST"
-  | "FALLBACK"
-  | "REAUTHORED"
-  | "NOT_SUPPORTED";
+  "PRESERVED" | "DEGRADED" | "LOST" | "FALLBACK" | "REAUTHORED" | "NOT_SUPPORTED";
 
 export const DIAGNOSTIC_ICONS: Record<DiagnosticStatus, string> = {
   PRESERVED: "✅",
@@ -38,8 +33,22 @@ export interface FieldTraceV1 {
 }
 
 export type TraceStageId =
-  | "T1" | "T2" | "T3" | "T4" | "T5" | "T6" | "T7" | "T8" | "T9" | "T10"
-  | "E18" | "E19" | "E20" | "E20B" | "E21" | "E22";
+  | "T1"
+  | "T2"
+  | "T3"
+  | "T4"
+  | "T5"
+  | "T6"
+  | "T7"
+  | "T8"
+  | "T9"
+  | "T10"
+  | "E18"
+  | "E19"
+  | "E20"
+  | "E20B"
+  | "E21"
+  | "E22";
 
 export interface TraceStageV1 {
   id: TraceStageId;

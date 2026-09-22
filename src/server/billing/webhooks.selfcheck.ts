@@ -130,7 +130,10 @@ const paypalSubscriptionEvent = {
   const n = normalizeStripeEvent(stripeInvoiceEvent);
   check("stripe invoice: normalizes", n !== null);
   check("stripe invoice: uses subscription reference", n?.providerSubscriptionId === "sub_456");
-  check("stripe invoice: invoice id NOT used as subscription id", n?.providerSubscriptionId !== "in_123");
+  check(
+    "stripe invoice: invoice id NOT used as subscription id",
+    n?.providerSubscriptionId !== "in_123",
+  );
 }
 
 // 3. Stripe invoice without subscription reference
@@ -138,7 +141,10 @@ const paypalSubscriptionEvent = {
   const n = normalizeStripeEvent(stripeInvoiceWithoutSubscription);
   check("stripe invoice (no sub): normalizes", n !== null);
   check("stripe invoice (no sub): no subscription id", n?.providerSubscriptionId === null);
-  check("stripe invoice (no sub): requires authoritative lookup", n?.requiresAuthoritativeLookup === true);
+  check(
+    "stripe invoice (no sub): requires authoritative lookup",
+    n?.requiresAuthoritativeLookup === true,
+  );
 }
 
 // 4. Mercado Pago thin notification
@@ -164,7 +170,10 @@ const paypalSubscriptionEvent = {
 {
   const n = normalizePayPalEvent(paypalSubscriptionEvent);
   check("paypal subscription: normalizes", n !== null);
-  check("paypal subscription: subscription id recognized", n?.providerSubscriptionId === "I-SUB-123");
+  check(
+    "paypal subscription: subscription id recognized",
+    n?.providerSubscriptionId === "I-SUB-123",
+  );
   check("paypal subscription: canonical paid status", n?.status === "active");
 }
 
@@ -242,7 +251,10 @@ async function idempotencyChecks(): Promise<void> {
   check("bridge claim -> claimBillingEvent", claimed === true && order[0] === "claim:stripe:evt_1");
   check("bridge markProcessed -> markBillingEventProcessed", order[1] === "processed:stripe:evt_1");
   check("bridge release -> markBillingEventFailed", order[2] === "failed:stripe:evt_2");
-  check("bridge release emits a diagnostic", failedDiagnostics[0]?.error_code === "WEBHOOK_APPLY_FAILED");
+  check(
+    "bridge release emits a diagnostic",
+    failedDiagnostics[0]?.error_code === "WEBHOOK_APPLY_FAILED",
+  );
 }
 
 /* --------------------------------- main ----------------------------------- */
@@ -269,5 +281,3 @@ void main().catch((err: unknown) => {
   // Re-throw so Node exits with a non-zero code (unhandled rejection).
   throw err;
 });
-
-

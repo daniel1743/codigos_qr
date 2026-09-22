@@ -79,7 +79,11 @@ const STANDALONE_CONTRACT_CSS = `
  * preserving each design's identity. Colors / logo / footer keep the template
  * defaults (they are part of the approved design).
  */
-export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }: BasicTemplateRendererProps) {
+export function StandaloneRenderer({
+  config,
+  targetRegistry,
+  highlightedTarget,
+}: BasicTemplateRendererProps) {
   const { template, content } = config;
   const { profile } = content;
   const standaloneStyle = buildStandaloneStyle(config);
@@ -130,7 +134,9 @@ export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }
     .filter((card) => card.enabled)
     .map((card, index) => ({
       id: card.id,
-      icon: (["dumbbell", "person", "leaf", "gift", "heart", "star"] as const)[index % 6] as Template07CardIcon,
+      icon: (["dumbbell", "person", "leaf", "gift", "heart", "star"] as const)[
+        index % 6
+      ] as Template07CardIcon,
       title: card.title,
       description: card.description,
       url: card.ctaUrl,
@@ -140,13 +146,25 @@ export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }
     .filter((card) => card.enabled)
     .map((card, index) => ({
       id: card.id,
-      type: (["website", "blog", "twitter", "instagram", "youtube", "email", "github", "linkedin"] as const)[index % 8] as Template08LinkType,
+      type: (
+        [
+          "website",
+          "blog",
+          "twitter",
+          "instagram",
+          "youtube",
+          "email",
+          "github",
+          "linkedin",
+        ] as const
+      )[index % 8] as Template08LinkType,
       title: card.title,
       subtitle: card.description,
       url: card.ctaUrl,
       highlight: index === 0,
     }));
-  const newsletterLink = links.find((link) => /newsletter|suscrib|inscri/i.test(link.label)) ?? links[0];
+  const newsletterLink =
+    links.find((link) => /newsletter|suscrib|inscri/i.test(link.label)) ?? links[0];
 
   switch (template.id) {
     case "amanda":
@@ -158,7 +176,7 @@ export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }
           links={links}
           targetRegistry={targetRegistry}
           highlightedTarget={highlightedTarget}
-        />
+        />,
       );
     case "adriana":
       return withStandaloneContract(
@@ -169,7 +187,7 @@ export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }
           links={links}
           targetRegistry={targetRegistry}
           highlightedTarget={highlightedTarget}
-        />
+        />,
       );
     case "eudora":
       return withStandaloneContract(
@@ -180,7 +198,7 @@ export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }
           links={links}
           targetRegistry={targetRegistry}
           highlightedTarget={highlightedTarget}
-        />
+        />,
       );
     case "barbara":
       return withStandaloneContract(
@@ -191,7 +209,7 @@ export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }
           services={services}
           targetRegistry={targetRegistry}
           highlightedTarget={highlightedTarget}
-        />
+        />,
       );
     case "studio":
       return withStandaloneContract(
@@ -200,7 +218,15 @@ export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }
           profession={profile.subtitle}
           description={profile.bio}
           heroUrl={profile.heroUrl}
-          monogram={profile.name.trim().split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase() || "ST"}
+          monogram={
+            profile.name
+              .trim()
+              .split(/\s+/)
+              .map((part) => part[0])
+              .join("")
+              .slice(0, 2)
+              .toUpperCase() || "ST"
+          }
           cards={studioCards}
           socials={content.socials
             .filter(({ platform }) => ["whatsapp", "instagram", "website"].includes(platform))
@@ -213,7 +239,7 @@ export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }
           standaloneStyle={standaloneStyle}
           targetRegistry={targetRegistry}
           highlightedTarget={highlightedTarget}
-        />
+        />,
       );
     case "classic-bio":
       return withStandaloneContract(
@@ -221,7 +247,11 @@ export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }
           {...common}
           socials={[
             ...content.socials
-              .filter(({ platform }) => ["instagram", "facebook", "linkedin", "twitter", "youtube", "tiktok"].includes(platform))
+              .filter(({ platform }) =>
+                ["instagram", "facebook", "linkedin", "twitter", "youtube", "tiktok"].includes(
+                  platform,
+                ),
+              )
               .map((social) => ({
                 type: social.platform as Template04SocialType,
                 url: social.url,
@@ -232,12 +262,17 @@ export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }
           links={links}
           gallery={content.cards
             .filter((card) => card.enabled && Boolean(card.imageUrl))
-            .map((card) => ({ id: card.id, imageUrl: card.imageUrl, url: card.ctaUrl, alt: card.title }))}
+            .map((card) => ({
+              id: card.id,
+              imageUrl: card.imageUrl,
+              url: card.ctaUrl,
+              alt: card.title,
+            }))}
           footerText={footerText}
           standaloneStyle={standaloneStyle}
           targetRegistry={targetRegistry}
           highlightedTarget={highlightedTarget}
-        />
+        />,
       );
     case "sage":
       return withStandaloneContract(
@@ -245,7 +280,9 @@ export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }
           {...common}
           socials={[
             ...content.socials
-              .filter(({ platform }) => ["tiktok", "youtube", "twitter", "facebook", "instagram"].includes(platform))
+              .filter(({ platform }) =>
+                ["tiktok", "youtube", "twitter", "facebook", "instagram"].includes(platform),
+              )
               .map((social) => ({
                 type: social.platform as Template05SocialType,
                 url: social.url,
@@ -258,7 +295,7 @@ export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }
           standaloneStyle={standaloneStyle}
           targetRegistry={targetRegistry}
           highlightedTarget={highlightedTarget}
-        />
+        />,
       );
     case "silver":
       return withStandaloneContract(
@@ -266,7 +303,11 @@ export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }
           {...common}
           socials={[
             ...content.socials
-              .filter(({ platform }) => ["youtube", "facebook", "tiktok", "twitter", "instagram", "website"].includes(platform))
+              .filter(({ platform }) =>
+                ["youtube", "facebook", "tiktok", "twitter", "instagram", "website"].includes(
+                  platform,
+                ),
+              )
               .map((social) => ({
                 type: social.platform as Template06SocialType,
                 url: social.url,
@@ -279,7 +320,7 @@ export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }
           standaloneStyle={standaloneStyle}
           targetRegistry={targetRegistry}
           highlightedTarget={highlightedTarget}
-        />
+        />,
       );
     case "fitness":
       return withStandaloneContract(
@@ -287,7 +328,9 @@ export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }
           {...common}
           socials={[
             ...content.socials
-              .filter(({ platform }) => ["instagram", "tiktok", "youtube", "whatsapp", "website"].includes(platform))
+              .filter(({ platform }) =>
+                ["instagram", "tiktok", "youtube", "whatsapp", "website"].includes(platform),
+              )
               .map((social) => ({
                 type: social.platform as Template07SocialType,
                 url: social.url,
@@ -304,7 +347,7 @@ export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }
           standaloneStyle={standaloneStyle}
           targetRegistry={targetRegistry}
           highlightedTarget={highlightedTarget}
-        />
+        />,
       );
     case "neon":
       return withStandaloneContract(
@@ -315,7 +358,11 @@ export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }
           avatarUrl={profile.avatarUrl}
           socials={[
             ...content.socials
-              .filter(({ platform }) => ["website", "twitter", "instagram", "youtube", "github", "linkedin"].includes(platform))
+              .filter(({ platform }) =>
+                ["website", "twitter", "instagram", "youtube", "github", "linkedin"].includes(
+                  platform,
+                ),
+              )
               .map((social) => ({
                 type: social.platform as Template08LinkType,
                 url: social.url,
@@ -328,7 +375,7 @@ export function StandaloneRenderer({ config, targetRegistry, highlightedTarget }
           standaloneStyle={standaloneStyle}
           targetRegistry={targetRegistry}
           highlightedTarget={highlightedTarget}
-        />
+        />,
       );
     default:
       return null;

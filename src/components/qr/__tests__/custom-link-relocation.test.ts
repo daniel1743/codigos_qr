@@ -24,7 +24,9 @@ describe("CRIPQER custom public link UI relocation (QR area)", () => {
   });
 
   it("the control was relocated out of power-editor into qr (no duplicate source)", () => {
-    expect(existsSync(resolve(ROOT, "src/components/power-editor/CustomPublicLinkControl.tsx"))).toBe(false);
+    expect(
+      existsSync(resolve(ROOT, "src/components/power-editor/CustomPublicLinkControl.tsx")),
+    ).toBe(false);
     expect(existsSync(resolve(ROOT, "src/components/qr/CustomPublicLinkControl.tsx"))).toBe(true);
   });
 

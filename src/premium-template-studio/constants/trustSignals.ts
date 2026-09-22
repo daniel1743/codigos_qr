@@ -120,9 +120,7 @@ export function isTrustSignalValid(signal: TrustBadge): boolean {
  * or destructively rewrites historical data — it only selects what to render.
  * Invalid / SYSTEM_ONLY / unknown signals are dropped from the rendered list.
  */
-export function normalizeTrustSignals(
-  signals: TrustBadge[] | undefined | null,
-): TrustBadge[] {
+export function normalizeTrustSignals(signals: TrustBadge[] | undefined | null): TrustBadge[] {
   if (!signals) return [];
   const valid = signals.filter(isTrustSignalValid);
   return valid.slice(0, MAX_TRUST_SIGNALS);

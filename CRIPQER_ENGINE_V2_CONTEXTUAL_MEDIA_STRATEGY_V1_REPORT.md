@@ -9,14 +9,14 @@
 The repository already contains one provider abstraction and both provider
 clients. No duplicate API clients were created.
 
-| Area | Evidence | Result |
-|---|---|---|
-| Unsplash | `src/lib/parametric-engine-v2/media/unsplash-provider.ts` | Present; server secret lookup and normalized photo metadata |
-| Pexels | `src/lib/parametric-engine-v2/media/pexels-provider.ts` | Present; server secret lookup and normalized photo/video metadata |
-| Shared abstraction | `media/types.ts`, `media/curator.ts` | Present; deterministic role/provider routing and ranking |
-| Secret boundary | `src/server/integrations/server-fetch.ts` | Server-only `process.env` lookup |
-| Attribution | Provider normalizers | Preserves creator, creator URL and source page |
-| Existing tests | `media-providers.test.ts` | Covers normalization, missing keys, empty results and provider fallback |
+| Area               | Evidence                                                  | Result                                                                  |
+| ------------------ | --------------------------------------------------------- | ----------------------------------------------------------------------- |
+| Unsplash           | `src/lib/parametric-engine-v2/media/unsplash-provider.ts` | Present; server secret lookup and normalized photo metadata             |
+| Pexels             | `src/lib/parametric-engine-v2/media/pexels-provider.ts`   | Present; server secret lookup and normalized photo/video metadata       |
+| Shared abstraction | `media/types.ts`, `media/curator.ts`                      | Present; deterministic role/provider routing and ranking                |
+| Secret boundary    | `src/server/integrations/server-fetch.ts`                 | Server-only `process.env` lookup                                        |
+| Attribution        | Provider normalizers                                      | Preserves creator, creator URL and source page                          |
+| Existing tests     | `media-providers.test.ts`                                 | Covers normalization, missing keys, empty results and provider fallback |
 
 ## Previously resolved blockers
 

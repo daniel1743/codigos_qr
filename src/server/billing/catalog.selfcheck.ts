@@ -41,9 +41,7 @@ function assert(condition: unknown, message: string): asserts condition {
 function assertNull(value: unknown, message: string): void {
   assertions++;
   if (value !== null) {
-    throw new Error(
-      `ASSERTION FAILED: ${message} (expected null, got ${JSON.stringify(value)})`,
-    );
+    throw new Error(`ASSERTION FAILED: ${message} (expected null, got ${JSON.stringify(value)})`);
   }
 }
 
@@ -69,9 +67,7 @@ function hasCode(result: CatalogValidationResult, code: string): boolean {
 // ============================================================
 
 function makeOffer(
-  o: Partial<
-    Omit<CatalogOfferDefinition, "planId" | "billingInterval" | "provider">
-  > & {
+  o: Partial<Omit<CatalogOfferDefinition, "planId" | "billingInterval" | "provider">> & {
     planId: string;
     billingInterval: string;
     provider: string;
@@ -93,7 +89,6 @@ function makeRequest(
 ): ValidatedCheckoutRequest {
   return { planId, billingInterval, provider } as unknown as ValidatedCheckoutRequest;
 }
-
 
 // ============================================================
 // TEST CASES
@@ -165,15 +160,11 @@ function testValidOffersResolve(): void {
     "pro/monthly/stripe reference",
   );
 
-  const bizYearly = catalog.resolveOffer(
-    makeRequest("business", "yearly", "mercado_pago"),
-  );
+  const bizYearly = catalog.resolveOffer(makeRequest("business", "yearly", "mercado_pago"));
   assert(bizYearly !== null, "business/yearly/mercado_pago resolves");
   assertEqual(bizYearly.amount, 23456, "business/yearly/mercado_pago amount");
 
-  const proYearlyPaypal = catalog.resolveOffer(
-    makeRequest("pro", "yearly", "paypal"),
-  );
+  const proYearlyPaypal = catalog.resolveOffer(makeRequest("pro", "yearly", "paypal"));
   assert(proYearlyPaypal !== null, "pro/yearly/paypal resolves");
   assertEqual(proYearlyPaypal.amount, 12345, "pro/yearly/paypal amount");
 }
@@ -345,10 +336,7 @@ function testEmptyProviderReferenceRejected(): void {
     providerOfferReference: "",
   });
   const validation = validateCatalogOffers([offer]);
-  assert(
-    hasCode(validation, "EMPTY_PROVIDER_REFERENCE"),
-    "empty providerOfferReference flagged",
-  );
+  assert(hasCode(validation, "EMPTY_PROVIDER_REFERENCE"), "empty providerOfferReference flagged");
 
   const catalog = createBillingCatalog({ offers: [offer] });
   assertNull(
@@ -377,7 +365,6 @@ function testDisabledOfferDoesNotResolve(): void {
     "disabled offer does not resolve",
   );
 }
-
 
 function testUnsupportedRejected(): void {
   const badPlan = makeOffer({
@@ -475,18 +462,12 @@ function testPortablePlaceholderNotUsedByDefault(): void {
     0,
     "default catalog contains no portable placeholder offers",
   );
-  assertEqual(
-    DEFAULT_BILLING_CATALOG.validation.valid,
-    true,
-    "default catalog validates clean",
-  );
+  assertEqual(DEFAULT_BILLING_CATALOG.validation.valid, true, "default catalog validates clean");
   assertNull(
     DEFAULT_BILLING_CATALOG.resolveOffer(makeRequest("pro", "monthly", "stripe")),
     "no portable placeholder price is reachable by default",
   );
 }
-
-
 
 // ============================================================
 // RUNNER

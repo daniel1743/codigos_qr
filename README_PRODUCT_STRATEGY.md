@@ -50,16 +50,16 @@ Free solves the underlying user need, but does not automatically receive every a
 
 When a Free user requests a Pro capability, the underlying need should receive a Core fallback where practical instead of being ignored.
 
-| Pro capability | Free fallback |
-| --- | --- |
-| Integrated booking | CTA, booking URL or WhatsApp |
-| Product catalog | Basic cards or links |
-| Embedded video block | External video link or card |
-| Advanced pricing | Simple service cards with price |
-| Advanced portfolio | Limited media or cards |
-| Floating or sticky CTA | Normal CTA |
-| Advanced gallery | Limited media or gallery |
-| Motion and animation | Static presentation |
+| Pro capability         | Free fallback                   |
+| ---------------------- | ------------------------------- |
+| Integrated booking     | CTA, booking URL or WhatsApp    |
+| Product catalog        | Basic cards or links            |
+| Embedded video block   | External video link or card     |
+| Advanced pricing       | Simple service cards with price |
+| Advanced portfolio     | Limited media or cards          |
+| Floating or sticky CTA | Normal CTA                      |
+| Advanced gallery       | Limited media or gallery        |
+| Motion and animation   | Static presentation             |
 
 ## Pro
 
@@ -136,11 +136,11 @@ Cripqer reportedly has three security or encryption modes, but their real techni
 
 Recommended packaging:
 
-| Plan | Product name | Value |
-| --- | --- | --- |
-| Free | Secure Basic | Essential protection and simple use |
-| Pro | Secure Advanced | Additional expiry, use and management controls |
-| Business | Secure Control | Team policies, traceability and centralized administration |
+| Plan       | Product name      | Value                                                          |
+| ---------- | ----------------- | -------------------------------------------------------------- |
+| Free       | Secure Basic      | Essential protection and simple use                            |
+| Pro        | Secure Advanced   | Additional expiry, use and management controls                 |
+| Business   | Secure Control    | Team policies, traceability and centralized administration     |
 | Enterprise | Secure Governance | Corporate identity, audit, policy, integrations and compliance |
 
 Monetize administration, governance, traceability and enterprise controls—not unsafe cryptography.
@@ -149,12 +149,12 @@ Monetize administration, governance, traceability and enterprise controls—not 
 
 Pricing is not final. It must later be validated against the market, costs, usage and willingness to pay.
 
-| Plan | Working hypothesis |
-| --- | --- |
-| Free | USD 0 |
-| Pro | Approximately USD 10–25/month |
-| Business | Approximately USD 50–150/month, depending on pages, seats and usage |
-| Enterprise | Approximately USD 250–500+/month or custom |
+| Plan       | Working hypothesis                                                  |
+| ---------- | ------------------------------------------------------------------- |
+| Free       | USD 0                                                               |
+| Pro        | Approximately USD 10–25/month                                       |
+| Business   | Approximately USD 50–150/month, depending on pages, seats and usage |
+| Enterprise | Approximately USD 250–500+/month or custom                          |
 
 These are working hypotheses, not launch commitments.
 

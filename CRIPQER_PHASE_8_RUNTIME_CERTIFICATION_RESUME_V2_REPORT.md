@@ -31,14 +31,14 @@ interacciones runtime.
 
 ## Matriz de gates
 
-| Gate | Resultado | Motivo |
-|---|---|---|
-| Restaurant fresh starter | `BLOCKED_AUTOMATION` | no fixture fresca y editor no vinculable |
-| Contextual selection desktop/mobile | `BLOCKED_AUTOMATION` | no canvas/Inspector controlable |
-| CTA editor/public parity | `BLOCKED_AUTOMATION` | no preview editor controlable |
-| Hover/motion/reduced motion | `NOT_VERIFIED` | no evidencia runtime nueva |
-| Keyboard/focus | `NOT_VERIFIED` | no evidencia runtime nueva |
-| Public parity | `NOT_VERIFIED` | no comparación editor-public nueva |
+| Gate                                | Resultado            | Motivo                                   |
+| ----------------------------------- | -------------------- | ---------------------------------------- |
+| Restaurant fresh starter            | `BLOCKED_AUTOMATION` | no fixture fresca y editor no vinculable |
+| Contextual selection desktop/mobile | `BLOCKED_AUTOMATION` | no canvas/Inspector controlable          |
+| CTA editor/public parity            | `BLOCKED_AUTOMATION` | no preview editor controlable            |
+| Hover/motion/reduced motion         | `NOT_VERIFIED`       | no evidencia runtime nueva               |
+| Keyboard/focus                      | `NOT_VERIFIED`       | no evidencia runtime nueva               |
+| Public parity                       | `NOT_VERIFIED`       | no comparación editor-public nueva       |
 
 La evidencia estática, de tests o de SSR no se convierte en runtime PASS.
 

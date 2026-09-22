@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { QRCodeCanvas, QRCodeSVG } from "qrcode.react";
 import { QRCodeAdvanced } from "./QRCodeAdvanced";
-import { requiresAdvancedRenderer, createAdvancedOptionsFromSimple } from "../../lib/qr-advanced-utils";
+import {
+  requiresAdvancedRenderer,
+  createAdvancedOptionsFromSimple,
+} from "../../lib/qr-advanced-utils";
 import type { DotsType, QREffectType, QRFrameStyle } from "../../types/qr-advanced";
 import { downloadQR, downloadSVG } from "../../lib/downloadQR";
 import { getPublicPageUrl } from "../../lib/url";
@@ -80,7 +83,7 @@ export function PageQrPanel({ page, userId }: PageQrPanelProps) {
     fgColor,
     bgColor,
     256,
-    config.qr_logo_enabled ? config.qr_logo_url ?? undefined : undefined,
+    config.qr_logo_enabled ? (config.qr_logo_url ?? undefined) : undefined,
     config.qr_logo_enabled ?? false,
   );
   advancedOptions.dotsType = dotsType as DotsType;
@@ -115,7 +118,13 @@ export function PageQrPanel({ page, userId }: PageQrPanelProps) {
         )}
         {/* Hidden SVG used only for SVG export (standard square-dot QR). */}
         <span className="hidden">
-          <QRCodeSVG id={PAGE_QR_SVG_ID} value={publicUrl} size={256} fgColor={fgColor} bgColor={bgColor} />
+          <QRCodeSVG
+            id={PAGE_QR_SVG_ID}
+            value={publicUrl}
+            size={256}
+            fgColor={fgColor}
+            bgColor={bgColor}
+          />
         </span>
       </div>
 
@@ -136,7 +145,10 @@ export function PageQrPanel({ page, userId }: PageQrPanelProps) {
 
         <div>
           <Label className="text-sm font-medium">Estilo de puntos</Label>
-          <Select value={dotsType} onValueChange={(value) => update({ qr_dots_type: value as DotsType })}>
+          <Select
+            value={dotsType}
+            onValueChange={(value) => update({ qr_dots_type: value as DotsType })}
+          >
             <SelectTrigger className="mt-2 w-full">
               <SelectValue />
             </SelectTrigger>

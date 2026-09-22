@@ -129,7 +129,12 @@ describe("smart-link-preview enrichment", () => {
   it("derives @handle title when no og:title", () => {
     const result = computeCardEnrichment(
       { title: "", titleIsDefault: true, description: "", imageUrl: "" },
-      { url: "https://instagram.com/daniel", provider: "instagram", handle: "daniel", status: "fallback" },
+      {
+        url: "https://instagram.com/daniel",
+        provider: "instagram",
+        handle: "daniel",
+        status: "fallback",
+      },
     );
     expect(result.title).toBe("@daniel");
   });
@@ -203,7 +208,10 @@ describe("smart-link-preview metadata parsing", () => {
   });
 
   it("falls back to <title> when no og:title", () => {
-    const meta = parseMetadata("<html><head><title>Just HTML</title></head></html>", new URL("https://x.example/"));
+    const meta = parseMetadata(
+      "<html><head><title>Just HTML</title></head></html>",
+      new URL("https://x.example/"),
+    );
     expect(meta.title).toBe("Just HTML");
   });
 
@@ -221,17 +229,24 @@ describe("smart-link-preview metadata parsing", () => {
 describe("smart-link-preview handle derivation", () => {
   it("parses an instagram handle and ignores reserved segments", () => {
     expect(parseHandleFromUrl(new URL("https://instagram.com/daniel"), "instagram")).toBe("daniel");
-    expect(parseHandleFromUrl(new URL("https://instagram.com/reel/abc123"), "instagram")).toBeUndefined();
+    expect(
+      parseHandleFromUrl(new URL("https://instagram.com/reel/abc123"), "instagram"),
+    ).toBeUndefined();
   });
 
   it("parses linkedin /in/ and /company/", () => {
-    expect(parseHandleFromUrl(new URL("https://linkedin.com/in/jane-doe"), "linkedin")).toBe("jane-doe");
-    expect(parseHandleFromUrl(new URL("https://linkedin.com/company/acme"), "linkedin")).toBe("acme");
+    expect(parseHandleFromUrl(new URL("https://linkedin.com/in/jane-doe"), "linkedin")).toBe(
+      "jane-doe",
+    );
+    expect(parseHandleFromUrl(new URL("https://linkedin.com/company/acme"), "linkedin")).toBe(
+      "acme",
+    );
   });
 
   it("parses youtube /@ handle but not a video id", () => {
     expect(parseHandleFromUrl(new URL("https://youtube.com/@creator"), "youtube")).toBe("creator");
-    expect(parseHandleFromUrl(new URL("https://youtube.com/watch?v=abc123"), "youtube")).toBeUndefined();
+    expect(
+      parseHandleFromUrl(new URL("https://youtube.com/watch?v=abc123"), "youtube"),
+    ).toBeUndefined();
   });
 });
-

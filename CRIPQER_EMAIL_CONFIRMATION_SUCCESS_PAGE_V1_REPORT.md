@@ -48,4 +48,3 @@ confirmation email is sent and its native confirmation button is followed:
 2. verify Supabase processes the link;
 3. verify the browser lands on `/correo-confirmado`;
 4. verify `Ir a Cripqer` opens `/login`.
-

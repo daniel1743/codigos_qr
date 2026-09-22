@@ -453,8 +453,12 @@ describe("pinch camera (two-finger mobile gestures)", () => {
   });
 
   it("clamps zoom within the existing user-zoom limits", () => {
-    expect(pinch({ startDistance: 1, currentDistance: 1000 }).userZoom).toBe(POWER_CANVAS_MAX_USER_ZOOM);
-    expect(pinch({ startDistance: 1000, currentDistance: 1 }).userZoom).toBe(POWER_CANVAS_MIN_USER_ZOOM);
+    expect(pinch({ startDistance: 1, currentDistance: 1000 }).userZoom).toBe(
+      POWER_CANVAS_MAX_USER_ZOOM,
+    );
+    expect(pinch({ startDistance: 1000, currentDistance: 1 }).userZoom).toBe(
+      POWER_CANVAS_MIN_USER_ZOOM,
+    );
   });
 
   it("keeps the world point under the start centroid anchored when zooming in place", () => {

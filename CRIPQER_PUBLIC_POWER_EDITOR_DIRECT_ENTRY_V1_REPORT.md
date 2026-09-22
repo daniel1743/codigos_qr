@@ -42,4 +42,3 @@
   files.
 - Automated authenticated desktop/mobile browser proof was not run in this
   environment; the runtime visual gate remains pending.
-

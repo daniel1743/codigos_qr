@@ -19,7 +19,10 @@ import { useStudio } from "./state/StudioProvider";
 import type { ProductTier, ProductCapability } from "../lib/product-entitlements/capabilities";
 import { resolveCapabilityAccess } from "../lib/product-entitlements/capabilities";
 import { resolveAssetEntitlement } from "../lib/product-entitlements/asset-manifest";
-import type { AssetEntitlement, ProductAssetKind } from "../lib/product-entitlements/asset-manifest";
+import type {
+  AssetEntitlement,
+  ProductAssetKind,
+} from "../lib/product-entitlements/asset-manifest";
 import { getBlockEntitlement } from "../lib/product-entitlements/asset-manifest";
 import type { MutationIntent } from "../lib/product-entitlements/mutation-guard";
 import { authorizeCanonicalMutation } from "../lib/product-entitlements/mutation-guard";
@@ -201,4 +204,3 @@ export function Locked({ locked, children }: { locked: boolean; children: ReactN
     </fieldset>
   );
 }
-

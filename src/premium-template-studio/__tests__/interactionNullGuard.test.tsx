@@ -72,7 +72,11 @@ describe("TemplateRenderer interaction null guard", () => {
 
   it("renders a link-bearing block without interaction using same-tab behavior", () => {
     const markup = renderToStaticMarkup(
-      <TemplateRenderer config={linkConfigWithoutInteraction()} breakpoint="mobile" mode="public" />,
+      <TemplateRenderer
+        config={linkConfigWithoutInteraction()}
+        breakpoint="mobile"
+        mode="public"
+      />,
     );
 
     expect(markup).toContain('href="https://example.com/"');
@@ -126,10 +130,7 @@ describe("TemplateRenderer interaction null guard", () => {
   it("does not mutate the canonical config during render", () => {
     const config = imageConfigWithoutInteraction();
     const before = JSON.stringify(config);
-    renderToStaticMarkup(
-      <TemplateRenderer config={config} breakpoint="mobile" mode="public" />,
-    );
+    renderToStaticMarkup(<TemplateRenderer config={config} breakpoint="mobile" mode="public" />);
     expect(JSON.stringify(config)).toBe(before);
   });
 });
-

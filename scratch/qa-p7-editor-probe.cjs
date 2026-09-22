@@ -25,14 +25,24 @@ const srH = { apikey: sr, Authorization: "Bearer " + sr, "Content-Type": "applic
   try {
     await page.waitForSelector("#email", { timeout: 20000 });
   } catch {}
-  if (await page.locator("#email").isVisible().catch(() => false)) {
+  if (
+    await page
+      .locator("#email")
+      .isVisible()
+      .catch(() => false)
+  ) {
     await page.locator("#email").fill(env.QA_EMAIL);
     await page.locator("#password").fill(env.QA_PASSWORD);
     await page.getByRole("button", { name: "Entrar al editor" }).click();
   }
-  await page.waitForFunction(() => document.cookie.includes("sb-"), { timeout: 30000 }).catch(() => {});
+  await page
+    .waitForFunction(() => document.cookie.includes("sb-"), { timeout: 30000 })
+    .catch(() => {});
 
-  await page.goto(BASE + "/pages/" + pageId + "/edit", { waitUntil: "domcontentloaded", timeout: 90000 });
+  await page.goto(BASE + "/pages/" + pageId + "/edit", {
+    waitUntil: "domcontentloaded",
+    timeout: 90000,
+  });
   await page.waitForSelector('[data-testid="power-editor"]', { timeout: 60000 });
   await page.waitForTimeout(2500);
 

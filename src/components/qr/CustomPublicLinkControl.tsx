@@ -87,7 +87,10 @@ export function CustomPublicLinkControl({
       const code = (error as { code?: string })?.code;
       setMessage({
         kind: "error",
-        text: code === "23505" ? "Este enlace ya está en uso. Prueba con otro." : "No se pudo guardar el enlace.",
+        text:
+          code === "23505"
+            ? "Este enlace ya está en uso. Prueba con otro."
+            : "No se pudo guardar el enlace.",
       });
     } finally {
       setSaving(false);
@@ -107,10 +110,15 @@ export function CustomPublicLinkControl({
   const friendlyUrl = normalized && isValidPageAlias(normalized) ? getPublicUrl(normalized) : "";
 
   return (
-    <section className="space-y-4 rounded-2xl border bg-card p-4 shadow-sm" aria-label="Personaliza tu enlace">
+    <section
+      className="space-y-4 rounded-2xl border bg-card p-4 shadow-sm"
+      aria-label="Personaliza tu enlace"
+    >
       <div className="space-y-1">
         <h4 className="font-semibold">Personaliza tu enlace</h4>
-        <p className="text-xs text-muted-foreground">Elige un enlace fácil de recordar y compartir.</p>
+        <p className="text-xs text-muted-foreground">
+          Elige un enlace fácil de recordar y compartir.
+        </p>
       </div>
 
       <div className="space-y-2">
@@ -132,15 +140,21 @@ export function CustomPublicLinkControl({
             className="h-9"
           />
           {checking && (
-            <Loader2 className="h-4 w-4 shrink-0 animate-spin text-muted-foreground" aria-label="Comprobando disponibilidad" />
+            <Loader2
+              className="h-4 w-4 shrink-0 animate-spin text-muted-foreground"
+              aria-label="Comprobando disponibilidad"
+            />
           )}
           {!checking && available === true && (
             <Check className="h-4 w-4 shrink-0 text-emerald-600" aria-label="Enlace disponible" />
           )}
         </div>
-        {normalized && isValidPageAlias(normalized) && available === true && normalized !== currentAlias && (
-          <p className="text-xs text-emerald-600">Este enlace está disponible.</p>
-        )}
+        {normalized &&
+          isValidPageAlias(normalized) &&
+          available === true &&
+          normalized !== currentAlias && (
+            <p className="text-xs text-emerald-600">Este enlace está disponible.</p>
+          )}
         {!checking && available === false && normalized !== currentAlias && (
           <p className="text-xs text-destructive">Este enlace ya está en uso. Prueba con otro.</p>
         )}
@@ -148,13 +162,19 @@ export function CustomPublicLinkControl({
           <p className="text-xs text-destructive">Ese enlace no es válido.</p>
         )}
         {message && (
-          <p className={message.kind === "success" ? "text-xs text-emerald-600" : "text-xs text-destructive"}>
+          <p
+            className={
+              message.kind === "success" ? "text-xs text-emerald-600" : "text-xs text-destructive"
+            }
+          >
             {message.text}
           </p>
         )}
       </div>
 
-      {friendlyUrl && <p className="truncate text-xs text-muted-foreground">URL pública: {friendlyUrl}</p>}
+      {friendlyUrl && (
+        <p className="truncate text-xs text-muted-foreground">URL pública: {friendlyUrl}</p>
+      )}
 
       <div className="flex flex-wrap items-center gap-2">
         <Button size="sm" onClick={() => void save()} disabled={saving || checking}>

@@ -6,9 +6,9 @@
 
 The page-type mapping was correct in source:
 
-| Page type | Canonical starter |
-|---|---|
-| `catalog` | `store-bento` |
+| Page type   | Canonical starter |
+| ----------- | ----------------- |
+| `catalog`   | `store-bento`     |
 | `portfolio` | `portfolio-bento` |
 
 The IDs are distinct. The defect was semantic: `store-bento` composed

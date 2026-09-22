@@ -61,7 +61,9 @@ function ownerSummary(ownerContent: OwnerContentInput) {
   };
 }
 
-function planSummary(plan: NonNullable<Extract<OnboardingSmartPagesGenerationResult, { ok: true }>["plan"]>) {
+function planSummary(
+  plan: NonNullable<Extract<OnboardingSmartPagesGenerationResult, { ok: true }>["plan"]>,
+) {
   return {
     experienceType: plan.experienceType,
     heroVariant: plan.heroVariant,
@@ -83,7 +85,9 @@ function subtractScores(
   return out;
 }
 
-export function buildEngineSnapshot(strategy: EngineV2StrategyTrace | null): EngineStrategySnapshotV1 | null {
+export function buildEngineSnapshot(
+  strategy: EngineV2StrategyTrace | null,
+): EngineStrategySnapshotV1 | null {
   if (!strategy) return null;
   return {
     businessCategory: strategy.normalized.businessCategory,
@@ -104,7 +108,9 @@ export function buildEngineSnapshot(strategy: EngineV2StrategyTrace | null): Eng
   };
 }
 
-export function buildVisualSnapshot(strategy: EngineV2StrategyTrace | null): VisualAuthoringSnapshotV1 | null {
+export function buildVisualSnapshot(
+  strategy: EngineV2StrategyTrace | null,
+): VisualAuthoringSnapshotV1 | null {
   if (!strategy) return null;
   const recipe = strategy.recipe;
   const skipped = recipe.capabilities_skipped ?? [];
@@ -120,8 +126,12 @@ export function buildVisualSnapshot(strategy: EngineV2StrategyTrace | null): Vis
     motion: recipe.visual.motion as unknown as Record<string, unknown>,
     texture: recipe.visual.texture as unknown as Record<string, unknown>,
     selected: used,
-    notSelected: skipped.filter((s) => !s.reason.includes("not_supported_by_renderer")).map((s) => s.capability),
-    unsupported: skipped.filter((s) => s.reason.includes("not_supported_by_renderer")).map((s) => s.capability),
+    notSelected: skipped
+      .filter((s) => !s.reason.includes("not_supported_by_renderer"))
+      .map((s) => s.capability),
+    unsupported: skipped
+      .filter((s) => s.reason.includes("not_supported_by_renderer"))
+      .map((s) => s.capability),
     blocks: recipe.structure.blocks.map((b) => ({ type: b.type, variant: b.variant })),
   };
 }
@@ -141,11 +151,7 @@ function buildTransformations(input: BuildInput): TransformationV1[] {
   const hasBlock = (key: string) => Boolean(contentBlocks && key in contentBlocks);
 
   out.push(
-    classifyTransformation(
-      "business name",
-      intent.identity.displayName,
-      config?.profile?.name,
-    ),
+    classifyTransformation("business name", intent.identity.displayName, config?.profile?.name),
     classifyTransformation(
       "profession/activity",
       intent.identity.professionOrActivity,
@@ -153,11 +159,7 @@ function buildTransformations(input: BuildInput): TransformationV1[] {
     ),
     classifyBusinessCategory(intent.business.category, strategy?.normalized.businessCategory),
     classifyGoal(intent.outcome.primaryGoal, strategy?.normalized.primaryGoal),
-    classifyTransformation(
-      "experience type",
-      intent.outcome.experienceHint,
-      plan?.experienceType,
-    ),
+    classifyTransformation("experience type", intent.outcome.experienceHint, plan?.experienceType),
     classifyTransformation("sales mode", intent.commercial?.mode, request?.salesMode),
     classifyTransformation("density", intent.scope.density, request?.density),
     classifyPersonality(engineInput?.style, strategy?.normalized.visualPersonality),
@@ -183,16 +185,31 @@ function buildTransformations(input: BuildInput): TransformationV1[] {
     ),
     classifyTransformation("contact", ownerContent.contact, engineInput?.primaryAction?.value),
     classifyTransformation("owner media", ownerContent.media, engineInput?.userMedia),
-    reauthored("section types", plan?.sections.map((s) => s.kind)),
-    reauthored("section order", plan?.sections.map((s) => s.order)),
+    reauthored(
+      "section types",
+      plan?.sections.map((s) => s.kind),
+    ),
+    reauthored(
+      "section order",
+      plan?.sections.map((s) => s.order),
+    ),
     reauthored("hero variant", plan?.heroVariant),
     reauthored("CTA position", plan?.ctaHierarchy.primary?.kind),
     strategy
-      ? classifyTransformation("archetype", intent.identity.professionOrActivity, strategy.archetype)
+      ? classifyTransformation(
+          "archetype",
+          intent.identity.professionOrActivity,
+          strategy.archetype,
+        )
       : classifyTransformation("archetype", intent.identity.professionOrActivity, undefined),
     strategy && Object.keys(strategy.familyBias).length
       ? classifyTransformation("family bias", "applied", "applied")
-      : classifyTransformation("family bias", "defined", undefined, "Archetype family_bias was not applied."),
+      : classifyTransformation(
+          "family bias",
+          "defined",
+          undefined,
+          "Archetype family_bias was not applied.",
+        ),
     reauthored("visual family", strategy?.selectedFamily),
   );
 
@@ -236,18 +253,33 @@ export function buildGenerationTrace(input: BuildInput): GenerationTraceV1 {
   if (!live.ok) {
     if (!live.mapping) {
       stages.push(stage("T3", "SMART PAGES REQUEST", "PageGenerationRequest", null, "failed"));
-      failure = { stage: "T3", stageName: "SMART PAGES REQUEST", code: live.code ?? "MAPPING_ERROR", message: live.errors[0] ?? "Mapping failed." };
+      failure = {
+        stage: "T3",
+        stageName: "SMART PAGES REQUEST",
+        code: live.code ?? "MAPPING_ERROR",
+        message: live.errors[0] ?? "Mapping failed.",
+      };
     } else if (!live.mapping.ok) {
       stages.push(stage("T3", "SMART PAGES REQUEST", "PageGenerationRequest", "mapped"));
       stages.push(stage("T5", "HOST MAPPING", "GeneratedPageInput", null, "failed"));
-      failure = { stage: "T5", stageName: "HOST MAPPING", code: "HOST_MAPPING_ERROR", message: live.errors[0] ?? "Host mapping failed." };
+      failure = {
+        stage: "T5",
+        stageName: "HOST MAPPING",
+        code: "HOST_MAPPING_ERROR",
+        message: live.errors[0] ?? "Host mapping failed.",
+      };
     } else {
       stages.push(stage("T3", "SMART PAGES REQUEST", "PageGenerationRequest", "mapped"));
       stages.push(stage("T4", "PAGE PLAN", "PagePlanV1", planSummary(live.mapping.plan)));
       stages.push(stage("T5", "HOST MAPPING", "GeneratedPageInput", "mapped"));
       stages.push(stage("T6", "PAGES_7 / ENGINE INPUT", "EngineV2HostGenerationInput", "mapped"));
       stages.push(stage("T7", "ENGINE STRATEGY", "EngineV2StrategyTrace", null, "failed"));
-      failure = { stage: "T7", stageName: "ENGINE STRATEGY", code: "ENGINE_GENERATION_ERROR", message: live.errors[0] ?? "Engine generation failed." };
+      failure = {
+        stage: "T7",
+        stageName: "ENGINE STRATEGY",
+        code: "ENGINE_GENERATION_ERROR",
+        message: live.errors[0] ?? "Engine generation failed.",
+      };
     }
   } else {
     const mapping = live.mapping;
@@ -319,12 +351,13 @@ export function buildGenerationTrace(input: BuildInput): GenerationTraceV1 {
 
   const media = buildMediaDiagnostic({
     ownerContent,
-    hasUserMedia: live.ok && live.mapping.ok
-      ? Boolean(
-          live.mapping.adapter.engineInput.userMedia?.avatarUrl ||
+    hasUserMedia:
+      live.ok && live.mapping.ok
+        ? Boolean(
+            live.mapping.adapter.engineInput.userMedia?.avatarUrl ||
             live.mapping.adapter.engineInput.userMedia?.bannerUrl,
-        )
-      : false,
+          )
+        : false,
     archetype: strategy?.archetype ?? null,
     mediaStrategy: strategy?.recipe.semantics.media_strategy ?? null,
     unsplashConnected,
@@ -350,5 +383,3 @@ export function buildGenerationTrace(input: BuildInput): GenerationTraceV1 {
     ...(failure ? { failure } : {}),
   };
 }
-
-

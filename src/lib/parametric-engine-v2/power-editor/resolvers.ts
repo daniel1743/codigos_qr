@@ -79,7 +79,13 @@ function archetypeClass(archetype: BusinessArchetype): ArchetypeClass {
 
 function toRgb(hex: string): [number, number, number] {
   const clean = hex.replace("#", "");
-  const full = clean.length === 3 ? clean.split("").map((c) => c + c).join("") : clean;
+  const full =
+    clean.length === 3
+      ? clean
+          .split("")
+          .map((c) => c + c)
+          .join("")
+      : clean;
   const int = parseInt(full.slice(0, 6) || "000000", 16);
   return [(int >> 16) & 255, (int >> 8) & 255, int & 255];
 }
@@ -214,7 +220,8 @@ export function resolveTypography(
   semantics: Pick<RecipeSemanticsV2, "family" | "density" | "visual_weight" | "archetype">,
 ): ThemeTypography {
   const t = recipe.design.typography;
-  const bump = semantics.visual_weight === "high" ? 4 : semantics.visual_weight === "light" ? -2 : 0;
+  const bump =
+    semantics.visual_weight === "high" ? 4 : semantics.visual_weight === "light" ? -2 : 0;
   // A visible hero hierarchy: retail and portfolio lean editorial, services
   // stay a touch smaller and calmer so the CTA hierarchy reads first.
   const cls = archetypeClass(semantics.archetype);
@@ -494,18 +501,20 @@ export function resolveSpacing(
     layoutId === "full-width"
       ? 680
       : layoutId === "portfolio" || layoutId === "bento"
-      ? 720
-      : cls === "retail" || cls === "portfolio"
-        ? 680
-        : semantics.family === "luxury" || semantics.family === "editorial"
-          ? 600
-          : 640;
+        ? 720
+        : cls === "retail" || cls === "portfolio"
+          ? 680
+          : semantics.family === "luxury" || semantics.family === "editorial"
+            ? 600
+            : 640;
   return { section, block, contentWidth };
 }
 
 /* ---------------------------------------------------------- animation */
 
-export function resolveAnimation(semantics: Pick<RecipeSemanticsV2, "family" | "energy">): AnimationPreset {
+export function resolveAnimation(
+  semantics: Pick<RecipeSemanticsV2, "family" | "energy">,
+): AnimationPreset {
   if (semantics.family === "minimal") return "fade";
   if (semantics.family === "luxury") return "soft-rise";
   if (semantics.family === "energetic") return semantics.energy >= 60 ? "scale" : "slide";
@@ -587,7 +596,8 @@ export function resolveAvatar(
   return {
     size,
     radius,
-    borderWidth: recipe.design.avatar.ring === "none" ? 0 : recipe.design.avatar.ring === "accent" ? 3 : 4,
+    borderWidth:
+      recipe.design.avatar.ring === "none" ? 0 : recipe.design.avatar.ring === "accent" ? 3 : 4,
     shadow: semantics.family !== "minimal" && semantics.family !== "editorial",
     overlap: layout.header === "overlap" ? Math.round(size / 2) : 0,
     align,
@@ -655,9 +665,7 @@ export function resolveTexture(
         ? { preset: "paper", opacity: semantics.visual_weight === "high" ? 0.1 : 0.07, scale: 28 }
         : none;
     case "luxury":
-      return capabilities.texture_linen
-        ? { preset: "linen", opacity: 0.08, scale: 22 }
-        : none;
+      return capabilities.texture_linen ? { preset: "linen", opacity: 0.08, scale: 22 } : none;
     case "creator":
       return capabilities.texture_grain
         ? { preset: "grain", opacity: semantics.visual_weight === "high" ? 0.12 : 0.08, scale: 18 }
@@ -689,7 +697,11 @@ export function resolveFrame(
   if (semantics.family === "minimal") return "none";
   if (semantics.family === "creator")
     return capabilities.frame_glow ? "glow" : capabilities.frame_gradient ? "gradient" : "none";
-  if (semantics.family === "energetic" && semantics.visual_weight === "high" && capabilities.frame_glow)
+  if (
+    semantics.family === "energetic" &&
+    semantics.visual_weight === "high" &&
+    capabilities.frame_glow
+  )
     return "glow";
   if (semantics.surface_mood === "glass" && capabilities.frame_inset) return "inset";
   return capabilities.frame_hairline ? "hairline" : "none";

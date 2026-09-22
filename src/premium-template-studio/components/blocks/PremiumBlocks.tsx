@@ -19,7 +19,12 @@ import {
   Award,
 } from "lucide-react";
 import { useRender } from "../../engine/RenderContext";
-import { applyTypographyOverride, applyCTAStyle, cardStyle, headingStyle } from "../../engine/styleEngine";
+import {
+  applyTypographyOverride,
+  applyCTAStyle,
+  cardStyle,
+  headingStyle,
+} from "../../engine/styleEngine";
 import { hexToRgba, safeUrl } from "../../utils";
 import type { BlockItem, TemplateBlock } from "../../types";
 import { ContextualItemTarget } from "./primitives";
@@ -211,120 +216,130 @@ export function ServicesBlock({ block }: { block: TemplateBlock }) {
             collection="services"
             itemId={item.id ?? String(idx)}
           >
-          <div
-            style={{
-              // Material precedence is intentional: an explicit block style
-              // wins over the Engine-authored theme card material. The
-              // variant remains structural; it must not erase an elevated or
-              // soft theme merely because the planner called it "minimal".
-              ...cardStyle(theme, block.style),
-              display: "flex",
-              flexDirection: isCompact ? "row" : "column",
-              alignItems: isCompact ? "center" : "stretch",
-              padding: isCompact ? "12px 16px" : "20px",
-              gap: 14,
-              overflow: "hidden",
-              position: "relative",
-            }}
-          >
-            {hasImage && (
-              <div data-editor-target={mode === "edit" ? `collection-services-${block.id}-${item.id ?? idx}-image` : undefined} style={{ height: 140, margin: "-20px -20px 14px", overflow: "hidden" }}>
-                <img
-                  src={item.imageUrl}
-                  alt=""
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                />
-              </div>
-            )}
-
-            <div style={{ display: "flex", gap: 12, alignItems: "flex-start", flex: 1 }}>
-              {item.icon && !hasImage && (
+            <div
+              style={{
+                // Material precedence is intentional: an explicit block style
+                // wins over the Engine-authored theme card material. The
+                // variant remains structural; it must not erase an elevated or
+                // soft theme merely because the planner called it "minimal".
+                ...cardStyle(theme, block.style),
+                display: "flex",
+                flexDirection: isCompact ? "row" : "column",
+                alignItems: isCompact ? "center" : "stretch",
+                padding: isCompact ? "12px 16px" : "20px",
+                gap: 14,
+                overflow: "hidden",
+                position: "relative",
+              }}
+            >
+              {hasImage && (
                 <div
-                  style={{
-                    padding: 8,
-                    borderRadius: 10,
-                    backgroundColor: hexToRgba(theme.colors.accent, 0.12),
-                    color: theme.colors.accent,
-                    flexShrink: 0,
-                  }}
+                  data-editor-target={
+                    mode === "edit"
+                      ? `collection-services-${block.id}-${item.id ?? idx}-image`
+                      : undefined
+                  }
+                  style={{ height: 140, margin: "-20px -20px 14px", overflow: "hidden" }}
                 >
-                  <SmartIcon name={item.icon} size={18} />
+                  <img
+                    src={item.imageUrl}
+                    alt=""
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  />
                 </div>
               )}
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "baseline",
-                    gap: 8,
-                  }}
-                >
-                  <h3
-                    style={applyTypographyOverride(
-                      { ...headingStyle(theme, 0.8), fontSize: "15px" },
-                      item.typography,
-                    )}
+
+              <div style={{ display: "flex", gap: 12, alignItems: "flex-start", flex: 1 }}>
+                {item.icon && !hasImage && (
+                  <div
+                    style={{
+                      padding: 8,
+                      borderRadius: 10,
+                      backgroundColor: hexToRgba(theme.colors.accent, 0.12),
+                      color: theme.colors.accent,
+                      flexShrink: 0,
+                    }}
                   >
-                    {item.title}
-                  </h3>
-                  {item.price && (
-                    <span
-                      style={{
-                        fontSize: "14px",
-                        fontWeight: 700,
-                        color: theme.colors.accent,
-                        flexShrink: 0,
-                      }}
+                    <SmartIcon name={item.icon} size={18} />
+                  </div>
+                )}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "baseline",
+                      gap: 8,
+                    }}
+                  >
+                    <h3
+                      style={applyTypographyOverride(
+                        { ...headingStyle(theme, 0.8), fontSize: "15px" },
+                        item.typography,
+                      )}
                     >
-                      {item.price}
-                    </span>
+                      {item.title}
+                    </h3>
+                    {item.price && (
+                      <span
+                        style={{
+                          fontSize: "14px",
+                          fontWeight: 700,
+                          color: theme.colors.accent,
+                          flexShrink: 0,
+                        }}
+                      >
+                        {item.price}
+                      </span>
+                    )}
+                  </div>
+                  {!isCompact && item.description && (
+                    <p
+                      style={applyTypographyOverride(
+                        {
+                          fontSize: "13px",
+                          color: theme.colors.mutedText,
+                          marginTop: 6,
+                          lineHeight: 1.4,
+                        },
+                        item.descriptionTypography,
+                      )}
+                    >
+                      {item.description}
+                    </p>
                   )}
                 </div>
-                {!isCompact && item.description && (
-                  <p
-                    style={applyTypographyOverride(
-                      {
-                        fontSize: "13px",
-                        color: theme.colors.mutedText,
-                        marginTop: 6,
-                        lineHeight: 1.4,
-                      },
-                      item.descriptionTypography,
-                    )}
-                  >
-                    {item.description}
-                  </p>
-                )}
               </div>
-            </div>
 
-            {item.ctaLabel && item.ctaUrl && (
-              <button
-                className="pts-hoverable pts-press-feedback"
-                onClick={() => handleCTA(item)}
-                style={applyCTAStyle({
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 6,
-                  padding: isCompact ? "6px 12px" : "8px 16px",
-                  borderRadius: theme.buttons.radius,
-                  backgroundColor: theme.colors.primary,
-                  color: "#ffffff",
-                  fontSize: "13px",
-                  fontWeight: 600,
-                  border: "none",
-                  cursor: "pointer",
-                  marginTop: isCompact ? 0 : 10,
-                  alignSelf: isCompact ? "center" : "flex-start",
-                }, item.ctaStyle)}
-              >
-                {item.ctaLabel}
-                <ArrowRight size={12} />
-              </button>
-            )}
-          </div>
+              {item.ctaLabel && item.ctaUrl && (
+                <button
+                  className="pts-hoverable pts-press-feedback"
+                  onClick={() => handleCTA(item)}
+                  style={applyCTAStyle(
+                    {
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: 6,
+                      padding: isCompact ? "6px 12px" : "8px 16px",
+                      borderRadius: theme.buttons.radius,
+                      backgroundColor: theme.colors.primary,
+                      color: "#ffffff",
+                      fontSize: "13px",
+                      fontWeight: 600,
+                      border: "none",
+                      cursor: "pointer",
+                      marginTop: isCompact ? 0 : 10,
+                      alignSelf: isCompact ? "center" : "flex-start",
+                    },
+                    item.ctaStyle,
+                  )}
+                >
+                  {item.ctaLabel}
+                  <ArrowRight size={12} />
+                </button>
+              )}
+            </div>
           </ContextualItemTarget>
         );
       })}
@@ -354,85 +369,90 @@ export function TestimonialsBlock({ block }: { block: TemplateBlock }) {
             collection="testimonials"
             itemId={item.id ?? String(idx)}
           >
-          <div
-            style={{
-              ...cardStyle(
-                theme,
-                isQuote
-                  ? { background: "transparent", borderWidth: 0, shadow: "none" }
-                  : block.style,
-              ),
-              padding: isCompact ? "12px 16px" : "20px",
-              display: "flex",
-              flexDirection: "column",
-              gap: 12,
-              borderLeft: isQuote ? `3px solid ${theme.colors.accent}` : undefined,
-            }}
-          >
-            {rating > 0 && (
-              <div style={{ display: "flex", gap: 2, color: "#ffb703" }}>
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Star
-                    key={i}
-                    size={14}
-                    fill={i < rating ? "#ffb703" : "none"}
-                    stroke={i < rating ? "none" : "#ffb703"}
-                  />
-                ))}
-              </div>
-            )}
-
-            <p
-              style={applyTypographyOverride(
-                {
-                  fontSize: isQuote ? "15px" : "13.5px",
-                  fontStyle: isQuote ? "italic" : "normal",
-                  color: theme.colors.text,
-                  lineHeight: 1.5,
-                },
-                item.typography,
-              )}
+            <div
+              style={{
+                ...cardStyle(
+                  theme,
+                  isQuote
+                    ? { background: "transparent", borderWidth: 0, shadow: "none" }
+                    : block.style,
+                ),
+                padding: isCompact ? "12px 16px" : "20px",
+                display: "flex",
+                flexDirection: "column",
+                gap: 12,
+                borderLeft: isQuote ? `3px solid ${theme.colors.accent}` : undefined,
+              }}
             >
-              "{item.quote}"
-            </p>
-
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 4 }}>
-              {item.avatarUrl ? (
-                <img
-                  src={item.avatarUrl}
-                  alt={item.name}
-                  style={{ width: 34, height: 34, borderRadius: "50%", objectFit: "cover" }}
-                />
-              ) : (
-                <div
-                  style={{
-                    width: 34,
-                    height: 34,
-                    borderRadius: "50%",
-                    backgroundColor: hexToRgba(theme.colors.accent, 0.15),
-                    color: theme.colors.accent,
-                    display: "grid",
-                    placeItems: "center",
-                    fontWeight: 700,
-                    fontSize: "12px",
-                  }}
-                >
-                  {item.name?.slice(0, 1) || "R"}
+              {rating > 0 && (
+                <div style={{ display: "flex", gap: 2, color: "#ffb703" }}>
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star
+                      key={i}
+                      size={14}
+                      fill={i < rating ? "#ffb703" : "none"}
+                      stroke={i < rating ? "none" : "#ffb703"}
+                    />
+                  ))}
                 </div>
               )}
-              <div>
-                <h4 style={applyTypographyOverride({ fontSize: "13px", fontWeight: 700, color: theme.colors.text }, item.typography)}>
-                  {item.name}
-                </h4>
-                {(item.role || item.source) && (
-                  <span style={{ fontSize: "11px", color: theme.colors.mutedText }}>
-                    {item.role}
-                    {item.source ? ` · ${item.source}` : ""}
-                  </span>
+
+              <p
+                style={applyTypographyOverride(
+                  {
+                    fontSize: isQuote ? "15px" : "13.5px",
+                    fontStyle: isQuote ? "italic" : "normal",
+                    color: theme.colors.text,
+                    lineHeight: 1.5,
+                  },
+                  item.typography,
                 )}
+              >
+                "{item.quote}"
+              </p>
+
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 4 }}>
+                {item.avatarUrl ? (
+                  <img
+                    src={item.avatarUrl}
+                    alt={item.name}
+                    style={{ width: 34, height: 34, borderRadius: "50%", objectFit: "cover" }}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      width: 34,
+                      height: 34,
+                      borderRadius: "50%",
+                      backgroundColor: hexToRgba(theme.colors.accent, 0.15),
+                      color: theme.colors.accent,
+                      display: "grid",
+                      placeItems: "center",
+                      fontWeight: 700,
+                      fontSize: "12px",
+                    }}
+                  >
+                    {item.name?.slice(0, 1) || "R"}
+                  </div>
+                )}
+                <div>
+                  <h4
+                    style={applyTypographyOverride(
+                      { fontSize: "13px", fontWeight: 700, color: theme.colors.text },
+                      item.typography,
+                    )}
+                  >
+                    {item.name}
+                  </h4>
+                  {(item.role || item.source) && (
+                    <span style={{ fontSize: "11px", color: theme.colors.mutedText }}>
+                      {item.role}
+                      {item.source ? ` · ${item.source}` : ""}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
           </ContextualItemTarget>
         );
       })}
@@ -473,119 +493,131 @@ export function PricingBlock({ block }: { block: TemplateBlock }) {
             collection="pricing"
             itemId={item.id ?? String(idx)}
           >
-          <div
-            style={{
-              ...cardStyle(theme, block.style),
-              borderColor: isRec ? theme.colors.accent : undefined,
-              borderWidth: isRec ? 2 : 1,
-              transform: isRec ? "scale(1.02)" : "none",
-              boxShadow: isRec ? `0 12px 30px ${hexToRgba(theme.colors.accent, 0.12)}` : undefined,
-              padding: isCompact ? "16px" : "24px",
-              display: "flex",
-              flexDirection: "column",
-              position: "relative",
-              overflow: "hidden",
-            }}
-          >
-            {isRec && (
-              <span
-                style={{
-                  position: "absolute",
-                  top: 12,
-                  right: 12,
-                  fontSize: "9px",
-                  fontWeight: 800,
-                  textTransform: "uppercase",
-                  padding: "3px 8px",
-                  borderRadius: 999,
-                  backgroundColor: theme.colors.accent,
-                  color: "#ffffff",
-                }}
-              >
-                Popular
-              </span>
-            )}
-
-            <h3 style={applyTypographyOverride({ ...headingStyle(theme, 0.8), fontSize: "16px" }, item.typography)}>{item.title}</h3>
-
-            <div style={{ display: "flex", alignItems: "baseline", gap: 4, margin: "14px 0" }}>
-              <span style={{ fontSize: "28px", fontWeight: 800, color: theme.colors.text }}>
-                {item.price}
-              </span>
-              {item.period && (
-                <span style={{ fontSize: "12px", color: theme.colors.mutedText }}>
-                  /{item.period}
+            <div
+              style={{
+                ...cardStyle(theme, block.style),
+                borderColor: isRec ? theme.colors.accent : undefined,
+                borderWidth: isRec ? 2 : 1,
+                transform: isRec ? "scale(1.02)" : "none",
+                boxShadow: isRec
+                  ? `0 12px 30px ${hexToRgba(theme.colors.accent, 0.12)}`
+                  : undefined,
+                padding: isCompact ? "16px" : "24px",
+                display: "flex",
+                flexDirection: "column",
+                position: "relative",
+                overflow: "hidden",
+              }}
+            >
+              {isRec && (
+                <span
+                  style={{
+                    position: "absolute",
+                    top: 12,
+                    right: 12,
+                    fontSize: "9px",
+                    fontWeight: 800,
+                    textTransform: "uppercase",
+                    padding: "3px 8px",
+                    borderRadius: 999,
+                    backgroundColor: theme.colors.accent,
+                    color: "#ffffff",
+                  }}
+                >
+                  Popular
                 </span>
               )}
-            </div>
 
-            {item.description && (
-              <p
+              <h3
                 style={applyTypographyOverride(
-                  {
-                    fontSize: "12px",
-                    color: theme.colors.mutedText,
-                    marginBottom: 16,
-                    lineHeight: 1.4,
-                  },
-                  item.descriptionTypography,
+                  { ...headingStyle(theme, 0.8), fontSize: "16px" },
+                  item.typography,
                 )}
               >
-                {item.description}
-              </p>
-            )}
+                {item.title}
+              </h3>
 
-            {item.features && item.features.length > 0 && (
-              <ul
-                style={{
-                  listStyle: "none",
-                  padding: 0,
-                  margin: "0 0 20px",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 8,
-                  flex: 1,
-                }}
-              >
-                {item.features.map((feat: string, i: number) => (
-                  <li
-                    key={i}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 8,
+              <div style={{ display: "flex", alignItems: "baseline", gap: 4, margin: "14px 0" }}>
+                <span style={{ fontSize: "28px", fontWeight: 800, color: theme.colors.text }}>
+                  {item.price}
+                </span>
+                {item.period && (
+                  <span style={{ fontSize: "12px", color: theme.colors.mutedText }}>
+                    /{item.period}
+                  </span>
+                )}
+              </div>
+
+              {item.description && (
+                <p
+                  style={applyTypographyOverride(
+                    {
                       fontSize: "12px",
-                      color: theme.colors.text,
-                    }}
-                  >
-                    <Check size={14} style={{ color: theme.colors.accent, flexShrink: 0 }} />
-                    <span>{feat}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
+                      color: theme.colors.mutedText,
+                      marginBottom: 16,
+                      lineHeight: 1.4,
+                    },
+                    item.descriptionTypography,
+                  )}
+                >
+                  {item.description}
+                </p>
+              )}
 
-            {item.ctaLabel && (
-              <button
-                className="pts-hoverable pts-press-feedback"
-                onClick={() => handleCTA(item.ctaUrl)}
-                style={applyCTAStyle({
-                  width: "100%",
-                  padding: "10px 16px",
-                  borderRadius: theme.buttons.radius,
-                  backgroundColor: isRec ? theme.colors.accent : theme.colors.primary,
-                  color: "#ffffff",
-                  fontWeight: 600,
-                  fontSize: "13px",
-                  border: "none",
-                  cursor: "pointer",
-                  marginTop: "auto",
-                }, item.ctaStyle)}
-              >
-                {item.ctaLabel}
-              </button>
-            )}
-          </div>
+              {item.features && item.features.length > 0 && (
+                <ul
+                  style={{
+                    listStyle: "none",
+                    padding: 0,
+                    margin: "0 0 20px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 8,
+                    flex: 1,
+                  }}
+                >
+                  {item.features.map((feat: string, i: number) => (
+                    <li
+                      key={i}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                        fontSize: "12px",
+                        color: theme.colors.text,
+                      }}
+                    >
+                      <Check size={14} style={{ color: theme.colors.accent, flexShrink: 0 }} />
+                      <span>{feat}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              {item.ctaLabel && (
+                <button
+                  className="pts-hoverable pts-press-feedback"
+                  onClick={() => handleCTA(item.ctaUrl)}
+                  style={applyCTAStyle(
+                    {
+                      width: "100%",
+                      padding: "10px 16px",
+                      borderRadius: theme.buttons.radius,
+                      backgroundColor: isRec ? theme.colors.accent : theme.colors.primary,
+                      color: "#ffffff",
+                      fontWeight: 600,
+                      fontSize: "13px",
+                      border: "none",
+                      cursor: "pointer",
+                      marginTop: "auto",
+                    },
+                    item.ctaStyle,
+                  )}
+                >
+                  {item.ctaLabel}
+                </button>
+              )}
+            </div>
           </ContextualItemTarget>
         );
       })}
@@ -623,63 +655,58 @@ export function FAQBlock({ block }: { block: TemplateBlock }) {
         const isOpen = openIds.includes(itemId);
 
         return (
-          <ContextualItemTarget
-            key={itemId}
-            blockId={block.id}
-            collection="faq"
-            itemId={itemId}
-          >
-          <div
-            style={{
-              ...cardStyle(theme, block.style),
-              padding: "14px 16px",
-              display: "flex",
-              flexDirection: "column",
-              overflow: "hidden",
-            }}
-          >
+          <ContextualItemTarget key={itemId} blockId={block.id} collection="faq" itemId={itemId}>
             <div
-              role="button"
-              tabIndex={0}
-              aria-expanded={isOpen}
-              onClick={() => toggleFAQ(itemId)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  toggleFAQ(itemId);
-                }
-              }}
               style={{
+                ...cardStyle(theme, block.style),
+                padding: "14px 16px",
                 display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                cursor: "pointer",
-                gap: 12,
-                userSelect: "none",
+                flexDirection: "column",
+                overflow: "hidden",
               }}
             >
-              <span style={{ fontSize: "14px", fontWeight: 600, color: theme.colors.text }}>
-                {item.question}
-              </span>
-              <div style={{ color: theme.colors.mutedText, flexShrink: 0 }}>
-                {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-              </div>
-            </div>
-            {isOpen && (
               <div
+                role="button"
+                tabIndex={0}
+                aria-expanded={isOpen}
+                onClick={() => toggleFAQ(itemId)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    toggleFAQ(itemId);
+                  }
+                }}
                 style={{
-                  marginTop: 10,
-                  fontSize: "13px",
-                  color: theme.colors.mutedText,
-                  lineHeight: 1.5,
-                  borderTop: `1px solid ${hexToRgba(theme.colors.border, 0.5)}`,
-                  paddingTop: 10,
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  cursor: "pointer",
+                  gap: 12,
+                  userSelect: "none",
                 }}
               >
-                {item.answer}
+                <span style={{ fontSize: "14px", fontWeight: 600, color: theme.colors.text }}>
+                  {item.question}
+                </span>
+                <div style={{ color: theme.colors.mutedText, flexShrink: 0 }}>
+                  {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                </div>
               </div>
-            )}
-          </div>
+              {isOpen && (
+                <div
+                  style={{
+                    marginTop: 10,
+                    fontSize: "13px",
+                    color: theme.colors.mutedText,
+                    lineHeight: 1.5,
+                    borderTop: `1px solid ${hexToRgba(theme.colors.border, 0.5)}`,
+                    paddingTop: 10,
+                  }}
+                >
+                  {item.answer}
+                </div>
+              )}
+            </div>
           </ContextualItemTarget>
         );
       })}
@@ -726,64 +753,66 @@ export function TimelineBlock({ block }: { block: TemplateBlock }) {
             collection="timeline"
             itemId={item.id ?? String(idx)}
           >
-          <div
-            style={{
-              position: "relative",
-              marginBottom: idx === items.length - 1 ? 0 : 20,
-            }}
-          >
-            {/* Dot */}
             <div
               style={{
-                position: "absolute",
-                left: -20,
-                top: 4,
-                width: 14,
-                height: 14,
-                borderRadius: "50%",
-                backgroundColor: theme.colors.background,
-                border: `3px solid ${theme.colors.accent}`,
-                display: "grid",
-                placeItems: "center",
-                boxShadow: `0 0 0 4px ${hexToRgba(theme.colors.accent, 0.1)}`,
-                zIndex: 2,
+                position: "relative",
+                marginBottom: idx === items.length - 1 ? 0 : 20,
               }}
-            />
+            >
+              {/* Dot */}
+              <div
+                style={{
+                  position: "absolute",
+                  left: -20,
+                  top: 4,
+                  width: 14,
+                  height: 14,
+                  borderRadius: "50%",
+                  backgroundColor: theme.colors.background,
+                  border: `3px solid ${theme.colors.accent}`,
+                  display: "grid",
+                  placeItems: "center",
+                  boxShadow: `0 0 0 4px ${hexToRgba(theme.colors.accent, 0.1)}`,
+                  zIndex: 2,
+                }}
+              />
 
-            <div style={isCard ? { ...cardStyle(theme, block.style), padding: "14px" } : undefined}>
-              {item.date && (
-                <span
-                  style={{
-                    fontSize: "11px",
-                    fontWeight: 700,
-                    color: theme.colors.accent,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.03em",
-                  }}
-                >
-                  {item.date}
-                </span>
-              )}
-              <h3 style={{ ...headingStyle(theme, 0.75), fontSize: "14px", marginTop: 2 }}>
-                {item.title}
-              </h3>
-              {item.description && (
-                <p
-                  style={applyTypographyOverride(
-                    {
-                      fontSize: "12.5px",
-                      color: theme.colors.mutedText,
-                      marginTop: 6,
-                      lineHeight: 1.4,
-                    },
-                    item.descriptionTypography,
-                  )}
-                >
-                  {item.description}
-                </p>
-              )}
+              <div
+                style={isCard ? { ...cardStyle(theme, block.style), padding: "14px" } : undefined}
+              >
+                {item.date && (
+                  <span
+                    style={{
+                      fontSize: "11px",
+                      fontWeight: 700,
+                      color: theme.colors.accent,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.03em",
+                    }}
+                  >
+                    {item.date}
+                  </span>
+                )}
+                <h3 style={{ ...headingStyle(theme, 0.75), fontSize: "14px", marginTop: 2 }}>
+                  {item.title}
+                </h3>
+                {item.description && (
+                  <p
+                    style={applyTypographyOverride(
+                      {
+                        fontSize: "12.5px",
+                        color: theme.colors.mutedText,
+                        marginTop: 6,
+                        lineHeight: 1.4,
+                      },
+                      item.descriptionTypography,
+                    )}
+                  >
+                    {item.description}
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
           </ContextualItemTarget>
         );
       })}
@@ -864,31 +893,43 @@ export function FeaturedMediaBlock({ block }: { block: TemplateBlock }) {
         gap: 8,
       }}
     >
-      {c.title && <h3 style={applyTypographyOverride(headingStyle(theme, 0.85), block.style.titleTypography)}>{c.title}</h3>}
+      {c.title && (
+        <h3 style={applyTypographyOverride(headingStyle(theme, 0.85), block.style.titleTypography)}>
+          {c.title}
+        </h3>
+      )}
       {c.description && (
-        <p style={applyTypographyOverride({ fontSize: "13px", color: theme.colors.mutedText, lineHeight: 1.4 }, block.style.descriptionTypography)}>
+        <p
+          style={applyTypographyOverride(
+            { fontSize: "13px", color: theme.colors.mutedText, lineHeight: 1.4 },
+            block.style.descriptionTypography,
+          )}
+        >
           {c.description}
         </p>
       )}
       {c.ctaLabel && c.ctaUrl && (
         <button
           onClick={handleCTA}
-          style={applyCTAStyle({
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 6,
-            padding: "8px 16px",
-            borderRadius: theme.buttons.radius,
-            backgroundColor: theme.colors.primary,
-            color: "#ffffff",
-            fontSize: "13px",
-            fontWeight: 600,
-            border: "none",
-            cursor: "pointer",
-            alignSelf: "flex-start",
-            marginTop: 6,
-          }, block.style.ctaStyle)}
+          style={applyCTAStyle(
+            {
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 6,
+              padding: "8px 16px",
+              borderRadius: theme.buttons.radius,
+              backgroundColor: theme.colors.primary,
+              color: "#ffffff",
+              fontSize: "13px",
+              fontWeight: 600,
+              border: "none",
+              cursor: "pointer",
+              alignSelf: "flex-start",
+              marginTop: 6,
+            },
+            block.style.ctaStyle,
+          )}
         >
           {c.ctaLabel}
           <ArrowRight size={12} />
@@ -959,27 +1000,27 @@ export function FloatingActionsBlock({ block }: { block: TemplateBlock }) {
           itemId={item.id ?? String(idx)}
           field="action"
         >
-        <button
-          onClick={() => handleAction(item.url)}
-          title={item.label}
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 6,
-            width: 44,
-            height: 44,
-            borderRadius: "50%",
-            backgroundColor: theme.colors.primary,
-            color: "#ffffff",
-            border: "none",
-            cursor: "pointer",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-            transition: "transform 0.16s ease, background-color 0.16s ease",
-          }}
-        >
-          <SmartIcon name={item.icon ?? ""} size={18} />
-        </button>
+          <button
+            onClick={() => handleAction(item.url)}
+            title={item.label}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 6,
+              width: 44,
+              height: 44,
+              borderRadius: "50%",
+              backgroundColor: theme.colors.primary,
+              color: "#ffffff",
+              border: "none",
+              cursor: "pointer",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+              transition: "transform 0.16s ease, background-color 0.16s ease",
+            }}
+          >
+            <SmartIcon name={item.icon ?? ""} size={18} />
+          </button>
         </ContextualItemTarget>
       ))}
     </div>

@@ -7,17 +7,17 @@
 The controlled Catalog page was read from `public.pages` after the reported
 Publish attempt:
 
-| Field | Observed value |
-|---|---|
-| Page | `QA Catalog Final` |
-| Page ID | `6b01e073-da2a-464c-9c1e-d16c9207fb6d` |
-| `public_id` | `A8LjoRw` |
-| slug | `null` |
-| published | `false` |
-| published revision | `0` |
-| published at | `null` |
-| `published_template_config` | `null` |
-| draft `template_config` | present |
+| Field                       | Observed value                         |
+| --------------------------- | -------------------------------------- |
+| Page                        | `QA Catalog Final`                     |
+| Page ID                     | `6b01e073-da2a-464c-9c1e-d16c9207fb6d` |
+| `public_id`                 | `A8LjoRw`                              |
+| slug                        | `null`                                 |
+| published                   | `false`                                |
+| published revision          | `0`                                    |
+| published at                | `null`                                 |
+| `published_template_config` | `null`                                 |
+| draft `template_config`     | present                                |
 
 The public lookup RPC returned `[]`, and `GET /pg/A8LjoRw` returned 404. This
 is the expected public result for an unpublished child whose draft remains

@@ -69,7 +69,10 @@ export function runEngineHardeningCheck(): HardeningCheckResult {
   add(
     "v1_and_v15_suites",
     previous.passed,
-    previous.checks.filter((c) => !c.passed).map((c) => c.name).join(","),
+    previous.checks
+      .filter((c) => !c.passed)
+      .map((c) => c.name)
+      .join(","),
   );
 
   /* ---------------------------------------- 2. hostile runtime input safety */
@@ -107,7 +110,10 @@ export function runEngineHardeningCheck(): HardeningCheckResult {
   add(
     "invalid_enum_throws_engine_error",
     throwsEngineError(() =>
-      generatePageRecipe(intent, { now: NOW, context: { business: { urgency: "nuclear" as never } } }),
+      generatePageRecipe(intent, {
+        now: NOW,
+        context: { business: { urgency: "nuclear" as never } },
+      }),
     ),
   );
 
@@ -180,8 +186,7 @@ export function runEngineHardeningCheck(): HardeningCheckResult {
   add("palettes_participate", paletteVariety.size > 1, `${paletteVariety.size}`);
   add(
     "presets_participate",
-    set.candidates.some((c) => c.preset !== null) ||
-      set.evaluated.some((c) => c.preset !== null),
+    set.candidates.some((c) => c.preset !== null) || set.evaluated.some((c) => c.preset !== null),
   );
   const repeat = generateCandidateSet(intent, { now: NOW, count: 5, variantsPerPreset: 3 });
   add(
@@ -193,7 +198,7 @@ export function runEngineHardeningCheck(): HardeningCheckResult {
   /* --------------------------------------- 7. bounds clamp hostile numbers */
   const bounded = generateCandidateSet(intent, {
     now: NOW,
-    count: 10 ** 6 as never,
+    count: (10 ** 6) as never,
     variantsPerPreset: -3,
   });
   add(
@@ -412,7 +417,8 @@ export function runEngineHardeningCheck(): HardeningCheckResult {
   heroIntent.identity = { ...heroIntent.identity, banner_preview: "/banner.jpg" };
   const heroNorm = normalizeIntent(heroIntent);
   const heroRef = (command: string, overrides = {}) =>
-    refineOptions(command as never, { overrides, variant: 0 }, heroNorm).options.overrides?.hero_mode;
+    refineOptions(command as never, { overrides, variant: 0 }, heroNorm).options.overrides
+      ?.hero_mode;
   const noBannerNorm = normalizeIntent(
     (() => {
       const i = structuredClone(intent);
@@ -425,7 +431,8 @@ export function runEngineHardeningCheck(): HardeningCheckResult {
     heroRef("prefer_banner") === "banner_only" &&
       heroRef("prefer_banner_avatar") === "banner_avatar" &&
       heroRef("prefer_avatar") === "avatar_only" &&
-      refineOptions("prefer_banner", { overrides: {}, variant: 0 }, noBannerNorm).ignored.length > 0,
+      refineOptions("prefer_banner", { overrides: {}, variant: 0 }, noBannerNorm).ignored.length >
+        0,
   );
   add(
     "prefer_banner_respects_lock",

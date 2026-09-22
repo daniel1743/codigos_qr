@@ -450,7 +450,9 @@ function catalogDefaultV1(): BioTemplateConfig {
       ...shared,
       id: productGridId,
       type: "productGrid",
-      variant: "bento",
+      // Document-local seam for the approved Magic Patterns catalog shell.
+      // Other ProductGrid documents keep their existing variants/rendering.
+      variant: "catalog-premium-card-v1",
       content: {
         products: [
           {
@@ -460,6 +462,11 @@ function catalogDefaultV1(): BioTemplateConfig {
             ctaUrl: "#contacto",
             ctaLabel: "Ver producto",
             imageUrl: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600",
+            imageProvenance: {
+              origin: "reference_stock",
+              provider: "unsplash",
+              providerAssetId: "1523275335684-37898b6baf30",
+            },
             description: "Una opción versátil para comenzar.",
           },
           {
@@ -469,6 +476,11 @@ function catalogDefaultV1(): BioTemplateConfig {
             ctaUrl: "#contacto",
             ctaLabel: "Consultar",
             imageUrl: "https://images.unsplash.com/photo-1498049794561-7780e7231661?w=600",
+            imageProvenance: {
+              origin: "reference_stock",
+              provider: "unsplash",
+              providerAssetId: "1498049794561-7780e7231661",
+            },
             description: "Diseñado para el uso diario y resultados confiables.",
           },
           {
@@ -478,6 +490,11 @@ function catalogDefaultV1(): BioTemplateConfig {
             ctaUrl: "#contacto",
             ctaLabel: "Comprar",
             imageUrl: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600",
+            imageProvenance: {
+              origin: "reference_stock",
+              provider: "unsplash",
+              providerAssetId: "1441986300917-64674bd600d8",
+            },
             description: "Descubre las novedades disponibles esta temporada.",
           },
         ],

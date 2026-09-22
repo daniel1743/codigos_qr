@@ -221,7 +221,9 @@ export function normalizeContent(source: ContentSourceV2 | undefined): ContentSo
   );
   if (pricing.length) clean.pricing = pricing;
 
-  const faq = safeList(input.faq, 8).filter((f) => f && !!text(f.question, 160) && !!text(f.answer, 600));
+  const faq = safeList(input.faq, 8).filter(
+    (f) => f && !!text(f.question, 160) && !!text(f.answer, 600),
+  );
   if (faq.length) clean.faq = faq;
 
   const timeline = safeList(input.timeline, 8).filter((t) => t && !!text(t.title, 80));
@@ -230,7 +232,9 @@ export function normalizeContent(source: ContentSourceV2 | undefined): ContentSo
   const events = safeList(input.events, 6).filter((e) => e && !!text(e.title, 80));
   if (events.length) clean.events = events;
 
-  const products = safeList(input.products, 8).filter((p) => p && !!text(p.title, 80) && isSafeUrl(p.imageUrl));
+  const products = safeList(input.products, 8).filter(
+    (p) => p && !!text(p.title, 80) && isSafeUrl(p.imageUrl),
+  );
   if (products.length) clean.products = products;
 
   if (input.music && text(input.music.title, 80)) clean.music = input.music;

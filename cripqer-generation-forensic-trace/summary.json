@@ -47,12 +47,7 @@
         "creator": 8,
         "energetic": 0
       },
-      "blockTypes": [
-        "text",
-        "services",
-        "cta",
-        "contact"
-      ],
+      "blockTypes": ["text", "services", "cta", "contact"],
       "themeColors": {
         "primary": "#1F3A5F",
         "secondary": "#5A564F",
@@ -116,12 +111,7 @@
         "creator": 16,
         "energetic": 26
       },
-      "blockTypes": [
-        "text",
-        "cta",
-        "productGrid",
-        "contact"
-      ],
+      "blockTypes": ["text", "cta", "productGrid", "contact"],
       "themeColors": {
         "primary": "#1F3A5F",
         "secondary": "#5A564F",
@@ -190,11 +180,7 @@
         "creator": 22,
         "energetic": 0
       },
-      "blockTypes": [
-        "text",
-        "cta",
-        "portfolio"
-      ],
+      "blockTypes": ["text", "cta", "portfolio"],
       "themeColors": {
         "primary": "#7A3B2E",
         "secondary": "#574E45",

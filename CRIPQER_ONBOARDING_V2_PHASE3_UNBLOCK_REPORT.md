@@ -21,19 +21,19 @@ No se modificaron scoring, candidatos, estrategia de generación, selección de
 layout, media, renderer, editores, persistencia, Supabase, Commerce ni rutas
 públicas.
 
-| Verificación | Resultado |
-| --- | --- |
-| Original blocker confirmed | **YES** |
-| Host input contract modified | **YES** |
-| Field added/reused | `businessOther?: string \| null` — new optional host seam |
-| Engine V2 business logic modified | **NO** |
-| Engine V2 scoring modified | **NO** |
-| Power Editor V2 modified | **NO** |
-| Basic Editor modified | **NO** |
-| Canonical persistence modified | **NO** |
-| Supabase modified | **NO** |
-| Public routes modified | **NO** |
-| Commerce implemented | **NO** |
+| Verificación                      | Resultado                                                 |
+| --------------------------------- | --------------------------------------------------------- |
+| Original blocker confirmed        | **YES**                                                   |
+| Host input contract modified      | **YES**                                                   |
+| Field added/reused                | `businessOther?: string \| null` — new optional host seam |
+| Engine V2 business logic modified | **NO**                                                    |
+| Engine V2 scoring modified        | **NO**                                                    |
+| Power Editor V2 modified          | **NO**                                                    |
+| Basic Editor modified             | **NO**                                                    |
+| Canonical persistence modified    | **NO**                                                    |
+| Supabase modified                 | **NO**                                                    |
+| Public routes modified            | **NO**                                                    |
+| Commerce implemented              | **NO**                                                    |
 
 ## Trace forense confirmado
 
@@ -61,22 +61,22 @@ públicas.
 
 ## QA funcional
 
-| Caso | Resultado |
-| --- | --- |
-| Jardinero mapping | **PASS** |
-| Veterinaria mapping | **PASS** |
-| Fotógrafo mapping | **PASS** |
-| Specific profession preserved | **YES** |
-| Generic degradation detected | **NO** |
-| Simple gardener generation | **PASS** |
-| Rich veterinarian generation | **PASS** |
-| Portfolio/photographer generation | **PASS** |
-| Future commerce semantic fixture | **Same prior status** — `buy` remains unsupported by the current host |
-| Secondary actions preserved | **PASS** for HTTPS URLs as ordered content links; phone/handles remain explicitly deferred |
-| Invalid destination behavior | **PASS** |
-| Generated `BioTemplateConfig` valid | **YES** |
-| Recognized activities unchanged | **PASS** — no `businessOther` is added for host-recognized values |
-| Adapter deterministic and source intent immutable | **PASS** |
+| Caso                                              | Resultado                                                                                  |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Jardinero mapping                                 | **PASS**                                                                                   |
+| Veterinaria mapping                               | **PASS**                                                                                   |
+| Fotógrafo mapping                                 | **PASS**                                                                                   |
+| Specific profession preserved                     | **YES**                                                                                    |
+| Generic degradation detected                      | **NO**                                                                                     |
+| Simple gardener generation                        | **PASS**                                                                                   |
+| Rich veterinarian generation                      | **PASS**                                                                                   |
+| Portfolio/photographer generation                 | **PASS**                                                                                   |
+| Future commerce semantic fixture                  | **Same prior status** — `buy` remains unsupported by the current host                      |
+| Secondary actions preserved                       | **PASS** for HTTPS URLs as ordered content links; phone/handles remain explicitly deferred |
+| Invalid destination behavior                      | **PASS**                                                                                   |
+| Generated `BioTemplateConfig` valid               | **YES**                                                                                    |
+| Recognized activities unchanged                   | **PASS** — no `businessOther` is added for host-recognized values                          |
+| Adapter deterministic and source intent immutable | **PASS**                                                                                   |
 
 ## Regression gates
 

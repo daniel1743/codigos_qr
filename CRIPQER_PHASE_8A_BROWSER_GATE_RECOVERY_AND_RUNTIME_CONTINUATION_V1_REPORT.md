@@ -70,19 +70,19 @@ the QA document. It accumulated 74 blocks; the attempted undo sequence did not
 restore the previous 28-block state. The following scenarios therefore remain
 blocked rather than being inferred from the smoke:
 
-| Scenario | Result |
-|---|---|
-| Save/reload by all eight families | BLOCKED |
-| Three full-template customize/save/reload flows | BLOCKED |
+| Scenario                                                 | Result  |
+| -------------------------------------------------------- | ------- |
+| Save/reload by all eight families                        | BLOCKED |
+| Three full-template customize/save/reload flows          | BLOCKED |
 | Collection add/edit/reorder/delete/undo/redo/save/reload | BLOCKED |
-| Owner-media upload/replace/undo/clear/reload | BLOCKED |
-| Desktop contextual selection | BLOCKED |
-| 360/390/430 mobile selection and controls | BLOCKED |
-| CTA editor/public parity | BLOCKED |
-| Header mode persistence | BLOCKED |
-| Hover/reduced motion | BLOCKED |
-| Keyboard focus | BLOCKED |
-| Public parity | BLOCKED |
+| Owner-media upload/replace/undo/clear/reload             | BLOCKED |
+| Desktop contextual selection                             | BLOCKED |
+| 360/390/430 mobile selection and controls                | BLOCKED |
+| CTA editor/public parity                                 | BLOCKED |
+| Header mode persistence                                  | BLOCKED |
+| Hover/reduced motion                                     | BLOCKED |
+| Keyboard focus                                           | BLOCKED |
+| Public parity                                            | BLOCKED |
 
 The prior Phase 7B render-safe and Phase 8 supporting test evidence remains
 valid, but it is not substituted for these runtime checks. Hero text

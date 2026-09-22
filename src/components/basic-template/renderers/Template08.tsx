@@ -6,14 +6,7 @@ import type { StandaloneStyle } from "./standaloneStyle";
 /* Template08 — Link-in-bio dark purple/neon: avatar con aro degradado, redes y tarjetas con icono de color */
 
 export type Template08LinkType =
-  | "website"
-  | "blog"
-  | "twitter"
-  | "instagram"
-  | "youtube"
-  | "email"
-  | "github"
-  | "linkedin";
+  "website" | "blog" | "twitter" | "instagram" | "youtube" | "email" | "github" | "linkedin";
 
 export interface Template08Social {
   type: Template08LinkType;
@@ -118,7 +111,10 @@ function Icon({ type }: { type: Template08LinkType }) {
     case "blog":
       return (
         <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden="true">
-          <path {...p} d="M6 3h8l4 4v14H6V3zm8 1.5V8h3.5L14 4.5zM8 11h8v1.6H8V11zm0 4h8v1.6H8V15z" />
+          <path
+            {...p}
+            d="M6 3h8l4 4v14H6V3zm8 1.5V8h3.5L14 4.5zM8 11h8v1.6H8V11zm0 4h8v1.6H8V15z"
+          />
         </svg>
       );
     default:
@@ -192,23 +188,24 @@ export default function Template08({
                 padding: 4,
                 boxSizing: "border-box",
                 background: standaloneStyle?.avatarRing.enabled
-                  ? standaloneStyle.avatarRing.color || `linear-gradient(135deg, ${secondaryColor}, ${primaryColor})`
+                  ? standaloneStyle.avatarRing.color ||
+                    `linear-gradient(135deg, ${secondaryColor}, ${primaryColor})`
                   : `linear-gradient(135deg, ${secondaryColor}, ${primaryColor})`,
               }}
             >
-            <img
-              src={avatarUrl}
-              alt={name}
-              style={{
-                width: "100%",
-                height: "100%",
-                borderRadius: "50%",
-                objectFit: "cover",
-                display: "block",
-                border: "3px solid #0a0a16",
-                boxSizing: "border-box",
-              }}
-            />
+              <img
+                src={avatarUrl}
+                alt={name}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  borderRadius: "50%",
+                  objectFit: "cover",
+                  display: "block",
+                  border: "3px solid #0a0a16",
+                  boxSizing: "border-box",
+                }}
+              />
             </div>
           </EditableTarget>
         </div>
@@ -327,64 +324,63 @@ export default function Template08({
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 12,
-                padding: "12px 14px",
-                borderRadius: standaloneStyle?.button.radius ?? 14,
-                textDecoration: "none",
-                color: standaloneStyle?.button.textColor ?? "#fff",
-                background: standaloneStyle?.button.background ?? (c.highlight
-                  ? `linear-gradient(90deg, ${secondaryColor}, ${primaryColor})`
-                  : "rgba(255,255,255,.05)"),
-                border: buttonBorder ?? (c.highlight
-                  ? "none"
-                  : "1px solid rgba(255,255,255,.09)"),
-                boxSizing: "border-box",
-                }}
-              >
-              <span
-                style={{
-                  width: 42,
-                  height: 42,
-                  flex: "0 0 auto",
-                  borderRadius: 12,
-                  background: BRAND[c.type],
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: "center",
+                  gap: 12,
+                  padding: "12px 14px",
+                  borderRadius: standaloneStyle?.button.radius ?? 14,
+                  textDecoration: "none",
+                  color: standaloneStyle?.button.textColor ?? "#fff",
+                  background:
+                    standaloneStyle?.button.background ??
+                    (c.highlight
+                      ? `linear-gradient(90deg, ${secondaryColor}, ${primaryColor})`
+                      : "rgba(255,255,255,.05)"),
+                  border:
+                    buttonBorder ?? (c.highlight ? "none" : "1px solid rgba(255,255,255,.09)"),
+                  boxSizing: "border-box",
                 }}
               >
-                <Icon type={c.type} />
-              </span>
-              <span style={{ flex: 1, minWidth: 0 }}>
-                <span style={{ display: "block", fontWeight: 700, fontSize: 16 }}>
-                  {c.title}
-                </span>
                 <span
                   style={{
-                    display: "block",
-                    fontSize: 12.5,
-                    marginTop: 2,
-                    opacity: 0.75,
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
+                    width: 42,
+                    height: 42,
+                    flex: "0 0 auto",
+                    borderRadius: 12,
+                    background: BRAND[c.type],
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
                   }}
                 >
-                  {c.subtitle}
+                  <Icon type={c.type} />
                 </span>
-              </span>
-              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-                <path
-                  d="M9 5l7 7-7 7"
-                  fill="none"
-                  stroke="#cfc9e6"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+                <span style={{ flex: 1, minWidth: 0 }}>
+                  <span style={{ display: "block", fontWeight: 700, fontSize: 16 }}>{c.title}</span>
+                  <span
+                    style={{
+                      display: "block",
+                      fontSize: 12.5,
+                      marginTop: 2,
+                      opacity: 0.75,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {c.subtitle}
+                  </span>
+                </span>
+                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                  <path
+                    d="M9 5l7 7-7 7"
+                    fill="none"
+                    stroke="#cfc9e6"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
               </a>
             </EditableTarget>
           ))}
@@ -412,4 +408,3 @@ export default function Template08({
     </div>
   );
 }
-

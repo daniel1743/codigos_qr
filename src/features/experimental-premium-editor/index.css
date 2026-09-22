@@ -1,27 +1,27 @@
 /* @import url() FONT IMPORTS MUST ALWAYS BE AT THE VERY TOP OF THIS FILE, ABOVE THE TAILWIND IMPORTS — DO NOT DELETE THIS COMMENT */
-@import url('https://fonts.googleapis.com/css2?family=Marcellus&family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Marcellus&family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap");
 
 /* END TAILWIND IMPORTS — ALL OTHER CSS MUST GO BELOW THIS LINE */
 @theme inline {
-  --color-canvas: #F5F3F0;
-  --color-surface: #FFFFFF;
-  --color-ink: #17140F;
-  --color-body: #4A443C;
-  --color-muted: #7A736A;
-  --color-hairline: #E6E1DA;
-  --color-brand: #1E4D44;
-  --color-brandSoft: #EAF1EE;
-  --color-sel: #2F6FED;
-  --color-selSoft: #EAF1FE;
-  --color-danger: #B42318;
+  --color-canvas: #f5f3f0;
+  --color-surface: #ffffff;
+  --color-ink: #17140f;
+  --color-body: #4a443c;
+  --color-muted: #7a736a;
+  --color-hairline: #e6e1da;
+  --color-brand: #1e4d44;
+  --color-brandSoft: #eaf1ee;
+  --color-sel: #2f6fed;
+  --color-selSoft: #eaf1fe;
+  --color-danger: #b42318;
 
-  --font-display: 'Marcellus', 'Georgia', 'serif';
-  --font-editorial: '"Playfair Display"', 'Georgia', 'serif';
-  --font-grotesk: '"DM Sans"', 'Inter', 'sans-serif';
+  --font-display: "Marcellus", "Georgia", "serif";
+  --font-editorial: '"Playfair Display"', "Georgia", "serif";
+  --font-grotesk: '"DM Sans"', "Inter", "sans-serif";
 
-  --shadow-card: 0 1px 2px rgba(23,20,15,0.04), 0 8px 24px -12px rgba(23,20,15,0.10);
-  --shadow-float: 0 2px 6px rgba(23,20,15,0.06), 0 16px 40px -12px rgba(23,20,15,0.22);
-  --shadow-sheet: 0 -8px 40px -12px rgba(23,20,15,0.26);
+  --shadow-card: 0 1px 2px rgba(23, 20, 15, 0.04), 0 8px 24px -12px rgba(23, 20, 15, 0.1);
+  --shadow-float: 0 2px 6px rgba(23, 20, 15, 0.06), 0 16px 40px -12px rgba(23, 20, 15, 0.22);
+  --shadow-sheet: 0 -8px 40px -12px rgba(23, 20, 15, 0.26);
 
   --ease-premium: cubic-bezier(0.23, 1, 0.32, 1);
 }

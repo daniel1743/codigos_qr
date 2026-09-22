@@ -45,9 +45,7 @@ export function PowerEditorLocaleProvider({ children }: { children: ReactNode })
   );
 
   return (
-    <PowerEditorLocaleContext.Provider value={value}>
-      {children}
-    </PowerEditorLocaleContext.Provider>
+    <PowerEditorLocaleContext.Provider value={value}>{children}</PowerEditorLocaleContext.Provider>
   );
 }
 

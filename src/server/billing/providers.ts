@@ -105,7 +105,6 @@ export interface ProviderReactivateInput {
   providerSubscriptionId: string;
 }
 
-
 // ============================================================
 // PROVIDER ADAPTER CONTRACT
 // ============================================================
@@ -132,9 +131,7 @@ export interface ProviderAdapter extends ProviderSessionAdapter {
   getCheckoutStatus(providerCheckoutId: string): Promise<ProviderCheckoutStatus>;
 
   /** Authoritative provider subscription lookup (null when not found). */
-  getSubscription(
-    providerSubscriptionId: string,
-  ): Promise<ProviderSubscriptionSnapshot | null>;
+  getSubscription(providerSubscriptionId: string): Promise<ProviderSubscriptionSnapshot | null>;
 
   /** Provider-native plan/interval change (no second subscription, no cancel-recreate). */
   changePlan(input: ProviderChangePlanInput): Promise<ProviderSubscriptionSnapshot>;
@@ -157,8 +154,9 @@ export interface ProviderAdapter extends ProviderSessionAdapter {
  * Checkout Host `ProviderSessionAdapter` seam. If this fails to compile, the
  * adapter is no longer checkout-compatible and the change must be reverted.
  */
-type _AdapterSatisfiesSessionAdapter =
-  ProviderAdapter extends ProviderSessionAdapter ? true : never;
+type _AdapterSatisfiesSessionAdapter = ProviderAdapter extends ProviderSessionAdapter
+  ? true
+  : never;
 
 // ============================================================
 // PROVIDER REGISTRY

@@ -13,11 +13,7 @@
  */
 
 import type { NormalizedContentV1 } from "./catalog.types";
-import type {
-  PageGenerationRequest,
-  PagePlanV1,
-  RuntimePageConfigV1,
-} from "./smart-pages.types";
+import type { PageGenerationRequest, PagePlanV1, RuntimePageConfigV1 } from "./smart-pages.types";
 import { buildRuntimeConfig } from "./page-orchestrator";
 
 /** Neutral host-engine input. The host maps this onto its own engine intent. */
@@ -46,10 +42,7 @@ export interface EngineV2Adapter {
   render(plan: PagePlanV1, content: NormalizedContentV1): Promise<RuntimePageConfigV1>;
 }
 
-export function toEngineV2Input(
-  plan: PagePlanV1,
-  request: PageGenerationRequest,
-): EngineV2Input {
+export function toEngineV2Input(plan: PagePlanV1, request: PageGenerationRequest): EngineV2Input {
   const content = request.content;
   const items = content.catalogs.flatMap((c) => c.items);
   const identity: EngineV2Input["identity"] = { name: content.business.name };

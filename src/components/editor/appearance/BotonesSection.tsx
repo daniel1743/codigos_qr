@@ -115,8 +115,8 @@ export function BotonesSection({ profile, onChange }: BotonesSectionProps) {
           />
           <AlertDescription className="flex flex-col sm:flex-row sm:items-center justify-between text-[11px] ml-1 gap-2">
             <span>
-              Contraste {contrastState === "POOR" ? "muy bajo" : "bajo"}. El texto puede ser
-              difícil de leer.
+              Contraste {contrastState === "POOR" ? "muy bajo" : "bajo"}. El texto puede ser difícil
+              de leer.
             </span>
             <Button
               variant="outline"

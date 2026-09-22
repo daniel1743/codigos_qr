@@ -8,15 +8,15 @@
 
 ## 1. Architecture
 
-| Question | Answer |
-|---|---|
-| Pure core? | **YES** (0 network, 0 DB, 0 React, 0 Supabase, 0 filesystem runtime) |
-| Power Editor modified? | **NO** |
-| Renderer modified? | **NO** |
-| Billing modified? | **NO** |
-| Capability Policy Core modified? | **NO** (read-only delegation) |
-| Asset Manifest modified? | **NO** (read-only delegation) |
-| BioTemplateConfig schema modified? | **NO** |
+| Question                           | Answer                                                               |
+| ---------------------------------- | -------------------------------------------------------------------- |
+| Pure core?                         | **YES** (0 network, 0 DB, 0 React, 0 Supabase, 0 filesystem runtime) |
+| Power Editor modified?             | **NO**                                                               |
+| Renderer modified?                 | **NO**                                                               |
+| Billing modified?                  | **NO**                                                               |
+| Capability Policy Core modified?   | **NO** (read-only delegation)                                        |
+| Asset Manifest modified?           | **NO** (read-only delegation)                                        |
+| BioTemplateConfig schema modified? | **NO**                                                               |
 
 ### Authoritative chain
 
@@ -48,46 +48,46 @@ template/layout/section classifications).
 
 The guard reasons about **intent**, not a bare final config snapshot.
 
-| Category | Intents |
-|---|---|
-| Field-scoped | `EDIT_CONTENT`, `EDIT_BASIC_STYLE`, `EDIT_AVATAR_BANNER`, `EDIT_MEDIA`, `EDIT_ADVANCED_TYPOGRAPHY`, `EDIT_ADVANCED_LAYOUT`, `EDIT_MANUAL_RESPONSIVE`, `EDIT_ADVANCED_MOTION`, `EDIT_PREMIUM_BACKGROUND`, `EDIT_ADVANCED_CARD_BUTTON` |
-| Structural | `ADD_BLOCK`, `DUPLICATE_BLOCK`, `DELETE_BLOCK`, `REORDER_BLOCK`, `TOGGLE_BLOCK_VISIBILITY` |
-| Asset application | `APPLY_LAYOUT`, `APPLY_SECTION`, `APPLY_TEMPLATE` |
-| Branding | `REMOVE_CRIPQER_BRANDING` |
-| Persistence | `SAVE_UNRELATED`, `PUBLISH_UNRELATED` |
+| Category          | Intents                                                                                                                                                                                                                              |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Field-scoped      | `EDIT_CONTENT`, `EDIT_BASIC_STYLE`, `EDIT_AVATAR_BANNER`, `EDIT_MEDIA`, `EDIT_ADVANCED_TYPOGRAPHY`, `EDIT_ADVANCED_LAYOUT`, `EDIT_MANUAL_RESPONSIVE`, `EDIT_ADVANCED_MOTION`, `EDIT_PREMIUM_BACKGROUND`, `EDIT_ADVANCED_CARD_BUTTON` |
+| Structural        | `ADD_BLOCK`, `DUPLICATE_BLOCK`, `DELETE_BLOCK`, `REORDER_BLOCK`, `TOGGLE_BLOCK_VISIBILITY`                                                                                                                                           |
+| Asset application | `APPLY_LAYOUT`, `APPLY_SECTION`, `APPLY_TEMPLATE`                                                                                                                                                                                    |
+| Branding          | `REMOVE_CRIPQER_BRANDING`                                                                                                                                                                                                            |
+| Persistence       | `SAVE_UNRELATED`, `PUBLISH_UNRELATED`                                                                                                                                                                                                |
 
 ### 2.2 Capability delegation
 
 Field-scoped and structural intents delegate to `resolveCapabilityAccess`
 (`capabilities.ts`). No Free/Pro matrix is duplicated.
 
-| Intent | Capability |
-|---|---|
-| `EDIT_CONTENT` | `edit_content` |
-| `EDIT_BASIC_STYLE` | `edit_basic_style` |
-| `EDIT_AVATAR_BANNER` | `avatar_banner` |
-| `EDIT_MEDIA` | `media_assets` |
-| `EDIT_ADVANCED_TYPOGRAPHY` | `advanced_typography` |
-| `EDIT_ADVANCED_LAYOUT` | `advanced_layout` |
-| `EDIT_MANUAL_RESPONSIVE` | `manual_responsive` |
-| `EDIT_ADVANCED_MOTION` | `advanced_motion` |
-| `EDIT_PREMIUM_BACKGROUND` | `premium_background_effects` |
-| `EDIT_ADVANCED_CARD_BUTTON` | `advanced_card_button_styling` |
-| `DELETE_BLOCK` / `REORDER_BLOCK` / `TOGGLE_BLOCK_VISIBILITY` | `block_structure` |
-| `REMOVE_CRIPQER_BRANDING` | `remove_cripqer_branding` |
-| `SAVE_UNRELATED` / `PUBLISH_UNRELATED` | `publishing` |
+| Intent                                                       | Capability                     |
+| ------------------------------------------------------------ | ------------------------------ |
+| `EDIT_CONTENT`                                               | `edit_content`                 |
+| `EDIT_BASIC_STYLE`                                           | `edit_basic_style`             |
+| `EDIT_AVATAR_BANNER`                                         | `avatar_banner`                |
+| `EDIT_MEDIA`                                                 | `media_assets`                 |
+| `EDIT_ADVANCED_TYPOGRAPHY`                                   | `advanced_typography`          |
+| `EDIT_ADVANCED_LAYOUT`                                       | `advanced_layout`              |
+| `EDIT_MANUAL_RESPONSIVE`                                     | `manual_responsive`            |
+| `EDIT_ADVANCED_MOTION`                                       | `advanced_motion`              |
+| `EDIT_PREMIUM_BACKGROUND`                                    | `premium_background_effects`   |
+| `EDIT_ADVANCED_CARD_BUTTON`                                  | `advanced_card_button_styling` |
+| `DELETE_BLOCK` / `REORDER_BLOCK` / `TOGGLE_BLOCK_VISIBILITY` | `block_structure`              |
+| `REMOVE_CRIPQER_BRANDING`                                    | `remove_cripqer_branding`      |
+| `SAVE_UNRELATED` / `PUBLISH_UNRELATED`                       | `publishing`                   |
 
 ### 2.3 Asset-manifest delegation
 
 Asset insertion/application delegates to the manifest helpers. Unknown assets
 fail closed (`UNKNOWN` → `DENY`).
 
-| Intent | Manifest helper | Standard → capability | Premium → capability |
-|---|---|---|---|
-| `ADD_BLOCK` / `DUPLICATE_BLOCK` | `getBlockEntitlement` | `standard_blocks` | `premium_blocks` |
-| `APPLY_LAYOUT` | `getLayoutEntitlement` | `basic_layout_selection` | `advanced_layout` |
-| `APPLY_SECTION` | `getSectionEntitlement` | `standard_sections` | `premium_sections` |
-| `APPLY_TEMPLATE` | `getTemplateEntitlement` | `standard_templates` | `premium_templates` |
+| Intent                          | Manifest helper          | Standard → capability    | Premium → capability |
+| ------------------------------- | ------------------------ | ------------------------ | -------------------- |
+| `ADD_BLOCK` / `DUPLICATE_BLOCK` | `getBlockEntitlement`    | `standard_blocks`        | `premium_blocks`     |
+| `APPLY_LAYOUT`                  | `getLayoutEntitlement`   | `basic_layout_selection` | `advanced_layout`    |
+| `APPLY_SECTION`                 | `getSectionEntitlement`  | `standard_sections`      | `premium_sections`   |
+| `APPLY_TEMPLATE`                | `getTemplateEntitlement` | `standard_templates`     | `premium_templates`  |
 
 ### 2.4 Expected behavior (verified)
 
@@ -143,8 +143,8 @@ A Free user applying an **authorized standard template** may intentionally
 replace the domains template application normally owns (layout, theme, blocks,
 motion, etc.) — `APPLY_TEMPLATE` owns all of them, so preservation passes. The
 **same** config diff under an unrelated `EDIT_CONTENT` save fails preservation.
-This is the core distinction between *accidental data loss* and *explicit
-authorized replacement*.
+This is the core distinction between _accidental data loss_ and _explicit
+authorized replacement_.
 
 ### 3.6 No automatic config sanitizer
 
@@ -158,22 +158,22 @@ not "strip existing canonical data".
 
 ## 4. Security (fail-closed)
 
-| Case | Result |
-|---|---|
-| Invalid tier (e.g. `platinum`) never obtains Pro mutation | **PASS** (treated ≤ Free) |
-| Unknown mutation intent | **DENY** (`UNKNOWN_INTENT`) |
-| Unknown asset | **DENY** (`UNKNOWN_ASSET`) |
-| Unknown capability | **DENY** (`UNKNOWN_CAPABILITY`) |
+| Case                                                      | Result                          |
+| --------------------------------------------------------- | ------------------------------- |
+| Invalid tier (e.g. `platinum`) never obtains Pro mutation | **PASS** (treated ≤ Free)       |
+| Unknown mutation intent                                   | **DENY** (`UNKNOWN_INTENT`)     |
+| Unknown asset                                             | **DENY** (`UNKNOWN_ASSET`)      |
+| Unknown capability                                        | **DENY** (`UNKNOWN_CAPABILITY`) |
 
 ---
 
 ## 5. Validation
 
-| Check | Result |
-|---|---|
+| Check                                                                                         | Result            |
+| --------------------------------------------------------------------------------------------- | ----------------- |
 | TypeScript (targeted, `--strict` + `exactOptionalPropertyTypes` + `noUncheckedIndexedAccess`) | **PASS** (exit 0) |
-| Mutation Guard selfcheck | **PASS** |
-| Assertion count | **78** (0 failed) |
+| Mutation Guard selfcheck                                                                      | **PASS**          |
+| Assertion count                                                                               | **78** (0 failed) |
 
 Selfcheck covered: free unrelated content-edit preservation, accidental motion
 strip, accidental layout downgrade, existing premium block semantics (edit /
@@ -198,28 +198,28 @@ function arity).
 - `POWER_EDITOR_CAPABILITY_INVENTORY_V1.md`
 - `CRIPQER_PRODUCT_CAPABILITY_POLICY_CORE_V1_REPORT.md`
 - `CRIPQER_PRODUCT_ASSET_ENTITLEMENT_MANIFEST_V1_REPORT.md`
-- `src/lib/product-entitlements/capabilities.selfcheck.ts` *(convention reference)*
-- `src/lib/product-entitlements/asset-manifest.selfcheck.ts` *(convention reference)*
-- `tsconfig.json`, `package.json` *(optional validation)*
+- `src/lib/product-entitlements/capabilities.selfcheck.ts` _(convention reference)_
+- `src/lib/product-entitlements/asset-manifest.selfcheck.ts` _(convention reference)_
+- `tsconfig.json`, `package.json` _(optional validation)_
 
 ### 6.2 Files created
 
 - `src/lib/product-entitlements/mutation-guard.ts`
 - `src/lib/product-entitlements/mutation-guard.selfcheck.ts`
-- `CRIPQER_CANONICAL_MUTATION_PRESERVATION_GUARD_V1_REPORT.md` *(this file)*
+- `CRIPQER_CANONICAL_MUTATION_PRESERVATION_GUARD_V1_REPORT.md` _(this file)_
 
 ### 6.3 Frozen-scope accounting
 
-| Item | Result |
-|---|---|
-| Existing files modified | **0** |
-| Dependencies changed | **NO** |
-| Routes changed | **NO** |
-| DB changed | **NO** |
-| Billing changed | **NO** |
-| Power Editor changed | **NO** |
-| Frozen violations | **NO** |
-| Commits / staging | **none** (per git-safety) |
+| Item                    | Result                    |
+| ----------------------- | ------------------------- |
+| Existing files modified | **0**                     |
+| Dependencies changed    | **NO**                    |
+| Routes changed          | **NO**                    |
+| DB changed              | **NO**                    |
+| Billing changed         | **NO**                    |
+| Power Editor changed    | **NO**                    |
+| Frozen violations       | **NO**                    |
+| Commits / staging       | **none** (per git-safety) |
 
 ---
 
@@ -238,4 +238,3 @@ determinable from the authorized files.
 - No lock icons, no upgrade modal.
 - No Billing connection, no persistence, no canonical config rewrite.
 - No Free sanitizer / no downgrade normalizer.
-

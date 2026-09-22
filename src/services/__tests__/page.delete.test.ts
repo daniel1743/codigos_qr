@@ -69,8 +69,14 @@ describe("pageService.deleteOwnedChildPage", () => {
       (call) => call.table === "pages" && call.method === "delete",
     );
     expect(pageDelete).toHaveLength(1);
-    expect(fake.calls).toContainEqual({ table: "pages", method: "eq", args: ["owner_user_id", "user-a"] });
-    expect(fake.calls.some((call) => call.table === "profiles" && call.method === "delete")).toBe(false);
+    expect(fake.calls).toContainEqual({
+      table: "pages",
+      method: "eq",
+      args: ["owner_user_id", "user-a"],
+    });
+    expect(fake.calls.some((call) => call.table === "profiles" && call.method === "delete")).toBe(
+      false,
+    );
   });
 
   it("blocks a foreign page before issuing a delete", async () => {

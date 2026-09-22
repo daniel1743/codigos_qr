@@ -18,6 +18,7 @@ Ejecutar en orden en Supabase SQL Editor:
 - [ ] `20260819214000_seed_demo_logos.sql` - 25 logos iniciales
 
 **Verificación:** Ir a Supabase → Database → Tables
+
 - [ ] Ver tabla `demo_logos` con 25 registros
 - [ ] Ver tabla `qr_analytics` vacía
 - [ ] Ver tabla `admin_users` con tu usuario: `falcondaniel37@gmail.com`
@@ -27,10 +28,12 @@ Ejecutar en orden en Supabase SQL Editor:
 ### 2. Rutas & Navegación
 
 **Rutas creadas:**
+
 - [ ] `/profile` - Mi Perfil (accesible para todos)
 - [ ] `/admin` - Panel Admin (solo para admins)
 
 **Testing:**
+
 ```
 1. Ir a http://localhost:5173/profile
    - [ ] Ver avatar del usuario
@@ -51,6 +54,7 @@ Ejecutar en orden en Supabase SQL Editor:
 ### 3. Componentes Nuevos
 
 **MyProfilePage.tsx:**
+
 - [ ] Avatar con upload funcional
 - [ ] Edición de nombre y bio
 - [ ] Display de email sin edición
@@ -59,6 +63,7 @@ Ejecutar en orden en Supabase SQL Editor:
 - [ ] Tabs responsivos
 
 **AdminPanel.tsx:**
+
 - [ ] Header con gradient purple/pink
 - [ ] Loader de acceso admin
 - [ ] Stats globales desde DB
@@ -66,6 +71,7 @@ Ejecutar en orden en Supabase SQL Editor:
 - [ ] Acciones rápidas (placeholders OK por ahora)
 
 **AdvancedEffectsSelector.tsx:**
+
 - [ ] Dialog modal con selector de efectos
 - [ ] 3 opciones de efecto (Neón, Glow, Ninguno)
 - [ ] 5 estilos de puntos
@@ -75,6 +81,7 @@ Ejecutar en orden en Supabase SQL Editor:
 ### 4. ShareSection Integration
 
 **En el editor de QR (/editor):**
+
 - [ ] Sección "Diseños QR" visible con botón "Explorar diseños"
 - [ ] Sección "Efectos Avanzados" visible con badge Premium
 - [ ] Botón "Explorar Efectos Premium" en la sección
@@ -95,11 +102,13 @@ npm run build
 ### 6. Funcionalidades Premium
 
 **Verificar acceso Premium:**
+
 - [ ] Usuario Free ve badges Premium en componentes
 - [ ] Usuario Premium (cuando se cree) puede acceder a todas funciones
 - [ ] Sistema de entitlements consulta DB correctamente
 
 **Verificar Analytics:**
+
 - [ ] Función `track_page_view()` existe en DB
 - [ ] Función `track_link_click()` existe en DB
 - [ ] Views `qr_analytics_daily` y `qr_top_links` existen
@@ -107,11 +116,13 @@ npm run build
 ### 7. Admin System
 
 **Verificar en Supabase:**
+
 - [ ] Tu email está en `admin_users` con rol `super_admin`
 - [ ] Puedes acceder a `/admin`
 - [ ] Panel muestra métricas correctas
 
 **Funciones SQL:**
+
 - [ ] `generate_invitation_code()` existe
 - [ ] `redeem_invitation_code()` existe
 
@@ -125,11 +136,13 @@ npm run build
 ### 9. Responsive Design
 
 **Testar en:**
+
 - [ ] Desktop (1920px)
 - [ ] Tablet (768px)
 - [ ] Mobile (375px)
 
 Verificar:
+
 - [ ] Avatar y stats se adaptan
 - [ ] Tabs responsive (icons hidden en mobile)
 - [ ] Modals centrados
@@ -147,6 +160,7 @@ Verificar:
 ## 🚀 Pasos para Desplegar
 
 ### Paso 1: Aplicar Migraciones
+
 ```bash
 # En Supabase SQL Editor, ejecutar en orden:
 1. 20260819210000_add_advanced_qr_fields.sql
@@ -157,6 +171,7 @@ Verificar:
 ```
 
 ### Paso 2: Build Local
+
 ```bash
 npm run build
 npm run lint
@@ -164,17 +179,20 @@ npx tsc --noEmit
 ```
 
 ### Paso 3: Start Dev Server
+
 ```bash
 npm run dev
 ```
 
 ### Paso 4: Testing Completo
+
 - [ ] Navega a `/profile`
 - [ ] Navega a `/admin`
 - [ ] Edita tu perfil
 - [ ] Verifica métricas
 
 ### Paso 5: Commit Changes
+
 ```bash
 git add .
 git commit -m "feat: Phase 8-11 QR Premium complete (integrations, seed, testing)"
@@ -184,15 +202,15 @@ git commit -m "feat: Phase 8-11 QR Premium complete (integrations, seed, testing
 
 ## 📊 Sumario de Implementación
 
-| Fase | Estado | Archivos |
-|------|--------|----------|
-| 1-3 | ✅ | Renderer, Logos, Templates |
-| 4 | ✅ | Analytics (4 funciones SQL) |
-| 5-7 | ✅ | Admin System + Perfiles |
-| 8 | ✅ | ShareSection Integration |
-| 9 | ⏳ | Panel Admin Detallado (→ Sonnet) |
-| 10 | ✅ | Seed Data (25 logos) |
-| 11 | ✅ | Testing Checklist |
+| Fase | Estado | Archivos                         |
+| ---- | ------ | -------------------------------- |
+| 1-3  | ✅     | Renderer, Logos, Templates       |
+| 4    | ✅     | Analytics (4 funciones SQL)      |
+| 5-7  | ✅     | Admin System + Perfiles          |
+| 8    | ✅     | ShareSection Integration         |
+| 9    | ⏳     | Panel Admin Detallado (→ Sonnet) |
+| 10   | ✅     | Seed Data (25 logos)             |
+| 11   | ✅     | Testing Checklist                |
 
 ---
 
@@ -221,16 +239,19 @@ Desarrollo local:
 ## 📝 Notas
 
 **Logos Demo:** Actualmente usan placeholder.com. Para producción:
+
 1. Crear/descargar 25 SVGs reales
 2. Subir a Supabase Storage: `demo-logos/[category]/[logo-name].svg`
 3. Actualizar URLs en `20260819214000_seed_demo_logos.sql`
 
 **Analytics:** Sistema listo. Para visualizar datos:
+
 1. Users crean/scanean QRs
 2. Se registran automáticamente en `qr_analytics`
 3. Admin puede consultar desde dashboard (FASE 9)
 
 **Premium:** Sistema completo. Para activar:
+
 1. Admin crea código en FASE 9 panel
 2. Usuario canjea código
 3. Se inserta en `premium_users`

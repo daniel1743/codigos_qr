@@ -4,7 +4,7 @@ Deterministic, pure-TypeScript engine that converts an approved
 `OnboardingIntentV1` into a validated `PageRecipeV1`.
 
 It is **not** a template gallery, **not** an AI layer, and **not** a renderer.
-It produces intent-driven design *parameters*; a renderer maps them to
+It produces intent-driven design _parameters_; a renderer maps them to
 `--tpl-*` tokens.
 
 ## Guarantees
@@ -24,9 +24,9 @@ It produces intent-driven design *parameters*; a renderer maps them to
 
 ```ts
 import {
-  generatePageRecipe,     // throws EngineError
-  tryGeneratePageRecipe,  // EngineResult<PageRecipeV1>
-  generateWithTrace,      // + normalized intent, profile, downgrades (QA only)
+  generatePageRecipe, // throws EngineError
+  tryGeneratePageRecipe, // EngineResult<PageRecipeV1>
+  generateWithTrace, // + normalized intent, profile, downgrades (QA only)
   validatePageRecipe,
   normalizeIntent,
   DEFAULT_CAPABILITIES,
@@ -34,17 +34,18 @@ import {
 
 const recipe = generatePageRecipe(intent, {
   capabilities: { media_block: false }, // partial renderer overrides
-  overrides: {                           // explicit user control
-    hero_mode: "banner_avatar",          // avatar_only | banner_only | banner_avatar
-    links_presentation: "cards",         // buttons | cards | mixed
+  overrides: {
+    // explicit user control
+    hero_mode: "banner_avatar", // avatar_only | banner_only | banner_avatar
+    links_presentation: "cards", // buttons | cards | mixed
     identity_alignment: "left",
     density: "balanced",
     card_media_position: "bottom",
-    visual_family: null,                 // FamilyId | null
-    locked: ["links_presentation"],      // survives regeneration + variants
+    visual_family: null, // FamilyId | null
+    locked: ["links_presentation"], // survives regeneration + variants
   },
-  variant: 0,                            // deterministic alternate variant
-  now: "2026-01-01T00:00:00.000Z",       // pin the timestamp in tests
+  variant: 0, // deterministic alternate variant
+  now: "2026-01-01T00:00:00.000Z", // pin the timestamp in tests
 });
 ```
 
@@ -59,7 +60,7 @@ const recipe = generatePageRecipe(intent, {
 
 ## Hero modes and asset presence
 
-`structure.hero.mode` expresses composition *intent*
+`structure.hero.mode` expresses composition _intent_
 (`avatar_only` / `banner_only` / `banner_avatar`), while `show_avatar` and
 `show_banner` reflect actual asset availability. The engine never invents or
 persists image URLs. A temporary `blob:` avatar counts as present for
@@ -99,20 +100,20 @@ intent -> validateIntent -> normalizeIntent -> buildDesignProfile
        -> validatePageRecipe -> deepFreeze
 ```
 
-| Module | Responsibility |
-|---|---|
-| `types.ts` | Contracts, enums, `EngineError` |
-| `normalize.ts` | Intent validation, alias mapping, trimming, avatar safety |
-| `strategy.ts` | Weighted scoring: energy, trust, media weight, CTA pressure |
-| `families.ts` | Six controlled parameter strategies + fixed tie-break order |
-| `palettes.ts` / `typography.ts` | Approved, contrast-checked value registries |
-| `rules.ts` | Parameter resolution and semantic composition |
-| `capabilities.ts` | What the current renderer can actually render |
-| `compatibility.ts` | Deterministic downgrades; never silent breakage |
-| `overrides.ts` | User design control + locking |
-| `destinations.ts` | Dependency-free destination validation |
-| `validator.ts` | Shape, enums, contrast, order, serialization |
-| `engine.ts` / `index.ts` | Pipeline and stable public surface |
+| Module                          | Responsibility                                              |
+| ------------------------------- | ----------------------------------------------------------- |
+| `types.ts`                      | Contracts, enums, `EngineError`                             |
+| `normalize.ts`                  | Intent validation, alias mapping, trimming, avatar safety   |
+| `strategy.ts`                   | Weighted scoring: energy, trust, media weight, CTA pressure |
+| `families.ts`                   | Six controlled parameter strategies + fixed tie-break order |
+| `palettes.ts` / `typography.ts` | Approved, contrast-checked value registries                 |
+| `rules.ts`                      | Parameter resolution and semantic composition               |
+| `capabilities.ts`               | What the current renderer can actually render               |
+| `compatibility.ts`              | Deterministic downgrades; never silent breakage             |
+| `overrides.ts`                  | User design control + locking                               |
+| `destinations.ts`               | Dependency-free destination validation                      |
+| `validator.ts`                  | Shape, enums, contrast, order, serialization                |
+| `engine.ts` / `index.ts`        | Pipeline and stable public surface                          |
 
 ## Families
 
@@ -146,9 +147,10 @@ reported through `generateWithTrace().trace.downgrades`.
 
 Every emitted palette is contrast-checked at generation time
 (text/background, text/surface, muted text, and CTA label on accent all
->= 4.5:1). A failing palette is replaced by the safe palette rather than
-shipped. Layouts stay viable at 320px (compact horizontal padding is
-rejected by the validator).
+
+> = 4.5:1). A failing palette is replaced by the safe palette rather than
+> shipped. Layouts stay viable at 320px (compact horizontal padding is
+> rejected by the validator).
 
 ## Future AI boundary
 
@@ -192,7 +194,7 @@ generatePageRecipe(intent, {
     business: { archetype: "home_service", urgency: "high" },
     content: { services: { available: true, count: 6 } },
     goals: { secondary: "leads" },
-    future_capabilities: {},           // all false by default
+    future_capabilities: {}, // all false by default
   },
 });
 ```
@@ -203,25 +205,25 @@ density, block order). It can never emit an unsupported feature.
 
 ### Modules
 
-| Module | Purpose |
-| --- | --- |
-| `business-signals.ts` | Archetype/goal-stack inference (16 archetypes, no profession spaghetti) |
-| `archetypes.ts` | Strategy packs: family bias, patterns, weights |
-| `content-inventory.ts` | Availability + counts only, never user content |
-| `composition-patterns.ts` | 10 semantic composition grammars |
-| `design-axes.ts` | Family-safe allowed values per design axis |
-| `palettes-extended.ts` | Advanced palette bank, contrast-verified |
-| `presets.ts` | Named safe override bundles |
-| `candidates.ts` | Deterministic N-candidate generation + ranking |
-| `quality-score.ts` | Heuristic score (NOT objective aesthetic truth) |
-| `diversity.ts` | Structural signature + anti-duplication selection |
-| `refinements.ts` | Semantic commands ("calmer", "bolder", ...) |
-| `control-catalog.ts` | Serializable editor control metadata |
-| `fingerprint.ts` / `recipe-diff.ts` | Version safety, stored-recipe compatibility, semantic diff |
-| `future-capabilities.ts` | All future flags default `false` |
-| `future-blocks.ts` / `future-plan.ts` | Dormant block strategies + planning contract |
-| `conversion-patterns.ts` | Current/future conversion strategies with fallback |
-| `responsive.ts` / `motion.ts` | Dormant contracts; return `null` unless declared |
+| Module                                | Purpose                                                                 |
+| ------------------------------------- | ----------------------------------------------------------------------- |
+| `business-signals.ts`                 | Archetype/goal-stack inference (16 archetypes, no profession spaghetti) |
+| `archetypes.ts`                       | Strategy packs: family bias, patterns, weights                          |
+| `content-inventory.ts`                | Availability + counts only, never user content                          |
+| `composition-patterns.ts`             | 10 semantic composition grammars                                        |
+| `design-axes.ts`                      | Family-safe allowed values per design axis                              |
+| `palettes-extended.ts`                | Advanced palette bank, contrast-verified                                |
+| `presets.ts`                          | Named safe override bundles                                             |
+| `candidates.ts`                       | Deterministic N-candidate generation + ranking                          |
+| `quality-score.ts`                    | Heuristic score (NOT objective aesthetic truth)                         |
+| `diversity.ts`                        | Structural signature + anti-duplication selection                       |
+| `refinements.ts`                      | Semantic commands ("calmer", "bolder", ...)                             |
+| `control-catalog.ts`                  | Serializable editor control metadata                                    |
+| `fingerprint.ts` / `recipe-diff.ts`   | Version safety, stored-recipe compatibility, semantic diff              |
+| `future-capabilities.ts`              | All future flags default `false`                                        |
+| `future-blocks.ts` / `future-plan.ts` | Dormant block strategies + planning contract                            |
+| `conversion-patterns.ts`              | Current/future conversion strategies with fallback                      |
+| `responsive.ts` / `motion.ts`         | Dormant contracts; return `null` unless declared                        |
 
 ### Unsupported feature isolation
 
@@ -238,6 +240,6 @@ candidates. It is not a claim of objective aesthetic quality.
 
 ```ts
 import { runEngineSelfCheck, runEngineSelfCheckV15 } from "@/lib/parametric-engine";
-runEngineSelfCheck();     // 61 V1 assertions
-runEngineSelfCheckV15();  // V1 gate + 21 V1.5 assertions
+runEngineSelfCheck(); // 61 V1 assertions
+runEngineSelfCheckV15(); // V1 gate + 21 V1.5 assertions
 ```

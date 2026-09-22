@@ -29,10 +29,7 @@
  */
 
 import type { BillingSubscriptionRecord } from "../../lib/billing/billing.types.ts";
-import {
-  resolveEntitlement,
-  type EntitlementResolution,
-} from "./entitlements.ts";
+import { resolveEntitlement, type EntitlementResolution } from "./entitlements.ts";
 
 /* ============================ dependency seam ============================ */
 
@@ -44,9 +41,7 @@ import {
  * declared here — `BillingSubscriptionRecord` is the actual canonical type.
  */
 export interface EntitlementSubscriptionStore {
-  getCanonicalSubscriptionForUser(
-    userId: string,
-  ): Promise<BillingSubscriptionRecord | null>;
+  getCanonicalSubscriptionForUser(userId: string): Promise<BillingSubscriptionRecord | null>;
 }
 
 /* ============================= host service ============================== */
@@ -73,9 +68,7 @@ export async function resolveUserEntitlement(
     return resolveEntitlement(null);
   }
 
-  const subscription = await store.getCanonicalSubscriptionForUser(
-    trustedUserId,
-  );
+  const subscription = await store.getCanonicalSubscriptionForUser(trustedUserId);
 
   return resolveEntitlement(subscription);
 }
@@ -85,9 +78,7 @@ export async function resolveUserEntitlement(
  * dependency-injection seam used by the selfcheck; production wiring may call
  * `resolveUserEntitlement` directly with the frozen persistence primitive.
  */
-export function createEntitlementHostService(
-  store: EntitlementSubscriptionStore,
-): {
+export function createEntitlementHostService(store: EntitlementSubscriptionStore): {
   resolveForUser(trustedUserId: string): Promise<EntitlementResolution>;
 } {
   return {

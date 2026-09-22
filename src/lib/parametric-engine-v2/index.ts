@@ -41,11 +41,7 @@ export { contrastRatio } from "./utils";
 export { runEngineSelfCheck, type SelfCheckResult } from "./fixtures/self-check";
 
 /* ------------------------------------------------------ V1.5 — context */
-export {
-  resolveEngineContext,
-  type EngineContextV1,
-  type ResolvedContext,
-} from "./context";
+export { resolveEngineContext, type EngineContextV1, type ResolvedContext } from "./context";
 export {
   BUSINESS_ARCHETYPES,
   CONVERSION_MODES,
@@ -64,11 +60,7 @@ export {
   type PriceModel,
   type ProofPriority,
 } from "./business-signals";
-export {
-  ARCHETYPE_STRATEGIES,
-  getArchetypeStrategy,
-  type ArchetypeStrategy,
-} from "./archetypes";
+export { ARCHETYPE_STRATEGIES, getArchetypeStrategy, type ArchetypeStrategy } from "./archetypes";
 export {
   EMPTY_CONTENT_INVENTORY,
   hasContent,
@@ -210,15 +202,8 @@ export {
   fingerprintRecipe,
   type RecipeCompatibilityReport,
 } from "./fingerprint";
-export {
-  diffRecipes,
-  type RecipeDiffEntry,
-  type RecipeDiffV1,
-} from "./recipe-diff";
-export {
-  runEngineSelfCheckV15,
-  type SelfCheckV15Result,
-} from "./fixtures/self-check-v15";
+export { diffRecipes, type RecipeDiffEntry, type RecipeDiffV1 } from "./recipe-diff";
+export { runEngineSelfCheckV15, type SelfCheckV15Result } from "./fixtures/self-check-v15";
 export {
   INDUSTRY_FIXTURES,
   INDUSTRY_FIXTURE_BY_ID,
@@ -258,9 +243,6 @@ export { CANDIDATE_BOUNDS } from "./candidates";
 export { structuralDistance } from "./diversity";
 export { MAX_CONTENT_COUNT, CONTENT_KEYS, contentCount } from "./content-inventory";
 export { isPersistableAssetRef } from "./normalize";
-export {
-  runEngineHardeningCheck,
-  type HardeningCheckResult,
-} from "./fixtures/self-check-v151";
+export { runEngineHardeningCheck, type HardeningCheckResult } from "./fixtures/self-check-v151";
 
 export * from "./types";

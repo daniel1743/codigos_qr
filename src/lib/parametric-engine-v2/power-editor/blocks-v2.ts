@@ -289,7 +289,11 @@ export function planBlocks(
             })
           : undefined,
         bannerImage: hero.bannerUrl
-          ? { url: hero.bannerUrl, blur: 0, ...(hero.bannerProvenance ? { provenance: hero.bannerProvenance } : {}) }
+          ? {
+              url: hero.bannerUrl,
+              blur: 0,
+              ...(hero.bannerProvenance ? { provenance: hero.bannerProvenance } : {}),
+            }
           : undefined,
         badge: hero.verified ? { enabled: true, label: hero.profession || "Verified" } : undefined,
         primaryCTA: {
@@ -361,7 +365,11 @@ export function planBlocks(
     if (useFeaturedMedia) {
       push(
         "featuredMedia",
-        semantics.media_weight >= 70 ? "hero-media" : semantics.surface_mood === "glass" ? "split" : "card",
+        semantics.media_weight >= 70
+          ? "hero-media"
+          : semantics.surface_mood === "glass"
+            ? "split"
+            : "card",
         "media",
         {
           mediaType: "image",
@@ -402,12 +410,12 @@ export function planBlocks(
         columns === 2 ? "row" : "split",
         "navigation",
         {
-            items: links.map((l, i) => ({
-              id: `btn-${i}`,
-              label: l.label,
-              url: l.url,
-              newTab: true,
-            })),
+          items: links.map((l, i) => ({
+            id: `btn-${i}`,
+            label: l.label,
+            url: l.url,
+            newTab: true,
+          })),
         },
         { columns, gap: 10 },
       );
@@ -436,7 +444,11 @@ export function planBlocks(
   }
   if (content.socials && recipe.structure.social_row.enabled) {
     push("social", semantics.family === "luxury" ? "outline" : "icons", "navigation", {
-      socials: content.socials.map((s, i) => ({ id: `soc-${i}`, platform: s.platform, url: s.url })),
+      socials: content.socials.map((s, i) => ({
+        id: `soc-${i}`,
+        platform: s.platform,
+        url: s.url,
+      })),
     });
   }
 
@@ -503,7 +515,11 @@ export function planBlocks(
       "video",
       "embed",
       "media",
-      { title: content.video.title, provider: content.video.provider, videoId: content.video.videoId },
+      {
+        title: content.video.title,
+        provider: content.video.provider,
+        videoId: content.video.videoId,
+      },
       { span, aspect: "video" },
     );
   }
@@ -659,18 +675,37 @@ export function planBlocks(
   }
 
   if (content.timeline && capabilities.block_timeline) {
-    push("timeline", semantics.family === "editorial" ? "editorial" : semantics.visual_weight === "high" ? "cards" : "minimal", "proof", {
-      items: content.timeline.map((t, i) =>
-        clean({ id: `tml-${i}`, title: t.title, date: t.date, description: t.description, icon: t.icon }),
-      ),
-    });
+    push(
+      "timeline",
+      semantics.family === "editorial"
+        ? "editorial"
+        : semantics.visual_weight === "high"
+          ? "cards"
+          : "minimal",
+      "proof",
+      {
+        items: content.timeline.map((t, i) =>
+          clean({
+            id: `tml-${i}`,
+            title: t.title,
+            date: t.date,
+            description: t.description,
+            icon: t.icon,
+          }),
+        ),
+      },
+    );
   }
 
   if (content.faq && capabilities.block_faq) {
     push("faq", "default", "meta", {
       title: "Preguntas frecuentes",
       behavior: { allowMultipleOpen: false },
-      items: content.faq.map((f, i) => ({ id: `faq-${i}`, question: f.question, answer: f.answer })),
+      items: content.faq.map((f, i) => ({
+        id: `faq-${i}`,
+        question: f.question,
+        answer: f.answer,
+      })),
     });
   }
 
@@ -825,7 +860,8 @@ export function planBlocks(
       planned.find((b) => b.type === "booking") ??
       planned.find((b) => b.type === "cta") ??
       planned.find((b) => b.type === "buttonGroup");
-    if (target) target.layout = { ...target.layout, sticky: { enabled: true, top: 12 }, zIndex: 20 };
+    if (target)
+      target.layout = { ...target.layout, sticky: { enabled: true, top: 12 }, zIndex: 20 };
   }
 
   const weight = ROLE_WEIGHT[semantics.pattern];

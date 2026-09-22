@@ -33,10 +33,9 @@ export type FutureCapabilityKey = (typeof FUTURE_CAPABILITY_KEYS)[number];
 
 export type FutureRendererCapabilitiesV1 = Record<FutureCapabilityKey, boolean>;
 
-export const DEFAULT_FUTURE_CAPABILITIES: FutureRendererCapabilitiesV1 =
-  Object.fromEntries(
-    FUTURE_CAPABILITY_KEYS.map((key) => [key, false]),
-  ) as FutureRendererCapabilitiesV1;
+export const DEFAULT_FUTURE_CAPABILITIES: FutureRendererCapabilitiesV1 = Object.fromEntries(
+  FUTURE_CAPABILITY_KEYS.map((key) => [key, false]),
+) as FutureRendererCapabilitiesV1;
 
 export function resolveFutureCapabilities(
   overrides?: Partial<FutureRendererCapabilitiesV1>,

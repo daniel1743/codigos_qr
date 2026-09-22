@@ -120,7 +120,12 @@ async function signIn(context) {
   try {
     await page.waitForSelector("#email", { timeout: 30000 });
   } catch {}
-  if (await page.locator("#email").isVisible().catch(() => false)) {
+  if (
+    await page
+      .locator("#email")
+      .isVisible()
+      .catch(() => false)
+  ) {
     await page.locator("#email").fill(env.QA_EMAIL);
     await page.locator("#password").fill(env.QA_PASSWORD);
     await page.getByRole("button", { name: "Entrar al editor" }).click();
@@ -304,9 +309,7 @@ async function checkMobile(page, publicId) {
     const html = await page.evaluate(() => document.body.innerHTML);
     out[`${viewport.width}x${viewport.height}`] = {
       http: response ? response.status() : null,
-      overflow: await page.evaluate(
-        () => document.documentElement.scrollWidth - window.innerWidth,
-      ),
+      overflow: await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth),
       cta_reachable: html.includes(WHATSAPP) || html.includes("qa-cripqer.example"),
     };
   }
@@ -524,8 +527,8 @@ async function runRegressions(before, out) {
     profile_revision: after.profile ? after.profile.published_revision : null,
     profile_revision_unchanged: Boolean(
       after.profile &&
-        before.profile &&
-        after.profile.published_revision === before.profile.published_revision,
+      before.profile &&
+      after.profile.published_revision === before.profile.published_revision,
     ),
     profile_slug_unchanged: Boolean(
       after.profile && before.profile && after.profile.slug === before.profile.slug,
@@ -536,8 +539,8 @@ async function runRegressions(before, out) {
     child_revision: after.child ? after.child.published_revision : null,
     child_revision_unchanged: Boolean(
       after.child &&
-        before.child &&
-        after.child.published_revision === before.child.published_revision,
+      before.child &&
+      after.child.published_revision === before.child.published_revision,
     ),
     child_slug_unchanged: Boolean(
       after.child && before.child && after.child.slug === before.child.slug,

@@ -4,7 +4,8 @@ import type { CuratedMediaResult, MediaQueryTrace } from "./types";
 import type { NormalizedMediaAsset } from "./types";
 
 const CONTEXTUAL_ROLES = ["banner", "background"] as const;
-const CONTEXTUAL_TERMS = /salon|beauty|barber|restaurant|fitness|fashion|clothing|office|studio|photograph|garden|consult/i;
+const CONTEXTUAL_TERMS =
+  /salon|beauty|barber|restaurant|fitness|fashion|clothing|office|studio|photograph|garden|consult/i;
 
 export interface ContextualMediaDecision {
   ownerCoverAvailable: boolean;
@@ -48,8 +49,14 @@ export async function searchContextualHero(input: {
       import("./unsplash-provider"),
     ]);
     const media = await curateMedia(
-      { profession: input.profession, ...(input.style ? { style: input.style } : {}), ...(input.goal ? { goal: input.goal } : {}), roles: [...CONTEXTUAL_ROLES] },
-      (request, provider) => provider === "unsplash" ? searchUnsplashPhotos(request) : searchPexels(request),
+      {
+        profession: input.profession,
+        ...(input.style ? { style: input.style } : {}),
+        ...(input.goal ? { goal: input.goal } : {}),
+        roles: [...CONTEXTUAL_ROLES],
+      },
+      (request, provider) =>
+        provider === "unsplash" ? searchUnsplashPhotos(request) : searchPexels(request),
     );
     return { decision, media };
   } catch {
@@ -57,10 +64,14 @@ export async function searchContextualHero(input: {
   }
 }
 
-export function selectedContextualHero(media: CuratedMediaResult | undefined): NormalizedMediaAsset | undefined {
+export function selectedContextualHero(
+  media: CuratedMediaResult | undefined,
+): NormalizedMediaAsset | undefined {
   return media?.assets.banner?.[0] ?? media?.assets.background?.[0];
 }
 
-export function contextualQuery(media: CuratedMediaResult | undefined): MediaQueryTrace | undefined {
+export function contextualQuery(
+  media: CuratedMediaResult | undefined,
+): MediaQueryTrace | undefined {
   return media?.queries.banner?.[0] ?? media?.queries.background?.[0];
 }

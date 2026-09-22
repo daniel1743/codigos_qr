@@ -20,12 +20,7 @@
       "theme_colors": true,
       "theme_typography": true,
       "layout_responsive": true,
-      "blocks": [
-        "text",
-        "services",
-        "cta",
-        "contact"
-      ],
+      "blocks": ["text", "services", "cta", "contact"],
       "block_count": 4
     },
     "published_snapshot_is_canonical": true,
@@ -35,11 +30,7 @@
     "http": 200,
     "renderer_mounted": true,
     "editor_chrome": false,
-    "content_visible": [
-      "Corte clásico",
-      "Perfilado de barba",
-      "$8.000"
-    ],
+    "content_visible": ["Corte clásico", "Perfilado de barba", "$8.000"],
     "content_missing": [],
     "host_action_hrefs": [],
     "owner_images": 0,

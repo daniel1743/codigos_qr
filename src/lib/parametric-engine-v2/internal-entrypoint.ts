@@ -251,7 +251,9 @@ export function generateCripqerPageWithEngineV2(
     ...(options.engine ?? {}),
     ...(Object.keys(content).length ? { content } : {}),
     now,
-    ...(input.userMedia?.bannerProvenance ? { bannerProvenance: input.userMedia.bannerProvenance } : {}),
+    ...(input.userMedia?.bannerProvenance
+      ? { bannerProvenance: input.userMedia.bannerProvenance }
+      : {}),
   });
   if (!candidate) throw new Error("Engine V2 did not produce an acceptable candidate.");
   const canonicalEnvelope = acceptEngineGeneratedConfig(candidate.config);
@@ -314,7 +316,9 @@ export function generateCripqerPageWithEngineV2Traced(
     ...(Object.keys(content).length ? { content } : {}),
     count: 1,
     now,
-    ...(input.userMedia?.bannerProvenance ? { bannerProvenance: input.userMedia.bannerProvenance } : {}),
+    ...(input.userMedia?.bannerProvenance
+      ? { bannerProvenance: input.userMedia.bannerProvenance }
+      : {}),
   });
   const candidate = candidates[0];
   if (!candidate) throw new Error("Engine V2 did not produce an acceptable candidate.");

@@ -50,11 +50,7 @@ export function PortadaAvatarSection({ profile, onChange, userId }: PortadaAvata
         <div className="flex flex-col gap-3">
           {profile.banner_url ? (
             <div className="relative w-full h-24 rounded-lg overflow-hidden border">
-              <img
-                src={profile.banner_url}
-                alt="Portada"
-                className="w-full h-full object-cover"
-              />
+              <img src={profile.banner_url} alt="Portada" className="w-full h-full object-cover" />
               <Button
                 variant="destructive"
                 size="sm"

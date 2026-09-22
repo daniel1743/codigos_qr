@@ -19,7 +19,10 @@ function categoryFor(activity: string): BusinessCategoryV2 {
   return normalizeBusinessCategory(activity.trim()) as BusinessCategoryV2;
 }
 
-function businessFor(activity: string, explicit?: BusinessCategoryV2): OnboardingIntentV2["business"] {
+function businessFor(
+  activity: string,
+  explicit?: BusinessCategoryV2,
+): OnboardingIntentV2["business"] {
   const category = explicit ?? categoryFor(activity);
   return {
     category,

@@ -15,6 +15,7 @@ Se reorganizó exitosamente el editor QR de 6 tabs a 4, implementando revelació
 ## ESTRUCTURA ANTERIOR DEL PANEL
 
 ### Tabs (6 en total):
+
 1. **Datos** (ProfileSection)
 2. **Enlaces** (LinksSection)
 3. **Diseño** (DesignSection) - 769 líneas
@@ -23,6 +24,7 @@ Se reorganizó exitosamente el editor QR de 6 tabs a 4, implementando revelació
 6. **QR** (ShareSection)
 
 ### Problema identificado:
+
 - Demasiadas opciones visibles simultáneamente
 - Usuario nuevo se perdía entre 6 secciones sin jerarquía clara
 - Opciones relacionadas dispersas en múltiples tabs
@@ -33,6 +35,7 @@ Se reorganizó exitosamente el editor QR de 6 tabs a 4, implementando revelació
 ## ESTRUCTURA NUEVA DEL PANEL
 
 ### Tabs (4 en total):
+
 1. **Perfil** (ProfileSection) - Sin cambios
 2. **Enlaces** (LinksSection) - Sin cambios
 3. **Apariencia** (AppearanceSection) - ⭐ NUEVO componente unificado
@@ -133,6 +136,7 @@ APARIENCIA
 ### ✅ Archivos Modificados
 
 **`src/routes/editor.tsx`**
+
 - Línea 8-11: Imports actualizados
   - Eliminado: `DesignSection`, `TextSection`, `ElementsSection`
   - Agregado: `AppearanceSection`
@@ -164,37 +168,38 @@ APARIENCIA
 
 ### De DesignSection → Subsecciones:
 
-| Opción Original | Destino Final | Líneas Origen |
-|----------------|---------------|---------------|
-| Template Picker | AppearanceSection (raíz) | Reutilizado |
-| Fondo (sólido/degradado) | FondoSection | 631-766 |
-| Botones (colores/formas/estilos) | BotonesSection | 768-997 |
-| Portada y Avatar | PortadaAvatarSection | 479-629 |
-| Social Covers Premium | SocialCoversSection | 291-477 |
+| Opción Original                  | Destino Final            | Líneas Origen |
+| -------------------------------- | ------------------------ | ------------- |
+| Template Picker                  | AppearanceSection (raíz) | Reutilizado   |
+| Fondo (sólido/degradado)         | FondoSection             | 631-766       |
+| Botones (colores/formas/estilos) | BotonesSection           | 768-997       |
+| Portada y Avatar                 | PortadaAvatarSection     | 479-629       |
+| Social Covers Premium            | SocialCoversSection      | 291-477       |
 
 ### De TextSection → TipografiaSection:
 
-| Opción Original | Destino Final |
-|----------------|---------------|
-| Fuente principal (39 fuentes) | TipografiaSection > Fuente principal |
-| Nombre (color/tamaño/peso/align) | TipografiaSection > Nombre (collapsible) |
-| Descripción (color/tamaño/peso/align) | TipografiaSection > Descripción (collapsible) |
-| Botones texto (tamaño/peso/align/icon) | TipografiaSection > Botones (collapsible) |
+| Opción Original                        | Destino Final                                 |
+| -------------------------------------- | --------------------------------------------- |
+| Fuente principal (39 fuentes)          | TipografiaSection > Fuente principal          |
+| Nombre (color/tamaño/peso/align)       | TipografiaSection > Nombre (collapsible)      |
+| Descripción (color/tamaño/peso/align)  | TipografiaSection > Descripción (collapsible) |
+| Botones texto (tamaño/peso/align/icon) | TipografiaSection > Botones (collapsible)     |
 
 ### De ElementsSection → DecoracionSection:
 
-| Opción Original | Destino Final |
-|----------------|---------------|
-| Formas de fondo (5 opciones) | DecoracionSection > Formas |
-| Ambiente (4 opciones) | DecoracionSection > Ambiente |
+| Opción Original                   | Destino Final                  |
+| --------------------------------- | ------------------------------ |
+| Formas de fondo (5 opciones)      | DecoracionSection > Formas     |
+| Ambiente (4 opciones)             | DecoracionSection > Ambiente   |
 | Intensidad (subtle/medium/strong) | DecoracionSection > Intensidad |
-| Limpiar elementos | DecoracionSection > Limpiar |
+| Limpiar elementos                 | DecoracionSection > Limpiar    |
 
 ---
 
 ## OPCIONES QUE PERMANECIERON INTACTAS
 
 ### ProfileSection:
+
 - ✅ Avatar upload
 - ✅ Nombre para mostrar
 - ✅ Biografía (con toolbar negrita)
@@ -202,6 +207,7 @@ APARIENCIA
 - ✅ Pie de página
 
 ### LinksSection:
+
 - ✅ Lista de enlaces (accordion)
 - ✅ Agregar enlace
 - ✅ Configuración por enlace (plataforma, título, URL, imagen)
@@ -210,6 +216,7 @@ APARIENCIA
 - ✅ Eliminar
 
 ### ShareSection (QR):
+
 - ✅ Estado publicación
 - ✅ Guardar/Publicar
 - ✅ Vista previa QR
@@ -224,6 +231,7 @@ APARIENCIA
 ## COMPORTAMIENTO DESKTOP vs MOBILE
 
 ### Desktop (md+):
+
 - ✅ Sidebar izquierdo con 4 tabs verticales
 - ✅ Panel contextual lateral (360px) con collapsibles
 - ✅ Preview siempre visible a la derecha
@@ -232,6 +240,7 @@ APARIENCIA
 - ✅ Panel colapsa/expande suavemente
 
 ### Mobile (<md):
+
 - ✅ Bottom navigation con 4 tabs
 - ✅ Bottom sheet (drawer desde abajo) con collapsibles
 - ✅ Preview ocupa full screen cuando panel cerrado
@@ -244,6 +253,7 @@ APARIENCIA
 ## BUILD / TYPECHECK / LINT
 
 ### Build Status: ✅ EXITOSO
+
 ```
 npm run build
 ✓ built in 25.92s
@@ -251,11 +261,13 @@ npm run build
 ```
 
 **Bundle sizes importantes:**
+
 - `editor-BJUOFXhK.mjs`: 318.19 kB (gzip: 59.08 kB)
 - `PublicProfileView-CtieCdYP.mjs`: 103.59 kB (gzip: 19.76 kB)
 - `admin-B-rm3f7V.mjs`: 92.83 kB (gzip: 13.17 kB)
 
 No se detectaron:
+
 - ❌ Errores de TypeScript
 - ❌ Warnings críticos
 - ❌ Imports circulares
@@ -268,6 +280,7 @@ No se detectaron:
 ### ✅ Verificaciones pendientes (requieren navegador):
 
 **Desktop:**
+
 - [ ] Los 4 tabs navegan correctamente
 - [ ] Panel contextual abre/cierra suavemente
 - [ ] Collapsibles de Apariencia funcionan
@@ -279,6 +292,7 @@ No se detectaron:
 - [ ] Botón "Publicar" accesible
 
 **Mobile:**
+
 - [ ] Bottom nav muestra 4 tabs
 - [ ] Bottom sheet abre/cierra
 - [ ] Collapsibles funcionan en móvil
@@ -288,6 +302,7 @@ No se detectaron:
 - [ ] Upload de imágenes funciona
 
 **Funcionalidad:**
+
 - [ ] Guardar borrador persiste cambios
 - [ ] Publicar actualiza página pública
 - [ ] Cambios en Apariencia se reflejan en preview
@@ -325,6 +340,7 @@ No se detectaron:
 ## MÉTRICAS DE IMPACTO
 
 ### Reducción de complejidad:
+
 - **Tabs:** 6 → 4 (33% reducción)
 - **Navegación top-level:** -2 clicks
 - **Opciones visibles inicialmente:** ~80% reducción (collapsibles cerrados)
@@ -333,12 +349,14 @@ No se detectaron:
   - Más fácil de mantener y extender
 
 ### Jerarquía mejorada:
+
 - **Nivel 1:** 4 tabs claros (Perfil, Enlaces, Apariencia, QR)
 - **Nivel 2:** Plantillas + "Personalizar manualmente"
 - **Nivel 3:** 6 subsecciones colapsables
 - **Nivel 4:** Collapsibles internos (ej: Nombre, Descripción en Tipografía)
 
 ### Path del usuario:
+
 - **Antes:** "¿Cambio el fondo en Diseño, Texto o Elementos?"
 - **Ahora:** "Apariencia > Personalizar > Fondo" ✅
 
@@ -355,9 +373,7 @@ No se detectaron:
     <span>Título</span>
     <ChevronDown className="..." />
   </CollapsibleTrigger>
-  <CollapsibleContent className="pt-4">
-    {/* Contenido */}
-  </CollapsibleContent>
+  <CollapsibleContent className="pt-4">{/* Contenido */}</CollapsibleContent>
 </Collapsible>
 ```
 
@@ -367,7 +383,7 @@ No se detectaron:
 interface SubsectionProps {
   profile: Partial<Profile>;
   onChange: (updates: Partial<Profile>) => void;
-  userId?: string;          // Solo si necesita uploads
+  userId?: string; // Solo si necesita uploads
   links?: Partial<ProfileLink>[]; // Solo SocialCoversSection
   onManageLinkImages?: () => void; // Solo SocialCoversSection
 }
@@ -379,38 +395,42 @@ interface SubsectionProps {
 
 Un usuario nuevo debe poder responder:
 
-| Pregunta | Respuesta | Status |
-|----------|-----------|--------|
-| ¿Dónde cambio mi foto? | Perfil | ✅ Claro |
-| ¿Dónde agrego Instagram? | Enlaces | ✅ Claro |
-| ¿Dónde cambio la foto de Instagram? | Enlaces > Expandir Instagram | ✅ Claro |
-| ¿Dónde cambio el fondo? | Apariencia > Personalizar > Fondo | ✅ Claro |
-| ¿Dónde cambio la fuente? | Apariencia > Personalizar > Tipografía | ✅ Claro |
-| ¿Dónde elijo un diseño listo? | Apariencia (primer elemento) | ✅ Claro |
-| ¿Dónde edito mi QR? | QR | ✅ Claro |
-| ¿Qué estoy modificando ahora? | Título del panel lo indica | ✅ Claro |
-| ¿Dónde veo el resultado? | Preview siempre visible | ✅ Claro |
+| Pregunta                            | Respuesta                              | Status   |
+| ----------------------------------- | -------------------------------------- | -------- |
+| ¿Dónde cambio mi foto?              | Perfil                                 | ✅ Claro |
+| ¿Dónde agrego Instagram?            | Enlaces                                | ✅ Claro |
+| ¿Dónde cambio la foto de Instagram? | Enlaces > Expandir Instagram           | ✅ Claro |
+| ¿Dónde cambio el fondo?             | Apariencia > Personalizar > Fondo      | ✅ Claro |
+| ¿Dónde cambio la fuente?            | Apariencia > Personalizar > Tipografía | ✅ Claro |
+| ¿Dónde elijo un diseño listo?       | Apariencia (primer elemento)           | ✅ Claro |
+| ¿Dónde edito mi QR?                 | QR                                     | ✅ Claro |
+| ¿Qué estoy modificando ahora?       | Título del panel lo indica             | ✅ Claro |
+| ¿Dónde veo el resultado?            | Preview siempre visible                | ✅ Claro |
 
 ---
 
 ## SIGUIENTES PASOS RECOMENDADOS
 
 ### Inmediato:
+
 1. ✅ Testing manual en navegador (todos los checkboxes arriba)
 2. ✅ Verificar en diferentes resoluciones
 3. ✅ Probar en móvil real (no solo DevTools)
 
 ### Corto plazo (Fase P1):
+
 1. Agregar tooltips en controles clave
 2. Mejorar estados vacíos en otras secciones
 3. Agrupar visualmente estilos básicos vs premium en BotonesSection
 
 ### Medio plazo:
+
 1. Considerar onboarding opcional (3-4 pasos)
 2. Analytics de uso de collapsibles (cuáles se abren más)
 3. A/B testing: ¿usuarios completan más perfiles?
 
 ### Mantenimiento:
+
 1. Eliminar archivos deprecados cuando confianza 100%:
    - `DesignSection.tsx`
    - `TextSection.tsx`
@@ -425,12 +445,14 @@ Un usuario nuevo debe poder responder:
 La reorganización UX del editor QR está implementada y funcional. El build pasa sin errores, la estructura es más clara, y se implementó revelación progresiva en todas las secciones de personalización.
 
 **Impacto esperado:**
+
 - Menor confusión en usuarios nuevos
 - Path más corto para tareas comunes
 - Mejor organización mental del sistema
 - Más fácil de mantener y extender
 
 **Sin pérdida de funcionalidad:**
+
 - Todas las opciones anteriores siguen disponibles
 - Mismo nivel de personalización
 - Compatibilidad completa con datos existentes

@@ -67,7 +67,7 @@ Two camera integration defects are now addressed:
    and the sole scroll owner is explicit:
 
    ```tsx
-   className="pts-power-viewport h-full min-h-0 min-w-0 overflow-auto ..."
+   className = "pts-power-viewport h-full min-h-0 min-w-0 overflow-auto ...";
    ```
 
 Stage remains finite and uses the existing bounded overscan formula; no giant safety bound or double scaling was introduced.

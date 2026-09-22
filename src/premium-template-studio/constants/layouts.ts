@@ -50,8 +50,30 @@ export function getLayout(id: string): TemplateLayout {
   return LAYOUT_MAP[id] ?? LAYOUTS[0]!;
 }
 
+export type EditorDocumentKind = "profile" | "page";
+export type EditorCanvasMode = "compact-bio" | "premium-web-page";
+
 export const BREAKPOINT_WIDTHS = {
   desktop: 1180,
   tablet: 834,
   mobile: 390,
 } as const;
+
+export const COMPACT_BIO_WIDTHS = {
+  desktop: 520,
+  tablet: 520,
+  mobile: 390,
+} as const;
+
+export function canvasModeForDocument(kind: EditorDocumentKind): EditorCanvasMode {
+  return kind === "page" ? "premium-web-page" : "compact-bio";
+}
+
+export function canvasWidthForDocument(
+  kind: EditorDocumentKind,
+  breakpoint: keyof typeof BREAKPOINT_WIDTHS,
+): number {
+  return canvasModeForDocument(kind) === "premium-web-page"
+    ? BREAKPOINT_WIDTHS[breakpoint]
+    : COMPACT_BIO_WIDTHS[breakpoint];
+}

@@ -2,26 +2,26 @@
 
 ## RISK REGISTER
 
-| ID | Domain | Sev | Conf | Finding | Evidence | Runtime | Action | When |
-|----|--------|-----|------|---------|----------|---------|--------|------|
-| P0-001 | Persistence | P0 | HIGH | Autosave + manual save race | StudioProvider.tsx:150-201 | NOT_VERIFIED | Add save mutex | BLOCKER |
-| P0-002 | Selection | P0 | CONFIRMED | Selection refs deleted block after undo | templateReducer.ts:141-181 | NOT_VERIFIED | Clear selection on undo | BLOCKER |
-| P0-003 | History | P0 | HIGH | Undo during in-flight save loses edits | StudioProvider.tsx:150-162 | NOT_VERIFIED | Cancel save on undo | BLOCKER |
-| P0-004 | State Sync | P0 | MEDIUM | Config sync loop from parent | StudioProvider.tsx:126-141 | NOT_VERIFIED | Remove sync or stabilize | BLOCKER |
-| P0-005 | Persistence | P0 | CONFIRMED | No optimistic locking in RPC | canonical-page.service.ts | NOT_VERIFIED | Add CAS/updatedAt check | BLOCKER |
-| P0-006 | Renderer | P0 | HIGH | Renderer exception crashes studio | TemplateRenderer.tsx | NOT_VERIFIED | Add ErrorBoundary | BLOCKER |
-| P1-001 | Camera | P1 | MEDIUM | ResizeObserver feedback loop risk | usePowerCanvasCamera.ts:88-98 | NOT_VERIFIED | Debounce content observer | Phase 3 |
-| P1-002 | Responsive | P1 | MEDIUM | Breakpoint lost after undo | StudioProvider.tsx:115 | NOT_VERIFIED | Document limitation | Phase 3 |
-| P1-003 | History | P1 | CONFIRMED | Dirty=true after undo to saved | templateReducer.ts:167,179 | NOT_VERIFIED | Track saved hash | Phase 3 |
-| P1-004 | Blocks | P1 | HIGH | Duplicate shares nested refs | templateReducer.ts:131-139 | NOT_VERIFIED | Deep re-ID nested content | Phase 3 |
-| P1-005 | Blocks | P1 | MEDIUM | Reorder stale index race | templateReducer.ts:121-128 | NOT_VERIFIED | Add sequence number | Post-Phase 3 |
-| P1-006 | Engine V2 | P1 | MEDIUM | Engine generates duplicate IDs | Engine generation | NOT_VERIFIED | Add uniqueness validation | Phase 3 |
-| P1-007 | Renderer | P1 | HIGH | Unknown block type disappears | TemplateRenderer.tsx | NOT_VERIFIED | Render fallback component | Phase 3 |
-| P1-008 | Camera | P1 | MEDIUM | Long text explodes stage width | Camera measurement | NOT_VERIFIED | Add word-break CSS | Phase 3 |
-| P1-009 | Mobile | P1 | HIGH | Sheet covers selected block | Mobile layout | NOT_VERIFIED | Auto-scroll or padding | Phase 3 |
-| P1-010 | Input | P1 | CONFIRMED | Shortcuts fire inside inputs | StudioProvider.tsx:211-213 | NOT_VERIFIED | Check typing guard | Phase 3 |
-| P1-011 | History | P1 | MEDIUM | History stores mutable refs | templateReducer.ts:52 | NOT_VERIFIED | Already safe (immutable) | Post-Phase 3 |
-| P1-012 | Persistence | P1 | MEDIUM | Save failure dirty state loss | StudioProvider.tsx:158-160 | NOT_VERIFIED | Track last saved config | Phase 3 |
+| ID     | Domain      | Sev | Conf      | Finding                                 | Evidence                      | Runtime      | Action                    | When         |
+| ------ | ----------- | --- | --------- | --------------------------------------- | ----------------------------- | ------------ | ------------------------- | ------------ |
+| P0-001 | Persistence | P0  | HIGH      | Autosave + manual save race             | StudioProvider.tsx:150-201    | NOT_VERIFIED | Add save mutex            | BLOCKER      |
+| P0-002 | Selection   | P0  | CONFIRMED | Selection refs deleted block after undo | templateReducer.ts:141-181    | NOT_VERIFIED | Clear selection on undo   | BLOCKER      |
+| P0-003 | History     | P0  | HIGH      | Undo during in-flight save loses edits  | StudioProvider.tsx:150-162    | NOT_VERIFIED | Cancel save on undo       | BLOCKER      |
+| P0-004 | State Sync  | P0  | MEDIUM    | Config sync loop from parent            | StudioProvider.tsx:126-141    | NOT_VERIFIED | Remove sync or stabilize  | BLOCKER      |
+| P0-005 | Persistence | P0  | CONFIRMED | No optimistic locking in RPC            | canonical-page.service.ts     | NOT_VERIFIED | Add CAS/updatedAt check   | BLOCKER      |
+| P0-006 | Renderer    | P0  | HIGH      | Renderer exception crashes studio       | TemplateRenderer.tsx          | NOT_VERIFIED | Add ErrorBoundary         | BLOCKER      |
+| P1-001 | Camera      | P1  | MEDIUM    | ResizeObserver feedback loop risk       | usePowerCanvasCamera.ts:88-98 | NOT_VERIFIED | Debounce content observer | Phase 3      |
+| P1-002 | Responsive  | P1  | MEDIUM    | Breakpoint lost after undo              | StudioProvider.tsx:115        | NOT_VERIFIED | Document limitation       | Phase 3      |
+| P1-003 | History     | P1  | CONFIRMED | Dirty=true after undo to saved          | templateReducer.ts:167,179    | NOT_VERIFIED | Track saved hash          | Phase 3      |
+| P1-004 | Blocks      | P1  | HIGH      | Duplicate shares nested refs            | templateReducer.ts:131-139    | NOT_VERIFIED | Deep re-ID nested content | Phase 3      |
+| P1-005 | Blocks      | P1  | MEDIUM    | Reorder stale index race                | templateReducer.ts:121-128    | NOT_VERIFIED | Add sequence number       | Post-Phase 3 |
+| P1-006 | Engine V2   | P1  | MEDIUM    | Engine generates duplicate IDs          | Engine generation             | NOT_VERIFIED | Add uniqueness validation | Phase 3      |
+| P1-007 | Renderer    | P1  | HIGH      | Unknown block type disappears           | TemplateRenderer.tsx          | NOT_VERIFIED | Render fallback component | Phase 3      |
+| P1-008 | Camera      | P1  | MEDIUM    | Long text explodes stage width          | Camera measurement            | NOT_VERIFIED | Add word-break CSS        | Phase 3      |
+| P1-009 | Mobile      | P1  | HIGH      | Sheet covers selected block             | Mobile layout                 | NOT_VERIFIED | Auto-scroll or padding    | Phase 3      |
+| P1-010 | Input       | P1  | CONFIRMED | Shortcuts fire inside inputs            | StudioProvider.tsx:211-213    | NOT_VERIFIED | Check typing guard        | Phase 3      |
+| P1-011 | History     | P1  | MEDIUM    | History stores mutable refs             | templateReducer.ts:52         | NOT_VERIFIED | Already safe (immutable)  | Post-Phase 3 |
+| P1-012 | Persistence | P1  | MEDIUM    | Save failure dirty state loss           | StudioProvider.tsx:158-160    | NOT_VERIFIED | Track last saved config   | Phase 3      |
 
 ## FAILURE TREES
 
@@ -59,6 +59,7 @@
    - Status: NOT_VERIFIED at runtime
 
 **Recommended Tests**:
+
 - ErrorBoundary with fallback UI
 - Minimum block count validation (warn if 0)
 - Camera diagnostic in DEV mode (already added by Codex)
@@ -94,6 +95,7 @@
    - Status: RESOLVED (uses scrollWidth/offsetWidth)
 
 **Recommended Tests**:
+
 - Extreme content test: 1000-char unbreakable URL
 - 100-block page measurement stability
 - ResizeObserver cycle limit (fail-safe)
@@ -125,6 +127,7 @@
    - Status: NOT_VERIFIED at runtime
 
 **Recommended Tests**:
+
 - Visual regression: same config at all three breakpoints
 - Automated test: `getMergedBlock()` merging logic
 - Runtime assertion: visible blocks match `isVisible()` filter
@@ -159,6 +162,7 @@
    - Fix: Stricter pre-save validation
 
 **Recommended Tests**:
+
 - Multi-tab concurrent save simulation
 - Rapid edit → undo → save sequence
 - Network delay simulation (save in-flight during undo)
@@ -187,6 +191,7 @@
    - Fix: Document limitation or store breakpoint
 
 **Recommended Tests**:
+
 - Add block → select → undo → inspect selection
 - Undo 10 times → verify all states valid
 - Selection validation assertion after undo/redo
@@ -219,6 +224,7 @@
    - Status: Both use schemaVersion:1, no mismatch currently
 
 **Recommended Tests**:
+
 - Generate all onboarding goal combinations
 - Validate all generated block types exist in registry
 - Check block ID uniqueness in generated output
@@ -252,6 +258,7 @@
    - Status: Canonical uses JSONB, safe for primitives
 
 **Recommended Tests**:
+
 - Add unknown property to config → save → load → verify present
 - Edit responsive overrides → save → load → verify
 - Save from Power → patch from Basic → load in Power → verify
@@ -285,6 +292,7 @@
    - Fix: Add focus trap
 
 **Recommended Tests**:
+
 - Mobile device testing (iOS/Android)
 - Select bottom block → open inspector → verify visible
 - Measure all interactive element sizes (min 44x44)
@@ -335,44 +343,45 @@
 
 ## INVARIANT MATRIX
 
-| Invariant | Status | Evidence |
-|-----------|--------|----------|
-| One canonical BioTemplateConfig | PASS | Single config in templateReducer |
-| Same doc rendered publicly and in editor | PASS | Same TemplateRenderer |
-| Camera never canonical data | PASS | Separate usePowerCanvasCamera state |
-| Camera never in undo history | PASS | selectBlock/camera don't call commit() |
-| Panel layout never in history | PASS | panel/previewing local state |
-| Responsive modes don't create separate docs | PASS | Breakpoint is render param only |
-| Engine block IDs remain stable | RISK | P1-006: duplicates possible |
-| QR/public identity untouched | PASS | Power Editor doesn't touch QR tables |
-| No editor action resets unknown fields | RISK | NOT_VERIFIED at runtime |
-| Unknown canonical property preserved | PASS | Namespace preservation in RPC |
+| Invariant                                   | Status | Evidence                               |
+| ------------------------------------------- | ------ | -------------------------------------- |
+| One canonical BioTemplateConfig             | PASS   | Single config in templateReducer       |
+| Same doc rendered publicly and in editor    | PASS   | Same TemplateRenderer                  |
+| Camera never canonical data                 | PASS   | Separate usePowerCanvasCamera state    |
+| Camera never in undo history                | PASS   | selectBlock/camera don't call commit() |
+| Panel layout never in history               | PASS   | panel/previewing local state           |
+| Responsive modes don't create separate docs | PASS   | Breakpoint is render param only        |
+| Engine block IDs remain stable              | RISK   | P1-006: duplicates possible            |
+| QR/public identity untouched                | PASS   | Power Editor doesn't touch QR tables   |
+| No editor action resets unknown fields      | RISK   | NOT_VERIFIED at runtime                |
+| Unknown canonical property preserved        | PASS   | Namespace preservation in RPC          |
 
 ---
 
 ## TEST COVERAGE MATRIX
 
-| Critical Behavior | Unit Test | Integration Test | Visual Test | E2E Test | Gap |
-|-------------------|-----------|------------------|-------------|----------|-----|
-| Camera math | ✅ PASS (5/5) | ❌ | ❌ | ❌ | Runtime geometry |
-| Scroll isolation | ❌ | ❌ | ❌ | ❌ | All levels |
-| Responsive rendering | ❌ | ❌ | ❌ | ❌ | All levels |
-| Zoom controls | ❌ | ❌ | ❌ | ❌ | All levels |
-| Panel collapse | ❌ | ❌ | ❌ | ❌ | All levels |
-| History undo/redo | ❌ | ❌ | ❌ | ❌ | All levels |
-| Autosave | ❌ | ❌ | ❌ | ❌ | All levels |
-| Block add | ❌ | ❌ | ❌ | ❌ | All levels |
-| Block reorder | ❌ | ❌ | ❌ | ❌ | All levels |
-| Block duplicate | ❌ | ❌ | ❌ | ❌ | All levels |
-| Block delete | ❌ | ❌ | ❌ | ❌ | All levels |
-| Canonical round-trip | ❌ | ❌ | ❌ | ❌ | All levels |
-| Engine V2 output | ❌ | ❌ | ❌ | ❌ | All levels |
-| Unknown field preservation | ❌ | ❌ | ❌ | ❌ | All levels |
-| Invalid config handling | ❌ | ❌ | ❌ | ❌ | All levels |
-| Mobile responsiveness | ❌ | ❌ | ❌ | ❌ | All levels |
-| Touch interactions | ❌ | ❌ | ❌ | ❌ | All levels |
+| Critical Behavior          | Unit Test     | Integration Test | Visual Test | E2E Test | Gap              |
+| -------------------------- | ------------- | ---------------- | ----------- | -------- | ---------------- |
+| Camera math                | ✅ PASS (5/5) | ❌               | ❌          | ❌       | Runtime geometry |
+| Scroll isolation           | ❌            | ❌               | ❌          | ❌       | All levels       |
+| Responsive rendering       | ❌            | ❌               | ❌          | ❌       | All levels       |
+| Zoom controls              | ❌            | ❌               | ❌          | ❌       | All levels       |
+| Panel collapse             | ❌            | ❌               | ❌          | ❌       | All levels       |
+| History undo/redo          | ❌            | ❌               | ❌          | ❌       | All levels       |
+| Autosave                   | ❌            | ❌               | ❌          | ❌       | All levels       |
+| Block add                  | ❌            | ❌               | ❌          | ❌       | All levels       |
+| Block reorder              | ❌            | ❌               | ❌          | ❌       | All levels       |
+| Block duplicate            | ❌            | ❌               | ❌          | ❌       | All levels       |
+| Block delete               | ❌            | ❌               | ❌          | ❌       | All levels       |
+| Canonical round-trip       | ❌            | ❌               | ❌          | ❌       | All levels       |
+| Engine V2 output           | ❌            | ❌               | ❌          | ❌       | All levels       |
+| Unknown field preservation | ❌            | ❌               | ❌          | ❌       | All levels       |
+| Invalid config handling    | ❌            | ❌               | ❌          | ❌       | All levels       |
+| Mobile responsiveness      | ❌            | ❌               | ❌          | ❌       | All levels       |
+| Touch interactions         | ❌            | ❌               | ❌          | ❌       | All levels       |
 
 **Priority Test Gaps**:
+
 1. Autosave race condition test
 2. Undo during save test
 3. Selection after undo validation test
@@ -453,45 +462,54 @@
 ## FILES INSPECTED
 
 ### Power Editor Core
+
 - `src/components/power-editor/PowerEditorHost.tsx`
 - `src/premium-template-studio/components/PremiumTemplateStudio.tsx`
 - `src/premium-template-studio/state/StudioProvider.tsx`
 - `src/premium-template-studio/state/templateReducer.ts`
 
 ### Workspace/Camera
+
 - `src/premium-template-studio/components/workspace/PowerCanvasViewport.tsx`
 - `src/premium-template-studio/components/workspace/usePowerCanvasCamera.ts`
 - `src/premium-template-studio/components/workspace/powerCanvasCameraMath.ts`
 - `src/premium-template-studio/components/workspace/__tests__/powerCanvasCameraMath.test.ts`
 
 ### Panels
+
 - `src/premium-template-studio/components/editor/Sidebar.tsx`
 - `src/premium-template-studio/components/inspector/Inspector.tsx`
 
 ### Renderer
+
 - `src/premium-template-studio/engine/TemplateRenderer.tsx`
 - `src/premium-template-studio/engine/TemplateValidator.ts`
 - `src/premium-template-studio/types/index.ts`
 
 ### Canonical/Persistence
+
 - `src/lib/canonical-page/contract.ts`
 - `src/services/canonical-page.service.ts`
 
 ### Engine V2
+
 - `src/lib/parametric-engine-v2/internal-entrypoint.ts`
 - `src/lib/parametric-engine-v2/power-editor/to-template-config.ts`
 - `src/lib/parametric-engine-v2/power-editor/generate-v2.ts`
 
 ### Onboarding Integration
+
 - `src/lib/onboarding-v2/engine-v2-adapter.ts`
 - `src/lib/onboarding-v2/engine-v2-generation.ts`
 - `src/lib/onboarding-v2/canonical-persistence.ts`
 - `src/lib/onboarding-v2/basic-editor-handoff.ts`
 
 ### Styles
+
 - `src/premium-template-studio/styles/studio.css`
 
 ### Reports
+
 - `POWER_EDITOR_PHASE1_PHASE2_FUNCTIONAL_RUNTIME_GATE_REPORT.md`
 - `POWER_EDITOR_PHASE2_CAMERA_DOM_VISIBILITY_GEOMETRY_FIX_V2_REPORT.md`
 - `CRIPQER_ENGINE_V2_GENERATION_QUALITY_FORENSIC_REPORT.md`
@@ -520,7 +538,8 @@ No build, test, or runtime commands executed due to parallel Codex work.
 **Config Files Modified**: NONE  
 **Dependencies Modified**: NONE
 
-**Files Created**: 
+**Files Created**:
+
 - `POWER_EDITOR_ENGINE_V2_PREVENTIVE_FORENSIC_AUDIT_V1.md` (this audit)
 - `POWER_EDITOR_ENGINE_V2_PREVENTIVE_FORENSIC_AUDIT_V1_CONTINUED.md` (continuation)
 
@@ -551,6 +570,7 @@ ESTIMATED EFFORT:         3-5 days (P0 fixes + tests)
 The Power Editor architecture is **structurally sound** but has **critical race conditions and state management issues** that must be resolved before Phase 3.
 
 **Strengths**:
+
 - Clean separation of document vs UI state
 - Pure renderer architecture
 - Robust canonical persistence design
@@ -558,6 +578,7 @@ The Power Editor architecture is **structurally sound** but has **critical race 
 - Immutable state patterns mostly correct
 
 **Critical Risks**:
+
 - Autosave/undo/manual save race conditions (P0)
 - No optimistic locking (P0)
 - Selection validation missing (P0)

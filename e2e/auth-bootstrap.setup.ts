@@ -10,9 +10,9 @@ setup("manual login and save local auth state", async ({ page }) => {
 
   // The user completes the real login in the visible browser window.
   // We only continue after an authenticated editor surface is observable.
-  await expect(
-    page.getByRole("button", { name: /Guardar|Publicar|Exportar/ }).first(),
-  ).toBeVisible({ timeout: 9 * 60 * 1000 });
+  await expect(page.getByRole("button", { name: /Guardar|Publicar|Exportar/ }).first()).toBeVisible(
+    { timeout: 9 * 60 * 1000 },
+  );
 
   await mkdir(dirname(storageState), { recursive: true });
   await page.context().storageState({ path: storageState });

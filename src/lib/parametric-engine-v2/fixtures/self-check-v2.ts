@@ -43,15 +43,16 @@ for (const testCase of PLAYGROUND_CASES) {
 
   /* renderer contract */
   const validation = validateTemplate(first.config);
-  check(`${testCase.id}: config passes renderer validator`, validation.valid, JSON.stringify(validation));
+  check(
+    `${testCase.id}: config passes renderer validator`,
+    validation.valid,
+    JSON.stringify(validation),
+  );
 
   /* serializable */
   const json = JSON.stringify(first.config);
   check(`${testCase.id}: config is JSON serializable`, typeof json === "string" && json.length > 0);
-  check(
-    `${testCase.id}: config roundtrips`,
-    JSON.stringify(JSON.parse(json)) === json,
-  );
+  check(`${testCase.id}: config roundtrips`, JSON.stringify(JSON.parse(json)) === json);
 
   /* determinism */
   const again = generatePowerEditorCandidates(testCase.intent, {
@@ -66,9 +67,15 @@ for (const testCase of PLAYGROUND_CASES) {
 
   /* diversity */
   const signatures = new Set(
-    candidates.map((c) => `${c.recipe.layout.id}|${c.recipe.visual.cards.preset}|${c.recipe.visual.buttons.variant}|${c.recipe.visual.colors.primary}|${c.recipe.visual.background.type}|${c.recipe.visual.typography.headingFont}`),
+    candidates.map(
+      (c) =>
+        `${c.recipe.layout.id}|${c.recipe.visual.cards.preset}|${c.recipe.visual.buttons.variant}|${c.recipe.visual.colors.primary}|${c.recipe.visual.background.type}|${c.recipe.visual.typography.headingFont}`,
+    ),
   );
-  check(`${testCase.id}: candidates are visually distinct`, signatures.size >= Math.min(2, candidates.length));
+  check(
+    `${testCase.id}: candidates are visually distinct`,
+    signatures.size >= Math.min(2, candidates.length),
+  );
 
   /* accessibility */
   for (const candidate of candidates) {
@@ -88,7 +95,11 @@ for (const testCase of PLAYGROUND_CASES) {
   const unsupported = first.recipe.capabilities_used.filter(
     (key) => POWER_EDITOR_CAPABILITIES[key] !== true,
   );
-  check(`${testCase.id}: no unsupported capability emitted`, unsupported.length === 0, unsupported.join(","));
+  check(
+    `${testCase.id}: no unsupported capability emitted`,
+    unsupported.length === 0,
+    unsupported.join(","),
+  );
 
   /* no invented content */
   const blockTypes = first.recipe.structure.blocks.map((b) => b.type);
@@ -195,9 +206,7 @@ for (const candidate of v2) {
 }
 
 /* hero block replaces the banner header on cover-led patterns */
-const heroCandidates = v2.filter((c) =>
-  c.recipe.structure.blocks.some((b) => b.type === "hero"),
-);
+const heroCandidates = v2.filter((c) => c.recipe.structure.blocks.some((b) => b.type === "hero"));
 check(
   "hero block never coexists with an enabled banner",
   heroCandidates.every((c) => c.recipe.banner.enabled === false),
@@ -216,7 +225,6 @@ check(
     ),
   ),
 );
-
 
 /* ============ FINAL CAPABILITY UTILIZATION MICRO-ROUND (V2) ============ */
 
@@ -280,20 +288,63 @@ const bg = planBlocks(
 );
 const bgBlock = bg.find((b) => b.type === "buttonGroup");
 check("buttonGroup: planned for compact action pages", Boolean(bgBlock));
-check("buttonGroup: 6 buttons in 2 columns (3x2)", bgBlock?.layout.columns === 2 && (bgBlock?.content.items ?? []).length === 6);
+check(
+  "buttonGroup: 6 buttons in 2 columns (3x2)",
+  bgBlock?.layout.columns === 2 && (bgBlock?.content.items ?? []).length === 6,
+);
 
-const bg2 = planBlocks(BASE_RECIPE, semantics("corporate", "compact_action"), { links: sixLinks.slice(0, 2) }, CAPS, 1, HERO_OFF);
-check("buttonGroup: 2 buttons in 2 columns (1x2)", bg2.find((b) => b.type === "buttonGroup")?.layout.columns === 2);
+const bg2 = planBlocks(
+  BASE_RECIPE,
+  semantics("corporate", "compact_action"),
+  { links: sixLinks.slice(0, 2) },
+  CAPS,
+  1,
+  HERO_OFF,
+);
+check(
+  "buttonGroup: 2 buttons in 2 columns (1x2)",
+  bg2.find((b) => b.type === "buttonGroup")?.layout.columns === 2,
+);
 
-const bg4 = planBlocks(BASE_RECIPE, semantics("corporate", "compact_action"), { links: sixLinks.slice(0, 4) }, CAPS, 1, HERO_OFF);
-check("buttonGroup: 4 buttons in 2 columns (2x2)", bg4.find((b) => b.type === "buttonGroup")?.layout.columns === 2);
+const bg4 = planBlocks(
+  BASE_RECIPE,
+  semantics("corporate", "compact_action"),
+  { links: sixLinks.slice(0, 4) },
+  CAPS,
+  1,
+  HERO_OFF,
+);
+check(
+  "buttonGroup: 4 buttons in 2 columns (2x2)",
+  bg4.find((b) => b.type === "buttonGroup")?.layout.columns === 2,
+);
 
 const threeLinks = sixLinks.slice(0, 3);
-const bg3 = planBlocks(BASE_RECIPE, semantics("corporate", "compact_action"), { links: threeLinks }, CAPS, 1, HERO_OFF);
-check("buttonGroup: odd count uses a single column", bg3.find((b) => b.type === "buttonGroup")?.layout.columns === 1);
+const bg3 = planBlocks(
+  BASE_RECIPE,
+  semantics("corporate", "compact_action"),
+  { links: threeLinks },
+  CAPS,
+  1,
+  HERO_OFF,
+);
+check(
+  "buttonGroup: odd count uses a single column",
+  bg3.find((b) => b.type === "buttonGroup")?.layout.columns === 1,
+);
 
-const noBg = planBlocks(BASE_RECIPE, semantics("editorial", "editorial_stack"), { links: sixLinks }, CAPS, 1, HERO_OFF);
-check("buttonGroup: not every link list becomes a button group", !noBg.some((b) => b.type === "buttonGroup") && noBg.some((b) => b.type === "links"));
+const noBg = planBlocks(
+  BASE_RECIPE,
+  semantics("editorial", "editorial_stack"),
+  { links: sixLinks },
+  CAPS,
+  1,
+  HERO_OFF,
+);
+check(
+  "buttonGroup: not every link list becomes a button group",
+  !noBg.some((b) => b.type === "buttonGroup") && noBg.some((b) => b.type === "links"),
+);
 
 /* priority 2 — 75/25 media link cards */
 const mediaLinks = [
@@ -309,8 +360,14 @@ const mediaPlan = planBlocks(
   HERO_OFF,
 );
 const mediaItems = mediaPlan.find((b) => b.type === "links")?.content.items ?? [];
-check("media-card: emitted when content provides images", mediaItems.every((i) => i.presentation === "media-card"));
-check("media-card: alternates left/right", mediaItems[0]?.mediaPosition === "left" && mediaItems[1]?.mediaPosition === "right");
+check(
+  "media-card: emitted when content provides images",
+  mediaItems.every((i) => i.presentation === "media-card"),
+);
+check(
+  "media-card: alternates left/right",
+  mediaItems[0]?.mediaPosition === "left" && mediaItems[1]?.mediaPosition === "right",
+);
 check("media-card: multiple media link cards supported", mediaItems.length === 2);
 
 const noImagePlan = planBlocks(
@@ -322,7 +379,10 @@ const noImagePlan = planBlocks(
   HERO_OFF,
 );
 const fallbackItems = noImagePlan.find((b) => b.type === "links")?.content.items ?? [];
-check("media-card: falls back when no image exists", fallbackItems.every((i) => i.presentation !== "media-card" && !i.imageUrl));
+check(
+  "media-card: falls back when no image exists",
+  fallbackItems.every((i) => i.presentation !== "media-card" && !i.imageUrl),
+);
 
 const corporateMedia = planBlocks(
   BASE_RECIPE,
@@ -334,16 +394,46 @@ const corporateMedia = planBlocks(
 );
 check(
   "media-card: corporate/minimal do not overuse image cards",
-  (corporateMedia.find((b) => b.type === "links")?.content.items ?? []).every((i) => i.presentation !== "media-card"),
+  (corporateMedia.find((b) => b.type === "links")?.content.items ?? []).every(
+    (i) => i.presentation !== "media-card",
+  ),
 );
 
 /* priority 3 — frames reach real output */
-const luxuryPlan = planBlocks(BASE_RECIPE, semantics("luxury", "service_first"), { badges: [{ label: "10 años" }] }, CAPS, 1, HERO_OFF);
-check("frames: luxury CTA receives a luxury frame", luxuryPlan.find((b) => b.type === "cta")?.frame === "luxury");
-check("frames: not everything is framed", luxuryPlan.some((b) => b.frame === "none"));
-check("frames: minimal family stays unframed", planBlocks(BASE_RECIPE, semantics("minimal", "centered_profile"), {}, CAPS, 1, HERO_OFF).every((b) => b.frame === "none"));
-check("frames: creator prefers glow/gradient", ["glow", "gradient"].includes(resolveFrame(semantics("creator", "social_first"), "primary", CAPS)));
-check("frames: corporate prefers hairline/none", ["hairline", "none"].includes(resolveFrame(semantics("corporate", "trust_first"), "primary", CAPS)));
+const luxuryPlan = planBlocks(
+  BASE_RECIPE,
+  semantics("luxury", "service_first"),
+  { badges: [{ label: "10 años" }] },
+  CAPS,
+  1,
+  HERO_OFF,
+);
+check(
+  "frames: luxury CTA receives a luxury frame",
+  luxuryPlan.find((b) => b.type === "cta")?.frame === "luxury",
+);
+check(
+  "frames: not everything is framed",
+  luxuryPlan.some((b) => b.frame === "none"),
+);
+check(
+  "frames: minimal family stays unframed",
+  planBlocks(BASE_RECIPE, semantics("minimal", "centered_profile"), {}, CAPS, 1, HERO_OFF).every(
+    (b) => b.frame === "none",
+  ),
+);
+check(
+  "frames: creator prefers glow/gradient",
+  ["glow", "gradient"].includes(
+    resolveFrame(semantics("creator", "social_first"), "primary", CAPS),
+  ),
+);
+check(
+  "frames: corporate prefers hairline/none",
+  ["hairline", "none"].includes(
+    resolveFrame(semantics("corporate", "trust_first"), "primary", CAPS),
+  ),
+);
 
 /* priority 4 — semantic sticky */
 const stickyPlan = planBlocks(
@@ -354,8 +444,14 @@ const stickyPlan = planBlocks(
   1,
   HERO_OFF,
 );
-check("sticky: applied to the high-intent action block", stickyPlan.some((b) => b.layout.sticky?.enabled === true));
-check("sticky: at most one sticky block", stickyPlan.filter((b) => b.layout.sticky?.enabled === true).length <= 1);
+check(
+  "sticky: applied to the high-intent action block",
+  stickyPlan.some((b) => b.layout.sticky?.enabled === true),
+);
+check(
+  "sticky: at most one sticky block",
+  stickyPlan.filter((b) => b.layout.sticky?.enabled === true).length <= 1,
+);
 check(
   "sticky: never used on large content blocks",
   stickyPlan
@@ -364,9 +460,14 @@ check(
 );
 check(
   "sticky: not generated on low-pressure pages",
-  !planBlocks(BASE_RECIPE, semantics("editorial", "editorial_stack"), { bookingUrl: "https://example.com/book" }, CAPS, 1, HERO_OFF).some(
-    (b) => b.layout.sticky?.enabled === true,
-  ),
+  !planBlocks(
+    BASE_RECIPE,
+    semantics("editorial", "editorial_stack"),
+    { bookingUrl: "https://example.com/book" },
+    CAPS,
+    1,
+    HERO_OFF,
+  ).some((b) => b.layout.sticky?.enabled === true),
 );
 
 const collisionPlan = planBlocks(
@@ -382,26 +483,45 @@ const collisionPlan = planBlocks(
 );
 check(
   "sticky/floating: never coexist",
-  !(collisionPlan.some((b) => b.layout.floating?.enabled === true) && collisionPlan.some((b) => b.layout.sticky?.enabled === true)),
+  !(
+    collisionPlan.some((b) => b.layout.floating?.enabled === true) &&
+    collisionPlan.some((b) => b.layout.sticky?.enabled === true)
+  ),
 );
 
 /* capability override safety */
 const promoted = resolvePowerEditorCapabilities({ arbitrary_css: true, multi_stop_gradient: true });
-check("overrides: cannot promote false -> true", promoted.arbitrary_css === false && promoted.multi_stop_gradient === false);
+check(
+  "overrides: cannot promote false -> true",
+  promoted.arbitrary_css === false && promoted.multi_stop_gradient === false,
+);
 const demoted = resolvePowerEditorCapabilities({ block_buttonGroup: false });
 check("overrides: may disable a true capability", demoted.block_buttonGroup === false);
 check(
   "overrides: disabling buttonGroup falls back to links",
-  !planBlocks(BASE_RECIPE, semantics("corporate", "compact_action"), { links: sixLinks }, demoted, 1, HERO_OFF).some(
-    (b) => b.type === "buttonGroup",
-  ),
+  !planBlocks(
+    BASE_RECIPE,
+    semantics("corporate", "compact_action"),
+    { links: sixLinks },
+    demoted,
+    1,
+    HERO_OFF,
+  ).some((b) => b.type === "buttonGroup"),
 );
 
 /* determinism of the new planning paths */
 check(
   "micro-round: planning stays deterministic",
-  JSON.stringify(planBlocks(BASE_RECIPE, semantics("corporate", "compact_action"), { links: sixLinks }, CAPS, 1, HERO_OFF)) ===
-    JSON.stringify(bg),
+  JSON.stringify(
+    planBlocks(
+      BASE_RECIPE,
+      semantics("corporate", "compact_action"),
+      { links: sixLinks },
+      CAPS,
+      1,
+      HERO_OFF,
+    ),
+  ) === JSON.stringify(bg),
 );
 
 const passed = results.filter((r) => r.ok).length;

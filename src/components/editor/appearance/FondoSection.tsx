@@ -169,7 +169,9 @@ export function FondoSection({ profile, onChange }: FondoSectionProps) {
                   <button
                     key={dir.value}
                     type="button"
-                    onClick={() => handleGradientChange(gradColor1, gradColor2, "linear", dir.value)}
+                    onClick={() =>
+                      handleGradientChange(gradColor1, gradColor2, "linear", dir.value)
+                    }
                     className={`flex-1 h-8 rounded-md border text-sm font-medium transition-colors ${gradAngle === dir.value ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground hover:bg-accent hover:text-accent-foreground"}`}
                   >
                     {dir.label}

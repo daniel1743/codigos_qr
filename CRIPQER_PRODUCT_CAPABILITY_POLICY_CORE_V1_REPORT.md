@@ -69,20 +69,20 @@ ALLOW every one of the 21 declared capabilities — identical visual matrix to P
 Differentiation will come later from governance, integrations, security and scale
 (SSO, audit logs, API, SLA), not additional visual effects.
 
-> **Power Editor access is public to all tiers.** This policy gates *mutation of
-> capabilities*, not entry into the Power Editor.
+> **Power Editor access is public to all tiers.** This policy gates _mutation of
+> capabilities_, not entry into the Power Editor.
 
 ---
 
 ## 2. Architecture
 
-| Question | Answer |
-|---|---|
-| Pure product policy? | **YES** (0 network, 0 DB, 0 filesystem runtime calls) |
-| Server dependency? | **NO** (no import of `src/server/billing/**`) |
-| React dependency? | **NO** |
-| Billing modified? | **NO** |
-| Power Editor modified? | **NO** |
+| Question               | Answer                                                |
+| ---------------------- | ----------------------------------------------------- |
+| Pure product policy?   | **YES** (0 network, 0 DB, 0 filesystem runtime calls) |
+| Server dependency?     | **NO** (no import of `src/server/billing/**`)         |
+| React dependency?      | **NO**                                                |
+| Billing modified?      | **NO**                                                |
+| Power Editor modified? | **NO**                                                |
 
 **Boundary documented:** The canonical tier vocabulary (`free | pro | business |
 enterprise`) is declared **locally** in `capabilities.ts` (`PRODUCT_TIERS` →
@@ -100,11 +100,11 @@ duplicated switch, no `isPremium` boolean, no email/provider/browser checks.
 
 ## 3. Safety
 
-| Check | Result |
-|---|---|
-| Unknown capability fails closed | **PASS** (LOCKED, `UNKNOWN_CAPABILITY`, no upgrade target) |
-| Invalid tier cannot receive Pro capability | **PASS** (treated no more permissively than Free) |
-| LOCKED = mutation blocked, not config deletion | **YES** (documented in code + report) |
+| Check                                          | Result                                                     |
+| ---------------------------------------------- | ---------------------------------------------------------- |
+| Unknown capability fails closed                | **PASS** (LOCKED, `UNKNOWN_CAPABILITY`, no upgrade target) |
+| Invalid tier cannot receive Pro capability     | **PASS** (treated no more permissively than Free)          |
+| LOCKED = mutation blocked, not config deletion | **YES** (documented in code + report)                      |
 
 **LOCKED semantics:** `visible: true`, `editable: false`. LOCKED means the future
 UI shows the capability but prevents mutation. It does **not** remove stored
@@ -116,11 +116,11 @@ not implemented here (this is a pure decision core, not a preservation guard).
 
 ## 4. Validation
 
-| Check | Result |
-|---|---|
-| TypeScript (targeted, `--strict`) | **PASS** (exit 0) |
-| Selfcheck | **PASS** |
-| Assertion count | **158** (0 failed) |
+| Check                             | Result             |
+| --------------------------------- | ------------------ |
+| TypeScript (targeted, `--strict`) | **PASS** (exit 0)  |
+| Selfcheck                         | **PASS**           |
+| Assertion count                   | **158** (0 failed) |
 
 Selfcheck covered: tier/capability vocabulary integrity, Free core ALLOW, Free
 advanced LOCKED, Pro/Business/Enterprise allow-all, Business/Enterprise = Pro
@@ -135,10 +135,12 @@ authority, and deterministic purity.
 ### 5.1 Files read
 
 **Authorized reads (within read_scope):**
-- `src/server/billing/entitlements.ts` *(READ ONLY — confirmed `EffectiveTier` = `free | pro | business | enterprise`)*
-- `POWER_EDITOR_CAPABILITY_INVENTORY_V1.md` *(factual capability basis)*
+
+- `src/server/billing/entitlements.ts` _(READ ONLY — confirmed `EffectiveTier` = `free | pro | business | enterprise`)_
+- `POWER_EDITOR_CAPABILITY_INVENTORY_V1.md` _(factual capability basis)_
 
 **Authorized optional validation reads:**
+
 - `tsconfig.json`
 - `package.json`
 
@@ -161,21 +163,21 @@ files were written as a result.
 
 - `src/lib/product-entitlements/capabilities.ts`
 - `src/lib/product-entitlements/capabilities.selfcheck.ts`
-- `CRIPQER_PRODUCT_CAPABILITY_POLICY_CORE_V1_REPORT.md` *(this file)*
+- `CRIPQER_PRODUCT_CAPABILITY_POLICY_CORE_V1_REPORT.md` _(this file)_
 
 ### 5.3 Frozen-scope accounting
 
-| Item | Result |
-|---|---|
-| Existing source files modified | **0** |
-| Frozen write-scope violations | **0** |
-| Unauthorized read-scope expansions | **3** |
-| Implementation impact from those reads | **none** |
-| Additional files written | **none** |
-| Dependencies changed | **NO** |
-| Routes changed | **NO** |
-| DB changed | **NO** |
-| Commits / staging | **none** (per git-safety) |
+| Item                                   | Result                    |
+| -------------------------------------- | ------------------------- |
+| Existing source files modified         | **0**                     |
+| Frozen write-scope violations          | **0**                     |
+| Unauthorized read-scope expansions     | **3**                     |
+| Implementation impact from those reads | **none**                  |
+| Additional files written               | **none**                  |
+| Dependencies changed                   | **NO**                    |
+| Routes changed                         | **NO**                    |
+| DB changed                             | **NO**                    |
+| Commits / staging                      | **none** (per git-safety) |
 
 ---
 

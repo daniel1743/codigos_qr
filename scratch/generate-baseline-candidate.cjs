@@ -15,43 +15,44 @@
  * constraints, indexes, RLS, policies, functions, triggers, views, COMMENT ON,
  * and GRANT statements.
  */
-const fs = require('fs');
+const fs = require("fs");
 
-const INPUT = 'scratch/cripqer-live-schema-raw.sql';
-const OUTPUT = 'scratch/cripqer-production-baseline-candidate.sql';
+const INPUT = "scratch/cripqer-live-schema-raw.sql";
+const OUTPUT = "scratch/cripqer-production-baseline-candidate.sql";
 
-const lines = fs.readFileSync(INPUT, 'utf8').split(/\r?\n/);
+const lines = fs.readFileSync(INPUT, "utf8").split(/\r?\n/);
 
-const TOC_COMMENT = /^-- (TOC entry|Dependencies|Name:|Type:|Schema:|Owner:|PostgreSQL|Dumped|Started|Completed)/;
+const TOC_COMMENT =
+  /^-- (TOC entry|Dependencies|Name:|Type:|Schema:|Owner:|PostgreSQL|Dumped|Started|Completed)/;
 const LONE_DASH = /^--\s*$/;
 
 const PREAMBLE = [
-  '-- =============================================================================',
-  '-- Cripqer Production Baseline Candidate (REVIEW-ONLY)',
-  '--',
-  '-- Source : scratch/cripqer-live-schema-raw.sql (pg_dump --schema-only, PG 17.6)',
-  '-- Purpose: Recreate the CURRENT public structural contract on a fresh Supabase',
-  '--          project where auth/storage already exist.',
-  '--',
-  '-- External dependencies (NOT included here):',
-  '--   * auth schema (auth.users FKs, auth.uid(), auth.jwt())  -> Supabase-managed',
-  '--   * pgcrypto extension (gen_random_uuid())               -> Supabase default',
-  '--',
-  '-- Deliberately ABSENT (matches live production truth):',
-  '--   * claim_billing_event (missing in production)',
-  '--   * any row data (no COPY / INSERT data)',
-  '--',
-  '-- Removed as environment/Supabase boilerplate (not part of the structural',
-  '-- contract, re-established automatically on a fresh Supabase project):',
-  '--   * ALTER ... OWNER TO ... statements',
-  '--   * ALTER DEFAULT PRIVILEGES ... (supabase_admin/postgres defaults)',
-  '--   * pg_dump TOC comments, session SET boilerplate, \\restrict/\\unrestrict',
-  '-- =============================================================================',
-  '',
-  'SET check_function_bodies = false;',
-  'SET search_path = public;',
-  '',
-  'CREATE SCHEMA IF NOT EXISTS public;',
+  "-- =============================================================================",
+  "-- Cripqer Production Baseline Candidate (REVIEW-ONLY)",
+  "--",
+  "-- Source : scratch/cripqer-live-schema-raw.sql (pg_dump --schema-only, PG 17.6)",
+  "-- Purpose: Recreate the CURRENT public structural contract on a fresh Supabase",
+  "--          project where auth/storage already exist.",
+  "--",
+  "-- External dependencies (NOT included here):",
+  "--   * auth schema (auth.users FKs, auth.uid(), auth.jwt())  -> Supabase-managed",
+  "--   * pgcrypto extension (gen_random_uuid())               -> Supabase default",
+  "--",
+  "-- Deliberately ABSENT (matches live production truth):",
+  "--   * claim_billing_event (missing in production)",
+  "--   * any row data (no COPY / INSERT data)",
+  "--",
+  "-- Removed as environment/Supabase boilerplate (not part of the structural",
+  "-- contract, re-established automatically on a fresh Supabase project):",
+  "--   * ALTER ... OWNER TO ... statements",
+  "--   * ALTER DEFAULT PRIVILEGES ... (supabase_admin/postgres defaults)",
+  "--   * pg_dump TOC comments, session SET boilerplate, \\restrict/\\unrestrict",
+  "-- =============================================================================",
+  "",
+  "SET check_function_bodies = false;",
+  "SET search_path = public;",
+  "",
+  "CREATE SCHEMA IF NOT EXISTS public;",
 ];
 
 const out = [];
@@ -62,7 +63,7 @@ for (const line of lines) {
 
   // Drop everything until the first CREATE SCHEMA (the pg_dump header block).
   if (!started) {
-    if (t === 'CREATE SCHEMA public;') {
+    if (t === "CREATE SCHEMA public;") {
       started = true;
       continue; // we re-emit our own schema preamble above
     }
@@ -96,23 +97,23 @@ for (const line of lines) {
 }
 
 // Trim trailing blank lines, ensure single trailing newline
-while (out.length && out[out.length - 1].trim() === '') out.pop();
+while (out.length && out[out.length - 1].trim() === "") out.pop();
 
 // Collapse runs of 2+ blank lines into a single blank line
 const collapsed = [];
 for (const line of out) {
-  if (line.trim() === '') {
-    if (collapsed.length && collapsed[collapsed.length - 1].trim() === '') continue;
+  if (line.trim() === "") {
+    if (collapsed.length && collapsed[collapsed.length - 1].trim() === "") continue;
   }
   collapsed.push(line);
 }
 
 // Trim leading/trailing blank lines from the collapsed output
-while (collapsed.length && collapsed[0].trim() === '') collapsed.shift();
-while (collapsed.length && collapsed[collapsed.length - 1].trim() === '') collapsed.pop();
+while (collapsed.length && collapsed[0].trim() === "") collapsed.shift();
+while (collapsed.length && collapsed[collapsed.length - 1].trim() === "") collapsed.pop();
 
-const result = PREAMBLE.join('\n') + '\n' + collapsed.join('\n') + '\n';
-fs.writeFileSync(OUTPUT, result, 'utf8');
+const result = PREAMBLE.join("\n") + "\n" + collapsed.join("\n") + "\n";
+fs.writeFileSync(OUTPUT, result, "utf8");
 
 // Quick structural counts for verification
 const counts = {
@@ -130,4 +131,4 @@ const counts = {
 };
 
 console.log(JSON.stringify(counts, null, 2));
-console.log('Bytes written:', fs.statSync(OUTPUT).size);
+console.log("Bytes written:", fs.statSync(OUTPUT).size);
