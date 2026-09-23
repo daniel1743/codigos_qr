@@ -11,7 +11,7 @@ describe("platform navigation", () => {
     ).toEqual([
       { label: "Inicio", href: "/profile" },
       { label: "Mi página", href: "/page" },
-      { label: "Editor", href: "/editor" },
+      { label: "Editor", href: "/profile" },
       { label: "QR", href: "/qr" },
       { label: "Documentos", href: "/encrypted-documents" },
       { label: "Perfil", href: "/account" },
@@ -22,7 +22,7 @@ describe("platform navigation", () => {
     const expectedPaths = {
       profile: "/profile",
       pagina: "/page",
-      editor: "/editor",
+      editor: "/profile",
       qr: "/qr",
       documents: "/encrypted-documents",
       perfil: "/account",
@@ -34,7 +34,5 @@ describe("platform navigation", () => {
       expect(matchesPlatformNavActivePath(item!.activeMatch, pathname)).toBe(true);
     }
 
-    const editor = PLATFORM_NAV_ITEMS.find((item) => item.id === "editor");
-    expect(matchesPlatformNavActivePath(editor!.activeMatch, "/power-editor")).toBe(true);
   });
 });

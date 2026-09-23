@@ -58,6 +58,41 @@ export function isInteractionEvent(t: AnalyticsEventType): boolean {
   return INTERACTION_EVENTS.includes(t);
 }
 
+/**
+ * Link destinations eligible for the Top Links ranking.
+ *
+ * Deliberately excludes `share` (no destination) and `page_view`/`session_start`
+ * (entry attribution is a separate analytical question from link ranking).
+ */
+const TOP_LINK_EVENTS: AnalyticsEventType[] = [
+  "link_click",
+  "external_link_click",
+  "cta_click",
+  "whatsapp_click",
+  "instagram_click",
+  "facebook_click",
+  "tiktok_click",
+  "youtube_click",
+  "linkedin_click",
+];
+
+export function isTopLinkEvent(t: AnalyticsEventType): boolean {
+  return TOP_LINK_EVENTS.includes(t);
+}
+
+/**
+ * Canonical identity for a Top Links row: link_id > item_id > event type.
+ * (`block_id` is not part of the AnalyticsEventV1 contract; target URL/label
+ * are fallbacks only when no canonical identity exists.)
+ */
+function topLinkIdentity(event: AnalyticsEventV1): string {
+  return event.linkId ?? event.itemId ?? event.eventType;
+}
+
+function topLinkLabel(event: AnalyticsEventV1): string {
+  return event.linkLabel ?? CHANNEL_LABEL[channelOf(event.eventType) ?? "other"];
+}
+
 function ts(event: AnalyticsEventV1): number {
   const value = Date.parse(event.timestamp);
   return Number.isFinite(value) ? value : NaN;
@@ -73,12 +108,20 @@ function compare(current: number, previous: number): ComparisonV1 {
 }
 
 /** Builds the current range for a period, anchored on an injected clock. */
-export function resolveRange(period: PeriodId, now: Date, timezone: string, custom?: DateRangeV1): DateRangeV1 {
+export function resolveRange(
+  period: PeriodId,
+  now: Date,
+  timezone: string,
+  custom?: DateRangeV1,
+): DateRangeV1 {
   assertTimezone(timezone);
   if (period === "custom" && custom) return custom;
   const end = now.getTime();
   const days = period === "today" ? 0 : period === "7d" ? 7 : period === "30d" ? 30 : 90;
-  const from = period === "today" ? startOfLocalDay(end, timezone) : shiftLocalDays(end, -(days - 1), timezone);
+  const from =
+    period === "today"
+      ? startOfLocalDay(end, timezone)
+      : shiftLocalDays(end, -(days - 1), timezone);
   return { from: new Date(from).toISOString(), to: new Date(end + 1).toISOString() };
 }
 
@@ -192,14 +235,15 @@ export function computeMetrics(input: ComputeMetricsInput): AnalyticsMetricsV1 {
   const previousQr = count(previous, (e) => e.eventType === "qr_scan");
   const interactions = count(current, (e) => isInteractionEvent(e.eventType));
   const previousInteractions = count(previous, (e) => isInteractionEvent(e.eventType));
-  const linkClicks = count(current, (e) => e.eventType !== "cta_click" && isInteractionEvent(e.eventType));
+  const linkClicks = count(
+    current,
+    (e) => e.eventType !== "cta_click" && isInteractionEvent(e.eventType),
+  );
   const leads = count(current, (e) => e.eventType === "lead_created");
   const previousLeads = count(previous, (e) => e.eventType === "lead_created");
 
   const sessionIds = new Set(current.map((e) => e.sessionId).filter(Boolean) as string[]);
-  const previousSessionIds = new Set(
-    previous.map((e) => e.sessionId).filter(Boolean) as string[],
-  );
+  const previousSessionIds = new Set(previous.map((e) => e.sessionId).filter(Boolean) as string[]);
   const visitors = sessionIds.size || views;
   const previousVisitors = previousSessionIds.size || previousViews;
 
@@ -212,7 +256,10 @@ export function computeMetrics(input: ComputeMetricsInput): AnalyticsMetricsV1 {
       .filter(Boolean),
   );
   const viewSessions = new Set(
-    current.filter((e) => isViewEvent(e.eventType)).map((e) => e.sessionId).filter(Boolean),
+    current
+      .filter((e) => isViewEvent(e.eventType))
+      .map((e) => e.sessionId)
+      .filter(Boolean),
   );
   const actionRate =
     viewSessions.size > 0
@@ -239,7 +286,13 @@ export function computeMetrics(input: ComputeMetricsInput): AnalyticsMetricsV1 {
         previousClicks,
         share: totalChannelClicks > 0 ? clicks / totalChannelClicks : 0,
         deltaPct: pct(clicks, previousClicks),
-        series: bucketSeries(current, range, granularity, (e) => e.eventType === CHANNEL_EVENT[channel], timezone),
+        series: bucketSeries(
+          current,
+          range,
+          granularity,
+          (e) => e.eventType === CHANNEL_EVENT[channel],
+          timezone,
+        ),
       };
     })
     .filter((metric) => metric.clicks > 0 || metric.previousClicks > 0)
@@ -250,20 +303,17 @@ export function computeMetrics(input: ComputeMetricsInput): AnalyticsMetricsV1 {
   /* Ranked breakdowns ---------------------------------------------- */
   const linkMap = new Map<string, { label: string; value: number }>();
   const previousLinkMap = new Map<string, number>();
-  const entryEvents = current.filter(
-    (event) => event.eventType === "session_start" || isViewEvent(event.eventType),
-  );
-  for (const event of entryEvents) {
-    if (!isInteractionEvent(event.eventType)) continue;
-    const id = event.linkId ?? event.eventType;
-    const label = event.linkLabel ?? CHANNEL_LABEL[channelOf(event.eventType) ?? "other"];
+  for (const event of current) {
+    if (!isTopLinkEvent(event.eventType)) continue;
+    const id = topLinkIdentity(event);
+    const label = topLinkLabel(event);
     const entry = linkMap.get(id) ?? { label, value: 0 };
     entry.value += 1;
     linkMap.set(id, entry);
   }
   for (const event of previous) {
-    if (!isInteractionEvent(event.eventType)) continue;
-    const id = event.linkId ?? event.eventType;
+    if (!isTopLinkEvent(event.eventType)) continue;
+    const id = topLinkIdentity(event);
     previousLinkMap.set(id, (previousLinkMap.get(id) ?? 0) + 1);
   }
 
@@ -328,7 +378,8 @@ export function computeMetrics(input: ComputeMetricsInput): AnalyticsMetricsV1 {
   const hourTotals = new Array<number>(24).fill(0);
   for (const event of current) {
     const parts = zonedParts(ts(event), timezone);
-    const weekday = (new Date(Date.UTC(parts.year, parts.month - 1, parts.day)).getUTCDay() + 6) % 7;
+    const weekday =
+      (new Date(Date.UTC(parts.year, parts.month - 1, parts.day)).getUTCDay() + 6) % 7;
     const hour = parts.hour;
     const position = hourIndex.get(`${weekday}-${hour}`);
     if (position !== undefined) {
@@ -352,7 +403,7 @@ export function computeMetrics(input: ComputeMetricsInput): AnalyticsMetricsV1 {
   /* Funnel ---------------------------------------------------------- */
   const funnelValues = sessionFunnel(current);
   const funnel: FunnelStepV1[] = funnelValues.map((step, i) => {
-    const prev = i === 0 ? null : funnelValues[i - 1]?.value ?? 0;
+    const prev = i === 0 ? null : (funnelValues[i - 1]?.value ?? 0);
     const stepRate = prev === null ? null : prev > 0 ? Math.min(step.value / prev, 1) : 0;
     return {
       id: step.id,
@@ -406,7 +457,15 @@ export function computeMetrics(input: ComputeMetricsInput): AnalyticsMetricsV1 {
     previousRange,
     granularity,
     sampleSize: current.length,
-    totals: { views, qrScans, interactions, linkClicks, leads, sessions: sessionIds.size, visitors },
+    totals: {
+      views,
+      qrScans,
+      interactions,
+      linkClicks,
+      leads,
+      sessions: sessionIds.size,
+      visitors,
+    },
     comparisons: {
       views: viewsComparison,
       qrScans: compare(qrScans, previousQr),
@@ -422,10 +481,25 @@ export function computeMetrics(input: ComputeMetricsInput): AnalyticsMetricsV1 {
     monthToDate: monthToDate(clean, now, timezone),
     series: {
       views: bucketSeries(current, range, granularity, (e) => isViewEvent(e.eventType), timezone),
-      interactions: bucketSeries(current, range, granularity, (e) => isInteractionEvent(e.eventType), timezone),
-      qrScans: bucketSeries(current, range, granularity, (e) => e.eventType === "qr_scan", timezone),
-      previousViews: bucketSeries(previous, previousRange, granularity, (e) =>
-        isViewEvent(e.eventType),
+      interactions: bucketSeries(
+        current,
+        range,
+        granularity,
+        (e) => isInteractionEvent(e.eventType),
+        timezone,
+      ),
+      qrScans: bucketSeries(
+        current,
+        range,
+        granularity,
+        (e) => e.eventType === "qr_scan",
+        timezone,
+      ),
+      previousViews: bucketSeries(
+        previous,
+        previousRange,
+        granularity,
+        (e) => isViewEvent(e.eventType),
         timezone,
       ),
     },
@@ -442,10 +516,7 @@ export function computeMetrics(input: ComputeMetricsInput): AnalyticsMetricsV1 {
     funnel,
     records: {
       bestDayValue,
-      bestDayLabel:
-        bestDayKey === null
-          ? null
-          : formatLocalDate(bestDayKey, timezone),
+      bestDayLabel: bestDayKey === null ? null : formatLocalDate(bestDayKey, timezone),
       bestWeekValue,
       thisWeekValue,
       averageDailyValue,
@@ -461,7 +532,11 @@ function sessionRepresentatives(events: AnalyticsEventV1[]): AnalyticsEventV1[] 
   for (const event of events) {
     const key = event.sessionId ?? `event:${event.id}`;
     const existing = bySession.get(key);
-    if (!existing || priority(event) < priority(existing) || (priority(event) === priority(existing) && ts(event) < ts(existing))) {
+    if (
+      !existing ||
+      priority(event) < priority(existing) ||
+      (priority(event) === priority(existing) && ts(event) < ts(existing))
+    ) {
       bySession.set(key, event);
     }
   }
@@ -475,7 +550,9 @@ function priority(event: AnalyticsEventV1): number {
   return 3;
 }
 
-function sessionFunnel(events: AnalyticsEventV1[]): Array<{ id: string; label: string; value: number }> {
+function sessionFunnel(
+  events: AnalyticsEventV1[],
+): Array<{ id: string; label: string; value: number }> {
   const sessions = new Map<string, AnalyticsEventV1[]>();
   for (const event of events) {
     if (!event.sessionId) continue;
@@ -490,15 +567,20 @@ function sessionFunnel(events: AnalyticsEventV1[]): Array<{ id: string; label: s
   for (const list of sessions.values()) {
     list.sort((a, b) => ts(a) - ts(b));
     const qrIndex = list.findIndex((e) => e.eventType === "qr_scan");
-    const viewIndex = qrIndex >= 0
-      ? list.findIndex((e) => isViewEvent(e.eventType) && ts(e) >= ts(list[qrIndex]!))
-      : -1;
-    const interactionIndex = viewIndex >= 0
-      ? list.findIndex((e) => isInteractionEvent(e.eventType) && ts(e) >= ts(list[viewIndex]!))
-      : -1;
-    const actionIndex = interactionIndex >= 0
-      ? list.findIndex((e) => e.eventType === "lead_created" && ts(e) >= ts(list[interactionIndex]!))
-      : -1;
+    const viewIndex =
+      qrIndex >= 0
+        ? list.findIndex((e) => isViewEvent(e.eventType) && ts(e) >= ts(list[qrIndex]!))
+        : -1;
+    const interactionIndex =
+      viewIndex >= 0
+        ? list.findIndex((e) => isInteractionEvent(e.eventType) && ts(e) >= ts(list[viewIndex]!))
+        : -1;
+    const actionIndex =
+      interactionIndex >= 0
+        ? list.findIndex(
+            (e) => e.eventType === "lead_created" && ts(e) >= ts(list[interactionIndex]!),
+          )
+        : -1;
     if (qrIndex >= 0) qr += 1;
     if (viewIndex >= 0) views += 1;
     if (interactionIndex >= 0) interactions += 1;

@@ -11,6 +11,8 @@ import { readDirectPageEnvelope } from "../lib/canonical-page";
 import { DirectPageRenderer } from "../components/direct-page-editor/DirectPageRenderer";
 import { isQaAnalyticsRuntime, resolveCanonicalClickType } from "../lib/analytics";
 import { getBrowserCanonicalWriter } from "../lib/analytics/browser";
+import { isMagicPageDocument } from "../features/magic-page-editor-production/magic-document";
+import { MagicPublicRenderer } from "../features/magic-page-editor-production/MagicPublicRenderer";
 
 /**
  * PUBLIC CHILD PAGE ROUTE.
@@ -70,18 +72,21 @@ export const Route = createFileRoute("/pg/$publicId")({
     // The published snapshot is the only canonical document. An invalid or
     // missing envelope is indistinguishable from "not published" publicly.
     const direct = readDirectPageEnvelope(page.published_template_config);
-    const config = direct ? null : resolveCanonicalEditorConfig(page.published_template_config);
-    if (!direct && !config) {
+    const magicDocument = isMagicPageDocument(page.published_template_config)
+      ? page.published_template_config
+      : null;
+    const config = direct || magicDocument ? null : resolveCanonicalEditorConfig(page.published_template_config);
+    if (!direct && !magicDocument && !config) {
       throw notFound();
     }
 
-    return { page, config, directDocument: direct?.editorConfig ?? null };
+    return { page, config, directDocument: direct?.editorConfig ?? null, magicDocument };
   },
   component: PublicChildPage,
 });
 
 function PublicChildPage() {
-  const { page, config, directDocument } = Route.useLoaderData();
+  const { page, config, directDocument, magicDocument } = Route.useLoaderData();
 
   // The canonical Analytics V1.1 writer is QA-only. When the runtime resolves to
   // the production project we keep the legacy tracking path untouched.
@@ -134,7 +139,9 @@ function PublicChildPage() {
     [page.page_id, page.public_id, useCanonical],
   );
 
-  return directDocument ? (
+  return magicDocument ? (
+    <MagicPublicRenderer document={magicDocument} />
+  ) : directDocument ? (
     <DirectPageRenderer
       document={directDocument}
       mode="public"

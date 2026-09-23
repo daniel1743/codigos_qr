@@ -1,5 +1,6 @@
 import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
 import { INITIAL_PRODUCTS, INITIAL_CATEGORIES } from "../data/products";
+import { INITIAL_PRODUCTS as FUXION_PRODUCTS, INITIAL_CATEGORIES as FUXION_CATEGORIES } from "../data/products-fuxion";
 import {
   Category,
   HeroVariant,
@@ -95,9 +96,9 @@ const EditorContext = createContext<EditorValue | null>(null);
 let idCounter = 0;
 const nextId = (base: string) => `${base}-copy-${++idCounter}`;
 
-export function EditorProvider({ children }: { children: React.ReactNode }) {
-  const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
-  const [categories, setCategories] = useState<Category[]>(INITIAL_CATEGORIES);
+export function EditorProvider({ children, pageId }: { children: React.ReactNode, pageId?: string }) {
+  const [products, setProducts] = useState<Product[]>(pageId === "fuxion-catalog" ? FUXION_PRODUCTS : INITIAL_PRODUCTS);
+  const [categories, setCategories] = useState<Category[]>(pageId === "fuxion-catalog" ? FUXION_CATEGORIES : INITIAL_CATEGORIES);
   const [sharedStyles, setSharedStyles] = useState({
     title: INITIAL_PRODUCTS[0].titleStyle,
     description: INITIAL_PRODUCTS[0].descriptionStyle,

@@ -375,7 +375,7 @@ function EditorPage() {
   const validate = () => {
     if (!profile.display_name) return false;
     const enabledLinks = links.filter((link) => link.enabled && link.url && isValidUrl(link.url));
-    return enabledLinks.length >= 3;
+    return enabledLinks.length >= 1;
   };
 
   const handleSave = async (publish: boolean) => {

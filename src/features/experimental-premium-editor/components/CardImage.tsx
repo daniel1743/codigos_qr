@@ -10,11 +10,12 @@ interface CardImageProps {
   onActivate: () => void;
   onRetry: () => void;
   onPick: () => void;
+  priority?: boolean;
 }
 
 import { useEditor } from "../contexts/EditorContext";
 
-export function CardImage({ product, selected, onActivate, onRetry, onPick }: CardImageProps) {
+export function CardImage({ product, selected, onActivate, onRetry, onPick, priority }: CardImageProps) {
   const { mode } = useEditor();
   const readonly = mode === "preview";
   const ratio = CROP_RATIO[product.imageCrop];
@@ -53,17 +54,43 @@ export function CardImage({ product, selected, onActivate, onRetry, onPick }: Ca
             : !readonly && "hover:shadow-[0_0_0_1px_rgba(47,111,237,0.35)]",
         )}
       >
-        {product.image && product.imageState !== "preparing" && (
-          <img
-            src={product.image}
-            alt={product.title}
-            className={cn(
-              "h-full w-full object-cover transition-opacity duration-200 ease-premium",
-              product.imageState === "error" ? "opacity-45" : "opacity-100",
-            )}
-            style={{ objectPosition: FOCUS_POSITION[product.imageFocus] }}
-          />
-        )}
+        {(() => {
+            if (!product.image || product.imageState === "preparing") return null;
+            
+            let src = product.image;
+            let srcSet = undefined;
+            let sizes = undefined;
+            
+            const isFuxionImage = src.includes("/productos-fuxion/productos/");
+            if (isFuxionImage) {
+              const parts = src.split("/");
+              const filename = parts.pop() || "";
+              const name = filename.substring(0, filename.lastIndexOf('.'));
+              
+              const w640 = `/productos-fuxion/optimized/${name}-640.webp`;
+              const w960 = `/productos-fuxion/optimized/${name}-960.webp`;
+              
+              srcSet = `${w640} 640w, ${w960} 960w`;
+              sizes = "(max-width: 768px) 100vw, 400px";
+              src = w640;
+            }
+            
+            return (
+              <img
+                src={src}
+                srcSet={srcSet}
+                sizes={sizes}
+                alt={product.title}
+                loading={priority ? "eager" : "lazy"}
+                fetchPriority={priority ? "high" : "auto"}
+                decoding="async"
+                className={cn(
+                  "h-full w-full object-cover transition-opacity duration-200 ease-premium",
+                  product.imageState === "error" ? "opacity-45" : "opacity-100",
+                )}
+              />
+            );
+          })()}
 
         {product.imageState === "preparing" && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-[#EFEBE5]">

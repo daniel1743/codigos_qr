@@ -77,10 +77,10 @@ export const PLATFORM_NAV_ITEMS = [
   {
     id: "editor",
     label: "Editor",
-    href: "/editor",
+    href: "/profile",
     scope: "authenticated",
     visibility: "authenticated",
-    activeMatch: { type: "paths", values: ["/editor", "/power-editor"] },
+    activeMatch: { type: "exact", value: "/profile" },
     desktop: true,
     mobile: true,
     description: "Edita y publica tu página QR.",

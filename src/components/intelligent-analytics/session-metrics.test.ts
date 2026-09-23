@@ -155,14 +155,21 @@ describe("Phase C2B3 — traffic sources / UTM", () => {
   });
 });
 
-describe("Phase C2B3 — top links (current behavior)", () => {
-  it("documents the known limitation: top links are empty (entryEvents filter bug)", () => {
-    // Finding (C2B3): computeMetrics builds `topLinks` from `entryEvents`
-    // (session_start + view events) and then skips non-interaction events,
-    // which are ALL of them. The result is always an empty ranking even when
-    // real clicks are persisted. Documented as NOT_SUPPORTED_YET; the fix is
-    // to rank over `current` interaction events grouped by item_id/item_label.
+describe("Phase C2B4A — top links (fixed: rank real click events)", () => {
+  it("ranks persisted clicks by item identity, not session entry", () => {
     const metrics = computeMetrics({ events: buildMatrix(), range: RANGE, now: NOW, timezone: TZ });
-    expect(metrics.topLinks).toHaveLength(0);
+    const byId = Object.fromEntries(metrics.topLinks.map((entry) => [entry.id, entry.value]));
+    expect(metrics.topLinks).toHaveLength(4);
+    expect(byId["qa-hero"]).toBe(3);
+    expect(byId["qa-whatsapp"]).toBe(3);
+    expect(byId["qa-instagram"]).toBe(2);
+    expect(byId["qa-external"]).toBe(2);
+  });
+
+  it("never lists page_view or session_start as a Top Link", () => {
+    const metrics = computeMetrics({ events: buildMatrix(), range: RANGE, now: NOW, timezone: TZ });
+    const ids = metrics.topLinks.map((entry) => entry.id);
+    expect(ids).not.toContain("page_view");
+    expect(ids).not.toContain("session_start");
   });
 });

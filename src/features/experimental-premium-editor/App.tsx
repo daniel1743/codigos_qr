@@ -3,7 +3,7 @@ import "./index.css";
 import { EditorProvider } from "./contexts/EditorContext";
 import { Workspace } from "./components/Workspace";
 
-type InitialState =
+export type InitialState =
   | "default"
   | "card-selected"
   | "title-editing"
@@ -13,15 +13,14 @@ type InitialState =
   | "publish-warning";
 
 interface AppProps {
-  /** Estado inicial del prototipo, para revisar cada pantalla del spec. */
   initialState?: InitialState;
-  /** Muestra el panel lateral de ajustes avanzados (opcional). */
   showAdvancedPanel?: boolean;
+  pageId?: string;
 }
 
-export function App({ initialState = "default", showAdvancedPanel = false }: AppProps) {
+export function App({ initialState = "default", showAdvancedPanel = false, pageId }: AppProps) {
   return (
-    <EditorProvider>
+    <EditorProvider pageId={pageId}>
       <Workspace initialState={initialState} showAdvancedPanel={showAdvancedPanel} />
     </EditorProvider>
   );

@@ -53,7 +53,7 @@ export function TopBar() {
           <p className="text-[13px] font-semibold leading-tight text-ink">Cripqer</p>
           <p className="truncate text-[11.5px] leading-tight text-mute">cripqer.com/{meta.slug}</p>
         </div>
-        <span className="flex h-8 items-center rounded-[8px] bg-white px-3 text-[12.5px] font-medium text-ink shadow-[0_1px_2px_rgba(16,24,40,0.1)]">
+        <span className="hidden h-8 items-center rounded-[8px] bg-white px-3 text-[12.5px] font-medium text-ink shadow-[0_1px_2px_rgba(16,24,40,0.1)] sm:flex">
           Editor Magic
         </span>
       </div>

@@ -10,8 +10,10 @@
 
 import { assertQaRuntime } from "./qa-runtime-guard";
 import { getOrCreateSessionId } from "./session";
+import { classifyDeviceType } from "./device-classifier";
 
 export const CANONICAL_WRITABLE_EVENT_TYPES = [
+  "qr_scan",
   "session_start",
   "page_view",
   "cta_click",
@@ -30,6 +32,8 @@ export interface TrackAnalyticsEventInput {
   eventType: CanonicalWritableEventType;
   /** Canonical public identity; the host derives page/profile from it. */
   publicId: string;
+  /** QR identity, only supplied for a `qr_scan` emitted by a QR boundary. */
+  qrId?: string;
   targetUrl?: string;
   itemId?: string;
   itemLabel?: string;
@@ -54,6 +58,7 @@ export interface AnalyticsRpcBoundary {
 
 /** Deterministic platform normalization at the write boundary. */
 const PLATFORM_BY_EVENT: Readonly<Record<CanonicalWritableEventType, string | null>> = {
+  qr_scan: null,
   session_start: null,
   page_view: null,
   cta_click: null,
@@ -163,8 +168,14 @@ export function createCanonicalWriter(config: CanonicalWriterConfig): CanonicalA
         emittedPageViews.add(key);
       }
 
-      // 5) Delegate to the single canonical RPC boundary (which normalizes
-      //    platform server-side and bounds metadata).
+      // 5) Classify the coarse device category from the browser user-agent.
+      //    Deterministic and coarse (mobile/desktop/tablet/unknown) — no
+      //    fingerprinting, no precise model detection, no new PII.
+      const userAgent = typeof navigator === "undefined" ? null : navigator.userAgent;
+      const deviceType = classifyDeviceType(userAgent);
+
+      // 6) Delegate to the single canonical RPC boundary (which normalizes
+      //    platform + device server-side and bounds metadata).
       const { data, error } = await config.boundary.rpc("track_analytics_event", {
         p_public_id: input.publicId,
         p_event_type: input.eventType,
@@ -172,11 +183,13 @@ export function createCanonicalWriter(config: CanonicalWriterConfig): CanonicalA
         p_target_url: input.targetUrl ?? null,
         p_item_id: input.itemId ?? null,
         p_item_label: input.itemLabel ?? null,
-        p_source: input.source ?? null,
+        p_qr_id: input.qrId ?? null,
+        p_source: input.source ?? (input.eventType === "qr_scan" ? "qr" : null),
         p_utm_source: input.utmSource ?? null,
         p_utm_campaign: input.utmCampaign ?? null,
-        p_user_agent: typeof navigator === "undefined" ? null : navigator.userAgent,
+        p_user_agent: userAgent,
         p_referrer: typeof document === "undefined" ? null : document.referrer || null,
+        p_device_type: deviceType,
       });
 
       if (error) {

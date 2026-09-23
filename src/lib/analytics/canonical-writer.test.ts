@@ -58,9 +58,9 @@ describe("isCanonicalWritableEventType", () => {
     for (const type of CANONICAL_WRITABLE_EVENT_TYPES) {
       expect(isCanonicalWritableEventType(type)).toBe(true);
     }
-    expect(isCanonicalWritableEventType("qr_scan")).toBe(false);
     expect(isCanonicalWritableEventType("lead_created")).toBe(false);
     expect(isCanonicalWritableEventType("share")).toBe(false);
+    expect(isCanonicalWritableEventType("return_visit")).toBe(false);
     expect(isCanonicalWritableEventType("view")).toBe(false);
     expect(isCanonicalWritableEventType("link_click")).toBe(false);
     expect(isCanonicalWritableEventType(42)).toBe(false);
@@ -200,5 +200,72 @@ describe("canonical writer session & idempotency", () => {
 
     const sessionIds = boundary.calls.map((call) => call.args["p_session_id"]);
     expect(new Set(sessionIds).size).toBe(1);
+  });
+});
+
+describe("canonical writer device context", () => {
+  it("classifies the browser user-agent and passes p_device_type to the RPC", async () => {
+    installFakeSessionStorage();
+    vi.stubGlobal("navigator", {
+      userAgent:
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
+    });
+    const boundary = fakeBoundary();
+    const writer = createCanonicalWriter({ supabaseUrl: QA_URL, boundary });
+
+    const result = await writer.track({ eventType: "page_view", publicId: "qa-page" });
+    expect(result.skipped).toBe(false);
+    expect(boundary.calls[0]?.args["p_device_type"]).toBe("mobile");
+    expect(boundary.calls[0]?.args["p_user_agent"]).toContain("iPhone");
+  });
+
+  it("passes unknown when no navigator/user-agent is available", async () => {
+    installFakeSessionStorage();
+    vi.stubGlobal("navigator", undefined);
+    const boundary = fakeBoundary();
+    const writer = createCanonicalWriter({ supabaseUrl: QA_URL, boundary });
+
+    await writer.track({ eventType: "page_view", publicId: "qa-page" });
+    expect(boundary.calls[0]?.args["p_device_type"]).toBe("unknown");
+    expect(boundary.calls[0]?.args["p_user_agent"]).toBeNull();
+  });
+});
+
+describe("canonical writer QR scan boundary", () => {
+  it("emits qr_scan with the QR identity and forces source=qr", async () => {
+    installFakeSessionStorage();
+    const boundary = fakeBoundary();
+    const writer = createCanonicalWriter({ supabaseUrl: QA_URL, boundary });
+
+    const result = await writer.track({
+      eventType: "qr_scan",
+      publicId: "qa-page",
+      qrId: "qa-page",
+    });
+
+    expect(result.skipped).toBe(false);
+    expect(boundary.calls[0]?.args["p_event_type"]).toBe("qr_scan");
+    expect(boundary.calls[0]?.args["p_qr_id"]).toBe("qa-page");
+    expect(boundary.calls[0]?.args["p_source"]).toBe("qr");
+  });
+
+  it("defaults source to qr for qr_scan even without an explicit source", async () => {
+    installFakeSessionStorage();
+    const boundary = fakeBoundary();
+    const writer = createCanonicalWriter({ supabaseUrl: QA_URL, boundary });
+
+    await writer.track({ eventType: "qr_scan", publicId: "qa-page" });
+    expect(boundary.calls[0]?.args["p_source"]).toBe("qr");
+  });
+
+  it("does not deduplicate two distinct qr_scan events", async () => {
+    installFakeSessionStorage();
+    const boundary = fakeBoundary();
+    const writer = createCanonicalWriter({ supabaseUrl: QA_URL, boundary });
+
+    await writer.track({ eventType: "qr_scan", publicId: "qa-page" });
+    await writer.track({ eventType: "qr_scan", publicId: "qa-page" });
+
+    expect(boundary.calls).toHaveLength(2);
   });
 });

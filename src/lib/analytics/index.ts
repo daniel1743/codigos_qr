@@ -33,3 +33,6 @@ export {
 export type { QaRuntimeVerdict } from "./qa-runtime-guard";
 
 export { QR_SESSION_STORAGE_KEY, getOrCreateSessionId } from "./session";
+
+export { classifyDeviceType } from "./device-classifier";
+export type { DeviceClassification } from "./device-classifier";

@@ -205,7 +205,7 @@ export function Workspace({ initialState, showAdvancedPanel }: WorkspaceProps) {
 
                 <div className="mt-9 grid grid-cols-1 items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-7">
                   {editor.products.map((product, index) => (
-                    <ProductCard key={product.id} product={product} index={index} />
+                    <ProductCard key={product.id} priority={index < 2} product={product} index={index} />
                   ))}
                   {editor.mode === "edit" && <AddProductTile />}
                 </div>

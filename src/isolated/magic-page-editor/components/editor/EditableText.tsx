@@ -33,6 +33,12 @@ export function EditableText({
   const isEditing = ed.mode === 'edit' && ed.editingId === id;
 
   useEffect(() => {
+    if (!isEditing && ref.current && ref.current.innerText !== text) {
+      ref.current.innerText = text;
+    }
+  }, [isEditing, text, ref]);
+
+  useEffect(() => {
     const el = ref.current;
     if (!isEditing || !el) return;
     el.focus({ preventScroll: true });
@@ -47,7 +53,7 @@ export function EditableText({
   if (removed) return null;
 
   const finish = (el: HTMLElement) => {
-    const next = el.innerText.replace(/\u00a0/g, ' ').trim();
+    const next = (multiline ? el.innerText : el.textContent ?? '').replace(/\u00a0/g, ' ').trim();
     if (next && next !== text) ed.setText(id, next);else
     el.innerText = text;
   };

@@ -6,9 +6,10 @@ export const Route = createFileRoute("/pages/$pageId/edit-prototype")({
 });
 
 function PremiumPrototypePage() {
+  const { pageId } = Route.useParams();
   return (
     <div className="w-full h-[100dvh] flex flex-col">
-      <PremiumPrototype initialState="default" showAdvancedPanel={false} />
+      <PremiumPrototype initialState="default" showAdvancedPanel={false} pageId={pageId} />
     </div>
   );
 }

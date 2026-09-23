@@ -14,6 +14,7 @@ export const Route = createFileRoute("/$alias")({
       "login",
       "auth",
       "api",
+      "q",
       "qr",
       "account",
       "settings",

@@ -1,0 +1,256 @@
+{
+  "total_images": 27,
+  "total_mb": 212.5105857849121,
+  "largest_kb": 13549.4443359375,
+  "median_kb": 8174.779296875,
+  "average_kb": 8059.6607349537035,
+  "over_300": 27,
+  "over_500": 27,
+  "over_1mb": 27,
+  "over_2mb": 27,
+  "images": [
+    {
+      "product": "berry-balance",
+      "file": "berry-balance.png",
+      "bytes": 13874631,
+      "kb": 13549.4443359375,
+      "w": 3456,
+      "h": 3456,
+      "fmt": "PNG"
+    },
+    {
+      "product": "protein-active-fit",
+      "file": "protein-active-fit.png",
+      "bytes": 10703251,
+      "kb": 10452.3935546875,
+      "w": 3200,
+      "h": 3200,
+      "fmt": "PNG"
+    },
+    {
+      "product": "liquid-fiber",
+      "file": "liquid-fiber.png",
+      "bytes": 10446789,
+      "kb": 10201.9423828125,
+      "w": 4096,
+      "h": 4096,
+      "fmt": "PNG"
+    },
+    {
+      "product": "golden-flx",
+      "file": "golden-flx.png",
+      "bytes": 10272689,
+      "kb": 10031.9228515625,
+      "w": 3584,
+      "h": 3584,
+      "fmt": "PNG"
+    },
+    {
+      "product": "bioprotein-active",
+      "file": "bioprotein-active.png",
+      "bytes": 10182533,
+      "kb": 9943.8798828125,
+      "w": 3584,
+      "h": 3584,
+      "fmt": "PNG"
+    },
+    {
+      "product": "gano+-cappuccino",
+      "file": "gano+-cappuccino.png",
+      "bytes": 9848589,
+      "kb": 9617.7626953125,
+      "w": 3456,
+      "h": 3456,
+      "fmt": "PNG"
+    },
+    {
+      "product": "passion",
+      "file": "passion.png",
+      "bytes": 9768992,
+      "kb": 9540.03125,
+      "w": 3456,
+      "h": 3456,
+      "fmt": "PNG"
+    },
+    {
+      "product": "thermo-t3",
+      "file": "thermo-t3.png",
+      "bytes": 9674764,
+      "kb": 9448.01171875,
+      "w": 3328,
+      "h": 3328,
+      "fmt": "PNG"
+    },
+    {
+      "product": "probal",
+      "file": "probal.png",
+      "bytes": 9360982,
+      "kb": 9141.583984375,
+      "w": 3584,
+      "h": 3584,
+      "fmt": "PNG"
+    },
+    {
+      "product": "nocarb-t",
+      "file": "nocarb-t.png",
+      "bytes": 9115157,
+      "kb": 8901.5205078125,
+      "w": 3456,
+      "h": 3456,
+      "fmt": "PNG"
+    },
+    {
+      "product": "youth-elixir-hgh",
+      "file": "youth-elixir-hgh.png",
+      "bytes": 8800642,
+      "kb": 8594.376953125,
+      "w": 3584,
+      "h": 3584,
+      "fmt": "PNG"
+    },
+    {
+      "product": "beauty-in",
+      "file": "beauty-in.png",
+      "bytes": 8739451,
+      "kb": 8534.6201171875,
+      "w": 3456,
+      "h": 3456,
+      "fmt": "PNG"
+    },
+    {
+      "product": "nutraday",
+      "file": "nutraday.png",
+      "bytes": 8424851,
+      "kb": 8227.3935546875,
+      "w": 3328,
+      "h": 3328,
+      "fmt": "PNG"
+    },
+    {
+      "product": "biopro+-fit",
+      "file": "biopro+-fit.png",
+      "bytes": 8370974,
+      "kb": 8174.779296875,
+      "w": 3712,
+      "h": 3712,
+      "fmt": "PNG"
+    },
+    {
+      "product": "biopro+-tect",
+      "file": "biopro+-tect.png",
+      "bytes": 7971210,
+      "kb": 7784.384765625,
+      "w": 3464,
+      "h": 3464,
+      "fmt": "PNG"
+    },
+    {
+      "product": "vera+",
+      "file": "vera+.png",
+      "bytes": 7616203,
+      "kb": 7437.6982421875,
+      "w": 3328,
+      "h": 3328,
+      "fmt": "PNG"
+    },
+    {
+      "product": "flora-liv",
+      "file": "flora-liv.png",
+      "bytes": 7610738,
+      "kb": 7432.361328125,
+      "w": 3328,
+      "h": 3328,
+      "fmt": "PNG"
+    },
+    {
+      "product": "no-stress",
+      "file": "no-stress.png",
+      "bytes": 7048065,
+      "kb": 6882.8759765625,
+      "w": 3456,
+      "h": 3456,
+      "fmt": "PNG"
+    },
+    {
+      "product": "vitaenergia",
+      "file": "vitaenergia.png",
+      "bytes": 6714436,
+      "kb": 6557.06640625,
+      "w": 2676,
+      "h": 2676,
+      "fmt": "PNG"
+    },
+    {
+      "product": "rexet",
+      "file": "rexet.png",
+      "bytes": 6691184,
+      "kb": 6534.359375,
+      "w": 2676,
+      "h": 2676,
+      "fmt": "PNG"
+    },
+    {
+      "product": "alpha-balance",
+      "file": "alpha-balance.png",
+      "bytes": 6610994,
+      "kb": 6456.048828125,
+      "w": 3200,
+      "h": 3200,
+      "fmt": "PNG"
+    },
+    {
+      "product": "prunex-1",
+      "file": "prunex-1.png",
+      "bytes": 6368929,
+      "kb": 6219.6572265625,
+      "w": 3116,
+      "h": 2676,
+      "fmt": "PNG"
+    },
+    {
+      "product": "vita-xtra-t+",
+      "file": "vita-xtra-t+.png",
+      "bytes": 6250965,
+      "kb": 6104.4580078125,
+      "w": 3200,
+      "h": 3200,
+      "fmt": "PNG"
+    },
+    {
+      "product": "pre-sport",
+      "file": "pre-sport.png",
+      "bytes": 6173447,
+      "kb": 6028.7568359375,
+      "w": 3456,
+      "h": 3456,
+      "fmt": "PNG"
+    },
+    {
+      "product": "post-sport",
+      "file": "post-sport.png",
+      "bytes": 6059779,
+      "kb": 5917.7529296875,
+      "w": 4096,
+      "h": 3185,
+      "fmt": "PNG"
+    },
+    {
+      "product": "on",
+      "file": "on.png",
+      "bytes": 5826996,
+      "kb": 5690.42578125,
+      "w": 3100,
+      "h": 2736,
+      "fmt": "PNG"
+    },
+    {
+      "product": "biopro+-sport",
+      "file": "biopro+-sport.png",
+      "bytes": 4306259,
+      "kb": 4205.3310546875,
+      "w": 2448,
+      "h": 2448,
+      "fmt": "PNG"
+    }
+  ]
+}

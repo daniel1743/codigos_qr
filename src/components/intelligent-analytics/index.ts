@@ -7,6 +7,7 @@ export {
   previousRangeOf,
   isViewEvent,
   isInteractionEvent,
+  isTopLinkEvent,
   channelOf,
   type ComputeMetricsInput,
 } from "./metrics-engine";

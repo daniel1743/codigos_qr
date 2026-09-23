@@ -101,7 +101,7 @@ export function useSelectionActions(): EditorAction[] {
 
     case 'image':
       return [
-      { key: 'replace', label: 'Reemplazar', icon: RefreshCwIcon, showLabel: true, panel: <ImagePicker value={props.src} onChange={(v) => set('src', v)} /> },
+      { key: 'replace', label: 'Reemplazar', icon: RefreshCwIcon, showLabel: true, panel: <ImagePicker value={props.src} onChange={(v) => set('src', v)} onUpload={ed.uploadAsset} /> },
       {
         key: 'crop',
         label: 'Recortar',
@@ -129,7 +129,7 @@ export function useSelectionActions(): EditorAction[] {
     case 'avatar':{
         const ringOn = (props.ring ?? 'on') === 'on';
         return [
-        { key: 'replace', label: 'Reemplazar', icon: RefreshCwIcon, showLabel: true, panel: <ImagePicker value={props.src} onChange={(v) => set('src', v)} /> },
+        { key: 'replace', label: 'Reemplazar', icon: RefreshCwIcon, showLabel: true, panel: <ImagePicker value={props.src} onChange={(v) => set('src', v)} onUpload={ed.uploadAsset} /> },
         {
           key: 'shape',
           label: 'Forma',
@@ -171,7 +171,7 @@ export function useSelectionActions(): EditorAction[] {
 
     case 'hero':
       return [
-      { key: 'media', label: 'Imagen', icon: ImageIcon, showLabel: true, panel: <ImagePicker value={props.src} onChange={(v) => set('src', v)} /> },
+      { key: 'media', label: 'Imagen', icon: ImageIcon, showLabel: true, panel: <ImagePicker value={props.src} onChange={(v) => set('src', v)} onUpload={ed.uploadAsset} /> },
       {
         key: 'variant',
         label: 'Variante',
@@ -262,7 +262,7 @@ export function useSelectionActions(): EditorAction[] {
             key: 'image',
             label: 'Imagen',
             icon: ImageIcon,
-            panel: <ImagePicker value={ed.doc.props[imgId]?.src} onChange={(v) => ed.setProp(imgId, 'src', v)} />
+            panel: <ImagePicker value={ed.doc.props[imgId]?.src} onChange={(v) => ed.setProp(imgId, 'src', v)} onUpload={ed.uploadAsset} />
           });
         }
         actions.push(

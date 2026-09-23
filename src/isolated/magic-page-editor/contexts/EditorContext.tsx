@@ -12,6 +12,7 @@ import type {
   TemplateId,
   TextStyle } from
 '../types/editor';
+import type { MagicEditorStateV1 } from '../../../features/magic-page-editor-production/magic-document';
 
 interface History {
   past: PageDoc[];
@@ -80,6 +81,7 @@ export interface EditorValue {
   getInfo: (id: string) => ElementInfo | null;
   publishing: boolean;
   publish: () => void;
+  uploadAsset?: (file: File) => Promise<string>;
 }
 
 const EditorContext = createContext<EditorValue | null>(null);
@@ -106,16 +108,21 @@ interface EditorProviderProps {
   children: React.ReactNode;
   initialTemplate?: TemplateId;
   initialDevice?: Device;
+  initialDocument?: MagicEditorStateV1;
+  initialMode?: EditorMode;
+  onDocumentChange?: (state: MagicEditorStateV1) => void;
+  onPublish?: (state: MagicEditorStateV1) => Promise<void> | void;
+  uploadAsset?: (file: File) => Promise<string>;
 }
 
-export function EditorProvider({ children, initialTemplate = 'bio', initialDevice = 'desktop' }: EditorProviderProps) {
-  const [templateId, setTemplateIdState] = useState<TemplateId>(initialTemplate);
+export function EditorProvider({ children, initialTemplate = 'bio', initialDevice = 'desktop', initialDocument, initialMode = 'edit', onDocumentChange, onPublish, uploadAsset }: EditorProviderProps) {
+  const [templateId, setTemplateIdState] = useState<TemplateId>(initialDocument?.templateId ?? initialTemplate);
   const [histories, setHistories] = useState<Record<TemplateId, History>>(() => ({
-    bio: createHistory('bio'),
-    business: createHistory('business'),
-    portfolio: createHistory('portfolio')
+    bio: initialDocument?.templateId === 'bio' ? { past: [], present: initialDocument.doc, future: [] } : createHistory('bio'),
+    business: initialDocument?.templateId === 'business' ? { past: [], present: initialDocument.doc, future: [] } : createHistory('business'),
+    portfolio: initialDocument?.templateId === 'portfolio' ? { past: [], present: initialDocument.doc, future: [] } : createHistory('portfolio')
   }));
-  const [mode, setModeState] = useState<EditorMode>('edit');
+  const [mode, setModeState] = useState<EditorMode>(initialMode);
   const [device, setDeviceState] = useState<Device>(initialDevice);
   const [mobileWidth, setMobileWidth] = useState<MobileWidth>(390);
   const [isSmallScreen, setIsSmallScreen] = useState(false);
@@ -134,6 +141,10 @@ export function EditorProvider({ children, initialTemplate = 'bio', initialDevic
   const isMobile = device === 'mobile' || isSmallScreen;
   const history = histories[templateId];
   const doc = history.present;
+
+  useEffect(() => {
+    onDocumentChange?.({ templateId, doc });
+  }, [doc, onDocumentChange, templateId]);
 
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 767px)');
@@ -355,11 +366,15 @@ export function EditorProvider({ children, initialTemplate = 'bio', initialDevic
 
   const publish = useCallback(() => {
     setPublishing(true);
-    window.setTimeout(() => {
+    const result = onPublish?.({ templateId, doc });
+    Promise.resolve(result).then(() => {
       setPublishing(false);
       toast.success('Página publicada', { description: `cripqer.com/${templates[templateId].slug}` });
-    }, 900);
-  }, [templateId]);
+    }).catch((error) => {
+      setPublishing(false);
+      toast.error(error instanceof Error ? error.message : 'No se pudo publicar la página.');
+    });
+  }, [doc, onPublish, templateId]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -430,7 +445,8 @@ export function EditorProvider({ children, initialTemplate = 'bio', initialDevic
     getElement,
     getInfo,
     publishing,
-    publish
+    publish,
+    uploadAsset
   };
 
   return <EditorContext.Provider value={value}>{children}</EditorContext.Provider>;

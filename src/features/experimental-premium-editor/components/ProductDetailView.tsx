@@ -10,6 +10,21 @@ export function ProductDetailView() {
   const product = products.find((p) => p.id === viewingProductId);
   if (!product) return null;
 
+  let src = product.image;
+  let srcSet = undefined;
+  let sizes = undefined;
+  
+  if (src && src.includes("/productos-fuxion/productos/")) {
+    const parts = src.split("/");
+    const filename = parts.pop() || "";
+    const name = filename.substring(0, filename.lastIndexOf('.'));
+    const w960 = `/productos-fuxion/optimized/${name}-960.webp`;
+    const w1440 = `/productos-fuxion/optimized/${name}-1440.webp`;
+    srcSet = `${w960} 960w, ${w1440} 1440w`;
+    sizes = "(max-width: 1024px) 100vw, 800px";
+    src = w960;
+  }
+
   return (
     <div
       className="absolute inset-0 z-20 flex flex-col bg-canvas overflow-y-auto"
@@ -31,69 +46,79 @@ export function ProductDetailView() {
             <div className="overflow-hidden rounded-3xl border border-hairline bg-surface shadow-sm">
               {product.image ? (
                 <img
-                  src={product.image}
+                  src={src!}
+                  srcSet={srcSet}
+                  sizes={sizes}
                   alt={product.title}
+                  loading="eager"
+                  fetchPriority="high"
+                  decoding="async"
                   className="aspect-[4/3] w-full object-cover"
                 />
               ) : (
-                <div className="aspect-[4/3] w-full bg-[#EAE5DE]" />
+                <div className="flex aspect-[4/3] w-full flex-col items-center justify-center bg-[#EAE5DE]">
+                  <div className="text-[13px] font-medium text-muted">Sin imagen</div>
+                </div>
               )}
             </div>
           </div>
 
           {/* Right Column: Details */}
-          <div className="flex flex-col">
-            {product.category && (
-              <span className="mb-4 inline-flex items-center self-start rounded-full bg-surface px-3 py-1 text-[12.5px] font-medium tracking-wide text-muted shadow-sm">
-                {product.category.label}
-              </span>
-            )}
-
-            <h1 className="font-display text-[32px] leading-tight text-ink sm:text-[40px]">
+          <div className="flex flex-col py-2">
+            <h1
+              style={product.titleStyle}
+              className="mb-4 whitespace-pre-wrap text-[32px] leading-[1.15]"
+            >
               {product.title}
             </h1>
 
-            <p className="mt-4 text-[24px] font-medium text-ink">{product.price}</p>
-
-            <div className="mt-8 flex flex-wrap gap-2">
-              {product.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="rounded-lg bg-[#EAE7E1] px-2.5 py-1 text-[13px] text-body"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-
-            <p className="mt-8 text-[15.5px] leading-relaxed text-body">
-              {product.longDescription || product.description}
-            </p>
-
-            <div className="mt-10">
-              <button
-                type="button"
-                onClick={() => {
-                  if (product.cta.link) window.open(product.cta.link, "_blank");
-                }}
-                className={cn(
-                  "flex h-12 w-full items-center justify-center rounded-xl text-[15px] font-medium transition-transform active:scale-[0.98]",
-                  product.cta.variant === "solid" && "text-white",
-                  product.cta.variant === "outline" && "border-2 border-current bg-transparent",
-                  product.cta.variant === "ghost" && "bg-transparent underline underline-offset-4",
-                )}
-                style={{
-                  backgroundColor: product.cta.variant === "solid" ? product.cta.color : undefined,
-                  color: product.cta.variant === "solid" ? "#FFFFFF" : product.cta.color,
-                }}
+            <div className="mb-8 font-medium">
+              <span
+                style={product.priceStyle}
+                className="rounded-full bg-brand/5 px-3 py-1 text-[18px]"
               >
-                {product.cta.text}
-              </button>
+                {product.price}
+              </span>
             </div>
 
-            {product.footerNote && (
-              <p className="mt-6 text-center text-[12.5px] text-muted">{product.footerNote}</p>
-            )}
+            <div className="space-y-6">
+              <div>
+                <h3 className="mb-2 text-[13px] font-bold uppercase tracking-wider text-muted">
+                  Descripción
+                </h3>
+                <p
+                  style={product.descriptionStyle}
+                  className="whitespace-pre-wrap leading-relaxed text-body opacity-90"
+                >
+                  {product.description}
+                </p>
+              </div>
+
+              {product.longDescription && (
+                <div className="pt-2">
+                  <h3 className="mb-2 text-[13px] font-bold uppercase tracking-wider text-muted">
+                    Detalles
+                  </h3>
+                  <p
+                    style={product.descriptionStyle}
+                    className="whitespace-pre-wrap leading-relaxed text-body opacity-90"
+                  >
+                    {product.longDescription}
+                  </p>
+                </div>
+              )}
+
+              {product.footerNote && (
+                <div className="pt-2">
+                  <p
+                    style={{ ...product.descriptionStyle, size: 13 }}
+                    className="whitespace-pre-wrap leading-relaxed text-muted"
+                  >
+                    {product.footerNote}
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

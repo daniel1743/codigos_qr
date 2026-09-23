@@ -1,0 +1,42 @@
+-- =============================================================================
+-- CRIPQER — Intelligent Analytics V1.1 · Phase C2B5
+-- ANALYTICS READ VIEWS RLS HARDENING (QA-ONLY — DO NOT APPLY TO PRODUCTION)
+-- =============================================================================
+-- Task: CRIPQER_ANALYTICS_V1_1_PHASE_C2B5_SECURITY_AND_PRODUCTION_READINESS
+--
+-- Target database: cripqer-qa (project ref tjigzcyoogmvdkivypym) ONLY.
+--
+-- ⚠️  NEVER run this file against production project mlinfiuhkxdhlveflbkj.
+--
+-- Finding (C2B5 forensics):
+--   `qr_analytics_daily` and `qr_top_links` are aggregate views over
+--   `qr_analytics`. They are `GRANT ALL … TO anon/authenticated` and were
+--   created with the PostgreSQL default `security_invoker = false`, so a query
+--   against them runs with the view owner's privileges and BYPASSES the
+--   `qr_analytics` RLS policies. That exposed every profile's aggregate
+--   analytics (and top-links) to anonymous and authenticated callers, in
+--   violation of the owner-only read contract.
+--
+-- Hardening (this migration):
+--   Switch both views to `security_invoker = true`. From then on, any query
+--   against the views executes with the CALLER's privileges and therefore
+--   honors the underlying `qr_analytics` RLS policies:
+--     * anon          -> 0 rows (no anon SELECT policy)
+--     * authenticated -> own rows only ("Users can read their own analytics")
+--     * admin         -> all rows ("Admin can read all analytics")
+--
+--   This is non-destructive (view option only; no data, columns, or grants
+--   changed) and the canonical V1.1 read path (`analyticsRealDataService`
+--   reading `qr_analytics` directly through RLS) is unaffected.
+-- =============================================================================
+
+ALTER VIEW public.qr_analytics_daily SET (security_invoker = true);
+ALTER VIEW public.qr_top_links SET (security_invoker = true);
+
+-- =============================================================================
+-- ROLLBACK / RECOVERY (restore owner-invoker semantics if a legacy consumer
+-- is found to depend on the old behavior):
+--
+--   ALTER VIEW public.qr_analytics_daily SET (security_invoker = false);
+--   ALTER VIEW public.qr_top_links SET (security_invoker = false);
+-- =============================================================================

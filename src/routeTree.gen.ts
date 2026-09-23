@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AliasRouteImport } from './routes/$alias'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AnalyticsVisualQaRouteImport } from './routes/analytics-visual-qa'
 import { Route as CorreoConfirmadoRouteImport } from './routes/correo-confirmado'
 import { Route as EditorRouteImport } from './routes/editor'
 import { Route as EncryptedDocumentsRouteImport } from './routes/encrypted-documents'
@@ -36,6 +37,7 @@ import { Route as PPublicIdRouteImport } from './routes/p.$publicId'
 import { Route as PagesPageIdRouteImport } from './routes/pages.$pageId'
 import { Route as PagesNewRouteImport } from './routes/pages.new'
 import { Route as PgPublicIdRouteImport } from './routes/pg.$publicId'
+import { Route as QPublicIdRouteImport } from './routes/q.$publicId'
 import { Route as VsLinktreeRouteImport } from './routes/vs/linktree'
 import { Route as PagesPageIdAnalyticsRouteImport } from './routes/pages.$pageId.analytics'
 import { Route as PagesPageIdEditRouteImport } from './routes/pages.$pageId.edit'
@@ -60,6 +62,11 @@ const AccountRoute = AccountRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AnalyticsVisualQaRoute = AnalyticsVisualQaRouteImport.update({
+  id: '/analytics-visual-qa',
+  path: '/analytics-visual-qa',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CorreoConfirmadoRoute = CorreoConfirmadoRouteImport.update({
@@ -177,6 +184,11 @@ const PgPublicIdRoute = PgPublicIdRouteImport.update({
   path: '/pg/$publicId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const QPublicIdRoute = QPublicIdRouteImport.update({
+  id: '/q/$publicId',
+  path: '/q/$publicId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VsLinktreeRoute = VsLinktreeRouteImport.update({
   id: '/vs/linktree',
   path: '/vs/linktree',
@@ -209,6 +221,7 @@ export interface FileRoutesByFullPath {
   '/$alias': typeof AliasRoute
   '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
+  '/analytics-visual-qa': typeof AnalyticsVisualQaRoute
   '/correo-confirmado': typeof CorreoConfirmadoRoute
   '/editor': typeof EditorRoute
   '/encrypted-documents': typeof EncryptedDocumentsRoute
@@ -232,6 +245,7 @@ export interface FileRoutesByFullPath {
   '/pages/$pageId': typeof PagesPageIdRouteWithChildren
   '/pages/new': typeof PagesNewRoute
   '/pg/$publicId': typeof PgPublicIdRoute
+  '/q/$publicId': typeof QPublicIdRoute
   '/vs/linktree': typeof VsLinktreeRoute
   '/pages/$pageId/analytics': typeof PagesPageIdAnalyticsRoute
   '/pages/$pageId/edit': typeof PagesPageIdEditRoute
@@ -243,6 +257,7 @@ export interface FileRoutesByTo {
   '/$alias': typeof AliasRoute
   '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
+  '/analytics-visual-qa': typeof AnalyticsVisualQaRoute
   '/correo-confirmado': typeof CorreoConfirmadoRoute
   '/editor': typeof EditorRoute
   '/encrypted-documents': typeof EncryptedDocumentsRoute
@@ -266,6 +281,7 @@ export interface FileRoutesByTo {
   '/pages/$pageId': typeof PagesPageIdRouteWithChildren
   '/pages/new': typeof PagesNewRoute
   '/pg/$publicId': typeof PgPublicIdRoute
+  '/q/$publicId': typeof QPublicIdRoute
   '/vs/linktree': typeof VsLinktreeRoute
   '/pages/$pageId/analytics': typeof PagesPageIdAnalyticsRoute
   '/pages/$pageId/edit': typeof PagesPageIdEditRoute
@@ -278,6 +294,7 @@ export interface FileRoutesById {
   '/$alias': typeof AliasRoute
   '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
+  '/analytics-visual-qa': typeof AnalyticsVisualQaRoute
   '/correo-confirmado': typeof CorreoConfirmadoRoute
   '/editor': typeof EditorRoute
   '/encrypted-documents': typeof EncryptedDocumentsRoute
@@ -301,6 +318,7 @@ export interface FileRoutesById {
   '/pages/$pageId': typeof PagesPageIdRouteWithChildren
   '/pages/new': typeof PagesNewRoute
   '/pg/$publicId': typeof PgPublicIdRoute
+  '/q/$publicId': typeof QPublicIdRoute
   '/vs/linktree': typeof VsLinktreeRoute
   '/pages/$pageId/analytics': typeof PagesPageIdAnalyticsRoute
   '/pages/$pageId/edit': typeof PagesPageIdEditRoute
@@ -314,6 +332,7 @@ export interface FileRouteTypes {
     | '/$alias'
     | '/account'
     | '/admin'
+    | '/analytics-visual-qa'
     | '/correo-confirmado'
     | '/editor'
     | '/encrypted-documents'
@@ -337,6 +356,7 @@ export interface FileRouteTypes {
     | '/pages/$pageId'
     | '/pages/new'
     | '/pg/$publicId'
+    | '/q/$publicId'
     | '/vs/linktree'
     | '/pages/$pageId/analytics'
     | '/pages/$pageId/edit'
@@ -348,6 +368,7 @@ export interface FileRouteTypes {
     | '/$alias'
     | '/account'
     | '/admin'
+    | '/analytics-visual-qa'
     | '/correo-confirmado'
     | '/editor'
     | '/encrypted-documents'
@@ -371,6 +392,7 @@ export interface FileRouteTypes {
     | '/pages/$pageId'
     | '/pages/new'
     | '/pg/$publicId'
+    | '/q/$publicId'
     | '/vs/linktree'
     | '/pages/$pageId/analytics'
     | '/pages/$pageId/edit'
@@ -382,6 +404,7 @@ export interface FileRouteTypes {
     | '/$alias'
     | '/account'
     | '/admin'
+    | '/analytics-visual-qa'
     | '/correo-confirmado'
     | '/editor'
     | '/encrypted-documents'
@@ -405,6 +428,7 @@ export interface FileRouteTypes {
     | '/pages/$pageId'
     | '/pages/new'
     | '/pg/$publicId'
+    | '/q/$publicId'
     | '/vs/linktree'
     | '/pages/$pageId/analytics'
     | '/pages/$pageId/edit'
@@ -417,6 +441,7 @@ export interface RootRouteChildren {
   AliasRoute: typeof AliasRoute
   AccountRoute: typeof AccountRoute
   AdminRoute: typeof AdminRoute
+  AnalyticsVisualQaRoute: typeof AnalyticsVisualQaRoute
   CorreoConfirmadoRoute: typeof CorreoConfirmadoRoute
   EditorRoute: typeof EditorRoute
   EncryptedDocumentsRoute: typeof EncryptedDocumentsRoute
@@ -438,6 +463,7 @@ export interface RootRouteChildren {
   LabsMagicEditorRoute: typeof LabsMagicEditorRoute
   PPublicIdRoute: typeof PPublicIdRoute
   PgPublicIdRoute: typeof PgPublicIdRoute
+  QPublicIdRoute: typeof QPublicIdRoute
   VsLinktreeRoute: typeof VsLinktreeRoute
   PgASlugRoute: typeof PgASlugRoute
 }
@@ -470,6 +496,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/analytics-visual-qa': {
+      id: '/analytics-visual-qa'
+      path: '/analytics-visual-qa'
+      fullPath: '/analytics-visual-qa'
+      preLoaderRoute: typeof AnalyticsVisualQaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/correo-confirmado': {
@@ -633,6 +666,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PgPublicIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/q/$publicId': {
+      id: '/q/$publicId'
+      path: '/q/$publicId'
+      fullPath: '/q/$publicId'
+      preLoaderRoute: typeof QPublicIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/vs/linktree': {
       id: '/vs/linktree'
       path: '/vs/linktree'
@@ -704,6 +744,7 @@ const rootRouteChildren: RootRouteChildren = {
   AliasRoute: AliasRoute,
   AccountRoute: AccountRoute,
   AdminRoute: AdminRoute,
+  AnalyticsVisualQaRoute: AnalyticsVisualQaRoute,
   CorreoConfirmadoRoute: CorreoConfirmadoRoute,
   EditorRoute: EditorRoute,
   EncryptedDocumentsRoute: EncryptedDocumentsRoute,
@@ -725,6 +766,7 @@ const rootRouteChildren: RootRouteChildren = {
   LabsMagicEditorRoute: LabsMagicEditorRoute,
   PPublicIdRoute: PPublicIdRoute,
   PgPublicIdRoute: PgPublicIdRoute,
+  QPublicIdRoute: QPublicIdRoute,
   VsLinktreeRoute: VsLinktreeRoute,
   PgASlugRoute: PgASlugRoute,
 }

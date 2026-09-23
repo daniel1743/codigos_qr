@@ -32,6 +32,8 @@ import { hasPremiumAccessByEmail } from "../../lib/entitlements";
 import { getPublicProfileUrl } from "../../lib/url";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { PLATFORM_BRAND } from "../platform/platform-brand";
+import { magicPageService } from "../../services/magic-page.service";
+import type { Page } from "../../types/database";
 
 interface UserProfile {
   id: string;
@@ -54,6 +56,8 @@ interface PageProfileSummary {
   scan_count: number;
 }
 
+const ACTIVE_LEGACY_PROFILE_PUBLIC_ID = "icff9yG";
+
 interface PremiumStatus {
   isPremium: boolean;
   tier?: string;
@@ -71,11 +75,13 @@ export function MyProfilePage() {
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [pageProfile, setPageProfile] = useState<PageProfileSummary | null>(null);
+  const [canonicalPage, setCanonicalPage] = useState<Page | null>(null);
   const [premiumStatus, setPremiumStatus] = useState<PremiumStatus>({ isPremium: false });
   const [stats, setStats] = useState<UserStats>({ totalProfiles: 0, totalScans: 0, totalLinks: 0 });
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [creatingPage, setCreatingPage] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
 
   const supabase = getBrowserSupabaseClient();
@@ -139,11 +145,14 @@ export function MyProfilePage() {
       const { data: profilesData } = await supabase
         .from("profiles")
         .select(
-          "id, scan_count, public_id, slug, display_name, profession, bio, avatar_url, published",
+          "id, scan_count, public_id, slug, display_name, profession, bio, avatar_url, published, created_at",
         )
-        .eq("user_id", authUser.id);
+        .eq("user_id", authUser.id)
+        .order("created_at", { ascending: true });
 
-      const primaryProfile = profilesData?.[0];
+      const primaryProfile =
+        profilesData?.find((candidate) => candidate.public_id === ACTIVE_LEGACY_PROFILE_PUBLIC_ID) ??
+        profilesData?.[0];
       setPageProfile(
         primaryProfile
           ? {
@@ -159,6 +168,14 @@ export function MyProfilePage() {
             }
           : null,
       );
+
+      const { data: pagesData, error: pagesError } = await supabase
+        .from("pages")
+        .select("*")
+        .eq("owner_user_id", authUser.id)
+        .order("updated_at", { ascending: false });
+      if (pagesError) throw pagesError;
+      setCanonicalPage((pagesData?.[0] as Page | undefined) ?? null);
 
       const totalProfiles = profilesData?.length || 0;
       const totalScans =
@@ -188,6 +205,25 @@ export function MyProfilePage() {
       toast.error("Error al cargar tu perfil");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCreateMagicPage = async () => {
+    if (!user || !pageProfile || creatingPage) return;
+    setCreatingPage(true);
+    try {
+      const created = await magicPageService.createPage(supabase, {
+        userId: user.id,
+        profileId: pageProfile.id,
+        title: pageName,
+        pageType: "landing",
+      });
+      setCanonicalPage(created);
+      await navigate({ to: "/pages/$pageId/edit", params: { pageId: created.id } });
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "No se pudo crear tu página.");
+    } finally {
+      setCreatingPage(false);
     }
   };
 
@@ -283,7 +319,7 @@ export function MyProfilePage() {
   const pageName = pageProfile?.display_name?.trim() || profile.full_name || "Mi página";
   const pageProfession = pageProfile?.profession?.trim();
   const pageAvatar = pageProfile?.avatar_url || profile.avatar_url;
-  const publicUrl = pageProfile?.public_id ? getPublicProfileUrl(pageProfile.public_id) : null;
+  const publicUrl = canonicalPage ? `/pg/${canonicalPage.public_id}` : null;
 
   return (
     <div className="min-h-screen bg-[#f6f7f9] text-slate-950">
@@ -346,7 +382,7 @@ export function MyProfilePage() {
             </div>
 
             <CardContent className="p-5 sm:p-7">
-              {pageProfile ? (
+              {canonicalPage && pageProfile ? (
                 <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
                   <div className="relative shrink-0 self-start">
                     <Avatar className="h-24 w-24 border-4 border-white shadow-md sm:h-28 sm:w-28">
@@ -403,7 +439,7 @@ export function MyProfilePage() {
                         className="w-full text-white hover:opacity-90 sm:w-auto"
                         style={{ backgroundColor: PLATFORM_BRAND.colors.blue }}
                       >
-                        <Link to="/editor">
+                        <Link to="/pages/$pageId/edit" params={{ pageId: canonicalPage.id }}>
                           <Pencil className="h-4 w-4" />
                           Editar mi página
                         </Link>
@@ -431,14 +467,13 @@ export function MyProfilePage() {
                     </p>
                   </div>
                   <Button
-                    asChild
                     className="w-full shrink-0 text-white hover:opacity-90 sm:w-auto"
                     style={{ backgroundColor: PLATFORM_BRAND.colors.blue }}
+                    onClick={() => void handleCreateMagicPage()}
+                    disabled={!pageProfile || creatingPage}
                   >
-                    <Link to="/editor">
-                      Crear mi página
-                      <ArrowRight className="h-4 w-4" />
-                    </Link>
+                    {creatingPage ? "Creando…" : "Crear mi página"}
+                    <ArrowRight className="h-4 w-4" />
                   </Button>
                 </div>
               )}
@@ -456,10 +491,12 @@ export function MyProfilePage() {
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-              <Link
-                to="/editor"
-                className="group rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50"
-              >
+              {canonicalPage ? (
+                <Link
+                  to="/pages/$pageId/edit"
+                  params={{ pageId: canonicalPage.id }}
+                  className="group rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50"
+                >
                 <div className="flex items-start justify-between gap-4">
                   <span className="grid h-10 w-10 place-items-center rounded-xl bg-blue-50 text-blue-700">
                     <QrCode className="h-5 w-5" />
@@ -470,7 +507,26 @@ export function MyProfilePage() {
                 <p className="mt-1 text-sm leading-5 text-slate-600">
                   Ajusta diseño, contenido y enlaces.
                 </p>
-              </Link>
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => void handleCreateMagicPage()}
+                  disabled={!pageProfile || creatingPage}
+                  className="group rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <span className="grid h-10 w-10 place-items-center rounded-xl bg-blue-50 text-blue-700">
+                      <QrCode className="h-5 w-5" />
+                    </span>
+                    <ArrowRight className="h-4 w-4 text-slate-400 transition-transform group-hover:translate-x-1" />
+                  </div>
+                  <p className="mt-4 font-semibold">Crear mi página</p>
+                  <p className="mt-1 text-sm leading-5 text-slate-600">
+                    Crea tu página Magic y empieza a editarla.
+                  </p>
+                </button>
+              )}
 
               <Link
                 to="/encrypted-documents"

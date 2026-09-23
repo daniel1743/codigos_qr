@@ -1,0 +1,263 @@
+{
+  "project": "FUXION_CHILE_MASTER_RAW_BATCHES_1_7",
+  "generated_from_uploaded_batches": true,
+  "total_records": 32,
+  "products": [
+    {
+      "product_id": "fuxion_prunex1",
+      "name": "Prunex1",
+      "category": "limpieza_digestiva",
+      "short_description": "Té herbal con mezcla de fibras solubles y extracto de guindón que FuXion comercializa para apoyar el tránsito intestinal lento y la limpieza del colon.",
+      "price": { "current_clp": 19250 },
+      "long_description": "Prunex1 es un té herbal en polvo del Sistema Base de FuXion diseñado para personas con tránsito intestinal lento o que desean apoyar la limpieza del colon dentro de hábitos saludables. Su fórmula combina fibras solubles como psyllium, inulina de achicoria y mucílago de linaza con extracto de guindón y kelp. Estas fibras pueden aumentar el volumen del contenido intestinal y favorecer evacuaciones más regulares, mientras que el extracto de guindón aporta un componente frutal tradicionalmente asociado al alivio del estreñimiento ocasional. Se disuelve en agua caliente y se suele tomar por la noche. FuXion lo comercializa para apoyar la desintoxicación digestiva, liberar el tránsito y ayudar a sentirse más liviano, pero debe entenderse como complemento nutricional y no como tratamiento médico. Las personas con patologías intestinales o que usan medicación deben consultar con un profesional de salud antes de incorporarlo."
+    },
+    {
+      "product_id": "fuxion_rexet",
+      "name": "Rexet",
+      "category": "limpieza_digestiva",
+      "short_description": "Bebida efervescente sabor tuna que FuXion comercializa para apoyar la función hepática y la desintoxicación, combinando extractos vegetales y micronutrientes.",
+      "price": { "current_clp": 29750 },
+      "long_description": "Rexet es una bebida efervescente del Sistema Base de FuXion con sabor a tuna, orientada a quienes desean apoyar la función hepática y la depuración así como mantener su cuerpo en equilibrio. Su fórmula combina concentrados vegetales como alcachofa, perejil y clorofila con vitaminas del complejo B, vitamina C y zinc en molécula orgánica. La marca indica que contribuye a proteger el hígado, promover su función desintoxicante y mantener el cuerpo limpio de toxinas, especialmente como parte de programas de detox nutricional. Se disuelve en agua fría y se bebe de inmediato para aprovechar la efervescencia. Aunque algunos ingredientes vegetales han sido tradicionalmente utilizados para apoyo hepático, la evidencia científica específica en humanos es limitada y la bebida debe considerarse un complemento nutricional, no un reemplazo de tratamientos médicos para enfermedades del hígado."
+    },
+    {
+      "product_id": "fuxion_flora_liv",
+      "name": "Flora Liv",
+      "category": "limpieza_digestiva",
+      "short_description": "Bebida probiótica sabor granadilla y aguaymanto que FuXion comercializa para nutrir, reconstruir y equilibrar la flora intestinal y apoyar defensas.",
+      "price": { "current_clp": 35500 },
+      "long_description": "Flora Liv es una bebida funcional en polvo con sabor granadilla y aguaymanto que forma parte del Sistema Base de FuXion. Su fórmula combina cultivos probióticos, fibra prebiótica y extractos frutales, y se presenta como apoyo para regenerar y equilibrar la flora intestinal, necesaria para una correcta asimilación de nutrientes y para la protección inmunitaria. Cada toma aporta un número elevado de bacterias probióticas y la fibra necesaria para que se mantengan activas en el intestino. FuXion lo comercializa para mejorar procesos digestivos, prevenir molestias intestinales y reducir efectos nocivos del uso de ciertos medicamentos, especialmente antibióticos. Los probióticos tienen evidencia moderada para algunos cuadros digestivos, pero los resultados dependen mucho de la cepa, la dosis y el contexto clínico, por lo que Flora Liv debe considerarse complemento nutricional y no tratamiento específico de enfermedades digestivas."
+    },
+    {
+      "product_id": "fuxion_liquid_fiber",
+      "name": "Liquid Fiber",
+      "category": "limpieza_digestiva",
+      "short_description": "Fibra soluble en bebida que FuXion comercializa para apoyar la frecuencia de evacuaciones y el balance de la flora intestinal de forma natural.",
+      "price": { "current_clp": 23750 },
+      "long_description": "Liquid Fiber es una bebida de fibra soluble del Sistema Base de FuXion diseñada para mejorar la frecuencia de evacuaciones intestinales y favorecer un balance adecuado de la flora intestinal. La mezcla de fibra prebiótica y micronutrientes se disuelve en agua y puede tomarse diariamente como parte de la rutina de limpieza digestiva. La marca indica que ayuda a mejorar la puntualidad de las evacuaciones, promover una salud digestiva más estable y apoyar la flora intestinal. La evidencia sobre el uso de fibra soluble para mejorar tránsito y confort digestivo es razonable, aunque la respuesta varía entre personas. Este producto debe considerarse una herramienta de apoyo y no un sustituto de evaluación médica en caso de estreñimiento prolongado o síntomas de alarma."
+    },
+    {
+      "product_id": "fuxion_balance",
+      "name": "Balance",
+      "category": "limpieza_digestiva",
+      "short_description": "Bebida alcalinizante con extractos de vegetales verdes que FuXion comercializa para apoyar la limpieza de toxinas y el equilibrio del pH corporal.",
+      "price": { "current_clp": 29750 },
+      "long_description": "Balance es una bebida en polvo de FuXion que combina extractos de vegetales verdes como alfalfa, chlorella, espirulina, pasto de trigo y espinaca con frutas como manzana verde y limón, además de minerales como magnesio y zinc. La marca la describe como una bebida alcalinizante que ayuda a promover la limpieza de elementos tóxicos del organismo y a equilibrar el pH corporal. Se suele usar dentro de programas de detox y alimentación más vegetal, acompañando cambios de dieta y reducción de alimentos ultraprocesados. Aunque los vegetales verdes y la clorofila son nutritivos, la evidencia específica sobre “alcalinizar el cuerpo” es limitada y la regulación del pH sanguíneo está principalmente determinada por mecanismos fisiológicos internos. Balance puede considerarse una forma práctica de consumir componentes vegetales concentrados, sin reemplazar la ingesta de verduras frescas ni tratamientos médicos."
+    },
+    {
+      "product_id": "fuxion_berry_balance",
+      "name": "Berry Balance",
+      "category": "inmunidad",
+      "short_description": "Bebida con concentrados de berries, probióticos y antioxidantes que FuXion comercializa para apoyar el equilibrio del tracto urinario y la retención de líquidos.",
+      "price": { "current_clp": 38500 },
+      "long_description": "Berry Balance es una bebida en polvo de FuXion que combina concentrados de cranberry, camu camu, infusión de cáscara de piña, cultivos probióticos y antioxidantes. La marca la orienta a personas que desean cuidar su sistema urinario de manera natural, promoviendo el equilibrio del pH de la flora que protege el tracto urinario y ayudando a manejar la retención de líquidos. Los concentrados de cranberry se han estudiado en relación con molestias urinarias recurrentes, con resultados moderados y no uniformes; el uso de probióticos y otros componentes vegetales añade soporte general. Berry Balance debe entenderse como complemento nutricional, no tratamiento antibiótico ni sustituto de evaluación médica en casos de infecciones urinarias o síntomas persistentes."
+    },
+    {
+      "product_id": "fuxion_biopro_tect",
+      "name": "BioPro+ Tect",
+      "category": "nutricion",
+      "short_description": "Batido proteico con Bioprotein+ con Colostrum y aminoácidos que FuXion comercializa para complementar la nutrición diaria y apoyar defensas y regeneración celular.",
+      "price": { "current_clp": 28000 },
+      "long_description": "BioPro+ Tect es un batido proteico instantáneo de FuXion que forma parte del Sistema Base para regeneración celular. Utiliza Bioprotein+ con Colostrum, una proteína de alto valor biológico patentada por la marca, enriquecida con aminoácidos esenciales, lactoferrina (Bioferrin), calcio lácteo y ácidos grasos como DHA y ARA. FuXion lo comercializa como complemento de una nutrición diaria sana para activar y potenciar defensas, mejorar procesos de regeneración celular, fortalecer huesos y elevar la resistencia a enfermedades. La evidencia sobre proteínas de alto valor biológico en nutrición y masa muscular es sólida a nivel general, pero los efectos concretos de esta formulación dependen de la dieta total, la actividad física y la cantidad de proteína consumida. Debe considerarse un suplemento proteico avanzado, no un medicamento."
+    },
+    {
+      "product_id": "fuxion_protein_active",
+      "name": "Protein Active",
+      "category": "nutricion",
+      "short_description": "Proteína activa 100% vegetal con germinados y algas que FuXion comercializa para complementar la alimentación diaria y apoyar regeneración y defensa antioxidante.",
+      "price": { "current_clp": 33000 },
+      "long_description": "Protein Active es la primera proteína activa de origen 100% vegetal de FuXion, con mezcla de proteínas de quinua germinada, arroz integral germinado, arveja y algas, acompañadas de enzimas, vitaminas y ácidos grasos como DHA y ARA. Está orientada a personas de cualquier edad que desean complementar su dieta con una proteína vegetal de alta biodisponibilidad y digestibilidad, libre de alérgenos lácteos. FuXion la presenta como una herramienta para mejorar la regeneración celular, optimizar la nutrición de tejidos y proteger el sistema inmunológico y antioxidante. La evidencia sobre proteínas vegetales bien formuladas muestra que pueden cubrir necesidades proteicas si se combinan adecuadamente, pero los efectos dependen de la cantidad diaria y del patrón dietético global."
+    },
+    {
+      "product_id": "fuxion_vitaenergia",
+      "name": "Vitaenergia",
+      "category": "energia",
+      "short_description": "Bebida funcional multivitamínica sabor maíz morado que FuXion comercializa para apoyar energía diaria, reducir fatiga y aportar antioxidantes.",
+      "price": { "current_clp": 29750 },
+      "long_description": "Vitaenergia es una bebida funcional multivitamínica de FuXion con sabor a refresco de maíz morado, que contiene aminoácidos, vitaminas, minerales, fibra prebiótica, camu camu y luteína. La marca la orienta a personas que desean mejorar su energía diaria, reducir la sensación de fatiga y reforzar la defensa antioxidante. Se presenta como apoyo a la regeneración celular y al sistema inmunológico. La evidencia sobre complejos multivitamínicos muestra beneficios en corrección de deficiencias nutricionales, pero los efectos específicos en vigor diario dependen de la situación de cada persona. Vitaenergia debe considerarse un complemento nutricional, no una solución única frente a fatiga crónica."
+    },
+    {
+      "product_id": "fuxion_vita_xtra_t_plus",
+      "name": "Vita Xtra T+",
+      "category": "energia",
+      "short_description": "Bebida energizante con té verde, guayusa, cordyceps y vitaminas que FuXion comercializa para apoyar energía física y antioxidantes sin exceso de azúcar.",
+      "price": { "current_clp": 29750 },
+      "long_description": "Vita Xtra T+ es una bebida funcional energizante de FuXion que combina extractos de guayusa, té verde, goji berry, micelio de cordyceps, fibra, vitaminas y minerales, con sabor a refresco de maíz morado. La marca la orienta a personas que necesitan energía más duradera sin grandes cantidades de azúcar, buscando mantener alerta y mejorar la resistencia física a través de componentes naturales. La cafeína de la guayusa y el té verde tiene evidencia moderada en aumento de alerta y rendimiento en algunos contextos, mientras que cordyceps y goji provienen de tradiciones asiáticas con evidencia limitada en humanos. Vita Xtra T+ debe verse como alternativa a bebidas energizantes clásicas dentro de un estilo de vida saludable, evitando su uso excesivo en personas sensibles a estimulantes."
+    },
+    {
+      "product_id": "fuxion_nocarb_t",
+      "name": "Nocarb-T",
+      "category": "control_de_peso",
+      "short_description": "Té herbal sabor manzana y canela con mezcla de fibras solubles y té verde que FuXion comercializa para apoyar el control de glucosa y la reducción de la asimilación de carbohidratos.",
+      "price": { "current_clp": 35999 },
+      "long_description": "Nocarb-T es un té herbal en polvo de FuXion, parte de la línea Control de Peso y Medidas, con sabor manzana y canela. Combina fibras solubles de yacón, acacia, achicoria y pectina de manzana con verdolaga, canela, té verde y cromo en molécula orgánica. La marca lo presenta como apoyo para inhibir parcialmente la asimilación de carbohidratos y azúcar de los alimentos, ayudando a controlar la glucosa en la sangre y a reducir la formación de reservas de grasa cuando se usa dentro de un estilo de vida saludable. Las fibras solubles tienen evidencia razonable en el control de glucemia postprandial y saciedad, y el cromo tiene claims nutricionales sobre metabolismo de macronutrientes, pero no existen ensayos clínicos publicados que evalúen la formulación Nocarb-T como producto completo ni la cantidad exacta de cada componente por stick. Por ello, debe verse como un complemento nutricional que puede apoyar programas de control de glucosa y peso, no como tratamiento médico."
+    },
+    {
+      "product_id": "fuxion_thermo_t3",
+      "name": "Thermo T3",
+      "category": "control_de_peso",
+      "short_description": "Té sabor limón con mezcla de tres tés, L-carnitina y cetonas de frambuesa que FuXion comercializa para acompañar programas de control de peso y energía física.",
+      "price": { "current_clp": 35999 },
+      "long_description": "Thermo T3 es un té funcional sabor limón que combina extractos de té negro, rojo y verde con L-carnitina, cetonas de frambuesa, aminoácidos, vitamina B6 y cromo en molécula orgánica. FuXion lo comercializa como parte de la línea Control de Peso y Medidas para acompañar programas de reducción de grasa corporal y medidas, promoviendo un efecto termogénico que, junto con actividad física y dieta adecuada, ayudaría a convertir reservas de grasa en energía. La evidencia sobre extractos de té verde ricos en catequinas y cafeína muestra efectos moderados en gasto energético y pérdida de peso en ciertos contextos, mientras que L-carnitina tiene resultados limitados fuera de condiciones específicas. No hay estudios clínicos publicados sobre Thermo T3 como formulación completa ni se conoce la dosis exacta de catequinas, cafeína o L-carnitina por stick, por lo que sus efectos deben considerarse complementarios y no como solución aislada."
+    },
+    {
+      "product_id": "fuxion_cafe_cafe_fit_cappuccino",
+      "name": "Café & Café Fit Cappuccino",
+      "category": "control_de_peso",
+      "short_description": "Café cappuccino gourmet con café tostado, crema baja en calorías y leche descremada que FuXion comercializa para ayudar a controlar apetito y medidas dentro de planes de peso.",
+      "price": { "current_clp": 51499 },
+      "long_description": "Café & Café Fit Cappuccino es un café cappuccino gourmet en polvo que combina café tostado liofilizado, crema para café baja en calorías y leche descremada, enriquecido con extracto de café verde rico en ácidos clorogénicos. FuXion lo comercializa como parte de la línea Control de Peso y Medidas para ayudar a controlar el apetito y la ansiedad entre comidas, reducir la absorción de carbohidratos a nivel intestinal y apoyar programas de reducción de medidas. La cafeína del café aporta energía y puede reducir temporalmente la sensación de fatiga, mientras que los ácidos clorogénicos del café verde han sido estudiados en extractos concentrados para reducción de peso y mejora de indicadores de obesidad, con resultados modestos y variables en estudios clínicos."
+    },
+    {
+      "product_id": "fuxion_biopro_fit",
+      "name": "BioPro+ Fit",
+      "category": "control_de_peso",
+      "short_description": "Batido proteico a base de Bioprotein+ con Colostrum, Prolibra y micronutrientes que FuXion comercializa para apoyar reducción de grasa corporal y formación de masa magra.",
+      "price": { "current_clp": 30250 },
+      "long_description": "BioPro+ Fit es un batido de proteínas de FuXion creado para la línea Control de Peso y Medidas. Está formulado sobre Bioprotein+ con Colostrum, una proteína patentada de alto valor biológico, enriquecida con aminoácidos, micronutrientes, calcio lácteo y Prolibra, fracción especializada de suero que ha sido estudiada en pérdida de grasa corporal y preservación de masa magra durante dietas hipocalóricas."
+    },
+    {
+      "product_id": "fuxion_protein_active_fit",
+      "name": "Protein Active Fit",
+      "category": "control_de_peso",
+      "short_description": "Batido proteico 100% vegetal a base de BioProtein Active que FuXion comercializa para apoyar reducción de grasa corporal, control de apetito y formación de músculos tonificados.",
+      "price": { "current_clp": 34250 },
+      "long_description": "Protein Active Fit es un batido proteico 100% vegetal de FuXion, basado en la fórmula BioProtein Active, enriquecido con aceite de coco y enzimas. La marca lo presenta como herramienta para ayudar a eliminar grasa del cuerpo mientras se tonifican los músculos."
+    },
+    {
+      "product_id": "fuxion_youth_elixir",
+      "name": "Youth Elixir",
+      "category": "belleza_antiedad",
+      "short_description": "Bebida funcional sabor uva de vino con aminoácidos, resveratrol y antioxidantes que FuXion comercializa para acompañar bienestar hormonal, vitalidad y apariencia de la piel.",
+      "price": { "current_clp": 35999 },
+      "long_description": "Youth Elixir es una bebida funcional en polvo de FuXion con sabor a uva de vino que forma parte de la línea Anti-Edad y Belleza. Su fórmula incluye un mix de extractos frutales, aminoácidos, fibras, antioxidantes, selenio, zinc y resveratrol. FuXion lo comercializa para ‘retardar signos del paso de los años’."
+    },
+    {
+      "product_id": "fuxion_beauty_in",
+      "name": "Beauty-In",
+      "category": "belleza_antiedad",
+      "short_description": "Bebida funcional sabor guayaba con péptidos de colágeno bioactivo, vitamina C y biotina que FuXion comercializa para acompañar el cuidado de piel, cabello y uñas.",
+      "price": { "current_clp": 37000 },
+      "long_description": "Beauty-In es una bebida funcional de FuXion sabor guayaba, toronja y camu camu que contiene péptidos de colágeno bioactivo tipo I y III, vitamina C, biotina, coenzima Q10 y antioxidantes. FuXion la comercializa para el cuidado y regeneración de la piel desde adentro."
+    },
+    {
+      "product_id": "fuxion_passion",
+      "name": "Passion",
+      "category": "bienestar_mental",
+      "short_description": "Bebida funcional con guaraná, jalea real, maca y ginseng que FuXion comercializa para apoyar energía, vigor sexual y bienestar general.",
+      "price": { "current_clp": 35999 },
+      "long_description": "Passion es una bebida funcional de FuXion que combina guaraná, jalea real, maca y ginseng, orientada al apoyo del vigor sexual, la líbido, la fertilidad y el nivel de energía. Guaraná aporta cafeína que puede aumentar energía y alerta."
+    },
+    {
+      "product_id": "fuxion_golden_flx",
+      "name": "Golden FLX",
+      "category": "salud_articular",
+      "short_description": "Bebida funcional inspirada en ‘golden milk’ con cúrcuma, jengibre, cardamomo, leche de coco y pimienta que FuXion comercializa para apoyar flexibilidad y bienestar articular.",
+      "price": { "current_clp": 35999 },
+      "long_description": "Golden FLX es una bebida funcional de FuXion inspirada en la tradicional ‘golden milk’ ayurvédica, creada para mejorar la flexibilidad y movilidad articular y aliviar molestias asociadas al desgaste o ejercicio."
+    },
+    {
+      "product_id": "fuxion_probal",
+      "name": "Probal",
+      "category": null,
+      "short_description": "Suplemento de nombre Probal asociado en fuentes externas a fórmulas de bienestar.",
+      "price": { "current_clp": null },
+      "long_description": "Probal aparece mencionado en algunos listados de productos FuXion, pero no se ha encontrado ficha oficial en Chile."
+    },
+    {
+      "product_id": "fuxion_vera_plus",
+      "name": "Vera+",
+      "category": "inmunidad",
+      "short_description": "Té sabor menta con aloe vera, beta glucanos Wellmune, extracto de oliva y vitamina C que FuXion comercializa como apoyo nutricional al funcionamiento normal del sistema inmunitario.",
+      "price": { "current_clp": 38500 },
+      "long_description": "Vera+ es un té funcional sabor menta de FuXion perteneciente a la línea Inmunológica, que combina beta glucanos de levadura, concentrado de hoja de oliva, aloe vera y vitamina C procedente de amalaki."
+    },
+    {
+      "product_id": "fuxion_nutraday",
+      "name": "Nutraday",
+      "category": "nutricion_diaria",
+      "short_description": "Refresco sabor fresa con moringa, superfrutas, 12 vitaminas y 5 minerales orgánicos que FuXion comercializa para complementar la nutrición diaria.",
+      "price": { "current_clp": null },
+      "long_description": "Nutraday es una bebida nutracéutica sabor fresa natural de FuXion, diseñada para complementar la nutrición diaria de niños, jóvenes y adultos."
+    },
+    {
+      "product_id": "fuxion_on",
+      "name": "ON",
+      "category": "vigor_mental",
+      "short_description": "Bebida funcional sabor mix frutal con yerba mate, GABA, taurina y vitaminas B que FuXion comercializa para apoyar alerta mental, enfoque y sensación de energía cerebral.",
+      "price": { "current_clp": 28749 },
+      "long_description": "ON es una bebida funcional en polvo sabor mix frutal que FuXion comercializa como ‘vigorizante mental’ para mejorar procesos neuronales como concentración, memoria y enfoque."
+    },
+    {
+      "product_id": "fuxion_no_stress",
+      "name": "No Stress",
+      "category": "estres_relajacion",
+      "short_description": "Bebida nutritiva sabor durazno mandarina con L-teanina, triptófano, glicina, ashwagandha y magnesio que FuXion comercializa para apoyar relajación, enfoque y resistencia frente al estrés cotidiano.",
+      "price": { "current_clp": null },
+      "long_description": "No Stress es una bebida nutritiva sabor durazno mandarina que FuXion comercializa para ayudar a manejar el estrés cotidiano, mantener el enfoque en momentos de tensión y favorecer la relajación mental sin producir somnolencia."
+    },
+    {
+      "product_id": "fuxion_biopro_sport",
+      "name": "BioPro+ Sport",
+      "category": "proteina_deportiva",
+      "short_description": "Batido proteico en polvo sabor vainilla que FuXion comercializa para apoyar incremento de masa muscular magra y rendimiento en deportistas de alto desempeño.",
+      "price": { "current_clp": null },
+      "long_description": "BioPro+ Sport es un batido proteico en polvo de FuXion, sabor vainilla, diseñado para personas que realizan actividad física intensa."
+    },
+    {
+      "product_id": "fuxion_protein_active_sport",
+      "name": "Protein Active Sport",
+      "category": "proteina_deportiva",
+      "short_description": "Proteína activa 100% vegetal sabor vainilla y canela que FuXion comercializa para apoyar recuperación y desarrollo saludable de masa muscular tras ejercicio intenso.",
+      "price": { "current_clp": null },
+      "long_description": "Protein Active Sport es una variante deportiva de la proteína activa vegetal de FuXion."
+    },
+    {
+      "product_id": "fuxion_pre_sport",
+      "name": "Pre Sport",
+      "category": "pre_entrenamiento",
+      "short_description": "Bebida isotónica sabor limón con creatina, beta-alanina, citrulina, yerba mate y electrolitos.",
+      "price": { "current_clp": null },
+      "long_description": "Pre Sport es una bebida funcional de FuXion sabor limón, descrita como bebida isotónica rehidratante, energética y termogénica."
+    },
+    {
+      "product_id": "fuxion_post_sport",
+      "name": "Post Sport",
+      "category": "post_entrenamiento",
+      "short_description": "Bebida deportiva sabor granada a base de aminoácidos, agua de coco y antioxidantes.",
+      "price": { "current_clp": 39249 },
+      "long_description": "Post Sport es una bebida deportiva en polvo sabor granada que FuXion comercializa para recuperar el cuerpo del deportista."
+    },
+    {
+      "product_id": "fuxion_probix",
+      "name": "Probix",
+      "category": "microbiota",
+      "short_description": "Micropolvo para espolvorear sobre la comida; FuXion lo comercializa como apoyo al metabolismo y la grasa visceral.",
+      "price": { "current_clp": 36000 },
+      "long_description": "Probix es un micropolvo funcional de FuXion que se espolvorea directamente sobre comidas frías o calientes."
+    },
+    {
+      "product_id": "fuxion_base_madre_roja",
+      "name": "Base Madre Roja",
+      "category": "gastronomia_funcional",
+      "short_description": "Base culinaria concentrada roja elaborada con vegetales y ajíes peruanos.",
+      "price": { "current_clp": 8950 },
+      "long_description": "Base Madre Roja Q’ocina en Casa es una base culinaria concentrada creada en colaboración entre Gastón Acurio y FuXion."
+    },
+    {
+      "product_id": "fuxion_base_madre_verde",
+      "name": "Base Madre Verde",
+      "category": "gastronomia_funcional",
+      "short_description": "Base culinaria verde inspirada en recetas caseras peruanas.",
+      "price": { "current_clp": 8950 },
+      "long_description": "Base Madre Verde Q’ocina en Casa forma parte de la familia de bases culinarias."
+    },
+    {
+      "product_id": "fuxion_base_madre_amarilla",
+      "name": "Base Madre Amarilla",
+      "category": "gastronomia_funcional",
+      "short_description": "Base culinaria amarilla con vegetales y ají amarillo.",
+      "price": { "current_clp": 8950 },
+      "long_description": "Base Madre Amarilla Q’ocina en Casa completa la familia de bases culinarias desarrolladas por Gastón Acurio & FuXion."
+    }
+  ]
+}

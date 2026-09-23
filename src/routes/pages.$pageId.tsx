@@ -30,6 +30,8 @@ const PAGE_TYPE_LABELS: Record<string, string> = {
   portfolio: "Portafolio",
 };
 
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 export const Route = createFileRoute("/pages/$pageId")({ component: PageDetail });
 
 function formatDate(value: string | null): string {
@@ -194,7 +196,11 @@ function PageDetail() {
           return;
         }
 
-        const loaded = await pageService.getOwnPageById(supabase, pageId, auth.user.id);
+        // Route params are user-controlled. Validate before querying the UUID
+        // column so malformed links resolve to the normal not-found state.
+        const loaded = UUID_PATTERN.test(pageId)
+          ? await pageService.getOwnPageById(supabase, pageId, auth.user.id)
+          : null;
         setPage(loaded);
         if (!loaded) setNotFound(true);
       } catch (err) {

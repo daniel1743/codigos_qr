@@ -1,0 +1,47 @@
+-- =============================================================================
+-- CRIPQER — Intelligent Analytics V1.1 · Phase C2B5
+-- LEGACY INSERT POLICY HARDENING (QA-ONLY — DO NOT APPLY TO PRODUCTION)
+-- =============================================================================
+-- Task: CRIPQER_ANALYTICS_V1_1_PHASE_C2B5_SECURITY_AND_PRODUCTION_READINESS
+--
+-- Target database: cripqer-qa (project ref tjigzcyoogmvdkivypym) ONLY.
+--
+-- ⚠️  NEVER run this file against production project mlinfiuhkxdhlveflbkj.
+--
+-- Background:
+--   The historical "Anyone can insert analytics" policy granted a raw,
+--   unrestricted INSERT on public.qr_analytics to `anon` and `authenticated`
+--   (WITH CHECK (true)). That allowed any browser to fabricate rows with an
+--   ARBITRARY profile_id / page_id / event_type, bypassing the canonical
+--   write boundary entirely.
+--
+-- Truth established in C2B5 forensics:
+--   * Every Analytics write path in the application is a SECURITY DEFINER RPC
+--     (track_analytics_event, track_child_page_event, track_page_view,
+--     track_link_click). SECURITY DEFINER functions execute as the function
+--     owner (postgres, the table owner) and therefore bypass RLS on INSERT —
+--     the direct-INSERT policy is NOT needed for any production flow.
+--   * No application code performs a direct `supabase.from("qr_analytics").insert(...)`.
+--
+-- Safe restriction (this migration):
+--   DROP the unrestricted INSERT policy so that ONLY the SECURITY DEFINER
+--   write boundaries (which derive owner/page/profile server-side and validate
+--   the event allowlist) can persist rows. Direct raw INSERT from anon /
+--   authenticated is now denied.
+--
+--   * `service_role` still bypasses RLS (Supabase-managed) and is unaffected.
+--   * The SECURITY DEFINER RPCs are unaffected (table-owner bypass).
+--   * SELECT policies ("Users can read their own analytics" + "Admin can read
+--     all analytics") are NOT touched — read protection is unchanged.
+--
+-- This is NOT a destructive change to data: it only removes a permission grant.
+-- =============================================================================
+
+DROP POLICY IF EXISTS "Anyone can insert analytics" ON public.qr_analytics;
+
+-- =============================================================================
+-- ROLLBACK / RECOVERY (only if the legacy direct-INSERT path must be restored):
+--
+--   CREATE POLICY "Anyone can insert analytics"
+--     ON public.qr_analytics FOR INSERT WITH CHECK (true);
+-- =============================================================================
