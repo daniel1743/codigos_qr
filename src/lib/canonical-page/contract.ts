@@ -7,10 +7,20 @@
  */
 
 import type { BioTemplateConfig } from "@/premium-template-studio/types";
+import {
+  validatePageDocumentV1,
+  type PageDocumentV1,
+} from "@/lib/direct-page-editor/page-document";
 
 export const CRIPQER_CANONICAL_PAGE_SCHEMA_VERSION = 1 as const;
 
 export type CanonicalEditorConfigV1 = BioTemplateConfig;
+
+export interface DirectPageEnvelopeV1 {
+  readonly schemaVersion: typeof CRIPQER_CANONICAL_PAGE_SCHEMA_VERSION;
+  readonly documentType: "direct-page";
+  readonly editorConfig: PageDocumentV1;
+}
 
 export interface CanonicalPageEnvelopeV1<
   TEditorConfig extends CanonicalEditorConfigV1 = CanonicalEditorConfigV1,
@@ -74,6 +84,27 @@ export function createCanonicalPageEnvelope(editorConfig: unknown): CanonicalPag
     throw new Error(validation.errors.join(" "));
   }
   return envelope as CanonicalPageEnvelopeV1;
+}
+
+export function createDirectPageEnvelope(editorConfig: PageDocumentV1): DirectPageEnvelopeV1 {
+  return {
+    schemaVersion: CRIPQER_CANONICAL_PAGE_SCHEMA_VERSION,
+    documentType: "direct-page",
+    editorConfig,
+  };
+}
+
+export function readDirectPageEnvelope(value: unknown): DirectPageEnvelopeV1 | null {
+  if (
+    !isRecord(value) ||
+    value.schemaVersion !== CRIPQER_CANONICAL_PAGE_SCHEMA_VERSION ||
+    value.documentType !== "direct-page" ||
+    !isRecord(value.editorConfig)
+  )
+    return null;
+  const config = value.editorConfig as Record<string, unknown>;
+  if (!validatePageDocumentV1(config).valid) return null;
+  return value as unknown as DirectPageEnvelopeV1;
 }
 
 /** Return a canonical envelope, or null for a legacy Basic-only JSON value. */

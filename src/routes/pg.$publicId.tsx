@@ -1,5 +1,5 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { getServerSupabaseClient } from "../lib/supabase/server";
 import { getBrowserSupabaseClient } from "../lib/supabase/client";
 import { PublicTemplateRenderer } from "../premium-template-studio/engine/PublicTemplateRenderer";
@@ -7,6 +7,10 @@ import { resolveCanonicalEditorConfig } from "../components/profile/canonicalRen
 import { pageService } from "../services/page.service";
 import { analyticsService } from "../services/analyticsService";
 import type { PageAnalyticsInteraction } from "../types/analytics";
+import { readDirectPageEnvelope } from "../lib/canonical-page";
+import { DirectPageRenderer } from "../components/direct-page-editor/DirectPageRenderer";
+import { isQaAnalyticsRuntime, resolveCanonicalClickType } from "../lib/analytics";
+import { getBrowserCanonicalWriter } from "../lib/analytics/browser";
 
 /**
  * PUBLIC CHILD PAGE ROUTE.
@@ -65,46 +69,79 @@ export const Route = createFileRoute("/pg/$publicId")({
 
     // The published snapshot is the only canonical document. An invalid or
     // missing envelope is indistinguishable from "not published" publicly.
-    const config = resolveCanonicalEditorConfig(page.published_template_config);
-    if (!config) {
+    const direct = readDirectPageEnvelope(page.published_template_config);
+    const config = direct ? null : resolveCanonicalEditorConfig(page.published_template_config);
+    if (!direct && !config) {
       throw notFound();
     }
 
-    return { page, config };
+    return { page, config, directDocument: direct?.editorConfig ?? null };
   },
   component: PublicChildPage,
 });
 
 function PublicChildPage() {
-  const { page, config } = Route.useLoaderData();
+  const { page, config, directDocument } = Route.useLoaderData();
+
+  // The canonical Analytics V1.1 writer is QA-only. When the runtime resolves to
+  // the production project we keep the legacy tracking path untouched.
+  const useCanonical = useMemo(
+    () => isQaAnalyticsRuntime(import.meta.env["VITE_SUPABASE_URL"]),
+    [],
+  );
 
   useEffect(() => {
-    void analyticsService.trackPageEvent(getBrowserSupabaseClient(), page.page_id, "view");
-  }, [page.page_id]);
+    if (!useCanonical) {
+      void analyticsService.trackPageEvent(getBrowserSupabaseClient(), page.page_id, "view");
+      return;
+    }
+    const writer = getBrowserCanonicalWriter();
+    void writer.track({ eventType: "session_start", publicId: page.public_id });
+    void writer.track({ eventType: "page_view", publicId: page.public_id });
+  }, [page.page_id, page.public_id, useCanonical]);
 
   const handleTrack = useCallback(
     (event: { type: string; blockId?: string; url?: string; itemId?: string; label?: string }) => {
-      const interaction: PageAnalyticsInteraction | undefined =
-        event.type === "product_click"
-          ? "product"
-          : event.type === "service_click"
-            ? "service"
-            : event.url?.toLowerCase().includes("wa.me") ||
-                event.url?.toLowerCase().includes("whatsapp")
-              ? "whatsapp"
-              : "button";
-      void analyticsService.trackPageEvent(
-        getBrowserSupabaseClient(),
-        page.page_id,
-        "link_click",
-        interaction,
-        event.itemId ?? event.blockId,
-        event.label,
-        event.url,
-      );
+      if (!useCanonical) {
+        const interaction: PageAnalyticsInteraction | undefined =
+          event.type === "product_click"
+            ? "product"
+            : event.type === "service_click"
+              ? "service"
+              : event.url?.toLowerCase().includes("wa.me") ||
+                  event.url?.toLowerCase().includes("whatsapp")
+                ? "whatsapp"
+                : "button";
+        void analyticsService.trackPageEvent(
+          getBrowserSupabaseClient(),
+          page.page_id,
+          "link_click",
+          interaction,
+          event.itemId ?? event.blockId,
+          event.label,
+          event.url,
+        );
+        return;
+      }
+      void getBrowserCanonicalWriter().track({
+        eventType: resolveCanonicalClickType(event.type, event.url),
+        publicId: page.public_id,
+        ...(event.url ? { targetUrl: event.url } : {}),
+        ...(event.itemId || event.blockId ? { itemId: event.itemId ?? event.blockId } : {}),
+        ...(event.label ? { itemLabel: event.label } : {}),
+      });
     },
-    [page.page_id],
+    [page.page_id, page.public_id, useCanonical],
   );
 
-  return <PublicTemplateRenderer config={config} onTrack={handleTrack} />;
+  return directDocument ? (
+    <DirectPageRenderer
+      document={directDocument}
+      mode="public"
+      breakpoint="desktop"
+      onTrack={handleTrack}
+    />
+  ) : (
+    <PublicTemplateRenderer config={config!} onTrack={handleTrack} />
+  );
 }

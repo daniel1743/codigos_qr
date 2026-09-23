@@ -2,9 +2,12 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { validateTemplate } from "../premium-template-studio/engine/TemplateValidator";
 import {
   acceptEngineGeneratedConfig,
+  createDirectPageEnvelope,
   readCanonicalPageEnvelope,
+  readDirectPageEnvelope,
   type CanonicalPageEnvelopeV1,
 } from "../lib/canonical-page";
+import { isPageDocumentV1, type PageDocumentV1 } from "../lib/direct-page-editor/page-document";
 import type { Page } from "../types/database";
 
 function assertValidEditorConfig(editorConfig: unknown): void {
@@ -15,6 +18,10 @@ function assertValidEditorConfig(editorConfig: unknown): void {
       `El editorConfig no es válido: ${first?.path ?? "config"} — ${first?.message ?? "error desconocido"}.`,
     );
   }
+}
+
+function isDirectDocument(value: unknown): value is PageDocumentV1 {
+  return isPageDocumentV1(value);
 }
 
 /**
@@ -39,8 +46,9 @@ export const pageCanonicalService = {
     userId: string,
     editorConfig: unknown,
   ): Promise<CanonicalPageEnvelopeV1> {
-    const envelope = acceptEngineGeneratedConfig(editorConfig);
-    assertValidEditorConfig(envelope.editorConfig);
+    const direct = isDirectDocument(editorConfig);
+    const envelope = direct ? createDirectPageEnvelope(editorConfig) : acceptEngineGeneratedConfig(editorConfig);
+    if (!direct) assertValidEditorConfig(envelope.editorConfig);
 
     const { data, error } = await supabase
       .from("pages")
@@ -53,7 +61,7 @@ export const pageCanonicalService = {
     if (error) throw error;
     if (!data) throw new Error("Página inexistente o no pertenece al usuario autenticado.");
 
-    const persisted = readCanonicalPageEnvelope(data.template_config);
+    const persisted = readDirectPageEnvelope(data.template_config) ?? readCanonicalPageEnvelope(data.template_config);
     if (!persisted) {
       throw new Error("La persistencia de la página devolvió un envelope inválido.");
     }
@@ -72,8 +80,9 @@ export const pageCanonicalService = {
     editorConfig: unknown,
     expectedRevision: number,
   ): Promise<Page> {
-    const envelope = acceptEngineGeneratedConfig(editorConfig);
-    assertValidEditorConfig(envelope.editorConfig);
+    const direct = isDirectDocument(editorConfig);
+    const envelope = direct ? createDirectPageEnvelope(editorConfig) : acceptEngineGeneratedConfig(editorConfig);
+    if (!direct) assertValidEditorConfig(envelope.editorConfig);
 
     const { data, error } = await supabase
       .from("pages")

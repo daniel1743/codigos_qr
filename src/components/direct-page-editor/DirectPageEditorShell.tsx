@@ -1,100 +1,65 @@
 import { useEffect, useMemo, useState } from "react";
-import {
-  ChevronDown,
-  ChevronUp,
-  Copy,
-  EyeOff,
-  Image as ImageIcon,
-  Plus,
-  Redo2,
-  Save,
-  Undo2,
-  X,
-} from "lucide-react";
-import type { AssetAdapter, StorageAdapter } from "../../premium-template-studio/adapters";
+import { Copy, EyeOff, ImagePlus, Plus, Redo2, Save, Undo2, X } from "lucide-react";
 import type {
-  BioTemplateConfig,
-  Breakpoint,
-  BlockContent,
-  TemplateBlock,
-  SaveState,
-} from "../../premium-template-studio/types";
-import {
-  TemplateRenderer,
-  type EditingHandlers,
-} from "../../premium-template-studio/engine/TemplateRenderer";
-import type { SelectedCollectionItem } from "../../premium-template-studio/engine/RenderContext";
-import type { PageDocumentV1 } from "../../lib/direct-page-editor/page-document";
-import {
-  canonicalFromPageDocument,
-  pageDocumentFromCanonical,
+  DirectItem,
+  PageDocumentBlockV1,
+  PageDocumentV1,
 } from "../../lib/direct-page-editor/page-document";
-import { createMagicServicesConfig } from "./magicServicesConfig";
-import "../../premium-template-studio/styles/studio.css";
+import {
+  cloneCollectionItem,
+  reorderPageDocumentBlock,
+} from "../../lib/direct-page-editor/page-document";
+import { DirectPageRenderer, type DirectEditingHandlers } from "./DirectPageRenderer";
+import { createMagicServicesDocument } from "./magicServicesConfig";
+import type { DirectPageStorageAdapter } from "./directPagePersistence";
+import type { DirectAssetAdapter } from "./directPageAssets";
+import { createDirectId } from "./directPageAssets";
+import { DIRECT_BLOCK_REGISTRY_METADATA } from "./DirectBlockRegistry";
 
+type DirectBreakpoint = "desktop" | "tablet" | "mobile";
 type Selection = {
-  kind: "block" | "item" | "background";
+  kind: "block" | "item" | "background" | "cta";
   blockId?: string;
   itemId?: string;
+  path?: string;
 } | null;
 
-interface DirectPageEditorShellProps {
-  pageId: string;
-  pageTitle: string;
-  initialConfig: BioTemplateConfig;
-  storage: StorageAdapter;
-  assets: AssetAdapter;
-}
-
-function setAtPath(value: unknown, path: string, nextValue: unknown): unknown {
-  const parts = path.split(".").filter(Boolean);
-  if (!parts.length) return nextValue;
-  const root = Array.isArray(value) ? [...value] : { ...(value as Record<string, unknown>) };
-  let cursor: Record<string, unknown> | unknown[] = root;
-  parts.forEach((part, index) => {
-    if (index === parts.length - 1) {
-      (cursor as Record<string, unknown>)[part] = nextValue;
-      return;
-    }
-    const current = (cursor as Record<string, unknown>)[part];
-    const copy = Array.isArray(current)
-      ? [...current]
-      : { ...(current as Record<string, unknown>) };
-    (cursor as Record<string, unknown>)[part] = copy;
-    cursor = copy as Record<string, unknown> | unknown[];
-  });
-  return root;
-}
-
-function cloneBlock(block: PageDocumentV1["blocks"][number]): PageDocumentV1["blocks"][number] {
-  return { ...structuredClone(block), id: `${block.id}-copy-${Date.now()}` };
-}
-
-function blockForType(
-  type: TemplateBlock["type"],
-  source: BioTemplateConfig,
-): PageDocumentV1["blocks"][number] | null {
-  const block = source.blocks.find((candidate) => candidate.type === type);
-  if (!block) return null;
-  return pageDocumentFromCanonical({ ...source, blocks: [block] }).blocks[0] ?? null;
+function setNested(
+  target: Record<string, unknown>,
+  keys: string[],
+  value: unknown,
+): Record<string, unknown> {
+  const [key, ...rest] = keys;
+  if (!key) return target;
+  return {
+    ...target,
+    [key]: rest.length
+      ? setNested((target[key] as Record<string, unknown>) ?? {}, rest, value)
+      : value,
+  };
 }
 
 export function DirectPageEditorShell({
   pageId,
   pageTitle,
-  initialConfig,
+  initialDocument,
   storage,
   assets,
-}: DirectPageEditorShellProps) {
-  const [baseConfig, setBaseConfig] = useState(initialConfig);
-  const [document, setDocument] = useState(() => pageDocumentFromCanonical(initialConfig));
+}: {
+  pageId: string;
+  pageTitle: string;
+  initialDocument: PageDocumentV1;
+  storage: DirectPageStorageAdapter;
+  assets: DirectAssetAdapter;
+}) {
+  const [document, setDocument] = useState(initialDocument);
   const [past, setPast] = useState<PageDocumentV1[]>([]);
   const [future, setFuture] = useState<PageDocumentV1[]>([]);
   const [selection, setSelection] = useState<Selection>(null);
-  const [selectedItem, setSelectedItem] = useState<SelectedCollectionItem | null>(null);
-  const [breakpoint, setBreakpoint] = useState<Breakpoint>("desktop");
-  const [saveState, setSaveState] = useState<SaveState>("idle");
+  const [breakpoint, setBreakpoint] = useState<DirectBreakpoint>("desktop");
+  const [saveState, setSaveState] = useState("idle");
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [assetBusy, setAssetBusy] = useState(false);
 
   useEffect(() => {
     const update = () =>
@@ -105,84 +70,92 @@ export function DirectPageEditorShell({
     window.addEventListener("resize", update);
     return () => window.removeEventListener("resize", update);
   }, []);
-
-  const renderedConfig = useMemo(
-    () => canonicalFromPageDocument(document, baseConfig),
-    [document, baseConfig],
-  );
-
   const commit = (next: PageDocumentV1) => {
     setPast((items) => [...items.slice(-59), document]);
     setFuture([]);
     setDocument(next);
     setSaveState("dirty");
   };
-
-  const patchCanonical = (path: string, value: unknown) => {
-    const blockPath = /^blocks\.([^.]+)\.(.+)$/.exec(path);
-    const nextConfig = blockPath
-      ? {
-          ...renderedConfig,
-          blocks: renderedConfig.blocks.map((block) =>
-            block.id === blockPath[1] ? setAtPath(block, blockPath[2]!, value) : block,
-          ),
-        }
-      : (setAtPath(renderedConfig, path, value) as BioTemplateConfig);
-    setBaseConfig(nextConfig);
-    commit(pageDocumentFromCanonical(nextConfig));
+  const patchPath = (path: string, value: unknown) => {
+    const itemMatch = /^blocks\.([^.]+)\.content\.items\.([^.]+)\.(.+)$/.exec(path);
+    const blockMatch = /^blocks\.([^.]+)\.(.+)$/.exec(path);
+    if (itemMatch) {
+      const [, blockId, itemId, field] = itemMatch;
+      const blocks = document.blocks.map((block) =>
+        block.id === blockId
+          ? {
+              ...block,
+              content: {
+                ...block.content,
+                items: (block.content.items ?? []).map((item) =>
+                  item.id === itemId ? setNested(item, field.split("."), value) : item,
+                ),
+              },
+            }
+          : block,
+      );
+      commit({ ...document, blocks });
+      return;
+    }
+    if (blockMatch) {
+      const [, blockId, field] = blockMatch;
+      const blocks = document.blocks.map((block) =>
+        block.id === blockId
+          ? { ...block, content: setNested(block.content, field.split("."), value) }
+          : block,
+      );
+      commit({ ...document, blocks });
+    }
   };
-
+  const replaceImage = async (file: File) => {
+    const target =
+      selection?.kind === "item" && selection.blockId && selection.itemId
+        ? `blocks.${selection.blockId}.content.items.${selection.itemId}.image`
+        : selection?.blockId
+          ? `blocks.${selection.blockId}.content.image`
+          : null;
+    if (!target) return;
+    setAssetBusy(true);
+    try {
+      const asset = await assets.upload(file);
+      patchPath(target, asset.url);
+    } finally {
+      setAssetBusy(false);
+    }
+  };
+  const editing: DirectEditingHandlers = {
+    selectedBlockId: selection?.blockId,
+    selectedItemId: selection?.itemId,
+    onSelectBlock: (blockId) => setSelection({ kind: "block", blockId }),
+    onSelectItem: (blockId, itemId) => setSelection({ kind: "item", blockId, itemId }),
+    onSelectCTA: (blockId, itemId, path) => setSelection({ kind: "cta", blockId, itemId, path }),
+    onSelectPage: () => setSelection({ kind: "background" }),
+    onInlineEdit: patchPath,
+  };
   const save = async (publish = false) => {
     setSaveState("saving");
     try {
-      const canonical = canonicalFromPageDocument(document, baseConfig);
-      if (publish && storage.publish) await storage.publish(canonical);
-      else await storage.save(canonical);
-      setBaseConfig(canonical);
+      if (publish) await storage.publish(document);
+      else await storage.save(document);
       setSaveState("saved");
     } catch {
       setSaveState("error");
     }
   };
-
-  const editing: EditingHandlers = {
-    selectedBlockId: selection?.blockId ?? null,
-    selectedCollectionItem: selectedItem,
-    onSelect: (id) => {
-      setSelection(id ? { kind: "block", blockId: id } : null);
-      setSelectedItem(null);
-    },
-    onSelectPageBackground: () => {
-      setSelection({ kind: "background" });
-      setSelectedItem(null);
-    },
-    onSelectCollectionItem: (blockId, collection, itemId, field = "item") => {
-      setSelection({ kind: "item", blockId, itemId });
-      setSelectedItem({ blockId, collection, itemId, field });
-    },
-    onInlineEdit: patchCanonical,
-    onMove: (id, direction) => {
-      const index = document.blocks.findIndex((block) => block.id === id);
-      const nextIndex = index + direction;
-      if (index < 0 || nextIndex < 0 || nextIndex >= document.blocks.length) return;
-      const blocks = [...document.blocks];
-      [blocks[index], blocks[nextIndex]] = [blocks[nextIndex], blocks[index]];
-      commit({ ...document, blocks });
-    },
-    onDuplicate: (id) => {
-      const index = document.blocks.findIndex((block) => block.id === id);
-      if (index < 0) return;
-      const blocks = [...document.blocks];
-      const copy = cloneBlock(blocks[index]!);
-      blocks.splice(index + 1, 0, copy);
-      commit({ ...document, blocks });
-      setSelection({ kind: "block", blockId: copy.id });
-    },
-    onToggleHidden: (id) =>
+  const selectedBlock = selection?.blockId
+    ? document.blocks.find((block) => block.id === selection.blockId)
+    : undefined;
+  const blockAction = (action: "duplicate" | "hide" | "delete" | "up" | "down") => {
+    if (!selectedBlock) return;
+    if (action === "up" || action === "down") {
+      commit(reorderPageDocumentBlock(document, selectedBlock.id, action === "up" ? -1 : 1));
+      return;
+    }
+    if (action === "hide") {
       commit({
         ...document,
         blocks: document.blocks.map((block) =>
-          block.id === id
+          block.id === selectedBlock.id
             ? {
                 ...block,
                 visible: !block.visible,
@@ -194,69 +167,65 @@ export function DirectPageEditorShell({
               }
             : block,
         ),
-      }),
-    onDelete: (id) =>
-      commit({ ...document, blocks: document.blocks.filter((block) => block.id !== id) }),
-    onReorder: (sourceId, targetId) => {
-      const source = document.blocks.findIndex((block) => block.id === sourceId);
-      const target = document.blocks.findIndex((block) => block.id === targetId);
-      if (source < 0 || target < 0 || source === target) return;
-      const blocks = [...document.blocks];
-      const [moved] = blocks.splice(source, 1);
-      if (moved) blocks.splice(target, 0, moved);
-      commit({ ...document, blocks });
-    },
-    onAddCollectionItem: (blockId, collection) => {
-      const block = renderedConfig.blocks.find((candidate) => candidate.id === blockId);
-      if (!block || collection !== "services") return;
-      const items = block.content.items ?? [];
-      const item = items[items.length - 1];
-      if (!item) return;
-      patchCanonical(`blocks.${blockId}.content.items`, [
-        ...items,
-        { ...structuredClone(item), id: `${item.id}-copy-${Date.now()}` },
-      ]);
-    },
-    onCollectionItemAction: (blockId, collection, itemId, action) => {
-      if (collection !== "services") return;
-      const block = renderedConfig.blocks.find((candidate) => candidate.id === blockId);
-      const items = [...(block?.content.items ?? [])];
-      const index = items.findIndex((item) => item.id === itemId);
-      if (index < 0) return;
-      if (action === "delete") items.splice(index, 1);
-      if (action === "duplicate")
-        items.splice(index + 1, 0, {
-          ...structuredClone(items[index]!),
-          id: `${itemId}-copy-${Date.now()}`,
-        });
-      if (action === "up" && index > 0)
-        [items[index - 1], items[index]] = [items[index]!, items[index - 1]!];
-      if (action === "down" && index < items.length - 1)
-        [items[index], items[index + 1]] = [items[index + 1]!, items[index]!];
-      patchCanonical(`blocks.${blockId}.content.items`, items);
-    },
-    onUploadCollectionItemImage: (blockId, itemId, file) =>
-      void assets.upload(file).then((asset) => {
-        const block = renderedConfig.blocks.find((candidate) => candidate.id === blockId);
-        const items = (block?.content.items ?? []).map((item) =>
-          item.id === itemId ? { ...item, imageUrl: asset.url } : item,
-        );
-        patchCanonical(`blocks.${blockId}.content.items`, items);
-      }),
-    onListCollectionItemImages: () => assets.list?.() ?? Promise.resolve([]),
-    onRemoveCollectionItemImage: (blockId, itemId) => {
-      const block = renderedConfig.blocks.find((candidate) => candidate.id === blockId);
-      patchCanonical(
-        `blocks.${blockId}.content.items`,
-        (block?.content.items ?? []).map((item) =>
-          item.id === itemId ? { ...item, imageUrl: "" } : item,
-        ),
-      );
-    },
+      });
+      return;
+    }
+    if (action === "delete") {
+      commit({
+        ...document,
+        blocks: document.blocks.filter((block) => block.id !== selectedBlock.id),
+      });
+      setSelection(null);
+      return;
+    }
+    const copy: PageDocumentBlockV1 = {
+      ...structuredClone(selectedBlock),
+      id: createDirectId(selectedBlock.id),
+    };
+    const index = document.blocks.findIndex((block) => block.id === selectedBlock.id);
+    const blocks = [...document.blocks];
+    blocks.splice(index + 1, 0, copy);
+    commit({ ...document, blocks });
+    setSelection({ kind: "block", blockId: copy.id });
   };
-
+  const itemAction = (action: "duplicate" | "delete" | "up" | "down") => {
+    if (!selection?.blockId || !selection.itemId) return;
+    const block = document.blocks.find((candidate) => candidate.id === selection.blockId);
+    if (!block) return;
+    const list = [...(block.content.items ?? [])];
+    const index = list.findIndex((item) => item.id === selection.itemId);
+    if (index < 0) return;
+    if (action === "delete") list.splice(index, 1);
+    if (action === "duplicate") {
+      const copy = cloneCollectionItem(list[index] as DirectItem, createDirectId(selection.itemId));
+      list.splice(index + 1, 0, copy);
+      setSelection({ kind: "item", blockId: block.id, itemId: copy.id });
+    }
+    if (action === "up" && index > 0)
+      [list[index - 1], list[index]] = [list[index]!, list[index - 1]!];
+    if (action === "down" && index < list.length - 1)
+      [list[index], list[index + 1]] = [list[index + 1]!, list[index]!];
+    commit({
+      ...document,
+      blocks: document.blocks.map((candidate) =>
+        candidate.id === block.id
+          ? { ...candidate, content: { ...candidate.content, items: list } }
+          : candidate,
+      ),
+    });
+  };
+  const addBlock = (type: PageDocumentBlockV1["type"]) => {
+    const candidate = createMagicServicesDocument(pageTitle).blocks.find(
+      (block) => block.type === type,
+    );
+    if (!candidate) return;
+    const copy = { ...structuredClone(candidate), id: createDirectId(candidate.id) };
+    commit({ ...document, blocks: [...document.blocks, copy] });
+    setSelection({ kind: "block", blockId: copy.id });
+    setPickerOpen(false);
+  };
   const undo = () => {
-    const previous = past[past.length - 1];
+    const previous = past.at(-1);
     if (!previous) return;
     setPast((items) => items.slice(0, -1));
     setFuture((items) => [document, ...items]);
@@ -271,19 +240,25 @@ export function DirectPageEditorShell({
     setDocument(next);
     setSaveState("dirty");
   };
-
-  const addBlock = (type: TemplateBlock["type"]) => {
-    const candidate = blockForType(type, createMagicServicesConfig(pageTitle));
-    if (!candidate) return;
-    commit({ ...document, blocks: [...document.blocks, candidate] });
-    setPickerOpen(false);
-    setSelection({ kind: "block", blockId: candidate.id });
-  };
-
+  const mobile = breakpoint === "mobile";
+  const imageTarget =
+    selectedBlock?.type === "image" || selectedBlock?.type === "hero" || selection?.kind === "item";
+  const ctaValue =
+    selection?.kind === "cta" && selectedBlock && selection.path
+      ? ((selection.itemId
+          ? selectedBlock.content.items?.find((item) => item.id === selection.itemId)?.cta
+          : selectedBlock.content[selection.path.split(".").at(-1) ?? ""]) as
+          { label?: string; url?: string } | undefined)
+      : undefined;
+  const selectedCapabilities = selectedBlock
+    ? (DIRECT_BLOCK_REGISTRY_METADATA[
+        selectedBlock.type as keyof typeof DIRECT_BLOCK_REGISTRY_METADATA
+      ]?.capabilities ?? [])
+    : [];
   return (
     <main
       data-testid="direct-page-editor-pilot"
-      className="direct-page-editor flex min-h-screen flex-col bg-slate-950 text-slate-950"
+      className="flex min-h-screen flex-col bg-slate-950 text-slate-950"
     >
       <header className="flex min-h-16 items-center justify-between gap-3 border-b border-white/10 bg-slate-950 px-4 text-white sm:px-6">
         <div className="min-w-0">
@@ -296,7 +271,6 @@ export function DirectPageEditorShell({
           <button
             type="button"
             aria-label="Deshacer"
-            title="Deshacer"
             disabled={!past.length}
             onClick={undo}
             className="rounded-lg p-2 hover:bg-white/10 disabled:opacity-40"
@@ -306,7 +280,6 @@ export function DirectPageEditorShell({
           <button
             type="button"
             aria-label="Rehacer"
-            title="Rehacer"
             disabled={!future.length}
             onClick={redo}
             className="rounded-lg p-2 hover:bg-white/10 disabled:opacity-40"
@@ -321,13 +294,13 @@ export function DirectPageEditorShell({
                 : saveState === "dirty"
                   ? "Cambios sin guardar"
                   : saveState === "error"
-                    ? "Error al guardar"
+                    ? "Error"
                     : "Listo"}
           </span>
           <button
             type="button"
             onClick={() => void save()}
-            className="inline-flex items-center gap-1 rounded-lg border border-white/20 px-3 py-2 text-xs font-semibold hover:bg-white/10"
+            className="inline-flex items-center gap-1 rounded-lg border border-white/20 px-3 py-2 text-xs font-semibold"
           >
             <Save size={14} />
             Guardar
@@ -335,51 +308,68 @@ export function DirectPageEditorShell({
           <button
             type="button"
             onClick={() => void save(true)}
-            className="rounded-lg bg-white px-3 py-2 text-xs font-semibold text-slate-950 hover:bg-slate-200"
+            className="rounded-lg bg-white px-3 py-2 text-xs font-semibold text-slate-950"
           >
             Publicar
           </button>
         </div>
       </header>
-      <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-slate-100">
-        <div className="pointer-events-none absolute left-4 top-4 z-20 flex items-center gap-2 sm:left-6">
-          <span className="rounded-full bg-white/90 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500 shadow-sm">
-            {breakpoint}
-          </span>
-          <span data-testid="direct-page-editor-document-authority" className="sr-only">
-            PageDocumentV1
-          </span>
-        </div>
-        <div className="min-h-0 flex-1 overflow-auto px-3 pb-32 pt-3 sm:px-8 sm:pb-16 sm:pt-6">
-          <div className="mx-auto min-h-full w-full max-w-[1240px] overflow-hidden rounded-[28px] bg-white shadow-2xl shadow-slate-900/15">
-            <TemplateRenderer
-              config={renderedConfig}
-              documentKind="page"
-              breakpoint={breakpoint}
-              mode="edit"
-              editing={editing}
-            />
-          </div>
+      <div className="relative min-h-0 flex-1 overflow-auto bg-slate-100 px-3 pb-28 pt-3 sm:px-8 sm:pb-10 sm:pt-6">
+        <div className="mx-auto min-h-full w-full max-w-[1240px] overflow-hidden rounded-[28px] bg-white shadow-2xl">
+          <DirectPageRenderer
+            document={document}
+            breakpoint={breakpoint}
+            mode="edit"
+            editing={editing}
+          />
         </div>
         {selection ? (
-          <FloatingToolbar
+          <ContextualActions
+            mobile={mobile}
             selection={selection}
-            document={document}
-            onClose={() => {
-              setSelection(null);
-              setSelectedItem(null);
-            }}
-            onDuplicate={() => editing.onDuplicate?.(selection.blockId ?? "")}
-            onToggle={() => editing.onToggleHidden?.(selection.blockId ?? "")}
+            selectedBlock={selectedBlock}
+            selectedCapabilities={selectedCapabilities}
+            ctaValue={ctaValue}
+            imageTarget={imageTarget}
+            assetBusy={assetBusy}
+            onReplaceImage={replaceImage}
+            onPatch={patchPath}
+            onClose={() => setSelection(null)}
+            onBlockAction={blockAction}
+            onItemAction={itemAction}
           />
         ) : null}
-        <div className="fixed bottom-4 left-1/2 z-40 -translate-x-1/2 sm:bottom-6">
+        <div className="fixed bottom-4 left-1/2 z-40 -translate-x-1/2">
           {pickerOpen ? (
-            <div className="mb-2 grid w-[min(92vw,22rem)] grid-cols-2 gap-2 rounded-2xl border border-slate-200 bg-white p-3 shadow-2xl">
-              <BlockButton label="Texto" onClick={() => addBlock("text")} />
-              <BlockButton label="Servicios" onClick={() => addBlock("services")} />
-              <BlockButton label="Imagen" onClick={() => addBlock("image")} />
-              <BlockButton label="Enlaces" onClick={() => addBlock("links")} />
+            <div className="mb-2 grid w-[min(92vw,22rem)] grid-cols-2 gap-2 rounded-2xl bg-white p-3 shadow-2xl">
+              <button
+                type="button"
+                onClick={() => addBlock("text")}
+                className="rounded-xl border p-2 text-xs"
+              >
+                Texto
+              </button>
+              <button
+                type="button"
+                onClick={() => addBlock("collection")}
+                className="rounded-xl border p-2 text-xs"
+              >
+                Servicios
+              </button>
+              <button
+                type="button"
+                onClick={() => addBlock("image")}
+                className="rounded-xl border p-2 text-xs"
+              >
+                Imagen
+              </button>
+              <button
+                type="button"
+                onClick={() => addBlock("links")}
+                className="rounded-xl border p-2 text-xs"
+              >
+                Enlaces
+              </button>
             </div>
           ) : null}
           <button
@@ -391,16 +381,10 @@ export function DirectPageEditorShell({
             Añadir bloque
           </button>
         </div>
-        {selection ? (
-          <MobileSheet
-            selection={selection}
-            document={document}
-            onClose={() => setSelection(null)}
-            onDuplicate={() => editing.onDuplicate?.(selection.blockId ?? "")}
-            onToggle={() => editing.onToggleHidden?.(selection.blockId ?? "")}
-          />
-        ) : null}
       </div>
+      <span data-testid="direct-page-editor-document-authority" className="sr-only">
+        PageDocumentV1/direct-page
+      </span>
       <span data-testid="direct-page-editor-save-status" className="sr-only">
         {saveState}
       </span>
@@ -411,130 +395,153 @@ export function DirectPageEditorShell({
   );
 }
 
-function BlockButton({ label, onClick }: { label: string; onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold hover:bg-slate-50"
-    >
-      {label}
-    </button>
-  );
-}
-
-function FloatingToolbar({
+function ContextualActions({
+  mobile,
   selection,
-  document,
+  selectedBlock,
+  selectedCapabilities,
+  ctaValue,
+  imageTarget,
+  assetBusy,
+  onReplaceImage,
+  onPatch,
   onClose,
-  onDuplicate,
-  onToggle,
+  onBlockAction,
+  onItemAction,
 }: {
-  selection: NonNullable<Selection>;
-  document: PageDocumentV1;
+  mobile: boolean;
+  selection: Selection;
+  selectedBlock?: PageDocumentBlockV1;
+  selectedCapabilities: readonly string[];
+  ctaValue?: { label?: string; url?: string };
+  imageTarget: boolean;
+  assetBusy: boolean;
+  onReplaceImage: (file: File) => Promise<void>;
+  onPatch: (path: string, value: unknown) => void;
   onClose: () => void;
-  onDuplicate: () => void;
-  onToggle: () => void;
+  onBlockAction: (action: "duplicate" | "hide" | "delete" | "up" | "down") => void;
+  onItemAction: (action: "duplicate" | "delete" | "up" | "down") => void;
 }) {
-  const block = selection.blockId
-    ? document.blocks.find((item) => item.id === selection.blockId)
-    : undefined;
+  const item = selection?.kind === "item";
+  const cta = selection?.kind === "cta";
+  const imagePath =
+    selection?.kind === "item" && selection.blockId && selection.itemId
+      ? `blocks.${selection.blockId}.content.items.${selection.itemId}.image`
+      : selectedBlock
+        ? `blocks.${selectedBlock.id}.content.image`
+        : "";
   return (
     <div
-      data-testid="direct-page-editor-floating-toolbar"
-      className="fixed left-1/2 top-[4.75rem] z-50 hidden -translate-x-1/2 items-center gap-1 rounded-2xl border border-slate-200 bg-white/95 p-2 shadow-2xl backdrop-blur sm:flex"
+      data-testid={
+        mobile ? "direct-page-editor-mobile-sheet" : "direct-page-editor-floating-toolbar"
+      }
+      className={
+        mobile
+          ? "fixed inset-x-0 bottom-0 z-40 max-h-[45vh] overflow-auto rounded-t-3xl bg-white px-5 pb-5 pt-4 shadow-2xl"
+          : "fixed left-1/2 top-[4.75rem] z-50 flex max-w-[min(94vw,48rem)] -translate-x-1/2 flex-wrap items-center gap-1 rounded-2xl border bg-white/95 p-2 shadow-2xl"
+      }
     >
-      <span className="px-2 text-xs font-semibold text-slate-700">
-        {selection.kind === "background"
-          ? "Fondo"
-          : selection.kind === "item"
-            ? "Elemento"
-            : (block?.type ?? "Bloque")}
+      <span className="mr-2 text-xs font-semibold">
+        {cta ? "CTA" : item ? "Elemento" : (selectedBlock?.type ?? "Fondo")}
       </span>
-      <button
-        type="button"
-        onClick={onDuplicate}
-        className="rounded-lg p-2 hover:bg-slate-100"
-        title="Duplicar"
-      >
-        <Copy size={15} />
+      {selectedBlock && !item && !cta ? (
+        <>
+          <button type="button" title="Subir" onClick={() => onBlockAction("up")}>
+            <Undo2 size={16} />
+          </button>
+          <button type="button" title="Bajar" onClick={() => onBlockAction("down")}>
+            <Redo2 size={16} />
+          </button>
+          <button type="button" title="Duplicar" onClick={() => onBlockAction("duplicate")}>
+            <Copy size={16} />
+          </button>
+          <button type="button" title="Ocultar" onClick={() => onBlockAction("hide")}>
+            <EyeOff size={16} />
+          </button>
+          <button
+            type="button"
+            title="Alinear izquierda"
+            onClick={() => onPatch(`blocks.${selectedBlock.id}.layout.alignment`, "left")}
+          >
+            L
+          </button>
+          <button
+            type="button"
+            title="Alinear centro"
+            onClick={() => onPatch(`blocks.${selectedBlock.id}.layout.alignment`, "center")}
+          >
+            C
+          </button>
+          {selectedCapabilities.includes("replace") || selectedCapabilities.includes("image") ? (
+            <label title="Reemplazar imagen" className="cursor-pointer">
+              <ImagePlus size={16} />
+              {assetBusy ? "…" : ""}
+              <input
+                className="sr-only"
+                type="file"
+                accept="image/*"
+                disabled={assetBusy}
+                onChange={(event) => {
+                  const file = event.target.files?.[0];
+                  if (file) void onReplaceImage(file);
+                  event.currentTarget.value = "";
+                }}
+              />
+            </label>
+          ) : null}
+        </>
+      ) : null}
+      {item ? (
+        <>
+          <button type="button" title="Subir" onClick={() => onItemAction("up")}>
+            <Undo2 size={16} />
+          </button>
+          <button type="button" title="Bajar" onClick={() => onItemAction("down")}>
+            <Redo2 size={16} />
+          </button>
+          <button type="button" title="Duplicar" onClick={() => onItemAction("duplicate")}>
+            <Copy size={16} />
+          </button>
+          <button type="button" title="Eliminar" onClick={() => onItemAction("delete")}>
+            <EyeOff size={16} />
+          </button>
+          {imageTarget ? (
+            <label title="Reemplazar imagen" className="cursor-pointer">
+              <ImagePlus size={16} />
+              <input
+                className="sr-only"
+                type="file"
+                accept="image/*"
+                disabled={assetBusy}
+                onChange={(event) => {
+                  const file = event.target.files?.[0];
+                  if (file) void onReplaceImage(file);
+                  event.currentTarget.value = "";
+                }}
+              />
+            </label>
+          ) : null}
+        </>
+      ) : null}
+      {cta ? (
+        <div className="flex flex-wrap items-center gap-1">
+          <input
+            aria-label="Texto del CTA"
+            className="w-28 rounded border px-2 py-1 text-xs"
+            defaultValue={ctaValue?.label ?? ""}
+            onBlur={(event) => onPatch(`${selection.path}.label`, event.currentTarget.value)}
+          />
+          <input
+            aria-label="URL del CTA"
+            className="w-40 rounded border px-2 py-1 text-xs"
+            defaultValue={ctaValue?.url ?? ""}
+            onBlur={(event) => onPatch(`${selection.path}.url`, event.currentTarget.value)}
+          />
+        </div>
+      ) : null}
+      <button type="button" title="Cerrar" onClick={onClose}>
+        <X size={16} />
       </button>
-      <button
-        type="button"
-        onClick={onToggle}
-        className="rounded-lg p-2 hover:bg-slate-100"
-        title="Ocultar"
-      >
-        <EyeOff size={15} />
-      </button>
-      <button
-        type="button"
-        onClick={onClose}
-        className="rounded-lg p-2 hover:bg-slate-100"
-        title="Cerrar"
-      >
-        <X size={15} />
-      </button>
-    </div>
-  );
-}
-
-function MobileSheet({
-  selection,
-  document,
-  onClose,
-  onDuplicate,
-  onToggle,
-}: {
-  selection: NonNullable<Selection>;
-  document: PageDocumentV1;
-  onClose: () => void;
-  onDuplicate: () => void;
-  onToggle: () => void;
-}) {
-  const block = selection.blockId
-    ? document.blocks.find((item) => item.id === selection.blockId)
-    : undefined;
-  return (
-    <div
-      data-testid="direct-page-editor-mobile-sheet"
-      className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-between gap-3 rounded-t-3xl border-t border-slate-200 bg-white px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 shadow-[0_-12px_40px_rgba(15,23,42,0.18)] sm:hidden"
-    >
-      <div>
-        <div className="mx-auto mb-2 h-1 w-10 rounded-full bg-slate-300" />
-        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-          Editando
-        </p>
-        <p className="text-sm font-semibold text-slate-800">
-          {selection.kind === "background" ? "Fondo" : (block?.type ?? "Bloque")}
-        </p>
-      </div>
-      <div className="flex gap-1">
-        <button
-          type="button"
-          onClick={onDuplicate}
-          className="rounded-xl p-3 hover:bg-slate-100"
-          title="Duplicar"
-        >
-          <Copy size={16} />
-        </button>
-        <button
-          type="button"
-          onClick={onToggle}
-          className="rounded-xl p-3 hover:bg-slate-100"
-          title="Ocultar"
-        >
-          <EyeOff size={16} />
-        </button>
-        <button
-          type="button"
-          onClick={onClose}
-          className="rounded-xl p-3 hover:bg-slate-100"
-          title="Cerrar"
-        >
-          <X size={16} />
-        </button>
-      </div>
     </div>
   );
 }

@@ -1,12 +1,23 @@
 /** Isolated staging adapter. It does not call Supabase or production code. */
 
-import { CHANNEL_EVENT, type AnalyticsEventV1, type AnalyticsEventType, type DeviceKind } from "./analytics.types";
+import {
+  CHANNEL_EVENT,
+  type AnalyticsEventV1,
+  type AnalyticsEventType,
+  type DeviceKind,
+} from "./analytics.types";
 
 export interface CripqerLegacyAnalyticsEvent {
   id: string;
   profile_id: string;
   page_id?: string | null;
-  event_type: "view" | "link_click";
+  /**
+   * Persisted event discriminator. Legacy writes produce "view" and
+   * "link_click"; future canonical writes may persist any AnalyticsEventType
+   * verbatim (e.g. "qr_scan", "share", "lead_created"). Legacy values are
+   * normalized at read time, never rewritten in storage.
+   */
+  event_type: "view" | AnalyticsEventType;
   link_id?: string | null;
   item_id?: string | null;
   item_label?: string | null;
@@ -19,6 +30,14 @@ export interface CripqerLegacyAnalyticsEvent {
   city?: string | null;
   referrer?: string | null;
   session_id?: string | null;
+  /**
+   * Normalized destination platform written by the canonical V1.1 write
+   * boundary (whatsapp/instagram/facebook/tiktok/youtube/linkedin). Legacy rows
+   * have NULL here and fall back to `interaction_type` at read time.
+   */
+  platform?: string | null;
+  /** QR entry identity, only written by a QR-aware runtime point (never inferred). */
+  qr_id?: string | null;
   created_at: string;
   interaction_type?: "button" | "whatsapp" | "product" | "service" | null;
   source?: string | null;
@@ -49,8 +68,16 @@ export interface FieldProvenance {
   note?: string;
 }
 
-function channelEvent(url: string | null | undefined, interaction: CripqerLegacyAnalyticsEvent["interaction_type"]): AnalyticsEventType {
-  if (interaction === "whatsapp" || url?.toLowerCase().includes("wa.me") || url?.toLowerCase().includes("whatsapp")) return CHANNEL_EVENT.whatsapp;
+function channelEvent(
+  url: string | null | undefined,
+  interaction: CripqerLegacyAnalyticsEvent["interaction_type"],
+): AnalyticsEventType {
+  if (
+    interaction === "whatsapp" ||
+    url?.toLowerCase().includes("wa.me") ||
+    url?.toLowerCase().includes("whatsapp")
+  )
+    return CHANNEL_EVENT.whatsapp;
   const lower = url?.toLowerCase() ?? "";
   if (lower.includes("instagram")) return CHANNEL_EVENT.instagram;
   if (lower.includes("facebook")) return CHANNEL_EVENT.facebook;
@@ -60,10 +87,31 @@ function channelEvent(url: string | null | undefined, interaction: CripqerLegacy
   return interaction === "button" ? "cta_click" : CHANNEL_EVENT.other;
 }
 
-export function toAnalyticsEventV1(event: CripqerLegacyAnalyticsEvent, context: AdapterContext): AnalyticsEventV1 {
-  const eventType: AnalyticsEventType = event.event_type === "view"
-    ? context.scope === "smart_page" ? "smart_page_view" : "page_view"
-    : channelEvent(event.target_url, event.interaction_type);
+/**
+ * Resolve the canonical V1.1 event type from a persisted record.
+ *
+ * - Legacy "view" is normalized to `page_view` / `smart_page_view`.
+ * - Legacy "link_click" is normalized to a deterministic channel event.
+ * - Canonical event types (qr_scan, share, lead_created, …) pass through verbatim.
+ */
+function resolveEventType(
+  event: CripqerLegacyAnalyticsEvent,
+  context: AdapterContext,
+): AnalyticsEventType {
+  if (event.event_type === "view") {
+    return context.scope === "smart_page" ? "smart_page_view" : "page_view";
+  }
+  if (event.event_type === "link_click") {
+    return channelEvent(event.target_url, event.interaction_type);
+  }
+  return event.event_type;
+}
+
+export function toAnalyticsEventV1(
+  event: CripqerLegacyAnalyticsEvent,
+  context: AdapterContext,
+): AnalyticsEventV1 {
+  const eventType = resolveEventType(event, context);
   return {
     id: event.id,
     eventType,
@@ -72,10 +120,13 @@ export function toAnalyticsEventV1(event: CripqerLegacyAnalyticsEvent, context: 
     ...(event.page_id ? { pageId: event.page_id } : {}),
     ...(context.smartPageId ? { smartPageId: context.smartPageId } : {}),
     ...(context.qrId ? { qrId: context.qrId } : {}),
+    ...(event.qr_id ? { qrId: event.qr_id } : {}),
     ...(event.link_id ? { linkId: event.link_id } : {}),
     ...(event.item_id ? { itemId: event.item_id } : {}),
     ...(event.item_label ? { linkLabel: event.item_label } : {}),
-    ...(event.interaction_type ? { platform: event.interaction_type } : {}),
+    ...(event.interaction_type || event.platform
+      ? { platform: event.platform ?? event.interaction_type }
+      : {}),
     ...(event.session_id ? { sessionId: event.session_id } : {}),
     ...(event.source ? { source: event.source } : {}),
     ...(event.referrer ? { referrer: event.referrer } : {}),
@@ -90,7 +141,10 @@ export function toAnalyticsEventV1(event: CripqerLegacyAnalyticsEvent, context: 
   };
 }
 
-export function toAnalyticsEventsV1(events: CripqerLegacyAnalyticsEvent[], context: AdapterContext): AnalyticsEventV1[] {
+export function toAnalyticsEventsV1(
+  events: CripqerLegacyAnalyticsEvent[],
+  context: AdapterContext,
+): AnalyticsEventV1[] {
   return events.map((event) => toAnalyticsEventV1(event, context));
 }
 
@@ -110,12 +164,14 @@ export const fromLegacyAnalyticsRecords = toAnalyticsEventsV1;
  * Every field is classified so a host can show exactly which fields are
  * trustworthy, normalized, approximate or unavailable — without inventing any.
  */
-export function provenanceOf(event: CripqerLegacyAnalyticsEvent, context: AdapterContext): FieldProvenance[] {
+export function provenanceOf(
+  event: CripqerLegacyAnalyticsEvent,
+  context: AdapterContext,
+): FieldProvenance[] {
   const isClick = event.event_type === "link_click";
-  const eventType = event.event_type === "view"
-    ? context.scope === "smart_page" ? "smart_page_view" : "page_view"
-    : channelEvent(event.target_url, event.interaction_type);
-  const channelNormalized = isClick && eventType !== "external_link_click" && eventType !== "cta_click";
+  const eventType = resolveEventType(event, context);
+  const channelNormalized =
+    isClick && eventType !== "external_link_click" && eventType !== "cta_click";
 
   return [
     { field: "id", provenance: "EXACT", available: true, source: "qr_analytics.id" },
@@ -142,10 +198,12 @@ export function provenanceOf(event: CripqerLegacyAnalyticsEvent, context: Adapte
     },
     {
       field: "qrId",
-      provenance: "UNAVAILABLE",
-      available: false,
-      source: "not persisted",
-      note: "no QR origin is recorded for child-page events; page_view is never assumed to be a qr_scan",
+      provenance: event.qr_id ? "EXACT" : "UNAVAILABLE",
+      available: Boolean(event.qr_id),
+      source: "qr_analytics.qr_id",
+      note: event.qr_id
+        ? undefined
+        : "no QR origin is recorded; page_view is never assumed to be a qr_scan",
     },
     {
       field: "linkId",
@@ -167,9 +225,9 @@ export function provenanceOf(event: CripqerLegacyAnalyticsEvent, context: Adapte
     },
     {
       field: "platform",
-      provenance: event.interaction_type ? "NORMALIZED" : "UNAVAILABLE",
-      available: Boolean(event.interaction_type),
-      source: "qr_analytics.interaction_type",
+      provenance: event.platform ? "EXACT" : event.interaction_type ? "NORMALIZED" : "UNAVAILABLE",
+      available: Boolean(event.platform || event.interaction_type),
+      source: event.platform ? "qr_analytics.platform" : "qr_analytics.interaction_type",
     },
     {
       field: "sessionId",
@@ -182,7 +240,7 @@ export function provenanceOf(event: CripqerLegacyAnalyticsEvent, context: Adapte
       field: "source",
       provenance: event.source ? "EXACT" : "UNAVAILABLE",
       available: Boolean(event.source),
-      source: "qr_analytics has no source column; only reflected if a future column supplies it",
+      source: "qr_analytics.source",
     },
     {
       field: "referrer",
@@ -190,26 +248,36 @@ export function provenanceOf(event: CripqerLegacyAnalyticsEvent, context: Adapte
       available: Boolean(event.referrer),
       source: "qr_analytics.referrer",
     },
-    { field: "utmSource", provenance: "UNAVAILABLE", available: false, source: "column does not exist" },
-    { field: "utmCampaign", provenance: "UNAVAILABLE", available: false, source: "column does not exist" },
+    {
+      field: "utmSource",
+      provenance: event.utm_source ? "EXACT" : "UNAVAILABLE",
+      available: Boolean(event.utm_source),
+      source: "qr_analytics.utm_source",
+    },
+    {
+      field: "utmCampaign",
+      provenance: event.utm_campaign ? "EXACT" : "UNAVAILABLE",
+      available: Boolean(event.utm_campaign),
+      source: "qr_analytics.utm_campaign",
+    },
     {
       field: "device",
-      provenance: "UNAVAILABLE",
-      available: false,
-      source: "not persisted for child-page events",
-      note: "user_agent is persisted but device_type is not written by track_child_page_event",
+      provenance: event.device_type ? "EXACT" : "UNAVAILABLE",
+      available: Boolean(event.device_type),
+      source: "qr_analytics.device_type",
+      note: "user_agent is persisted; device_type is only written by profile-level RPCs, not track_child_page_event",
     },
     {
       field: "browser",
-      provenance: "UNAVAILABLE",
-      available: false,
-      source: "not persisted for child-page events",
+      provenance: event.browser ? "EXACT" : "UNAVAILABLE",
+      available: Boolean(event.browser),
+      source: "qr_analytics.browser",
     },
     {
       field: "os",
-      provenance: "UNAVAILABLE",
-      available: false,
-      source: "not persisted for child-page events",
+      provenance: event.os ? "EXACT" : "UNAVAILABLE",
+      available: Boolean(event.os),
+      source: "qr_analytics.os",
     },
     {
       field: "country",

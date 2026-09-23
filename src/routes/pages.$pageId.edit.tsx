@@ -10,14 +10,16 @@ import { DirectPageEditorPilotHost } from "@/components/direct-page-editor/Direc
  * (never mounted with someone else's data).
  */
 export const Route = createFileRoute("/pages/$pageId/edit")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    directEditor: typeof search["directEditor"] === "string" ? search["directEditor"] : undefined,
+  }),
   component: PagePowerEditor,
 });
 
 function PagePowerEditor() {
   const { pageId } = Route.useParams();
-  const magicPilot =
-    typeof window !== "undefined" &&
-    new URLSearchParams(window.location.search).get("directEditor") === "magic";
+  const { directEditor } = Route.useSearch();
+  const magicPilot = directEditor === "magic";
   if (magicPilot) return <DirectPageEditorPilotHost pageId={pageId} />;
   return <PowerEditorHost target={{ kind: "page", id: pageId }} />;
 }

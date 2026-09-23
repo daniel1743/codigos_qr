@@ -31,6 +31,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as TemplateLabRouteImport } from './routes/template-lab'
 import { Route as DShortUrlRouteImport } from './routes/d.$shortUrl'
 import { Route as InternalPowerEditorRouteImport } from './routes/internal.power-editor'
+import { Route as LabsMagicEditorRouteImport } from './routes/labs.magic-editor'
 import { Route as PPublicIdRouteImport } from './routes/p.$publicId'
 import { Route as PagesPageIdRouteImport } from './routes/pages.$pageId'
 import { Route as PagesNewRouteImport } from './routes/pages.new'
@@ -151,6 +152,11 @@ const InternalPowerEditorRoute = InternalPowerEditorRouteImport.update({
   path: '/internal/power-editor',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LabsMagicEditorRoute = LabsMagicEditorRouteImport.update({
+  id: '/labs/magic-editor',
+  path: '/labs/magic-editor',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PPublicIdRoute = PPublicIdRouteImport.update({
   id: '/p/$publicId',
   path: '/p/$publicId',
@@ -221,6 +227,7 @@ export interface FileRoutesByFullPath {
   '/template-lab': typeof TemplateLabRoute
   '/d/$shortUrl': typeof DShortUrlRoute
   '/internal/power-editor': typeof InternalPowerEditorRoute
+  '/labs/magic-editor': typeof LabsMagicEditorRoute
   '/p/$publicId': typeof PPublicIdRoute
   '/pages/$pageId': typeof PagesPageIdRouteWithChildren
   '/pages/new': typeof PagesNewRoute
@@ -254,6 +261,7 @@ export interface FileRoutesByTo {
   '/template-lab': typeof TemplateLabRoute
   '/d/$shortUrl': typeof DShortUrlRoute
   '/internal/power-editor': typeof InternalPowerEditorRoute
+  '/labs/magic-editor': typeof LabsMagicEditorRoute
   '/p/$publicId': typeof PPublicIdRoute
   '/pages/$pageId': typeof PagesPageIdRouteWithChildren
   '/pages/new': typeof PagesNewRoute
@@ -288,6 +296,7 @@ export interface FileRoutesById {
   '/template-lab': typeof TemplateLabRoute
   '/d/$shortUrl': typeof DShortUrlRoute
   '/internal/power-editor': typeof InternalPowerEditorRoute
+  '/labs/magic-editor': typeof LabsMagicEditorRoute
   '/p/$publicId': typeof PPublicIdRoute
   '/pages/$pageId': typeof PagesPageIdRouteWithChildren
   '/pages/new': typeof PagesNewRoute
@@ -323,6 +332,7 @@ export interface FileRouteTypes {
     | '/template-lab'
     | '/d/$shortUrl'
     | '/internal/power-editor'
+    | '/labs/magic-editor'
     | '/p/$publicId'
     | '/pages/$pageId'
     | '/pages/new'
@@ -356,6 +366,7 @@ export interface FileRouteTypes {
     | '/template-lab'
     | '/d/$shortUrl'
     | '/internal/power-editor'
+    | '/labs/magic-editor'
     | '/p/$publicId'
     | '/pages/$pageId'
     | '/pages/new'
@@ -389,6 +400,7 @@ export interface FileRouteTypes {
     | '/template-lab'
     | '/d/$shortUrl'
     | '/internal/power-editor'
+    | '/labs/magic-editor'
     | '/p/$publicId'
     | '/pages/$pageId'
     | '/pages/new'
@@ -423,6 +435,7 @@ export interface RootRouteChildren {
   TemplateLabRoute: typeof TemplateLabRoute
   DShortUrlRoute: typeof DShortUrlRoute
   InternalPowerEditorRoute: typeof InternalPowerEditorRoute
+  LabsMagicEditorRoute: typeof LabsMagicEditorRoute
   PPublicIdRoute: typeof PPublicIdRoute
   PgPublicIdRoute: typeof PgPublicIdRoute
   VsLinktreeRoute: typeof VsLinktreeRoute
@@ -585,6 +598,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InternalPowerEditorRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/labs/magic-editor': {
+      id: '/labs/magic-editor'
+      path: '/labs/magic-editor'
+      fullPath: '/labs/magic-editor'
+      preLoaderRoute: typeof LabsMagicEditorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/p/$publicId': {
       id: '/p/$publicId'
       path: '/p/$publicId'
@@ -702,6 +722,7 @@ const rootRouteChildren: RootRouteChildren = {
   TemplateLabRoute: TemplateLabRoute,
   DShortUrlRoute: DShortUrlRoute,
   InternalPowerEditorRoute: InternalPowerEditorRoute,
+  LabsMagicEditorRoute: LabsMagicEditorRoute,
   PPublicIdRoute: PPublicIdRoute,
   PgPublicIdRoute: PgPublicIdRoute,
   VsLinktreeRoute: VsLinktreeRoute,

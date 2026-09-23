@@ -1,48 +1,122 @@
-# Cripqer — Magic Card Faithful Port Phase 2 Toolbar V1
+TASK:
+  id: "CRIPQER_MAGIC_CARD_PHASE_2B_REAL_CONTROLS_WIRING_V1"
+  project: "CRIPQER"
+  mode: "TARGETED_CONTEXTUAL_CONTROL_WIRING"
 
-**Modo:** `FAITHFUL_CONTEXTUAL_TOOLBAR_PORT`  
-**Fecha:** `2026-09-22`  
-**Task:** `CRIPQER_MAGIC_CARD_FAITHFUL_PORT_PHASE_2_TOOLBAR_V1`
+OBJECTIVE: >
+  Mantener EXACTAMENTE la tarjeta y toolbar que ya aprobaron visualmente
+  y conectar sus controles visibles a las autoridades reales de Cripqer.
 
-## Alcance
+ABSOLUTE_FREEZE:
+  - "PremiumProductCardMagicV1 visual"
+  - "toolbar visual"
+  - "toolbar dimensions"
+  - "toolbar positioning"
+  - "card proportions"
+  - "Premium Page Canvas"
 
-- Se integró una toolbar contextual desktop sobre `PremiumProductCardMagicV1`.
-- La selección usa la autoridad existente `blockId`, `itemId` y `field`; no se creó estado paralelo.
-- Se agregaron anclajes estables `itemId:card`, `itemId:image`, `itemId:title`, `itemId:description`, `itemId:price` y `itemId:cta`.
-- La toolbar se monta como overlay fijo en `document.body`, con posición arriba, fallback abajo y clamp al viewport. No entra en el flujo del documento ni altera el zoom lógico.
+DO_NOT_REDESIGN:
+  true
 
-## Acciones canónicas
+CONTROLS_TO_WIRE:
 
-- Título, descripción y precio: edición directa y controles de tipografía mediante `onInlineEdit`.
-- Imagen: `Cambiar imagen` usa el adaptador de assets existente; `Quitar` persiste la eliminación de la URL y su provenance.
-- CTA: etiqueta, URL, color y alineación escriben en los campos canónicos existentes.
-- Tarjeta: fondo, borde y radio escriben en `block.style` existente.
-- Recorte/posición, duplicar/mover/detalle y búsquedas externas permanecen deshabilitados cuando no existe autoridad persistente en esta fase.
+  title:
+    - "inline text"
+    - "font family"
+    - "font size"
+    - "color"
+    - "bold"
+    - "italic"
+    - "alignment"
 
-## Aislamiento
+  description:
+    - "inline text"
+    - "font family"
+    - "font size"
+    - "color"
+    - "weight"
+    - "alignment"
 
-- La apariencia, proporciones, imagen 4:3 y contenido de la tarjeta de Fase 1 se conservaron.
-- `ProductCardBlock`, Bio, QR, Menu, Portfolio, Services, save, publish y detalle público no fueron rediseñados.
-- El Inspector continúa disponible como superficie avanzada/secundaria.
+  price:
+    - "direct value"
+    - "font size"
+    - "color"
+    - "weight"
+    - "alignment"
 
-## Runtime evidence
+  image:
+    - "Cambiar imagen"
+    - "Quitar"
 
-- Fixture: Premium Page fresca `promos · GPyZRjg`.
-- La selección de título mostró `Acciones de Título` con fuente, tamaño, color, peso, estilo y alineación.
-- La selección de imagen mostró `Acciones de Imagen` con `Cambiar imagen`, `Quitar`, y `Recortar`/`Posición` deshabilitados.
-- El overlay quedó fijo sobre el canvas a zoom `37%` sin alterar el layout; la posición se mantiene basada en `getBoundingClientRect` y eventos de scroll/resize.
-- El control `Negrita` cambió el estilo canónico del título a `fontWeight: 700`.
+  cta:
+    - "label"
+    - "URL"
+    - "color"
+    - "style"
+    - "alignment"
 
-## Verificación
+  card:
+    - "background"
+    - "border"
+    - "radius"
 
-```text
-Existing Premium Page/catalog/media tests: PASS (14 tests)
-Focused direct-edit regression: PASS
-ESLint touched files: PASS (existing Fast Refresh warning only)
-Production build: PASS
-Runtime title/image toolbar: PASS
-Runtime typography patch/history path: PASS
-```
+DISABLED_UNTIL_REAL_AUTHORITY_EXISTS:
+  - "crop"
+  - "image position"
+  - "move"
+  - "detail"
+  - "advanced effects"
 
-**Estado:** `CRIPQER_MAGIC_CARD_FAITHFUL_PORT_PHASE_2_TOOLBAR_PASS_FROZEN`  
-**STOP_AFTER:** `true`
+CANONICAL_STATE:
+  MUST_USE:
+    - "existing blockId"
+    - "existing itemId"
+    - "existing field selection"
+    - "templateReducer"
+    - "existing history"
+    - "existing TypographyOverride/style authority"
+
+  MUST_NOT:
+    - "store real values only in local component state"
+    - "fake working controls"
+    - "change DOM without canonical persistence"
+
+RUNTIME_REQUIRED:
+
+  sequence:
+    - "change title text"
+    - "change title size"
+    - "change title color"
+    - "undo"
+    - "redo"
+    - "change description"
+    - "change price"
+    - "change CTA label"
+    - "change CTA URL"
+    - "change CTA color"
+    - "remove image"
+    - "undo image removal"
+    - "change card background"
+    - "save"
+    - "reload"
+
+  after_reload:
+    require:
+      - "all canonical changes remain"
+
+CRITICAL_RULE: >
+  A control is not considered implemented because it renders,
+  receives clicks or changes local state.
+
+  PASS requires:
+  UI -> canonical reducer/state -> history -> save -> reload.
+
+SUCCESS_GATE:
+  "CRIPQER_MAGIC_CARD_PHASE_2B_REAL_CONTROLS_PASS_FROZEN"
+
+AFTER_SUCCESS:
+  next:
+    "CRIPQER_MAGIC_CARD_PHASE_3_DUPLICATION_AND_GRID_V1"
+
+STOP_AFTER:
+  true
