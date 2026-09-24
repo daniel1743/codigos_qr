@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   CheckIcon,
   ChevronDownIcon,
@@ -7,6 +7,7 @@ import {
   MonitorIcon,
   PenLineIcon,
   Redo2Icon,
+  SendIcon,
   Settings2Icon,
   SmartphoneIcon,
   Undo2Icon,
@@ -50,7 +51,6 @@ function IconButton({
 
 export function TopBar() {
   const ed = useEditor();
-  const [mobileActionsOpen, setMobileActionsOpen] = useState(false);
   const meta = templates[ed.templateId];
   const tab = (active: boolean) =>
     cx(
@@ -169,9 +169,11 @@ export function TopBar() {
                 <Loader2Icon className="h-3.5 w-3.5 animate-spin" /> Guardando…
               </>
             ) : (
-              <>
-                <CheckIcon className="h-3.5 w-3.5 text-[#16A34A]" /> Guardado
-              </>
+              <CheckIcon
+                className="h-3.5 w-3.5 text-[#16A34A]"
+                aria-label="Guardado"
+                title="Guardado"
+              />
             )}
           </span>
           <IconButton
@@ -186,16 +188,18 @@ export function TopBar() {
             type="button"
             onClick={() => ed.setMode(ed.mode === "edit" ? "preview" : "edit")}
             className={cx(
-              "ml-1 hidden h-9 items-center gap-1.5 whitespace-nowrap rounded-[10px] px-3 text-[13px] font-medium transition-colors duration-150 md:inline-flex",
+              "ml-1 inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-150 md:h-9 md:w-auto md:gap-1.5 md:rounded-[10px] md:px-3",
               ed.mode === "preview" ? "bg-select-soft text-select" : "text-ink hover:bg-[#F2F3F5]",
             )}
+            aria-label={ed.mode === "preview" ? "Editar" : "Vista previa"}
+            title={ed.mode === "preview" ? "Editar" : "Vista previa"}
           >
             {ed.mode === "preview" ? (
               <PenLineIcon className="h-4 w-4" />
             ) : (
               <EyeIcon className="h-4 w-4" />
             )}
-            <span className="hidden sm:inline">
+            <span className="hidden md:inline">
               {ed.mode === "preview" ? "Editar" : "Vista previa"}
             </span>
           </button>
@@ -208,55 +212,17 @@ export function TopBar() {
             {ed.publishing && <Loader2Icon className="h-3.5 w-3.5 animate-spin" />}
             Publicar
           </button>
-          <div className="relative ml-1 md:hidden">
-            <button
-              type="button"
-              aria-haspopup="menu"
-              aria-expanded={mobileActionsOpen}
-              aria-label="Ver y publicar"
-              onClick={() => setMobileActionsOpen((open) => !open)}
-              className="inline-flex h-9 items-center gap-1 rounded-[10px] bg-ink px-2.5 text-[12px] font-semibold text-white transition-opacity duration-150 hover:opacity-90"
-            >
-              {ed.publishing && <Loader2Icon className="h-3.5 w-3.5 animate-spin" />}
-              <span>{ed.mode === "preview" ? "Editar" : "Acciones"}</span>
-              <ChevronDownIcon
-                className={cx(
-                  "h-3.5 w-3.5 transition-transform",
-                  mobileActionsOpen && "rotate-180",
-                )}
-              />
-            </button>
-            {mobileActionsOpen && (
-              <div
-                role="menu"
-                className="absolute right-0 top-11 z-50 min-w-[150px] rounded-[10px] border border-line bg-white p-1.5 shadow-lg"
-              >
-                <button
-                  type="button"
-                  role="menuitem"
-                  onClick={() => {
-                    ed.setMode(ed.mode === "edit" ? "preview" : "edit");
-                    setMobileActionsOpen(false);
-                  }}
-                  className="flex h-9 w-full items-center rounded-[8px] px-3 text-left text-[13px] text-ink hover:bg-[#F2F3F5]"
-                >
-                  {ed.mode === "preview" ? "Editar" : "Vista previa"}
-                </button>
-                <button
-                  type="button"
-                  role="menuitem"
-                  onClick={() => {
-                    ed.publish();
-                    setMobileActionsOpen(false);
-                  }}
-                  disabled={ed.publishing}
-                  className="flex h-9 w-full items-center rounded-[8px] px-3 text-left text-[13px] font-semibold text-ink hover:bg-[#F2F3F5] disabled:opacity-60"
-                >
-                  Publicar
-                </button>
-              </div>
-            )}
-          </div>
+          <button
+            type="button"
+            onClick={ed.publish}
+            disabled={ed.publishing}
+            aria-label="Publicar"
+            title="Publicar"
+            className="ml-1 inline-flex h-9 w-9 items-center justify-center rounded-[10px] text-ink transition-colors duration-150 hover:bg-[#F2F3F5] disabled:opacity-40 md:h-9 md:w-auto md:rounded-[10px] md:bg-ink md:px-4 md:text-white md:hover:opacity-90"
+          >
+            {ed.publishing ? <Loader2Icon className="h-4 w-4 animate-spin" /> : <SendIcon className="h-4 w-4" />}
+            <span className="hidden md:inline">Publicar</span>
+          </button>
         </div>
       </>
     </header>
