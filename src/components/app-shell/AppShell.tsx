@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import PlatformNavbar from "../brand/PlatformNavbar";
 import { PLATFORM_NAV_ITEMS } from "../platform/platform-navigation";
+import MobilePlatformNav from "./MobilePlatformNav";
 
 const SHELL_NAV_ITEMS = PLATFORM_NAV_ITEMS.filter((item) => item.scope !== "admin");
 
@@ -26,6 +27,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         navItems={SHELL_NAV_ITEMS}
       />
       {children}
+      <MobilePlatformNav />
     </div>
   );
 }

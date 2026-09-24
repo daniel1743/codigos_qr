@@ -11,6 +11,7 @@ import {
 import { getBrowserSupabaseClient } from "../../lib/supabase/client";
 import { magicPageService } from "../../services/magic-page.service";
 import type { Page } from "../../types/database";
+import MobilePlatformNav from "../../components/app-shell/MobilePlatformNav";
 
 const MEDIA_BUCKET = "avatars";
 
@@ -163,11 +164,14 @@ export function MagicProductionEditorHost({ pageId }: { pageId: string }) {
   }
 
   return (
-    <MagicEditorApp
-      initialDocument={document}
-      onDocumentChange={onDocumentChange}
-      onPublish={onPublish}
-      uploadAsset={uploadAsset}
-    />
+    <>
+      <MagicEditorApp
+        initialDocument={document}
+        onDocumentChange={onDocumentChange}
+        onPublish={onPublish}
+        uploadAsset={uploadAsset}
+      />
+      <MobilePlatformNav editorPageId={pageId} />
+    </>
   );
 }
