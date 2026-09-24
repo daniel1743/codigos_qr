@@ -1,6 +1,6 @@
 -- =============================================================================
 -- CRIPQER — Intelligent Analytics V1.1 · Phase C2A
--- ANALYTICS PERSISTENCE EVOLUTION (DRY RUN — ADDITIVE ONLY)
+-- ANALYTICS PERSISTENCE EVOLUTION (ADDITIVE ONLY — validated in QA, production via C2B7)
 -- =============================================================================
 -- Task: CRIPQER_ANALYTICS_V1_1_PHASE_C2A_PERSISTENCE_EVOLUTION_DRY_RUN
 --
@@ -11,8 +11,12 @@
 --   * Legacy rows ("view" / "link_click") remain valid and untouched.
 --     NULL means unknown/unavailable; never infer fabricated values.
 --
--- ⚠️  DO NOT apply to remote production. This is a dry-run candidate intended
---     to be validated on a disposable / local / shadow database first.
+-- Lifecycle:
+--   * Validated in the dedicated QA project (tjigzcyoogmvdkivypym).
+--   * Production rollout requires the C2B7 gate sequence AND the deployed
+--     production feature gate (global flag + page allowlist).
+--   * Apply to production (mlinfiuhkxdhlveflbkj) only after the feature gate is
+--     deployed/ready. Rollback/recovery is documented at the end of this file.
 --
 -- Compatibility notes:
 --   * Existing RPC signatures are NOT changed:

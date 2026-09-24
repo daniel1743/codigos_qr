@@ -1,12 +1,15 @@
 -- =============================================================================
 -- CRIPQER — Intelligent Analytics V1.1 · Phase C2B4B
--- REAL QR SCAN BOUNDARY (QA-ONLY — DO NOT APPLY TO PRODUCTION)
+-- REAL QR SCAN BOUNDARY (validated in QA — production rollout via C2B7 gates)
 -- =============================================================================
 -- Task: CRIPQER_ANALYTICS_V1_1_PHASE_C2B4B_REAL_QR_SCAN_BOUNDARY
 --
--- Target database: cripqer-qa (project ref tjigzcyoogmvdkivypym) ONLY.
---
--- ⚠️  NEVER run this file against production project mlinfiuhkxdhlveflbkj.
+-- Lifecycle:
+--   * Validated in the dedicated QA project (tjigzcyoogmvdkivypym).
+--   * Production rollout requires the C2B7 gate sequence AND the deployed
+--     production feature gate (global flag + page allowlist).
+--   * Apply to production (mlinfiuhkxdhlveflbkj) only after the feature gate is
+--     deployed/ready. Rollback/recovery is documented at the end of this file.
 --
 -- Truth rule: a `qr_scan` is emitted ONLY by the dedicated QR redirect path
 -- (`/q/{public_id}`). A direct `/pg/{public_id}` visit is a `page_view`, never a

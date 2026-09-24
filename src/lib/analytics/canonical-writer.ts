@@ -8,7 +8,10 @@
  * the session id and bounds the metadata before delegating to the host RPC.
  */
 
-import { assertQaRuntime } from "./qa-runtime-guard";
+import {
+  assertCanonicalAnalyticsAllowed,
+  type CanonicalAnalyticsEnvironment,
+} from "./feature-gate";
 import { getOrCreateSessionId } from "./session";
 import { classifyDeviceType } from "./device-classifier";
 
@@ -108,6 +111,8 @@ export function resolveCanonicalClickType(
 export interface CanonicalWriterConfig {
   supabaseUrl?: string | null;
   boundary: AnalyticsRpcBoundary;
+  /** Runtime env used by the feature gate (flag + page allowlist). */
+  environment?: CanonicalAnalyticsEnvironment;
 }
 
 export interface CanonicalAnalyticsWriter {
@@ -138,14 +143,19 @@ export function createCanonicalWriter(config: CanonicalWriterConfig): CanonicalA
         };
       }
 
-      // 2) QA runtime gate — refuse to write to production or any unknown project.
+      // 2) Feature gate — QA allowed; production requires the global flag and a
+      //    page-scoped allowlist; unknown projects are always denied.
       try {
-        assertQaRuntime(config.supabaseUrl);
+        assertCanonicalAnalyticsAllowed({
+          supabaseUrl: config.supabaseUrl,
+          publicId: input.publicId,
+          environment: config.environment,
+        });
       } catch (error) {
         return {
           eventId: null,
           skipped: true,
-          reason: error instanceof Error ? error.message : "qa_runtime_gate_failed",
+          reason: error instanceof Error ? error.message : "canonical_analytics_gate_failed",
         };
       }
 
