@@ -61,7 +61,7 @@ export interface EditorValue {
   closePicker: () => void;
   settingsOpen: boolean;
   setSettingsOpen: Setter<boolean>;
-  saveState: 'saved' | 'saving';
+  saveState: 'saved' | 'saving' | 'error';
   canUndo: boolean;
   canRedo: boolean;
   undo: () => void;
@@ -100,6 +100,15 @@ function createHistory(id: TemplateId): History {
   return { past: [], present: createDoc(id), future: [] };
 }
 
+function withTemplateDefaults(doc: PageDoc, id: TemplateId): PageDoc {
+  const existing = new Set(doc.blocks.map((block) => block.key));
+  const missing = templates[id].initialBlocks
+    .filter((block) => !existing.has(block.key))
+    .map((block) => ({ ...block }));
+
+  return missing.length ? { ...doc, blocks: [...doc.blocks, ...missing] } : doc;
+}
+
 function uid(): string {
   return Math.random().toString(36).slice(2, 7);
 }
@@ -110,7 +119,7 @@ interface EditorProviderProps {
   initialDevice?: Device;
   initialDocument?: MagicEditorStateV1;
   initialMode?: EditorMode;
-  onDocumentChange?: (state: MagicEditorStateV1) => void;
+  onDocumentChange?: (state: MagicEditorStateV1) => Promise<void> | void;
   onPublish?: (state: MagicEditorStateV1) => Promise<void> | void;
   uploadAsset?: (file: File) => Promise<string>;
 }
@@ -134,7 +143,7 @@ export function EditorProvider({ children, initialTemplate = 'bio', initialDevic
   const [moreOpen, setMoreOpen] = useState(false);
   const [picker, setPicker] = useState<PickerState>({ open: false });
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [saveState, setSaveState] = useState<'saved' | 'saving'>('saved');
+  const [saveState, setSaveState] = useState<'saved' | 'saving' | 'error'>('saved');
   const [publishing, setPublishing] = useState(false);
   const registry = useRef(new Map<string, RegisteredElement>());
 
@@ -143,7 +152,13 @@ export function EditorProvider({ children, initialTemplate = 'bio', initialDevic
   const doc = history.present;
 
   useEffect(() => {
-    onDocumentChange?.({ templateId, doc });
+    const request = onDocumentChange?.({ templateId, doc });
+    if (!request) return;
+
+    setSaveState('saving');
+    void Promise.resolve(request)
+      .then(() => setSaveState('saved'))
+      .catch(() => setSaveState('error'));
   }, [doc, onDocumentChange, templateId]);
 
   useEffect(() => {
@@ -174,17 +189,6 @@ export function EditorProvider({ children, initialTemplate = 'bio', initialDevic
     },
     [templateId]
   );
-
-  const firstRender = useRef(true);
-  useEffect(() => {
-    if (firstRender.current) {
-      firstRender.current = false;
-      return;
-    }
-    setSaveState('saving');
-    const t = window.setTimeout(() => setSaveState('saved'), 700);
-    return () => window.clearTimeout(t);
-  }, [histories]);
 
   const undo = useCallback(() => {
     setHistories((h) => {
@@ -255,12 +259,21 @@ export function EditorProvider({ children, initialTemplate = 'bio', initialDevic
 
   const setTemplateId = useCallback(
     (id: TemplateId) => {
+      if (id === templateId) return;
+      setHistories((h) => {
+        const next = withTemplateDefaults(h[templateId].present, id);
+        return {
+          bio: { ...h.bio, present: next, future: [] },
+          business: { ...h.business, present: next, future: [] },
+          portfolio: { ...h.portfolio, present: next, future: [] },
+        };
+      });
       setTemplateIdState(id);
       resetTransient();
       setPicker({ open: false });
       setSettingsOpen(false);
     },
-    [resetTransient]
+    [resetTransient, templateId]
   );
 
   const setDevice = useCallback(

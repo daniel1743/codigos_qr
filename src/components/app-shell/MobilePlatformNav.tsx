@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from "@tanstack/react-router";
 import { FileLock2, Home, Pencil, QrCode, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getBrowserSupabaseClient } from "../../lib/supabase/client";
+import { resolveCanonicalMagicPageId } from "../../lib/editor-routing/resolveCanonicalMagicPage";
 import { PLATFORM_BRAND } from "../platform/platform-brand";
 
 type MobilePlatformNavProps = { editorPageId?: string };
@@ -25,14 +26,8 @@ export default function MobilePlatformNav({ editorPageId }: MobilePlatformNavPro
       const supabase = getBrowserSupabaseClient();
       const { data: sessionData } = await supabase.auth.getSession();
       if (!sessionData.session) return;
-      const { data } = await supabase
-        .from("pages")
-        .select("id")
-        .eq("owner_user_id", sessionData.session.user.id)
-        .order("created_at", { ascending: true })
-        .limit(1)
-        .maybeSingle();
-      if (active) setResolvedPageId(data?.id);
+      const pageId = await resolveCanonicalMagicPageId(supabase, sessionData.session.user.id);
+      if (active) setResolvedPageId(pageId ?? undefined);
     })();
     return () => {
       active = false;

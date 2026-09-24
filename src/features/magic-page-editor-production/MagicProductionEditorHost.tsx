@@ -42,6 +42,11 @@ export function MagicProductionEditorHost({ pageId }: { pageId: string }) {
   const [revision, setRevision] = useState(0);
   const saveTimer = useRef<number | null>(null);
   const skipFirstChange = useRef(true);
+  const pendingSave = useRef<{
+    state: MagicEditorStateV1;
+    resolve: Array<() => void>;
+    reject: Array<(reason: unknown) => void>;
+  } | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -77,6 +82,10 @@ export function MagicProductionEditorHost({ pageId }: { pageId: string }) {
     return () => {
       active = false;
       if (saveTimer.current) window.clearTimeout(saveTimer.current);
+      pendingSave.current?.reject.forEach((reject) =>
+        reject(new Error("El editor se cerró antes de guardar.")),
+      );
+      pendingSave.current = null;
     };
   }, [pageId, supabase]);
 
@@ -93,27 +102,66 @@ export function MagicProductionEditorHost({ pageId }: { pageId: string }) {
     [page, session, supabase],
   );
 
+  const flushPendingSave = useCallback(
+    async (stateOverride?: MagicEditorStateV1) => {
+      if (saveTimer.current) {
+        window.clearTimeout(saveTimer.current);
+        saveTimer.current = null;
+      }
+
+      const pending = pendingSave.current;
+      const state = stateOverride ?? pending?.state;
+      if (!state) return;
+
+      try {
+        await save(state);
+        pending?.resolve.forEach((resolve) => resolve());
+      } catch (reason) {
+        pending?.reject.forEach((reject) => reject(reason));
+        throw reason;
+      } finally {
+        if (pendingSave.current === pending) pendingSave.current = null;
+      }
+    },
+    [save],
+  );
+
   const onDocumentChange = useCallback(
-    (state: MagicEditorStateV1) => {
+    (state: MagicEditorStateV1): Promise<void> => {
       setDocument(state);
       if (skipFirstChange.current) {
         skipFirstChange.current = false;
-        return;
+        return Promise.resolve();
       }
+
+      if (pendingSave.current) {
+        pendingSave.current.state = state;
+      }
+      const promise = new Promise<void>((resolve, reject) => {
+        if (!pendingSave.current) {
+          pendingSave.current = { state, resolve: [resolve], reject: [reject] };
+        } else {
+          pendingSave.current.resolve.push(resolve);
+          pendingSave.current.reject.push(reject);
+        }
+      });
       if (saveTimer.current) window.clearTimeout(saveTimer.current);
       saveTimer.current = window.setTimeout(() => {
-        void save(state).catch((reason) =>
+        saveTimer.current = null;
+        void flushPendingSave().catch((reason) =>
           setError(reason instanceof Error ? reason.message : "No se pudo guardar el borrador."),
         );
       }, 650);
+      return promise;
     },
-    [save],
+    [flushPendingSave],
   );
 
   const onPublish = useCallback(
     async (state: MagicEditorStateV1) => {
       if (!page || !session) return;
-      await save(state);
+      if (pendingSave.current) await flushPendingSave(state);
+      else await save(state);
       const published = await magicPageService.publish(
         supabase,
         page.id,
@@ -124,7 +172,7 @@ export function MagicProductionEditorHost({ pageId }: { pageId: string }) {
       setRevision(published.published_revision);
       setPage(published);
     },
-    [page, revision, save, session, supabase],
+    [flushPendingSave, page, revision, save, session, supabase],
   );
 
   const uploadAsset = useCallback(

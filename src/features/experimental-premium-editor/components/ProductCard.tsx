@@ -73,7 +73,7 @@ export function ProductCard({ product, index }: ProductCardProps) {
       )}
 
       <div className="relative">
-        <CardImage priority={priority}
+        <CardImage priority={index < 2}
           product={product}
           selected={isTarget("image")}
           onActivate={() => select(product.id, "image")}

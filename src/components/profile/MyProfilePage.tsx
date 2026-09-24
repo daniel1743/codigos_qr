@@ -489,7 +489,7 @@ export function MyProfilePage() {
                           Editar mi página
                         </Link>
                       </Button>
-                      {pageProfile.published && publicUrl && (
+                      {canonicalPage.published && publicUrl && (
                         <Button asChild variant="outline" className="w-full sm:w-auto">
                           <a href={publicUrl} target="_blank" rel="noreferrer">
                             <ExternalLink className="h-4 w-4" />

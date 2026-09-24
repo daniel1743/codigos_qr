@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ArrowUpRight, Eye, Globe, Pencil, QrCode, Share2 } from "lucide-react";
 import { AppShell } from "../components/app-shell/AppShell";
@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { PLATFORM_BRAND } from "../components/platform/platform-brand";
 import { getBrowserSupabaseClient } from "../lib/supabase/client";
 import { getPublicProfileUrl } from "../lib/url";
+import { resolveCanonicalMagicPageId } from "../lib/editor-routing/resolveCanonicalMagicPage";
 
 interface PageSummary {
   display_name: string;
@@ -36,12 +37,15 @@ function MyPageHub() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState<PageSummary | null>(null);
   const [activeTab, setActiveTab] = useState("resumen");
+  const [canonicalPageId, setCanonicalPageId] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     (async () => {
       try {
         const { data: auth } = await supabase.auth.getUser();
         if (!auth.user) return;
+        setCanonicalPageId(await resolveCanonicalMagicPageId(supabase, auth.user.id));
         const { data: profiles } = await supabase
           .from("profiles")
           .select(
@@ -82,9 +86,9 @@ function MyPageHub() {
               <Link to="/pages">Ver todas mis páginas</Link>
             </Button>
             <Button asChild style={{ backgroundColor: PLATFORM_BRAND.colors.blue }}>
-              <Link to="/editor">
+              <button type="button" onClick={() => void navigate(canonicalPageId ? { to: "/pages/$pageId/edit", params: { pageId: canonicalPageId } } : { to: "/profile" })}>
                 <Pencil className="mr-2 h-4 w-4" /> Editar
-              </Link>
+              </button>
             </Button>
           </div>
         </header>
@@ -136,9 +140,9 @@ function MyPageHub() {
               )}
               <div className="flex flex-wrap gap-3">
                 <Button asChild style={{ backgroundColor: PLATFORM_BRAND.colors.blue }}>
-                  <Link to="/editor">
+                  <button type="button" onClick={() => void navigate(canonicalPageId ? { to: "/pages/$pageId/edit", params: { pageId: canonicalPageId } } : { to: "/profile" })}>
                     <Pencil className="mr-2 h-4 w-4" /> Editar página
-                  </Link>
+                  </button>
                 </Button>
                 {publicUrl && page?.published && (
                   <Button asChild variant="outline">

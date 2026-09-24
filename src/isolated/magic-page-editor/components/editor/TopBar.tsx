@@ -1,6 +1,7 @@
 import React from "react";
 import {
   CheckIcon,
+  AlertCircleIcon,
   ChevronDownIcon,
   EyeIcon,
   Loader2Icon,
@@ -168,6 +169,12 @@ export function TopBar() {
               <>
                 <Loader2Icon className="h-3.5 w-3.5 animate-spin" /> Guardando…
               </>
+            ) : ed.saveState === "error" ? (
+              <AlertCircleIcon
+                className="h-3.5 w-3.5 text-red-600"
+                aria-label="Error al guardar"
+                title="Error al guardar"
+              />
             ) : (
               <CheckIcon
                 className="h-3.5 w-3.5 text-[#16A34A]"

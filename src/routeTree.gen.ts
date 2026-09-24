@@ -42,6 +42,7 @@ import { Route as VsLinktreeRouteImport } from './routes/vs/linktree'
 import { Route as PagesPageIdAnalyticsRouteImport } from './routes/pages.$pageId.analytics'
 import { Route as PagesPageIdEditRouteImport } from './routes/pages.$pageId.edit'
 import { Route as PagesPageIdEditPrototypeRouteImport } from './routes/pages.$pageId.edit-prototype'
+import { Route as PagesPageIdFuxionDemoRouteImport } from './routes/pages.$pageId.fuxion-demo'
 import { Route as PgASlugRouteImport } from './routes/pg.a.$slug'
 
 const IndexRoute = IndexRouteImport.update({
@@ -210,6 +211,11 @@ const PagesPageIdEditPrototypeRoute =
     path: '/edit-prototype',
     getParentRoute: () => PagesPageIdRoute,
   } as any)
+const PagesPageIdFuxionDemoRoute = PagesPageIdFuxionDemoRouteImport.update({
+  id: '/fuxion-demo',
+  path: '/fuxion-demo',
+  getParentRoute: () => PagesPageIdRoute,
+} as any)
 const PgASlugRoute = PgASlugRouteImport.update({
   id: '/pg/a/$slug',
   path: '/pg/a/$slug',
@@ -250,6 +256,7 @@ export interface FileRoutesByFullPath {
   '/pages/$pageId/analytics': typeof PagesPageIdAnalyticsRoute
   '/pages/$pageId/edit': typeof PagesPageIdEditRoute
   '/pages/$pageId/edit-prototype': typeof PagesPageIdEditPrototypeRoute
+  '/pages/$pageId/fuxion-demo': typeof PagesPageIdFuxionDemoRoute
   '/pg/a/$slug': typeof PgASlugRoute
 }
 export interface FileRoutesByTo {
@@ -286,6 +293,7 @@ export interface FileRoutesByTo {
   '/pages/$pageId/analytics': typeof PagesPageIdAnalyticsRoute
   '/pages/$pageId/edit': typeof PagesPageIdEditRoute
   '/pages/$pageId/edit-prototype': typeof PagesPageIdEditPrototypeRoute
+  '/pages/$pageId/fuxion-demo': typeof PagesPageIdFuxionDemoRoute
   '/pg/a/$slug': typeof PgASlugRoute
 }
 export interface FileRoutesById {
@@ -323,6 +331,7 @@ export interface FileRoutesById {
   '/pages/$pageId/analytics': typeof PagesPageIdAnalyticsRoute
   '/pages/$pageId/edit': typeof PagesPageIdEditRoute
   '/pages/$pageId/edit-prototype': typeof PagesPageIdEditPrototypeRoute
+  '/pages/$pageId/fuxion-demo': typeof PagesPageIdFuxionDemoRoute
   '/pg/a/$slug': typeof PgASlugRoute
 }
 export interface FileRouteTypes {
@@ -361,6 +370,7 @@ export interface FileRouteTypes {
     | '/pages/$pageId/analytics'
     | '/pages/$pageId/edit'
     | '/pages/$pageId/edit-prototype'
+    | '/pages/$pageId/fuxion-demo'
     | '/pg/a/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -397,6 +407,7 @@ export interface FileRouteTypes {
     | '/pages/$pageId/analytics'
     | '/pages/$pageId/edit'
     | '/pages/$pageId/edit-prototype'
+    | '/pages/$pageId/fuxion-demo'
     | '/pg/a/$slug'
   id:
     | '__root__'
@@ -433,6 +444,7 @@ export interface FileRouteTypes {
     | '/pages/$pageId/analytics'
     | '/pages/$pageId/edit'
     | '/pages/$pageId/edit-prototype'
+    | '/pages/$pageId/fuxion-demo'
     | '/pg/a/$slug'
   fileRoutesById: FileRoutesById
 }
@@ -701,6 +713,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PagesPageIdEditPrototypeRouteImport
       parentRoute: typeof PagesPageIdRoute
     }
+    '/pages/$pageId/fuxion-demo': {
+      id: '/pages/$pageId/fuxion-demo'
+      path: '/fuxion-demo'
+      fullPath: '/pages/$pageId/fuxion-demo'
+      preLoaderRoute: typeof PagesPageIdFuxionDemoRouteImport
+      parentRoute: typeof PagesPageIdRoute
+    }
     '/pg/a/$slug': {
       id: '/pg/a/$slug'
       path: '/pg/a/$slug'
@@ -715,12 +734,14 @@ interface PagesPageIdRouteChildren {
   PagesPageIdAnalyticsRoute: typeof PagesPageIdAnalyticsRoute
   PagesPageIdEditRoute: typeof PagesPageIdEditRoute
   PagesPageIdEditPrototypeRoute: typeof PagesPageIdEditPrototypeRoute
+  PagesPageIdFuxionDemoRoute: typeof PagesPageIdFuxionDemoRoute
 }
 
 const PagesPageIdRouteChildren: PagesPageIdRouteChildren = {
   PagesPageIdAnalyticsRoute: PagesPageIdAnalyticsRoute,
   PagesPageIdEditRoute: PagesPageIdEditRoute,
   PagesPageIdEditPrototypeRoute: PagesPageIdEditPrototypeRoute,
+  PagesPageIdFuxionDemoRoute: PagesPageIdFuxionDemoRoute,
 }
 
 const PagesPageIdRouteWithChildren = PagesPageIdRoute._addFileChildren(

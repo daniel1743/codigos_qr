@@ -19,6 +19,7 @@ import { Separator } from "../components/ui/separator";
 import { hasPremiumAccessByEmail } from "../lib/entitlements";
 import { getBrowserSupabaseClient } from "../lib/supabase/client";
 import { getPublicProfileUrl } from "../lib/url";
+import { resolveCanonicalMagicPageId } from "../lib/editor-routing/resolveCanonicalMagicPage";
 
 export const Route = createFileRoute("/account")({
   component: AccountPage,
@@ -34,6 +35,7 @@ function AccountPage() {
   } | null>(null);
   const [premium, setPremium] = useState(false);
   const [publicUrl, setPublicUrl] = useState<string | null>(null);
+  const [canonicalPageId, setCanonicalPageId] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -42,6 +44,7 @@ function AccountPage() {
         if (data.user) {
           setUser(data.user);
           setPremium(hasPremiumAccessByEmail(data.user.email || ""));
+          setCanonicalPageId(await resolveCanonicalMagicPageId(supabase, data.user.id));
           const { data: profiles } = await supabase
             .from("profiles")
             .select("public_id")
@@ -93,11 +96,13 @@ function AccountPage() {
         </header>
 
         <div className="mt-8 grid gap-3 sm:grid-cols-3">
-          <Link to="/editor" className="no-underline">
-            <Button variant="outline" className="w-full justify-start">
-              <Pencil className="mr-2 h-4 w-4" /> Editar página
-            </Button>
-          </Link>
+          <Button
+            variant="outline"
+            className="w-full justify-start"
+            onClick={() => void navigate(canonicalPageId ? { to: "/pages/$pageId/edit", params: { pageId: canonicalPageId } } : { to: "/profile" })}
+          >
+            <Pencil className="mr-2 h-4 w-4" /> Editar página
+          </Button>
           {publicUrl ? (
             <a href={publicUrl} target="_blank" rel="noreferrer" className="no-underline">
               <Button variant="outline" className="w-full justify-start">
