@@ -83,6 +83,50 @@ export function MyProfilePage() {
   const [uploading, setUploading] = useState(false);
   const [creatingPage, setCreatingPage] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
+  const [redeemCode, setRedeemCode] = useState("");
+  const [redeeming, setRedeeming] = useState(false);
+
+  const handleRedeemCode = async () => {
+    if (!redeemCode.trim()) return;
+    setRedeeming(true);
+    try {
+      const code = redeemCode.trim().toUpperCase();
+      const { data, error } = await supabase.rpc("redeem_invitation_code_secure", { p_code: code });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data && data.success) {
+        if (!data.expires_at) {
+          toast.success("Premium activado", { description: "Tu acceso Premium es vitalicio." });
+        } else {
+          toast.success("Premium activado", {
+            description: "Tu acceso Premium estará activo durante 1 año.",
+          });
+        }
+        await loadUserData();
+        setRedeemCode("");
+      } else {
+        const errorMsg = data?.error || "Error al canjear el código.";
+        if (errorMsg.includes("agotado")) {
+          toast.error("Este código ya fue utilizado.");
+        } else if (errorMsg.includes("inválido") || errorMsg.includes("inactivo")) {
+          toast.error("Código inválido.");
+        } else if (errorMsg.includes("expirado")) {
+          toast.error("Este código expiró.");
+        } else if (errorMsg.includes("Ya tienes acceso")) {
+          toast.error("Tu cuenta ya tiene Premium.");
+        } else {
+          toast.error(errorMsg);
+        }
+      }
+    } catch (error: any) {
+      toast.error("Error al procesar la solicitud.");
+    } finally {
+      setRedeeming(false);
+    }
+  };
 
   const supabase = getBrowserSupabaseClient();
   const navigate = useNavigate();
@@ -151,8 +195,9 @@ export function MyProfilePage() {
         .order("created_at", { ascending: true });
 
       const primaryProfile =
-        profilesData?.find((candidate) => candidate.public_id === ACTIVE_LEGACY_PROFILE_PUBLIC_ID) ??
-        profilesData?.[0];
+        profilesData?.find(
+          (candidate) => candidate.public_id === ACTIVE_LEGACY_PROFILE_PUBLIC_ID,
+        ) ?? profilesData?.[0];
       setPageProfile(
         primaryProfile
           ? {
@@ -497,16 +542,16 @@ export function MyProfilePage() {
                   params={{ pageId: canonicalPage.id }}
                   className="group rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50"
                 >
-                <div className="flex items-start justify-between gap-4">
-                  <span className="grid h-10 w-10 place-items-center rounded-xl bg-blue-50 text-blue-700">
-                    <QrCode className="h-5 w-5" />
-                  </span>
-                  <ArrowRight className="h-4 w-4 text-slate-400 transition-transform group-hover:translate-x-1" />
-                </div>
-                <p className="mt-4 font-semibold">Editar mi página</p>
-                <p className="mt-1 text-sm leading-5 text-slate-600">
-                  Ajusta diseño, contenido y enlaces.
-                </p>
+                  <div className="flex items-start justify-between gap-4">
+                    <span className="grid h-10 w-10 place-items-center rounded-xl bg-blue-50 text-blue-700">
+                      <QrCode className="h-5 w-5" />
+                    </span>
+                    <ArrowRight className="h-4 w-4 text-slate-400 transition-transform group-hover:translate-x-1" />
+                  </div>
+                  <p className="mt-4 font-semibold">Editar mi página</p>
+                  <p className="mt-1 text-sm leading-5 text-slate-600">
+                    Ajusta diseño, contenido y enlaces.
+                  </p>
                 </Link>
               ) : (
                 <button
@@ -705,11 +750,30 @@ export function MyProfilePage() {
                         </Button>
                       </div>
 
-                      <div className="space-y-2">
-                        <h4 className="text-sm font-semibold">¿Tienes un código de invitación?</h4>
-                        <Button variant="outline" className="w-full">
-                          Canjear Código
-                        </Button>
+                      <div className="space-y-3 pt-4">
+                        <div>
+                          <h4 className="text-sm font-semibold">¿Tienes un código?</h4>
+                          <p className="text-xs text-muted-foreground">
+                            Ingresa tu código para activar Premium.
+                          </p>
+                        </div>
+                        <div className="flex gap-2 flex-col sm:flex-row">
+                          <Input
+                            placeholder="CQ-XXXX-XXXX-XXXX"
+                            value={redeemCode}
+                            onChange={(e) => setRedeemCode(e.target.value.toUpperCase().trim())}
+                            className="uppercase"
+                            disabled={redeeming}
+                          />
+                          <Button
+                            variant="default"
+                            onClick={handleRedeemCode}
+                            disabled={!redeemCode || redeeming}
+                            className="w-full sm:w-auto"
+                          >
+                            {redeeming ? "Aplicando..." : "Aplicar código"}
+                          </Button>
+                        </div>
                       </div>
                     </>
                   )}

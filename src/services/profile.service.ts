@@ -102,6 +102,8 @@ export const profileService = {
       .from("profiles")
       .select("*")
       .eq("user_id", userId)
+      .order("created_at", { ascending: true })
+      .limit(1)
       .maybeSingle();
 
     if (error) throw error;

@@ -1,8 +1,11 @@
-import type { ReactNode } from 'react';
-import type { LucideIcon } from 'lucide-react';
+import type { ReactNode } from "react";
+import type { LucideIcon } from "lucide-react";
 import {
   AppWindowIcon,
   AtSignIcon,
+  BadgeIcon,
+  EuroIcon,
+  RectangleHorizontalIcon,
   CircleUserRoundIcon,
   ImageIcon,
   ImagesIcon,
@@ -10,9 +13,9 @@ import {
   LayoutPanelTopIcon,
   MousePointerClickIcon,
   SquareIcon,
-  TypeIcon } from
-'lucide-react';
-import type { ElementKind } from '../../types/editor';
+  TypeIcon,
+} from "lucide-react";
+import type { ElementKind } from "../../types/editor";
 
 /**
  * One action definition drives both surfaces:
@@ -44,5 +47,8 @@ export const kindIcons: Record<ElementKind, LucideIcon> = {
   card: SquareIcon,
   gallery: ImagesIcon,
   section: LayersIcon,
-  page: AppWindowIcon
+  page: AppWindowIcon,
+  familyCard: RectangleHorizontalIcon,
+  price: EuroIcon,
+  badge: BadgeIcon,
 };
