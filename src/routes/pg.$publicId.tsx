@@ -145,8 +145,15 @@ function PublicChildPage() {
     [page.page_id, page.public_id, useCanonical],
   );
 
+  // STRICT CANARY SCOPE: Magic click analytics are handed down ONLY when the
+  // canonical writer is enabled for this page (QA, or production with the global
+  // flag plus the page allowlist). Non-allowlisted Magic pages keep their
+  // previous behaviour during this rollout: no click tracking, no legacy write.
   return magicDocument ? (
-    <MagicPublicRenderer document={magicDocument} />
+    <MagicPublicRenderer
+      document={magicDocument}
+      onTrack={useCanonical ? handleTrack : undefined}
+    />
   ) : directDocument ? (
     <DirectPageRenderer
       document={directDocument}

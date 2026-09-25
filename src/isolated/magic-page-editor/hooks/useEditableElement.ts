@@ -1,6 +1,7 @@
 import React, { useContext, useLayoutEffect, useRef } from 'react';
 import { useEditor } from '../contexts/EditorContext';
 import { EditableParentContext } from '../contexts/EditableParentContext';
+import { buildPublicLinkTrackEvent } from '../utils/publicLinkTracking';
 import type { ElementKind } from '../types/editor';
 
 interface Options {
@@ -38,6 +39,32 @@ export function useEditableElement(id: string, kind: ElementKind, label: string,
     }
   };
 
+  /**
+   * PUBLIC ANALYTICS (preview mode only).
+   *
+   * Magic templates render every external destination (`EditableSocial`,
+   * `EditableCTA`, block CTAs, card CTAs, location CTA) through this shared
+   * `Editable` layer, so a single handler here instruments the whole public
+   * surface without duplicating analytics code per template or per component:
+   *   - it is attached ONLY in preview mode, so edit mode never emits;
+   *   - it never calls preventDefault/stopPropagation, so navigation is intact;
+   *   - in-page `#anchor` links and the `https://` placeholder are skipped;
+   *   - one click on one anchor produces exactly one event (no double counting).
+   */
+  const trackPublicLink = ed.mode === 'preview' && ed.onTrack
+    ? (e: React.MouseEvent) => {
+        const el = e.currentTarget as HTMLElement;
+        const event = buildPublicLinkTrackEvent({
+          href: el.getAttribute('href'),
+          itemId: id,
+          blockId: blockKey,
+          label,
+          visibleText: el.textContent
+        });
+        if (event) ed.onTrack?.(event);
+      }
+    : undefined;
+
   const handlers = active ?
   {
     'data-cq': '',
@@ -64,6 +91,8 @@ export function useEditableElement(id: string, kind: ElementKind, label: string,
       }
     }
   } :
+  trackPublicLink ?
+  { onClick: trackPublicLink } :
   {};
 
   return {

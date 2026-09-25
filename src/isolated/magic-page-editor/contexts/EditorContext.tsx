@@ -13,6 +13,7 @@ import type {
   TextStyle } from
 '../types/editor';
 import type { MagicEditorStateV1 } from '../../../features/magic-page-editor-production/magic-document';
+import type { PublicLinkTrackEvent } from '../utils/publicLinkTracking';
 
 interface History {
   past: PageDoc[];
@@ -82,6 +83,12 @@ export interface EditorValue {
   publishing: boolean;
   publish: () => void;
   uploadAsset?: (file: File) => Promise<string>;
+  /**
+   * Host analytics hook. Only public (preview) renderers pass it: the shared
+   * `Editable` anchor layer emits one click intent per click and nothing else in
+   * the Magic runtime writes analytics through it. Editor hosts leave it unset.
+   */
+  onTrack?: ((event: PublicLinkTrackEvent) => void) | undefined;
 }
 
 const EditorContext = createContext<EditorValue | null>(null);
@@ -122,9 +129,10 @@ interface EditorProviderProps {
   onDocumentChange?: (state: MagicEditorStateV1) => Promise<void> | void;
   onPublish?: (state: MagicEditorStateV1) => Promise<void> | void;
   uploadAsset?: (file: File) => Promise<string>;
+  onTrack?: ((event: PublicLinkTrackEvent) => void) | undefined;
 }
 
-export function EditorProvider({ children, initialTemplate = 'bio', initialDevice = 'desktop', initialDocument, initialMode = 'edit', onDocumentChange, onPublish, uploadAsset }: EditorProviderProps) {
+export function EditorProvider({ children, initialTemplate = 'bio', initialDevice = 'desktop', initialDocument, initialMode = 'edit', onDocumentChange, onPublish, uploadAsset, onTrack }: EditorProviderProps) {
   const [templateId, setTemplateIdState] = useState<TemplateId>(initialDocument?.templateId ?? initialTemplate);
   const [histories, setHistories] = useState<Record<TemplateId, History>>(() => ({
     bio: initialDocument?.templateId === 'bio' ? { past: [], present: initialDocument.doc, future: [] } : createHistory('bio'),
@@ -459,7 +467,8 @@ export function EditorProvider({ children, initialTemplate = 'bio', initialDevic
     getInfo,
     publishing,
     publish,
-    uploadAsset
+    uploadAsset,
+    onTrack
   };
 
   return <EditorContext.Provider value={value}>{children}</EditorContext.Provider>;
