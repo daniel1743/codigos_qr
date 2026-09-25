@@ -1,12 +1,15 @@
 -- =============================================================================
 -- CRIPQER — Intelligent Analytics V1.1 · Phase C2B5
--- ANALYTICS READ VIEWS RLS HARDENING (QA-ONLY — DO NOT APPLY TO PRODUCTION)
+-- ANALYTICS READ VIEWS RLS HARDENING (validated in QA — production rollout via C2B7 gates)
 -- =============================================================================
 -- Task: CRIPQER_ANALYTICS_V1_1_PHASE_C2B5_SECURITY_AND_PRODUCTION_READINESS
 --
--- Target database: cripqer-qa (project ref tjigzcyoogmvdkivypym) ONLY.
---
--- ⚠️  NEVER run this file against production project mlinfiuhkxdhlveflbkj.
+-- Lifecycle:
+--   * Validated in the dedicated QA project (tjigzcyoogmvdkivypym).
+--   * Production rollout requires the C2B7 gate sequence AND the deployed
+--     production feature gate (global flag + page allowlist).
+--   * Apply to production (mlinfiuhkxdhlveflbkj) only after the feature gate is
+--     deployed/ready. Rollback/recovery is documented at the end of this file.
 --
 -- Finding (C2B5 forensics):
 --   `qr_analytics_daily` and `qr_top_links` are aggregate views over

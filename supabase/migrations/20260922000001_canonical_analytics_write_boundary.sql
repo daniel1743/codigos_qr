@@ -1,12 +1,15 @@
 -- =============================================================================
 -- CRIPQER — Intelligent Analytics V1.1 · Phase C2B2
--- CANONICAL ANALYTICS WRITE BOUNDARY (QA-ONLY — DO NOT APPLY TO PRODUCTION)
+-- CANONICAL ANALYTICS WRITE BOUNDARY (validated in QA — production rollout via C2B7 gates)
 -- =============================================================================
 -- Task: CRIPQER_ANALYTICS_V1_1_PHASE_C2B2_SINGLE_QA_PAGE_CANONICAL_EVENT_WRITES
 --
--- Target database: cripqer-qa (project ref tjigzcyoogmvdkivypym) ONLY.
---
--- ⚠️  NEVER run this file against production project mlinfiuhkxdhlveflbkj.
+-- Lifecycle:
+--   * Validated in the dedicated QA project (tjigzcyoogmvdkivypym).
+--   * Production rollout requires the C2B7 gate sequence AND the deployed
+--     production feature gate (global flag + page allowlist).
+--   * Apply to production (mlinfiuhkxdhlveflbkj) only after the feature gate is
+--     deployed/ready. Rollback/recovery is documented at the end of this file.
 -- ⚠️  This creates the ONE canonical Analytics V1.1 write boundary and adds a
 --     normalized `platform` column. It is strictly additive.
 --

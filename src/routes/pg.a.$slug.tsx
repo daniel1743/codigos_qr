@@ -9,7 +9,7 @@ import { getBrowserSupabaseClient } from "../lib/supabase/client";
 import type { PageAnalyticsInteraction } from "../types/analytics";
 import { readDirectPageEnvelope } from "../lib/canonical-page";
 import { DirectPageRenderer } from "../components/direct-page-editor/DirectPageRenderer";
-import { isQaAnalyticsRuntime, resolveCanonicalClickType } from "../lib/analytics";
+import { isCanonicalAnalyticsEnabled, resolveCanonicalClickType } from "../lib/analytics";
 import { getBrowserCanonicalWriter } from "../lib/analytics/browser";
 import { isMagicPageDocument } from "../features/magic-page-editor-production/magic-document";
 import { MagicPublicRenderer } from "../features/magic-page-editor-production/MagicPublicRenderer";
@@ -80,11 +80,17 @@ export const Route = createFileRoute("/pg/a/$slug")({
 function PublicPageAlias() {
   const { page, config, directDocument, magicDocument } = Route.useLoaderData();
 
-  // The canonical Analytics V1.1 writer is QA-only. When the runtime resolves to
-  // the production project we keep the legacy tracking path untouched.
+  // The canonical Analytics V1.1 writer is enabled in QA, and in production only
+  // when the global flag is on AND this page is explicitly allowlisted. Any
+  // other page keeps the legacy tracking path untouched.
   const useCanonical = useMemo(
-    () => isQaAnalyticsRuntime(import.meta.env["VITE_SUPABASE_URL"]),
-    [],
+    () =>
+      isCanonicalAnalyticsEnabled({
+        supabaseUrl: import.meta.env["VITE_SUPABASE_URL"],
+        publicId: page.public_id,
+        environment: import.meta.env,
+      }),
+    [page.public_id],
   );
 
   useEffect(() => {
@@ -131,8 +137,15 @@ function PublicPageAlias() {
     [page.page_id, page.public_id, useCanonical],
   );
 
+  // STRICT CANARY SCOPE: Magic click analytics are handed down ONLY when the
+  // canonical writer is enabled for this page (QA, or production with the global
+  // flag plus the page allowlist). Non-allowlisted Magic pages keep their
+  // previous behaviour during this rollout: no click tracking, no legacy write.
   return magicDocument ? (
-    <MagicPublicRenderer document={magicDocument} />
+    <MagicPublicRenderer
+      document={magicDocument}
+      onTrack={useCanonical ? handleTrack : undefined}
+    />
   ) : directDocument ? (
     <DirectPageRenderer
       document={directDocument}

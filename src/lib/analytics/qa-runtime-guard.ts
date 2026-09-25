@@ -1,9 +1,10 @@
 /**
- * QA-only runtime guard for the Analytics V1.1 canonical writer.
+ * Runtime classification for the Analytics V1.1 canonical writer.
  *
- * This module prevents the canonical writer from ever running against the
- * production Supabase project. It is intentionally dependency-free so it can
- * be unit-tested in isolation.
+ * Dependency-free helper that maps a Supabase URL to `qa`, `production`, or
+ * `unknown`. This module only classifies; the feature-gate decision lives in
+ * `feature-gate.ts` (QA is allowed, production requires an explicit page-scoped
+ * allowlist + global flag, unknown is denied).
  */
 
 export const QA_PROJECT_REF = "tjigzcyoogmvdkivypym";
@@ -29,29 +30,4 @@ export function classifyRuntime(supabaseUrl: string | null | undefined): QaRunti
   if (ref === PRODUCTION_PROJECT_REF) return "production";
   if (ref === QA_PROJECT_REF) return "qa";
   return "unknown";
-}
-
-/** True only when the runtime resolves to the dedicated cripqer-qa project. */
-export function isQaAnalyticsRuntime(supabaseUrl: string | null | undefined): boolean {
-  return classifyRuntime(supabaseUrl) === "qa";
-}
-
-/**
- * Assert that the runtime is the QA project. Throws (refuses to write) when the
- * runtime points to production or to any unknown project.
- */
-export function assertQaRuntime(supabaseUrl: string | null | undefined): void {
-  const verdict = classifyRuntime(supabaseUrl);
-  if (verdict === "production") {
-    throw new Error(
-      "STOP_IMMEDIATELY: Analytics V1.1 canonical writer resolved to the production " +
-        `Supabase project (${PRODUCTION_PROJECT_REF}). Refusing to write.`,
-    );
-  }
-  if (verdict !== "qa") {
-    throw new Error(
-      "Analytics V1.1 canonical writer is QA-only: the runtime Supabase project is " +
-        `not cripqer-qa (${QA_PROJECT_REF}).`,
-    );
-  }
 }

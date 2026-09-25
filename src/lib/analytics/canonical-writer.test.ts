@@ -97,7 +97,7 @@ describe("resolveCanonicalClickType", () => {
 });
 
 describe("canonical writer runtime gate", () => {
-  it("refuses to write when the runtime resolves to the production project", async () => {
+  it("refuses to write when the runtime resolves to the production project without the gate", async () => {
     const boundary = fakeBoundary();
     const writer = createCanonicalWriter({
       supabaseUrl: "https://mlinfiuhkxdhlveflbkj.supabase.co",
@@ -105,8 +105,23 @@ describe("canonical writer runtime gate", () => {
     });
     const result = await writer.track({ eventType: "page_view", publicId: "qa-page" });
     expect(result.skipped).toBe(true);
-    expect(result.reason).toContain("STOP_IMMEDIATELY");
+    expect(result.reason).toContain("disabled");
     expect(boundary.calls).toHaveLength(0);
+  });
+
+  it("allows a production write only when the flag is on and the page is allowlisted", async () => {
+    const boundary = fakeBoundary();
+    const writer = createCanonicalWriter({
+      supabaseUrl: "https://mlinfiuhkxdhlveflbkj.supabase.co",
+      boundary,
+      environment: {
+        VITE_ANALYTICS_CANONICAL_ENABLED: "true",
+        VITE_ANALYTICS_CANONICAL_PAGE_ALLOWLIST: "canary-page",
+      },
+    });
+    const result = await writer.track({ eventType: "page_view", publicId: "canary-page" });
+    expect(result.skipped).toBe(false);
+    expect(boundary.calls).toHaveLength(1);
   });
 
   it("refuses to write against an unknown project", async () => {

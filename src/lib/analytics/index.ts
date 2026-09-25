@@ -25,12 +25,19 @@ export type {
 export {
   PRODUCTION_PROJECT_REF,
   QA_PROJECT_REF,
-  assertQaRuntime,
   classifyRuntime,
   extractSupabaseProjectRef,
-  isQaAnalyticsRuntime,
 } from "./qa-runtime-guard";
 export type { QaRuntimeVerdict } from "./qa-runtime-guard";
+
+export {
+  CANONICAL_ANALYTICS_ENABLED_KEY,
+  CANONICAL_ANALYTICS_PAGE_ALLOWLIST_KEY,
+  assertCanonicalAnalyticsAllowed,
+  isCanonicalAnalyticsEnabled,
+  parseCanonicalPageAllowlist,
+} from "./feature-gate";
+export type { CanonicalAnalyticsEnvironment, CanonicalAnalyticsGateContext } from "./feature-gate";
 
 export { QR_SESSION_STORAGE_KEY, getOrCreateSessionId } from "./session";
 
