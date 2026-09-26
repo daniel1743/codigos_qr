@@ -34,10 +34,14 @@ export {
   CANONICAL_ANALYTICS_ENABLED_KEY,
   CANONICAL_ANALYTICS_PAGE_ALLOWLIST_KEY,
   assertCanonicalAnalyticsAllowed,
+  isAnalyticsDashboardRealModeEnabled,
   isCanonicalAnalyticsEnabled,
   parseCanonicalPageAllowlist,
 } from "./feature-gate";
 export type { CanonicalAnalyticsEnvironment, CanonicalAnalyticsGateContext } from "./feature-gate";
+
+export { resolveAnalyticsDashboardMode, resolveDevDashboardMode } from "./dashboard-mode";
+export type { AnalyticsDashboardMode, DashboardModeInput } from "./dashboard-mode";
 
 export { QR_SESSION_STORAGE_KEY, getOrCreateSessionId } from "./session";
 
