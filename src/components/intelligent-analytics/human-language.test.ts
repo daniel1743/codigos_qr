@@ -264,7 +264,9 @@ describe("C2B8A · LANG-01/02 — ni inglés ni jerga como primera capa", () => 
     for (const value of copyValues(METRIC_COPY.liveActivity)) {
       expectHuman(value, "METRIC_COPY.liveActivity");
     }
-    for (const value of copyValues(METRIC_COPY.visitors)) expectHuman(value, "METRIC_COPY.visitors");
+    for (const value of copyValues(METRIC_COPY.visitors)) {
+      expectHuman(value, "METRIC_COPY.visitors");
+    }
     for (const value of copyValues(MOMENTUM_LABEL)) expectHuman(value, "MOMENTUM_LABEL");
     for (const value of copyValues(MOMENTUM_COPY)) expectHuman(value, "MOMENTUM_COPY");
     for (const value of copyValues(ROLLING_STATE_COPY)) expectHuman(value, "ROLLING_STATE_COPY");
