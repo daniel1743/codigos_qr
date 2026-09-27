@@ -8,6 +8,8 @@
 **Locale:** `es-419`
 **Canary protegido:** `VvUsngW` · `1c4aa062-a012-47e4-b0f1-99ca8e80d1ec`
 
+**Commit de la fase:** `c1de81d2e17b3e4c9c7a2ec9b66c24790087451b` — 18 archivos, +1690 / −334, en la rama `feat/analytics-c2b8a-es-latam` (worktree `…generador de QR - c2b8a-es-latam`). **Sin push, sin merge.**
+
 ---
 
 ## 1. Estrategia de workspace

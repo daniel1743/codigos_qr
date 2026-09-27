@@ -3,7 +3,7 @@
 **Fase:** `CRIPQER — C2B8A`
 **Base SHA:** `f1cf3544a63a39b882b3f277fdd930fdab516748`
 **Rama:** `feat/analytics-c2b8a-es-latam` (worktree limpio: `…\generador de QR - c2b8a-es-latam`)
-**SHA final:** ver §7 (commit local de la fase; **sin push y sin merge**)
+**SHA final:** `c1de81d2e17b3e4c9c7a2ec9b66c24790087451b` (commit único de la fase en `feat/analytics-c2b8a-es-latam`; 18 archivos, +1690 / −334; **sin push y sin merge**)
 **Canary protegido:** `VvUsngW` · page `1c4aa062-a012-47e4-b0f1-99ca8e80d1ec`
 
 > **Alcance de esta validación.** Todo lo que se puede comprobar en este entorno se comprobó
