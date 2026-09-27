@@ -24,7 +24,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cat .payload/part*.txt | base64 --decode > /tmp/magic-frame-prototype.tar.xz
+          cat .payload/archive*.b64 | base64 --decode > /tmp/magic-frame-prototype.tar.xz
           mkdir -p /tmp/magic-frame-prototype
           tar -xJf /tmp/magic-frame-prototype.tar.xz -C /tmp/magic-frame-prototype
 
