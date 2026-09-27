@@ -6,6 +6,7 @@
  */
 
 import { LEARNING_THRESHOLD } from "./intelligence-engine";
+import { GOAL_NOUN } from "./copy.es-419";
 import type { AnalyticsMetricsV1, GoalStatus, SmartGoalV1 } from "./analytics.types";
 import { zonedParts, zonedDateTimeToUtc } from "./timezone";
 
@@ -44,14 +45,15 @@ function buildGoal(
   const requiredPerDay = Math.max(Math.ceil((target - current) / daysRemaining), 0);
   const status = statusOf(progress, projected, target);
 
+  const noun = GOAL_NOUN[metric];
   const message =
     status === "achieved"
-      ? `Goal reached — ${current} of ${target} ${label.toLowerCase()} this month.`
+      ? `Meta cumplida: ${current} de ${target} ${noun} este mes.`
       : status === "on_track"
-        ? `On pace for about ${projected} ${label.toLowerCase()} — comfortably past ${target}.`
+        ? `La proyección es ${projected} ${noun} y tu meta es ${target}.`
         : status === "at_risk"
-          ? `Projected ${projected} versus a ${target} target. About ${requiredPerDay} per day closes the gap.`
-          : `Currently behind: ${requiredPerDay} per day for the remaining ${daysRemaining} days would still make it.`;
+          ? `La proyección es ${projected} ${noun} y tu meta es ${target}. Con alrededor de ${requiredPerDay} por día llegas.`
+          : `Vas por debajo de tu meta: necesitas alrededor de ${requiredPerDay} por día durante los ${daysRemaining} días que quedan.`;
 
   return {
     id,
@@ -74,7 +76,7 @@ export function generateSmartGoals(metrics: AnalyticsMetricsV1, now: Date, timez
       {
         id: "learning",
         metric: "views",
-        label: "Monthly views",
+        label: "Visitas del mes",
         status: "learning",
         target: 0,
         current: metrics.totals.views,
@@ -83,7 +85,7 @@ export function generateSmartGoals(metrics: AnalyticsMetricsV1, now: Date, timez
         requiredPerDay: 0,
         projected: 0,
         message:
-          "Cripqer sets your goals from your own history. A few more days of activity and targets appear here.",
+          "Cripqer calcula tus metas a partir de tu propia historia. Con unos días más de actividad aparecerán aquí.",
       },
     ];
   }
@@ -93,11 +95,11 @@ export function generateSmartGoals(metrics: AnalyticsMetricsV1, now: Date, timez
   const baselineInteractions = metrics.monthToDate.interactions / elapsed;
 
   const goals: SmartGoalV1[] = [
-    buildGoal("views", "views", "Monthly views", metrics.monthToDate.views, baselineViews, now, timezone),
+    buildGoal("views", "views", "Visitas del mes", metrics.monthToDate.views, baselineViews, now, timezone),
     buildGoal(
       "interactions",
       "interactions",
-      "Monthly interactions",
+      "Acciones del mes",
       metrics.monthToDate.interactions,
       Math.max(baselineInteractions, 0.5),
       now,
@@ -110,7 +112,7 @@ export function generateSmartGoals(metrics: AnalyticsMetricsV1, now: Date, timez
       buildGoal(
         "leads",
         "leads",
-        "Monthly leads",
+        "Contactos del mes",
         metrics.monthToDate.leads,
         Math.max(metrics.monthToDate.leads / elapsed, 0.2),
         now,

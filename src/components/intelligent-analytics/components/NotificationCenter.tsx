@@ -7,6 +7,7 @@
  */
 
 import { useEffect, useRef } from "react";
+import { SEVERITY_LABEL } from "../copy.es-419";
 import type {
   NotificationItemV1,
   NotificationKind,
@@ -65,7 +66,7 @@ export function NotificationCenter({
         className="cq-nc__bell"
         aria-expanded={open}
         aria-haspopup="dialog"
-        aria-label={unread > 0 ? `Notifications, ${unread} unread` : "Notifications"}
+        aria-label={unread > 0 ? `Avisos, ${unread} sin leer` : "Avisos"}
         onClick={() => onToggle(!open)}
       >
         <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
@@ -84,19 +85,19 @@ export function NotificationCenter({
       {open ? (
         <>
           <div className="cq-nc__scrim" onClick={() => onToggle(false)} aria-hidden="true" />
-          <div className="cq-nc__panel" role="dialog" aria-label="Notifications" ref={panel}>
+          <div className="cq-nc__panel" role="dialog" aria-label="Avisos" ref={panel}>
             <header className="cq-nc__head">
-              <strong>Notifications</strong>
+              <strong>Avisos</strong>
               <div className="cq-nc__headActions">
                 {unread > 0 ? (
                   <button type="button" className="cq-btn cq-btn--ghost" onClick={onMarkAllRead}>
-                    Mark all read
+                    Marcar todo como leído
                   </button>
                 ) : null}
                 <button
                   type="button"
                   className="cq-nc__close"
-                  aria-label="Close notifications"
+                  aria-label="Cerrar avisos"
                   onClick={() => onToggle(false)}
                 >
                   ×
@@ -108,8 +109,8 @@ export function NotificationCenter({
               {visible.length === 0 ? (
                 <div className="cq-nc__empty">
                   <span aria-hidden="true">✅</span>
-                  <strong>You&apos;re all caught up</strong>
-                  <p>Cripqer will let you know when something important happens.</p>
+                  <strong>Estás al día</strong>
+                  <p>Cripqer te avisará cuando ocurra algo importante.</p>
                 </div>
               ) : null}
 
@@ -133,7 +134,7 @@ export function NotificationCenter({
                     <p className="cq-nc__msg">{item.message}</p>
                     <div className="cq-nc__meta">
                       <span className="cq-badge" data-tone={item.severity}>
-                        {item.severity}
+                        {SEVERITY_LABEL[item.severity]}
                       </span>
                       {item.channel ? <span className="cq-badge">{item.channel}</span> : null}
                       {item.metric ? (
@@ -159,7 +160,7 @@ export function NotificationCenter({
                   <button
                     type="button"
                     className="cq-nc__dismiss"
-                    aria-label={`Dismiss ${item.title}`}
+                    aria-label={`Descartar ${item.title}`}
                     onClick={() => onDismiss(item.id)}
                   >
                     ×

@@ -20,6 +20,7 @@ import {
   type RecommendedActionV1,
   type WidgetId,
 } from "../analytics.types";
+import { greeting, LEARNING_HEADLINE, liveLastHourUnit, PERIOD_LABEL } from "../copy.es-419";
 import { buildDailyBrief } from "../daily-brief";
 import { generateSmartGoals } from "../goals-engine";
 import { generateInsights } from "../intelligence-engine";
@@ -52,10 +53,10 @@ import {
 } from "./widgets";
 
 const PERIODS: Array<{ id: PeriodId; label: string }> = [
-  { id: "today", label: "Today" },
-  { id: "7d", label: "7 days" },
-  { id: "30d", label: "30 days" },
-  { id: "90d", label: "90 days" },
+  { id: "today", label: PERIOD_LABEL.today },
+  { id: "7d", label: PERIOD_LABEL["7d"] },
+  { id: "30d", label: PERIOD_LABEL["30d"] },
+  { id: "90d", label: PERIOD_LABEL["90d"] },
 ];
 
 export interface AnalyticsDashboardProps {
@@ -171,16 +172,16 @@ export function AnalyticsDashboard({
           <div className="cq-header__top">
             <div className="cq-header__id">
               <h1 className="cq-header__title">
-                {context.displayName ? `${context.displayName} · Analytics` : "Analytics"}
+                {context.displayName ? `${context.displayName} · Estadísticas` : "Estadísticas"}
               </h1>
               <p className="cq-header__subtitle">
-                {metrics.sampleSize} signals in this period
+                {metrics.sampleSize} registros de actividad en este período
                 {context.timezoneLabel ? ` · ${context.timezoneLabel}` : ""}
-                {rolling.state === "spike" ? " · unusual activity right now" : ""}
+                {rolling.state === "spike" ? " · más actividad de lo normal ahora mismo" : ""}
               </p>
             </div>
             <div className="cq-controls">
-              <div className="cq-segment" role="group" aria-label="Period">
+              <div className="cq-segment" role="group" aria-label="Período">
                 {PERIODS.map((entry) => (
                   <button
                     key={entry.id}
@@ -206,7 +207,7 @@ export function AnalyticsDashboard({
           </div>
 
           {context.availableChannels.length > 1 ? (
-            <div className="cq-controls" role="group" aria-label="Channel filter">
+            <div className="cq-controls" role="group" aria-label="Filtrar por canal">
               {context.availableChannels.map((channel) => (
                 <button
                   key={channel}
@@ -239,8 +240,8 @@ export function AnalyticsDashboard({
               <div>
                 <p className="cq-welcome__eyebrow">{brief.dateLabel}</p>
                 <h2 className="cq-welcome__title">
-                  {firstName ? `Hi ${firstName} — ` : ""}
-                  {learning ? "Cripqer is still learning your audience" : brief.headline}
+                  {firstName ? greeting(firstName) : ""}
+                  {learning ? LEARNING_HEADLINE : brief.headline}
                 </h2>
                 <p className="cq-welcome__msg">{brief.paragraphs[0]}</p>
               </div>
@@ -248,7 +249,9 @@ export function AnalyticsDashboard({
                 <div className="cq-welcome__live">
                   <span className="cq-pulse" aria-hidden="true" />
                   <strong>{rolling.windows.find((w) => w.windowMinutes === 60)?.total ?? 0}</strong>
-                  <span>signals in the last hour</span>
+                  <span>
+                    {liveLastHourUnit(rolling.windows.find((w) => w.windowMinutes === 60)?.total ?? 0)}
+                  </span>
                 </div>
               ) : null}
             </section>

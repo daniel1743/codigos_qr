@@ -7,6 +7,7 @@
  */
 
 import { PLAN_ORDER, type AnalyticsMetricsV1, type PlanId, type WidgetDecisionV1, type WidgetId } from "./analytics.types";
+import { planLockReason } from "./copy.es-419";
 
 interface WidgetSpec {
   id: WidgetId;
@@ -20,108 +21,108 @@ interface WidgetSpec {
 const SPECS: WidgetSpec[] = [
   {
     id: "live_activity",
-    title: "Live activity",
+    title: "Actividad reciente",
     requiredPlan: "free",
     hasData: (m) => m.recentEvents.length > 0,
-    emptyReason: "No activity recorded yet",
+    emptyReason: "Todavía no hay actividad registrada",
   },
   {
     id: "performance_overview",
-    title: "Performance overview",
+    title: "Resumen de tu actividad",
     requiredPlan: "free",
     hasData: () => true,
     emptyReason: "",
   },
   {
     id: "performance_trend",
-    title: "Performance trend",
+    title: "Cómo evolucionaron tus visitas",
     requiredPlan: "free",
     hasData: (m) => m.series.views.some((point) => point.value > 0),
-    emptyReason: "No views in this period",
+    emptyReason: "No hubo visitas en este período",
   },
   {
     id: "intelligence",
-    title: "Cripqer intelligence",
+    title: "Lo que Cripqer detectó",
     requiredPlan: "free",
     hasData: () => true,
     emptyReason: "",
   },
   {
     id: "channel_performance",
-    title: "Channel performance",
+    title: "Qué canales están funcionando",
     requiredPlan: "free",
     hasData: (m) => m.channels.length > 0,
-    emptyReason: "No channel clicks yet",
+    emptyReason: "Todavía no hay acciones en tus enlaces",
   },
   {
     id: "top_links",
-    title: "Top links",
+    title: "Enlaces que más interesaron",
     requiredPlan: "free",
     hasData: (m) => m.topLinks.length > 0,
-    emptyReason: "No link clicks yet",
+    emptyReason: "Todavía no hay acciones registradas",
   },
   {
     id: "hot_hours",
-    title: "Hot hours",
+    title: "Horas con más actividad",
     requiredPlan: "pro",
     hasData: (m) => m.hourly.some((cell) => cell.value > 0),
-    emptyReason: "Not enough activity to map timing",
+    emptyReason: "Todavía no hay suficiente actividad para mostrar horarios",
   },
   {
     id: "smart_goals",
-    title: "Smart goals",
+    title: "Tus metas",
     requiredPlan: "pro",
     hasData: (m) => m.sampleSize >= 25,
     emptyReason: "",
   },
   {
     id: "period_comparison",
-    title: "Period comparison",
+    title: "Cómo vas comparado con el período anterior",
     requiredPlan: "pro",
     hasData: (m) => m.comparisons.views.previous > 0 || m.comparisons.views.current > 0,
-    emptyReason: "No comparable history yet",
+    emptyReason: "Todavía no hay un período anterior para comparar",
   },
   {
     id: "traffic_sources",
-    title: "Traffic sources",
+    title: "De dónde llegaron tus visitas",
     requiredPlan: "pro",
     hasData: (m) => m.sources.length > 0,
-    emptyReason: "No traffic sources detected",
+    emptyReason: "Todavía no podemos saber de dónde llegaron",
   },
   {
     id: "devices",
-    title: "Devices",
+    title: "Dispositivos utilizados",
     requiredPlan: "pro",
     hasData: (m) => m.devices.length > 0,
-    emptyReason: "No device information captured",
+    emptyReason: "Todavía no registramos el tipo de dispositivo",
   },
   {
     id: "new_vs_returning",
-    title: "New vs returning",
+    title: "Visitas nuevas y visitas que vuelven",
     requiredPlan: "business",
     hasData: (m) => m.totals.visitors > 0,
-    emptyReason: "No visitors yet",
+    emptyReason: "Todavía no hay visitas registradas",
   },
   {
     id: "conversion_funnel",
-    title: "Conversion funnel",
+    title: "Qué hicieron después de entrar",
     requiredPlan: "business",
     hasData: (m) => m.sampleSize >= 25 && m.funnel.some((step) => step.value > 0),
-    emptyReason: "No funnel activity yet",
+    emptyReason: "Todavía no hay suficiente actividad para ver este recorrido",
   },
   {
     id: "geography",
-    title: "Geography",
+    title: "Desde dónde te visitan",
     requiredPlan: "business",
     hasData: (m) => m.countries.length > 0 || m.cities.length > 0,
-    emptyReason: "No location signals captured",
+    emptyReason: "Todavía no hay señales de ubicación",
   },
   {
     id: "anomalies_momentum",
-    title: "Momentum & anomalies",
+    title: "Cambios fuera de lo normal",
     requiredPlan: "business",
     hasData: (m) => m.sampleSize > 0,
-    emptyReason: "No activity to analyse",
+    emptyReason: "Todavía no hay actividad para analizar",
   },
 ];
 
@@ -145,7 +146,7 @@ export function resolveWidgets(metrics: AnalyticsMetricsV1, plan: PlanId): Widge
         id: spec.id,
         title: spec.title,
         visibility: "locked" as const,
-        reason: `Available on ${spec.requiredPlan.charAt(0).toUpperCase()}${spec.requiredPlan.slice(1)}`,
+        reason: planLockReason(spec.requiredPlan),
         requiredPlan: spec.requiredPlan,
       };
     }

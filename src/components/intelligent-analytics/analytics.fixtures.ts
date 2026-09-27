@@ -27,25 +27,25 @@ export interface ScenarioSpec {
 }
 
 export const ANALYTICS_SCENARIOS: ScenarioSpec[] = [
-  { id: "no_data", label: "No data", description: "Brand new page, zero activity." },
-  { id: "new_user", label: "New user", description: "First signals, learning mode." },
-  { id: "growing_business", label: "Growing", description: "Healthy upward trend across channels." },
-  { id: "declining_business", label: "Declining", description: "Traffic and engagement cooling down." },
-  { id: "viral_spike", label: "Viral spike", description: "Sudden anomaly from a single campaign." },
-  { id: "whatsapp_heavy", label: "WhatsApp heavy", description: "One channel dominates everything." },
+  { id: "no_data", label: "Sin datos", description: "Página nueva, sin actividad." },
+  { id: "new_user", label: "Primeros datos", description: "Primeras señales de actividad." },
+  { id: "growing_business", label: "Creciendo", description: "Tendencia al alza en todos los canales." },
+  { id: "declining_business", label: "Bajando", description: "Menos visitas y menos acciones." },
+  { id: "viral_spike", label: "Pico inesperado", description: "Cambio brusco desde una sola campaña." },
+  { id: "whatsapp_heavy", label: "Todo pasa por WhatsApp", description: "Un canal concentra casi todo." },
   {
     id: "rolling_instagram_spike",
-    label: "Realtime Instagram spike",
-    description: "A burst of Instagram clicks inside the last 45 minutes.",
+    label: "Pico de Instagram en vivo",
+    description: "Ráfaga de entradas a Instagram en los últimos 45 minutos.",
   },
-  { id: "goal_at_risk", label: "Goal at risk", description: "Pace below the monthly target." },
+  { id: "goal_at_risk", label: "Meta en riesgo", description: "Ritmo por debajo de la meta del mes." },
   {
     id: "goal_success_projection",
-    label: "Goal on track",
-    description: "Projected to pass the monthly target.",
+    label: "Meta bien encaminada",
+    description: "Proyección por encima de la meta del mes.",
   },
-  { id: "hot_window", label: "Hot time window", description: "Activity concentrated in one hour." },
-  { id: "weekly_record", label: "Weekly record", description: "Strongest week on record." },
+  { id: "hot_window", label: "Horario con más actividad", description: "Actividad concentrada en una hora." },
+  { id: "weekly_record", label: "Mejor semana", description: "La semana con más actividad registrada." },
 ];
 
 function mulberry32(seed: number) {
@@ -59,18 +59,18 @@ function mulberry32(seed: number) {
   };
 }
 
-const COUNTRIES = ["Spain", "Mexico", "Colombia", "Argentina", "United States", "Chile"];
-const CITIES = ["Madrid", "Barcelona", "Mexico City", "Bogotá", "Buenos Aires", "Miami"];
+const COUNTRIES = ["España", "México", "Colombia", "Argentina", "Estados Unidos", "Chile"];
+const CITIES = ["Madrid", "Barcelona", "Ciudad de México", "Bogotá", "Buenos Aires", "Miami"];
 const DEVICES: DeviceKind[] = ["mobile", "mobile", "mobile", "desktop", "tablet"];
 const SOURCES = ["direct", "instagram", "referrer", "qr"];
 
 const LINKS: Array<{ id: string; label: string; type: AnalyticsEventType; channel: ChannelId }> = [
-  { id: "link_whatsapp", label: "Chat on WhatsApp", type: "whatsapp_click", channel: "whatsapp" },
-  { id: "link_instagram", label: "Instagram profile", type: "instagram_click", channel: "instagram" },
-  { id: "link_menu", label: "See the menu", type: "external_link_click", channel: "other" },
+  { id: "link_whatsapp", label: "Hablar por WhatsApp", type: "whatsapp_click", channel: "whatsapp" },
+  { id: "link_instagram", label: "Perfil de Instagram", type: "instagram_click", channel: "instagram" },
+  { id: "link_menu", label: "Ver el menú", type: "external_link_click", channel: "other" },
   { id: "link_tiktok", label: "TikTok", type: "tiktok_click", channel: "tiktok" },
-  { id: "link_booking", label: "Book an appointment", type: "cta_click", channel: "other" },
-  { id: "link_facebook", label: "Facebook page", type: "facebook_click", channel: "facebook" },
+  { id: "link_booking", label: "Agendar una cita", type: "cta_click", channel: "other" },
+  { id: "link_facebook", label: "Página de Facebook", type: "facebook_click", channel: "facebook" },
 ];
 
 interface ScenarioProfile {

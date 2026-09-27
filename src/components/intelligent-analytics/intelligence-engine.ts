@@ -15,6 +15,7 @@ import {
   type InsightType,
   type RecommendedActionV1,
 } from "./analytics.types";
+import { GOAL_NOUN, METRIC_COPY, conversionPer100, decimalEs, rateEs } from "./copy.es-419";
 
 /** Below this many events we only speak in "learning" language. */
 export const LEARNING_THRESHOLD = 25;
@@ -31,10 +32,6 @@ function fmtPct(value: number | null): string {
   if (value === null) return "new";
   const rounded = Math.round(value);
   return `${rounded > 0 ? "+" : ""}${rounded}%`;
-}
-
-function fmtRate(value: number): string {
-  return `${(value * 100).toFixed(1)}%`;
 }
 
 function hourWindow(hour: number): string {
@@ -72,15 +69,15 @@ export function generateInsights(
     drafts.push({
       type: "low_data_learning",
       category: "learning",
-      title: "Still learning your audience",
+      title: "Todavía estamos conociendo a tus visitantes",
       message:
         sampleSize === 0
-          ? "No activity recorded in this period yet. Share your page or QR code to start collecting signals."
-          : `Only ${sampleSize} signals so far. Cripqer needs a bit more activity before it can call trends with confidence.`,
+          ? "En este período todavía no registramos actividad en tu página. Comparte tu página o tu QR para empezar a ver qué pasa."
+          : `Ya registramos ${metrics.totals.views} visitas y ${metrics.totals.interactions} acciones. Todavía necesitamos un poco más de actividad para detectar patrones con suficiente confianza.`,
       severity: "info",
       confidence: 0.4,
-      metrics: [{ label: "Signals", value: String(sampleSize) }],
-      action: { type: "none", label: "Keep sharing your page" },
+      metrics: [{ label: METRIC_COPY.views.primary, value: String(metrics.totals.views) }],
+      action: { type: "none", label: "Seguir compartiendo tu página" },
     });
     return finalize(drafts);
   }
@@ -92,29 +89,29 @@ export function generateInsights(
       drafts.push({
         type: "traffic_spike",
         category: "positive",
-        title: "Your traffic is climbing",
-        message: `Views are up ${fmtPct(viewDelta)} versus the previous period (${metrics.comparisons.views.current} vs ${metrics.comparisons.views.previous}).`,
+        title: "Recibiste más visitas que en el período anterior",
+        message: `Tus visitas aumentaron ${fmtPct(viewDelta)} frente al período anterior (${metrics.comparisons.views.current} frente a ${metrics.comparisons.views.previous}).`,
         severity: viewDelta >= 60 ? "important" : "notable",
         confidence: confidenceFor(sampleSize, viewDelta),
         metrics: [
-          { label: "Views", value: String(metrics.totals.views) },
-          { label: "Change", value: fmtPct(viewDelta) },
+          { label: METRIC_COPY.views.primary, value: String(metrics.totals.views) },
+          { label: "Variación", value: fmtPct(viewDelta) },
         ],
-        action: { type: "open_analytics", label: "See what changed" },
+        action: { type: "open_analytics", label: "Ver qué cambió" },
       });
     } else if (viewDelta <= -25) {
       drafts.push({
         type: "traffic_drop",
         category: "warning",
-        title: "Traffic slowed down",
-        message: `Views dropped ${fmtPct(viewDelta)} compared with the previous period. Consider resharing your page or QR code.`,
+        title: "Tus visitas bajaron frente al período anterior",
+        message: `Tus visitas bajaron ${Math.abs(Math.round(viewDelta))}% frente al período anterior. Puede ser buen momento para volver a compartir tu página o tu QR.`,
         severity: viewDelta <= -50 ? "important" : "notable",
         confidence: confidenceFor(sampleSize, viewDelta),
         metrics: [
-          { label: "Views", value: String(metrics.totals.views) },
-          { label: "Change", value: fmtPct(viewDelta) },
+          { label: METRIC_COPY.views.primary, value: String(metrics.totals.views) },
+          { label: "Variación", value: fmtPct(viewDelta) },
         ],
-        action: { type: "open_editor", label: "Refresh your page", target: "page" },
+        action: { type: "open_editor", label: "Renovar tu página", target: "page" },
       });
     }
   }
@@ -126,16 +123,16 @@ export function generateInsights(
       drafts.push({
         type: "dominant_channel",
         category: "trend",
-        title: `${leader.label} is doing the heavy lifting`,
-        message: `${Math.round(leader.share * 100)}% of all channel clicks go to ${leader.label}. Give it the most visible position on your page.`,
+        title: `${leader.label} es el canal que más acciones recibe`,
+        message: `${Math.round(leader.share * 100)}% de las acciones en tus enlaces van a ${leader.label}. Vale la pena darle el lugar más visible de tu página.`,
         severity: "notable",
         confidence: confidenceFor(sampleSize, leader.share * 100),
         metrics: [
-          { label: "Clicks", value: String(leader.clicks) },
-          { label: "Share", value: `${Math.round(leader.share * 100)}%` },
+          { label: "Acciones", value: String(leader.clicks) },
+          { label: "Parte del total", value: `${Math.round(leader.share * 100)}%` },
         ],
         channel: leader.channel,
-        action: { type: "open_editor", label: `Promote ${leader.label}`, target: "channel", targetId: leader.channel },
+        action: { type: "open_editor", label: `Destacar ${leader.label}`, target: "channel", targetId: leader.channel },
       });
     }
     for (const channel of metrics.channels) {
@@ -143,13 +140,13 @@ export function generateInsights(
         drafts.push({
           type: "channel_spike",
           category: "positive",
-          title: `${channel.label} is heating up`,
-          message: `${channel.label} clicks grew ${fmtPct(channel.deltaPct)} this period (${channel.clicks} clicks).`,
+          title: `${channel.label} está generando más interés`,
+          message: `Las acciones en ${channel.label} crecieron ${fmtPct(channel.deltaPct)} en este período (${channel.clicks} acciones).`,
           severity: "notable",
           confidence: confidenceFor(sampleSize, channel.deltaPct),
           metrics: [
             { label: channel.label, value: String(channel.clicks) },
-            { label: "Change", value: fmtPct(channel.deltaPct) },
+            { label: "Variación", value: fmtPct(channel.deltaPct) },
           ],
           channel: channel.channel,
         });
@@ -164,19 +161,24 @@ export function generateInsights(
     drafts.push({
       type: improving ? "ctr_improvement" : "ctr_drop",
       category: improving ? "positive" : "opportunity",
-      title: improving ? "Engagement is rising" : "Fewer interactions per view",
+      title: improving
+        ? "Ahora tus visitantes hacen más acciones"
+        : "Bajaron las acciones por visita",
       message: improving
-        ? `Interactions per view rose to ${metrics.interactionRate.toFixed(2)} (${fmtPct(ctrDelta)}). Whatever changed, keep it.`
-        : `Interactions per view fell to ${metrics.interactionRate.toFixed(2)} (${fmtPct(ctrDelta)}). A clearer main button usually recovers this.`,
+        ? `Tus visitantes pasaron a hacer ${decimalEs(metrics.interactionRate)} acciones por visita (${fmtPct(ctrDelta)}). Sea lo que sea que cambiaste, vale la pena mantenerlo.`
+        : `Las acciones por visita bajaron a ${decimalEs(metrics.interactionRate)} (${fmtPct(ctrDelta)}). Un botón principal más claro suele recuperar este número.`,
       severity: improving ? "notable" : "important",
       confidence: confidenceFor(sampleSize, ctrDelta),
       metrics: [
-        { label: "Interactions/view", value: `${metrics.interactionRate.toFixed(2)}×` },
-        { label: "Change", value: fmtPct(ctrDelta) },
+        {
+          label: `${METRIC_COPY.interactionsPerView.primary} ${METRIC_COPY.interactionsPerView.technical}`,
+          value: `${decimalEs(metrics.interactionRate)}\u00d7`,
+        },
+        { label: "Variación", value: fmtPct(ctrDelta) },
       ],
       action: improving
-        ? { type: "open_analytics", label: "See engagement detail" }
-        : { type: "open_editor", label: "Improve your main button", target: "cta" },
+        ? { type: "open_analytics", label: "Ver el detalle de las acciones" }
+        : { type: "open_editor", label: "Mejorar tu botón principal", target: "cta" },
     });
   }
 
@@ -187,13 +189,15 @@ export function generateInsights(
     drafts.push({
       type: improving ? "conversion_improvement" : "conversion_deterioration",
       category: improving ? "positive" : "warning",
-      title: improving ? "More views are converting" : "Conversion is slipping",
-      message: `${fmtRate(metrics.conversionRate)} of views now convert (${fmtPct(conversionDelta)}).`,
+      title: improving
+        ? "Se generan más contactos por visita"
+        : "Bajaron los contactos generados",
+      message: `Se generaron alrededor de ${Math.round(metrics.conversionRate * 100)} contactos por cada 100 visitas (conversión: ${rateEs(metrics.conversionRate)}, ${fmtPct(conversionDelta)} frente al período anterior).`,
       severity: improving ? "notable" : "important",
       confidence: confidenceFor(sampleSize, conversionDelta),
       metrics: [
-        { label: "Conversion", value: fmtRate(metrics.conversionRate) },
-        { label: "Leads", value: String(metrics.totals.leads) },
+        { label: METRIC_COPY.conversion.primary, value: conversionPer100(metrics.conversionRate) },
+        { label: "Contactos", value: String(metrics.totals.leads) },
       ],
     });
   }
@@ -204,23 +208,23 @@ export function generateInsights(
     drafts.push({
       type: "new_daily_record",
       category: "record",
-      title: "New daily record",
-      message: `Today is your strongest day so far with ${records.todayValue} views.`,
+      title: "Hoy es tu mejor día hasta ahora",
+      message: `Hoy registraste ${records.todayValue} visitas: es tu día con más actividad hasta ahora.`,
       severity: "important",
       confidence: 0.9,
-      metrics: [{ label: "Views today", value: String(records.todayValue) }],
+      metrics: [{ label: "Visitas de hoy", value: String(records.todayValue) }],
     });
   } else if (records.bestDayValue > 0 && records.todayValue >= records.bestDayValue * 0.8) {
     drafts.push({
       type: "near_daily_record",
       category: "record",
-      title: "Close to your best day",
-      message: `Today is at ${records.todayValue} views — your record is ${records.bestDayValue}.`,
+      title: "Estás cerca de tu mejor día",
+      message: `Hoy llevas ${records.todayValue} visitas y tu mejor día registrado tiene ${records.bestDayValue}.`,
       severity: "notable",
       confidence: 0.75,
       metrics: [
-        { label: "Today", value: String(records.todayValue) },
-        { label: "Record", value: String(records.bestDayValue) },
+        { label: "Hoy", value: String(records.todayValue) },
+        { label: "Mejor día", value: String(records.bestDayValue) },
       ],
     });
   }
@@ -230,13 +234,13 @@ export function generateInsights(
     drafts.push({
       type: "best_hour",
       category: "opportunity",
-      title: "Your audience shows up at a specific time",
-      message: `${hourWindow(metrics.bestHour.hour)} is your busiest window. Publish and share around then.`,
+      title: "Hay una hora en que tu página recibe más actividad",
+      message: `Entre ${hourWindow(metrics.bestHour.hour)} está tu mayor actividad. Puede ser buen momento para compartir tu página.`,
       severity: "notable",
       confidence: confidenceFor(sampleSize, metrics.bestHour.value),
       metrics: [
-        { label: "Peak window", value: hourWindow(metrics.bestHour.hour) },
-        { label: "Activity", value: String(metrics.bestHour.value) },
+        { label: "Horario con más actividad", value: hourWindow(metrics.bestHour.hour) },
+        { label: "Actividad registrada", value: String(metrics.bestHour.value) },
       ],
     });
   }
@@ -247,15 +251,15 @@ export function generateInsights(
     drafts.push({
       type: "top_link_emerging",
       category: "opportunity",
-      title: `"${topLink.label}" is gaining traction`,
-      message: `That link grew ${fmtPct(topLink.deltaPct)} this period. Moving it higher usually compounds the gain.`,
+      title: `"${topLink.label}" está llamando más la atención`,
+      message: `Ese enlace creció ${fmtPct(topLink.deltaPct)} en este período. Subirlo en tu página suele aumentar todavía más las acciones.`,
       severity: "notable",
       confidence: confidenceFor(sampleSize, topLink.deltaPct),
       metrics: [
-        { label: "Clicks", value: String(topLink.value) },
-        { label: "Change", value: fmtPct(topLink.deltaPct) },
+        { label: "Acciones", value: String(topLink.value) },
+        { label: "Variación", value: fmtPct(topLink.deltaPct) },
       ],
-      action: { type: "open_editor", label: "Move it up", target: "link", targetId: topLink.id },
+      action: { type: "open_editor", label: "Subirlo en tu página", target: "link", targetId: topLink.id },
     });
   }
   const weakest = metrics.topLinks[metrics.topLinks.length - 1];
@@ -263,12 +267,12 @@ export function generateInsights(
     drafts.push({
       type: "underperforming_link",
       category: "opportunity",
-      title: `"${weakest.label}" barely gets clicks`,
-      message: `It takes up space but captures ${Math.round(weakest.share * 100)}% of clicks. Consider rewording or removing it.`,
+      title: `"${weakest.label}" casi no recibe acciones`,
+      message: `Ocupa espacio en tu página y reúne solo ${Math.round(weakest.share * 100)}% de las acciones. Puedes cambiarle el texto o quitarlo.`,
       severity: "info",
       confidence: confidenceFor(sampleSize, 20),
-      metrics: [{ label: "Clicks", value: String(weakest.value) }],
-      action: { type: "open_editor", label: "Review this link", target: "link", targetId: weakest.id },
+      metrics: [{ label: "Acciones", value: String(weakest.value) }],
+      action: { type: "open_editor", label: "Revisar este enlace", target: "link", targetId: weakest.id },
     });
   }
 
@@ -281,17 +285,17 @@ export function generateInsights(
       drafts.push({
         type: "realtime_channel_spike",
         category: "realtime",
-        title: `${spike.label} is heating up right now`,
-        message: `${spike.clicks} clicks were recorded on your ${spike.label} link from Cripqer during the last ${spike.windowMinutes} minutes. That is ${spike.ratio.toFixed(1)}\u00d7 your usual activity.`,
+        title: `Ahora mismo ${spike.label} está recibiendo más acciones`,
+        message: `Registramos ${spike.clicks} acciones hacia ${spike.label} durante los últimos ${spike.windowMinutes} minutos. Es ${decimalEs(spike.ratio, 1)}\u00d7 tu actividad habitual.`,
         severity: spike.ratio >= 3 ? "important" : "notable",
         confidence: spike.confidence,
         metrics: [
-          { label: "Clicks", value: String(spike.clicks) },
-          { label: "Versus usual", value: `${spike.ratio.toFixed(1)}\u00d7` },
-          { label: "Window", value: `${spike.windowMinutes} min` },
+          { label: "Acciones", value: String(spike.clicks) },
+          { label: "Frente a lo habitual", value: `${decimalEs(spike.ratio, 1)}\u00d7` },
+          { label: "Últimos minutos", value: `${spike.windowMinutes} min` },
         ],
         channel: spike.channel,
-        action: { type: "open_analytics", label: "View activity" },
+        action: { type: "open_analytics", label: "Ver la actividad" },
       });
     }
     const hour = rolling.windows.find((entry) => entry.windowMinutes === 60);
@@ -299,15 +303,15 @@ export function generateInsights(
       drafts.push({
         type: "realtime_surge",
         category: "realtime",
-        title: "More activity than usual is on your page",
-        message: `${hour.total} signals in the last hour, ${hour.ratio.toFixed(1)}\u00d7 your usual pace for this window.`,
+        title: "Hay más actividad que de costumbre en tu página",
+        message: `${hour.total} registros de actividad en la última hora, ${decimalEs(hour.ratio, 1)}\u00d7 tu ritmo habitual para este horario.`,
         severity: "notable",
         confidence: 0.72,
         metrics: [
-          { label: "Last hour", value: String(hour.total) },
-          { label: "Versus usual", value: `${hour.ratio.toFixed(1)}\u00d7` },
+          { label: "Última hora", value: String(hour.total) },
+          { label: "Frente a lo habitual", value: `${decimalEs(hour.ratio, 1)}\u00d7` },
         ],
-        action: { type: "open_analytics", label: "View activity" },
+        action: { type: "open_analytics", label: "Ver la actividad" },
       });
     }
   }
@@ -318,15 +322,15 @@ export function generateInsights(
     drafts.push({
       type: "new_weekly_record",
       category: "record",
-      title: "Best week so far",
-      message: `This week already reached ${thisWeek} views \u2014 your strongest week on record.`,
+      title: "Tu mejor semana hasta ahora",
+      message: `Esta semana ya llegó a ${thisWeek} visitas \u2014 es tu semana con más actividad registrada.`,
       severity: "important",
       confidence: 0.88,
       metrics: [
-        { label: "This week", value: String(thisWeek) },
-        { label: "Previous best", value: String(records.bestWeekValue) },
+        { label: "Esta semana", value: String(thisWeek) },
+        { label: "Mejor semana anterior", value: String(records.bestWeekValue) },
       ],
-      action: { type: "open_analytics", label: "View performance" },
+      action: { type: "open_analytics", label: "Ver el detalle" },
     });
   }
 
@@ -337,15 +341,15 @@ export function generateInsights(
       drafts.push({
         type: "hot_time_window",
         category: "opportunity",
-        title: "There is a window that works better than the rest",
-        message: `${Math.round(share * 100)}% of everything happens around ${hourWindow(metrics.bestHour.hour)}. Sharing just before that window compounds it.`,
+        title: "Hay un horario que funciona mejor que el resto",
+        message: `Cerca del ${Math.round(share * 100)}% de la actividad ocurre alrededor de ${hourWindow(metrics.bestHour.hour)}. Compartir justo antes de ese horario suele dar mejores resultados.`,
         severity: "notable",
         confidence: confidenceFor(sampleSize, share * 100),
         metrics: [
-          { label: "Window", value: hourWindow(metrics.bestHour.hour) },
-          { label: "Share", value: `${Math.round(share * 100)}%` },
+          { label: "Horario con más actividad", value: hourWindow(metrics.bestHour.hour) },
+          { label: "Parte del total", value: `${Math.round(share * 100)}%` },
         ],
-        action: { type: "open_analytics", label: "See hot hours" },
+        action: { type: "open_analytics", label: "Ver las horas con más actividad" },
       });
     }
   }
@@ -358,43 +362,43 @@ export function generateInsights(
       drafts.push({
         type: "goal_progress",
         category: "goal",
-        title: "You're close to your record",
-        message: `You need ${remaining} more ${goal.label.toLowerCase().replace("monthly ", "")} to reach your ${goal.target} target.`,
+        title: "Estás cerca de tu meta del mes",
+        message: `Te faltan ${remaining} ${GOAL_NOUN[goal.metric]} para llegar a tu meta de ${goal.target}.`,
         severity: "notable",
         confidence: 0.75,
         metrics: [
-          { label: "Progress", value: `${Math.round(goal.progress * 100)}%` },
-          { label: "Remaining", value: String(remaining) },
+          { label: "Avance", value: `${Math.round(goal.progress * 100)}%` },
+          { label: "Te falta", value: String(remaining) },
         ],
-        action: { type: "open_analytics", label: "View performance" },
+        action: { type: "open_analytics", label: "Ver el detalle" },
       });
     } else if (goal.status === "on_track" && goal.progress < 1) {
       drafts.push({
         type: "goal_projected_success",
         category: "goal",
-        title: `You are on track for your ${goal.label.toLowerCase()} goal`,
-        message: `At the current pace you land around ${goal.projected}, past your ${goal.target} target.`,
+        title: "Vas bien encaminado para cumplir tu meta del mes",
+        message: `Si mantienes el ritmo actual, la proyección es ${goal.projected} ${GOAL_NOUN[goal.metric]} y tu meta es ${goal.target}.`,
         severity: "notable",
         confidence: 0.8,
         metrics: [
-          { label: "Projected", value: String(goal.projected) },
-          { label: "Target", value: String(goal.target) },
+          { label: "Proyección", value: String(goal.projected) },
+          { label: "Meta", value: String(goal.target) },
         ],
-        action: { type: "open_analytics", label: "View performance" },
+        action: { type: "open_analytics", label: "Ver el detalle" },
       });
     } else if (goal.status === "at_risk" || goal.status === "behind") {
       drafts.push({
         type: "goal_at_risk",
         category: "goal",
-        title: `Your ${goal.label.toLowerCase()} goal needs a push`,
-        message: `${remaining} to go with ${goal.daysRemaining} days left \u2014 about ${goal.requiredPerDay} per day closes the gap.`,
+        title: "Tu meta del mes necesita un empujón",
+        message: `Te faltan ${remaining} ${GOAL_NOUN[goal.metric]} y quedan ${goal.daysRemaining} días: necesitas alrededor de ${goal.requiredPerDay} por día para llegar.`,
         severity: goal.status === "behind" ? "important" : "notable",
         confidence: 0.78,
         metrics: [
-          { label: "Remaining", value: String(remaining) },
-          { label: "Per day", value: String(goal.requiredPerDay) },
+          { label: "Te falta", value: String(remaining) },
+          { label: "Por día", value: String(goal.requiredPerDay) },
         ],
-        action: { type: "open_editor", label: "Improve your page", target: "page" },
+        action: { type: "open_editor", label: "Mejorar tu página", target: "page" },
       });
     }
   }

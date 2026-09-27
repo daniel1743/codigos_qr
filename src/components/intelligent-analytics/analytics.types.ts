@@ -82,7 +82,7 @@ export const CHANNEL_LABEL: Record<ChannelId, string> = {
   tiktok: "TikTok",
   youtube: "YouTube",
   linkedin: "LinkedIn",
-  other: "Other links",
+  other: "Otros enlaces",
 };
 
 /* ------------------------------------------------------------------ */

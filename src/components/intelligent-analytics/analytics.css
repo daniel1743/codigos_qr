@@ -693,6 +693,9 @@
   .cq-kpis { grid-template-columns: repeat(6, minmax(0, 1fr)); }
   .cq-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .cq-grid__wide { grid-column: span 2; }
+  /* C2B8A · QA Round 1: en escritorio el aviso no ocupa todo el ancho. Va
+     después de la regla de 700px para ganarle (misma especificidad). */
+  .cq-toasts { left: auto; width: 380px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

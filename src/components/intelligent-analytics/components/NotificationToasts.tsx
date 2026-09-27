@@ -88,7 +88,7 @@ export function NotificationToasts({
           <button
             type="button"
             className="cq-toast__close"
-            aria-label="Dismiss notification"
+            aria-label="Descartar aviso"
             onClick={() => close(candidate.id)}
           >
             ×
