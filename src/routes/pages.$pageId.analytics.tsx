@@ -43,6 +43,12 @@ const EMPTY: PageAnalyticsSummary = {
   dailyVisits: [],
 };
 
+/**
+ * Deterministic safe state when the route is opened without a session.
+ * It is also the ONLY error that offers a sign-in action.
+ */
+const AUTH_REQUIRED_MESSAGE = "Debes iniciar sesión para ver estadísticas.";
+
 function MetricCard({ label, value, icon }: { label: string; value: number; icon: ReactNode }) {
   return (
     <Card>
@@ -117,11 +123,14 @@ function PageAnalytics() {
 
   useEffect(() => {
     let active = true;
+    // A failed load (no session, no access, transport error) must also end the
+    // `pending` canary state, otherwise the screen hangs on "Cargando…" forever.
+    let failed = false;
     (async () => {
       try {
         const supabase = getBrowserSupabaseClient();
         const { data: auth } = await supabase.auth.getUser();
-        if (!auth.user) throw new Error("Debes iniciar sesión para ver estadísticas.");
+        if (!auth.user) throw new Error(AUTH_REQUIRED_MESSAGE);
         const ownedPage = await pageService.getOwnPageById(supabase, pageId, auth.user.id);
         if (!ownedPage) throw new Error("No se encontró esta página o no tienes acceso a ella.");
         if (!active) return;
@@ -178,13 +187,15 @@ function PageAnalytics() {
         }
         if (active) setError(null);
       } catch (reason) {
+        failed = true;
         if (active)
           setError(
             reason instanceof Error ? reason.message : "No se pudieron cargar las estadísticas.",
           );
       } finally {
-        // `pending` keeps the loading state until the canary gate resolves.
-        if (active && mode !== "pending") setLoading(false);
+        // `pending` keeps the loading state until the canary gate resolves — but a
+        // failure ends that wait deterministically in the safe error state.
+        if (active && (failed || mode !== "pending")) setLoading(false);
       }
     })();
     return () => {
@@ -225,12 +236,17 @@ function PageAnalytics() {
           </Link>
         </Button>
 
-        {loading || mode === "pending" ? (
+        {loading || (mode === "pending" && !error) ? (
           <p className="text-sm text-muted-foreground">Cargando estadísticas…</p>
         ) : error || !page ? (
           <Card>
             <CardContent className="py-10 text-center text-sm text-destructive">
-              {error ?? "No se encontró esta página."}
+              <p>{error ?? "No se encontró esta página."}</p>
+              {error === AUTH_REQUIRED_MESSAGE ? (
+                <Button asChild size="sm" className="mt-4">
+                  <Link to="/login">Iniciar sesión</Link>
+                </Button>
+              ) : null}
             </CardContent>
           </Card>
         ) : (
