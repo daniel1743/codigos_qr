@@ -24,9 +24,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cat .payload/part*.txt | base64 --decode > /tmp/magic-frame-prototype.zip
+          cat .payload/part*.txt | base64 --decode > /tmp/magic-frame-prototype.tar.xz
           mkdir -p /tmp/magic-frame-prototype
-          unzip -q /tmp/magic-frame-prototype.zip -d /tmp/magic-frame-prototype
+          tar -xJf /tmp/magic-frame-prototype.tar.xz -C /tmp/magic-frame-prototype
 
       - name: Replace branch contents with isolated prototype
         shell: bash
