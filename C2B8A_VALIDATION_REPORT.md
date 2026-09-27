@@ -102,7 +102,7 @@ Comparación contra la línea base previa a los cambios (misma base `f1cf3544`):
 
 | Chequeo | Resultado |
 | --- | --- |
-| `tsc --noEmit` | ⚠️ **667 errores TypeScript preexistentes en baseline; 0 errores nuevos atribuibles a C2B8A** (medido con el ajuste de copy aplicado: 667 errores, mismo conjunto `archivo + código + mensaje`; ninguno en los archivos de la fase — ver §8.2) |
+| `tsc --noEmit` | ⚠️ **667 errores TypeScript preexistentes en baseline; 0 errores nuevos atribuibles a C2B8A** (medido antes y después del ajuste de copy: 667 y 667, con el conjunto `archivo + código + mensaje` **idéntico**; `intelligence-engine.ts` sin errores y `analytics-visual-qa.tsx` con sus 5 `TS4111` preexistentes — ver §8.2) |
 | `git diff --check` | ✅ Sin problemas de espacio en blanco |
 | Escaneo de inglés residual en la capa de presentación | ✅ 29 frases de C2B8 protegidas por test |
 | Escaneo de inglés/jerga en la salida de los motores | ✅ 76 tokens, 11 escenarios |
@@ -254,8 +254,16 @@ Queda identificado como micro-ajuste de 1 palabra si el owner lo quiere en una f
 | Verificación directa del copy nuevo | chequeo temporal sobre los 11 escenarios: `insight.title === "Hay una hora en que tu página recibe más actividad"` y `message` conserva “Entre … está tu mayor actividad. Puede ser buen momento para compartir tu página.” | ✅ **10 insights `best_hour`** (los 10 escenarios con datos; `no_data` queda en modo aprendizaje) **todos con la cadena nueva** (archivo temporal **eliminado**, no versionado) |
 | Contrato C2B8A (`human-language.test.ts`) | incluido en la suite de arriba: tokens de jerga/inglés (76) y afirmaciones prohibidas | ✅ PASS — el título nuevo no dispara ningún token |
 | Build de producción | `npm run build` (`vite build` + nitro · preset `vercel`) | ✅ cliente + SSR + `.vercel/output/nitro.json` generados, **sin errores** |
-| Typecheck | `tsc --noEmit` | ⚠️ **667 errores TypeScript preexistentes en baseline; 0 errores nuevos atribuibles a C2B8A** (ninguno en `intelligence-engine.ts` ni en `analytics-visual-qa.tsx`) |
+| Typecheck | `tsc --noEmit` | ⚠️ **667 errores TypeScript preexistentes en baseline; 0 errores nuevos atribuibles a C2B8A**: 667 antes y 667 después del ajuste, con el conjunto `archivo + código + mensaje` **idéntico** (`Compare-Object`); `intelligence-engine.ts` sin errores y `analytics-visual-qa.tsx` con sus **5 `TS4111` preexistentes** |
 | Higiene git | `git diff --check` | ✅ limpio |
+
+**Nota de trazabilidad del typecheck.** Frente al baseline de **C2B8** (666 errores, medido en `9e33d86`),
+el conteo sube en **1**: `TS2741` en `src/routes/pages.$pageId.analytics.tsx` (*“Property 'search' is missing
+in type '{ children: string; to: "/login"; }'”*). Se verificó con `git show` que ese `<Link to="/login">`
+**no existía** en `9e33d86` y **aparece en `5190cb9`** (*“fix(analytics): resolve pending state without
+session”*, rama de producción C2B8 / PR #6, merge `f1cf354`): es decir, **heredado por C2B8A, no
+introducido por ella**. Ni C2B8A ni este cierre tocaron esa línea (`git diff f1cf354 HEAD` sobre el archivo
+no muestra ninguna coincidencia con `login`). El ajuste de copy **no** altera el conjunto de errores.
 
 ### 8.3 Alcance respetado (sin cambios)
 
