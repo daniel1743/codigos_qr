@@ -39,3 +39,8 @@ e2e/.auth/
 
 .vercel
 .env*
+
+# Local browser automation artifacts — never commit
+/scratch/qr-center-icon-06/edge-profile-excel/
+/scratch/qr-center-icon-06/edge-profile-pdf/
+/tatus --short
