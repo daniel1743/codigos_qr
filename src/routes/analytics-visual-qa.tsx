@@ -60,7 +60,7 @@ const SAMPLE_NOTIFICATIONS: NotificationItemV1[] = [
     type: "best_hour",
     kind: "opportunity",
     icon: "💡",
-    title: "Tus visitantes se conectan a una hora parecida",
+    title: "Hay una hora en que tu página recibe más actividad",
     message: "Entre 11:00 y 12:00 está tu mayor actividad: puede ser buen momento para publicar o compartir.",
     severity: "important",
     score: 78,

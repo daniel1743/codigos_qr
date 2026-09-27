@@ -234,7 +234,7 @@ export function generateInsights(
     drafts.push({
       type: "best_hour",
       category: "opportunity",
-      title: "Tus visitantes se conectan a una hora parecida",
+      title: "Hay una hora en que tu página recibe más actividad",
       message: `Entre ${hourWindow(metrics.bestHour.hour)} está tu mayor actividad. Puede ser buen momento para compartir tu página.`,
       severity: "notable",
       confidence: confidenceFor(sampleSize, metrics.bestHour.value),

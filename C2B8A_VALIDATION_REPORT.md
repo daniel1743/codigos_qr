@@ -5,12 +5,14 @@
 **Rama:** `feat/analytics-c2b8a-es-latam` (worktree limpio: `…\generador de QR - c2b8a-es-latam`)
 **SHA final:** `c1de81d2e17b3e4c9c7a2ec9b66c24790087451b` (commit único de la fase en `feat/analytics-c2b8a-es-latam`; 18 archivos, +1690 / −334; **sin push y sin merge**)
 **Canary protegido:** `VvUsngW` · page `1c4aa062-a012-47e4-b0f1-99ca8e80d1ec`
+**Cierre pre-canary:** `2026-09-27` · copy `best_hour` aprobado + **QA visual PASS del owner** (escritorio y 360 px) · tests/build/`diff --check` re-ejecutados — detalle en **§8** (incluye el SHA del commit de cierre).
 
 > **Alcance de esta validación.** Todo lo que se puede comprobar en este entorno se comprobó
-> y está abajo con su evidencia. Dos gates **no** se pudieron ejecutar aquí y se declaran
-> explícitamente como **PENDIENTES** con el procedimiento exacto: la **QA visual móvil/escritorio**
-> (no hay navegador en este entorno) y la **QA del canary en producción** (requiere deploy
-> autorizado y credenciales de Supabase). No se reportan como PASS.
+> y está abajo con su evidencia. Dos gates no se podían ejecutar en este entorno y se declararon
+> **PENDIENTES** con el procedimiento exacto: la **QA visual móvil/escritorio** y la **QA del canary
+> en producción**. Estado al cierre pre-canary (2026-09-27): la **QA visual quedó en PASS** por
+> revisión manual del owner (escritorio y **360 px**, ver §6) y la **QA del canary sigue PENDIENTE**
+> hasta que se autorice el deploy y se disponga de credenciales de producción (§5).
 
 ---
 
@@ -61,8 +63,8 @@
 
 | ID | Prueba | Resultado | Evidencia |
 | --- | --- | --- | --- |
-| UI-01 | Escritorio sin overflow, cortes ni textos ilegibles | **PENDIENTE (QA visual)** | Revisión estática PASS; QA visual real no ejecutada (§6) |
-| UI-02 | Móvil sin overflow, cortes ni tarjetas rotas | **PENDIENTE (QA visual)** | Revisión estática PASS; QA visual real no ejecutada (§6) |
+| UI-01 | Escritorio sin overflow, cortes ni textos ilegibles | **PASS** | QA visual **manual del owner** (escritorio) al cierre pre-canary; revisión estática PASS (§6) |
+| UI-02 | Móvil sin overflow, cortes ni tarjetas rotas | **PASS** | QA visual **manual del owner** a **360 px**; revisión estática PASS (§6) |
 
 ---
 
@@ -93,11 +95,14 @@ Comparación contra la línea base previa a los cambios (misma base `f1cf3544`):
 | Después (C2B8A) | 16 | 116 | 0 |
 | Delta | +1 archivo de contrato nuevo | **+13 pruebas** | **0 regresiones** |
 
+> **Nota de cierre (2026-09-27):** el commit de *QA Round 1* (`09a3b66`) sumó 4 pruebas al contrato
+> `human-language.test.ts`; la suite ejecutada en el cierre pre-canary queda en **20 archivos / 143 pruebas** (§8.2).
+
 ### 2.1 Verificaciones estáticas
 
 | Chequeo | Resultado |
 | --- | --- |
-| `tsc --noEmit` | ✅ Sin salida (0 errores) |
+| `tsc --noEmit` | ⚠️ **667 errores TypeScript preexistentes en baseline; 0 errores nuevos atribuibles a C2B8A** (medido con el ajuste de copy aplicado: 667 errores, mismo conjunto `archivo + código + mensaje`; ninguno en los archivos de la fase — ver §8.2) |
 | `git diff --check` | ✅ Sin problemas de espacio en blanco |
 | Escaneo de inglés residual en la capa de presentación | ✅ 29 frases de C2B8 protegidas por test |
 | Escaneo de inglés/jerga en la salida de los motores | ✅ 76 tokens, 11 escenarios |
@@ -164,7 +169,11 @@ Rollback si algo falla: vaciar la allowlist (sin tocar código ni datos).
 
 ---
 
-## 6. QA móvil y escritorio — PENDIENTE (QA visual)
+## 6. QA móvil y escritorio — ✅ PASS (QA visual manual del owner)
+
+**Cierre pre-canary (2026-09-27).** El owner revisó la interfaz manualmente: **escritorio PASS** y
+**móvil 360 px PASS**. No se solicitan más capturas: los pasos de abajo quedan como registro
+reproducible de esa revisión, **no** como un pendiente.
 
 Revisión **estática** completada (PASS):
 
@@ -174,7 +183,7 @@ Revisión **estática** completada (PASS):
 - El estado bloqueado usaba una frase de 124 caracteres y ahora usa dos líneas (76 + 60) en un contenedor con `margin: 0`, es decir, **menos** presión de ancho que antes.
 - Todos los `aria-label` nuevos están en español y ningún estado depende solo del color (se mantienen los textos).
 
-QA visual real (no ejecutada aquí, sin navegador). Procedimiento de 5 minutos con el resultado esperado:
+Registro reproducible de la revisión (5 minutos), por si hay que repetirla:
 
 | Paso | Acción | Resultado esperado |
 | --- | --- | --- |
@@ -191,22 +200,68 @@ QA visual real (no ejecutada aquí, sin navegador). Procedimiento de 5 minutos c
 
 | Gate | Estado |
 | --- | --- |
-| Tests (20 archivos / 139 pruebas) | ✅ PASS |
+| Tests (20 archivos / **143** pruebas al cierre) | ✅ PASS |
 | Build (`npm run build`) | ✅ PASS |
-| `tsc --noEmit` | ✅ PASS |
+| `tsc --noEmit` | ⚠️ Sin cambio respecto al baseline: **667 errores preexistentes**, **0 nuevos atribuibles a C2B8A** (no es un gate verde; el gate verde de construcción es el build, §8.2) |
 | `git diff --check` | ✅ PASS |
 | Escaneos de idioma / jerga / inglés residual | ✅ PASS |
 | Regresiones C2B8 (eventos, números, gates, planes, permisos) | ✅ PASS |
-| QA visual móvil / escritorio (UI-01, UI-02) | ⏳ PENDIENTE (procedimiento en §6) |
-| QA del canary `VvUsngW` (REG-01, REG-02) | ⏳ PENDIENTE (procedimiento en §5) |
+| QA visual móvil / escritorio (UI-01, UI-02) | ✅ **PASS** (manual del owner: escritorio + 360 px; §6) |
+| Ajuste de copy aprobado del insight `best_hour` | ✅ **PASS** (tests + build + `git diff --check`; §8) |
+| QA del canary `VvUsngW` (REG-01, REG-02) | ⏳ PENDIENTE (requiere el **deploy autorizado**; §5) |
 
-**Veredicto:** ✅ **PASS técnico completo** en todo lo ejecutable en este entorno, **sin regresiones**,
-con 0 cambios en cálculos, eventos, base de datos, RLS, RPC, canonical writer, feature gate y allowlist.
-La fase queda **lista para QA visual y de canary**; esos dos pasos son de aprobación humana.
+**Veredicto:** ✅ **PASS técnico completo** y **QA visual PASS** (revisión manual del owner).
+Sin regresiones y con **0 cambios** en cálculos, eventos, base de datos, RLS, RPC, canonical writer,
+feature gate y allowlist. La fase queda **cerrada en local** y lista para el **deploy controlado del
+canary** (requiere autorización explícita del owner).
 
 **Token de fase:** `CRIPQER_ANALYTICS_C2B8A_ES_LATAM_HUMAN_LANGUAGE_PASS`
-*(válido una vez completados los pasos §5 y §6; hasta entonces el estado es PASS con reserva de QA visual/canary)*
+*(§6 cumplido con la QA visual del owner; §5 sigue pendiente hasta que el deploy del canary sea autorizado)*
 
-**Próximo paso:** no iniciar Business OS hasta que C2B8A esté validado en producción y el usuario autorice continuar. Sin merge y sin push desde esta fase.
+**Próximo paso:** deploy controlado del canary `VvUsngW` (§5) con autorización del owner. No iniciar Business OS hasta que C2B8A esté validado en producción y el usuario autorice continuar. Sin merge y sin push desde esta fase.
 
+---
 
+## 8. Cierre pre-canary (2026-09-27)
+
+### 8.1 Único cambio de código: copy del insight `best_hour`
+
+| | |
+| --- | --- |
+| Insight | `best_hour` — tipo `opportunity`, categoría *horario con más actividad* |
+| ANTES | `Tus visitantes se conectan a una hora parecida` |
+| DESPUÉS | `Hay una hora en que tu página recibe más actividad` |
+| Texto secundario | **sin cambios** (`hourWindow()` intacto): `Entre {11:00–12:00} está tu mayor actividad. Puede ser buen momento para compartir tu página.` |
+
+Ocurrencias de la misma cadena actualizadas (2, para que el texto anterior no quede en ninguna superficie):
+
+| Archivo | Línea | Superficie |
+| --- | --- | --- |
+| `src/components/intelligent-analytics/intelligence-engine.ts` | 237 | insight `best_hour` real (producción) |
+| `src/routes/analytics-visual-qa.tsx` | 63 | fixture **DEV** del mismo aviso (Centro de avisos de la ruta de QA visual, inalcanzable en producción) |
+
+**Nota de precisión (sin cambio aplicado).** La cadena vigente del texto secundario es
+“**Puede ser buen momento** para compartir tu página.”, mientras que la cita del owner dice
+“**Puede ser un buen momento** para compartir tu página.”. Son equivalentes en significado; la
+instrucción pedía **conservar el texto secundario actual**, así que **no** se añadió la palabra “un”.
+Queda identificado como micro-ajuste de 1 palabra si el owner lo quiere en una fase posterior.
+
+### 8.2 Gates ejecutados en el cierre
+
+| Gate | Detalle | Resultado |
+| --- | --- | --- |
+| Tests afectados + contrato de lenguaje | `node node_modules/vitest/vitest.mjs run --dir src src/components/intelligent-analytics src/lib/analytics src/services/__tests__/analyticsRealData.test.ts src/routes/__tests__/analytics-canary-gate.test.ts src/routes/__tests__/magic-public-analytics-wiring.test.ts src/routes/__tests__/analytics-no-session.test.tsx src/routes/__tests__/pages.routing.test.ts --reporter=dot` | ✅ **20 archivos / 143 pruebas PASS · 0 fallos** (100,42 s) |
+| Verificación directa del copy nuevo | chequeo temporal sobre los 11 escenarios: `insight.title === "Hay una hora en que tu página recibe más actividad"` y `message` conserva “Entre … está tu mayor actividad. Puede ser buen momento para compartir tu página.” | ✅ **10 insights `best_hour`** (los 10 escenarios con datos; `no_data` queda en modo aprendizaje) **todos con la cadena nueva** (archivo temporal **eliminado**, no versionado) |
+| Contrato C2B8A (`human-language.test.ts`) | incluido en la suite de arriba: tokens de jerga/inglés (76) y afirmaciones prohibidas | ✅ PASS — el título nuevo no dispara ningún token |
+| Build de producción | `npm run build` (`vite build` + nitro · preset `vercel`) | ✅ cliente + SSR + `.vercel/output/nitro.json` generados, **sin errores** |
+| Typecheck | `tsc --noEmit` | ⚠️ **667 errores TypeScript preexistentes en baseline; 0 errores nuevos atribuibles a C2B8A** (ninguno en `intelligence-engine.ts` ni en `analytics-visual-qa.tsx`) |
+| Higiene git | `git diff --check` | ✅ limpio |
+
+### 8.3 Alcance respetado (sin cambios)
+
+- **No** se tocó: base de datos, migraciones, RLS, RPC, canonical writer, eventos/tracking,
+  feature gate, `dashboard-mode`, allowlist del canary ni ningún cálculo de métricas.
+- La allowlist **no** se amplió: sigue con el canary `VvUsngW` únicamente.
+- **Sin push**, **sin merge** y **sin deploy**: el cierre es un commit **local** en
+  `feat/analytics-c2b8a-es-latam`.
+- Worktree limpio al cierre (los artefactos de validación se escribieron fuera del repositorio, en `%TEMP%`).

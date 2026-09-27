@@ -184,7 +184,7 @@ Fuente de verdad: `widget-registry.ts` (SPECS) + el `Card` de cada widget.
 | `More views are converting` / `Conversion is slipping` | JARGON | `Más visitas terminan completando una acción` / `Bajaron las personas que completan una acción` |
 | `{x} of views now convert (conversion rate)` | JARGON | `Aproximadamente {x} de cada 100 visitas completaron una acción (conversión: 12,3%…)` |
 | `New daily record` / `Close to your best day` | EN | `Hoy es tu mejor día hasta ahora` / `Estás cerca de tu mejor día` |
-| `Your audience shows up at a specific time` | EN | `Tus visitantes se conectan a una hora parecida` |
+| `Your audience shows up at a specific time` | EN | `Hay una hora en que tu página recibe más actividad` — *(copy ajustado en el cierre pre-canary del 2026-09-27: antes decía `Tus visitantes se conectan a una hora parecida`; el texto secundario no cambió. Ver §8 del reporte de validación)* |
 | `"{enlace}" is gaining traction` / `"{enlace}" barely gets clicks` | EN | `"{enlace}" está llamando más la atención` / `"{enlace}" casi no recibe acciones` |
 | `{canal} is heating up right now` / `More activity than usual is on your page` | EN | `Ahora mismo {canal} está recibiendo más acciones` / `Hay más actividad que de costumbre en tu página` |
 | `Best week so far` | EN | `Tu mejor semana hasta ahora` |
