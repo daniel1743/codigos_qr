@@ -180,7 +180,7 @@ function PageAnalytics() {
               setRealError(
                 reason instanceof Error
                   ? reason.message
-                  : "No se pudieron cargar los datos de Intelligent Analytics.",
+                  : "No pudimos cargar tus estadísticas.",
               );
             }
           }
@@ -265,13 +265,13 @@ function PageAnalytics() {
 
             {import.meta.env.DEV ? (
               <div className="mt-4 flex flex-wrap items-center gap-2 rounded-lg border border-dashed border-border bg-muted/30 p-3 text-sm">
-                <span className="font-medium">Analytics QA</span>
+                <span className="font-medium">QA de estadísticas</span>
                 <Button
                   size="sm"
                   variant={mode === "fixtures" ? "default" : "outline"}
                   onClick={() => setMode("fixtures")}
                 >
-                  Fixtures
+                  Datos de prueba
                 </Button>
                 <Button
                   size="sm"
@@ -330,9 +330,9 @@ function PageAnalytics() {
                   }}
                   slot={
                     <div className="cq-qa-banner" role="status">
-                      <strong>QA fixtures</strong> · {fixture} · timezone {qaTimezone} · plan {plan}
+                      <strong>Datos de prueba</strong> · {fixture} · zona horaria {qaTimezone} · plan {plan}
                       {billingStatus === "fallback"
-                        ? " · Billing no disponible, se aplicó fail-closed free"
+                        ? " · sin datos de facturación: se aplicó el plan Gratis"
                         : ""}
                     </div>
                   }
@@ -343,11 +343,11 @@ function PageAnalytics() {
             {mode === "real" && realError ? (
               <Card className="mt-6">
                 <CardHeader>
-                  <CardTitle>No se pudieron cargar los datos de Intelligent Analytics</CardTitle>
+                  <CardTitle>No pudimos cargar tus estadísticas</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4 text-sm text-muted-foreground">
                   <p>{realError}</p>
-                  <p>Puedes seguir usando el dashboard anterior mientras lo revisamos.</p>
+                  <p>Puedes seguir viendo el resumen anterior mientras lo revisamos.</p>
                   <Button
                     size="sm"
                     variant="outline"
@@ -385,13 +385,13 @@ function PageAnalytics() {
                   }}
                   slot={
                     <div className="cq-qa-banner" role="status">
-                      <strong>Datos reales · solo lectura</strong> · {realRows} eventos cargados
-                      (máx. 90 días)
-                      {realTruncated ? " · truncado al límite" : " · ventana completa"}
-                      {" · session_id "}
-                      {realAvailability.sessionTracking ? "disponible" : "no disponible"}
+                      <strong>Datos reales · solo lectura</strong> · {realRows} registros cargados
+                      (últimos 90 días)
+                      {realTruncated ? " · llegamos al límite de lectura" : " · ventana completa"}
+                      {" · visitas con sesión identificada: "}
+                      {realAvailability.sessionTracking ? "sí" : "no"}
                       {billingStatus === "fallback"
-                        ? " · Billing no disponible, se aplicó fail-closed free"
+                        ? " · sin datos de facturación: se aplicó el plan Gratis"
                         : ""}
                     </div>
                   }
@@ -400,7 +400,7 @@ function PageAnalytics() {
             ) : null}
 
             {mode === "legacy" ? (
-              <div className="mt-6 flex flex-wrap gap-2" aria-label="Periodo de estadísticas">
+              <div className="mt-6 flex flex-wrap gap-2" aria-label="Período de estadísticas">
                 {[1, 7, 30].map((range) => (
                   <Button
                     key={range}

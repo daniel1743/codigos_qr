@@ -11,6 +11,7 @@ import {
   type ReactNode,
 } from "react";
 import type { HourCellV1, RankedItemV1, SeriesPointV1 } from "../analytics.types";
+import { WEEKDAY_SHORT } from "../copy.es-419";
 
 export function Card({
   title,
@@ -45,7 +46,7 @@ export function Delta({ value, suffix }: { value: number | null; suffix?: string
   if (value === null) {
     return (
       <span className="cq-delta" data-tone="flat">
-        New
+        Nuevo
       </span>
     );
   }
@@ -76,8 +77,8 @@ export function AreaChart({
   series,
   compare,
   height = 180,
-  label = "Trend",
-  compareLabel = "Previous period",
+  label = "Tendencia",
+  compareLabel = "Período anterior",
 }: {
   series: SeriesPointV1[];
   compare?: SeriesPointV1[];
@@ -248,7 +249,7 @@ export function PulseBars({ series, tone = "accent" }: { series: SeriesPointV1[]
   );
 }
 
-/** Circular progress used by Smart Goals. */
+/** Circular progress used by the goals widget. */
 export function ProgressRing({
   value,
   tone = "accent",
@@ -269,7 +270,7 @@ export function ProgressRing({
       height={size}
       viewBox={`0 0 ${size} ${size}`}
       role="img"
-      aria-label={caption ?? "Progress"}
+      aria-label={caption ?? "Avance de la meta"}
     >
       <circle
         cx={size / 2}
@@ -341,7 +342,7 @@ export function Sparkline({
 
 export function BarList({
   items,
-  emptyLabel = "Nothing to show yet",
+  emptyLabel = "Todavía no hay datos para mostrar",
   formatValue,
 }: {
   items: RankedItemV1[];
@@ -367,14 +368,14 @@ export function BarList({
   );
 }
 
-const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const WEEKDAYS = WEEKDAY_SHORT;
 
 export function Heatmap({ cells }: { cells: HourCellV1[] }) {
   const max = Math.max(...cells.map((cell) => cell.value), 1);
   return (
     <div className="cq-heatmap__scroll">
       <div className="cq-heatmap__content">
-        <div className="cq-heatmap" role="img" aria-label="Activity by weekday and hour">
+        <div className="cq-heatmap" role="img" aria-label="Actividad por día de la semana y hora">
           {WEEKDAYS.map((day, weekday) => (
             <Fragment key={day}>
               <span className="cq-heatmap__label">{day}</span>
@@ -410,7 +411,7 @@ export function Heatmap({ cells }: { cells: HourCellV1[] }) {
 
 export function Donut({ items }: { items: RankedItemV1[] }) {
   const total = items.reduce((sum, item) => sum + item.value, 0);
-  if (total === 0) return <p className="cq-empty">No data yet</p>;
+  if (total === 0) return <p className="cq-empty">Todavía no hay datos</p>;
   const radius = 54;
   const circumference = 2 * Math.PI * radius;
   let offset = 0;
@@ -423,7 +424,7 @@ export function Donut({ items }: { items: RankedItemV1[] }) {
 
   return (
     <div style={{ display: "flex", gap: 18, alignItems: "center", flexWrap: "wrap" }}>
-      <svg width="140" height="140" viewBox="0 0 140 140" role="img" aria-label="Distribution">
+      <svg width="140" height="140" viewBox="0 0 140 140" role="img" aria-label="Distribución">
         {items.slice(0, 4).map((item, i) => {
           const fraction = item.value / total;
           const dash = fraction * circumference;

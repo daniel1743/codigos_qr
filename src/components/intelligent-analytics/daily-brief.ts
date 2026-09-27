@@ -5,6 +5,7 @@
  */
 
 import { LEARNING_THRESHOLD } from "./intelligence-engine";
+import { METRIC_COPY, decimalEs } from "./copy.es-419";
 import type {
   AnalyticsInsightV1,
   AnalyticsMetricsV1,
@@ -13,10 +14,10 @@ import type {
 } from "./analytics.types";
 
 function pctLabel(value: number | null): string {
-  if (value === null) return "new activity";
+  if (value === null) return "todavía no tienen con qué compararse";
   const rounded = Math.round(value);
-  if (rounded === 0) return "flat";
-  return `${rounded > 0 ? "up" : "down"} ${Math.abs(rounded)}%`;
+  if (rounded === 0) return "se mantienen igual";
+  return rounded > 0 ? `aumentaron ${Math.abs(rounded)}%` : `bajaron ${Math.abs(rounded)}%`;
 }
 
 export function buildDailyBrief(
@@ -36,14 +37,20 @@ export function buildDailyBrief(
       id: `brief_${now.toISOString().slice(0, 10)}`,
       dateLabel,
       state: "learning",
-      headline: "Collecting your first signals",
+      headline: "Estamos empezando a conocer a tus visitantes",
       paragraphs: [
-        `So far this period recorded ${metrics.sampleSize} signals and ${metrics.totals.views} views. That is not enough for Cripqer to describe a pattern honestly.`,
-        "Share your page link or QR code in the places your customers already are. As soon as there is enough activity, this brief turns into a real daily read of your performance.",
+        `Ya registramos ${metrics.totals.views} visitas y ${metrics.totals.interactions} acciones en tu página. Todavía no alcanza para describir un patrón con confianza.`,
+        "Sigue compartiendo el enlace de tu página o tu QR donde ya están tus clientes. Cuando haya más actividad, este resumen se convertirá en una lectura diaria de tu negocio.",
       ],
       bullets: [
-        { label: "Views", value: String(metrics.totals.views) },
-        { label: "Interactions", value: String(metrics.totals.interactions) },
+        {
+          label: `${METRIC_COPY.views.primary} ${METRIC_COPY.views.technical}`,
+          value: String(metrics.totals.views),
+        },
+        {
+          label: `${METRIC_COPY.interactions.primary} ${METRIC_COPY.interactions.technical}`,
+          value: String(metrics.totals.interactions),
+        },
       ],
     };
   }
@@ -54,24 +61,24 @@ export function buildDailyBrief(
 
   const headline =
     headlineInsight?.title ??
-    (metrics.momentum === "declining" ? "A quieter period" : "Steady performance");
+    (metrics.momentum === "declining" ? "Un período más tranquilo" : "Actividad estable");
 
   const paragraphs: string[] = [];
   paragraphs.push(
-    `Your page received ${metrics.totals.views} views and ${metrics.totals.interactions} interactions, ${pctLabel(metrics.comparisons.views.deltaPct)} against the previous period. That is ${metrics.interactionRate.toFixed(2)} interactions per view; ${Math.round(metrics.actionRate * 100)}% of sessions with a view took an action.`,
+    `En tu página registramos ${metrics.totals.views} visitas y ${metrics.totals.interactions} acciones. Frente al período anterior, tus visitas ${pctLabel(metrics.comparisons.views.deltaPct)}. Son ${decimalEs(metrics.interactionRate)} acciones por visita (interacciones por visita), y en ${Math.round(metrics.actionRate * 100)}% de las visitas la persona hizo algo.`,
   );
 
   if (leader && leader.clicks > 0) {
     paragraphs.push(
-      `${leader.label} is your strongest channel with ${leader.clicks} clicks (${Math.round(leader.share * 100)}% of all clicks)${
-        topLink ? `, and "${topLink.label}" is the single most used link` : ""
+      `${leader.label} es tu canal con más acciones: ${leader.clicks} (${Math.round(leader.share * 100)}% del total)${
+        topLink ? `, y "${topLink.label}" es el enlace que más interesó` : ""
       }.`,
     );
   }
 
   if (metrics.bestHour) {
     paragraphs.push(
-      `Most of the activity concentrates around ${String(metrics.bestHour.hour).padStart(2, "0")}:00, which is the best moment to post or send your page.`,
+      `La mayor parte de la actividad se concentra alrededor de las ${String(metrics.bestHour.hour).padStart(2, "0")}:00, un buen momento para publicar o enviar tu página.`,
     );
   }
 
@@ -85,10 +92,19 @@ export function buildDailyBrief(
     headline,
     paragraphs,
     bullets: [
-      { label: "Views", value: String(metrics.totals.views) },
-      { label: "Interactions", value: String(metrics.totals.interactions) },
-      { label: "Interactions/view", value: `${metrics.interactionRate.toFixed(2)}×` },
-      { label: "QR scans", value: String(metrics.totals.qrScans) },
+      { label: `${METRIC_COPY.views.primary} ${METRIC_COPY.views.technical}`, value: String(metrics.totals.views) },
+      {
+        label: `${METRIC_COPY.interactions.primary} ${METRIC_COPY.interactions.technical}`,
+        value: String(metrics.totals.interactions),
+      },
+      {
+        label: `${METRIC_COPY.interactionsPerView.primary} ${METRIC_COPY.interactionsPerView.technical}`,
+        value: `${decimalEs(metrics.interactionRate)}\u00d7`,
+      },
+      {
+        label: `${METRIC_COPY.qrScans.primary} ${METRIC_COPY.qrScans.technical}`,
+        value: String(metrics.totals.qrScans),
+      },
     ],
   };
 }

@@ -15,6 +15,24 @@ import type {
   WidgetDecisionV1,
 } from "../analytics.types";
 import type { RollingWindowAnalyticsV1, SeriesPointV1 } from "../analytics.types";
+import {
+  decimalEs,
+  devicesEs,
+  EVENT_COPY,
+  funnelEs,
+  GOAL_STATUS_LABEL,
+  GRANULARITY_LABEL,
+  LOCKED_WIDGET_HONESTY,
+  lockedWidgetValue,
+  METRIC_COPY,
+  MOMENTUM_COPY,
+  MOMENTUM_LABEL,
+  rateEs,
+  relativeTimeEs,
+  ROLLING_STATE_COPY,
+  sourcesEs,
+  upgradeCta,
+} from "../copy.es-419";
 import { AreaChart, BarList, Card, Delta, Donut, Heatmap, ProgressRing, PulseBars, Sparkline } from "./charts";
 
 export function LockedWidget({
@@ -29,18 +47,13 @@ export function LockedWidget({
       <span className="cq-badge">{decision.reason}</span>
       <span className="cq-locked__title">{decision.title}</span>
       <p className="cq-empty" style={{ margin: 0 }}>
-        Unlock this view to see the full picture. No sample numbers are shown here — only your real data
-        once the plan includes it.
+        {lockedWidgetValue(decision.requiredPlan)} {LOCKED_WIDGET_HONESTY}
       </p>
       <button type="button" className="cq-btn cq-btn--primary" onClick={() => onUpgrade?.(decision.requiredPlan)}>
-        Upgrade to {decision.requiredPlan}
+        {upgradeCta(decision.requiredPlan)}
       </button>
     </div>
   );
-}
-
-function fmtRate(value: number) {
-  return `${(value * 100).toFixed(1)}%`;
 }
 
 function ratioSeries(a: SeriesPointV1[], b: SeriesPointV1[]): SeriesPointV1[] {
@@ -74,48 +87,48 @@ export function OverviewWidget({
     live?: boolean;
   }> = [
     {
-      label: "Views",
+      label: `${METRIC_COPY.views.primary} ${METRIC_COPY.views.technical}`,
       value: metrics.totals.views,
       delta: metrics.comparisons.views.deltaPct,
       series: metrics.series.views,
     },
     {
-      label: "QR scans",
+      label: `${METRIC_COPY.qrScans.primary} ${METRIC_COPY.qrScans.technical}`,
       value: metrics.totals.qrScans,
       delta: metrics.comparisons.qrScans.deltaPct,
       series: metrics.series.qrScans,
     },
     {
-      label: "Interactions",
+      label: `${METRIC_COPY.interactions.primary} ${METRIC_COPY.interactions.technical}`,
       value: metrics.totals.interactions,
       delta: metrics.comparisons.interactions.deltaPct,
       series: metrics.series.interactions,
     },
     {
-      label: "Interactions/view",
-      value: `${metrics.interactionRate.toFixed(2)}×`,
+      label: `${METRIC_COPY.interactionsPerView.primary} ${METRIC_COPY.interactionsPerView.technical}`,
+      value: `${decimalEs(metrics.interactionRate)}\u00d7`,
       delta: metrics.comparisons.ctr.deltaPct,
       series: ratioSeries(metrics.series.interactions, metrics.series.views),
     },
     {
-      label: "Conversion",
-      value: fmtRate(metrics.conversionRate),
+      label: `${METRIC_COPY.conversion.primary} ${METRIC_COPY.conversion.technical}`,
+      value: rateEs(metrics.conversionRate),
       delta: metrics.comparisons.conversion.deltaPct,
       series: [],
-      hint: `${metrics.totals.leads} leads`,
+      hint: `${metrics.totals.leads} contactos`,
     },
   ];
 
   if (liveWindow) {
     kpis.push({
-      label: "Live activity",
+      label: `${METRIC_COPY.liveActivity.primary} ${METRIC_COPY.liveActivity.technical}`,
       value: liveWindow.total,
       delta: null,
       series: liveWindow.series,
       hint:
         liveWindow.ratio !== null
-          ? `${liveWindow.ratio.toFixed(1)}\u00d7 usual \u00b7 last 60 min`
-          : "Last 60 min",
+          ? `${decimalEs(liveWindow.ratio, 1)}\u00d7 lo habitual \u00b7 últimos 60 min`
+          : "Últimos 60 min",
       live: true,
     });
   }
@@ -142,13 +155,6 @@ export function OverviewWidget({
   );
 }
 
-const ROLLING_STATE_COPY: Record<RollingWindowAnalyticsV1["state"], string> = {
-  quiet: "Quiet right now \u2014 no activity in the last hour.",
-  normal: "Activity is running at your usual pace.",
-  rising: "Activity is picking up versus your usual pace.",
-  spike: "Unusual burst of activity happening right now.",
-};
-
 export function RealtimeWidget({
   rolling,
   onAction,
@@ -160,8 +166,8 @@ export function RealtimeWidget({
   const fifteen = rolling.windows.find((entry) => entry.windowMinutes === 15);
   return (
     <Card
-      title="Right now"
-      hint="Rolling 15 / 30 / 60 minute windows"
+      title="Ahora mismo"
+      hint="Ventanas móviles de 15, 30 y 60 minutos"
       className="cq-grid__wide"
       actions={<span className="cq-pulse" aria-hidden="true" />}
     >
@@ -172,12 +178,14 @@ export function RealtimeWidget({
       <div className="cq-kpis cq-kpis--compact">
         {rolling.windows.map((window) => (
           <div className="cq-kpi" key={window.windowMinutes}>
-            <span className="cq-kpi__label">Last {window.windowMinutes} min</span>
+            <span className="cq-kpi__label">Últimos {window.windowMinutes} min</span>
             <span className="cq-kpi__value" style={{ fontSize: 20 }}>
               {window.total}
             </span>
             <span className="cq-kpi__hint">
-              {window.ratio === null ? "Baseline still building" : `${window.ratio.toFixed(1)}\u00d7 usual`}
+              {window.ratio === null
+                ? "Todavía estamos conociendo tu ritmo habitual"
+                : `${decimalEs(window.ratio, 1)}\u00d7 lo habitual`}
             </span>
           </div>
         ))}
@@ -186,24 +194,24 @@ export function RealtimeWidget({
         <div className="cq-insight" data-category="realtime">
           <span className="cq-insight__mark" aria-hidden="true" />
           <div style={{ minWidth: 0, flex: 1 }}>
-            <h4 className="cq-insight__title">{spike.label} is heating up</h4>
+            <h4 className="cq-insight__title">Ahora mismo {spike.label} está recibiendo más acciones</h4>
             <p className="cq-insight__msg">
-              {spike.clicks} clicks on your {spike.label} link from Cripqer
-              during the last {spike.windowMinutes} minutes. That is {spike.ratio.toFixed(1)}× your usual activity.
+              Registramos {spike.clicks} acciones hacia {spike.label} durante los últimos{" "}
+              {spike.windowMinutes} minutos. Es {decimalEs(spike.ratio, 1)}× tu actividad habitual.
             </p>
             <button
               type="button"
               className="cq-btn"
               style={{ marginTop: 10 }}
-              onClick={() => onAction?.({ type: "open_analytics", label: "View activity" })}
+              onClick={() => onAction?.({ type: "open_analytics", label: "Ver la actividad" })}
             >
-              View activity
+              Ver la actividad
             </button>
           </div>
         </div>
       ) : null}
       <p className="cq-card__hint" style={{ marginTop: 4 }}>
-        Computed from the events already loaded in this session — no live socket is claimed.
+        Se calcula con la actividad ya cargada en esta sesión: no hay conexión en vivo.
       </p>
     </Card>
   );
@@ -212,19 +220,23 @@ export function RealtimeWidget({
 export function TrendWidget({ metrics }: { metrics: AnalyticsMetricsV1 }) {
   return (
     <Card
-      title="Performance trend"
-      hint={`${metrics.granularity === "hour" ? "Hourly" : "Daily"} views versus the previous period`}
+      title="Cómo evolucionaron tus visitas"
+      hint={`Visitas ${GRANULARITY_LABEL[metrics.granularity]} comparadas con el período anterior`}
       className="cq-grid__wide"
     >
-      <AreaChart series={metrics.series.views} compare={metrics.series.previousViews} label="Views" />
+      <AreaChart
+        series={metrics.series.views}
+        compare={metrics.series.previousViews}
+        label={`${METRIC_COPY.views.primary} ${METRIC_COPY.views.technical}`}
+      />
       <div className="cq-legend">
         <span>
           <span className="cq-legend__dot" style={{ background: "var(--cq-accent)" }} />
-          This period
+          Este período
         </span>
         <span>
           <span className="cq-legend__dot" style={{ background: "var(--cq-muted)" }} />
-          Previous period
+          Período anterior
         </span>
       </div>
     </Card>
@@ -233,7 +245,7 @@ export function TrendWidget({ metrics }: { metrics: AnalyticsMetricsV1 }) {
 
 export function BriefWidget({ brief }: { brief: DailyBriefV1 }) {
   return (
-    <Card className="cq-grid__full cq-brief" title="Daily brief" hint={brief.dateLabel}>
+    <Card className="cq-grid__full cq-brief" title="Resumen del día" hint={brief.dateLabel}>
       <h2 className="cq-brief__headline">{brief.headline}</h2>
       {brief.paragraphs.map((paragraph, i) => (
         <p key={i}>{paragraph}</p>
@@ -260,8 +272,14 @@ export function InsightsWidget({
   onAction?: (action: RecommendedActionV1) => void;
 }) {
   return (
-    <Card title="Cripqer intelligence" hint="Plain-language reading of your data" className="cq-grid__wide">
-      {insights.length === 0 ? <p className="cq-empty">Nothing worth flagging in this period.</p> : null}
+    <Card
+      title="Lo que Cripqer detectó"
+      hint="Una lectura en palabras simples de tus datos"
+      className="cq-grid__wide"
+    >
+      {insights.length === 0 ? (
+        <p className="cq-empty">En este período no hubo nada que valga la pena destacar.</p>
+      ) : null}
       <div style={{ display: "grid", gap: 10 }}>
         {insights.map((insight) => (
           <article className="cq-insight" data-category={insight.category} key={insight.id}>
@@ -275,7 +293,7 @@ export function InsightsWidget({
                     {metric.label}: {metric.value}
                   </span>
                 ))}
-                <span>Confidence {Math.round(insight.confidence * 100)}%</span>
+                <span>Nivel de confianza: {Math.round(insight.confidence * 100)}%</span>
               </div>
               {insight.action && insight.action.type !== "none" ? (
                 <button
@@ -307,7 +325,7 @@ export function ChannelsWidget({
       ? metrics.channels.filter((channel) => availableChannels.includes(channel.channel))
       : metrics.channels;
   return (
-    <Card title="Channel performance" hint="Only the channels you have configured">
+    <Card title="Qué canales están funcionando" hint="Solo los canales que tienes configurados">
       <BarList
         items={channels.map((channel) => ({
           id: channel.channel,
@@ -317,8 +335,8 @@ export function ChannelsWidget({
           deltaPct: channel.deltaPct,
           share: channel.share,
         }))}
-        emptyLabel="No channel clicks yet"
-        formatValue={(item) => `${item.value} · ${Math.round(item.share * 100)}%`}
+        emptyLabel="Todavía no hay acciones en tus enlaces"
+        formatValue={(item) => `${item.value} acciones · ${Math.round(item.share * 100)}%`}
       />
     </Card>
   );
@@ -326,8 +344,8 @@ export function ChannelsWidget({
 
 export function TopLinksWidget({ metrics }: { metrics: AnalyticsMetricsV1 }) {
   return (
-    <Card title="Top links" hint="Most used destinations">
-      <BarList items={metrics.topLinks} emptyLabel="No link clicks yet" />
+    <Card title="Enlaces que más interesaron" hint="Los destinos con más acciones en este período">
+      <BarList items={metrics.topLinks} emptyLabel="Todavía no hay acciones registradas" />
     </Card>
   );
 }
@@ -336,8 +354,12 @@ export function HotHoursWidget({ metrics }: { metrics: AnalyticsMetricsV1 }) {
   const best = metrics.bestHour;
   return (
     <Card
-      title="Hot hours"
-      hint={best ? `Peak around ${String(best.hour).padStart(2, "0")}:00` : "Activity by weekday and hour"}
+      title="Horas con más actividad"
+      hint={
+        best
+          ? `Más actividad alrededor de las ${String(best.hour).padStart(2, "0")}:00`
+          : "Actividad por día de la semana y hora"
+      }
       className="cq-grid__wide"
     >
       <Heatmap cells={metrics.hourly} />
@@ -347,9 +369,9 @@ export function HotHoursWidget({ metrics }: { metrics: AnalyticsMetricsV1 }) {
 
 export function FunnelWidget({ metrics }: { metrics: AnalyticsMetricsV1 }) {
   return (
-    <Card title="Conversion funnel" hint="Scan → view → interaction → action">
+    <Card title="Qué hicieron después de entrar" hint="Entrada → visita → acción → dejan sus datos">
       <div className="cq-funnel">
-        {metrics.funnel.map((step) => (
+        {funnelEs(metrics.funnel).map((step) => (
           <div className="cq-funnel__step" key={step.id}>
             <span style={{ fontSize: 13, fontWeight: 600 }}>{step.label}</span>
             <span style={{ display: "flex", gap: 10, alignItems: "baseline" }}>
@@ -368,12 +390,15 @@ export function FunnelWidget({ metrics }: { metrics: AnalyticsMetricsV1 }) {
 export function AudienceWidget({ metrics }: { metrics: AnalyticsMetricsV1 }) {
   const total = metrics.audience.newVisitors + metrics.audience.returningVisitors;
   return (
-    <Card title="New vs returning" hint={`${total} sessions in this period`}>
+    <Card
+      title="Personas nuevas y personas que regresaron"
+      hint={`${total} visitas consideradas en este período`}
+    >
       <Donut
         items={[
           {
             id: "new",
-            label: "New",
+            label: "Personas nuevas",
             value: metrics.audience.newVisitors,
             previousValue: 0,
             deltaPct: null,
@@ -381,7 +406,7 @@ export function AudienceWidget({ metrics }: { metrics: AnalyticsMetricsV1 }) {
           },
           {
             id: "returning",
-            label: "Returning",
+            label: "Personas que volvieron",
             value: metrics.audience.returningVisitors,
             previousValue: 0,
             deltaPct: null,
@@ -395,11 +420,11 @@ export function AudienceWidget({ metrics }: { metrics: AnalyticsMetricsV1 }) {
 
 export function GeographyWidget({ metrics }: { metrics: AnalyticsMetricsV1 }) {
   return (
-    <Card title="Geography" hint="Approximate, from country-level signals">
-      <BarList items={metrics.countries.slice(0, 6)} emptyLabel="No location signals" />
+    <Card title="Desde dónde te visitan" hint="Aproximado, según las señales de país">
+      <BarList items={metrics.countries.slice(0, 6)} emptyLabel="Todavía no hay señales de ubicación" />
       {metrics.cities.length > 0 ? (
         <>
-          <div className="cq-card__hint">Cities</div>
+          <div className="cq-card__hint">Ciudades</div>
           <BarList items={metrics.cities.slice(0, 5)} />
         </>
       ) : null}
@@ -409,29 +434,32 @@ export function GeographyWidget({ metrics }: { metrics: AnalyticsMetricsV1 }) {
 
 export function DevicesWidget({ metrics }: { metrics: AnalyticsMetricsV1 }) {
   return (
-    <Card title="Devices" hint="By device (from browser signal)">
-      <Donut items={metrics.devices} />
+    <Card title="Dispositivos utilizados" hint="Según la señal del navegador">
+      <Donut items={devicesEs(metrics.devices)} />
     </Card>
   );
 }
 
 export function SourcesWidget({ metrics }: { metrics: AnalyticsMetricsV1 }) {
   return (
-    <Card title="Traffic sources" hint="Where the visit came from">
-      <BarList items={metrics.sources.slice(0, 6)} emptyLabel="No sources detected" />
+    <Card title="De dónde llegaron tus visitas" hint="El origen de cada visita">
+      <BarList
+        items={sourcesEs(metrics.sources).slice(0, 6)}
+        emptyLabel="Todavía no podemos saber de dónde llegaron"
+      />
     </Card>
   );
 }
 
 export function ComparisonWidget({ metrics }: { metrics: AnalyticsMetricsV1 }) {
   const rows = [
-    { label: "Views", now: metrics.comparisons.views.current, before: metrics.comparisons.views.previous, delta: metrics.comparisons.views.deltaPct },
-    { label: "Interactions", now: metrics.comparisons.interactions.current, before: metrics.comparisons.interactions.previous, delta: metrics.comparisons.interactions.deltaPct },
-    { label: "QR scans", now: metrics.comparisons.qrScans.current, before: metrics.comparisons.qrScans.previous, delta: metrics.comparisons.qrScans.deltaPct },
-    { label: "Visitors", now: metrics.comparisons.visitors.current, before: metrics.comparisons.visitors.previous, delta: metrics.comparisons.visitors.deltaPct },
+    { label: `${METRIC_COPY.views.primary} ${METRIC_COPY.views.technical}`, now: metrics.comparisons.views.current, before: metrics.comparisons.views.previous, delta: metrics.comparisons.views.deltaPct },
+    { label: `${METRIC_COPY.interactions.primary} ${METRIC_COPY.interactions.technical}`, now: metrics.comparisons.interactions.current, before: metrics.comparisons.interactions.previous, delta: metrics.comparisons.interactions.deltaPct },
+    { label: `${METRIC_COPY.qrScans.primary} ${METRIC_COPY.qrScans.technical}`, now: metrics.comparisons.qrScans.current, before: metrics.comparisons.qrScans.previous, delta: metrics.comparisons.qrScans.deltaPct },
+    { label: `${METRIC_COPY.visitors.primary} ${METRIC_COPY.visitors.technical}`, now: metrics.comparisons.visitors.current, before: metrics.comparisons.visitors.previous, delta: metrics.comparisons.visitors.deltaPct },
   ];
   return (
-    <Card title="Period comparison" hint="This period versus the one before">
+    <Card title="Cómo vas comparado con el período anterior" hint="Este período frente al anterior">
       <div style={{ display: "grid", gap: 10 }}>
         {rows.map((row) => (
           <div key={row.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
@@ -449,14 +477,6 @@ export function ComparisonWidget({ metrics }: { metrics: AnalyticsMetricsV1 }) {
   );
 }
 
-const MOMENTUM_COPY: Record<AnalyticsMetricsV1["momentum"], string> = {
-  strong_growth: "Strong growth — your page is clearly accelerating.",
-  growing: "Growing steadily compared with the previous period.",
-  stable: "Stable performance, no meaningful swing.",
-  declining: "Cooling down. Worth resharing your page.",
-  unusual_activity: "Unusual activity detected today versus your normal pace.",
-};
-
 export function MomentumWidget({ metrics }: { metrics: AnalyticsMetricsV1 }) {
   const tone =
     metrics.momentum === "declining"
@@ -467,28 +487,28 @@ export function MomentumWidget({ metrics }: { metrics: AnalyticsMetricsV1 }) {
           ? "accent"
           : "positive";
   return (
-    <Card title="Momentum & anomalies" hint="Rule-based, from your own baseline">
+    <Card title="Cambios fuera de lo normal" hint="Calculado con reglas simples sobre tu propia actividad">
       <div className="cq-momentum" data-tone={tone}>
         <Sparkline series={metrics.series.views} tone={tone} height={44} />
         <span className="cq-badge" data-tone={metrics.momentum}>
-          {metrics.momentum.replace(/_/g, " ")}
+          {MOMENTUM_LABEL[metrics.momentum]}
         </span>
       </div>
       <p style={{ margin: 0, fontSize: 14, lineHeight: 1.55 }}>{MOMENTUM_COPY[metrics.momentum]}</p>
       <div className="cq-kpis" style={{ gridTemplateColumns: "repeat(2, minmax(0,1fr))" }}>
         <div className="cq-kpi">
-          <span className="cq-kpi__label">Best day</span>
+          <span className="cq-kpi__label">Mejor día</span>
           <span className="cq-kpi__value" style={{ fontSize: 18 }}>
             {metrics.records.bestDayValue}
           </span>
           <span className="cq-card__hint">{metrics.records.bestDayLabel ?? "—"}</span>
         </div>
         <div className="cq-kpi">
-          <span className="cq-kpi__label">Daily average</span>
+          <span className="cq-kpi__label">Promedio diario</span>
           <span className="cq-kpi__value" style={{ fontSize: 18 }}>
-            {metrics.records.averageDailyValue.toFixed(1)}
+            {decimalEs(metrics.records.averageDailyValue, 1)}
           </span>
-          <span className="cq-card__hint">Today: {metrics.records.todayValue}</span>
+          <span className="cq-card__hint">Hoy: {metrics.records.todayValue}</span>
         </div>
       </div>
     </Card>
@@ -497,14 +517,14 @@ export function MomentumWidget({ metrics }: { metrics: AnalyticsMetricsV1 }) {
 
 export function GoalsWidget({ goals }: { goals: SmartGoalV1[] }) {
   return (
-    <Card title="Smart goals" hint="Targets derived from your own history">
+    <Card title="Tus metas" hint="Metas calculadas a partir de tu propia historia">
       <div style={{ display: "grid", gap: 10 }}>
         {goals.map((goal) => (
           <div className="cq-goal" key={goal.id}>
             <div className="cq-goal__head">
               <strong style={{ fontSize: 13 }}>{goal.label}</strong>
               <span className="cq-badge" data-tone={goal.status}>
-                {goal.status.replace("_", " ")}
+                {GOAL_STATUS_LABEL[goal.status]}
               </span>
             </div>
             {goal.status !== "learning" ? (
@@ -512,14 +532,14 @@ export function GoalsWidget({ goals }: { goals: SmartGoalV1[] }) {
                 <ProgressRing
                   value={goal.progress}
                   tone={goal.status === "behind" ? "danger" : goal.status === "at_risk" ? "warning" : "positive"}
-                  caption={`${goal.label} progress`}
+                  caption={`Avance de ${goal.label.toLowerCase()}`}
                 />
                 <div style={{ minWidth: 0, flex: 1, display: "grid", gap: 6 }}>
                   <span className="cq-bar__track">
                     <span className="cq-bar__fill" style={{ width: `${Math.round(goal.progress * 100)}%` }} />
                   </span>
                   <span className="cq-card__hint">
-                    {goal.current} of {goal.target} · projected {goal.projected} · {goal.daysRemaining} days left
+                    {goal.current} de {goal.target} · proyección {goal.projected} · quedan {goal.daysRemaining} días
                   </span>
                 </div>
               </div>
@@ -534,23 +554,6 @@ export function GoalsWidget({ goals }: { goals: SmartGoalV1[] }) {
   );
 }
 
-const EVENT_COPY: Partial<Record<AnalyticsEventV1["eventType"], string>> = {
-  page_view: "Page view",
-  smart_page_view: "Smart page view",
-  qr_scan: "QR scan",
-  whatsapp_click: "WhatsApp click",
-  instagram_click: "Instagram click",
-  facebook_click: "Facebook click",
-  tiktok_click: "TikTok click",
-  youtube_click: "YouTube click",
-  linkedin_click: "LinkedIn click",
-  external_link_click: "Link click",
-  cta_click: "Main button",
-  lead_created: "New lead",
-  share: "Share",
-  return_visit: "Returning visitor",
-};
-
 export function LiveActivityWidget({
   events,
   now,
@@ -560,33 +563,22 @@ export function LiveActivityWidget({
 }) {
   return (
     <Card
-      title="Live activity"
-      hint="Most recent signals"
+      title="Actividad reciente"
+      hint="Lo más reciente que ocurrió en tu página"
       actions={<span className="cq-pulse" aria-hidden="true" />}
     >
       <div className="cq-feed" role="log" aria-live="polite">
-        {events.length === 0 ? <p className="cq-empty">No activity yet</p> : null}
+        {events.length === 0 ? <p className="cq-empty">Todavía no hay actividad</p> : null}
         {events.slice(0, 12).map((event) => (
           <div className="cq-feed__row" key={event.id}>
             <span>
               {EVENT_COPY[event.eventType] ?? event.eventType}
               {event.linkLabel ? ` · ${event.linkLabel}` : ""}
             </span>
-            <span className="cq-feed__time">{relativeTime(event.timestamp, now)}</span>
+            <span className="cq-feed__time">{relativeTimeEs(event.timestamp, now)}</span>
           </div>
         ))}
       </div>
     </Card>
   );
-}
-
-function relativeTime(timestamp: string, now: Date): string {
-  const diff = now.getTime() - Date.parse(timestamp);
-  if (!Number.isFinite(diff)) return "";
-  const minutes = Math.round(diff / 60_000);
-  if (minutes < 1) return "just now";
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.round(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  return `${Math.round(hours / 24)}d ago`;
 }

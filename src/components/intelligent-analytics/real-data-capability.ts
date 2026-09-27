@@ -75,7 +75,7 @@ export function resolveRealDataWidgets(
     return {
       ...decision,
       visibility: "hidden",
-      reason: "Requiere sesión persistida (session_id), aún no disponible en estos datos",
+      reason: "Todavía no podemos saber qué hizo cada visitante con estos datos",
     };
   });
 }
