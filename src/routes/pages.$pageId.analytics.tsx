@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { BarChart3, ArrowLeft, Eye, MousePointerClick } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import "../components/intelligent-analytics/analytics.css";
 import { AppShell } from "../components/app-shell/AppShell";
@@ -24,6 +24,11 @@ import { analyticsRealDataService, realDataPeriodBounds } from "../services/anal
 import { pageService } from "../services/page.service";
 import type { Page } from "../types/database";
 import type { PageAnalyticsSummary } from "../types/analytics";
+import {
+  isAnalyticsDashboardRealModeEnabled,
+  resolveAnalyticsDashboardMode,
+  type AnalyticsDashboardMode,
+} from "../lib/analytics";
 
 export const Route = createFileRoute("/pages/$pageId/analytics")({ component: PageAnalytics });
 
@@ -37,6 +42,12 @@ const EMPTY: PageAnalyticsSummary = {
   topServices: [],
   dailyVisits: [],
 };
+
+/**
+ * Deterministic safe state when the route is opened without a session.
+ * It is also the ONLY error that offers a sign-in action.
+ */
+const AUTH_REQUIRED_MESSAGE = "Debes iniciar sesión para ver estadísticas.";
 
 function MetricCard({ label, value, icon }: { label: string; value: number; icon: ReactNode }) {
   return (
@@ -54,17 +65,21 @@ function MetricCard({ label, value, icon }: { label: string; value: number; icon
   );
 }
 
-type AnalyticsMode = "fixtures" | "real" | "legacy";
+type AnalyticsMode = AnalyticsDashboardMode;
 
+/**
+ * C2B8 canary gate.
+ *
+ * DEV keeps the QA selector (`?analytics=…`, fixtures by default). In production
+ * the mode starts as `pending` and is decided ONCE after the owner-scoped page
+ * row loads (canary gate on `public_id`), never from the URL; anything else
+ * falls back to `legacy`.
+ */
 function initialMode(): AnalyticsMode {
-  if (!import.meta.env.DEV) return "legacy";
-  const param =
-    typeof window === "undefined"
-      ? null
-      : new URLSearchParams(window.location.search).get("analytics");
-  if (param === "legacy") return "legacy";
-  if (param === "real") return "real";
-  return "fixtures";
+  return resolveAnalyticsDashboardMode({
+    isDev: import.meta.env.DEV,
+    search: typeof window === "undefined" ? null : window.location.search,
+  });
 }
 
 function PageAnalytics() {
@@ -80,6 +95,9 @@ function PageAnalytics() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<AnalyticsMode>(initialMode);
+  const [realError, setRealError] = useState<string | null>(null);
+  /** The production canary verdict is decided once per mount (rollback-safe). */
+  const canaryResolved = useRef(false);
   const [realEvents, setRealEvents] = useState<AnalyticsEventV1[]>([]);
   const [realRows, setRealRows] = useState(0);
   const [realTruncated, setRealTruncated] = useState(false);
@@ -101,41 +119,83 @@ function PageAnalytics() {
     }
   }, []);
 
-  const isLegacy = mode === "legacy";
+  const needsTier = mode === "fixtures" || mode === "real";
 
   useEffect(() => {
     let active = true;
+    // A failed load (no session, no access, transport error) must also end the
+    // `pending` canary state, otherwise the screen hangs on "Cargando…" forever.
+    let failed = false;
     (async () => {
       try {
         const supabase = getBrowserSupabaseClient();
         const { data: auth } = await supabase.auth.getUser();
-        if (!auth.user) throw new Error("Debes iniciar sesión para ver estadísticas.");
+        if (!auth.user) throw new Error(AUTH_REQUIRED_MESSAGE);
         const ownedPage = await pageService.getOwnPageById(supabase, pageId, auth.user.id);
         if (!ownedPage) throw new Error("No se encontró esta página o no tienes acceso a ella.");
         if (!active) return;
         setPage(ownedPage);
 
+        // C2B8: in production the canary gate decides real vs legacy ONCE, from
+        // the owner-scoped page row (`public_id`) — never from the query string.
+        if (!import.meta.env.DEV && !canaryResolved.current) {
+          canaryResolved.current = true;
+          const resolved = resolveAnalyticsDashboardMode({
+            isDev: false,
+            page: { publicId: ownedPage.public_id },
+            realModeEnabled: isAnalyticsDashboardRealModeEnabled({
+              supabaseUrl: import.meta.env["VITE_SUPABASE_URL"],
+              publicId: ownedPage.public_id,
+              environment: import.meta.env,
+            }),
+          });
+          if (active) setMode(resolved);
+        }
+
         if (mode === "legacy") {
           const analytics = await analyticsService.getPageAnalytics(supabase, pageId, days);
           if (active) setSummary(analytics);
         } else if (mode === "real") {
-          const bounds = realDataPeriodBounds("90d", new Date(), timezone);
-          const result = await analyticsRealDataService.getRealPageEvents(supabase, pageId, bounds);
-          if (active) {
-            setRealEvents(result.events);
-            setRealRows(result.rows);
-            setRealTruncated(result.truncated);
-            setRealAvailability(inferAvailability(result.events));
+          // A V1.1 failure must never break the page: degrade to a controlled
+          // state that offers the legacy dashboard as fallback.
+          try {
+            const bounds = realDataPeriodBounds("90d", new Date(), timezone);
+            const result = await analyticsRealDataService.getRealPageEvents(
+              supabase,
+              pageId,
+              bounds,
+            );
+            if (active) {
+              setRealEvents(result.events);
+              setRealRows(result.rows);
+              setRealTruncated(result.truncated);
+              setRealAvailability(inferAvailability(result.events));
+              setRealError(null);
+            }
+          } catch (reason) {
+            if (active) {
+              setRealEvents([]);
+              setRealRows(0);
+              setRealTruncated(false);
+              setRealError(
+                reason instanceof Error
+                  ? reason.message
+                  : "No se pudieron cargar los datos de Intelligent Analytics.",
+              );
+            }
           }
         }
         if (active) setError(null);
       } catch (reason) {
+        failed = true;
         if (active)
           setError(
             reason instanceof Error ? reason.message : "No se pudieron cargar las estadísticas.",
           );
       } finally {
-        if (active) setLoading(false);
+        // `pending` keeps the loading state until the canary gate resolves — but a
+        // failure ends that wait deterministically in the safe error state.
+        if (active && (failed || mode !== "pending")) setLoading(false);
       }
     })();
     return () => {
@@ -144,7 +204,7 @@ function PageAnalytics() {
   }, [pageId, days, mode, timezone]);
 
   useEffect(() => {
-    if (isLegacy) {
+    if (!needsTier) {
       setBillingStatus("resolved");
       return;
     }
@@ -163,7 +223,7 @@ function PageAnalytics() {
     return () => {
       active = false;
     };
-  }, [isLegacy]);
+  }, [needsTier]);
 
   const hasEvents = summary.visits + summary.buttonClicks > 0;
 
@@ -176,12 +236,17 @@ function PageAnalytics() {
           </Link>
         </Button>
 
-        {loading ? (
+        {loading || (mode === "pending" && !error) ? (
           <p className="text-sm text-muted-foreground">Cargando estadísticas…</p>
         ) : error || !page ? (
           <Card>
             <CardContent className="py-10 text-center text-sm text-destructive">
-              {error ?? "No se encontró esta página."}
+              <p>{error ?? "No se encontró esta página."}</p>
+              {error === AUTH_REQUIRED_MESSAGE ? (
+                <Button asChild size="sm" className="mt-4">
+                  <Link to="/login">Iniciar sesión</Link>
+                </Button>
+              ) : null}
             </CardContent>
           </Card>
         ) : (
@@ -275,7 +340,29 @@ function PageAnalytics() {
               </div>
             ) : null}
 
-            {mode === "real" ? (
+            {mode === "real" && realError ? (
+              <Card className="mt-6">
+                <CardHeader>
+                  <CardTitle>No se pudieron cargar los datos de Intelligent Analytics</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4 text-sm text-muted-foreground">
+                  <p>{realError}</p>
+                  <p>Puedes seguir usando el dashboard anterior mientras lo revisamos.</p>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setRealError(null);
+                      setMode("legacy");
+                    }}
+                  >
+                    Ver dashboard anterior
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : null}
+
+            {mode === "real" && !realError ? (
               <div className="mt-6">
                 <AnalyticsDashboard
                   events={realEvents}

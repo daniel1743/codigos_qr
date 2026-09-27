@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   assertCanonicalAnalyticsAllowed,
+  isAnalyticsDashboardRealModeEnabled,
   isCanonicalAnalyticsEnabled,
   parseCanonicalPageAllowlist,
 } from "./feature-gate";
@@ -126,4 +127,67 @@ describe("assertCanonicalAnalyticsAllowed", () => {
       assertCanonicalAnalyticsAllowed({ supabaseUrl: QA_URL, publicId: "any-page" }),
     ).not.toThrow();
   });
+
+/**
+ * C2B8: the dashboard gate is the SAME canary gate, so the rollout has one
+ * interruptor and the production default stays closed.
+ */
+describe("isAnalyticsDashboardRealModeEnabled (C2B8)", () => {
+  it("allows the QA runtime", () => {
+    expect(isAnalyticsDashboardRealModeEnabled({ supabaseUrl: QA_URL, publicId: "any" })).toBe(true);
+  });
+
+  it("denies production by default (flag off)", () => {
+    expect(
+      isAnalyticsDashboardRealModeEnabled({ supabaseUrl: PROD_URL, publicId: "canary-page" }),
+    ).toBe(false);
+  });
+
+  it("allows production only for an allowlisted page with the flag on", () => {
+    expect(
+      isAnalyticsDashboardRealModeEnabled({
+        supabaseUrl: PROD_URL,
+        publicId: "canary-page",
+        environment: {
+          VITE_ANALYTICS_CANONICAL_ENABLED: "true",
+          VITE_ANALYTICS_CANONICAL_PAGE_ALLOWLIST: "canary-page, another",
+        },
+      }),
+    ).toBe(true);
+    expect(
+      isAnalyticsDashboardRealModeEnabled({
+        supabaseUrl: PROD_URL,
+        publicId: "not-allowlisted",
+        environment: {
+          VITE_ANALYTICS_CANONICAL_ENABLED: "true",
+          VITE_ANALYTICS_CANONICAL_PAGE_ALLOWLIST: "canary-page",
+        },
+      }),
+    ).toBe(false);
+  });
+
+  it("denies unknown projects and missing page identity", () => {
+    expect(
+      isAnalyticsDashboardRealModeEnabled({
+        supabaseUrl: "https://unknown.supabase.co",
+        publicId: "canary-page",
+        environment: {
+          VITE_ANALYTICS_CANONICAL_ENABLED: "true",
+          VITE_ANALYTICS_CANONICAL_PAGE_ALLOWLIST: "canary-page",
+        },
+      }),
+    ).toBe(false);
+    expect(
+      isAnalyticsDashboardRealModeEnabled({
+        supabaseUrl: PROD_URL,
+        publicId: null,
+        environment: {
+          VITE_ANALYTICS_CANONICAL_ENABLED: "true",
+          VITE_ANALYTICS_CANONICAL_PAGE_ALLOWLIST: "canary-page",
+        },
+      }),
+    ).toBe(false);
+  });
+});
+
 });

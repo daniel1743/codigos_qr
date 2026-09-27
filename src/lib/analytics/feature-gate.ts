@@ -71,3 +71,22 @@ export function assertCanonicalAnalyticsAllowed(context: CanonicalAnalyticsGateC
     );
   }
 }
+
+/**
+ * C2B8 — the SAME canary gate, applied to the Intelligent Analytics dashboard UI.
+ *
+ * It reuses the existing flag + page allowlist on purpose: the rollout keeps a
+ * single interruptor, so enabling/disabling the canary once makes both the
+ * canonical writer and the V1.1 dashboard follow it, and the rollback is
+ * "flip the flag / empty the allowlist" without touching code or data.
+ *
+ * Semantics are identical to `isCanonicalAnalyticsEnabled` (QA runtime allowed;
+ * production requires the flag plus an allowlisted `public_id`; unknown projects
+ * and a missing `public_id` are denied). The gate input must always come from the
+ * owner-scoped page row, never from a query parameter.
+ */
+export function isAnalyticsDashboardRealModeEnabled(
+  context: CanonicalAnalyticsGateContext,
+): boolean {
+  return isCanonicalAnalyticsEnabled(context);
+}
