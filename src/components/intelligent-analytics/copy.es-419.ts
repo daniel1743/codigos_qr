@@ -51,11 +51,11 @@ export const GRANULARITY_LABEL: Record<"hour" | "day", string> = {
 export const METRIC_COPY = {
   views: { primary: "Visitas", technical: "(vistas)" },
   qrScans: { primary: "Visitas desde tu QR", technical: "(escaneos de QR)" },
-  interactions: { primary: "Acciones realizadas", technical: "(interacciones)" },
+  interactions: { primary: "Acciones", technical: "(interacciones)" },
   interactionsPerView: { primary: "Acciones por visita", technical: "(interacciones por visita)" },
-  conversion: { primary: "Personas que completaron una acción", technical: "(conversión)" },
+  conversion: { primary: "Contactos por cada 100 visitas", technical: "(conversión)" },
   liveActivity: { primary: "Actividad reciente", technical: "(últimos 60 minutos)" },
-  visitors: { primary: "Personas distintas que visitaron", technical: "(visitantes únicos)" },
+  visitors: { primary: "Visitas identificadas", technical: "(sesiones distintas)" },
 } as const;
 
 /* ------------------------------------------------------------------ */
@@ -244,6 +244,14 @@ export function decimalEs(value: number, digits = 2): string {
 /** 0.123 → "12,3%". */
 export function rateEs(ratio: number, digits = 1): string {
   return `${decimalEs(ratio * 100, digits)}%`;
+}
+
+/**
+ * La MISMA conversión (contactos ÷ visitas), expresada como cantidad por cada
+ * 100 visitas: 0.048 → "4,8". No cambia ningún cálculo, solo la unidad visible.
+ */
+export function conversionPer100(ratio: number, digits = 1): string {
+  return decimalEs(ratio * 100, digits);
 }
 
 /* ------------------------------------------------------------------ */

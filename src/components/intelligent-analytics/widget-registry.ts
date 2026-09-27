@@ -98,7 +98,7 @@ const SPECS: WidgetSpec[] = [
   },
   {
     id: "new_vs_returning",
-    title: "Personas nuevas y personas que regresaron",
+    title: "Visitas nuevas y visitas que vuelven",
     requiredPlan: "business",
     hasData: (m) => m.totals.visitors > 0,
     emptyReason: "Todavía no hay visitas registradas",

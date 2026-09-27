@@ -15,7 +15,7 @@ import {
   type InsightType,
   type RecommendedActionV1,
 } from "./analytics.types";
-import { GOAL_NOUN, METRIC_COPY, decimalEs, rateEs } from "./copy.es-419";
+import { GOAL_NOUN, METRIC_COPY, conversionPer100, decimalEs, rateEs } from "./copy.es-419";
 
 /** Below this many events we only speak in "learning" language. */
 export const LEARNING_THRESHOLD = 25;
@@ -190,14 +190,14 @@ export function generateInsights(
       type: improving ? "conversion_improvement" : "conversion_deterioration",
       category: improving ? "positive" : "warning",
       title: improving
-        ? "Más visitas terminan completando una acción"
-        : "Bajaron las personas que completan una acción",
-      message: `Aproximadamente ${Math.round(metrics.conversionRate * 100)} de cada 100 visitas completaron una acción (conversión: ${rateEs(metrics.conversionRate)}, ${fmtPct(conversionDelta)} frente al período anterior).`,
+        ? "Se generan más contactos por visita"
+        : "Bajaron los contactos generados",
+      message: `Se generaron alrededor de ${Math.round(metrics.conversionRate * 100)} contactos por cada 100 visitas (conversión: ${rateEs(metrics.conversionRate)}, ${fmtPct(conversionDelta)} frente al período anterior).`,
       severity: improving ? "notable" : "important",
       confidence: confidenceFor(sampleSize, conversionDelta),
       metrics: [
-        { label: METRIC_COPY.conversion.primary, value: rateEs(metrics.conversionRate) },
-        { label: "Contactos que dejaron sus datos", value: String(metrics.totals.leads) },
+        { label: METRIC_COPY.conversion.primary, value: conversionPer100(metrics.conversionRate) },
+        { label: "Contactos", value: String(metrics.totals.leads) },
       ],
     });
   }

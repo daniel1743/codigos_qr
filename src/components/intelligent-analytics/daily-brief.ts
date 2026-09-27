@@ -13,11 +13,37 @@ import type {
   SmartGoalV1,
 } from "./analytics.types";
 
-function pctLabel(value: number | null): string {
-  if (value === null) return "todavía no tienen con qué compararse";
-  const rounded = Math.round(value);
-  if (rounded === 0) return "se mantienen igual";
-  return rounded > 0 ? `aumentaron ${Math.abs(rounded)}%` : `bajaron ${Math.abs(rounded)}%`;
+function plural(count: number, singular: string, pluralForm: string): string {
+  return `${count} ${count === 1 ? singular : pluralForm}`;
+}
+
+/**
+ * Primera frase del resumen. Se adapta a crecimiento, caída, igualdad, ausencia
+ * de período anterior y cero visitas. Nunca equipara eventos con personas ni
+ * con sesiones, y no usa `actionRate` (métrica de sesiones).
+ */
+function viewsSentence(views: number, deltaPct: number | null): string {
+  if (views === 0) return "En este período no registramos visitas en tu página.";
+  const visitas = plural(views, "visita", "visitas");
+  if (deltaPct === null) {
+    return `Tu página registró ${visitas} este período: todavía no hay un período anterior con el que comparar.`;
+  }
+  const rounded = Math.round(deltaPct);
+  if (rounded === 0) return `Tu página se mantuvo igual: ${visitas}, como en el período anterior.`;
+  if (rounded > 0) {
+    return `Tu página sigue creciendo: ${visitas}, un ${rounded}% más que en el período anterior.`;
+  }
+  return `Tu página recibió menos visitas: ${visitas}, un ${Math.abs(rounded)}% menos que en el período anterior.`;
+}
+
+/** Segunda frase: acciones y contactos, cada uno con su unidad real. */
+function activitySentence(interactions: number, leads: number): string {
+  const acciones = plural(interactions, "acción", "acciones");
+  const contactos = plural(leads, "contacto", "contactos");
+  if (interactions === 0 && leads === 0) return "No se registraron acciones ni contactos.";
+  if (interactions === 0) return `No se registraron acciones, pero sí ${contactos}.`;
+  if (leads === 0) return `Se registraron ${acciones} y ningún contacto.`;
+  return `Se registraron ${acciones} y ${contactos}.`;
 }
 
 export function buildDailyBrief(
@@ -43,14 +69,8 @@ export function buildDailyBrief(
         "Sigue compartiendo el enlace de tu página o tu QR donde ya están tus clientes. Cuando haya más actividad, este resumen se convertirá en una lectura diaria de tu negocio.",
       ],
       bullets: [
-        {
-          label: `${METRIC_COPY.views.primary} ${METRIC_COPY.views.technical}`,
-          value: String(metrics.totals.views),
-        },
-        {
-          label: `${METRIC_COPY.interactions.primary} ${METRIC_COPY.interactions.technical}`,
-          value: String(metrics.totals.interactions),
-        },
+        { label: METRIC_COPY.views.primary, value: String(metrics.totals.views) },
+        { label: METRIC_COPY.interactions.primary, value: String(metrics.totals.interactions) },
       ],
     };
   }
@@ -65,7 +85,7 @@ export function buildDailyBrief(
 
   const paragraphs: string[] = [];
   paragraphs.push(
-    `En tu página registramos ${metrics.totals.views} visitas y ${metrics.totals.interactions} acciones. Frente al período anterior, tus visitas ${pctLabel(metrics.comparisons.views.deltaPct)}. Son ${decimalEs(metrics.interactionRate)} acciones por visita (interacciones por visita), y en ${Math.round(metrics.actionRate * 100)}% de las visitas la persona hizo algo.`,
+    `${viewsSentence(metrics.totals.views, metrics.comparisons.views.deltaPct)} ${activitySentence(metrics.totals.interactions, metrics.totals.leads)}`,
   );
 
   if (leader && leader.clicks > 0) {
@@ -92,19 +112,13 @@ export function buildDailyBrief(
     headline,
     paragraphs,
     bullets: [
-      { label: `${METRIC_COPY.views.primary} ${METRIC_COPY.views.technical}`, value: String(metrics.totals.views) },
+      { label: METRIC_COPY.views.primary, value: String(metrics.totals.views) },
+      { label: METRIC_COPY.interactions.primary, value: String(metrics.totals.interactions) },
       {
-        label: `${METRIC_COPY.interactions.primary} ${METRIC_COPY.interactions.technical}`,
-        value: String(metrics.totals.interactions),
-      },
-      {
-        label: `${METRIC_COPY.interactionsPerView.primary} ${METRIC_COPY.interactionsPerView.technical}`,
+        label: METRIC_COPY.interactionsPerView.primary,
         value: `${decimalEs(metrics.interactionRate)}\u00d7`,
       },
-      {
-        label: `${METRIC_COPY.qrScans.primary} ${METRIC_COPY.qrScans.technical}`,
-        value: String(metrics.totals.qrScans),
-      },
+      { label: METRIC_COPY.qrScans.primary, value: String(metrics.totals.qrScans) },
     ],
   };
 }

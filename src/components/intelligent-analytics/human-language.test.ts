@@ -11,6 +11,7 @@ import {
   MOMENTUM_COPY,
   MOMENTUM_LABEL,
   ROLLING_STATE_COPY,
+  conversionPer100,
   decimalEs,
   devicesEs,
   funnelEs,
@@ -18,6 +19,7 @@ import {
   relativeTimeEs,
   sourcesEs,
 } from "./copy.es-419";
+import type { AnalyticsMetricsV1 } from "./analytics.types";
 import { buildDailyBrief } from "./daily-brief";
 import { generateSmartGoals } from "./goals-engine";
 import { generateInsights } from "./intelligence-engine";
@@ -297,8 +299,9 @@ describe("C2B8A · SEM — traducir no cambia el significado", () => {
   it("SEM-01 — Visitas son visitas, no personas", () => {
     expect(METRIC_COPY.views.primary).toBe("Visitas");
     expect(METRIC_COPY.views.primary.toLowerCase()).not.toContain("personas");
+    expect(METRIC_COPY.visitors.primary).toBe("Visitas identificadas");
     expect(METRIC_COPY.visitors.primary).not.toBe(METRIC_COPY.views.primary);
-    expect(METRIC_COPY.visitors.primary).toContain("Personas distintas");
+    expect(METRIC_COPY.visitors.technical).toBe("(sesiones distintas)");
   });
 
   it("SEM-02 — WhatsApp se describe como entrada, nunca como mensaje", () => {
@@ -307,14 +310,17 @@ describe("C2B8A · SEM — traducir no cambia el significado", () => {
   });
 
   it("SEM-03 — las acciones no se presentan como personas únicas", () => {
-    expect(METRIC_COPY.interactions.primary).toBe("Acciones realizadas");
+    expect(METRIC_COPY.interactions.primary).toBe("Acciones");
     expect(METRIC_COPY.interactions.primary.toLowerCase()).not.toContain("personas");
     expect(METRIC_COPY.interactionsPerView.primary).toBe("Acciones por visita");
   });
 
   it("SEM-04 — conversión conserva el contrato actual", () => {
-    expect(METRIC_COPY.conversion.primary).toBe("Personas que completaron una acción");
+    expect(METRIC_COPY.conversion.primary).toBe("Contactos por cada 100 visitas");
     expect(METRIC_COPY.conversion.technical).toBe("(conversión)");
+    // La misma conversión, en dos unidades de presentación (mismo cálculo).
+    expect(conversionPer100(0.048)).toBe("4,8");
+    expect(rateEs(0.048)).toBe("4,8%");
   });
 
   it("traducir etiquetas no toca ningún número", () => {
@@ -435,5 +441,86 @@ describe("C2B8A · LANG-01 — guardia contra inglés residual en el código", (
       expect(route.includes(phrase), `route todavía contiene "${phrase}"`).toBe(false);
     }
   });
+});
+
+/* ------------------------------------------------------------------ */
+/* Round 1 — unidad real y sin conclusiones de sesión                   */
+/* ------------------------------------------------------------------ */
+
+/** Base calculada UNA sola vez: variar contadores no debe recalcular el fixture. */
+const READY_BASE: AnalyticsMetricsV1 = (() => {
+  const events = buildScenarioEvents("growing_business", NOW, "owned-profile");
+  return computeMetrics({ events, range: resolveRange("30d", NOW, TZ), now: NOW, timezone: TZ });
+})();
+
+/** Métricas listas (sampleSize sobre el umbral) con los contadores indicados. */
+function readyMetrics(
+  views: number,
+  deltaPct: number | null,
+  interactions: number,
+  leads: number,
+): AnalyticsMetricsV1 {
+  const previous = deltaPct === null ? 0 : Math.max(Math.round(views / (1 + deltaPct / 100)), 0);
+  return {
+    ...READY_BASE,
+    totals: { ...READY_BASE.totals, views, interactions, leads },
+    comparisons: { ...READY_BASE.comparisons, views: { current: views, previous, deltaPct } },
+  };
+}
+
+function briefText(metrics: AnalyticsMetricsV1): string {
+  return buildDailyBrief(metrics, [], [], NOW).paragraphs.join(" ");
+}
+
+describe("C2B8A · Round 1 — unidad real, sin equiparar eventos con personas", () => {
+  it("ninguna etiqueta de métrica habla de personas", () => {
+    for (const metric of Object.values(METRIC_COPY)) {
+      expect(metric.primary.toLowerCase(), metric.primary).not.toContain("persona");
+      expect(metric.technical.toLowerCase(), metric.technical).not.toContain("persona");
+    }
+  });
+
+  it("los motores no hablan de personas en métricas de vista o sesión", () => {
+    for (const corpus of CORPORA) {
+      for (const value of corpus.strings) {
+        expect(value.toLowerCase(), `${corpus.scenario}: ${value}`).not.toContain("persona");
+      }
+    }
+  });
+
+  it("el resumen se adapta a crecimiento, caída, igualdad, sin comparación y cero", () => {
+    const growth = briefText(readyMetrics(875, 68, 308, 42));
+    expect(growth).toContain(
+      "Tu página sigue creciendo: 875 visitas, un 68% más que en el período anterior.",
+    );
+    expect(growth).toContain("Se registraron 308 acciones y 42 contactos.");
+
+    const decline = briefText(readyMetrics(400, -24, 120, 0));
+    expect(decline).toContain("menos visitas: 400 visitas, un 24% menos");
+    expect(decline).toContain("y ningún contacto");
+
+    const flat = briefText(readyMetrics(400, 0, 10, 2));
+    expect(flat).toContain("se mantuvo igual: 400 visitas");
+
+    const noComparison = briefText(readyMetrics(400, null, 10, 2));
+    expect(noComparison).toContain("todavía no hay un período anterior");
+
+    const zero = briefText(readyMetrics(0, 0, 0, 0));
+    expect(zero).toContain("no registramos visitas");
+    expect(zero).toContain("No se registraron acciones ni contactos.");
+
+    const single = briefText(readyMetrics(1, 10, 1, 1));
+    expect(single).toContain("1 visita, un 10%");
+    expect(single).toContain("1 acción");
+    expect(single).toContain("1 contacto.");
+  }, 30_000);
+
+  it("no muestra un 0% artificial cuando falta el session_id (4B)", () => {
+    const metrics: AnalyticsMetricsV1 = { ...readyMetrics(875, 68, 308, 42), actionRate: 0 };
+    const text = briefText(metrics);
+    expect(text).not.toContain("0%");
+    expect(text.toLowerCase()).not.toContain("sesi");
+    expect(text).not.toContain("hizo algo");
+  }, 30_000);
 });
 

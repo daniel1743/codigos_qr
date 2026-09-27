@@ -44,8 +44,8 @@ const EMPTY: PageAnalyticsSummary = {
 };
 
 /**
- * Deterministic safe state when the route is opened without a session.
- * It is also the ONLY error that offers a sign-in action.
+ * Estado seguro y fijo cuando la ruta se abre sin sesión.
+ * Es además el ÚNICO error que ofrece la acción de iniciar sesión.
  */
 const AUTH_REQUIRED_MESSAGE = "Debes iniciar sesión para ver estadísticas.";
 
@@ -193,8 +193,8 @@ function PageAnalytics() {
             reason instanceof Error ? reason.message : "No se pudieron cargar las estadísticas.",
           );
       } finally {
-        // `pending` keeps the loading state until the canary gate resolves — but a
-        // failure ends that wait deterministically in the safe error state.
+        // `pending` mantiene el estado de carga hasta que el gate del canary se
+        // resuelve; un fallo termina esa espera en el estado de error seguro.
         if (active && (failed || mode !== "pending")) setLoading(false);
       }
     })();

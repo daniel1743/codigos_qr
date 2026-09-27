@@ -16,6 +16,7 @@ import type {
 } from "../analytics.types";
 import type { RollingWindowAnalyticsV1, SeriesPointV1 } from "../analytics.types";
 import {
+  conversionPer100,
   decimalEs,
   devicesEs,
   EVENT_COPY,
@@ -27,7 +28,6 @@ import {
   METRIC_COPY,
   MOMENTUM_COPY,
   MOMENTUM_LABEL,
-  rateEs,
   relativeTimeEs,
   ROLLING_STATE_COPY,
   sourcesEs,
@@ -79,7 +79,9 @@ export function OverviewWidget({
 }) {
   const liveWindow = rolling?.windows.find((entry) => entry.windowMinutes === 60);
   const kpis: Array<{
+    id: string;
     label: string;
+    technical: string;
     value: string | number;
     delta: number | null;
     series: SeriesPointV1[];
@@ -87,32 +89,42 @@ export function OverviewWidget({
     live?: boolean;
   }> = [
     {
-      label: `${METRIC_COPY.views.primary} ${METRIC_COPY.views.technical}`,
+      id: "views",
+      label: METRIC_COPY.views.primary,
+      technical: METRIC_COPY.views.technical,
       value: metrics.totals.views,
       delta: metrics.comparisons.views.deltaPct,
       series: metrics.series.views,
     },
     {
-      label: `${METRIC_COPY.qrScans.primary} ${METRIC_COPY.qrScans.technical}`,
+      id: "qrScans",
+      label: METRIC_COPY.qrScans.primary,
+      technical: METRIC_COPY.qrScans.technical,
       value: metrics.totals.qrScans,
       delta: metrics.comparisons.qrScans.deltaPct,
       series: metrics.series.qrScans,
     },
     {
-      label: `${METRIC_COPY.interactions.primary} ${METRIC_COPY.interactions.technical}`,
+      id: "interactions",
+      label: METRIC_COPY.interactions.primary,
+      technical: METRIC_COPY.interactions.technical,
       value: metrics.totals.interactions,
       delta: metrics.comparisons.interactions.deltaPct,
       series: metrics.series.interactions,
     },
     {
-      label: `${METRIC_COPY.interactionsPerView.primary} ${METRIC_COPY.interactionsPerView.technical}`,
+      id: "interactionsPerView",
+      label: METRIC_COPY.interactionsPerView.primary,
+      technical: METRIC_COPY.interactionsPerView.technical,
       value: `${decimalEs(metrics.interactionRate)}\u00d7`,
       delta: metrics.comparisons.ctr.deltaPct,
       series: ratioSeries(metrics.series.interactions, metrics.series.views),
     },
     {
-      label: `${METRIC_COPY.conversion.primary} ${METRIC_COPY.conversion.technical}`,
-      value: rateEs(metrics.conversionRate),
+      id: "conversion",
+      label: METRIC_COPY.conversion.primary,
+      technical: METRIC_COPY.conversion.technical,
+      value: conversionPer100(metrics.conversionRate),
       delta: metrics.comparisons.conversion.deltaPct,
       series: [],
       hint: `${metrics.totals.leads} contactos`,
@@ -121,7 +133,9 @@ export function OverviewWidget({
 
   if (liveWindow) {
     kpis.push({
-      label: `${METRIC_COPY.liveActivity.primary} ${METRIC_COPY.liveActivity.technical}`,
+      id: "liveActivity",
+      label: METRIC_COPY.liveActivity.primary,
+      technical: METRIC_COPY.liveActivity.technical,
       value: liveWindow.total,
       delta: null,
       series: liveWindow.series,
@@ -135,22 +149,32 @@ export function OverviewWidget({
 
   return (
     <div className="cq-kpis">
-      {kpis.map((kpi) => (
-        <div className="cq-kpi" key={kpi.label} data-live={kpi.live ? "true" : undefined}>
-          <span className="cq-kpi__label">
-            {kpi.label}
-            {kpi.live ? <span className="cq-pulse cq-pulse--sm" aria-hidden="true" /> : null}
-          </span>
-          <span className="cq-kpi__value">{kpi.value}</span>
-          <div className="cq-kpi__foot">
-            {kpi.delta !== null || !kpi.live ? <Delta value={kpi.delta} /> : null}
-            {kpi.hint ? <span className="cq-kpi__hint">{kpi.hint}</span> : null}
+      {kpis.map((kpi) => {
+        // La capa visible es solo la humana; el término técnico queda en el
+        // tooltip (`title`) y en el nombre accesible (`aria-label`).
+        const fullLabel = `${kpi.label} ${kpi.technical}`;
+        return (
+          <div
+            className="cq-kpi"
+            key={kpi.id}
+            data-live={kpi.live ? "true" : undefined}
+            title={fullLabel}
+          >
+            <span className="cq-kpi__label" aria-label={fullLabel}>
+              {kpi.label}
+              {kpi.live ? <span className="cq-pulse cq-pulse--sm" aria-hidden="true" /> : null}
+            </span>
+            <span className="cq-kpi__value">{kpi.value}</span>
+            <div className="cq-kpi__foot">
+              {kpi.delta !== null || !kpi.live ? <Delta value={kpi.delta} /> : null}
+              {kpi.hint ? <span className="cq-kpi__hint">{kpi.hint}</span> : null}
+            </div>
+            {kpi.series.length > 0 ? (
+              <Sparkline series={kpi.series} tone={kpi.live ? "record" : toneOf(kpi.delta)} height={30} />
+            ) : null}
           </div>
-          {kpi.series.length > 0 ? (
-            <Sparkline series={kpi.series} tone={kpi.live ? "record" : toneOf(kpi.delta)} height={30} />
-          ) : null}
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -391,14 +415,14 @@ export function AudienceWidget({ metrics }: { metrics: AnalyticsMetricsV1 }) {
   const total = metrics.audience.newVisitors + metrics.audience.returningVisitors;
   return (
     <Card
-      title="Personas nuevas y personas que regresaron"
-      hint={`${total} visitas consideradas en este período`}
+      title="Visitas nuevas y visitas que vuelven"
+      hint={`${total} visitas identificadas en este período`}
     >
       <Donut
         items={[
           {
             id: "new",
-            label: "Personas nuevas",
+            label: "Visitas nuevas",
             value: metrics.audience.newVisitors,
             previousValue: 0,
             deltaPct: null,
@@ -406,7 +430,7 @@ export function AudienceWidget({ metrics }: { metrics: AnalyticsMetricsV1 }) {
           },
           {
             id: "returning",
-            label: "Personas que volvieron",
+            label: "Visitas que vuelven",
             value: metrics.audience.returningVisitors,
             previousValue: 0,
             deltaPct: null,
@@ -453,17 +477,54 @@ export function SourcesWidget({ metrics }: { metrics: AnalyticsMetricsV1 }) {
 
 export function ComparisonWidget({ metrics }: { metrics: AnalyticsMetricsV1 }) {
   const rows = [
-    { label: `${METRIC_COPY.views.primary} ${METRIC_COPY.views.technical}`, now: metrics.comparisons.views.current, before: metrics.comparisons.views.previous, delta: metrics.comparisons.views.deltaPct },
-    { label: `${METRIC_COPY.interactions.primary} ${METRIC_COPY.interactions.technical}`, now: metrics.comparisons.interactions.current, before: metrics.comparisons.interactions.previous, delta: metrics.comparisons.interactions.deltaPct },
-    { label: `${METRIC_COPY.qrScans.primary} ${METRIC_COPY.qrScans.technical}`, now: metrics.comparisons.qrScans.current, before: metrics.comparisons.qrScans.previous, delta: metrics.comparisons.qrScans.deltaPct },
-    { label: `${METRIC_COPY.visitors.primary} ${METRIC_COPY.visitors.technical}`, now: metrics.comparisons.visitors.current, before: metrics.comparisons.visitors.previous, delta: metrics.comparisons.visitors.deltaPct },
+    {
+      id: "views",
+      label: METRIC_COPY.views.primary,
+      technical: METRIC_COPY.views.technical,
+      now: metrics.comparisons.views.current,
+      before: metrics.comparisons.views.previous,
+      delta: metrics.comparisons.views.deltaPct,
+    },
+    {
+      id: "interactions",
+      label: METRIC_COPY.interactions.primary,
+      technical: METRIC_COPY.interactions.technical,
+      now: metrics.comparisons.interactions.current,
+      before: metrics.comparisons.interactions.previous,
+      delta: metrics.comparisons.interactions.deltaPct,
+    },
+    {
+      id: "qrScans",
+      label: METRIC_COPY.qrScans.primary,
+      technical: METRIC_COPY.qrScans.technical,
+      now: metrics.comparisons.qrScans.current,
+      before: metrics.comparisons.qrScans.previous,
+      delta: metrics.comparisons.qrScans.deltaPct,
+    },
+    {
+      id: "visitors",
+      label: METRIC_COPY.visitors.primary,
+      technical: METRIC_COPY.visitors.technical,
+      now: metrics.comparisons.visitors.current,
+      before: metrics.comparisons.visitors.previous,
+      delta: metrics.comparisons.visitors.deltaPct,
+    },
   ];
   return (
     <Card title="Cómo vas comparado con el período anterior" hint="Este período frente al anterior">
       <div style={{ display: "grid", gap: 10 }}>
         {rows.map((row) => (
-          <div key={row.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
-            <span style={{ fontSize: 13, fontWeight: 600 }}>{row.label}</span>
+          <div
+            key={row.id}
+            style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}
+          >
+            <span
+              style={{ fontSize: 13, fontWeight: 600 }}
+              title={`${row.label} ${row.technical}`}
+              aria-label={`${row.label} ${row.technical}`}
+            >
+              {row.label}
+            </span>
             <span style={{ display: "flex", gap: 10, alignItems: "center" }}>
               <span className="cq-card__hint">
                 {row.before} → <strong style={{ color: "var(--cq-text)" }}>{row.now}</strong>
