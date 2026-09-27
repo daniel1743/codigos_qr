@@ -1,0 +1,41 @@
+name: Unpack Magic Frame prototype
+
+on:
+  push:
+    branches:
+      - magic-patterns/magic-frame-prototype
+    paths:
+      - .payload/READY
+
+permissions:
+  contents: write
+
+jobs:
+  unpack:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout prototype branch
+        uses: actions/checkout@v4
+        with:
+          ref: magic-patterns/magic-frame-prototype
+          fetch-depth: 0
+
+      - name: Reconstruct prototype archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .payload/part*.txt | base64 --decode > /tmp/magic-frame-prototype.zip
+          mkdir -p /tmp/magic-frame-prototype
+          unzip -q /tmp/magic-frame-prototype.zip -d /tmp/magic-frame-prototype
+
+      - name: Replace branch contents with isolated prototype
+        shell: bash
+        run: |
+          set -euo pipefail
+          find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp -a /tmp/magic-frame-prototype/. .
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "chore: isolate Magic Patterns prototype"
+          git push origin HEAD:magic-patterns/magic-frame-prototype
