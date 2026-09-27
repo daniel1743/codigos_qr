@@ -265,3 +265,13 @@ Queda identificado como micro-ajuste de 1 palabra si el owner lo quiere en una f
 - **Sin push**, **sin merge** y **sin deploy**: el cierre es un commit **local** en
   `feat/analytics-c2b8a-es-latam`.
 - Worktree limpio al cierre (los artefactos de validación se escribieron fuera del repositorio, en `%TEMP%`).
+
+### 8.4 Commit de cierre
+
+| | |
+| --- | --- |
+| Rama | `feat/analytics-c2b8a-es-latam` (**local**; sin push y sin merge) |
+| Commit del cambio + este reporte | `3804e75744cf79108e2bd2e73cf3d0b4b6a32d3c` |
+| Archivos del commit | `C2B8A_VALIDATION_REPORT.md`, `C2B8A_TEXT_INVENTORY.md`, `src/components/intelligent-analytics/intelligence-engine.ts`, `src/routes/analytics-visual-qa.tsx` (4 archivos, +76 / −21) |
+| Este registro del SHA | commit `docs` inmediatamente posterior en la misma rama (patrón de la fase: cf. `6ca6d87`) |
+| Estado | sin push · sin merge · sin deploy · allowlist sin cambios |
