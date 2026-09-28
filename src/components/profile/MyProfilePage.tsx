@@ -1,857 +1,357 @@
-import { useEffect, useState } from "react";
-import { getBrowserSupabaseClient } from "../../lib/supabase/client";
+import { useEffect, useMemo, useState } from "react";
 import {
-  ArrowRight,
-  Award,
+  ArrowUpRight,
   BarChart3,
-  Camera,
-  Crown,
+  Check,
+  Copy,
   ExternalLink,
-  FileLock2,
-  LogOut,
-  Mail,
+  Link2,
   Pencil,
   QrCode,
-  Settings,
-  Shield,
-  Sparkles,
-  User,
+  Users,
 } from "lucide-react";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
-import { Badge } from "../ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { Separator } from "../ui/separator";
-import { toast } from "sonner";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
-import { isAdminEmail } from "../../lib/admin-check";
-import { hasPremiumAccessByEmail } from "../../lib/entitlements";
-import { getPublicProfileUrl } from "../../lib/url";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { PLATFORM_BRAND } from "../platform/platform-brand";
+import { toast } from "sonner";
+import { getBrowserSupabaseClient } from "../../lib/supabase/client";
 import { magicPageService } from "../../services/magic-page.service";
+import { profileService } from "../../services/profile.service";
 import type { Page } from "../../types/database";
 
-interface UserProfile {
-  id: string;
-  email: string;
-  full_name?: string;
-  avatar_url?: string;
-  bio?: string;
-  created_at: string;
-}
-
-interface PageProfileSummary {
-  id: string;
-  public_id: string;
-  slug: string;
+type UserProfile = { email: string; full_name?: string; avatar_url?: string; created_at: string };
+type PageProfile = {
   display_name: string;
   profession?: string | null;
-  bio: string | null;
-  avatar_url: string | null;
+  bio?: string | null;
+  avatar_url?: string | null;
   published: boolean;
   scan_count: number;
-}
-
-const ACTIVE_LEGACY_PROFILE_PUBLIC_ID = "icff9yG";
-
-interface PremiumStatus {
-  isPremium: boolean;
-  tier?: string;
-  source?: string;
-  expires_at?: string;
-}
-
-interface UserStats {
-  totalProfiles: number;
-  totalScans: number;
-  totalLinks: number;
-}
+  public_id: string;
+};
 
 export function MyProfilePage() {
-  const [user, setUser] = useState<SupabaseUser | null>(null);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [pageProfile, setPageProfile] = useState<PageProfileSummary | null>(null);
-  const [canonicalPage, setCanonicalPage] = useState<Page | null>(null);
-  const [premiumStatus, setPremiumStatus] = useState<PremiumStatus>({ isPremium: false });
-  const [stats, setStats] = useState<UserStats>({ totalProfiles: 0, totalScans: 0, totalLinks: 0 });
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [uploading, setUploading] = useState(false);
-  const [creatingPage, setCreatingPage] = useState(false);
-  const [activeTab, setActiveTab] = useState("overview");
-  const [redeemCode, setRedeemCode] = useState("");
-  const [redeeming, setRedeeming] = useState(false);
-
-  const handleRedeemCode = async () => {
-    if (!redeemCode.trim()) return;
-    setRedeeming(true);
-    try {
-      const code = redeemCode.trim().toUpperCase();
-      const { data, error } = await supabase.rpc("redeem_invitation_code_secure", { p_code: code });
-
-      if (error) {
-        throw error;
-      }
-
-      if (data && data.success) {
-        if (!data.expires_at) {
-          toast.success("Premium activado", { description: "Tu acceso Premium es vitalicio." });
-        } else {
-          toast.success("Premium activado", {
-            description: "Tu acceso Premium estará activo durante 1 año.",
-          });
-        }
-        await loadUserData();
-        setRedeemCode("");
-      } else {
-        const errorMsg = data?.error || "Error al canjear el código.";
-        if (errorMsg.includes("agotado")) {
-          toast.error("Este código ya fue utilizado.");
-        } else if (errorMsg.includes("inválido") || errorMsg.includes("inactivo")) {
-          toast.error("Código inválido.");
-        } else if (errorMsg.includes("expirado")) {
-          toast.error("Este código expiró.");
-        } else if (errorMsg.includes("Ya tienes acceso")) {
-          toast.error("Tu cuenta ya tiene Premium.");
-        } else {
-          toast.error(errorMsg);
-        }
-      }
-    } catch (error: any) {
-      toast.error("Error al procesar la solicitud.");
-    } finally {
-      setRedeeming(false);
-    }
-  };
-
   const supabase = getBrowserSupabaseClient();
   const navigate = useNavigate();
+  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [pageProfile, setPageProfile] = useState<PageProfile | null>(null);
+  const [canonicalPage, setCanonicalPage] = useState<Page | null>(null);
+  const [stats, setStats] = useState({ totalScans: 0, totalLinks: 0 });
+  const [loading, setLoading] = useState(true);
+  const [creating, setCreating] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    loadUserData();
-  }, []);
-
-  const loadUserData = async () => {
-    setLoading(true);
-    try {
-      const {
-        data: { user: authUser },
-      } = await supabase.auth.getUser();
-      if (!authUser) return;
-
-      setUser(authUser);
-
-      const userProfile: UserProfile = {
-        id: authUser.id,
-        email: authUser.email || "",
-        full_name: authUser.user_metadata?.full_name,
-        avatar_url: authUser.user_metadata?.avatar_url,
-        bio: authUser.user_metadata?.bio,
-        created_at: authUser.created_at,
-      };
-      setProfile(userProfile);
-      const hasPremiumOverride = hasPremiumAccessByEmail(authUser.email || "");
-
-      const { data: premiumData } = await supabase
-        .from("premium_users")
-        .select("*")
-        .eq("user_id", authUser.id)
-        .maybeSingle();
-
-      if (premiumData) {
-        const isActive = !premiumData.expires_at || new Date(premiumData.expires_at) > new Date();
-        setPremiumStatus({
-          isPremium: isActive || hasPremiumOverride,
-          tier: premiumData.tier,
-          source: premiumData.source,
-          expires_at: premiumData.expires_at,
+    let active = true;
+    void (async () => {
+      try {
+        const { data: authData, error: authError } = await supabase.auth.getUser();
+        if (authError) throw authError;
+        const authUser = authData.user;
+        if (!authUser || !active) return;
+        setUser(authUser);
+        setProfile({
+          email: authUser.email ?? "",
+          full_name:
+            typeof authUser.user_metadata?.full_name === "string"
+              ? authUser.user_metadata.full_name
+              : undefined,
+          avatar_url:
+            typeof authUser.user_metadata?.avatar_url === "string"
+              ? authUser.user_metadata.avatar_url
+              : undefined,
+          created_at: authUser.created_at,
         });
-      } else if (hasPremiumOverride) {
-        setPremiumStatus({
-          isPremium: true,
-          tier: "premium_pro",
-          source: "admin_test_override",
-        });
+
+        const [
+          { data: profilesData, error: profilesError },
+          { data: pagesData, error: pagesError },
+        ] = await Promise.all([
+          supabase
+            .from("profiles")
+            .select(
+              "id, scan_count, public_id, slug, display_name, profession, bio, avatar_url, published, created_at",
+            )
+            .eq("user_id", authUser.id)
+            .order("created_at", { ascending: true }),
+          supabase
+            .from("pages")
+            .select("*")
+            .eq("owner_user_id", authUser.id)
+            .order("updated_at", { ascending: false }),
+        ]);
+        if (profilesError) throw profilesError;
+        if (pagesError) throw pagesError;
+        const primary = profilesData?.[0];
+        if (primary)
+          setPageProfile({
+            display_name: primary.display_name,
+            profession: primary.profession,
+            bio: primary.bio,
+            avatar_url: primary.avatar_url,
+            published: primary.published,
+            scan_count: primary.scan_count ?? 0,
+            public_id: primary.public_id,
+          });
+        setCanonicalPage((pagesData?.[0] as Page | undefined) ?? null);
+        const profileIds = (profilesData ?? []).map((item) => item.id);
+        const { count } = profileIds.length
+          ? await supabase
+              .from("profile_links")
+              .select("*", { count: "exact", head: true })
+              .in("profile_id", profileIds)
+          : { count: 0 };
+        if (active)
+          setStats({
+            totalScans: (profilesData ?? []).reduce((sum, item) => sum + (item.scan_count ?? 0), 0),
+            totalLinks: count ?? 0,
+          });
+      } catch (error) {
+        console.error("Error loading Home:", error);
+        toast.error("No se pudo cargar tu espacio.");
+      } finally {
+        if (active) setLoading(false);
       }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [supabase]);
 
-      const { data: adminData } = await supabase
-        .from("admin_users")
-        .select("role")
-        .eq("user_id", authUser.id)
-        .maybeSingle();
+  const pageName = pageProfile?.display_name?.trim() || profile?.full_name || "Mi página";
+  const publicUrl = canonicalPage?.public_id
+    ? `/pg/${canonicalPage.public_id}`
+    : pageProfile?.public_id
+      ? `/p/${pageProfile.public_id}`
+      : null;
+  const firstName = useMemo(
+    () => (profile?.full_name?.trim() || "bienvenido").split(/\s+/)[0],
+    [profile?.full_name],
+  );
 
-      setIsAdmin(!!adminData || isAdminEmail(authUser.email || ""));
-
-      const { data: profilesData } = await supabase
-        .from("profiles")
-        .select(
-          "id, scan_count, public_id, slug, display_name, profession, bio, avatar_url, published, created_at",
-        )
-        .eq("user_id", authUser.id)
-        .order("created_at", { ascending: true });
-
-      const primaryProfile =
-        profilesData?.find(
-          (candidate) => candidate.public_id === ACTIVE_LEGACY_PROFILE_PUBLIC_ID,
-        ) ?? profilesData?.[0];
-      setPageProfile(
-        primaryProfile
-          ? {
-              id: primaryProfile.id,
-              public_id: primaryProfile.public_id,
-              slug: primaryProfile.slug,
-              display_name: primaryProfile.display_name,
-              profession: primaryProfile.profession,
-              bio: primaryProfile.bio,
-              avatar_url: primaryProfile.avatar_url,
-              published: primaryProfile.published,
-              scan_count: primaryProfile.scan_count,
-            }
-          : null,
-      );
-
-      const { data: pagesData, error: pagesError } = await supabase
-        .from("pages")
-        .select("*")
-        .eq("owner_user_id", authUser.id)
-        .order("updated_at", { ascending: false });
-      if (pagesError) throw pagesError;
-      setCanonicalPage((pagesData?.[0] as Page | undefined) ?? null);
-
-      const totalProfiles = profilesData?.length || 0;
-      const totalScans =
-        profilesData?.reduce(
-          (sum: number, currentProfile: { scan_count?: number | null }) =>
-            sum + (currentProfile.scan_count || 0),
-          0,
-        ) || 0;
-
-      if (profilesData && profilesData.length > 0) {
-        const profileIds = profilesData.map((currentProfile: { id: string }) => currentProfile.id);
-        const { count } = await supabase
-          .from("profile_links")
-          .select("*", { count: "exact", head: true })
-          .in("profile_id", profileIds);
-
-        setStats({
-          totalProfiles,
-          totalScans,
-          totalLinks: count || 0,
-        });
-      } else {
-        setStats({ totalProfiles: 0, totalScans: 0, totalLinks: 0 });
-      }
-    } catch (error) {
-      console.error("Error loading user data:", error);
-      toast.error("Error al cargar tu perfil");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCreateMagicPage = async () => {
-    if (!user || !pageProfile || creatingPage) return;
-    setCreatingPage(true);
+  const createPage = async () => {
+    if (!user || creating) return;
+    setCreating(true);
     try {
+      const ensuredProfile = await profileService.ensurePrimaryProfileForUser(supabase, {
+        userId: user.id,
+        email: user.email,
+        userMetadata: user.user_metadata,
+      });
       const created = await magicPageService.createPage(supabase, {
         userId: user.id,
-        profileId: pageProfile.id,
-        title: pageName,
+        profileId: ensuredProfile.id,
+        title: ensuredProfile.display_name || pageName,
         pageType: "landing",
       });
-      setCanonicalPage(created);
       await navigate({ to: "/pages/$pageId/edit", params: { pageId: created.id } });
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "No se pudo crear tu página.");
+      toast.error(error instanceof Error ? error.message : "No se pudo crear la página.");
     } finally {
-      setCreatingPage(false);
+      setCreating(false);
     }
   };
 
-  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (!event.target.files || event.target.files.length === 0 || !user) return;
-
-    const file = event.target.files[0];
-    if (!file) return;
-    const fileExt = file.name.split(".").pop();
-    const fileName = `${user.id}/profile/avatar-${Date.now()}.${fileExt}`;
-
-    setUploading(true);
-    try {
-      const { error: uploadError } = await supabase.storage
-        .from("avatars")
-        .upload(fileName, file, { upsert: true });
-
-      if (uploadError) throw uploadError;
-
-      const { data } = supabase.storage.from("avatars").getPublicUrl(fileName);
-      const { error: updateError } = await supabase.auth.updateUser({
-        data: { avatar_url: data.publicUrl },
-      });
-
-      if (updateError) throw updateError;
-
-      setProfile((previousProfile) =>
-        previousProfile ? { ...previousProfile, avatar_url: data.publicUrl } : null,
-      );
-      setPageProfile((previousProfile) =>
-        previousProfile ? { ...previousProfile, avatar_url: data.publicUrl } : null,
-      );
-      toast.success("Foto actualizada");
-    } catch (error: unknown) {
-      console.error("Error uploading avatar:", error);
-      toast.error("Error al subir la foto");
-    } finally {
-      setUploading(false);
-    }
+  const copyShare = async () => {
+    if (!publicUrl) return;
+    await navigator.clipboard.writeText(`${window.location.origin}${publicUrl}`);
+    setCopied(true);
+    toast.success("Enlace copiado");
+    window.setTimeout(() => setCopied(false), 1800);
   };
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    navigate({ to: "/" });
-  };
-
-  const handleUpdateProfile = async (updates: Partial<UserProfile>) => {
-    if (!user) return;
-
-    try {
-      const { error } = await supabase.auth.updateUser({
-        data: updates,
-      });
-
-      if (error) throw error;
-
-      setProfile((previousProfile) =>
-        previousProfile ? { ...previousProfile, ...updates } : null,
-      );
-      toast.success("Perfil actualizado");
-    } catch (error: unknown) {
-      console.error("Error updating profile:", error);
-      toast.error("Error al actualizar perfil");
-    }
-  };
-
-  if (loading) {
+  if (loading)
     return (
-      <div className="min-h-screen bg-[#f6f7f9]">
-        <div className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center px-4">
-          <p className="text-sm text-muted-foreground">Cargando tu espacio...</p>
-        </div>
+      <div className="flex min-h-[calc(100vh-68px)] items-center justify-center px-4 text-sm text-[#8290a3]">
+        Cargando tu espacio...
       </div>
     );
-  }
-
-  if (!user || !profile) {
+  if (!user || !profile)
     return (
-      <div className="min-h-screen bg-[#f6f7f9]">
-        <div className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center px-4">
-          <p className="text-sm text-muted-foreground">No se pudo cargar tu perfil</p>
-        </div>
+      <div className="flex min-h-[calc(100vh-68px)] items-center justify-center px-4 text-sm text-[#8290a3]">
+        No se pudo cargar tu perfil.
       </div>
     );
-  }
-
-  const accountAge = Math.max(
-    0,
-    Math.floor(
-      (new Date().getTime() - new Date(profile.created_at).getTime()) / (1000 * 60 * 60 * 24),
-    ),
-  );
-  const pageName = pageProfile?.display_name?.trim() || profile.full_name || "Mi página";
-  const pageProfession = pageProfile?.profession?.trim();
-  const pageAvatar = pageProfile?.avatar_url || profile.avatar_url;
-  const publicUrl = canonicalPage ? `/pg/${canonicalPage.public_id}` : null;
 
   return (
-    <div className="min-h-screen bg-[#f6f7f9] text-slate-950">
-      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
-        <header className="flex flex-col gap-5 border-b border-slate-200 pb-8 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-2xl space-y-3">
-            <p
-              className="text-xs font-semibold uppercase tracking-[0.22em]"
-              style={{ color: PLATFORM_BRAND.colors.blue }}
-            >
-              User Hub / Inicio
-            </p>
-            <h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
-              Hola, {profile.full_name || "bienvenido"}
-            </h1>
-            <p className="max-w-xl text-sm leading-6 text-slate-600 sm:text-base">
-              Este es el centro de tu cuenta: gestiona tu página pública, accede a tus documentos y
-              mantén actualizada tu información.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3 text-sm text-slate-600">
-            <Avatar className="h-10 w-10 border border-slate-200">
-              <AvatarImage src={profile.avatar_url} alt={profile.full_name || profile.email} />
-              <AvatarFallback>
-                {profile.full_name?.charAt(0) || profile.email.charAt(0)}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <p className="font-medium text-slate-900">Tu cuenta</p>
-              <p>{profile.email}</p>
-            </div>
-          </div>
-        </header>
-
-        <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(260px,0.65fr)]">
-          <Card className="overflow-hidden border-slate-200 bg-white shadow-sm">
-            <div className="border-b border-slate-200 bg-slate-50 px-5 py-4 sm:px-7">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p
-                    className="text-xs font-semibold uppercase tracking-[0.18em]"
-                    style={{ color: PLATFORM_BRAND.colors.blue }}
-                  >
-                    Tu página pública
-                  </p>
-                  <h2 className="mt-1 text-xl font-semibold tracking-tight">Mi página</h2>
-                </div>
-                {pageProfile ? (
-                  <Badge
-                    variant={pageProfile.published ? "default" : "secondary"}
-                    className={pageProfile.published ? "bg-emerald-700 hover:bg-emerald-700" : ""}
-                  >
-                    {pageProfile.published ? "Publicada" : "Borrador"}
-                  </Badge>
-                ) : (
-                  <Badge variant="secondary">Sin crear</Badge>
-                )}
-              </div>
-            </div>
-
-            <CardContent className="p-5 sm:p-7">
-              {canonicalPage && pageProfile ? (
-                <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
-                  <div className="relative shrink-0 self-start">
-                    <Avatar className="h-24 w-24 border-4 border-white shadow-md sm:h-28 sm:w-28">
-                      <AvatarImage src={pageAvatar || undefined} alt={pageName} />
-                      <AvatarFallback className="bg-slate-100 text-2xl font-semibold text-slate-700">
-                        {pageName.charAt(0).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <label
-                      htmlFor="avatar-upload"
-                      className="absolute bottom-0 right-0 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-white shadow-md transition-opacity hover:opacity-90"
-                      style={{ backgroundColor: PLATFORM_BRAND.colors.blue }}
-                      title="Cambiar foto"
-                    >
-                      {uploading ? (
-                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                      ) : (
-                        <Camera className="h-4 w-4" />
-                      )}
-                    </label>
-                    <input
-                      id="avatar-upload"
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleAvatarUpload}
-                      disabled={uploading}
-                    />
-                  </div>
-
-                  <div className="min-w-0 flex-1 space-y-3">
-                    <div>
-                      <h3 className="truncate text-2xl font-semibold tracking-tight text-slate-950">
-                        {pageName}
-                      </h3>
-                      <p className="mt-1 text-sm text-slate-600">
-                        {pageProfession ||
-                          pageProfile.bio ||
-                          "Personaliza la identidad de tu página."}
-                      </p>
-                    </div>
-
-                    {publicUrl && (
-                      <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
-                        <p className="truncate text-xs text-slate-600" title={publicUrl}>
-                          {publicUrl}
-                        </p>
-                      </div>
-                    )}
-
-                    <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-                      <Button
-                        asChild
-                        className="w-full text-white hover:opacity-90 sm:w-auto"
-                        style={{ backgroundColor: PLATFORM_BRAND.colors.blue }}
-                      >
-                        <Link to="/pages/$pageId/edit" params={{ pageId: canonicalPage.id }}>
-                          <Pencil className="h-4 w-4" />
-                          Editar mi página
-                        </Link>
-                      </Button>
-                      {canonicalPage.published && publicUrl && (
-                        <Button asChild variant="outline" className="w-full sm:w-auto">
-                          <a href={publicUrl} target="_blank" rel="noreferrer">
-                            <ExternalLink className="h-4 w-4" />
-                            Ver página
-                          </a>
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex flex-col items-start gap-5 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="space-y-2">
-                    <h3 className="text-xl font-semibold tracking-tight">
-                      Aún no tienes una página
-                    </h3>
-                    <p className="max-w-lg text-sm leading-6 text-slate-600">
-                      Crea tu primera página pública para compartir tu identidad y tus enlaces desde
-                      un solo lugar.
-                    </p>
-                  </div>
-                  <Button
-                    className="w-full shrink-0 text-white hover:opacity-90 sm:w-auto"
-                    style={{ backgroundColor: PLATFORM_BRAND.colors.blue }}
-                    onClick={() => void handleCreateMagicPage()}
-                    disabled={!pageProfile || creatingPage}
-                  >
-                    {creatingPage ? "Creando…" : "Crear mi página"}
-                    <ArrowRight className="h-4 w-4" />
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <section aria-labelledby="quick-actions-title" className="space-y-3">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                Accesos directos
-              </p>
-              <h2 id="quick-actions-title" className="mt-1 text-lg font-semibold tracking-tight">
-                Sigue trabajando
-              </h2>
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-              {canonicalPage ? (
-                <Link
-                  to="/pages/$pageId/edit"
-                  params={{ pageId: canonicalPage.id }}
-                  className="group rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50"
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <span className="grid h-10 w-10 place-items-center rounded-xl bg-blue-50 text-blue-700">
-                      <QrCode className="h-5 w-5" />
-                    </span>
-                    <ArrowRight className="h-4 w-4 text-slate-400 transition-transform group-hover:translate-x-1" />
-                  </div>
-                  <p className="mt-4 font-semibold">Editar mi página</p>
-                  <p className="mt-1 text-sm leading-5 text-slate-600">
-                    Ajusta diseño, contenido y enlaces.
-                  </p>
-                </Link>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => void handleCreateMagicPage()}
-                  disabled={!pageProfile || creatingPage}
-                  className="group rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <span className="grid h-10 w-10 place-items-center rounded-xl bg-blue-50 text-blue-700">
-                      <QrCode className="h-5 w-5" />
-                    </span>
-                    <ArrowRight className="h-4 w-4 text-slate-400 transition-transform group-hover:translate-x-1" />
-                  </div>
-                  <p className="mt-4 font-semibold">Crear mi página</p>
-                  <p className="mt-1 text-sm leading-5 text-slate-600">
-                    Crea tu página Magic y empieza a editarla.
-                  </p>
-                </button>
-              )}
-
-              <Link
-                to="/encrypted-documents"
-                className="group rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <span className="grid h-10 w-10 place-items-center rounded-xl bg-slate-100 text-slate-700">
-                    <FileLock2 className="h-5 w-5" />
-                  </span>
-                  <ArrowRight className="h-4 w-4 text-slate-400 transition-transform group-hover:translate-x-1" />
-                </div>
-                <p className="mt-4 font-semibold">Documentos</p>
-                <p className="mt-1 text-sm leading-5 text-slate-600">
-                  Accede a tus documentos seguros.
-                </p>
-              </Link>
-            </div>
-          </section>
+    <div className="mx-auto max-w-[1240px] px-4 py-7 sm:px-6 lg:px-10 lg:py-10">
+      <section className="mb-8 flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+        <div>
+          <p className="mb-2 text-sm font-semibold text-[#0d47a1]">Tu espacio de conversión</p>
+          <h1 className="text-3xl font-bold tracking-[-0.03em] text-[#172235] sm:text-4xl">
+            Hola, {firstName}
+          </h1>
+          <p className="mt-2 max-w-xl text-sm leading-6 text-[#68778b] sm:text-base">
+            Aquí tienes una vista rápida del rendimiento de tu página y de la actividad más
+            reciente.
+          </p>
         </div>
+        {canonicalPage ? (
+          <Link
+            to="/pages/$pageId/edit"
+            params={{ pageId: canonicalPage.id }}
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#0d47a1] px-4 text-sm font-semibold text-white shadow-[0_7px_18px_rgba(13,71,161,.16)] hover:bg-[#0a3b87]"
+          >
+            <Pencil className="h-4 w-4" aria-hidden />
+            Editar página
+          </Link>
+        ) : (
+          <button
+            type="button"
+            onClick={() => void createPage()}
+            disabled={creating}
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#0d47a1] px-4 text-sm font-semibold text-white shadow-[0_7px_18px_rgba(13,71,161,.16)] disabled:opacity-60"
+          >
+            {creating ? "Creando…" : "Crear página"}
+            <ArrowUpRight className="h-4 w-4" aria-hidden />
+          </button>
+        )}
+      </section>
 
-        <section className="mt-8" aria-labelledby="account-section-title">
-          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <section className="grid gap-5 xl:grid-cols-[minmax(0,1.4fr)_minmax(300px,.6fr)]">
+        <article className="overflow-hidden rounded-3xl border border-[#e3ebf5] bg-white shadow-[0_8px_30px_rgba(39,72,110,.06)]">
+          <div className="flex items-center justify-between border-b border-[#edf2f8] px-5 py-4 sm:px-7">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                Cuenta
+              <p className="text-xs font-bold uppercase tracking-[.16em] text-[#8290a3]">
+                Vista previa
               </p>
-              <h2 id="account-section-title" className="mt-1 text-xl font-semibold tracking-tight">
-                Configuración y estado
-              </h2>
+              <h2 className="mt-1 text-lg font-bold text-[#172235]">Mi página</h2>
             </div>
-            <Button
-              type="button"
-              variant="ghost"
-              className="w-full justify-start text-red-600 hover:bg-red-50 hover:text-red-700 sm:w-auto"
-              onClick={handleSignOut}
-            >
-              <LogOut className="h-4 w-4" />
-              Cerrar sesión
-            </Button>
+            {pageProfile && (
+              <span
+                className={`rounded-full px-2.5 py-1 text-xs font-semibold ${pageProfile.published ? "bg-[#e8f6ee] text-[#17703e]" : "bg-[#fff7df] text-[#8f6900]"}`}
+              >
+                {pageProfile.published ? "Publicada" : "Borrador"}
+              </span>
+            )}
           </div>
-
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-5">
-            <TabsList className="grid h-auto w-full grid-cols-2 gap-1 rounded-xl bg-slate-200/70 p-1 sm:grid-cols-4">
-              <TabsTrigger value="overview" className="min-h-10 gap-2">
-                <User className="h-4 w-4" />
-                Datos
-              </TabsTrigger>
-              <TabsTrigger value="premium" className="min-h-10 gap-2">
-                <Crown className="h-4 w-4" />
-                Premium
-              </TabsTrigger>
-              <TabsTrigger value="stats" className="min-h-10 gap-2">
-                <BarChart3 className="h-4 w-4" />
-                Estadísticas
-              </TabsTrigger>
-              {isAdmin && (
-                <TabsTrigger value="admin" className="min-h-10 gap-2">
-                  <Shield className="h-4 w-4" />
-                  Admin
-                </TabsTrigger>
-              )}
-            </TabsList>
-
-            <TabsContent value="overview" className="space-y-6">
-              <Card className="border-slate-200 bg-white shadow-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <User className="h-5 w-5" />
-                    Información personal
-                  </CardTitle>
-                  <CardDescription>Actualiza la información asociada a tu cuenta.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="full_name">Nombre completo</Label>
-                    <Input
-                      id="full_name"
-                      defaultValue={profile.full_name}
-                      onBlur={(event) => handleUpdateProfile({ full_name: event.target.value })}
-                      placeholder="Tu nombre"
-                    />
+          {canonicalPage && pageProfile ? (
+            <div className="p-5 sm:p-7">
+              <div className="rounded-2xl border border-[#edf2f8] bg-[#f7faff] p-5 sm:p-7">
+                <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+                  <div className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-2xl bg-white text-2xl font-bold text-[#0d47a1] shadow-sm">
+                    {pageProfile.avatar_url ? (
+                      <img
+                        src={pageProfile.avatar_url}
+                        alt=""
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      pageName.charAt(0).toUpperCase()
+                    )}
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="bio">Biografía</Label>
-                    <Input
-                      id="bio"
-                      defaultValue={profile.bio}
-                      onBlur={(event) => handleUpdateProfile({ bio: event.target.value })}
-                      placeholder="Cuéntanos sobre ti"
-                    />
-                  </div>
-                  <Separator />
-                  <div className="space-y-2">
-                    <Label>Email</Label>
-                    <Input value={profile.email} disabled className="bg-muted" />
-                    <p className="text-xs text-muted-foreground">
-                      El email no puede ser cambiado desde aquí.
+                  <div className="min-w-0">
+                    <h3 className="truncate text-2xl font-bold text-[#172235]">{pageName}</h3>
+                    <p className="mt-1 line-clamp-2 text-sm leading-6 text-[#68778b]">
+                      {pageProfile.profession ||
+                        pageProfile.bio ||
+                        "Personaliza la identidad de tu página."}
                     </p>
                   </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="premium" className="space-y-6">
-              <Card className="border-slate-200 bg-white shadow-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Crown className="h-5 w-5 text-amber-500" />
-                    Estado Premium
-                  </CardTitle>
-                  <CardDescription>Gestiona tu suscripción y beneficios Premium.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  {premiumStatus.isPremium ? (
-                    <>
-                      <div className="rounded-lg bg-gradient-to-r from-amber-500/10 to-yellow-500/10 p-6">
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-2">
-                              <Sparkles className="h-5 w-5 text-amber-500" />
-                              <h3 className="text-lg font-semibold">Eres Premium</h3>
-                            </div>
-                            <p className="text-sm text-muted-foreground">
-                              Tier: <span className="font-medium">{premiumStatus.tier}</span>
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              Origen: <span className="font-medium">{premiumStatus.source}</span>
-                            </p>
-                            {premiumStatus.expires_at && (
-                              <p className="text-sm text-muted-foreground">
-                                Expira:{" "}
-                                <span className="font-medium">
-                                  {new Date(premiumStatus.expires_at).toLocaleDateString()}
-                                </span>
-                              </p>
-                            )}
-                          </div>
-                          <Award className="h-12 w-12 shrink-0 text-amber-500" />
-                        </div>
-                      </div>
-
-                      <div className="space-y-3">
-                        <h4 className="font-semibold">Beneficios activos:</h4>
-                        <ul className="space-y-2 text-sm">
-                          <li className="flex items-center gap-2">
-                            <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                            Plantillas QR Premium (degradados, neón)
-                          </li>
-                          <li className="flex items-center gap-2">
-                            <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                            Logos demo editables
-                          </li>
-                          <li className="flex items-center gap-2">
-                            <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                            Analytics avanzados
-                          </li>
-                          <li className="flex items-center gap-2">
-                            <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                            Soporte prioritario
-                          </li>
-                        </ul>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="rounded-lg border-2 border-dashed p-6 text-center">
-                        <Crown className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
-                        <h3 className="mb-2 text-lg font-semibold">Desbloquea Premium</h3>
-                        <p className="mb-4 text-sm text-muted-foreground">
-                          Accede a plantillas avanzadas, logos personalizados y analytics
-                          detallados.
-                        </p>
-                        <Button className="gap-2">
-                          <Sparkles className="h-4 w-4" />
-                          Ver Planes Premium
-                        </Button>
-                      </div>
-
-                      <div className="space-y-3 pt-4">
-                        <div>
-                          <h4 className="text-sm font-semibold">¿Tienes un código?</h4>
-                          <p className="text-xs text-muted-foreground">
-                            Ingresa tu código para activar Premium.
-                          </p>
-                        </div>
-                        <div className="flex gap-2 flex-col sm:flex-row">
-                          <Input
-                            placeholder="CQ-XXXX-XXXX-XXXX"
-                            value={redeemCode}
-                            onChange={(e) => setRedeemCode(e.target.value.toUpperCase().trim())}
-                            className="uppercase"
-                            disabled={redeeming}
-                          />
-                          <Button
-                            variant="default"
-                            onClick={handleRedeemCode}
-                            disabled={!redeemCode || redeeming}
-                            className="w-full sm:w-auto"
-                          >
-                            {redeeming ? "Aplicando..." : "Aplicar código"}
-                          </Button>
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="stats" className="space-y-6">
-              <div className="grid gap-4 sm:grid-cols-3">
-                <Card className="border-slate-200 bg-white shadow-sm">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm font-medium">Total QR Codes</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-3xl font-bold">{stats.totalProfiles}</div>
-                    <p className="text-xs text-muted-foreground">Códigos creados</p>
-                  </CardContent>
-                </Card>
-                <Card className="border-slate-200 bg-white shadow-sm">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm font-medium">Total escaneos</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-3xl font-bold">{stats.totalScans}</div>
-                    <p className="text-xs text-muted-foreground">Vistas acumuladas</p>
-                  </CardContent>
-                </Card>
-                <Card className="border-slate-200 bg-white shadow-sm">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm font-medium">Enlaces activos</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-3xl font-bold">{stats.totalLinks}</div>
-                    <p className="text-xs text-muted-foreground">Links configurados</p>
-                  </CardContent>
-                </Card>
+                </div>
+                <div className="mt-6 flex flex-wrap gap-2">
+                  <Link
+                    to="/pages/$pageId"
+                    params={{ pageId: canonicalPage.id }}
+                    className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[#d8e2ef] bg-white px-3.5 text-sm font-semibold text-[#34445a] hover:border-[#0d47a1] hover:text-[#0d47a1]"
+                  >
+                    <ExternalLink className="h-4 w-4" aria-hidden />
+                    Ver página
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => void copyShare()}
+                    className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[#d8e2ef] bg-white px-3.5 text-sm font-semibold text-[#34445a] hover:border-[#0d47a1] hover:text-[#0d47a1]"
+                  >
+                    {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}Compartir
+                  </button>
+                </div>
               </div>
+            </div>
+          ) : (
+            <div className="flex flex-col items-start gap-4 p-6 sm:p-8">
+              <div className="grid h-12 w-12 place-items-center rounded-2xl bg-[#eaf2ff] text-[#0d47a1]">
+                <GlobePlaceholder />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-[#172235]">Aún no tienes una página</h3>
+                <p className="mt-1 max-w-lg text-sm leading-6 text-[#68778b]">
+                  Crea tu primera página pública para compartir tu identidad y tus enlaces.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => void createPage()}
+                disabled={creating}
+                className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-[#0d47a1] px-4 text-sm font-semibold text-white disabled:opacity-60"
+              >
+                {creating ? "Creando…" : "Crear página"}
+                <ArrowUpRight className="h-4 w-4" />
+              </button>
+            </div>
+          )}
+        </article>
 
-              <Card className="border-slate-200 bg-white shadow-sm">
-                <CardHeader>
-                  <CardTitle>Resumen de tu cuenta</CardTitle>
-                  <CardDescription>Datos reales asociados a tus perfiles actuales.</CardDescription>
-                </CardHeader>
-                <CardContent className="text-sm text-muted-foreground">
-                  Tu cuenta lleva activa {accountAge} días y tiene {stats.totalProfiles} perfil
-                  {stats.totalProfiles === 1 ? "" : "es"} registrado
-                  {stats.totalProfiles === 1 ? "" : "s"}.
-                </CardContent>
-              </Card>
-            </TabsContent>
+        <aside className="rounded-3xl border border-[#e3ebf5] bg-white p-5 shadow-[0_8px_30px_rgba(39,72,110,.06)] sm:p-6">
+          <p className="text-xs font-bold uppercase tracking-[.16em] text-[#8290a3]">Resumen</p>
+          <h2 className="mt-1 text-lg font-bold text-[#172235]">Rendimiento</h2>
+          <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+            <Metric icon={Users} label="Personas vieron tu página" value={stats.totalScans} />
+            <Metric icon={Link2} label="Enlaces activos" value={stats.totalLinks} />
+          </div>
+          <Link
+            to={canonicalPage ? "/pages/$pageId/analytics" : "/pages"}
+            params={canonicalPage ? { pageId: canonicalPage.id } : undefined}
+            className="mt-5 flex items-center justify-between rounded-xl bg-[#f7faff] px-4 py-3 text-sm font-semibold text-[#0d47a1] hover:bg-[#eaf2ff]"
+          >
+            Ver más detalles
+            <ArrowUpRight className="h-4 w-4" />
+          </Link>
+        </aside>
+      </section>
 
-            {isAdmin && (
-              <TabsContent value="admin" className="space-y-6">
-                <Card className="border-slate-200 bg-white shadow-sm">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Shield className="h-5 w-5 text-purple-500" />
-                      Panel de administración
-                    </CardTitle>
-                    <CardDescription>
-                      Gestión del sistema, usuarios y configuración global.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Button
-                      className="w-full gap-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
-                      onClick={() => (window.location.href = "/admin")}
-                    >
-                      <Settings className="h-4 w-4" />
-                      Abrir Panel de Administración
-                    </Button>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            )}
-          </Tabs>
-        </section>
-      </main>
+      <section className="mt-6 rounded-3xl border border-[#e3ebf5] bg-white p-5 shadow-[0_8px_30px_rgba(39,72,110,.06)] sm:p-7">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[.16em] text-[#8290a3]">
+              Actividad reciente
+            </p>
+            <h2 className="mt-1 text-lg font-bold text-[#172235]">Últimos 7 días</h2>
+          </div>
+          <BarChart3 className="h-5 w-5 text-[#9aabc0]" aria-hidden />
+        </div>
+        <div className="mt-5 rounded-2xl border border-dashed border-[#dbe5f1] bg-[#fbfdff] px-4 py-6 text-center">
+          <p className="text-sm font-medium text-[#526176]">
+            Todavía no hay actividad reciente disponible.
+          </p>
+          <p className="mt-1 text-xs text-[#8290a3]">
+            Cuando tengamos eventos de los últimos 7 días, aparecerán aquí.
+          </p>
+        </div>
+      </section>
     </div>
   );
+}
+
+function Metric({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: typeof Users;
+  label: string;
+  value: number;
+}) {
+  return (
+    <div className="rounded-2xl border border-[#edf2f8] p-4">
+      <div className="flex items-center gap-2 text-xs text-[#8290a3]">
+        <Icon className="h-4 w-4 text-[#0d47a1]" aria-hidden />
+        {label}
+      </div>
+      <p className="mt-2 text-2xl font-bold text-[#172235]">{value.toLocaleString("es-CL")}</p>
+    </div>
+  );
+}
+function GlobePlaceholder() {
+  return <QrCode className="h-6 w-6" aria-hidden />;
 }

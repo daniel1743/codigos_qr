@@ -2,6 +2,15 @@
 @source "../src";
 @import "tw-animate-css";
 
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
 /* Fonts */
 /* Modified by Claude Code — font weight coverage fix: each font now imports
    its full practical weight range (300/400/500/600/700/800 where available)

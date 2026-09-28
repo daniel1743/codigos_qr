@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Profile } from "../types/database";
+import { generatePublicId, getInternalSlugFromPublicId } from "../lib/publicId";
 import {
   createBasicEditorPatch,
   hasBasicEditorTemplateConfigPatch,
@@ -119,6 +120,40 @@ export const profileService = {
 
     if (error) throw error;
     return data ?? [];
+  },
+
+  async ensurePrimaryProfileForUser(
+    supabase: SupabaseClient,
+    input: {
+      userId: string;
+      email?: string | null;
+      userMetadata?: Record<string, unknown> | null;
+    },
+  ): Promise<Profile> {
+    const existing = await this.getProfileByUserId(supabase, input.userId);
+    if (existing) return existing;
+
+    const metadataName = input.userMetadata?.full_name ?? input.userMetadata?.name;
+    const emailLocalPart = input.email?.split("@")[0]?.trim();
+    const displayName =
+      (typeof metadataName === "string" && metadataName.trim()) || emailLocalPart || "Mi pagina";
+    const publicId = generatePublicId();
+
+    try {
+      return await this.createProfile(supabase, {
+        user_id: input.userId,
+        public_id: publicId,
+        slug: getInternalSlugFromPublicId(publicId),
+        display_name: displayName,
+        published: false,
+      });
+    } catch (creationError) {
+      // A second tab/device may have won the insert race. Re-read before
+      // surfacing the original error so bootstrap remains idempotent.
+      const racedProfile = await this.getProfileByUserId(supabase, input.userId);
+      if (racedProfile) return racedProfile;
+      throw creationError;
+    }
   },
 
   async getProfileByIdForUser(
