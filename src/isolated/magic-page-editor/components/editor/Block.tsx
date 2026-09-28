@@ -6,6 +6,7 @@ import { Editable } from './Editable';
 import { blockLabels } from '../../data/blockKit';
 import { cx } from '../../utils/cx';
 import { toneVars } from '../../utils/styles';
+import { DecorationLayer } from './DecorationLayer';
 import type { BlockRef } from '../../types/editor';
 
 export type Spacing = 'none' | 'S' | 'M' | 'L';
@@ -48,6 +49,7 @@ export function Block({ block, className, defaultTone, defaultSpacing = 'M', chi
           <EyeOffIcon className="h-3 w-3" /> Oculto
         </span>
       }
+      <DecorationLayer id={id} />
       {children}
     </Editable>);
 

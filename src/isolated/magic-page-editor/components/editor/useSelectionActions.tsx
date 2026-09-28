@@ -26,7 +26,7 @@ import {
 import { useEditor } from '../../contexts/EditorContext';
 import { useThemeTokens } from '../../hooks/useThemeTokens';
 import { structureActions } from './structureActions';
-import { socialStyleScope, type SocialStyle } from './EditableSocial';
+import { socialStyleScope, type SocialStyle, type SocialLayout, type SocialShape, type SocialFill, type SocialSize } from './EditableSocial';
 import { PanelSection } from './controls/PanelSection';
 import { Segmented } from './controls/Segmented';
 import { SizeStepper } from './controls/SizeStepper';
@@ -36,11 +36,15 @@ import { ImagePicker } from './controls/ImagePicker';
 import { FreeCropControl, PositionPad } from './controls/PositionPad';
 import { LinkEditor } from './controls/LinkEditor';
 import { CtaStylePicker } from './controls/CtaStylePicker';
+import { CtaTreatmentPicker } from './controls/CtaTreatmentPicker';
 import { HeroVariantPicker } from './controls/HeroVariantPicker';
 import { PlatformPicker } from './controls/PlatformPicker';
 import { GalleryPhotosPicker } from './controls/GalleryPhotosPicker';
 import { ToneGrid } from './controls/ToneGrid';
 import { FontPicker } from './controls/FontPicker';
+import { PalettePicker } from './controls/PalettePicker';
+import { DecorationPicker } from './controls/DecorationPicker';
+import { TypographyTreatmentPicker } from './controls/TypographyTreatmentPicker';
 import { socialPlatforms } from '../../data/socialPlatforms';
 import { familyForBlockType } from '../../data/cardFamilies';
 import { CardLayoutPicker } from '../cards/CardLayoutPicker';
@@ -60,6 +64,7 @@ export function useSelectionActions(): EditorAction[] {
 
   const id = sel.id;
   const propId = sel.kind === 'image' && id.endsWith(':hero-image') ? id.slice(0, -':hero-image'.length) : id;
+  const mediaShapeKey = sel.kind === 'image' && id.endsWith(':hero-image') ? 'mediaShape' : 'shape';
   const props = ed.doc.props[propId] ?? {};
   const el = ed.getElement(id);
   const set = (key: string, value: string) => ed.setProp(propId, key, value);
@@ -103,13 +108,31 @@ export function useSelectionActions(): EditorAction[] {
             onChange={(v) => ed.setTextStyle(id, { align: v })} />
 
 
-        }, { key: 'remove', label: 'Ocultar ' + sel.label.toLowerCase(), icon: Trash2Icon, danger: true, onClick: () => ed.removeElement(id, sel.label) }];
+        },
+        { key: 'typography', label: 'Tratamiento', icon: TypeIcon, showLabel: true, panel: <TypographyTreatmentPicker value={ts} onChange={(patch) => ed.setTextStyle(id, patch)} /> },
+        { key: 'remove', label: 'Ocultar ' + sel.label.toLowerCase(), icon: Trash2Icon, danger: true, onClick: () => ed.removeElement(id, sel.label) }];
 
       }
 
     case 'image':
       return [
       { key: 'replace', label: 'Reemplazar', icon: RefreshCwIcon, showLabel: true, panel: <ImagePicker value={props.src} onChange={(v) => set('src', v)} /> },
+      {
+        key: 'shape',
+        label: 'Forma',
+        icon: ShapesIcon,
+        showLabel: true,
+        panel: <PanelSection title="Forma de imagen">
+          <Segmented ariaLabel="Forma de imagen" options={[
+            { value: 'square', label: 'Cuadrada' },
+            { value: 'rounded', label: 'Redondeada' },
+            { value: 'circle', label: 'Círculo' },
+            { value: 'oval', label: 'Óvalo' },
+            { value: 'arch', label: 'Arco' },
+            { value: 'bleed', label: 'A sangre' }
+          ]} value={props[mediaShapeKey] ?? 'rounded'} onChange={(v) => set(mediaShapeKey, v)} />
+        </PanelSection>
+      },
       {
         key: 'crop',
         label: 'Recortar',
@@ -268,6 +291,18 @@ export function useSelectionActions(): EditorAction[] {
         showLabel: true,
         panel: <CtaStylePicker value={props.variant as CtaVariant ?? el?.dataset.variant as CtaVariant ?? 'solid'} onChange={(v) => set('variant', v)} />
       },
+      {
+        key: 'treatment',
+        label: 'Forma y tamaño',
+        icon: ShapesIcon,
+        showLabel: true,
+        panel: <CtaTreatmentPicker
+          shape={props.shape as 'square' | 'soft' | 'pill' | 'circle' | undefined}
+          size={props.size as 'sm' | 'md' | 'lg' | 'full' | undefined}
+          iconPosition={props.iconPosition as 'none' | 'left' | 'right' | undefined}
+          kind={props.kind as 'standard' | 'card' | undefined}
+          onChange={(key, value) => set(key, value)} />
+      },
       { key: 'remove', label: 'Eliminar', icon: Trash2Icon, danger: true, onClick: () => ed.removeElement(id, sel.label) }];
 
 
@@ -283,7 +318,7 @@ export function useSelectionActions(): EditorAction[] {
           label: 'Estilo',
           icon: PaintbrushIcon,
           panel:
-          <PanelSection title="Estilo de iconos" hint="Se aplica a todos los iconos de este grupo.">
+          <div className="space-y-4"><PanelSection title="Estilo de iconos" hint="Se aplica a todos los iconos de este grupo.">
               <Segmented
               ariaLabel="Estilo de iconos"
               options={[
@@ -295,6 +330,11 @@ export function useSelectionActions(): EditorAction[] {
               onChange={(v) => ed.setProp(scope, 'iconStyle', v)} />
 
             </PanelSection>
+            <PanelSection title="Distribución"><Segmented ariaLabel="Distribución social" options={[{ value: 'row', label: 'Fila' }, { value: 'column', label: 'Columna' }, { value: 'arc', label: 'Arco' }, { value: 'cluster', label: 'Grupo' }]} value={ed.doc.props[scope]?.socialLayout as SocialLayout ?? 'row'} onChange={(v) => ed.setProp(scope, 'socialLayout', v)} /></PanelSection>
+            <PanelSection title="Forma"><Segmented ariaLabel="Forma social" options={[{ value: 'circle', label: 'Círculo' }, { value: 'rounded', label: 'Suave' }, { value: 'square', label: 'Cuadrado' }]} value={ed.doc.props[scope]?.socialShape as SocialShape ?? 'circle'} onChange={(v) => ed.setProp(scope, 'socialShape', v)} /></PanelSection>
+            <PanelSection title="Relleno"><Segmented ariaLabel="Relleno social" options={[{ value: 'filled', label: 'Relleno' }, { value: 'outline', label: 'Contorno' }, { value: 'plain', label: 'Plano' }]} value={ed.doc.props[scope]?.socialFill as SocialFill ?? 'filled'} onChange={(v) => ed.setProp(scope, 'socialFill', v)} /></PanelSection>
+            <PanelSection title="Tamaño"><Segmented ariaLabel="Tamaño social" options={[{ value: 'sm', label: 'S' }, { value: 'md', label: 'M' }, { value: 'lg', label: 'L' }]} value={ed.doc.props[scope]?.socialSize as SocialSize ?? 'md'} onChange={(v) => ed.setProp(scope, 'socialSize', v)} /></PanelSection>
+          </div>
 
         },
         { key: 'remove', label: 'Quitar', icon: Trash2Icon, danger: true, onClick: () => ed.removeElement(id, sel.label) }];
@@ -419,6 +459,21 @@ export function useSelectionActions(): EditorAction[] {
         icon: TypeIcon,
         showLabel: true,
         panel: <FontPicker fonts={t.fonts} value={ed.doc.props.page?.font ?? t.fonts[0].id} onChange={(v) => ed.setProp('page', 'font', v)} />
+      },
+      {
+        key: 'palette',
+        label: 'Paleta',
+        icon: PaletteIcon,
+        showLabel: true,
+        panel: <PalettePicker value={ed.doc.props['page']?.['palette']} onChange={(v) => ed.setProp('page', 'palette', v)} />
+      },
+      {
+        key: 'decorations',
+        label: 'Decoración',
+        icon: ShapesIcon,
+        panel: <PanelSection title="Elementos decorativos" hint="No interfieren con la selección ni con los clics.">
+          <DecorationPicker values={ed.doc.props.page ?? {}} onChange={(key, value) => ed.setProp('page', key, value)} />
+        </PanelSection>
       },
       { key: 'settings', label: 'Ajustes', icon: Settings2Icon, showLabel: true, onClick: () => ed.setSettingsOpen(true) }];
 

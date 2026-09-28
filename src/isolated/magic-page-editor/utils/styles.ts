@@ -13,11 +13,12 @@ export function textStyleToCss(ts?: TextStyle): CSSProperties {
   if (!ts) return {};
   return {
     fontSize: ts.size,
-    fontWeight: ts.bold === undefined ? undefined : ts.bold ? 700 : 400,
-    color: ts.color,
+    fontWeight: ts.weight === 'medium' ? 500 : ts.weight === 'bold' || ts.bold ? 700 : ts.bold === false || ts.weight === 'regular' ? 400 : undefined,
     textAlign: ts.align,
     textTransform: ts.upper ? 'uppercase' : undefined,
-    letterSpacing: ts.tracking === 'wide' ? '0.14em' : undefined
+    letterSpacing: ts.tracking === 'tight' ? '-0.02em' : ts.tracking === 'wide' ? '0.14em' : undefined,
+    fontFamily: ts.typeStyle === 'editorial' ? "'Cormorant Garamond', serif" : ts.typeStyle === 'luxury' ? "'Bodoni Moda', serif" : ts.typeStyle === 'script' ? "'Caveat', cursive" : ts.typeStyle === 'mixed' ? "'Marcellus', serif" : undefined,
+    color: ts.goldText ? 'var(--accent, #B8935A)' : ts.color
   };
 }
 
@@ -96,6 +97,21 @@ export function mediaPhotoStyle(
 ): CSSProperties {
   const p = props ?? {};
   return mediaImageStyle(mediaTreatmentFromProps(p), p['fit'], p['pos'] ?? fallbackPosition);
+}
+
+export type MediaShape = 'square' | 'rounded' | 'circle' | 'oval' | 'arch' | 'bleed';
+
+/** Optional media shape treatment. Undefined intentionally preserves legacy CSS. */
+export function mediaShapeStyle(shape?: string): CSSProperties {
+  if (!shape) return {};
+  const value = shape as MediaShape;
+  if (value === 'square') return { borderRadius: 0 };
+  if (value === 'rounded') return { borderRadius: 18 };
+  if (value === 'circle') return { borderRadius: '9999px' };
+  if (value === 'oval') return { borderRadius: '50%' };
+  if (value === 'arch') return { borderRadius: '9999px 9999px 18px 18px' };
+  if (value === 'bleed') return { borderRadius: 0, margin: 0 };
+  return {};
 }
 
 /**

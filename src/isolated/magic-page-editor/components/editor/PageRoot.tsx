@@ -4,6 +4,7 @@ import { useThemeTokens } from '../../hooks/useThemeTokens';
 import { Editable } from './Editable';
 import { cx } from '../../utils/cx';
 import { toneVars } from '../../utils/styles';
+import { DecorationLayer } from './DecorationLayer';
 
 const PAGE_VARIANT_PROFILES: Record<string, { width: number; scale: number }> = {
   signature: { width: 760, scale: 1 },
@@ -59,8 +60,8 @@ export function PageRoot({ children, className }: PageRootProps) {
       data-page-family={family}
       data-page-variant={variant}
       className={cx('relative flex w-full flex-1 flex-col', `page-family-${family}`, `page-variant-${variant}`, className)}
-      style={{ ...toneVars(t.page), background: t.page.color, color: 'var(--fg)', fontFamily: t.bodyFont, '--page-content-width': `${profile.width}px`, '--page-variant-scale': profile.scale } as React.CSSProperties}>
-      
+      style={{ ...toneVars(t.page), '--accent': t.accent, '--accent-fg': t.accentFg, background: t.page.color, color: 'var(--fg)', fontFamily: t.bodyFont, '--page-content-width': `${profile.width}px`, '--page-variant-scale': profile.scale } as React.CSSProperties}>
+      <DecorationLayer />
       {children}
     </Editable>);
 

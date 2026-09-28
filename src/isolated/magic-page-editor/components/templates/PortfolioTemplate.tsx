@@ -8,7 +8,7 @@ import { EditableText } from '../editor/EditableText';
 import { EditableImage } from '../editor/EditableImage';
 import { EditableAvatar, VerifiedNameCheck } from '../editor/EditableAvatar';
 import { EditableCTA, type CtaVariants } from '../editor/EditableCTA';
-import { EditableSocial } from '../editor/EditableSocial';
+import { EditableSocial, EditableSocialGroup } from '../editor/EditableSocial';
 import { PageRoot, useFooterTone } from '../editor/PageRoot';
 import { AddBlockSlot } from '../editor/AddBlockSlot';
 import { HeroFrame } from '../blocks/HeroFrame';
@@ -202,9 +202,9 @@ export function PortfolioTemplate() {
           <Block key={b.key} block={b} defaultSpacing="S">
             <div className={cx(wrap, 'flex flex-wrap items-center gap-2')} style={wrapStyle}>
               <EditableText id={`${p}social.label`} value="En otros sitios" as="span" label="Etiqueta" className="cq-muted mr-3 text-[12px] uppercase tracking-[0.2em]" />
-              {pfSocials.map((s, i) =>
+              <EditableSocialGroup className="flex flex-wrap items-center"><>{pfSocials.map((s, i) =>
               <EditableSocial key={s.platform} id={`${p}social.${i}`} platform={s.platform} href={s.href} size={42} defaultStyle="plain" />
-              )}
+              )}</></EditableSocialGroup>
             </div>
           </Block>);
 

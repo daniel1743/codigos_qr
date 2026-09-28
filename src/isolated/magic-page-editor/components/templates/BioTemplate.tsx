@@ -9,7 +9,7 @@ import { EditableText } from "../editor/EditableText";
 import { EditableImage } from "../editor/EditableImage";
 import { EditableAvatar, VerifiedNameCheck } from "../editor/EditableAvatar";
 import { EditableCTA, CtaVariants } from "../editor/EditableCTA";
-import { EditableSocial } from "../editor/EditableSocial";
+import { EditableSocial, EditableSocialGroup } from "../editor/EditableSocial";
 import { PageRoot, useFooterTone } from "../editor/PageRoot";
 import { AddBlockSlot } from "../editor/AddBlockSlot";
 import { HeroFrame } from "../blocks/HeroFrame";
@@ -85,7 +85,7 @@ export function BioTemplate() {
       case 'social':
         return <Block key={b.key} block={b} defaultSpacing="S">
             <div className={cx(col, 'flex justify-center gap-3')} style={colStyle}>
-              {bioSocials.map((s, i) => <EditableSocial key={s.platform} id={`${p}social.${i}`} platform={s.platform} href={s.href} size={m ? 44 : 48} />)}
+              <EditableSocialGroup className="flex items-center justify-center"><>{bioSocials.map((s, i) => <EditableSocial key={s.platform} id={`${p}social.${i}`} platform={s.platform} href={s.href} size={m ? 44 : 48} />)}</></EditableSocialGroup>
             </div>
           </Block>;
       case 'links':

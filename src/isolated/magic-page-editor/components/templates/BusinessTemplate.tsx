@@ -9,7 +9,7 @@ import { EditableText } from "../editor/EditableText";
 import { EditableImage } from "../editor/EditableImage";
 import { EditableAvatar, VerifiedNameCheck } from "../editor/EditableAvatar";
 import { EditableCTA, CtaVariants } from "../editor/EditableCTA";
-import { EditableSocial } from "../editor/EditableSocial";
+import { EditableSocial, EditableSocialGroup } from "../editor/EditableSocial";
 import { PageRoot, useFooterTone } from "../editor/PageRoot";
 import { AddBlockSlot } from "../editor/AddBlockSlot";
 import { SocialIcon } from "../icons/SocialIcon";
@@ -129,7 +129,7 @@ export function BusinessTemplate() {
                     <EditableCTA id={`${p}hero.cta2`} label={bizProfile.cta2} href="#tratamientos" variants={cta} defaultVariant="outline" className="inline-flex h-[54px] items-center whitespace-nowrap rounded-full px-7 text-[15px] font-semibold" />
                   </div>
                   <div className={cx('mt-9 flex flex-wrap items-center gap-2.5', align === 'center' && 'justify-center')}>
-                    {bizSocials.map((s, i) => <EditableSocial key={s.platform} id={`${p}hero.social.${i}`} platform={s.platform} href={s.href} size={40} defaultStyle="square" />)}
+                    <EditableSocialGroup className="flex flex-wrap items-center"><>{bizSocials.map((s, i) => <EditableSocial key={s.platform} id={`${p}hero.social.${i}`} platform={s.platform} href={s.href} size={40} defaultStyle="square" />)}</></EditableSocialGroup>
                     <span className="flex items-center"><EditableText id={`${p}hero.byline`} value={bizProfile.byline} label="Firma" className="cq-muted ml-2 text-[13px]" /><VerifiedNameCheck avatarId={`${p}avatar`} /></span>
                   </div>
                 </>}
@@ -254,7 +254,7 @@ export function BusinessTemplate() {
           <EditableText id="footer.note" value="Estética avanzada · Calle de Serrano 48, Madrid" label="Nota" className="cq-muted mt-1 text-[13px]" />
         </div>
         <div className="flex items-center gap-2.5">
-          {bizSocials.map((s, i) => <EditableSocial key={s.platform} id={`footer.social.${i}`} platform={s.platform} href={s.href} size={40} />)}
+          <EditableSocialGroup className="flex items-center"><>{bizSocials.map((s, i) => <EditableSocial key={s.platform} id={`footer.social.${i}`} platform={s.platform} href={s.href} size={40} />)}</></EditableSocialGroup>
         </div>
         <EditableText id="footer.legal" value="© 2026 Clínica Áurea · Hecho con Cripqer" label="Aviso" className="cq-muted text-[12px]" />
       </Editable>

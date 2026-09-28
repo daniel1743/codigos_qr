@@ -4,6 +4,7 @@ import { cx } from '../../utils/cx';
 import type { HeroVariant } from '../../types/editor';
 import { useFreeImagePan } from '../editor/controls/PositionPad';
 import { Editable } from '../editor/Editable';
+import { mediaShapeStyle } from '../../utils/styles';
 
 export type HeroShape = 'curve' | 'straight' | 'inset';
 type HeroHeight = 'S' | 'M' | 'L';
@@ -67,7 +68,7 @@ export function HeroFrame({
   <img src={url} alt={mediaAlt} draggable={false} {...(interactive ? crop.handlers : {})} className="absolute inset-0 h-full w-full object-cover" style={{ objectPosition: p['cropX'] || p['cropY'] ? crop.objectPosition : position, transform: `scale(${p['zoom'] ?? '1'})` }} />;
 
   const img =
-  <Editable id={`${id}:hero-image`} kind="image" label="Imagen de portada" aria-label="Imagen de portada" className="pointer-events-auto absolute inset-0 z-0">
+  <Editable id={`${id}:hero-image`} kind="image" label="Imagen de portada" aria-label="Imagen de portada" className="pointer-events-auto absolute inset-0 z-0" style={{ ...mediaShapeStyle(p['mediaShape']) }}>
     {photo(src, p['pos'] ?? 'center', true)}{overlay}{fusionLayer}
   </Editable>;
 

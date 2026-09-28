@@ -4,6 +4,7 @@ import { useEditor } from '../../contexts/EditorContext';
 import { PanelSection } from '../editor/controls/PanelSection';
 import { Segmented } from '../editor/controls/Segmented';
 import { Toggle } from '../editor/controls/Toggle';
+import { DecorationPicker } from '../editor/controls/DecorationPicker';
 import { cardOrder, moveCard } from '../../utils/cardOps';
 import { layoutsForFamily, resolveCard } from '../../utils/cardLayout';
 import { cx } from '../../utils/cx';
@@ -57,6 +58,10 @@ export function CardAdvanced({ ctx }: {ctx: CardContext;}) {
           </div>
         </PanelSection>
       )}
+
+      <PanelSection title="Elementos decorativos" hint="Siempre no interactivos; no interfieren con la selección.">
+        <DecorationPicker values={cp} onChange={(key, value) => set(key, value)} />
+      </PanelSection>
 
       <PanelSection title="Campos">
         {sample.price !== undefined && <Toggle label="Precio" checked={flag('showPrice')} onChange={(v) => set('showPrice', v ? 'on' : 'off')} />}

@@ -132,7 +132,10 @@ export interface TextStyle {
   color?: string;
   align?: TextAlign;
   upper?: boolean;
-  tracking?: "normal" | "wide";
+  tracking?: "tight" | "normal" | "wide";
+  typeStyle?: "sans" | "editorial" | "luxury" | "mixed" | "script";
+  weight?: "regular" | "medium" | "bold";
+  goldText?: boolean;
 }
 
 export interface BlockRef {
@@ -182,6 +185,16 @@ export interface Theme {
   tones: SurfaceTone[];
   pageTones: string[];
   fonts: FontPair[];
+}
+
+export interface PalettePreset {
+  id: string;
+  label: string;
+  page: SurfaceTone;
+  accent: string;
+  accentFg: string;
+  swatches: string[];
+  radius?: number;
 }
 
 export interface ThemeTokens extends Theme {

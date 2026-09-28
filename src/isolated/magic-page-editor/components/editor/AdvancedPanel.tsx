@@ -14,6 +14,8 @@ import {
 } from "./controls/MediaTreatmentPicker";
 import { StructureRow } from "./StructureRow";
 import { HeroFusionPicker } from "./controls/HeroFusionPicker";
+import { DecorationPicker } from "./controls/DecorationPicker";
+import { TypographyTreatmentPicker } from "./controls/TypographyTreatmentPicker";
 import { blockLabels } from "../../data/blockKit";
 import { CardAdvanced } from "../cards/CardAdvanced";
 import { getCardContext } from "../cards/cardActions";
@@ -39,6 +41,7 @@ export function AdvancedPanel() {
       const ts = ed.doc.textStyles[id] ?? {};
       specific = (
         <PanelSection title="Estilo del texto">
+          <TypographyTreatmentPicker value={ts} onChange={(patch) => ed.setTextStyle(id, patch)} />
           <Toggle
             label="Mayúsculas"
             checked={!!ts.upper}
@@ -148,6 +151,9 @@ export function AdvancedPanel() {
     case "hero":
       specific = (
         <>
+          <PanelSection title="Elementos decorativos" hint="Siempre no interactivos; no interfieren con la selección.">
+            <DecorationPicker values={p} onChange={(key, value) => set(key, value)} />
+          </PanelSection>
           {ed.canonicalEditing && (
             <HeroFusionPicker
               value={heroFusionFromProps(p)}
@@ -263,6 +269,9 @@ export function AdvancedPanel() {
               onCommit={(v) => set("anchor", v)}
             />
           </PanelSection>
+          <PanelSection title="Elementos decorativos" hint="Siempre no interactivos; no interfieren con la selección.">
+            <DecorationPicker values={p} onChange={(key, value) => set(key, value)} />
+          </PanelSection>
         </>
       ) : (
         <div className="flex items-start gap-2.5 rounded-xl bg-[#F7F8FA] p-3 text-[12.5px] leading-snug text-mute">
@@ -275,17 +284,22 @@ export function AdvancedPanel() {
       break;
     case "page":
       specific = (
-        <button
-          type="button"
-          onClick={() => ed.setSettingsOpen(true)}
-          className="flex w-full items-center gap-3 rounded-xl border border-line px-3 py-3 text-left transition-colors duration-150 hover:bg-[#F7F8FA]"
-        >
-          <Settings2Icon className="h-4 w-4 text-mute" />
-          <span className="flex-1">
-            <span className="block text-[13px] font-semibold text-ink">Ajustes de página</span>
-            <span className="block text-[12px] text-mute">Título, URL, SEO y dominio</span>
-          </span>
-        </button>
+        <>
+          <PanelSection title="Elementos decorativos" hint="Siempre no interactivos; no interfieren con la selección.">
+            <DecorationPicker values={ed.doc.props.page ?? {}} onChange={(key, value) => ed.setProp('page', key, value)} />
+          </PanelSection>
+          <button
+            type="button"
+            onClick={() => ed.setSettingsOpen(true)}
+            className="flex w-full items-center gap-3 rounded-xl border border-line px-3 py-3 text-left transition-colors duration-150 hover:bg-[#F7F8FA]"
+          >
+            <Settings2Icon className="h-4 w-4 text-mute" />
+            <span className="flex-1">
+              <span className="block text-[13px] font-semibold text-ink">Ajustes de página</span>
+              <span className="block text-[12px] text-mute">Título, URL, SEO y dominio</span>
+            </span>
+          </button>
+        </>
       );
 
       break;

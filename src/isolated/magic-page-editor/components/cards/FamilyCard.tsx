@@ -10,6 +10,7 @@ import { CardBody, type BodySize } from './CardBody';
 import { resolveCard } from '../../utils/cardLayout';
 import { cx } from '../../utils/cx';
 import type { CardFamilyDef, CardItem } from '../../types/editor';
+import { DecorationLayer } from '../editor/DecorationLayer';
 
 export type CardDemo = 'card' | 'image' | 'cta' | 'title';
 
@@ -177,6 +178,7 @@ export function FamilyCard({ id, family, item, blockProps, className, demo }: Fa
           <EyeOffIcon className="h-3 w-3" /> Oculta
         </span>
       }
+      <DecorationLayer id={id} />
       {content}
     </Editable>);
 

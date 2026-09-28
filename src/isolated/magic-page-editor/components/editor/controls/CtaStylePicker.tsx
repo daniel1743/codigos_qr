@@ -10,12 +10,14 @@ interface CtaStylePickerProps {
 const styles: {value: CtaVariant;label: string;preview: string;}[] = [
 { value: 'solid', label: 'Sólido', preview: 'bg-ink text-white' },
 { value: 'outline', label: 'Contorno', preview: 'border border-ink text-ink' },
-{ value: 'soft', label: 'Suave', preview: 'bg-[#EEF0F3] text-ink' }];
+{ value: 'soft', label: 'Suave', preview: 'bg-[#EEF0F3] text-ink' },
+{ value: 'ghost', label: 'Ghost', preview: 'text-ink' },
+{ value: 'glass', label: 'Glass', preview: 'bg-white/50 text-ink backdrop-blur' }];
 
 
 export function CtaStylePicker({ value, onChange }: CtaStylePickerProps) {
   return (
-    <div className="grid grid-cols-3 gap-2">
+    <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
       {styles.map((s) => {
         const active = s.value === value;
         return (

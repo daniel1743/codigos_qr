@@ -8,9 +8,15 @@ export interface CtaVariants {
   solid: React.CSSProperties;
   outline: React.CSSProperties;
   soft: React.CSSProperties;
+  ghost?: React.CSSProperties;
+  glass?: React.CSSProperties;
 }
 
-export type CtaVariant = keyof CtaVariants;
+export type CtaVariant = 'solid' | 'outline' | 'soft' | 'ghost' | 'glass';
+export type CtaShape = 'square' | 'soft' | 'pill' | 'circle';
+export type CtaSize = 'sm' | 'md' | 'lg' | 'full';
+export type CtaIconPosition = 'none' | 'left' | 'right';
+export type CtaKind = 'standard' | 'card';
 
 interface EditableCTAProps {
   id: string;
@@ -28,6 +34,22 @@ interface EditableCTAProps {
   trailing?: React.ReactNode;
   fullDefault?: boolean;
 }
+
+function treatmentFor(variant: CtaVariant, variants: CtaVariants): React.CSSProperties {
+  return variants[variant] ?? (variant === 'ghost'
+    ? { color: 'var(--fg)', background: 'transparent' }
+    : variant === 'glass'
+      ? { color: 'var(--fg)', background: 'color-mix(in srgb, var(--surface) 56%, transparent)', boxShadow: 'inset 0 0 0 1px color-mix(in srgb, var(--fg) 22%, transparent)', backdropFilter: 'blur(12px)' }
+      : variants.solid);
+}
+
+const shapeRadius: Record<CtaShape, string> = { square: '0px', soft: '12px', pill: '9999px', circle: '9999px' };
+const sizeStyle: Record<CtaSize, React.CSSProperties> = {
+  sm: { minHeight: 36, paddingInline: 14, fontSize: 12 },
+  md: { minHeight: 44, paddingInline: 20, fontSize: 14 },
+  lg: { minHeight: 54, paddingInline: 28, fontSize: 15 },
+  full: { width: '100%', minHeight: 52, paddingInline: 24, fontSize: 15 }
+};
 
 /** A button or long CTA block. Label, destination and style are all edited from the page. */
 export function EditableCTA({
@@ -48,8 +70,14 @@ export function EditableCTA({
 }: EditableCTAProps) {
   const { doc } = useEditor();
   const p = doc.props[id] ?? {};
-  const variant = p.variant as CtaVariant ?? defaultVariant;
-  const full = (p.full ?? (fullDefault ? 'on' : 'off')) === 'on';
+  const variant = p['variant'] as CtaVariant ?? defaultVariant;
+  const full = (p['full'] ?? (fullDefault ? 'on' : 'off')) === 'on';
+  const shape = p['shape'] as CtaShape | undefined;
+  const size = p['size'] as CtaSize | undefined;
+  const iconPosition = (p['iconPosition'] as CtaIconPosition | undefined) ?? 'both';
+  const showLeading = iconPosition === 'left' || iconPosition === 'both';
+  const showTrailing = iconPosition === 'right' || iconPosition === 'both';
+  const kind = (p['kind'] as CtaKind | undefined) ?? 'standard';
 
   const labelNode =
   <EditableText id={`${id}.label`} value={label} as="span" selectable={false} className={labelClassName} style={labelStyle} />;
@@ -61,18 +89,26 @@ export function EditableCTA({
       kind="cta"
       label={elementLabel}
       as="a"
-      href={p.href ?? href}
-      target={p.newTab === 'off' ? undefined : '_blank'}
+      href={p['href'] ?? href}
+      target={p['newTab'] === 'off' ? undefined : '_blank'}
       rel="noreferrer"
       data-variant={variant}
+      data-shape={shape}
+      data-size={size}
+      data-kind={kind}
       className={cx(
         className,
         full ? 'w-full' : 'w-fit',
         'transition-[transform,background-color,color,box-shadow] duration-150 ease-out active:scale-[0.98]'
       )}
-      style={variants[variant]}>
+      style={{
+        ...treatmentFor(variant, variants),
+        ...(shape ? { borderRadius: shapeRadius[shape] } : {}),
+        ...(size ? sizeStyle[size] : {}),
+        ...(shape === 'circle' ? { aspectRatio: '1', paddingInline: 0 } : {}),
+      }}>
       
-      {leading}
+      {showLeading && leading}
       {sub !== undefined ?
       <span className="flex min-w-0 flex-1 flex-col">
           {labelNode}
@@ -81,7 +117,7 @@ export function EditableCTA({
 
       labelNode
       }
-      {trailing}
+      {showTrailing && trailing}
     </Editable>);
 
 }
