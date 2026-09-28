@@ -133,7 +133,7 @@ export const profileService = {
     const existing = await this.getProfileByUserId(supabase, input.userId);
     if (existing) return existing;
 
-    const metadataName = input.userMetadata?.full_name ?? input.userMetadata?.name;
+    const metadataName = input.userMetadata?.["full_name"] ?? input.userMetadata?.["name"];
     const emailLocalPart = input.email?.split("@")[0]?.trim();
     const displayName =
       (typeof metadataName === "string" && metadataName.trim()) || emailLocalPart || "Mi pagina";

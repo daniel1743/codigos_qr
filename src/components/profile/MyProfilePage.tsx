@@ -29,6 +29,12 @@ type PageProfile = {
   public_id: string;
 };
 
+const editRouteSearch = {
+  directEditor: undefined,
+  magicProduction: undefined,
+  legacyEditor: undefined,
+};
+
 export function MyProfilePage() {
   const supabase = getBrowserSupabaseClient();
   const navigate = useNavigate();
@@ -94,7 +100,7 @@ export function MyProfilePage() {
             public_id: primary.public_id,
           });
         setCanonicalPage((pagesData?.[0] as Page | undefined) ?? null);
-        const profileIds = (profilesData ?? []).map((item) => item.id);
+        const profileIds = (profilesData ?? []).map((item: { id: string }) => item.id);
         const { count } = profileIds.length
           ? await supabase
               .from("profile_links")
@@ -103,7 +109,7 @@ export function MyProfilePage() {
           : { count: 0 };
         if (active)
           setStats({
-            totalScans: (profilesData ?? []).reduce((sum, item) => sum + (item.scan_count ?? 0), 0),
+            totalScans: (profilesData ?? []).reduce((sum: number, item: { scan_count?: number | null }) => sum + (item.scan_count ?? 0), 0),
             totalLinks: count ?? 0,
           });
       } catch (error) {
@@ -135,7 +141,7 @@ export function MyProfilePage() {
     try {
       const ensuredProfile = await profileService.ensurePrimaryProfileForUser(supabase, {
         userId: user.id,
-        email: user.email,
+        email: user.email ?? null,
         userMetadata: user.user_metadata,
       });
       const created = await magicPageService.createPage(supabase, {
@@ -144,7 +150,7 @@ export function MyProfilePage() {
         title: ensuredProfile.display_name || pageName,
         pageType: "landing",
       });
-      await navigate({ to: "/pages/$pageId/edit", params: { pageId: created.id } });
+      await navigate({ to: "/pages/$pageId/edit", params: { pageId: created.id }, search: editRouteSearch });
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "No se pudo crear la página.");
     } finally {
@@ -190,6 +196,7 @@ export function MyProfilePage() {
           <Link
             to="/pages/$pageId/edit"
             params={{ pageId: canonicalPage.id }}
+            search={editRouteSearch}
             className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#0d47a1] px-4 text-sm font-semibold text-white shadow-[0_7px_18px_rgba(13,71,161,.16)] hover:bg-[#0a3b87]"
           >
             <Pencil className="h-4 w-4" aria-hidden />
@@ -299,14 +306,24 @@ export function MyProfilePage() {
             <Metric icon={Users} label="Personas vieron tu página" value={stats.totalScans} />
             <Metric icon={Link2} label="Enlaces activos" value={stats.totalLinks} />
           </div>
-          <Link
-            to={canonicalPage ? "/pages/$pageId/analytics" : "/pages"}
-            params={canonicalPage ? { pageId: canonicalPage.id } : undefined}
-            className="mt-5 flex items-center justify-between rounded-xl bg-[#f7faff] px-4 py-3 text-sm font-semibold text-[#0d47a1] hover:bg-[#eaf2ff]"
-          >
-            Ver más detalles
-            <ArrowUpRight className="h-4 w-4" />
-          </Link>
+          {canonicalPage ? (
+            <Link
+              to="/pages/$pageId/analytics"
+              params={{ pageId: canonicalPage.id }}
+              className="mt-5 flex items-center justify-between rounded-xl bg-[#f7faff] px-4 py-3 text-sm font-semibold text-[#0d47a1] hover:bg-[#eaf2ff]"
+            >
+              Ver más detalles
+              <ArrowUpRight className="h-4 w-4" />
+            </Link>
+          ) : (
+            <Link
+              to="/pages"
+              className="mt-5 flex items-center justify-between rounded-xl bg-[#f7faff] px-4 py-3 text-sm font-semibold text-[#0d47a1] hover:bg-[#eaf2ff]"
+            >
+              Ver más detalles
+              <ArrowUpRight className="h-4 w-4" />
+            </Link>
+          )}
         </aside>
       </section>
 

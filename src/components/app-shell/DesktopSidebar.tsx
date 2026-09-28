@@ -29,7 +29,7 @@ function NavLink({
   isActive,
 }: {
   to: string;
-  params?: Record<string, string>;
+  params?: Record<string, string> | undefined;
   label: string;
   icon: typeof Home;
   isActive: boolean;
