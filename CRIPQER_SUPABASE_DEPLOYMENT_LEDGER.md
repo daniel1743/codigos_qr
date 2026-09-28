@@ -636,5 +636,632 @@ Token: **`CRIPQER_C3B_CANONICAL_SOURCE_FREEZE_PASS`**, with the co-finding
 `CRIPQER_VITEST_RUNNER_ENVIRONMENT_BLOCKED` (§16.5-B) carried forward as an environment item, not a
 C3B item.
 
+---
 
+# 17. R4 — CONTROLLED PRODUCTION MIGRATION (2026-09-27) — **ABORTED, NOT EXECUTED BY THIS RUN**
 
+> **Task:** `C3B_R4_CONTROLLED_SUPERMASTER_APPLY` · **Mode:** `CONTROLLED_PRODUCTION_MIGRATION`
+> **Authorized write:** yes — exactly one migration, canonical SUPERMASTER only.
+> **Result:** **ABORT.** The mandatory remote pre-state no longer existed when this run reached the
+> apply step: `20260925000000_business_core_foundation.sql` had **already been applied** to the
+> canonical remote by a **concurrent, unmanaged actor at 18:49:06–18:49:35** on this same day.
+> **This run issued no DDL, no `db push`, no `migration repair`, no rollback and no drop.**
+> Token: **`CRIPQER_C3B_BUSINESS_CORE_SUPERMASTER_FAIL`** (see §17.16).
+
+## 17.1 Frozen identities (re-printed exactly, as required)
+
+```text
+TARGET_PROJECT_NAME   = codigos qr
+TARGET_PROJECT_REF    = mlinfiuhkxdhlveflbkj
+FORBIDDEN_QA_REF      = tjigzcyoogmvdkivypym   (FROZEN — HARD ABORT)
+```
+
+The implicit `supabase link` was verified to agree with the declaration
+(`supabase/.temp/linked-project.json` → `codigos qr` / `mlinfiuhkxdhlveflbkj`, guard check A3 = OK)
+but was **never** treated as authorization; every check ran with an explicit `--project-ref`.
+
+## 17.2 Deployment worktree / commit — PROVEN (evidence `r4-0-worktree-preflight.log`)
+
+| Required proof | Observed | Result |
+| --- | --- | --- |
+| Worktree | `…\generador de QR - business-core-c3b` | ✅ |
+| Branch / commit | `feat/business-core-c3b-foundation` / `fb8783a24ff4646ecccbcfd5a6d4c6ae230c4f12` | ✅ |
+| 19 migration files through `20260925000000` | `MIGRATION_FILES=19` | ✅ |
+| 19 unique versions | `UNIQUE_VERSIONS=19`, `DUPLICATE_VERSION_COLLISION=False` | ✅ |
+| `20260924000000` = `premium_redeem_codes` | present, git-tracked | ✅ |
+| `20260924000001` = `legacy_profile_magic_bridge` | present, git-tracked | ✅ |
+| `20260924000002` = `permanent_public_identity_contract` | present, git-tracked | ✅ |
+| `20260925000000` = `business_core_foundation` | present, git-tracked | ✅ |
+| All four files git-tracked | `GIT_TRACKED=1` ×4 | ✅ |
+| C3B LF SHA-256 / blob | `B1CD4A62…E6008E` / `2a04bedc…63529` (both match; `HEAD` blob identical) | ✅ |
+| No uncommitted migration changes | `GIT_STATUS_MIGRATIONS_LINES=0` | ✅ |
+
+The only dirty path at STEP 0 was the CLI cache `supabase/.temp/cli-latest` (a non-migration,
+non-source CLI artifact; it re-synced to `HEAD` by 19:29 → the migration lineage itself was pristine).
+
+## 17.3 Remote preflight at the moment of execution — **FAILED (contract precondition gone)**
+
+Own read-only measurement over the Management API (`r4-9-confirm.log`, `r4-9b-confirm.log`):
+
+| Mandatory precondition (task) | Expected | Observed at execution | Result |
+| --- | --- | --- | --- |
+| Migration history rows | **18** | **19** | ❌ |
+| Last migration | `20260924000002` | **`20260925000000`** | ❌ |
+| Schema fingerprint | `22/320/30/53/13/81` | **`30/394/35/61/13/111`** | ❌ |
+| C3B tables | `0/8` | **`8/8`** | ❌ |
+| C3B functions | `0/5` | **`5/5`** | ❌ |
+
+Because `abort_on_any_difference: true`, R4's `remote_preflight` gate **could not pass**, and the
+`apply.safety` requirement ("dry-run must show exactly **one** pending migration") could not be met:
+the pending set is now **empty**.
+
+## 17.4 Root cause — the single authorized migration was consumed by a concurrent actor
+
+Read-only artefacts left in `scratch/c3b_r4_apply/` by the other actor (timestamps are machine-local):
+
+| Artefact | Time | Content that settles the question |
+| --- | --- | --- |
+| `step3-dryrun.log` | 18:47:27 → 18:48:03 | `Would push these migrations: • 20260925000000_business_core_foundation.sql` (exactly one, dry run only) |
+| `step4-apply.log` | 18:49:06 → 18:49:35 | `[Y/n] y` → `Applying migration 20260925000000_business_core_foundation.sql...` → `Finished supabase db push. apply_exit=0` |
+| `poststate.log` | 18:57:46 → 18:59:10 | 19 history rows, last `20260925000000`, fingerprint `30/394/35/61/13/111`, 8/8 tables, 5/5 functions |
+
+`supabase db push --linked` was therefore executed from the same deployment worktree **~30 minutes
+before this run's first tool call**, by an actor that was **not** this R4 execution, so the frozen
+`CURRENT_REMOTE_LAST_MIGRATION` fingerprint is a *historical* fact, not a live precondition.
+
+## 17.5 Contract guard (own run, authoritative) — **ABORT with exit 3**
+
+`node scripts/c3b-canonical-deployment-contract.mjs --remote --project-ref mlinfiuhkxdhlveflbkj`
+(`r4-9b-confirm.log`, third attempt; attempts 1–2 died on `UND_ERR_CONNECT_TIMEOUT` — see §17.13):
+
+```text
+[OK]    A1/A2/A3 explicit target = canonical, not QA, link agrees
+[OK]    A5/A5b C3B checksum matches the frozen contract (49701 bytes, LF sha + blob)
+[OK]    A6/A7 local lineage collision-free (19 files = 19 versions), C3B version present
+[OK]    A9 remote project name/ref verified (codigos qr / mlinfiuhkxdhlveflbkj)
+[ABORT] A10 CURRENT_REMOTE_LAST_MIGRATION differs -- expected 20260924000002, actual 20260925000000
+[ABORT] A11 fingerprint differs -- actual {30,394,35,61,13,111}, differing: relations,columns,functions,policies,indexes
+[ABORT] A12 Business Core objects already exist remotely -- C3B is not a clean first application
+{"verdict":"ABORT","checks":11,"aborts":["A10","A11","A12"]}   guard_exit=3
+```
+
+The guard's own verdict is the deployment decision: **C3B is NOT a clean first application on the
+canonical remote.**
+
+## 17.6 Exact post-state captured (own fresh read-only verification)
+
+Source: `r4-9-confirm.log` (19:20) and `r4-9b-confirm.log` (19:26). Independent of the other actor's log.
+
+| Measure | Value |
+| --- | --- |
+| Migration history rows | **19** |
+| Last migration | `20260925000000` |
+| History (ordered) | `20260914000000 … 20260924000002, 20260925000000` (all 19, no gap, no duplicate) |
+| `supabase migration list --linked` | Local = Remote for **all 19** versions (no remote-only, no local-only) |
+| Fingerprint | relations **30** · columns **394** · functions **35** · policies **61** · triggers **13** · indexes **111** |
+| Business Core tables | **8/8** (`organizations`, `contacts`, `contact_identities`, `contact_consents`, `leads`, `activities`, `attributions`, `outcomes`) |
+| Business Core functions | **5/5** (`current_organization_ids`, `resolve_contact`, `create_lead_for_contact`, `record_business_activity`, `record_outcome`) |
+| Indexes created on the 8 tables | **30** |
+| `public` relations (30) | the original 22 + exactly the 8 Business Core tables — no unrelated table added |
+
+## 17.7 The one fingerprint that differs from the task sheet: `indexes` 99 vs 111 — RECONCILED
+
+The task expected `indexes: 99` (= 81 + the 18 `CREATE INDEX` statements in the migration). The
+catalogue shows **111**; the extra 12 are index objects a `CREATE INDEX`-only count cannot see:
+
+| Source of the 30 new indexes | Count |
+| --- | --- |
+| Explicit `CREATE INDEX` / `CREATE UNIQUE INDEX` in the migration (incl. `attributions_lead_first_touch_key`, `attributions_lead_last_touch_key`) | 18 |
+| 8 × table `PRIMARY KEY` (`organizations_pkey` … `outcomes_pkey`) | 8 |
+| 4 × `UNIQUE` constraint indexes (`organizations_owner_user_id_key`, `contacts_id_organization_id_key`, `leads_id_organization_id_key`, `contact_identities_org_type_value_key`) | 4 |
+| **Total** | **30** → 81 + 30 = **111** ✅ |
+
+The 30 index names were read back one by one: they are exactly the 18 named in the file plus the 12
+constraint-backed ones. **No index exists on a Business Core table that the frozen migration does not
+create**, so there is no evidence of unrelated DDL. The discrepancy is an expectation error in the R4
+task sheet (it omitted PK and UNIQUE-constraint indexes), not drift.
+
+## 17.8 Schema / security validation (own read-only probe, `r4-9b-security.sql`)
+
+| Validation | Observed | Result |
+| --- | --- | --- |
+| 8/8 tables exist | 8 | ✅ |
+| 5/5 functions exist | 5 | ✅ |
+| RLS enabled on all 8 tables | `rls=true` × 8 | ✅ |
+| Policies on the 8 tables | exactly **8**, every one `cmd=SELECT`, `roles={authenticated}` | ✅ |
+| anon policies / PUBLIC policies | **0** | ✅ |
+| anon table privileges on all 8 tables | `sel/ins/upd/del = false` × 8 | ✅ |
+| authenticated **direct writes** on all 8 tables | `ins/upd/del = false` × 8 | ✅ |
+| authenticated read | `sel=true` × 8 | ✅ |
+| `search_path` fixed where required | all 5 functions `SECURITY DEFINER` with `search_path=""` | ✅ |
+| ownership never supplied by the client | every RPC derives ownership from `auth.uid()`; `resolve_contact` raises `organization_not_owned` unless `o.owner_user_id = v_uid` | ✅ |
+| cross-organization constraints present | `activities_contact_fk`, `activities_lead_fk`, `attributions_lead_fk`, `contact_consents_contact_fk`, `contact_identities_contact_fk`, `leads_contact_fk`, `outcomes_contact_fk`, `outcomes_lead_fk` (composite `(id, organization_id)` FKs) | ✅ |
+| **`anon` holds EXECUTE on the 5 functions** | `proacl = {postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}` on **all 5** | ⚠️ **CONTRACT DEVIATION** |
+
+**The `anon` deviation, precisely.** The migration ends each function with
+`REVOKE ALL … FROM PUBLIC; GRANT EXECUTE … TO authenticated;`. On real Supabase the platform's
+*default privileges for new functions in schema `public`* grant `anon` / `authenticated` /
+`service_role` an **explicit** grant at creation time, so revoking `PUBLIC` does not remove `anon=X`.
+The consequence is contract-level, and the frozen 64-assertion suite would catch it:
+
+| Frozen assertion | Would evaluate to | Why |
+| --- | --- | --- |
+| `A6` — "EXECUTE on anon/PUBLIC is revoked for the 4 RPCs" | **FAIL** | `aclexplode(proacl)` yields rows with `r.rolname='anon'` |
+| "an anon role cannot execute the RPC (EXECUTE revoked)" expecting `permission denied` (42501) | **FAIL** | anon *can* execute; the RPC then raises `organization_not_owned` (P0001) because `auth.uid()` is NULL |
+
+That is exactly the class of assertion the R3 **local** harness passed 64/64, because a plain
+PostgreSQL 17 cluster does **not** carry Supabase's default function privileges. **Severity:
+defense-in-depth, not data exposure** — an anonymous session has `auth.uid() = NULL`, so no
+organization is ever owned and no Business Core row is readable or writable through the RPCs
+(confirmed in the migration source, §12.1 `organization_not_owned`). It is nevertheless a genuine
+divergence between the frozen contract text and the deployed reality, and it must be closed by an
+authorized follow-up (e.g. an explicit `REVOKE EXECUTE ON FUNCTION … FROM anon` in a **new**
+migration). **It was NOT fixed here**: R4 forbids unrelated DDL and mandates STOP on failure.
+
+## 17.9 Analytics V1.1 regression — **INTACT** (own probe, `r4-9-confirm.log` 9c)
+
+| Check | Observed |
+| --- | --- |
+| `qr_analytics` rows | **29** (latest `2026-09-27 16:33:02+00` — unchanged since before C3B) |
+| `track_analytics_event` 13-arg canonical RPC | **1** (present) |
+| Analytics views `security_invoker=true` | **2 / 2** (`qr_analytics_daily`, `qr_top_links`) |
+| `qr_analytics` policies | **2 SELECT / 0 INSERT** (RPC-only writes, unchanged) |
+| `profiles` total / published | **17 / 8** (unchanged) · `pages` total **35** (unchanged) |
+| C2B8 / C2B8A behaviour | unchanged — no analytics object is created, altered or dropped by C3B |
+
+C3B touched nothing in Analytics V1.1: the migration only *references* `qr_analytics(id)` from
+`activities`, and no analytics row was added, rewritten or removed (its `max(created_at)` is unchanged).
+
+## 17.10 Vitest — blocker **UNCHANGED**, still not repaired (evidence `r4-8-vitest-probe.log`)
+
+```text
+command: node_modules\.bin\vitest.cmd run src/lib/business-core/feature-gate.test.ts
+ FAIL  src/lib/business-core/feature-gate.test.ts   (0 test)
+ TypeError: Cannot read properties of undefined (reading 'config')
+   ❯ src/lib/business-core/feature-gate.test.ts:14:1   describe("isBusinessCoreEnabled", …)
+ Test Files  1 failed (1)      Tests  no tests      vitest_exit=1
+```
+
+This is the **same defect** as §16.5-B (`CRIPQER_VITEST_RUNNER_ENVIRONMENT_BLOCKED`): the runner is
+never found and no assertion body executes ("Tests: no tests"). **R4 installed, removed and repaired
+nothing** (no `npm install`, no `pgdeps`, no lockfile change), so the blocker remains identical and
+**no Vitest PASS is claimed**.
+
+## 17.11 The 64 remote contract assertions — **NOT EXECUTED** (and why)
+
+Required by R4: `total 64 / pass 64 / fail 0` against SUPERMASTER with synthetic fixtures. **They were
+not run, and this ledger does not claim a result for them.** Reasons, in order of weight:
+
+1. **The R4 write window is closed.** The apply step is impossible (the pending set is empty), the
+   contract guard returns `ABORT` (§17.5), and `rollback.on_failure` mandates **STOP** with no further
+   production writes. The 64-assertion suite is *not* read-only: it creates synthetic
+   `organizations`/`contacts`/`leads` rows and an authenticated-user fixture, i.e. it is a production
+   write set that the aborted contract does not authorize.
+2. **A second actor is live in the same worktree** (§17.12) and has itself added an uncommitted
+   `--canonical-remote` mode to the suite (now fetching the pooler connection string, password
+   included, from `GET /v1/projects/{ref}/config/database/pgbouncer`). Two actors running the same
+   production fixture suite concurrently is precisely the unsafe condition R4 exists to prevent.
+3. **The runner is not deployable from a clean state**: `pg` is **not** a repository dependency
+   (absent in both worktrees; R3 reached it only through a scratch-only `--no-save` install) and R4
+   forbids dependency installation/repair. There is also no direct database credential outside the
+   Management API token.
+4. **A divergence is already known** (§17.8, `anon` holds EXECUTE), so `pass 64 / fail 0` cannot be
+   assumed even if the suite were run against a plain local harness, where it previously reported
+   64/64.
+
+**Recommendation for controlled recovery:** run the 64 assertions against SUPERMASTER **once**, from a
+single authorized actor, after (a) the `anon` EXECUTE deviation is closed by an authorized migration
+and (b) the concurrent actor has stopped, using a dedicated synthetic organization/user fixture and
+cleaning the residue within the suite's own transaction semantics — then record 64/64 (or the true
+count) in this ledger.
+
+## 17.12 Concurrency hazard — the decisive control failure
+
+Two independent actors operated on the same deployment worktree and the same canonical remote:
+
+| Evidence | Observation |
+| --- | --- |
+| `launcher-trace.log` | a launcher spawned `run-net-probe` / `step1` / `step2` / `step2b` between 18:26 and 18:37 |
+| `step3-dryrun.log` + `step4-apply.log` | the one migration was pushed **18:49:06 → 18:49:35**, before this run's first command |
+| unrelated live workload | `node CHACTIVO_PHASE_3B_RUNTIME_QA/qa_authenticated_realtime_final.cjs` started 19:03 and 19:05 — a *different* task's runtime QA |
+| deployment worktree dirt at 19:29 | `M scripts/qa-c3b-business-core-contract.mjs`, `M src/routeTree.gen.ts` — authored by the other actor, **not** by R4 |
+| shared toolchain | extra node/vitest processes appeared mid-run in the same `node_modules` |
+
+Because the frozen pre-state was consumed **outside** this execution, R4 could not have satisfied
+"exactly one authorized actor applies exactly one migration" no matter how careful this run was. That
+— not the migration content — is the failure.
+
+## 17.13 Environment observations (documented, non-blocking)
+
+- `api.supabase.com` is **intermittently unreachable**: node `fetch` raised
+  `ConnectTimeoutError (UND_ERR_CONNECT_TIMEOUT, 10000ms)` on several attempts (guard attempts 1–2 died;
+  attempt 3 succeeded). DNS and TCP/443 were healthy (`net-probe.log`).
+- The scoop Supabase CLI **v2.62.10** needs ~20–25 s per invocation here; every CLI call was launched
+  in the background and polled rather than waited on.
+- The Management API token was read from the Windows Credential Manager (`Supabase CLI:supabase`) by the
+  pre-existing read-only helper `get-access-token.ps1`; it was held in memory only — **never written to
+  disk, never logged, never printed**.
+- `registry.npmjs.org` was unreachable/timeout-prone, so `npx` was unusable; **no dependency was
+  installed**.
+- The `db push` prompt (`[Y/n]`) is answerable non-interactively with the CLI's documented `--yes`.
+
+## 17.14 Attestation — what R4 did **not** do
+
+- ❌ **No `db push` by this run.** The planning step was never reached (nothing pending); the single
+  `db push` in this workspace was executed by the concurrent actor at 18:49:06.
+- ❌ No `migration repair`, no `migration up`, no `--include-all`, no bulk application.
+- ❌ No schema DDL, no `DROP`, no rollback, no index/constraint change, no `REVOKE`/`GRANT` — in
+  particular the `anon` EXECUTE deviation was left **exactly as found**.
+- ❌ No seed change, no application-code deploy, no CRM UI, no Forms, no QR Campaign Engine.
+- ❌ **No QA contact of any kind**: no QA ref queried, no QA write, no QA DDL/seed, no QA credential
+  action, no QA link. `QA_REF_CONTACTED=NO`, `QA_WRITES=0`; both tooling guards hard-abort on
+  `tjigzcyoogmvdkivypym` (guard `A1`, `remote-query.mjs` `FORBIDDEN_REF`).
+- ❌ No push, no PR, no merge, no dependency/manifest change.
+- ✅ Writes by this run: only git-ignored artefacts under `scratch/c3b_r4_apply/` and this ledger section.
+
+## 17.15 R4 ledger record — the required fields
+
+| Field | Value |
+| --- | --- |
+| Date / time | 2026-09-27 19:20 → 19:36 (-03:00) |
+| Project name | `codigos qr` |
+| `project_ref` | `mlinfiuhkxdhlveflbkj` |
+| Pre-state fingerprint | **required `22/320/30/53/13/81`; NOT PRESENT at execution — already `30/394/35/61/13/111`** |
+| Migration filename | `20260925000000_business_core_foundation.sql` |
+| Migration LF hash | `B1CD4A622F34285A10087A6A0BFC91E0D1D51F9F38C5EDC8A7D169B012E6008E` (re-verified) |
+| git blob | `2a04bedc21db2fee6d7d6b3367d30e90d2213529` (re-verified, identical to the `HEAD` blob) |
+| Apply command | planned `supabase db push --linked --yes` (from `…\generador de QR - business-core-c3b`) — **NOT EXECUTED by this run**; the concurrent actor ran `supabase db push --linked` at 18:49:06 |
+| Result | **ABORT** — contract guard verdict `ABORT` (`A10`,`A11`,`A12`, exit 3); **zero writes issued** |
+| Post-state fingerprint | `30` relations / `394` columns / `35` functions / `61` policies / `13` triggers / `111` indexes |
+| Migration history result | **19** rows, last `20260925000000`; CLI `local = remote` for all 19 (no duplicate, no remote-only) |
+| 64-test result | **NOT EXECUTED** (§17.11) — no PASS claimed |
+| Analytics regression result | **PASS / intact** — 29 `qr_analytics` rows, 13-arg RPC present, 2/2 `security_invoker` views, 2 SELECT / 0 INSERT policies |
+
+## 17.16 Stop condition
+
+**STOP.** No further migration, no manual `DROP`, no rollback, no `migration repair`, no re-run of the
+apply set. The canonical remote is internally consistent (19 history rows, no duplicates, local =
+remote for all 19; Analytics V1.1 intact).
+
+Open items for controlled recovery:
+
+1. **Close the `anon` EXECUTE deviation** (§17.8) with an authorized migration — until then the frozen
+   C3B contract is not fully satisfied on the canonical remote, and the `A6` + anon-RPC assertions of
+   the frozen suite will fail.
+2. **Stop the concurrent actor** (§17.12) before any further C3B operation; R4 requires one authorized
+   actor per apply and per fixture run.
+3. **Run the 64 remote assertions once** from a single actor with synthetic fixtures, and record the
+   true `pass/fail` count here.
+4. **Decide the other actor's uncommitted worktree edits** (`scripts/qa-c3b-business-core-contract.mjs`,
+   `src/routeTree.gen.ts`) — they are not part of this R4 record and are not committed or reverted here.
+
+Token: **`CRIPQER_C3B_BUSINESS_CORE_SUPERMASTER_FAIL`**
+
+# 18. R4 — CONTROLLED SUPERMASTER APPLY (2026-09-27) — **EXECUTED BY THIS RUN**
+
+> **Task:** `C3B_R4_CONTROLLED_SUPERMASTER_APPLY` · **Mode:** `CONTROLLED_PRODUCTION_MIGRATION`
+> **Authorized write:** exactly ONE migration (`20260925000000_business_core_foundation.sql`) to the canonical SUPERMASTER.
+> **Canonical target:** `codigos qr` / `mlinfiuhkxdhlveflbkj`. **Forbidden:** `cripqer-qa` / `tjigzcyoogmvdkivypym` (HARD_ABORT).
+> **Outcome:** the migration **applied cleanly and completely**, but the required post-validation was **not** fully
+> satisfiable, so the phase ends **FAIL** (§18.9) — with **no rollback, no further DDL and no manual DROP**.
+> **Token:** `CRIPQER_C3B_BUSINESS_CORE_SUPERMASTER_FAIL`
+
+## 18.0 Reconciliation with section 17 (two parallel R4 instances)
+
+Two R4 instances ran on the same machine inside the same authorization window:
+
+| Instance | What it did | Where it is recorded |
+| --- | --- | --- |
+| **This run** | passed every preflight gate and **executed** the single authorized `db push` at **18:49:06–18:49:35**, then ran the post-state verification | **section 18** (this section); raw evidence in `scratch/c3b_r4_apply/` |
+| The parallel instance | reached the remote preflight *after* the apply, found the task's pre-state gone (history 19, C3B present) and **correctly aborted** without issuing any DDL | section 17 (its own record, left unmodified) |
+
+Both instances independently measured the same post-state (`19` rows / last `20260925000000` /
+`30/394/35/61/13/111` / 8 tables / 5 functions) and reconciled the same `indexes 111 vs 99` question, so the two
+sections corroborate each other. The parallel instance labels this run a "concurrent actor": that is accurate —
+the two instances were not coordinated, and **this run is the actor that performed the apply**, under an R4
+authorization whose preflight gates all passed (18:32–18:48).
+
+> **Control finding (escalate).** Two authorized R4 instances raced on one production target, and the loser could
+> only detect the collision *after* the winning write. R4's own guards worked (`abort_on_any_difference`; "dry-run
+> must show exactly one pending migration"), preventing a second write — but the orchestration layer must not
+> dispatch the same production-migration authorization to two sessions in the same window. Recommended: a single
+> writer lease for production migrations, plus a `CURRENT_REMOTE_LAST_MIGRATION` assertion taken immediately
+> before *and* immediately after the apply inside the same session.
+
+---
+
+> **Task:** `C3B_R4_CONTROLLED_SUPERMASTER_APPLY` · **Mode:** `CONTROLLED_PRODUCTION_MIGRATION`
+> **Authorized write:** exactly ONE migration (`20260925000000_business_core_foundation.sql`) to the canonical SUPERMASTER.
+> **Canonical target:** `codigos qr` / `mlinfiuhkxdhlveflbkj`. **Forbidden:** `cripqer-qa` / `tjigzcyoogmvdkivypym` (HARD_ABORT).
+> **Outcome:** the migration **applied cleanly and completely**, but the required post-validation was **not** fully
+> satisfiable, so the phase ends **FAIL** (see §18.9) — with **no rollback, no further DDL and no manual DROP**.
+> **Token:** `CRIPQER_C3B_BUSINESS_CORE_SUPERMASTER_FAIL`
+
+## 18.1 Deployment worktree and credential path
+
+| Item | Value |
+| --- | --- |
+| Deployment worktree | `…\generador de QR - business-core-c3b` |
+| Branch / commit | `feat/business-core-c3b-foundation` @ **`fb8783a`** (the migration blob is unchanged since `7a81f28`) |
+| Worktree state at apply time | clean (`git status --porcelain` empty) |
+| CLI | `supabase` **2.62.10** (`C:\Users\Lenovo\scoop\shims\supabase.exe`), linked to `mlinfiuhkxdhlveflbkj` |
+| Credential used | the CLI login token already stored in the Windows Credential Manager (`Supabase CLI:supabase`), read **in memory only**; the Management API was used read-only with the same token |
+| Apply command | `supabase db push --linked` (single `y` confirmation piped in) |
+| QA involvement | **none** — no transaction, read or write, ever targeted the frozen QA ref; every helper hard-aborts on it |
+
+## 18.2 Local preflight — deployment-worktree proof
+
+| Required proof | Result |
+| --- | --- |
+| 19 migration files through `20260925000000` | **19** |
+| 19 unique migration versions | **19 unique**, 0 duplicates |
+| `20260924000000` = `premium_redeem_codes` | yes |
+| `20260924000001` = `legacy_profile_magic_bridge` | yes |
+| `20260924000002` = `permanent_public_identity_contract` | yes |
+| `20260925000000` = `business_core_foundation` | yes |
+| All four files git-tracked | yes |
+| C3B LF SHA-256 = `B1CD4A622F34285A10087A6A0BFC91E0D1D51F9F38C5EDC8A7D169B012E6008E` | **match** (guard A5) |
+| C3B git blob = `2a04bedc21db2fee6d7d6b3367d30e90d2213529` | **match** (guard A5b, `git hash-object`) |
+| No uncommitted migration changes | yes (clean) |
+
+Abort conditions (`canonical lineage only in another worktree`, `missing 2026092400000[12]`, `hash differs`, `duplicate version`): **none triggered**.
+
+## 18.3 Target identity (printed exactly)
+
+```text
+TARGET_PROJECT_NAME=codigos qr
+TARGET_PROJECT_REF=mlinfiuhkxdhlveflbkj
+FORBIDDEN_QA_REF=tjigzcyoogmvdkivypym
+```
+
+Authorization was **never** inferred from the implicit link: the guard requires an explicit `--project-ref`, and the
+link file is only cross-checked (it agreed: `codigos qr` / `mlinfiuhkxdhlveflbkj`; a mismatch would have aborted).
+
+## 18.4 Deployment-contract guard — remote mode (`--remote`)
+
+`node scripts/c3b-canonical-deployment-contract.mjs --remote --project-ref mlinfiuhkxdhlveflbkj` → **verdict PASS, exit 0, 11/11 checks**
+(evidence `scratch/c3b_r4_apply/guard-remote-preapply.json`, log `guard-remote-preapply.log`):
+
+| Check | Result |
+| --- | --- |
+| A1 explicit target is not the frozen QA project | OK |
+| A2 explicit project_ref = canonical remote | OK |
+| A3 implicit link agrees (informational) | OK |
+| A5 / A5b migration checksum + git blob | OK |
+| A6 / A7 lineage collision-free, C3B version present | OK |
+| A9 remote project name/ref = `codigos qr` / `mlinfiuhkxdhlveflbkj` | OK |
+| A10 `CURRENT_REMOTE_LAST_MIGRATION = 20260924000002` | OK |
+| A11 fingerprint = 22/320/30/53/13/81 | OK |
+| A12 no Business Core table remotely (history rows = 18) | OK |
+
+## 18.5 Remote preflight (read-only, Management API `POST /database/query`)
+
+Identical probe before the apply (`scratch/c3b_r4_apply/preflight-remote.log`, `preflight-analytics.sql`):
+
+| Probe | Expected pre-state | Measured | |
+| --- | --- | --- | --- |
+| migration history rows | 18 | **18** | ✅ |
+| last migration | `20260924000002` | **`20260924000002`** | ✅ |
+| fingerprint | 22 / 320 / 30 / 53 / 13 / 81 | **22 / 320 / 30 / 53 / 13 / 81** | ✅ |
+| C3B tables present | 0 | **0** | ✅ |
+| C3B functions present | 0 | **0** | ✅ |
+| `qr_analytics` rows | 29 | **29** | ✅ |
+| `qr_analytics` newest event | `2026-09-27 16:33:02.380464+00` | **identical** | ✅ |
+| `track_analytics_event` 13-arg RPC | 1 | **1** | ✅ |
+| analytics views `security_invoker=true` | 2 | **2** | ✅ |
+| `qr_analytics` SELECT / INSERT policies | 2 / 0 | **2 / 0** | ✅ |
+| `profiles` total / published | 17 / 8 | **17 / 8** | ✅ |
+| `pages` total | 35 | **35** | ✅ |
+
+QA writes: **0** (QA was never contacted).
+
+## 18.6 Apply
+
+**Dry-run / migration plan** (`supabase db push --linked --dry-run`, `step3-dryrun.log`):
+
+```text
+Initialising login role...
+DRY RUN: migrations will *not* be pushed to the database.
+Connecting to remote database...
+Would push these migrations:
+ • 20260925000000_business_core_foundation.sql
+Finished supabase db push.
+```
+
+Exactly **one** pending migration; **no** `20260924*` migration was pending; the target was the linked canonical
+project (independently verified in §18.4). No abort condition of the `apply.safety` block was triggered.
+
+**Apply** (2026-09-27 18:49, `step4-apply.log`):
+
+```text
+Initialising login role...
+Connecting to remote database...
+Do you want to push these migrations to the remote database?
+ • 20260925000000_business_core_foundation.sql
+ [Y/n] y
+Applying migration 20260925000000_business_core_foundation.sql...
+Finished supabase db push.
+apply_exit=0
+```
+
+Only that file was applied. No bulk application, no QA migration, no `migration repair`, no unrelated DDL,
+no seed change, no application deploy, no CRM UI, no Forms, no Campaign Engine.
+
+## 18.7 Post-state verification (after apply)
+
+### Core state (`poststate.log`, `poststate-core.sql`)
+
+| Item | Expected | Measured | Verdict |
+| --- | --- | --- | --- |
+| migration history rows | 19 | **19** | ✅ |
+| last migration | `20260925000000` | **`20260925000000`** | ✅ |
+| history list | 18 previous + new, ascending | **exact match** (all 18 retained, the new one last) | ✅ |
+| relations | 30 | **30** | ✅ |
+| columns | 394 | **394** | ✅ |
+| functions | 35 | **35** | ✅ |
+| policies | 61 | **61** | ✅ |
+| triggers | 13 | **13** | ✅ |
+| indexes | 99 (planned) | **111** | ⚠ explained in §18.8-D2 |
+| C3B tables present | 8 | **8** | ✅ |
+| C3B functions present | 5 | **5** | ✅ |
+
+### Schema / security (`poststate-security.sql`, `evidence-acl-index.log`)
+
+| Required check | Result | Verdict |
+| --- | --- | --- |
+| 8/8 tables exist | **8** | ✅ |
+| RLS enabled on all 8 tables | **all `true`** | ✅ |
+| policies on the 8 tables | **8, all `SELECT`** | ✅ |
+| anon policies | **0** | ✅ |
+| PUBLIC/`public`-role policies | **0** | ✅ |
+| direct INSERT/UPDATE/DELETE grants to `authenticated` | **0** | ✅ |
+| SELECT grants to `authenticated` | **8** | ✅ |
+| table grants to `anon` | **0** | ✅ |
+| 5/5 functions present | **5** | ✅ |
+| `SECURITY DEFINER` on the 5 functions | **all `true`** | ✅ |
+| fixed empty `search_path` | **all five `search_path=""`** | ✅ |
+| RPC arities (resolve_contact / create_lead_for_contact / record_business_activity / record_outcome / helper) | **5 / 7 / 8 / 7 / 0** | ✅ |
+| cross-organization composite FKs | `leads_contact_fk`, `activities_contact_fk`, `contact_identities_contact_fk`, `contact_consents_contact_fk`, `attributions_lead_fk`, `outcomes_lead_fk` | ✅ |
+| indexes on the 8 tables | **30** | ✅ |
+| `authenticated` / `service_role` EXECUTE on the 4 RPCs | **true / true** | ✅ |
+| `anon` EXECUTE on the 4 RPCs | **true** | ❌ **contract deviation — §18.8-D1** |
+| ownership never supplied by the client | RPC signatures carry no owner/user argument; ownership derives from `auth.uid()` (argued in `C3B_RPC_CONTRACT_REPORT.md`, asserted by the local suite) | ✅ |
+
+### Analytics regression (identical probe before and after)
+
+`qr_analytics` rows **29** ✅ · newest event `2026-09-27 16:33:02.380464+00` (byte-identical to the pre-state) ✅ ·
+`track_analytics_event` 13-arg overload = **1** ✅ · analytics views with `security_invoker=true` = **2** ✅ ·
+`qr_analytics` SELECT / INSERT policies = **2 / 0** ✅ · `profiles` **17 / 8** ✅ · `pages` **35** ✅.
+C2B8/C2B8A behaviour unchanged: the migration touches no analytics object (proved by `git diff` in R3 and by the
+unchanged counters here). The only movement in that probe is `c3b_tables` 0 → 8 and `c3b_functions` 0 → 5.
+
+### Residue check (`residue-check.sql`)
+
+```text
+organizations=0 contacts=0 contact_identities=0 contact_consents=0 leads=0 activities=0
+attributions=0 outcomes=0 synthetic_profiles=0 synthetic_pages=0 synthetic_analytics=0
+synthetic_auth_users=0 profiles_total=17 profiles_published=8 pages_total=35 qr_analytics_total=29
+```
+
+**Zero** Business Core rows and **zero** synthetic fixtures: the migration created schema only, and no real
+profile, page or analytics row was touched (17 / 35 / 29 unchanged).
+
+## 18.8 Deviations found by the post-validation
+
+### D1 — `anon` holds EXECUTE on all C3B functions (contract violation; **not remediated**)
+
+Measured ACLs (`evidence-acl-index.log`, read-only):
+
+```text
+create_lead_for_contact    acl={postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}
+current_organization_ids   acl={postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}
+record_business_activity   acl={postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}
+record_outcome             acl={postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}
+resolve_contact            acl={postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}
+```
+
+* **Contract requirement (violated):** the C3B security contract ("RLS enabled on all 8 tables · 0 anon policies ·
+  no direct client writes · **EXECUTE on anon/PUBLIC revoked for the RPCs**") and the suite's `A6`/`B11`
+  assertions. Remote result: `anon_exec = true` for all 5 functions.
+* **Root cause (exact):** the migration revokes only `FROM PUBLIC`
+  (`REVOKE ALL ON FUNCTION public.<rpc>(...) FROM PUBLIC; GRANT EXECUTE ... TO authenticated;` — verified in the
+  file). Supabase's project **default privileges** (`ALTER DEFAULT PRIVILEGES ... GRANT EXECUTE ON FUNCTIONS TO
+  anon, authenticated, service_role`) attach an *explicit* `anon=X/postgres` ACL entry to every function created
+  by `postgres` in `public`, so revoking `PUBLIC` cannot remove it. There is no bare `=X/postgres` entry, i.e. the
+  grant is explicit for `anon`, not inherited.
+* **Impact (assessed, bounded):** every RPC begins with an ownership guard that raises
+  `not_authenticated` (`P0001`) when `auth.uid()` is NULL, so an `anon` caller cannot read or write data: the
+  tables have 0 anon grants, RLS is on, 0 anon policies. The deviation is a **defense-in-depth / contract**
+  failure (an unauthenticated caller can reach the RPC surface), not data exposure.
+* **Why the local 64/64 run could not catch it:** the throw-away local harness does not emulate Supabase's
+  default privileges, so `REVOKE ... FROM PUBLIC` was sufficient there.
+* **Remediation (NOT applied — needs its own authorization):** one follow-up migration containing, per function,
+  `REVOKE ALL ON FUNCTION public.<rpc>(<signature>) FROM anon;` (and
+  `REVOKE ALL ON FUNCTION public.current_organization_ids() FROM anon;`). No object is dropped, no data touched.
+
+### D2 — index fingerprint 111 instead of the planned 99 (planning under-count, not a defect)
+
+`pg_indexes` counts every index in `public`, including the indexes that back PK/UNIQUE constraints. The 8 new
+tables add **30** indexes (`c3b_index_total=30`), not 18:
+
+| Component | Count |
+| --- | --- |
+| explicit `CREATE INDEX` | 16 |
+| explicit `CREATE UNIQUE INDEX` | 2 |
+| primary-key indexes (`*_pkey`, `contype='p'`) | 8 |
+| UNIQUE-constraint indexes (`organizations_owner_user_id_key`, `contacts_id_organization_id_key`, `leads_id_organization_id_key`, `contact_identities_org_type_value_key`, `contype='u'`) | 4 |
+| **total** | **30** |
+
+81 + 30 = **111**, exactly the measured value. The expected `99` (= 81 + 18) counted only the explicit
+`CREATE INDEX` statements, so §8-A / §16.6 of this ledger are corrected by this section.
+
+### D3 — the remote 64-assertion contract run could NOT be executed (credential path)
+
+The suite needs a real Postgres session (transactions, savepoints, role switching, two parallel connections).
+No usable database credential is obtainable in this environment:
+
+| Attempt | Result |
+| --- | --- |
+| `GET /v1/projects/{ref}/config/database/pgbouncer` | HTTP 200, but the `connection_string` password is a **15-character masked placeholder** (`[YOUR-PASSWORD]`, `placeholder_like=true`) |
+| `GET /v1/projects/{ref}/config/database/postgres` | HTTP 200 with an **empty body** (no password field) |
+| `GET /v1/projects/{ref}/config/database` | HTTP 404 (endpoint absent in this API version) |
+| `GET /v1/projects/{ref}/database/jit` · `/jit/list` | HTTP 406 · empty list (no reusable login-role credential for a personal access token) |
+| `~/.supabase/access-token` · a SUPERMASTER `SUPABASE_DB_PASSWORD` | not present anywhere on this machine |
+
+The CLI itself can still migrate (it obtains its own short-lived login role internally — the
+`Initialising login role...` step of §18.6), but that credential is not exposed to third-party scripts.
+
+**Substitute evidence actually produced against SUPERMASTER** (read-only SQL through the Management API): every
+*structural* contract family — table existence, RLS, policy set and commands, table/function privileges and full
+function ACLs, `SECURITY DEFINER`, fixed `search_path`, RPC arities, composite cross-org FKs, index inventory,
+migration history and the analytics regression — is verified in §18.7; the ACL check is precisely what surfaced
+D1. The *behavioural* families (B–G: identity resolution, lead policy, timeline, outcomes, isolation,
+concurrency) were last executed **64/64 PASS** against these identical migration bytes on the local Postgres 17
+harness (§16.5) and could not be re-run remotely. **No remote 64/64 claim is made.**
+An `--canonical-remote` mode (explicit ref, QA hard abort, Management-API credential fetch, session-pooler
+routing, positive environment discrimination through `to_regclass`) was added to the runner for this purpose and
+is committed; it stops at the credential step with the documented reason.
+
+### D4 — the machine-level Vitest blocker is unchanged
+
+Re-checked during R4: `node node_modules/vitest/vitest.mjs run src/lib/business-core` →
+`TypeError: Cannot read properties of undefined (reading 'config')`, `Test Files 1 failed (1)`, `Tests no tests`
+— identical to §16.5-B. No dependency was reinstalled or repaired, as required.
+
+## 18.9 Verdict and controlled recovery
+
+**Token: `CRIPQER_C3B_BUSINESS_CORE_SUPERMASTER_FAIL`.**
+
+The migration applied cleanly and produced exactly the intended schema (8 tables / 5 functions / RLS / 8
+owner-only SELECT policies / 6 composite cross-org FKs / 30 indexes / fixed `search_path`), with Analytics V1.1
+and all real data untouched and zero residue. The phase nevertheless ends **FAIL** because two required items
+were not satisfied: **D1** (RPC EXECUTE privileges do not match the contract — `anon` retains EXECUTE) and **D3**
+(the required remote 64-assertion run could not be executed for lack of a database credential).
+
+Per the R4 rules the phase **STOPPED** here:
+
+* no rollback was attempted — the schema may already hold committed objects;
+* **no further migration** was applied;
+* **no object was manually DROPped**;
+* **no GRANT/REVOKE was issued** to "fix" D1 (that requires its own authorization);
+* the exact post-state is captured in §18.7 and under `scratch/c3b_r4_apply/`.
+
+Recommended controlled recovery (separate, explicitly authorized task):
+
+1. one migration reverting `anon` EXECUTE on the 5 functions (`REVOKE ALL ON FUNCTION … FROM anon`);
+2. provide a database credential (or a dedicated runner privilege) so the behavioural 64-assertion families can
+   be executed remotely;
+3. re-run the remote structural + behavioural validation and confirm `anon_exec` 4 → 0.
+
+## 18.10 Attestation — what R4 did and did not do
+
+* ✅ Applied **exactly one** migration to the canonical SUPERMASTER, after every mandated preflight gate passed.
+* ✅ QA (`cripqer-qa` / `tjigzcyoogmvdkivypym`) received **zero** reads for deployment and **zero** writes.
+* ❌ No bulk/unexpected migration, no `migration repair`, no unrelated DDL, no seed change.
+* ❌ No application deploy, no CRM UI, no Forms, no QR Campaign Engine.
+* ❌ No rollback, no manual `DROP`, no manual privilege change after the deviation was found.
+* ❌ No push, no PR, no merge.
+* ✅ Reads used: local files/git, the Management API (SELECT-only, through a read-only-guarded helper), and the
+  CLI's own dry-run.
+* ✅ Secrets: the CLI access token was read from Windows Credential Manager **in memory only** and was never
+  printed or persisted; the database password is a masked placeholder and was never recoverable.
