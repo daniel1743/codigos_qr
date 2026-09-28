@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { useEditor } from '../../contexts/EditorContext';
 import { useThemeTokens } from '../../hooks/useThemeTokens';
 import { miniGalleryVariants, pageFamilyVariants, templates } from '../../data/templates';
+import { cardFamilies } from '../../data/cardFamilies';
 import { PanelSection } from './controls/PanelSection';
 import { TextField } from './controls/TextField';
 import { FontPicker } from './controls/FontPicker';
@@ -26,6 +27,8 @@ export function PageSettings({ variant }: PageSettingsProps) {
   const isSheet = variant === 'sheet';
   const open = ed.settingsOpen && isSheet === ed.isMobile;
   const page = ed.doc.props.page ?? {};
+  const pageFamily = String(page.family ?? ed.templateId);
+  const familyVariants = pageFamily === 'catalog' ? cardFamilies.catalog.variants : pageFamily === 'gallery' ? miniGalleryVariants : pageFamilyVariants[ed.templateId];
   const set = (key: string, value: string) => ed.setProp('page', key, value);
 
   return (
@@ -73,22 +76,26 @@ export function PageSettings({ variant }: PageSettingsProps) {
               <PanelSection title="Fondo de página">
                 <ToneGrid tones={t.tones.filter((x) => t.pageTones.includes(x.id))} value={page.bg ?? t.pageTones[0]} onChange={(v) => set('bg', v)} allowDefault={false} />
               </PanelSection>
-              <PanelSection title={`${meta.short} · variante visual`} hint="Cambia el ritmo visual sin borrar tu contenido.">
+              {!ed.canonicalDocument && (
+                <PanelSection title={`${meta.short} · variante visual`} hint="Cambia el ritmo visual sin borrar tu contenido.">
                 <div className="grid grid-cols-2 gap-2">
-                  {pageFamilyVariants[ed.templateId].map((item, index) => {
-                    const active = (page.familyVariant ?? pageFamilyVariants[ed.templateId][0].id) === item.id;
+                  {familyVariants.map((item, index) => {
+                    const active = (page.familyVariant ?? familyVariants[0].id) === item.id;
                     return <button key={item.id} type="button" aria-pressed={active} onClick={() => set('familyVariant', item.id)} className={cx('rounded-xl border p-2 text-left', active ? 'border-select bg-select-soft' : 'border-line')}><span className={cx('mb-2 block h-12 overflow-hidden rounded-lg bg-[#EEF0F3]', index % 2 === 1 && 'p-2')}><span className={cx('block bg-[#C9CED6]', index % 4 === 0 ? 'h-full w-2/3' : index % 4 === 1 ? 'h-5 w-full' : index % 4 === 2 ? 'mx-auto h-full w-1/2 rounded-t-full' : 'mt-5 h-2 w-full')} /></span><span className="text-[12px] font-semibold text-ink">{item.label}</span></button>;
                   })}
                 </div>
-              </PanelSection>
-              <PanelSection title="Mini página galería" hint="Cinco composiciones completas centradas en fotografía.">
+                </PanelSection>
+              )}
+              {pageFamily === 'gallery' && (
+                <PanelSection title="Mini página galería" hint="Cinco composiciones completas centradas en fotografía.">
                 <div className="grid grid-cols-2 gap-2">
                   {miniGalleryVariants.map((item, index) => {
                     const active = page.familyVariant === item.id;
                     return <button key={item.id} type="button" aria-pressed={active} onClick={() => set('familyVariant', item.id)} className={cx('rounded-xl border p-2 text-left', active ? 'border-select bg-select-soft' : 'border-line')}><span className="mb-2 grid h-12 grid-cols-3 gap-1 overflow-hidden rounded-lg bg-[#EEF0F3] p-1">{Array.from({ length: index + 3 }).slice(0, 5).map((_, cell) => <span key={cell} className={cx('bg-[#C9CED6]', index === 0 && cell === 0 && 'col-span-2', index === 1 && cell === 1 && 'row-span-2', index === 2 && 'min-w-7', index === 4 && cell % 2 === 0 && 'translate-y-1 rotate-[-3deg]')} />)}</span><span className="text-[12px] font-semibold text-ink">{item.label}</span></button>;
                   })}
                 </div>
-              </PanelSection>
+                </PanelSection>
+              )}
               <PanelSection title="Buscadores y redes" hint="Cómo aparece tu página en Google y al compartirla.">
                 <TextField label="Descripción" multiline value={page.seo ?? meta.description} onCommit={(v) => set('seo', v)} />
               </PanelSection>

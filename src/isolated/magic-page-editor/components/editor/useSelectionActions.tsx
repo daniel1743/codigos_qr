@@ -59,9 +59,10 @@ export function useSelectionActions(): EditorAction[] {
   if (!sel) return [];
 
   const id = sel.id;
-  const props = ed.doc.props[id] ?? {};
+  const propId = sel.kind === 'image' && id.endsWith(':hero-image') ? id.slice(0, -':hero-image'.length) : id;
+  const props = ed.doc.props[propId] ?? {};
   const el = ed.getElement(id);
-  const set = (key: string, value: string) => ed.setProp(id, key, value);
+  const set = (key: string, value: string) => ed.setProp(propId, key, value);
 
   switch (sel.kind) {
     case 'text':{
@@ -102,7 +103,7 @@ export function useSelectionActions(): EditorAction[] {
             onChange={(v) => ed.setTextStyle(id, { align: v })} />
 
 
-        }];
+        }, { key: 'remove', label: 'Ocultar ' + sel.label.toLowerCase(), icon: Trash2Icon, danger: true, onClick: () => ed.removeElement(id, sel.label) }];
 
       }
 
@@ -198,7 +199,7 @@ export function useSelectionActions(): EditorAction[] {
             onChange={(v) => set('size', v)} />
 
 
-        }];
+        }, { key: 'remove', label: 'Ocultar ' + sel.label.toLowerCase(), icon: Trash2Icon, danger: true, onClick: () => ed.removeElement(id, sel.label) }];
 
       }
 
@@ -345,7 +346,7 @@ export function useSelectionActions(): EditorAction[] {
             onChange={(v) => set('layout', v)} />
 
 
-        }];
+        }, { key: 'remove', label: 'Ocultar ' + sel.label.toLowerCase(), icon: Trash2Icon, danger: true, onClick: () => ed.removeElement(id, sel.label) }];
 
       }
 

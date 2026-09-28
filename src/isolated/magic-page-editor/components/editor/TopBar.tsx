@@ -54,7 +54,8 @@ function VariantThumbnail({ index, active }: {index: number;active: boolean;}) {
 function PageVariantSelectors() {
   const ed = useEditor();
   const rootRef = useRef<HTMLDivElement>(null);
-  const [selectedFamily, setSelectedFamily] = useState<PageFamily>(ed.templateId);
+  const storedFamily = ed.doc.props.page?.family as PageFamily | undefined;
+  const [selectedFamily, setSelectedFamily] = useState<PageFamily>(storedFamily ?? ed.templateId);
   const [open, setOpen] = useState<'family' | 'variant' | null>(null);
   const variants = familyVariants(selectedFamily);
   const selectedVariant = selectedFamily === 'catalog' ? ed.doc.props['block:catalog']?.variant ?? variants[0].id : ed.doc.props.page?.familyVariant ?? variants[0].id;
@@ -78,6 +79,7 @@ function PageVariantSelectors() {
 
   const chooseFamily = (next: typeof pageFamilies[number]) => {
     setSelectedFamily(next.id);
+    ed.setProp('page', 'family', next.id);
     if (ed.templateId !== next.template) ed.setTemplateId(next.template);
     setOpen('variant');
   };
@@ -182,7 +184,7 @@ export function TopBar() {
 
       {!isSystem &&
       <>
-          <PageVariantSelectors />
+          {!ed.canonicalDocument && <PageVariantSelectors />}
 
           <div className="flex shrink-0 items-center gap-1">
             <div className="mr-1 hidden rounded-[10px] bg-[#F2F3F5] p-0.5 md:flex" role="radiogroup" aria-label="Dispositivo">

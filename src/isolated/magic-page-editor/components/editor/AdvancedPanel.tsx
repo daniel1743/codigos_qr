@@ -299,7 +299,7 @@ export function AdvancedPanel() {
           title={`Bloque · ${blockLabels[block.type]}`}
           hint={sel.kind === "hero" ? undefined : "Este elemento vive dentro de este bloque."}
         >
-          <StructureRow blockKey={block.key} />
+          {sel.kind === "hero" && <StructureRow blockKey={block.key} />}
           {sel.kind !== "hero" && (
             <button
               type="button"

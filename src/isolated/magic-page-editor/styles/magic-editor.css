@@ -10,7 +10,14 @@
 }
 
 .magic-editor-root > * { min-width: 0; }
-.magic-editor-root header { min-width: 0; overflow-x: hidden; }
+/* The top bar hosts the "Tipo de página" / "Variante" popovers, which are
+   absolutely positioned *below* the bar (top: calc(100% + 9px)). `overflow-x:
+   hidden` must never be used here: per the CSS overflow spec the visible axis
+   then computes to `auto`, the header turns into a scroll container and the
+   popovers are clipped inside its 56px height, so the menus mount but are never
+   reachable. `clip` keeps the horizontal guard without creating a scroll
+   container. */
+.magic-editor-root header { min-width: 0; overflow-x: clip; }
 
 /* The host app compiles its Tailwind theme from the root stylesheet. These
    small scoped aliases keep the port independent when its CSS is lazy-loaded
@@ -32,6 +39,17 @@
 .magic-editor-root .cq-muted { color: var(--muted); }
 .magic-editor-root .cq-surface { background-color: var(--surface); }
 .magic-editor-root .cq-line { border-color: var(--line); }
+.magic-editor-root [data-page-family] > :first-child {
+  max-width: var(--page-content-width, 760px) !important;
+}
+.magic-editor-root [data-page-family] [data-spacing="S"] {
+  padding-top: calc(28px * var(--page-variant-scale, 1)) !important;
+  padding-bottom: calc(28px * var(--page-variant-scale, 1)) !important;
+}
+.magic-editor-root [data-page-family] [data-spacing="M"] {
+  padding-top: calc(60px * var(--page-variant-scale, 1)) !important;
+  padding-bottom: calc(60px * var(--page-variant-scale, 1)) !important;
+}
 .magic-editor-root .cq-edit [data-cq] { cursor: pointer; }
 .magic-editor-root .cq-edit [data-cq]:hover {
   outline: 1.5px dashed rgba(47, 107, 255, 0.55);

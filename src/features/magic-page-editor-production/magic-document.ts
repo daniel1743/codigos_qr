@@ -26,6 +26,31 @@ export interface MagicEditorStateV1 {
   doc: PageDoc;
 }
 
+export function getCatalogPublicIds(document: MagicPageDocumentV1): string[] {
+  return [...new Set(
+    Object.values(document.props)
+      .map((props) => props.catalogPublicId)
+      .filter((value): value is string => Boolean(value)),
+  )];
+}
+
+export function markPublishedCatalogs(
+  document: MagicPageDocumentV1,
+  publishedPublicIds: string[],
+): MagicPageDocumentV1 {
+  const published = new Set(publishedPublicIds);
+  return {
+    ...document,
+    props: Object.fromEntries(
+      Object.entries(document.props).map(([key, props]) =>
+        props.catalogPublicId && published.has(props.catalogPublicId)
+          ? [key, { ...props, catalogPublished: "on" }]
+          : [key, props],
+      ),
+    ),
+  };
+}
+
 /** The single canonical starter used when a new Magic page is created. */
 export function createInitialMagicEditorState(templateId: TemplateId): MagicEditorStateV1 {
   const meta = templates[templateId];

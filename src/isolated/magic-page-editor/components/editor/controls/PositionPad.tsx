@@ -104,6 +104,10 @@ export function useFreeImagePan(id: string, cropX: string | undefined, cropY: st
     objectPosition: `${position.x}% ${position.y}%`,
     handlers: {
       onPointerDown: (event: React.PointerEvent<HTMLElement>) => {
+        // HeroFrame also receives bubbled pointer events from editable children.
+        // Only the media itself may start a crop gesture; otherwise pointer
+        // capture retargets the eventual click to the Hero container.
+        if (event.currentTarget !== event.target) return;
         start.current = { pointerX: event.clientX, pointerY: event.clientY, ...position };
         event.currentTarget.setPointerCapture(event.pointerId);
       },

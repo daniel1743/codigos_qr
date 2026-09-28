@@ -92,5 +92,5 @@ export function VerifiedNameCheck({ avatarId }: { avatarId: string }) {
   const { doc } = useEditor();
   const p = doc.props[avatarId] ?? {};
   if (p['badgeByName'] !== 'on') return null;
-  return <span className="ml-2 inline-grid h-5 w-5 shrink-0 place-items-center rounded-full text-white" style={{ background: p['badgeColor'] ?? '#56604A' }} aria-label="Nombre verificado"><CheckIcon className="h-3 w-3" strokeWidth={3} /></span>;
+  return <span className="pointer-events-none ml-2 inline-grid h-5 w-5 shrink-0 place-items-center rounded-full text-white" style={{ background: p['badgeColor'] ?? '#56604A' }} aria-label="Nombre verificado"><CheckIcon className="h-3 w-3" strokeWidth={3} /></span>;
 }
