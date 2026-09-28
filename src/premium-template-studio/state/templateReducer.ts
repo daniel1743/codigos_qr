@@ -1,6 +1,10 @@
 import type { BioTemplateConfig, BlockType, TemplateBlock } from "../types";
 import { createBlock } from "../constants/blockDefinitions";
 import { deepClone, uid } from "../utils";
+import {
+  setElementVisibility as applyElementVisibility,
+  type ElementVisibilityResult,
+} from "./elementVisibility";
 
 /** SINGLE SOURCE OF TRUTH — every panel reads and writes this config. */
 export interface StudioState {
@@ -17,12 +21,14 @@ export type StudioAction =
   | { type: "replaceConfig"; config: BioTemplateConfig; resetHistory?: boolean }
   | { type: "patchConfig"; patch: Partial<BioTemplateConfig> }
   | { type: "patch"; path: string; value: unknown }
+  | { type: "setConfigElementVisibility"; path: string; visible: boolean }
   | { type: "selectBlock"; id: string | null }
   | { type: "addBlock"; blockType: BlockType; at?: number }
   | { type: "insertBlock"; block: TemplateBlock; at?: number }
   | { type: "insertBlocks"; blocks: TemplateBlock[]; at?: number }
   | { type: "updateBlock"; id: string; patch: Partial<TemplateBlock> }
   | { type: "patchBlockField"; id: string; path: string; value: unknown }
+  | { type: "setElementVisibility"; id: string; path: string; visible: boolean }
   | { type: "moveBlock"; id: string; direction: -1 | 1 }
   | { type: "reorderBlock"; sourceId: string; targetId: string }
   | { type: "duplicateBlock"; id: string }
@@ -45,6 +51,37 @@ function setPath<T extends object>(target: T, path: string, value: unknown): T {
   const last = keys[keys.length - 1]!;
   node[last] = value;
   return clone as T;
+}
+
+function getPath(target: unknown, path: string): unknown {
+  return path.split(".").reduce<unknown>((node, key) => {
+    if (!node || typeof node !== "object") return undefined;
+    return (node as Record<string, unknown>)[key];
+  }, target);
+}
+
+function isKnownOptionalElementPath(path: string): boolean {
+  return (
+    path === "element" ||
+    [
+      "content.titleElement",
+      "content.subtitleElement",
+      "content.descriptionElement",
+      "content.eyebrowElement",
+      "content.badge.element",
+      "content.primaryCTA.element",
+      "content.secondaryCTA.element",
+      "content.avatar.element",
+      "content.media.element",
+    ].some((candidate) => path === candidate || path.endsWith(`.${candidate}`)) ||
+    /content\.(items|products)\.[^.]+\.(badgeElement|priceElement|ctaElement|descriptionElement)$/.test(
+      path,
+    )
+  );
+}
+
+function isKnownOptionalConfigElementPath(path: string): boolean {
+  return path === "profile.avatarElement" || path === "profile.descriptionElement";
 }
 
 function commit(state: StudioState, config: BioTemplateConfig): StudioState {
@@ -82,6 +119,17 @@ export function templateReducer(state: StudioState, action: StudioAction): Studi
     case "patch":
       return commit(state, setPath(state.config, action.path, action.value));
 
+    case "setConfigElementVisibility": {
+      const current = getPath(state.config, action.path);
+      const result = applyElementVisibility(
+        current as { optional?: boolean; visible?: boolean; protected?: boolean } | undefined,
+        action.visible,
+        isKnownOptionalConfigElementPath(action.path),
+      );
+      if (!result.allowed) return state;
+      return commit(state, setPath(state.config, action.path, result.contract));
+    }
+
     case "selectBlock":
       return { ...state, selectedBlockId: action.id };
 
@@ -117,6 +165,24 @@ export function templateReducer(state: StudioState, action: StudioAction): Studi
           b.id === action.id ? setPath(b, action.path, action.value) : b,
         ),
       );
+
+    case "setElementVisibility": {
+      const block = state.config.blocks.find((candidate) => candidate.id === action.id);
+      if (!block) return state;
+      const current = getPath(block, action.path);
+      const result: ElementVisibilityResult = applyElementVisibility(
+        current as { optional?: boolean; visible?: boolean; protected?: boolean } | undefined,
+        action.visible,
+        isKnownOptionalElementPath(action.path),
+      );
+      if (!result.allowed) return state;
+      return withBlocks(
+        state,
+        state.config.blocks.map((candidate) =>
+          candidate.id === action.id ? setPath(candidate, action.path, result.contract) : candidate,
+        ),
+      );
+    }
 
     case "moveBlock": {
       const blocks = [...state.config.blocks];

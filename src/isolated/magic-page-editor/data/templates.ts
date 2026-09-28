@@ -21,17 +21,7 @@ export const templates: Record<TemplateId, TemplateMeta> = {
       { id: 'arena', label: 'Arena', color: '#ECE3D5', fg: '#2A2521', muted: '#6F655B', surface: '#F7F2EA', line: '#DDD1BF' },
       { id: 'blanco', label: 'Blanco', color: '#FFFFFF', fg: '#2A2521', muted: '#7A6F65', surface: '#F6F1EA', line: '#ECE5DA' },
       { id: 'oliva', label: 'Oliva', color: '#56604A', fg: '#F6F2EA', muted: '#D4D6C8', surface: '#626D55', line: '#6E785F' },
-      { id: 'tinta', label: 'Tinta', color: '#2A2521', fg: '#F5F0E8', muted: '#B9AEA2', surface: '#362F2A', line: '#463E37' },
-      { id: 'marfil', label: 'Marfil', color: '#F7F3EA', fg: '#2A2521', muted: '#7A6F65', surface: '#FCF9F2', line: '#E8DFD1' },
-      { id: 'beige', label: 'Beige', color: '#E7D8C5', fg: '#2A2521', muted: '#6F655B', surface: '#F1E6D7', line: '#D8C8B5' },
-      { id: 'terracota', label: 'Terracota suave', color: '#C98F72', fg: '#2A2521', muted: '#60483D', surface: '#D8A78F', line: '#B97E64' },
-      { id: 'rosa-polvo', label: 'Rosa polvo', color: '#D9B4B0', fg: '#2A2521', muted: '#705A58', surface: '#E6C8C4', line: '#C89E9A' },
-      { id: 'lavanda', label: 'Lavanda', color: '#C9C0D8', fg: '#2A2521', muted: '#625B6D', surface: '#DAD3E5', line: '#B5AAC7' },
-      { id: 'azul-niebla', label: 'Azul niebla', color: '#B9C8D3', fg: '#22354A', muted: '#536575', surface: '#CCD8E0', line: '#A3B6C4' },
-      { id: 'azul-profundo', label: 'Azul profundo', color: '#22354A', fg: '#F5F0E8', muted: '#C2CED8', surface: '#304960', line: '#405A70' },
-      { id: 'verde-salvia', label: 'Verde salvia', color: '#A8B5A2', fg: '#263128', muted: '#566257', surface: '#BAC5B5', line: '#91A08C' },
-      { id: 'verde-bosque', label: 'Verde bosque', color: '#33483D', fg: '#F5F0E8', muted: '#C2CEC4', surface: '#405B4E', line: '#527060' },
-      { id: 'carbon', label: 'Carbón', color: '#3A3936', fg: '#F5F0E8', muted: '#C8C5BE', surface: '#484743', line: '#5A5853' }],
+      { id: 'tinta', label: 'Tinta', color: '#2A2521', fg: '#F5F0E8', muted: '#B9AEA2', surface: '#362F2A', line: '#463E37' }],
 
       pageTones: ['crema', 'arena', 'blanco'],
       fonts: [
@@ -75,17 +65,7 @@ export const templates: Record<TemplateId, TemplateMeta> = {
       { id: 'arena', label: 'Arena', color: '#F4EEE8', fg: '#1C2F33', muted: '#5E6D6F', surface: '#FFFFFF', line: '#E3D9CE' },
       { id: 'blanco', label: 'Blanco', color: '#FFFFFF', fg: '#1C2F33', muted: '#5E6D6F', surface: '#F6F1EC', line: '#ECE4DB' },
       { id: 'petroleo', label: 'Petróleo', color: '#1F4E55', fg: '#F4EEE8', muted: '#BFD0CF', surface: '#275C63', line: '#33686F' },
-      { id: 'noche', label: 'Noche', color: '#13272B', fg: '#F1E9E0', muted: '#A8B5B4', surface: '#1C3338', line: '#2A4348' },
-      { id: 'marfil', label: 'Marfil', color: '#F7F3EA', fg: '#1C2F33', muted: '#5E6D6F', surface: '#FFFFFF', line: '#E4DCD1' },
-      { id: 'beige', label: 'Beige', color: '#E7D8C5', fg: '#1C2F33', muted: '#5E6D6F', surface: '#F2E7D8', line: '#D8C8B5' },
-      { id: 'terracota', label: 'Terracota suave', color: '#C98F72', fg: '#243033', muted: '#5D514D', surface: '#D9A78F', line: '#B97E64' },
-      { id: 'rosa-polvo', label: 'Rosa polvo', color: '#D9B4B0', fg: '#293033', muted: '#65585A', surface: '#E8CCC8', line: '#C99F9B' },
-      { id: 'lavanda', label: 'Lavanda', color: '#C9C0D8', fg: '#293033', muted: '#625C6D', surface: '#DCD5E5', line: '#B6ABC8' },
-      { id: 'azul-niebla', label: 'Azul niebla', color: '#B9C8D3', fg: '#1C2F33', muted: '#536575', surface: '#D0DCE3', line: '#A5B8C5' },
-      { id: 'azul-profundo', label: 'Azul profundo', color: '#22354A', fg: '#F4EEE8', muted: '#C3CED6', surface: '#304960', line: '#405A70' },
-      { id: 'verde-salvia', label: 'Verde salvia', color: '#A8B5A2', fg: '#263128', muted: '#566257', surface: '#BAC5B5', line: '#91A08C' },
-      { id: 'verde-bosque', label: 'Verde bosque', color: '#33483D', fg: '#F4EEE8', muted: '#C2CEC4', surface: '#405B4E', line: '#527060' },
-      { id: 'carbon', label: 'Carbón', color: '#3A3936', fg: '#F4EEE8', muted: '#C8C5BE', surface: '#484743', line: '#5A5853' }],
+      { id: 'noche', label: 'Noche', color: '#13272B', fg: '#F1E9E0', muted: '#A8B5B4', surface: '#1C3338', line: '#2A4348' }],
 
       pageTones: ['arena', 'blanco'],
       fonts: [
@@ -98,6 +78,7 @@ export const templates: Record<TemplateId, TemplateMeta> = {
     { key: 'hero', type: 'hero' },
     { key: 'collection', type: 'collection' },
     { key: 'links', type: 'links' },
+    { key: 'catalog', type: 'catalog' },
     { key: 'gallery', type: 'gallery' },
     { key: 'location', type: 'location' }],
 
@@ -129,16 +110,7 @@ export const templates: Record<TemplateId, TemplateMeta> = {
       { id: 'carbon', label: 'Carbón', color: '#121211', fg: '#ECE6DB', muted: '#9A9387', surface: '#1B1B19', line: '#2D2C28' },
       { id: 'grafito', label: 'Grafito', color: '#1C1C1A', fg: '#ECE6DB', muted: '#A29B8F', surface: '#252522', line: '#34332F' },
       { id: 'hueso', label: 'Hueso', color: '#ECE6DB', fg: '#151513', muted: '#6C665D', surface: '#E2DACC', line: '#D4CBBB' },
-      { id: 'piedra', label: 'Piedra', color: '#D9CFBF', fg: '#151513', muted: '#5E584F', surface: '#CFC4B2', line: '#C2B6A2' },
-      { id: 'marfil', label: 'Marfil', color: '#F7F3EA', fg: '#151513', muted: '#6C665D', surface: '#FFFDF8', line: '#E8DFD1' },
-      { id: 'beige', label: 'Beige', color: '#E7D8C5', fg: '#151513', muted: '#5E584F', surface: '#F1E6D7', line: '#D8C8B5' },
-      { id: 'terracota', label: 'Terracota suave', color: '#C98F72', fg: '#151513', muted: '#60483D', surface: '#D8A78F', line: '#B97E64' },
-      { id: 'rosa-polvo', label: 'Rosa polvo', color: '#D9B4B0', fg: '#151513', muted: '#705A58', surface: '#E6C8C4', line: '#C89E9A' },
-      { id: 'lavanda', label: 'Lavanda', color: '#C9C0D8', fg: '#151513', muted: '#625B6D', surface: '#DAD3E5', line: '#B5AAC7' },
-      { id: 'azul-niebla', label: 'Azul niebla', color: '#B9C8D3', fg: '#151513', muted: '#536575', surface: '#CCD8E0', line: '#A3B6C4' },
-      { id: 'azul-profundo', label: 'Azul profundo', color: '#22354A', fg: '#ECE6DB', muted: '#C2CED8', surface: '#304960', line: '#405A70' },
-      { id: 'verde-salvia', label: 'Verde salvia', color: '#A8B5A2', fg: '#151513', muted: '#566257', surface: '#BAC5B5', line: '#91A08C' },
-      { id: 'verde-bosque', label: 'Verde bosque', color: '#33483D', fg: '#ECE6DB', muted: '#C2CEC4', surface: '#405B4E', line: '#527060' }],
+      { id: 'piedra', label: 'Piedra', color: '#D9CFBF', fg: '#151513', muted: '#5E584F', surface: '#CFC4B2', line: '#C2B6A2' }],
 
       pageTones: ['carbon', 'grafito'],
       fonts: [
@@ -168,3 +140,44 @@ export const templates: Record<TemplateId, TemplateMeta> = {
 };
 
 export const templateOrder: TemplateId[] = ['bio', 'business', 'portfolio'];
+
+/**
+ * Free/Premium metadata (prepared for future integration).
+ * enforcePremiumLocks = false during the prototype: every variant is selectable,
+ * no locks, no upgrade flow. Set to true in production to lock access === 'premium'.
+ */
+export const enforcePremiumLocks = false;
+export type VariantAccess = 'free' | 'premium';
+export const accessForIndex = (index: number): VariantAccess => (index < 2 ? 'free' : 'premium');
+export const isVariantLocked = (access: VariantAccess) => enforcePremiumLocks && access === 'premium';
+const withAccess = <T extends { id: string; label: string }>(list: T[]) => list.map((v, i) => ({ ...v, access: accessForIndex(i) }));
+
+export const pageFamilyVariants: Record<TemplateId, { id: string; label: string; access?: VariantAccess }[]> = {
+  bio: [
+    { id: 'signature', label: 'Firma editorial' }, { id: 'soft-grid', label: 'Retícula suave' },
+    { id: 'portrait', label: 'Retrato protagonista' }, { id: 'social', label: 'Social refinada' },
+    { id: 'journal', label: 'Diario visual' }, { id: 'minimal', label: 'Minimal precisa' },
+    { id: 'studio', label: 'Estudio creativo' }, { id: 'monogram', label: 'Monograma' }
+  ],
+  business: [
+    { id: 'atelier', label: 'Atelier' }, { id: 'clinical', label: 'Clínica serena' },
+    { id: 'concierge', label: 'Concierge' }, { id: 'service-grid', label: 'Servicios en retícula' },
+    { id: 'story', label: 'Historia de marca' }, { id: 'booking', label: 'Reserva directa' },
+    { id: 'local', label: 'Negocio local' }, { id: 'statement', label: 'Declaración' }
+  ],
+  portfolio: [
+    { id: 'archive', label: 'Archivo' }, { id: 'exhibition', label: 'Exposición' },
+    { id: 'contact-sheet', label: 'Hoja de contacto' }, { id: 'monograph', label: 'Monografía' },
+    { id: 'cinema', label: 'Cine' }, { id: 'index', label: 'Índice visual' },
+    { id: 'case-study', label: 'Caso de estudio' }, { id: 'nocturne', label: 'Nocturno' }
+  ]
+};
+for (const key of Object.keys(pageFamilyVariants) as TemplateId[]) pageFamilyVariants[key] = withAccess(pageFamilyVariants[key]);
+
+export const miniGalleryVariants = withAccess([
+  { id: 'gallery-editorial', label: 'Galería editorial' },
+  { id: 'gallery-mosaic', label: 'Galería mosaico' },
+  { id: 'gallery-filmstrip', label: 'Galería película' },
+  { id: 'gallery-masonry', label: 'Galería archivo' },
+  { id: 'gallery-stacked', label: 'Galería apilada' }
+]);

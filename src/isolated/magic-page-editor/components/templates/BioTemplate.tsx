@@ -1,12 +1,13 @@
 import React from "react";
 import { ArrowRightIcon, BookOpenIcon, CalendarDaysIcon, MailIcon, MessageCircleIcon, BoxIcon } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { useEditor } from "../../contexts/EditorContext";
 import { useThemeTokens } from "../../hooks/useThemeTokens";
 import { Block } from "../editor/Block";
 import { Editable } from "../editor/Editable";
 import { EditableText } from "../editor/EditableText";
 import { EditableImage } from "../editor/EditableImage";
-import { EditableAvatar } from "../editor/EditableAvatar";
+import { EditableAvatar, VerifiedNameCheck } from "../editor/EditableAvatar";
 import { EditableCTA, CtaVariants } from "../editor/EditableCTA";
 import { EditableSocial } from "../editor/EditableSocial";
 import { PageRoot, useFooterTone } from "../editor/PageRoot";
@@ -19,7 +20,7 @@ import { bioFeatured, bioLinks, bioMoments, bioProfile, bioSocials } from "../..
 import { cx } from "../../utils/cx";
 import { blockPrefix } from "../../utils/styles";
 import { BlockRef } from "../../types/editor";
-const linkIcons: Record<string, BoxIcon> = {
+const linkIcons: Record<string, LucideIcon> = {
   calendar: CalendarDaysIcon,
   book: BookOpenIcon,
   mail: MailIcon,
@@ -72,10 +73,10 @@ export function BioTemplate() {
               {({
               align
             }) => <>
-                  <EditableText id={`${p}hero.name`} value={bioProfile.name} as="h1" label="Nombre" className={cx('cq-fg leading-[0.95]', m ? 'text-[42px]' : 'text-[54px]')} style={{
+                  <div className="flex items-center"><EditableText id={`${p}hero.name`} value={bioProfile.name} as="h1" label="Nombre" className={cx('cq-fg leading-[0.95]', m ? 'text-[42px]' : 'text-[54px]')} style={{
                 ...display,
                 fontWeight: 500
-              }} />
+              }} /><VerifiedNameCheck avatarId={`${p}avatar`} /></div>
                   <EditableText id={`${p}hero.role`} value={bioProfile.role} label="Subtítulo" className="cq-muted mt-3 text-[12.5px] font-medium uppercase tracking-[0.16em]" />
                   <EditableText id={`${p}hero.bio`} value={bioProfile.bio} label="Descripción" multiline className={cx('cq-fg mt-4 max-w-[460px] text-[15px] leading-relaxed', align === 'center' ? 'text-center' : 'text-left')} />
                 </>}
@@ -91,7 +92,7 @@ export function BioTemplate() {
         return <Block key={b.key} block={b} defaultSpacing="S">
             <div className={cx(col, 'flex flex-col gap-3.5')} style={colStyle}>
               {bioLinks.map((l, i) => {
-              const Icon = linkIcons[l.icon];
+              const Icon = linkIcons[l.icon] ?? BoxIcon;
               return <EditableCTA key={l.label} id={`${p}links.${i}`} label={l.label} sub={l.sub} href={l.href} variants={cta} defaultVariant={i === 0 ? 'solid' : 'soft'} fullDefault className={cx('flex items-center gap-4 rounded-[26px] text-left', m ? 'min-h-[78px] px-4 py-3' : 'min-h-[86px] px-5 py-4')} labelClassName={cx('leading-tight', m ? 'text-[19px]' : 'text-[22px]')} labelStyle={{
                 ...display,
                 fontWeight: 600
@@ -155,7 +156,7 @@ export function BioTemplate() {
             </div>
           </Block>;
       default:
-        return <Block key={b.key} block={b} defaultSpacing={b.type === 'hero' ? 'none' : 'M'}>
+        return <Block key={b.key} block={b} defaultSpacing="M">
             <GenericBlock block={b} ctaVariants={cta} maxWidth={640} />
           </Block>;
     }

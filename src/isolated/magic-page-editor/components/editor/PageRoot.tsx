@@ -13,12 +13,14 @@ interface PageRootProps {
 /** The page background itself is tappable: it opens page-level controls (background, typography, settings). */
 export function PageRoot({ children, className }: PageRootProps) {
   const t = useThemeTokens();
+  const { doc } = useEditor();
   return (
     <Editable
       id="page"
       kind="page"
       label="Página"
-      className={cx('relative w-full flex-1', className)}
+      data-page-variant={doc.props['page']?.['familyVariant'] ?? 'signature'}
+      className={cx('relative flex w-full flex-1 flex-col', className)}
       style={{ ...toneVars(t.page), background: t.page.color, color: 'var(--fg)', fontFamily: t.bodyFont }}>
       
       {children}

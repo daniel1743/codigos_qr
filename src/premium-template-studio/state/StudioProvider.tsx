@@ -1,5 +1,5 @@
 import { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from "react";
-import type { BioTemplateConfig } from "../types";
+import type { BioTemplateConfig, Breakpoint, SaveState } from "../types";
 import { createInitialState, templateReducer } from "./templateReducer";
 import type { StudioAction, StudioState } from "./templateReducer";
 import { resolveAdapters } from "../adapters";

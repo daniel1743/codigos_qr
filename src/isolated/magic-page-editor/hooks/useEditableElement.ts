@@ -13,6 +13,7 @@ export function useEditableElement(id: string, kind: ElementKind, label: string,
   const parent = useContext(EditableParentContext);
   const ref = useRef<HTMLElement | null>(null);
   const selectable = opts.selectable !== false;
+  const inlineText = kind === 'text' || kind === 'price';
   const blockKey = opts.blockKey ?? parent.blockKey;
   const removed = !!ed.doc.removed[id];
   const { register, unregister } = ed;
@@ -32,7 +33,7 @@ export function useEditableElement(id: string, kind: ElementKind, label: string,
       ed.select(id);
       return;
     }
-    if (kind === 'text' && ed.editingId !== id) {
+    if (inlineText && ed.editingId !== id) {
       ed.setEditingId(id);
       if (ed.isMobile) ed.setKeyboard(true);
     }
@@ -49,7 +50,7 @@ export function useEditableElement(id: string, kind: ElementKind, label: string,
       activate();
     },
     onDoubleClick:
-    kind === 'cta' ?
+    kind === 'cta' || kind === 'badge' ?
     (e: React.MouseEvent) => {
       e.stopPropagation();
       ed.setEditingId(`${id}.label`);

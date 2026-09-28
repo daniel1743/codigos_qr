@@ -49,7 +49,27 @@ export type HeroVariant =
   | "banner"
   | "mosaic"
   | "frame"
-  | "bleed";
+  | "bleed"
+  | "editorialCenter"
+  | "splitHorizontal"
+  | "splitVertical"
+  | "fullBleed"
+  | "photoCard"
+  | "avatarBand"
+  | "photoGrid"
+  | "quote"
+  | "collage"
+  | "lowerBlock"
+  | "galleryFrame"
+  | "sideBleed"
+  | "magazine"
+  | "elegantOverlay"
+  | "backgroundFade"
+  | "minimalPremium"
+  | "sideInfo"
+  | "descriptionCard"
+  | "cinematic"
+  | "brandIdentity";
 
 /* ---------- Card families ---------- */
 

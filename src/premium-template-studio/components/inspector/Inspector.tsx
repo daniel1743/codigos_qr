@@ -37,6 +37,8 @@ import type {
   TrustBadge,
   TrustSignalType,
   TypographyOverride,
+  CardLayout,
+  CardVisualPreset,
 } from "../../types";
 import { FONT_OPTIONS } from "../../constants/themes";
 import {
@@ -811,7 +813,14 @@ function ProfileInspector() {
           <Toggle
             label={messages.inspector.showAvatar}
             checked={profile.showAvatar !== false}
-            onChange={(v) => patch("profile.showAvatar", v)}
+            onChange={(v) => {
+              patch("profile.showAvatar", v);
+              dispatch({
+                type: "setConfigElementVisibility",
+                path: "profile.avatarElement",
+                visible: v,
+              });
+            }}
           />
           <AssetField
             label={messages.inspector.avatar}
@@ -822,6 +831,47 @@ function ProfileInspector() {
             cleanupPreviousAssetOnReplace={false}
             onChange={(v) => patch("profile.avatarUrl", v)}
           />
+          <Field label="Forma del avatar">
+            <Segmented
+              size="sm"
+              value={profile.avatar.shape ?? "rounded"}
+              options={[
+                { value: "circle", label: "Círculo" },
+                { value: "rounded", label: "Redondo" },
+                { value: "square", label: "Cuadrado" },
+                { value: "arch", label: "Arco" },
+                { value: "none", label: "Ninguna" },
+              ]}
+              onChange={(v) => patch("profile.avatar.shape", v)}
+            />
+          </Field>
+          <Field label="Posición horizontal">
+            <NumberSlider
+              value={profile.avatar.media?.cropX ?? 50}
+              min={0}
+              max={100}
+              step={1}
+              onChange={(v) => patch("profile.avatar.media.cropX", v)}
+            />
+          </Field>
+          <Field label="Posición vertical">
+            <NumberSlider
+              value={profile.avatar.media?.cropY ?? 50}
+              min={0}
+              max={100}
+              step={1}
+              onChange={(v) => patch("profile.avatar.media.cropY", v)}
+            />
+          </Field>
+          <Field label="Zoom del avatar">
+            <NumberSlider
+              value={profile.avatar.media?.zoom ?? 1}
+              min={0.1}
+              max={4}
+              step={0.1}
+              onChange={(v) => patch("profile.avatar.media.zoom", v)}
+            />
+          </Field>
           <Field label={messages.inspector.avatarAlignment}>
             <Segmented
               size="sm"
@@ -1436,6 +1486,8 @@ function PositioningInspectorSection({ block }: { block: TemplateBlock }) {
   const { locale, messages } = usePowerEditorLocale();
   const field = (path: string, value: unknown) =>
     dispatch({ type: "patchBlockField", id: block.id, path, value });
+  const elementVisibility = (path: string, visible: boolean) =>
+    dispatch({ type: "setElementVisibility", id: block.id, path, visible });
 
   // Responsive getters
   const l = block.layout;
@@ -1871,6 +1923,8 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
   const { locale, messages } = usePowerEditorLocale();
   const field = (path: string, value: unknown) =>
     dispatch({ type: "patchBlockField", id: block.id, path, value });
+  const elementVisibility = (path: string, visible: boolean) =>
+    dispatch({ type: "setElementVisibility", id: block.id, path, visible });
 
   const content = block.content;
   const avatar = content.avatar ?? {};
@@ -1951,6 +2005,20 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
             onChange={(v) => dispatch({ type: "updateBlock", id: block.id, patch: { variant: v } })}
           />
         </Field>
+        <Field label="Fusión visual del hero">
+          <Segmented
+            size="sm"
+            value={block.style.fusion ?? "none"}
+            options={[
+              { value: "none", label: "Ninguna" },
+              { value: "fade", label: "Fade" },
+              { value: "halo", label: "Halo" },
+              { value: "organic", label: "Orgánica" },
+              { value: "dominant", label: "Dominante" },
+            ]}
+            onChange={(v) => field("style.fusion", v)}
+          />
+        </Field>
       </Section>
 
       {/* Content Section */}
@@ -1984,6 +2052,11 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
               onChange={(v) => field("content.subtitle", v)}
             />
           </Field>
+          <Toggle
+            label="Mostrar subtítulo"
+            checked={content.subtitleElement?.visible !== false}
+            onChange={(v) => elementVisibility("content.subtitleElement", v)}
+          />
           <div className="pt-2">
             <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
               Tipografía
@@ -2002,6 +2075,11 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
               rows={3}
             />
           </Field>
+          <Toggle
+            label="Mostrar descripción"
+            checked={content.descriptionElement?.visible !== false}
+            onChange={(v) => elementVisibility("content.descriptionElement", v)}
+          />
           <div className="pt-2">
             <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
               Tipografía
@@ -2091,6 +2169,47 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
             onChange={(v) => setResponsiveField("avatarSize", v)}
           />
         </Field>
+        <Field label="Forma del avatar">
+          <Segmented
+            size="sm"
+            value={avatar.shape ?? "rounded"}
+            options={[
+              { value: "circle", label: "Círculo" },
+              { value: "rounded", label: "Redondo" },
+              { value: "square", label: "Cuadrado" },
+              { value: "arch", label: "Arco" },
+              { value: "none", label: "Ninguna" },
+            ]}
+            onChange={(v) => field("content.avatar.shape", v)}
+          />
+        </Field>
+        <Field label="Posición horizontal">
+          <NumberSlider
+            value={avatar.media?.cropX ?? 50}
+            min={0}
+            max={100}
+            step={1}
+            onChange={(v) => field("content.avatar.media.cropX", v)}
+          />
+        </Field>
+        <Field label="Posición vertical">
+          <NumberSlider
+            value={avatar.media?.cropY ?? 50}
+            min={0}
+            max={100}
+            step={1}
+            onChange={(v) => field("content.avatar.media.cropY", v)}
+          />
+        </Field>
+        <Field label="Zoom del avatar">
+          <NumberSlider
+            value={avatar.media?.zoom ?? 1}
+            min={0.1}
+            max={4}
+            step={0.1}
+            onChange={(v) => field("content.avatar.media.zoom", v)}
+          />
+        </Field>
         <Field label={messages.inspector.avatarOverlap}>
           <NumberSlider
             value={avatar.overlap ?? 48}
@@ -2169,6 +2288,54 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
                   onChange={(v) => field("content.bannerImage.position", v)}
                 />
               </Field>
+              <Field label="Posición horizontal">
+                <NumberSlider
+                  value={bannerImage.cropX ?? 50}
+                  min={0}
+                  max={100}
+                  step={1}
+                  onChange={(v) => field("content.bannerImage.cropX", v)}
+                />
+              </Field>
+              <Field label="Posición vertical">
+                <NumberSlider
+                  value={bannerImage.cropY ?? 50}
+                  min={0}
+                  max={100}
+                  step={1}
+                  onChange={(v) => field("content.bannerImage.cropY", v)}
+                />
+              </Field>
+              <Field label="Zoom">
+                <NumberSlider
+                  value={bannerImage.zoom ?? 1}
+                  min={0.1}
+                  max={4}
+                  step={0.1}
+                  onChange={(v) => field("content.bannerImage.zoom", v)}
+                />
+              </Field>
+              <Field label="Overlay">
+                <Segmented
+                  size="sm"
+                  value={bannerImage.overlay ?? "none"}
+                  options={[
+                    { value: "none", label: "Ninguno" },
+                    { value: "soft", label: "Suave" },
+                    { value: "medium", label: "Medio" },
+                    { value: "intense", label: "Intenso" },
+                  ]}
+                  onChange={(v) => field("content.bannerImage.overlay", v)}
+                />
+              </Field>
+              {bannerImage.overlay && bannerImage.overlay !== "none" ? (
+                <Field label="Color del overlay">
+                  <ColorInput
+                    value={bannerImage.overlayColor ?? "#111318"}
+                    onChange={(v) => field("content.bannerImage.overlayColor", v)}
+                  />
+                </Field>
+              ) : null}
             </>
           )}
         </div>
@@ -2335,6 +2502,54 @@ function HeroBlockInspector({ block }: { block: TemplateBlock }) {
                   onChange={(v) => field("content.backgroundImage.position", v)}
                 />
               </Field>
+              <Field label="Posición horizontal">
+                <NumberSlider
+                  value={backgroundImage.cropX ?? 50}
+                  min={0}
+                  max={100}
+                  step={1}
+                  onChange={(v) => field("content.backgroundImage.cropX", v)}
+                />
+              </Field>
+              <Field label="Posición vertical">
+                <NumberSlider
+                  value={backgroundImage.cropY ?? 50}
+                  min={0}
+                  max={100}
+                  step={1}
+                  onChange={(v) => field("content.backgroundImage.cropY", v)}
+                />
+              </Field>
+              <Field label="Zoom">
+                <NumberSlider
+                  value={backgroundImage.zoom ?? 1}
+                  min={0.1}
+                  max={4}
+                  step={0.1}
+                  onChange={(v) => field("content.backgroundImage.zoom", v)}
+                />
+              </Field>
+              <Field label="Overlay">
+                <Segmented
+                  size="sm"
+                  value={backgroundImage.overlay ?? "none"}
+                  options={[
+                    { value: "none", label: "Ninguno" },
+                    { value: "soft", label: "Suave" },
+                    { value: "medium", label: "Medio" },
+                    { value: "intense", label: "Intenso" },
+                  ]}
+                  onChange={(v) => field("content.backgroundImage.overlay", v)}
+                />
+              </Field>
+              {backgroundImage.overlay && backgroundImage.overlay !== "none" ? (
+                <Field label="Color del overlay">
+                  <ColorInput
+                    value={backgroundImage.overlayColor ?? "#111318"}
+                    onChange={(v) => field("content.backgroundImage.overlayColor", v)}
+                  />
+                </Field>
+              ) : null}
             </>
           )}
           <Field label={messages.inspector.cornerRadius}>
@@ -2620,6 +2835,12 @@ function ServicesBlockInspector({ block }: { block: TemplateBlock }) {
               }
             />
           </Field>
+          <CardCapabilityControls
+            item={item}
+            onChange={(next) =>
+              update(items.map((current) => (current.id === item.id ? next : current)))
+            }
+          />
           <TypographyOverrideEditor
             value={item.typography}
             onChange={(typography) =>
@@ -3409,6 +3630,146 @@ function ProductBlockInspector({ block }: { block: TemplateBlock }) {
   );
 }
 
+function CardCapabilityControls({
+  item,
+  onChange,
+}: {
+  item: BlockItem;
+  onChange: (item: BlockItem) => void;
+}) {
+  const setVisibility = (
+    key: "badgeElement" | "priceElement" | "descriptionElement" | "ctaElement",
+    visible: boolean,
+  ) =>
+    onChange({ ...item, [key]: { ...(item[key] ?? { optional: true }), optional: true, visible } });
+  const setMedia = (key: "cropX" | "cropY" | "zoom" | "overlay" | "overlayColor", value: unknown) =>
+    onChange({ ...item, media: { ...(item.media ?? {}), [key]: value } });
+  return (
+    <div className="space-y-2 rounded-lg border border-border/60 bg-background/60 p-2">
+      <Field label="Card layout">
+        <select
+          className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-xs"
+          value={item.cardLayout ?? "balanced"}
+          onChange={(e) => onChange({ ...item, cardLayout: e.target.value as CardLayout })}
+        >
+          {(
+            [
+              "image-left",
+              "image-right",
+              "image-top",
+              "image-bottom",
+              "balanced",
+              "editorial",
+              "compact",
+              "highlight",
+            ] as CardLayout[]
+          ).map((value) => (
+            <option key={value} value={value}>
+              {value}
+            </option>
+          ))}
+        </select>
+      </Field>
+      <Field label="Visual preset">
+        <select
+          className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-xs"
+          value={item.cardVisualPreset ?? "inherit"}
+          onChange={(e) =>
+            onChange({ ...item, cardVisualPreset: e.target.value as CardVisualPreset })
+          }
+        >
+          {(["inherit", "soft", "flat", "elevated", "highlight"] as CardVisualPreset[]).map(
+            (value) => (
+              <option key={value} value={value}>
+                {value}
+              </option>
+            ),
+          )}
+        </select>
+      </Field>
+      <Toggle
+        label="Card emphasis"
+        checked={item.cardEmphasis ?? false}
+        onChange={(v) => onChange({ ...item, cardEmphasis: v })}
+      />
+      <Toggle
+        label="Show badge"
+        checked={item.badgeElement?.visible !== false}
+        onChange={(v) => setVisibility("badgeElement", v)}
+      />
+      <Toggle
+        label="Show price"
+        checked={item.priceElement?.visible !== false}
+        onChange={(v) => setVisibility("priceElement", v)}
+      />
+      <Toggle
+        label="Show description"
+        checked={item.descriptionElement?.visible !== false}
+        onChange={(v) => setVisibility("descriptionElement", v)}
+      />
+      <Toggle
+        label="Show CTA"
+        checked={item.ctaElement?.visible !== false}
+        onChange={(v) => setVisibility("ctaElement", v)}
+      />
+      <div className="border-t border-border/60 pt-2">
+        <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+          Card media
+        </span>
+        <Field label="Crop X">
+          <NumberSlider
+            value={item.media?.cropX ?? 50}
+            min={0}
+            max={100}
+            suffix="%"
+            onChange={(v) => setMedia("cropX", v)}
+          />
+        </Field>
+        <Field label="Crop Y">
+          <NumberSlider
+            value={item.media?.cropY ?? 50}
+            min={0}
+            max={100}
+            suffix="%"
+            onChange={(v) => setMedia("cropY", v)}
+          />
+        </Field>
+        <Field label="Zoom">
+          <NumberSlider
+            value={item.media?.zoom ?? 1}
+            min={1}
+            max={4}
+            step={0.05}
+            suffix="×"
+            onChange={(v) => setMedia("zoom", v)}
+          />
+        </Field>
+        <Field label="Overlay">
+          <select
+            className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-xs"
+            value={item.media?.overlay ?? "none"}
+            onChange={(e) => setMedia("overlay", e.target.value)}
+          >
+            {(["none", "soft", "medium", "intense"] as const).map((value) => (
+              <option key={value} value={value}>
+                {value}
+              </option>
+            ))}
+          </select>
+        </Field>
+        {item.media?.overlay && item.media.overlay !== "none" ? (
+          <Field label="Overlay color">
+            <ColorInput
+              value={item.media.overlayColor ?? "#111318"}
+              onChange={(v) => setMedia("overlayColor", v)}
+            />
+          </Field>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
 function ProductGridBlockInspector({ block }: { block: TemplateBlock }) {
   const { dispatch } = useStudio();
   const products = block.content.products ?? [];
@@ -3442,6 +3803,10 @@ function ProductGridBlockInspector({ block }: { block: TemplateBlock }) {
               }
             />
           </Field>
+          <CardCapabilityControls
+            item={prod}
+            onChange={(next) => update(products.map((p) => (p.id === prod.id ? next : p)))}
+          />
           <TypographyOverrideEditor
             value={prod.typography}
             onChange={(typography) =>

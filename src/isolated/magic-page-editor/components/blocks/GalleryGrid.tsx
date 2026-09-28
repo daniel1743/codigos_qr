@@ -4,7 +4,15 @@ import { Editable } from '../editor/Editable';
 import { EditableImage } from '../editor/EditableImage';
 import { cx } from '../../utils/cx';
 
-export type GalleryLayout = 'fila' | 'mosaico' | 'carrusel';
+export type GalleryLayout = 'fila' | 'mosaico' | 'carrusel' | 'masonry' | 'stacked';
+
+/** Every gallery layout the renderer implements, in the order the picker shows them. */
+export const galleryLayouts: {value: GalleryLayout;label: string;}[] = [
+{ value: 'fila', label: 'Fila' },
+{ value: 'mosaico', label: 'Mosaico' },
+{ value: 'carrusel', label: 'Carrusel' },
+{ value: 'masonry', label: 'Editorial' },
+{ value: 'stacked', label: 'Apilada' }];
 
 interface GalleryGridProps {
   id: string;
@@ -22,9 +30,14 @@ const GAPS: Record<string, number> = { S: 6, M: 12, L: 22 };
 export function GalleryGrid({ id, items, defaultLayout, radius, altPrefix, rowHeight = 210, className }: GalleryGridProps) {
   const { doc, isMobile: m } = useEditor();
   const p = doc.props[id] ?? {};
-  const list = p.items ? p.items.split('|').filter(Boolean) : items;
-  const layout = p.layout as GalleryLayout ?? defaultLayout;
-  const gap = Math.round((GAPS[p.gap ?? 'M'] ?? 12) * (m ? 0.7 : 1));
+  const list = p['items'] ? p['items'].split('|').filter(Boolean) : items;
+  const pageVariant = doc.props.page?.familyVariant;
+  const pageLayouts: Record<string, GalleryLayout> = {
+    'gallery-editorial': 'fila', 'gallery-mosaic': 'mosaico', 'gallery-filmstrip': 'carrusel',
+    'gallery-masonry': 'masonry', 'gallery-stacked': 'stacked'
+  };
+  const layout = pageLayouts[pageVariant ?? ''] ?? p['layout'] as GalleryLayout ?? defaultLayout;
+  const gap = Math.round((GAPS[p['gap'] ?? 'M'] ?? 12) * (m ? 0.7 : 1));
 
   const photo = (src: string, i: number, cls = '', style: React.CSSProperties = {}) =>
   <EditableImage
@@ -39,7 +52,11 @@ export function GalleryGrid({ id, items, defaultLayout, radius, altPrefix, rowHe
 
 
   let body: React.ReactNode;
-  if (layout === 'carrusel') {
+  if (layout === 'stacked') {
+    body = <div className="relative mx-auto h-[320px] max-w-[520px]">{list.slice(0, 5).map((s, i) => photo(s, i, 'absolute left-1/2 top-1/2 aspect-[4/5] w-[46%] -translate-x-1/2 -translate-y-1/2 shadow-xl', { transform: `translate(calc(-50% + ${(i - 2) * 22}px), calc(-50% + ${Math.abs(i - 2) * 8}px)) rotate(${(i - 2) * 5}deg)`, zIndex: i }))}</div>;
+  } else if (layout === 'masonry') {
+    body = <div className="columns-2 gap-3 md:columns-3">{list.map((s, i) => photo(s, i, `mb-3 inline-block w-full ${i % 3 === 0 ? 'aspect-[3/4]' : i % 3 === 1 ? 'aspect-square' : 'aspect-[4/3]'}`))}</div>;
+  } else if (layout === 'carrusel') {
     body =
     <div className="cq-scroll-none flex snap-x snap-mandatory overflow-x-auto" style={{ gap }}>
         {list.map((s, i) => photo(s, i, 'aspect-[4/5] shrink-0 snap-start', { width: m ? '72%' : '31%' }))}

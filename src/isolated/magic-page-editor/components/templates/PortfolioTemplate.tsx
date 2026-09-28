@@ -6,7 +6,7 @@ import { Block } from '../editor/Block';
 import { Editable } from '../editor/Editable';
 import { EditableText } from '../editor/EditableText';
 import { EditableImage } from '../editor/EditableImage';
-import { EditableAvatar } from '../editor/EditableAvatar';
+import { EditableAvatar, VerifiedNameCheck } from '../editor/EditableAvatar';
 import { EditableCTA, type CtaVariants } from '../editor/EditableCTA';
 import { EditableSocial } from '../editor/EditableSocial';
 import { PageRoot, useFooterTone } from '../editor/PageRoot';
@@ -75,13 +75,13 @@ export function PortfolioTemplate() {
               {({ align }) =>
               <>
                   <EditableText id={`${p}hero.kicker`} value={pfProfile.kicker} label="Antetítulo" className="cq-muted text-[13.5px] tracking-[0.02em]" />
-                  <EditableText
+                  <div className="flex items-center"><EditableText
                   id={`${p}hero.title`}
                   value={pfProfile.title}
                   as="h1"
                   label="Título"
                   className={cx('cq-fg mt-4 italic leading-[0.94]', m ? 'text-[54px]' : 'text-[116px]', align === 'center' && 'text-center')}
-                  style={display} />
+                  style={display} /><VerifiedNameCheck avatarId={`${p}avatar`} /></div>
                 
                   <div className={cx('mt-9 flex flex-wrap gap-3', align === 'center' && 'justify-center')}>
                     <EditableCTA id={`${p}hero.cta`} label={pfProfile.cta} href="#proyectos" variants={cta} defaultVariant="outline" className={btn} trailing={<ArrowDownRightIcon className="h-4 w-4" />} />
@@ -210,7 +210,7 @@ export function PortfolioTemplate() {
 
       default:
         return (
-          <Block key={b.key} block={b} defaultSpacing={b.type === 'hero' ? 'none' : 'M'}>
+          <Block key={b.key} block={b} defaultSpacing="M">
             <GenericBlock block={b} ctaVariants={cta} maxWidth={1240} />
           </Block>);
 

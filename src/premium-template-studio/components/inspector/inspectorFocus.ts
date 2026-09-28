@@ -18,6 +18,7 @@
  * store. `selectedBlockId` remains the canonical block-selection owner.
  */
 export type ContextualTarget =
+  | "block"
   | "profile-bio"
   | "profile-cover"
   | "profile-avatar"

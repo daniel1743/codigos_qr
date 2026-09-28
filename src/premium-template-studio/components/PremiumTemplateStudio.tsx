@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   Monitor,
   Tablet,
@@ -50,6 +50,7 @@ import { PowerEditorLocaleProvider, usePowerEditorLocale } from "../i18n/PowerEd
 import { isPersistenceDebugEnabled, PersistenceDebugPanel } from "../diagnostics/persistenceDebug";
 import { formatBreakpoint } from "../i18n/messages";
 import { DiscoveryHintHost } from "../microux/DiscoveryHint";
+import { ContextualEditorActions, ContextualEditorMobileSheet } from "./ContextualEditorActions";
 import { cloneProductItem } from "./blocks/productGridCollection";
 import "../styles/studio.css";
 
@@ -297,10 +298,19 @@ function BinaryIsolationDiagnostic({
   );
 }
 
-function Canvas({ documentKind }: { documentKind: EditorDocumentKind }) {
+function Canvas({
+  documentKind,
+  selectedCollectionItem,
+  onSelectedCollectionItemChange,
+}: {
+  documentKind: EditorDocumentKind;
+  selectedCollectionItem: SelectedCollectionItem | null;
+  onSelectedCollectionItemChange: (item: SelectedCollectionItem | null) => void;
+}) {
   const { state, dispatch, breakpoint, previewing, adapters } = useStudio();
-  const [selectedCollectionItem, setSelectedCollectionItem] =
-    useState<SelectedCollectionItem | null>(null);
+  const canvasRootRef = useRef<HTMLDivElement | null>(null);
+  const [toolbarAnchor, setToolbarAnchor] = useState<{ left: number; top: number } | null>(null);
+  const [focusTarget, setFocusTarget] = useState<InspectorFocusTarget | null>(null);
   const canvasMode = canvasModeForDocument(documentKind);
   const frameWidth = canvasWidthForDocument(documentKind, breakpoint);
   const cameraBypass =
@@ -310,9 +320,58 @@ function Canvas({ documentKind }: { documentKind: EditorDocumentKind }) {
 
   useEffect(() => {
     if (state.selectedBlockId === null && selectedCollectionItem !== null) {
-      setSelectedCollectionItem(null);
+      onSelectedCollectionItemChange(null);
     }
-  }, [state.selectedBlockId, selectedCollectionItem]);
+  }, [onSelectedCollectionItemChange, selectedCollectionItem, state.selectedBlockId]);
+
+  useEffect(() => subscribeInspectorFocus(setFocusTarget), []);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      onSelectedCollectionItemChange(null);
+      setFocusTarget(null);
+      dispatch({ type: "selectBlock", id: null });
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [dispatch, onSelectedCollectionItemChange]);
+
+  useLayoutEffect(() => {
+    if (previewing || typeof window === "undefined") return;
+    const root = canvasRootRef.current;
+    if (!root) return;
+    const updateToolbarPosition = () => {
+      const targetId = selectedCollectionItem?.blockId ?? state.selectedBlockId;
+      const candidates = Array.from(
+        root.querySelectorAll<HTMLElement>("[data-block-id], [data-editor-target]"),
+      );
+      const target = focusTarget
+        ? (candidates.find((element) => element.dataset.editorTarget === focusTarget) ??
+          candidates.find((element) => element.dataset.blockId === targetId))
+        : candidates.find((element) => element.dataset.blockId === targetId);
+      if (!target) {
+        setToolbarAnchor(null);
+        return;
+      }
+      const rootRect = root.getBoundingClientRect();
+      const targetRect = target.getBoundingClientRect();
+      setToolbarAnchor({
+        left: Math.max(
+          112,
+          Math.min(rootRect.width - 112, targetRect.left - rootRect.left + targetRect.width / 2),
+        ),
+        top: Math.max(12, targetRect.top - rootRect.top - 46),
+      });
+    };
+    updateToolbarPosition();
+    window.addEventListener("resize", updateToolbarPosition);
+    window.addEventListener("scroll", updateToolbarPosition, true);
+    return () => {
+      window.removeEventListener("resize", updateToolbarPosition);
+      window.removeEventListener("scroll", updateToolbarPosition, true);
+    };
+  }, [focusTarget, previewing, selectedCollectionItem, state.config, state.selectedBlockId]);
 
   const templateRenderer = (
     <TemplateRenderer
@@ -327,7 +386,8 @@ function Canvas({ documentKind }: { documentKind: EditorDocumentKind }) {
               selectedBlockId: state.selectedBlockId,
               selectedCollectionItem,
               onSelect: (id) => {
-                setSelectedCollectionItem(null);
+                onSelectedCollectionItemChange(null);
+                setFocusTarget(null);
                 dispatch({ type: "selectBlock", id });
               },
               onSelectProfileCover: () => {
@@ -335,7 +395,8 @@ function Canvas({ documentKind }: { documentKind: EditorDocumentKind }) {
                 // panel, then request the Cover/Banner section be brought into
                 // view. Only the Inspector scroll moves — never the Canvas zoom
                 // or pan (the camera is untouched).
-                setSelectedCollectionItem(null);
+                onSelectedCollectionItemChange(null);
+                setFocusTarget(null);
                 dispatch({ type: "selectBlock", id: null });
                 requestInspectorFocus("profile-cover");
               },
@@ -350,14 +411,16 @@ function Canvas({ documentKind }: { documentKind: EditorDocumentKind }) {
                 if (state.selectedBlockId !== null) {
                   dispatch({ type: "selectBlock", id: null });
                 }
-                setSelectedCollectionItem(null);
+                onSelectedCollectionItemChange(null);
+                setFocusTarget(null);
                 requestInspectorFocus("page-background");
               },
               onSelectCollectionItem: (blockId, collection, itemId, field = "item") => {
                 if (state.selectedBlockId !== blockId) {
                   dispatch({ type: "selectBlock", id: blockId });
                 }
-                setSelectedCollectionItem({ blockId, collection, itemId, field });
+                setFocusTarget(null);
+                onSelectedCollectionItemChange({ blockId, collection, itemId, field });
                 requestInspectorFocus(collectionTarget(blockId, collection, itemId, field));
               },
               onCollectionItemAction: (blockId, collection, itemId, action) => {
@@ -369,7 +432,7 @@ function Canvas({ documentKind }: { documentKind: EditorDocumentKind }) {
                 if (index < 0) return;
                 if (action === "delete") {
                   products.splice(index, 1);
-                  setSelectedCollectionItem(null);
+                  onSelectedCollectionItemChange(null);
                 }
                 if (action === "up" && index > 0) {
                   [products[index - 1], products[index]] = [products[index], products[index - 1]];
@@ -380,7 +443,7 @@ function Canvas({ documentKind }: { documentKind: EditorDocumentKind }) {
                 if (action === "duplicate") {
                   const copy = cloneProductItem(products[index] as BlockItem);
                   products.splice(index + 1, 0, copy);
-                  setSelectedCollectionItem({
+                  onSelectedCollectionItemChange({
                     blockId,
                     collection,
                     itemId: copy.id,
@@ -412,7 +475,12 @@ function Canvas({ documentKind }: { documentKind: EditorDocumentKind }) {
                   path: "content.products",
                   value: [...sourceProducts, next],
                 });
-                setSelectedCollectionItem({ blockId, collection, itemId: next.id, field: "item" });
+                onSelectedCollectionItemChange({
+                  blockId,
+                  collection,
+                  itemId: next.id,
+                  field: "item",
+                });
                 requestInspectorFocus(collectionTarget(blockId, collection, next.id, "item"));
               },
               onUploadCollectionItemImage: (blockId, itemId, file) => {
@@ -548,7 +616,7 @@ function Canvas({ documentKind }: { documentKind: EditorDocumentKind }) {
   }
 
   return (
-    <>
+    <div ref={canvasRootRef} className="relative min-h-0 min-w-0 flex-1">
       <PowerCanvasViewport
         contentWidth={frameWidth}
         selectedBlockId={state.selectedBlockId}
@@ -563,8 +631,21 @@ function Canvas({ documentKind }: { documentKind: EditorDocumentKind }) {
           {templateRenderer}
         </div>
       </PowerCanvasViewport>
+      {toolbarAnchor && (
+        <ContextualEditingToolbar
+          ariaLabel="Acciones del elemento seleccionado"
+          className="pointer-events-auto absolute z-30 hidden -translate-x-1/2 lg:block"
+          style={{ left: toolbarAnchor.left, top: toolbarAnchor.top }}
+        >
+          <ContextualEditorActions
+            surface="desktop"
+            selectedCollectionItem={selectedCollectionItem}
+            focusTarget={focusTarget}
+          />
+        </ContextualEditingToolbar>
+      )}
       <BinaryIsolationDiagnostic config={state.config} breakpoint={breakpoint} mode="CAMERA_ON" />
-    </>
+    </div>
   );
 }
 
@@ -672,10 +753,15 @@ function ExportSheet({ onClose }: { onClose: () => void }) {
   );
 }
 
-function MobileDock() {
+function MobileDock({
+  selectedCollectionItem,
+}: {
+  selectedCollectionItem: SelectedCollectionItem | null;
+}) {
   const { messages } = usePowerEditorLocale();
   const { state } = useStudio();
   const [sheet, setSheet] = useState<"none" | "panels" | "inspector">("none");
+  const [contextExpanded, setContextExpanded] = useState(false);
   // Internal scroll container for the mobile sheet body. Only THIS element
   // scrolls to reveal a requested control — never window/document/editor root.
   const scrollRef = useRef<HTMLDivElement | null>(null);
@@ -707,6 +793,7 @@ function MobileDock() {
     if (!shouldResetInspectorScroll(previousSelectionRef.current, state.selectedBlockId)) return;
     previousSelectionRef.current = state.selectedBlockId;
     setSheet("inspector");
+    setContextExpanded(false);
     const container = scrollRef.current;
     if (container && container.scrollTop !== 0) container.scrollTop = 0;
   }, [state.selectedBlockId]);
@@ -730,7 +817,10 @@ function MobileDock() {
       if (cancelled) return;
       const target = pendingFocus;
       const el = container.querySelector<HTMLElement>(`[data-inspector-focus="${target}"]`);
-      if (!el) return;
+      if (!el) {
+        setPendingFocus(null);
+        return;
+      }
       // Exact-target centering: place the target's center at ~45% of the visible
       // sheet height (comfortable 35%–55% band), clamped to the scroll range.
       const delta = computeInspectorFocusScroll(
@@ -751,6 +841,16 @@ function MobileDock() {
       cancelled = true;
     };
   }, [sheet, pendingFocus]);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      setSheet("none");
+      setContextExpanded(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
 
   return (
     <>
@@ -780,7 +880,14 @@ function MobileDock() {
                   <SidebarContent />
                 </>
               ) : (
-                <InspectorContent />
+                <>
+                  <ContextualEditorMobileSheet
+                    selectedCollectionItem={selectedCollectionItem}
+                    expanded={contextExpanded}
+                    onToggleExpanded={() => setContextExpanded((value) => !value)}
+                  />
+                  {contextExpanded && <InspectorContent />}
+                </>
               )}
             </div>
           </div>
@@ -832,6 +939,8 @@ function StudioShell({ documentKind }: { documentKind: EditorDocumentKind }) {
   const [exporting, setExporting] = useState(false);
   const [toolsCollapsed, setToolsCollapsed] = useState(false);
   const [inspectorCollapsed, setInspectorCollapsed] = useState(false);
+  const [selectedCollectionItem, setSelectedCollectionItem] =
+    useState<SelectedCollectionItem | null>(null);
   const { messages } = usePowerEditorLocale();
   const { error, previewing, setPreviewing } = useStudio();
 
@@ -852,7 +961,11 @@ function StudioShell({ documentKind }: { documentKind: EditorDocumentKind }) {
       )}
       {previewing ? (
         <div className="min-h-0 flex-1 overflow-hidden">
-          <Canvas documentKind={documentKind} />
+          <Canvas
+            documentKind={documentKind}
+            selectedCollectionItem={selectedCollectionItem}
+            onSelectedCollectionItemChange={setSelectedCollectionItem}
+          />
         </div>
       ) : (
         <div className="pts-studio-workspace flex min-h-0 flex-1 overflow-hidden">
@@ -891,7 +1004,11 @@ function StudioShell({ documentKind }: { documentKind: EditorDocumentKind }) {
               </div>
             )}
           </div>
-          <Canvas documentKind={documentKind} />
+          <Canvas
+            documentKind={documentKind}
+            selectedCollectionItem={selectedCollectionItem}
+            onSelectedCollectionItemChange={setSelectedCollectionItem}
+          />
           <div
             className={cx(
               "pts-desktop-panel pts-desktop-panel--inspector hidden lg:block",
@@ -929,7 +1046,7 @@ function StudioShell({ documentKind }: { documentKind: EditorDocumentKind }) {
           </div>
         </div>
       )}
-      {!previewing && <MobileDock />}
+      {!previewing && <MobileDock selectedCollectionItem={selectedCollectionItem} />}
       {exporting && !previewing && <ExportSheet onClose={() => setExporting(false)} />}
       {!previewing && <DiscoveryHintHost />}
     </div>

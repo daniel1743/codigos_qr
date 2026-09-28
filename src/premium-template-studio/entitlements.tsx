@@ -130,6 +130,10 @@ export function mutationIntentForAction(
       return { kind: "REORDER_BLOCK" };
     case "toggleBlockHidden":
       return { kind: "TOGGLE_BLOCK_VISIBILITY" };
+    case "setElementVisibility":
+      return { kind: "EDIT_CONTENT" };
+    case "setConfigElementVisibility":
+      return { kind: "EDIT_CONTENT" };
     case "patch":
       return intentForConfigPath(action.path);
     case "patchBlockField":

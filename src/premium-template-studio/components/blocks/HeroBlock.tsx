@@ -10,9 +10,18 @@ import {
   imageFitValue,
   imagePositionValue,
 } from "../../engine/styleEngine";
+import {
+  avatarShapeStyle,
+  heroFusionOverlayStyle,
+  heroFusionStyle,
+  mediaBackgroundStyle,
+  mediaImageStyle,
+  mediaOverlayStyle,
+} from "../../engine/mediaTreatment";
 import { hexToRgba } from "../../utils";
 import type { BadgeContent, TemplateBlock } from "../../types";
 import type { CSSProperties } from "react";
+import { isElementVisible } from "../../state/elementVisibility";
 
 function SmartIcon({ name, size = 14 }: { name?: string; size?: number }) {
   if (!name) return null;
@@ -83,15 +92,22 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
   const isSplit = variant === "split";
   const isFullImage = variant === "full-image";
   const isEditorial = variant === "editorial";
+  const fusion = block.style.fusion ?? "none";
 
   const alignFlex = align === "left" ? "flex-start" : align === "right" ? "flex-end" : "center";
   const textAlign = align;
 
   const bgStyle: React.CSSProperties = {};
   if (backgroundImage.url) {
-    bgStyle.backgroundImage = `url(${backgroundImage.url})`;
-    bgStyle.backgroundSize = imageFitValue(backgroundImage.fit);
-    bgStyle.backgroundPosition = imagePositionValue(backgroundImage.position);
+    Object.assign(
+      bgStyle,
+      mediaBackgroundStyle(
+        backgroundImage.url,
+        backgroundImage,
+        imageFitValue(backgroundImage.fit),
+        imagePositionValue(backgroundImage.position),
+      ),
+    );
   }
 
   // Block-level background gradient (distinct from the overlay gradient).
@@ -198,7 +214,7 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
   };
 
   const badgeElem =
-    badge.enabled && badge.label ? (
+    badge.enabled && badge.label && isElementVisible(badge.element) ? (
       <span
         style={{
           display: "inline-flex",
@@ -220,29 +236,32 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
       </span>
     ) : null;
 
-  const avatarElem = avatar.url ? (
-    <img
-      src={avatar.url}
-      alt="Avatar"
-      style={{
-        width: avatarSize,
-        height: avatarSize,
-        borderRadius: avatarRadius,
-        borderWidth: avatarBorderWidth,
-        borderStyle: "solid",
-        borderColor: theme.colors.background,
-        boxShadow: avatarShadow,
-        objectFit: "cover",
-        display: "block",
-      }}
-    />
-  ) : null;
+  const avatarElem =
+    avatar.url && isElementVisible(avatar.element) ? (
+      <img
+        src={avatar.url}
+        alt="Avatar"
+        style={{
+          width: avatarSize,
+          height: avatarSize,
+          ...avatarShapeStyle(avatar.shape, avatarRadius),
+          borderWidth: avatarBorderWidth,
+          borderStyle: "solid",
+          borderColor: theme.colors.background,
+          boxShadow: avatarShadow,
+          objectFit: "cover",
+          ...mediaImageStyle(avatar.media, "cover", "center"),
+          display: "block",
+        }}
+      />
+    ) : null;
 
   const ctaDirection = content.ctaDirection ?? "row";
   const ctaFlexDir = breakpoint === "mobile" && ctaDirection === "column" ? "column" : "row";
 
   const ctasElem =
-    primaryCTA.label || secondaryCTA.label ? (
+    (primaryCTA.label && isElementVisible(primaryCTA.element)) ||
+    (secondaryCTA.label && isElementVisible(secondaryCTA.element)) ? (
       <div
         {...(mode === "edit" ? { "data-editor-target": "hero-cta" } : {})}
         style={{
@@ -254,7 +273,7 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
           justifyContent: alignFlex,
         }}
       >
-        {primaryCTA.label && (
+        {primaryCTA.label && isElementVisible(primaryCTA.element) && (
           <button
             className="pts-hoverable pts-press-feedback"
             type="button"
@@ -276,7 +295,7 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
             {primaryCTA.label}
           </button>
         )}
-        {secondaryCTA.label && (
+        {secondaryCTA.label && isElementVisible(secondaryCTA.element) && (
           <button
             className="pts-hoverable pts-press-feedback"
             type="button"
@@ -321,6 +340,12 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
       />
     ) : null;
 
+  const backgroundMedia = backgroundImage.url ? backgroundImage : bannerImage;
+  const mediaOverlay = mediaOverlayStyle(backgroundMedia);
+  const mediaOverlayElem = mediaOverlay ? <div aria-hidden style={mediaOverlay} /> : null;
+  const fusionOverlay = heroFusionOverlayStyle(fusion, theme.colors.accent);
+  const fusionOverlayElem = fusionOverlay ? <div aria-hidden style={fusionOverlay} /> : null;
+
   const contentZIndex = { position: "relative" as const, zIndex: 10 };
 
   const bannerElem =
@@ -340,9 +365,12 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
           style={{
             width: "100%",
             height: "100%",
-            objectFit: imageFitValue(bannerImage.fit),
-            objectPosition: imagePositionValue(bannerImage.position),
-            filter: bannerImage.blur ? `blur(${bannerImage.blur}px)` : undefined,
+            ...mediaImageStyle(
+              bannerImage,
+              imageFitValue(bannerImage.fit),
+              imagePositionValue(bannerImage.position),
+              bannerImage.blur,
+            ),
           }}
         />
       </div>
@@ -355,6 +383,7 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
         {...heroBackgroundClickProps()}
         style={{
           ...cardStyle(theme, block.style),
+          ...heroFusionStyle(fusion, theme.colors.accent),
           ...gradientBgStyle,
           ...bgStyle,
           position: "relative",
@@ -366,6 +395,8 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
         }}
       >
         {overlayElem}
+        {mediaOverlayElem}
+        {fusionOverlayElem}
         {bannerElem}
         <div
           style={{
@@ -406,7 +437,7 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
               {content.title}
             </h1>
           )}
-          {content.subtitle && (
+          {content.subtitle && isElementVisible(content.subtitleElement) && (
             <p
               {...heroTextClickProps("subtitle")}
               style={applyTypographyOverride(
@@ -423,7 +454,7 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
               {content.subtitle}
             </p>
           )}
-          {content.description && (
+          {content.description && isElementVisible(content.descriptionElement) && (
             <p
               {...heroTextClickProps("description")}
               style={applyTypographyOverride(
@@ -453,6 +484,7 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
         {...heroBackgroundClickProps()}
         style={{
           ...cardStyle(theme, block.style),
+          ...heroFusionStyle(fusion, theme.colors.accent),
           ...gradientBgStyle,
           ...bgStyle,
           position: "relative",
@@ -464,6 +496,8 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
         }}
       >
         {overlayElem}
+        {mediaOverlayElem}
+        {fusionOverlayElem}
         {bannerElem}
         <div
           style={{
@@ -505,7 +539,7 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
               {content.title}
             </h1>
           )}
-          {content.subtitle && (
+          {content.subtitle && isElementVisible(content.subtitleElement) && (
             <p
               {...heroTextClickProps("subtitle")}
               style={applyTypographyOverride(
@@ -522,7 +556,7 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
               {content.subtitle}
             </p>
           )}
-          {content.description && (
+          {content.description && isElementVisible(content.descriptionElement) && (
             <p
               {...heroTextClickProps("description")}
               style={applyTypographyOverride(
@@ -552,6 +586,7 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
         {...heroBackgroundClickProps()}
         style={{
           ...cardStyle(theme, block.style),
+          ...heroFusionStyle(fusion, theme.colors.accent),
           ...gradientBgStyle,
           ...bgStyle,
           position: "relative",
@@ -563,6 +598,8 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
         }}
       >
         {overlayElem}
+        {mediaOverlayElem}
+        {fusionOverlayElem}
 
         {/* Left Side - Text Content */}
         <div
@@ -604,7 +641,7 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
               {content.title}
             </h1>
           )}
-          {content.subtitle && (
+          {content.subtitle && isElementVisible(content.subtitleElement) && (
             <p
               {...heroTextClickProps("subtitle")}
               style={applyTypographyOverride(
@@ -621,7 +658,7 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
               {content.subtitle}
             </p>
           )}
-          {content.description && (
+          {content.description && isElementVisible(content.descriptionElement) && (
             <p
               {...heroTextClickProps("description")}
               style={applyTypographyOverride(
@@ -663,9 +700,12 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
                 inset: 0,
                 width: "100%",
                 height: "100%",
-                objectFit: imageFitValue(bannerImage.fit),
-                objectPosition: imagePositionValue(bannerImage.position),
-                filter: bannerImage.blur ? `blur(${bannerImage.blur}px)` : undefined,
+                ...mediaImageStyle(
+                  bannerImage,
+                  imageFitValue(bannerImage.fit),
+                  imagePositionValue(bannerImage.position),
+                  bannerImage.blur,
+                ),
               }}
             />
           )}
@@ -688,11 +728,15 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
       {...heroBackgroundClickProps()}
       style={{
         ...cardStyle(theme, block.style),
+        ...heroFusionStyle(fusion, theme.colors.accent),
         ...gradientBgStyle,
-        backgroundImage: `url(${backgroundImage.url || bannerImage.url || "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=1200"})`,
-        backgroundSize: imageFitValue(backgroundImage.url ? backgroundImage.fit : bannerImage.fit),
-        backgroundPosition: imagePositionValue(
-          backgroundImage.url ? backgroundImage.position : bannerImage.position,
+        ...mediaBackgroundStyle(
+          backgroundImage.url ||
+            bannerImage.url ||
+            "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=1200",
+          backgroundMedia,
+          imageFitValue(backgroundImage.url ? backgroundImage.fit : bannerImage.fit),
+          imagePositionValue(backgroundImage.url ? backgroundImage.position : bannerImage.position),
         ),
         position: "relative",
         minHeight,
@@ -704,6 +748,8 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
       }}
     >
       {overlayElem}
+      {mediaOverlayElem}
+      {fusionOverlayElem}
 
       <div
         style={{
@@ -744,7 +790,7 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
             {content.title}
           </h1>
         )}
-        {content.subtitle && (
+        {content.subtitle && isElementVisible(content.subtitleElement) && (
           <p
             {...heroTextClickProps("subtitle")}
             style={applyTypographyOverride(
@@ -755,7 +801,7 @@ export function HeroBlock({ block }: { block: TemplateBlock }) {
             {content.subtitle}
           </p>
         )}
-        {content.description && (
+        {content.description && isElementVisible(content.descriptionElement) && (
           <p
             {...heroTextClickProps("description")}
             style={applyTypographyOverride(

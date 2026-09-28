@@ -1,10 +1,10 @@
 import React from "react";
 import { cx } from "../../../utils/cx";
-import { BoxIcon } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 export interface SegmentOption<T extends string> {
   value: T;
   label: string;
-  icon?: BoxIcon;
+  icon?: LucideIcon;
 }
 interface SegmentedProps<T extends string> {
   options: SegmentOption<T>[];

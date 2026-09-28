@@ -28,6 +28,13 @@ import {
 import { hexToRgba, safeUrl } from "../../utils";
 import type { BlockItem, TemplateBlock } from "../../types";
 import { ContextualItemTarget } from "./primitives";
+import { isElementVisible } from "../../state/elementVisibility";
+import {
+  cardLayoutStyle,
+  cardMediaStyle,
+  resolveCardLayout,
+  resolveCardPreset,
+} from "../../engine/cardEngine";
 
 // Dynamic Icon resolver
 function SmartIcon({
@@ -186,7 +193,7 @@ export function StatsBlock({ block }: { block: TemplateBlock }) {
 /* 2. Services Block                                                   */
 /* ------------------------------------------------------------------ */
 export function ServicesBlock({ block }: { block: TemplateBlock }) {
-  const { theme, mode, onTrack } = useRender();
+  const { theme, mode, breakpoint, onTrack } = useRender();
   const items = block.content.items ?? [];
   const variant = block.variant ?? "cards";
 
@@ -206,8 +213,11 @@ export function ServicesBlock({ block }: { block: TemplateBlock }) {
   return (
     <div style={{ display: "grid", gap: 14, width: "100%" }}>
       {items.map((item: BlockItem, idx: number) => {
-        const hasImage = variant === "image" && item.imageUrl;
+        const layout = resolveCardLayout(item, block);
+        const visualPreset = resolveCardPreset(item, block);
+        const hasImage = Boolean(item.imageUrl) && (variant === "image" || layout !== "compact");
         const isCompact = variant === "compact";
+        const mobile = breakpoint === "mobile";
 
         return (
           <ContextualItemTarget
@@ -230,6 +240,10 @@ export function ServicesBlock({ block }: { block: TemplateBlock }) {
                 gap: 14,
                 overflow: "hidden",
                 position: "relative",
+                ...cardLayoutStyle(layout, mobile),
+                ...(visualPreset === "highlight"
+                  ? { borderColor: theme.colors.accent, borderWidth: 2 }
+                  : {}),
               }}
             >
               {hasImage && (
@@ -239,17 +253,56 @@ export function ServicesBlock({ block }: { block: TemplateBlock }) {
                       ? `collection-services-${block.id}-${item.id ?? idx}-image`
                       : undefined
                   }
-                  style={{ height: 140, margin: "-20px -20px 14px", overflow: "hidden" }}
+                  style={{
+                    height: 140,
+                    margin: "-20px -20px 14px",
+                    overflow: "hidden",
+                    ...(layout === "image-left" || layout === "image-right"
+                      ? {
+                          height: "100%",
+                          margin: -20,
+                          gridColumn: layout === "image-right" ? 2 : 1,
+                          gridRow: 1,
+                        }
+                      : {}),
+                  }}
                 >
                   <img
                     src={item.imageUrl}
                     alt=""
-                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    style={{ width: "100%", height: "100%", ...cardMediaStyle(item) }}
                   />
+                  {item.media?.overlay && item.media.overlay !== "none" ? (
+                    <div
+                      aria-hidden
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        background: item.media.overlayColor ?? "#111318",
+                        opacity:
+                          item.media.overlay === "intense"
+                            ? 0.42
+                            : item.media.overlay === "medium"
+                              ? 0.26
+                              : 0.14,
+                        pointerEvents: "none",
+                      }}
+                    />
+                  ) : null}
                 </div>
               )}
 
-              <div style={{ display: "flex", gap: 12, alignItems: "flex-start", flex: 1 }}>
+              <div
+                style={{
+                  display: "flex",
+                  gap: 12,
+                  alignItems: "flex-start",
+                  flex: 1,
+                  ...(layout === "image-left" || layout === "image-right"
+                    ? { gridColumn: layout === "image-right" ? 1 : 2, gridRow: 1 }
+                    : {}),
+                }}
+              >
                 {item.icon && !hasImage && (
                   <div
                     style={{
@@ -264,6 +317,18 @@ export function ServicesBlock({ block }: { block: TemplateBlock }) {
                   </div>
                 )}
                 <div style={{ flex: 1, minWidth: 0 }}>
+                  {item.badge && isElementVisible(item.badgeElement) ? (
+                    <span
+                      style={{
+                        color: theme.colors.accent,
+                        fontSize: 10,
+                        fontWeight: 700,
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {item.badge}
+                    </span>
+                  ) : null}
                   <div
                     style={{
                       display: "flex",
@@ -280,7 +345,7 @@ export function ServicesBlock({ block }: { block: TemplateBlock }) {
                     >
                       {item.title}
                     </h3>
-                    {item.price && (
+                    {item.price && isElementVisible(item.priceElement) && (
                       <span
                         style={{
                           fontSize: "14px",
@@ -293,7 +358,7 @@ export function ServicesBlock({ block }: { block: TemplateBlock }) {
                       </span>
                     )}
                   </div>
-                  {!isCompact && item.description && (
+                  {!isCompact && item.description && isElementVisible(item.descriptionElement) && (
                     <p
                       style={applyTypographyOverride(
                         {
@@ -311,7 +376,7 @@ export function ServicesBlock({ block }: { block: TemplateBlock }) {
                 </div>
               </div>
 
-              {item.ctaLabel && item.ctaUrl && (
+              {item.ctaLabel && item.ctaUrl && isElementVisible(item.ctaElement) && (
                 <button
                   className="pts-hoverable pts-press-feedback"
                   onClick={() => handleCTA(item)}
@@ -548,7 +613,7 @@ export function PricingBlock({ block }: { block: TemplateBlock }) {
                 )}
               </div>
 
-              {item.description && (
+              {item.description && isElementVisible(item.descriptionElement) && (
                 <p
                   style={applyTypographyOverride(
                     {
@@ -796,7 +861,7 @@ export function TimelineBlock({ block }: { block: TemplateBlock }) {
                 <h3 style={{ ...headingStyle(theme, 0.75), fontSize: "14px", marginTop: 2 }}>
                   {item.title}
                 </h3>
-                {item.description && (
+                {item.description && isElementVisible(item.descriptionElement) && (
                   <p
                     style={applyTypographyOverride(
                       {

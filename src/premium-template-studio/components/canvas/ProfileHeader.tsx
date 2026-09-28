@@ -2,10 +2,12 @@ import { useRef } from "react";
 import { BadgeCheck, MapPin } from "lucide-react";
 import { useRender, type ProfileTarget } from "../../engine/RenderContext";
 import { headingStyle, applyTypographyOverride } from "../../engine/styleEngine";
+import { avatarShapeStyle, mediaImageStyle } from "../../engine/mediaTreatment";
 import { hexToRgba } from "../../utils";
 import type { TemplateLayout, TemplateProfile } from "../../types";
 import { InlineText } from "../blocks/primitives";
 import { requestInspectorFocus } from "../inspector/inspectorFocus";
+import { isElementVisible } from "../../state/elementVisibility";
 
 /**
  * Semantic rim thickness → pixel mapping. Kept in ONE place so the Inspector
@@ -249,61 +251,63 @@ export function ProfileHeader({
     requestInspectorFocus(target);
   };
 
-  const avatar = profile.avatarUrl ? (
-    <img
-      src={profile.avatarUrl}
-      alt={`${profile.name} avatar`}
-      loading="lazy"
-      style={{
-        width: profile.avatar.size,
-        height: profile.avatar.size,
-        borderRadius: profile.avatar.radius,
-        objectFit: "cover",
-        border: rimEnabled
-          ? `${rimThicknessPx}px solid ${rimColor}`
-          : `${profile.avatar.borderWidth}px solid ${theme.colors.background}`,
-        boxShadow: profile.avatar.shadow ? "0 12px 30px -14px rgba(0,0,0,.55)" : "none",
-        display: "block",
-        flexShrink: 0,
-      }}
-    />
-  ) : mode === "edit" ? (
-    <div
-      aria-hidden
-      style={{
-        width: profile.avatar.size,
-        height: profile.avatar.size,
-        borderRadius: profile.avatar.radius,
-        border: rimEnabled ? `${rimThicknessPx}px solid ${rimColor}` : undefined,
-        background: `linear-gradient(140deg, ${theme.colors.primary}, ${theme.colors.accent})`,
-        display: "grid",
-        placeItems: "center",
-        color: "#fff",
-        fontSize: profile.avatar.size / 2.6,
-        fontFamily: theme.typography.headingFont,
-        flexShrink: 0,
-      }}
-    >
-      <button
-        type="button"
-        onClick={(event) => {
-          event.stopPropagation();
-          selectProfileTarget("profile-avatar");
-        }}
+  const avatar =
+    profile.avatarUrl && isElementVisible(profile.avatarElement) ? (
+      <img
+        src={profile.avatarUrl}
+        alt={`${profile.name} avatar`}
+        loading="lazy"
         style={{
-          border: "1px solid rgba(255,255,255,.55)",
-          borderRadius: 999,
-          padding: "7px 10px",
-          background: "rgba(0,0,0,.24)",
+          width: profile.avatar.size,
+          height: profile.avatar.size,
+          ...avatarShapeStyle(profile.avatar.shape, profile.avatar.radius),
+          ...mediaImageStyle(profile.avatar.media, "cover", "center"),
+          objectFit: "cover",
+          border: rimEnabled
+            ? `${rimThicknessPx}px solid ${rimColor}`
+            : `${profile.avatar.borderWidth}px solid ${theme.colors.background}`,
+          boxShadow: profile.avatar.shadow ? "0 12px 30px -14px rgba(0,0,0,.55)" : "none",
+          display: "block",
+          flexShrink: 0,
+        }}
+      />
+    ) : mode === "edit" ? (
+      <div
+        aria-hidden
+        style={{
+          width: profile.avatar.size,
+          height: profile.avatar.size,
+          ...avatarShapeStyle(profile.avatar.shape, profile.avatar.radius),
+          border: rimEnabled ? `${rimThicknessPx}px solid ${rimColor}` : undefined,
+          background: `linear-gradient(140deg, ${theme.colors.primary}, ${theme.colors.accent})`,
+          display: "grid",
+          placeItems: "center",
           color: "#fff",
-          fontSize: 11,
-          cursor: "pointer",
+          fontSize: profile.avatar.size / 2.6,
+          fontFamily: theme.typography.headingFont,
+          flexShrink: 0,
         }}
       >
-        + Añadir foto
-      </button>
-    </div>
-  ) : null;
+        <button
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation();
+            selectProfileTarget("profile-avatar");
+          }}
+          style={{
+            border: "1px solid rgba(255,255,255,.55)",
+            borderRadius: 999,
+            padding: "7px 10px",
+            background: "rgba(0,0,0,.24)",
+            color: "#fff",
+            fontSize: 11,
+            cursor: "pointer",
+          }}
+        >
+          + Añadir foto
+        </button>
+      </div>
+    ) : null;
 
   const identity = (
     <div style={{ textAlign: inline ? "left" : align, flex: 1, minWidth: 0 }}>
@@ -346,7 +350,7 @@ export function ProfileHeader({
           {profile.company ? ` · ${profile.company}` : ""}
         </div>
       )}
-      {profile.description ? (
+      {profile.description && isElementVisible(profile.descriptionElement) ? (
         <div
           {...(mode === "edit" ? { "data-editor-target": "profile-bio" } : {})}
           onClick={(e) => {
@@ -444,7 +448,11 @@ export function ProfileHeader({
                 e.stopPropagation();
                 selectProfileTarget("profile-avatar");
               }}
-              style={{ cursor: mode === "edit" ? "pointer" : undefined }}
+              style={{
+                cursor: mode === "edit" ? "pointer" : undefined,
+                overflow: "hidden",
+                ...avatarShapeStyle(profile.avatar.shape, profile.avatar.radius),
+              }}
             >
               {avatar}
             </div>

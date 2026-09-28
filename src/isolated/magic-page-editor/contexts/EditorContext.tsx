@@ -13,6 +13,12 @@ import type {
   TextStyle } from
 '../types/editor';
 import type { MagicEditorStateV1 } from '../../../features/magic-page-editor-production/magic-document';
+import type { BioTemplateConfig } from '../../../premium-template-studio/types';
+import type { SemanticTarget } from '../types/semantic-selection';
+import { createCanonicalSemanticTarget } from '../adapters/canonical-adapter';
+import { createMagicSemanticTarget } from '../adapters/magic-adapter';
+import { applyCanonicalPatch } from '../adapters/canonical-patcher';
+import type { SemanticCommand } from '../types/semantic-commands';
 
 interface History {
   past: PageDoc[];
@@ -69,6 +75,8 @@ export interface EditorValue {
   setText: (id: string, value: string) => void;
   setTextStyle: (id: string, patch: Partial<TextStyle>) => void;
   setProp: (id: string, key: string, value: string) => void;
+  /** Low-level document patch used by structural controls (card ordering). */
+  updateDoc: (fn: (doc: PageDoc) => PageDoc) => void;
   removeElement: (id: string, label: string) => void;
   moveBlock: (key: string, dir: -1 | 1) => void;
   duplicateBlock: (key: string) => void;
@@ -82,6 +90,11 @@ export interface EditorValue {
   publishing: boolean;
   publish: () => void;
   uploadAsset?: (file: File) => Promise<string>;
+  canonicalDocument?: BioTemplateConfig;
+  canonicalIsNew?: boolean;
+  /** True while a canonical config is open in the common UI (semantic command boundary). */
+  canonicalEditing: boolean;
+  semanticSelection: SemanticTarget | null;
 }
 
 const EditorContext = createContext<EditorValue | null>(null);
@@ -122,22 +135,29 @@ interface EditorProviderProps {
   onDocumentChange?: (state: MagicEditorStateV1) => Promise<void> | void;
   onPublish?: (state: MagicEditorStateV1) => Promise<void> | void;
   uploadAsset?: (file: File) => Promise<string>;
+  canonicalDocument?: BioTemplateConfig;
+  canonicalIsNew?: boolean;
+  onCanonicalDocumentChange?: (doc: BioTemplateConfig) => Promise<void> | void;
+  onCanonicalPublish?: (doc: BioTemplateConfig) => Promise<void> | void;
 }
 
-export function EditorProvider({ children, initialTemplate = 'bio', initialDevice = 'desktop', initialDocument, initialMode = 'edit', onDocumentChange, onPublish, uploadAsset }: EditorProviderProps) {
+export function EditorProvider({ children, initialTemplate = 'bio', initialDevice = 'desktop', initialDocument, initialMode = 'edit', onDocumentChange, onPublish, uploadAsset, canonicalDocument, canonicalIsNew, onCanonicalDocumentChange, onCanonicalPublish }: EditorProviderProps) {
   const [templateId, setTemplateIdState] = useState<TemplateId>(initialDocument?.templateId ?? initialTemplate);
   const [histories, setHistories] = useState<Record<TemplateId, History>>(() => ({
     bio: initialDocument?.templateId === 'bio' ? { past: [], present: initialDocument.doc, future: [] } : createHistory('bio'),
     business: initialDocument?.templateId === 'business' ? { past: [], present: initialDocument.doc, future: [] } : createHistory('business'),
     portfolio: initialDocument?.templateId === 'portfolio' ? { past: [], present: initialDocument.doc, future: [] } : createHistory('portfolio')
   }));
+  const [canonicalHistory, setCanonicalHistory] = useState<{past: BioTemplateConfig[], present: BioTemplateConfig, future: BioTemplateConfig[]} | null>(
+    canonicalDocument ? { past: [], present: canonicalDocument, future: [] } : null
+  );
   const [mode, setModeState] = useState<EditorMode>(initialMode);
   const [device, setDeviceState] = useState<Device>(initialDevice);
   const [mobileWidth, setMobileWidth] = useState<MobileWidth>(390);
   const [isSmallScreen, setIsSmallScreen] = useState(false);
   const [selection, setSelection] = useState<ElementInfo | null>(null);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [keyboard, setKeyboard] = useState(false);
+  const [editingId, setEditingIdState] = useState<string | null>(null);
+  const [keyboard, setKeyboardState] = useState(false);
   const [sheet, setSheet] = useState<SheetState>('compact');
   const [sheetPanel, setSheetPanel] = useState<string | null>(null);
   const [moreOpen, setMoreOpen] = useState(false);
@@ -152,6 +172,16 @@ export function EditorProvider({ children, initialTemplate = 'bio', initialDevic
   const doc = history.present;
 
   useEffect(() => {
+    if (canonicalHistory && onCanonicalDocumentChange) {
+      const request = onCanonicalDocumentChange(canonicalHistory.present);
+      if (!request) return;
+      setSaveState('saving');
+      void Promise.resolve(request)
+        .then(() => setSaveState('saved'))
+        .catch(() => setSaveState('error'));
+      return;
+    }
+
     const request = onDocumentChange?.({ templateId, doc });
     if (!request) return;
 
@@ -159,7 +189,7 @@ export function EditorProvider({ children, initialTemplate = 'bio', initialDevic
     void Promise.resolve(request)
       .then(() => setSaveState('saved'))
       .catch(() => setSaveState('error'));
-  }, [doc, onDocumentChange, templateId]);
+  }, [doc, onDocumentChange, templateId, canonicalHistory?.present, onCanonicalDocumentChange]);
 
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 767px)');
@@ -169,10 +199,20 @@ export function EditorProvider({ children, initialTemplate = 'bio', initialDevic
     return () => mq.removeEventListener('change', update);
   }, []);
 
+  const setEditingId = useCallback<Setter<string | null>>((val) => {
+    const next = typeof val === 'function' ? val(editingId) : val;
+    setEditingIdState(next);
+  }, [editingId]);
+
+  const setKeyboard = useCallback<Setter<boolean>>((val) => {
+    const next = typeof val === 'function' ? val(keyboard) : val;
+    setKeyboardState(next);
+  }, [canonicalDocument, keyboard]);
+
   const resetTransient = useCallback(() => {
     setSelection(null);
-    setEditingId(null);
-    setKeyboard(false);
+    setEditingIdState(null);
+    setKeyboardState(false);
     setSheet('compact');
     setSheetPanel(null);
     setMoreOpen(false);
@@ -186,27 +226,89 @@ export function EditorProvider({ children, initialTemplate = 'bio', initialDevic
         if (next === cur.present) return h;
         return { ...h, [templateId]: { past: [...cur.past.slice(-49), cur.present], present: next, future: [] } };
       });
+      return true;
     },
     [templateId]
   );
 
+  /**
+   * Structural document patch shared with the card controls. A canonical document
+   * has no Magic `PageDoc`, so this is a deliberate no-op for it: canonical
+   * mutations only travel through the semantic command boundary.
+   */
+  const updateDoc = useCallback(
+    (fn: (d: PageDoc) => PageDoc) => {
+      if (canonicalHistory) return;
+      commit(fn);
+    },
+    [canonicalHistory, commit]
+  );
+
+  const semanticSelection = React.useMemo(() => {
+    if (!selection) return null;
+    if (canonicalHistory) {
+      return createCanonicalSemanticTarget(canonicalHistory.present, selection.id, selection.label);
+    }
+    return createMagicSemanticTarget(selection);
+  }, [selection, canonicalDocument]);
+
+  const dispatchCanonical = useCallback(
+    (command: SemanticCommand) => {
+      if (!canonicalHistory) return false;
+      const target = semanticSelection;
+      if (!target || target.documentKind !== 'canonical') {
+        toast.error('Selección inválida para el comando canónico.');
+        return false;
+      }
+      try {
+        const next = applyCanonicalPatch(canonicalHistory.present, target, command);
+        if (next === canonicalHistory.present) return false;
+        setCanonicalHistory((h) => {
+          if (!h) return h;
+          return { past: [...h.past.slice(-49), h.present], present: next, future: [] };
+        });
+        return true;
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : 'No se pudo aplicar la acción.');
+        return false;
+      }
+    },
+    [canonicalHistory, semanticSelection]
+  );
+
   const undo = useCallback(() => {
+    if (canonicalHistory) {
+      setCanonicalHistory((h) => {
+        if (!h || !h.past.length) return h;
+        const prev = h.past[h.past.length - 1];
+        return { past: h.past.slice(0, -1), present: prev, future: [h.present, ...h.future] };
+      });
+      return;
+    }
     setHistories((h) => {
       const c = h[templateId];
       if (!c.past.length) return h;
       const prev = c.past[c.past.length - 1];
       return { ...h, [templateId]: { past: c.past.slice(0, -1), present: prev, future: [c.present, ...c.future] } };
     });
-  }, [templateId]);
+  }, [canonicalHistory, templateId]);
 
   const redo = useCallback(() => {
+    if (canonicalHistory) {
+      setCanonicalHistory((h) => {
+        if (!h || !h.future.length) return h;
+        const [next, ...rest] = h.future;
+        return { past: [...h.past, h.present], present: next, future: rest };
+      });
+      return;
+    }
     setHistories((h) => {
       const c = h[templateId];
       if (!c.future.length) return h;
       const [next, ...rest] = c.future;
       return { ...h, [templateId]: { past: [...c.past, c.present], present: next, future: rest } };
     });
-  }, [templateId]);
+  }, [canonicalHistory, templateId]);
 
   const register = useCallback((r: RegisteredElement) => {
     registry.current.set(r.id, r);
@@ -237,10 +339,17 @@ export function EditorProvider({ children, initialTemplate = 'bio', initialDevic
       setSheetPanel(null);
       setSheet('compact');
       setKeyboard(false);
-      setEditingId(!isMobile && r.kind === 'text' ? id : null);
+
+      if (!isMobile && r.kind === 'text') {
+        if (!canonicalDocument) {
+          setEditingId(id);
+        }
+      } else {
+        setEditingId(null);
+      }
       if (opts?.reveal && !isMobile) r.el.scrollIntoView({ block: 'center', behavior: 'smooth' });
     },
-    [isMobile]
+    [isMobile, canonicalDocument]
   );
 
   const clearSelection = useCallback(() => {
@@ -286,88 +395,150 @@ export function EditorProvider({ children, initialTemplate = 'bio', initialDevic
   );
 
   const setText = useCallback(
-    (id: string, value: string) => commit((d) => d.texts[id] === value ? d : { ...d, texts: { ...d.texts, [id]: value } }),
-    [commit]
+    (id: string, value: string) => {
+      if (canonicalHistory) {
+        dispatchCanonical({ type: 'SET_TEXT', payload: { value } });
+        return;
+      }
+      if (!commit((d) => d.texts[id] === value ? d : { ...d, texts: { ...d.texts, [id]: value } })) return;
+    },
+    [commit, canonicalHistory, dispatchCanonical]
   );
 
   const setTextStyle = useCallback(
-    (id: string, patch: Partial<TextStyle>) =>
-    commit((d) => ({ ...d, textStyles: { ...d.textStyles, [id]: { ...d.textStyles[id], ...patch } } })),
-    [commit]
+    (id: string, patch: Partial<TextStyle>) => {
+      if (canonicalHistory) return;
+      if (!commit((d) => ({ ...d, textStyles: { ...d.textStyles, [id]: { ...d.textStyles[id], ...patch } } }))) return;
+    },
+    [canonicalHistory, commit]
   );
 
   const setProp = useCallback(
-    (id: string, key: string, value: string) =>
-    commit((d) => d.props[id]?.[key] === value ? d : { ...d, props: { ...d.props, [id]: { ...d.props[id], [key]: value } } }),
-    [commit]
+    (id: string, key: string, value: string) => {
+      if (canonicalHistory) {
+        if (key === 'src' || key === 'image') dispatchCanonical({ type: 'SET_IMAGE_SRC', payload: { src: value } });
+        else if (key === 'zoom') dispatchCanonical({ type: 'SET_MEDIA_ZOOM', payload: { zoom: parseFloat(value) } });
+        else if (key === 'cropX') dispatchCanonical({ type: 'SET_MEDIA_POSITION', payload: { cropX: parseFloat(value) } });
+        else if (key === 'cropY') dispatchCanonical({ type: 'SET_MEDIA_POSITION', payload: { cropY: parseFloat(value) } });
+        else if (key === 'overlay') dispatchCanonical({ type: 'SET_MEDIA_OVERLAY', payload: { overlay: value !== 'none' && value !== 'off' } });
+        else if (key === 'shape') dispatchCanonical({ type: 'SET_AVATAR_SHAPE', payload: { shape: value as 'circle' | 'square' | 'rounded' | 'arch' | 'none' } });
+        else if (key === 'fusion') dispatchCanonical({ type: 'SET_HERO_FUSION', payload: { mode: value as any } });
+        else if (key === 'variant') {
+          if (semanticSelection?.targetKind === 'hero') dispatchCanonical({ type: 'SET_HERO_VARIANT', payload: { variant: value } });
+          else if (semanticSelection?.targetKind === 'cta-primary' || semanticSelection?.targetKind === 'cta-secondary') dispatchCanonical({ type: 'SET_CTA_STYLE', payload: { variant: value } });
+          else dispatchCanonical({ type: 'SET_CARD_LAYOUT', payload: { layout: value } });
+        }
+        else if (key === 'href') dispatchCanonical({ type: 'SET_CTA_URL', payload: { url: value } });
+        else if (key === 'hidden' || key === 'show') {
+          const hidden = key === 'hidden' ? value === 'true' : value === 'off';
+          dispatchCanonical({ type: 'SET_ELEMENT_VISIBILITY', payload: { hidden } });
+        }
+        else if (key === 'showPrice') dispatchCanonical({ type: 'SET_CARD_PRICE_VISIBILITY', payload: { visible: value === 'on' } });
+        else if (key === 'showBadge') dispatchCanonical({ type: 'SET_CARD_BADGE_VISIBILITY', payload: { visible: value === 'on' } });
+        else if (key === 'showDesc') dispatchCanonical({ type: 'SET_CARD_DESCRIPTION_VISIBILITY', payload: { visible: value === 'on' } });
+        else if (key === 'showCta') dispatchCanonical({ type: 'SET_CARD_CTA_VISIBILITY', payload: { visible: value === 'on' } });
+        else if (key === 'emphasis') dispatchCanonical({ type: 'SET_CARD_EMPHASIS', payload: { emphasis: value === 'on' } });
+        return;
+      }
+      if (!commit((d) => d.props[id]?.[key] === value ? d : { ...d, props: { ...d.props, [id]: { ...d.props[id], [key]: value } } })) return;
+    },
+    [commit, canonicalHistory, dispatchCanonical, semanticSelection]
   );
 
   const removeElement = useCallback(
     (id: string, label: string) => {
-      commit((d) => ({ ...d, removed: { ...d.removed, [id]: true } }));
+      if (canonicalHistory) {
+        dispatchCanonical({ type: 'SET_ELEMENT_VISIBILITY', payload: { hidden: true } });
+        resetTransient();
+        toast(`${label} eliminado`, { action: { label: 'Deshacer', onClick: () => undo() } });
+        return;
+      }
+      if (!commit((d) => ({ ...d, removed: { ...d.removed, [id]: true } }))) return;
       resetTransient();
       toast(`${label} eliminado`, { action: { label: 'Deshacer', onClick: () => undo() } });
     },
-    [commit, resetTransient, undo]
+    [commit, resetTransient, undo, canonicalHistory, dispatchCanonical]
   );
 
   const moveBlock = useCallback(
-    (key: string, dir: -1 | 1) =>
-    commit((d) => {
-      const i = d.blocks.findIndex((b) => b.key === key);
-      const j = i + dir;
-      if (i < 0 || j < 0 || j >= d.blocks.length) return d;
-      const blocks = [...d.blocks];
-      [blocks[i], blocks[j]] = [blocks[j], blocks[i]];
-      return { ...d, blocks };
-    }),
-    [commit]
+    (key: string, dir: -1 | 1) => {
+      if (canonicalHistory) {
+        dispatchCanonical({ type: 'MOVE_BLOCK', payload: { dir } });
+        return;
+      }
+      if (!commit((d) => {
+        const i = d.blocks.findIndex((b) => b.key === key);
+        const j = i + dir;
+        if (i < 0 || j < 0 || j >= d.blocks.length) return d;
+        const blocks = [...d.blocks];
+        [blocks[i], blocks[j]] = [blocks[j], blocks[i]];
+        return { ...d, blocks };
+      })) return;
+    },
+    [commit, canonicalHistory, dispatchCanonical]
   );
 
   const duplicateBlock = useCallback(
     (key: string) => {
+      if (canonicalHistory) {
+        dispatchCanonical({ type: 'DUPLICATE_BLOCK', payload: {} });
+        toast('Bloque duplicado');
+        return;
+      }
       const newKey = `${key.split('-')[0]}-${uid()}`;
-      commit((d) => {
+      if (!commit((d) => {
         const i = d.blocks.findIndex((b) => b.key === key);
         if (i < 0) return d;
         const blocks = [...d.blocks];
         blocks.splice(i + 1, 0, { key: newKey, type: d.blocks[i].type });
         const sourceProps = d.props[`block:${key}`];
         return { ...d, blocks, props: sourceProps ? { ...d.props, [`block:${newKey}`]: { ...sourceProps } } : d.props };
-      });
+      })) return;
       toast('Bloque duplicado');
     },
-    [commit]
+    [commit, canonicalHistory, dispatchCanonical]
   );
 
   const toggleHidden = useCallback(
-    (key: string) =>
-    commit((d) => ({ ...d, blocks: d.blocks.map((b) => b.key === key ? { ...b, hidden: !b.hidden } : b) })),
-    [commit]
+    (key: string) => {
+      if (canonicalHistory) {
+        // Not implemented for blocks natively yet
+        return;
+      }
+      if (!commit((d) => ({ ...d, blocks: d.blocks.map((b) => b.key === key ? { ...b, hidden: !b.hidden } : b) }))) return;
+    },
+    [commit, canonicalHistory]
   );
 
   const deleteBlock = useCallback(
     (key: string) => {
-      commit((d) => ({ ...d, blocks: d.blocks.filter((b) => b.key !== key) }));
+      if (canonicalHistory) {
+        dispatchCanonical({ type: 'DELETE_BLOCK', payload: {} });
+        resetTransient();
+        toast('Bloque eliminado', { action: { label: 'Deshacer', onClick: () => undo() } });
+        return;
+      }
+      if (!commit((d) => ({ ...d, blocks: d.blocks.filter((b) => b.key !== key) }))) return;
       resetTransient();
       toast('Bloque eliminado', { action: { label: 'Deshacer', onClick: () => undo() } });
     },
-    [commit, resetTransient, undo]
+    [commit, resetTransient, undo, canonicalHistory, dispatchCanonical]
   );
 
   const addBlock = useCallback(
     (type: BlockType, afterKey?: string) => {
+      if (canonicalHistory) return;
       const key = `${type}-${uid()}`;
-      commit((d) => {
+      if (!commit((d) => {
         const i = afterKey ? d.blocks.findIndex((b) => b.key === afterKey) : -1;
         const blocks = [...d.blocks];
         blocks.splice(i >= 0 ? i + 1 : blocks.length, 0, { key, type });
         return { ...d, blocks };
-      });
+      })) return;
       setPicker({ open: false });
       window.setTimeout(() => select(`block:${key}`, { reveal: true }), 80);
     },
-    [commit, select]
+    [canonicalHistory, commit, select]
   );
 
   const openPicker = useCallback((afterKey?: string) => {
@@ -379,6 +550,17 @@ export function EditorProvider({ children, initialTemplate = 'bio', initialDevic
 
   const publish = useCallback(() => {
     setPublishing(true);
+    if (canonicalHistory && onCanonicalPublish) {
+      const result = onCanonicalPublish(canonicalHistory.present);
+      Promise.resolve(result).then(() => {
+        setPublishing(false);
+        toast.success('Página publicada');
+      }).catch((error) => {
+        setPublishing(false);
+        toast.error(error instanceof Error ? error.message : 'No se pudo publicar la página.');
+      });
+      return;
+    }
     const result = onPublish?.({ templateId, doc });
     Promise.resolve(result).then(() => {
       setPublishing(false);
@@ -387,7 +569,7 @@ export function EditorProvider({ children, initialTemplate = 'bio', initialDevic
       setPublishing(false);
       toast.error(error instanceof Error ? error.message : 'No se pudo publicar la página.');
     });
-  }, [doc, onPublish, templateId]);
+  }, [doc, onPublish, templateId, canonicalHistory, onCanonicalPublish]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -409,6 +591,7 @@ export function EditorProvider({ children, initialTemplate = 'bio', initialDevic
     return () => window.removeEventListener('keydown', onKey);
   }, [undo, redo, resetTransient]);
 
+  const activeCanonicalDocument = canonicalHistory?.present ?? canonicalDocument;
   const value: EditorValue = {
     templateId,
     setTemplateId,
@@ -440,13 +623,14 @@ export function EditorProvider({ children, initialTemplate = 'bio', initialDevic
     settingsOpen,
     setSettingsOpen,
     saveState,
-    canUndo: history.past.length > 0,
-    canRedo: history.future.length > 0,
+    canUndo: canonicalHistory ? canonicalHistory.past.length > 0 : histories[templateId].past.length > 0,
+    canRedo: canonicalHistory ? canonicalHistory.future.length > 0 : histories[templateId].future.length > 0,
     undo,
     redo,
     setText,
     setTextStyle,
     setProp,
+    updateDoc,
     removeElement,
     moveBlock,
     duplicateBlock,
@@ -459,7 +643,11 @@ export function EditorProvider({ children, initialTemplate = 'bio', initialDevic
     getInfo,
     publishing,
     publish,
-    uploadAsset
+    uploadAsset,
+    canonicalDocument: activeCanonicalDocument,
+    canonicalIsNew,
+    canonicalEditing: canonicalHistory !== null,
+    semanticSelection,
   };
 
   return <EditorContext.Provider value={value}>{children}</EditorContext.Provider>;

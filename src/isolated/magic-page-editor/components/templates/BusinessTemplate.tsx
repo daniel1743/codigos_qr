@@ -1,12 +1,13 @@
 import React from "react";
 import { ArrowRightIcon, CalendarDaysIcon, DropletIcon, HomeIcon, MailIcon, PhoneIcon, SparklesIcon, BoxIcon } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { useEditor } from "../../contexts/EditorContext";
 import { useThemeTokens } from "../../hooks/useThemeTokens";
 import { Block } from "../editor/Block";
 import { Editable } from "../editor/Editable";
 import { EditableText } from "../editor/EditableText";
 import { EditableImage } from "../editor/EditableImage";
-import { EditableAvatar } from "../editor/EditableAvatar";
+import { EditableAvatar, VerifiedNameCheck } from "../editor/EditableAvatar";
 import { EditableCTA, CtaVariants } from "../editor/EditableCTA";
 import { EditableSocial } from "../editor/EditableSocial";
 import { PageRoot, useFooterTone } from "../editor/PageRoot";
@@ -21,7 +22,7 @@ import { bizCta, bizLocation, bizProfile, bizResults, bizServices, bizSocials } 
 import { cx } from "../../utils/cx";
 import { blockPrefix, toneVars } from "../../utils/styles";
 import { BlockRef } from "../../types/editor";
-const serviceIcons: Record<string, BoxIcon> = {
+const serviceIcons: Record<string, LucideIcon> = {
   calendar: CalendarDaysIcon,
   sparkles: SparklesIcon,
   home: HomeIcon,
@@ -129,7 +130,7 @@ export function BusinessTemplate() {
                   </div>
                   <div className={cx('mt-9 flex flex-wrap items-center gap-2.5', align === 'center' && 'justify-center')}>
                     {bizSocials.map((s, i) => <EditableSocial key={s.platform} id={`${p}hero.social.${i}`} platform={s.platform} href={s.href} size={40} defaultStyle="square" />)}
-                    <EditableText id={`${p}hero.byline`} value={bizProfile.byline} label="Firma" className="cq-muted ml-2 text-[13px]" />
+                    <span className="flex items-center"><EditableText id={`${p}hero.byline`} value={bizProfile.byline} label="Firma" className="cq-muted ml-2 text-[13px]" /><VerifiedNameCheck avatarId={`${p}avatar`} /></span>
                   </div>
                 </>}
             </HeroFrame>
@@ -146,7 +147,7 @@ export function BusinessTemplate() {
               <div data-collection={layout} className={cx('grid gap-5', layout === 'lista' ? m ? 'grid-cols-1' : 'grid-cols-2' : m ? 'grid-cols-1' : 'grid-cols-4')}>
                 {bizServices.map((s, i) => {
                   const cid = `${p}collection.${i}`;
-                  const Icon = serviceIcons[s.icon];
+                  const Icon = serviceIcons[s.icon] ?? BoxIcon;
                   if (layout === 'lista') {
                     return <Editable key={s.title} id={cid} kind="card" label="Card de servicio" className="relative grid overflow-hidden" style={{
                       ...toneVars(petrol),
@@ -209,7 +210,7 @@ export function BusinessTemplate() {
                     </span>} />
               <div className={cx('mt-3 grid gap-3', m ? 'grid-cols-1' : 'grid-cols-2')}>
                 {bizCta.secondary.map((s, i) => {
-                const Icon = serviceIcons[s.icon];
+                const Icon = serviceIcons[s.icon] ?? BoxIcon;
                 return <EditableCTA key={s.label} id={`${p}links.${i + 1}`} label={s.label} sub={s.sub} href={i === 0 ? 'tel:+34910000000' : 'mailto:hola@clinicaaurea.es'} variants={surfaceCta} defaultVariant="soft" fullDefault className="flex min-h-[80px] items-center gap-4 rounded-[22px] px-5 py-4 text-left" labelClassName="text-[16px] font-semibold" subClassName="cq-muted mt-0.5 text-[13px]" leading={<span className="grid h-11 w-11 shrink-0 place-items-center rounded-full" style={{
                   background: 'var(--surface)',
                   boxShadow: '0 0 0 1px var(--line)'
@@ -235,7 +236,7 @@ export function BusinessTemplate() {
             <LocationBlock prefix={p} title={bizLocation.title} name={bizLocation.name} address={bizLocation.address} hours={bizLocation.hours} radius={t.radius} accent={t.accent} displayFont={t.displayFont} ctaVariants={cta} />
           </Block>;
       default:
-        return <Block key={b.key} block={b} defaultSpacing={b.type === 'hero' ? 'none' : 'M'}>
+        return <Block key={b.key} block={b} defaultSpacing="M">
             <GenericBlock block={b} ctaVariants={cta} />
           </Block>;
     }

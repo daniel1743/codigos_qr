@@ -13,6 +13,7 @@ import {
 import type { BlockProps } from "./ContentBlocks";
 import { Dialog, DialogContent, DialogTitle } from "../../../components/ui/dialog";
 import { getGalleryColumns, moveGalleryLightboxIndex } from "./galleryImages";
+import { isElementVisible } from "../../state/elementVisibility";
 
 const ASPECT: Record<string, string> = {
   square: "1 / 1",
@@ -376,7 +377,7 @@ export function PortfolioBlock({ block }: BlockProps) {
                     {item.label}
                     <ArrowUpRight size={14} aria-hidden style={{ color: theme.colors.mutedText }} />
                   </div>
-                  {item.description ? (
+                  {item.description && isElementVisible(item.descriptionElement) ? (
                     <div
                       style={applyTypographyOverride(
                         { fontSize: 12.5, color: theme.colors.mutedText, marginTop: 2 },

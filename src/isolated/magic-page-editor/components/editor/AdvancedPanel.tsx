@@ -1,23 +1,33 @@
 import React from "react";
 import { CornerLeftUpIcon, LockIcon, RotateCcwIcon, Settings2Icon } from "lucide-react";
 import { useEditor } from "../../contexts/EditorContext";
+import { useThemeTokens } from "../../hooks/useThemeTokens";
 import { PanelSection } from "./controls/PanelSection";
 import { Segmented } from "./controls/Segmented";
 import { Toggle } from "./controls/Toggle";
 import { TextField } from "./controls/TextField";
 import { PositionPad } from "./controls/PositionPad";
+import {
+  MediaOverlayColorPicker,
+  MediaOverlayPicker,
+  MediaZoomPicker,
+} from "./controls/MediaTreatmentPicker";
 import { StructureRow } from "./StructureRow";
+import { HeroFusionPicker } from "./controls/HeroFusionPicker";
 import { blockLabels } from "../../data/blockKit";
 import { CardAdvanced } from "../cards/CardAdvanced";
 import { getCardContext } from "../cards/cardActions";
+import { heroFusionFromProps, mediaOverlayFromProps } from "../../utils/styles";
 
 /** "Más": the advanced layer. Same content on desktop (popover) and mobile (expanded sheet). */
 export function AdvancedPanel() {
   const ed = useEditor();
+  const t = useThemeTokens();
   const sel = ed.selection;
   if (!sel) return null;
   const id = sel.id;
   const p = ed.doc.props[id] ?? {};
+  const overlay = mediaOverlayFromProps(p);
   const el = ed.getElement(id);
   const set = (key: string, value: string) => ed.setProp(id, key, value);
   const block = sel.blockKey ? ed.doc.blocks.find((b) => b.key === sel.blockKey) : undefined;
@@ -86,6 +96,19 @@ export function AdvancedPanel() {
         : !!el?.querySelector('[aria-label="Perfil verificado"]');
       specific = (
         <>
+          <PanelSection title="Forma">
+            <Segmented
+              ariaLabel="Forma"
+              options={[
+                { value: "circle", label: "Círculo" },
+                { value: "rounded", label: "Redondeado" },
+                { value: "square", label: "Cuadrado" },
+                { value: "arch", label: "Arco" },
+              ]}
+              value={p.shape ?? "circle"}
+              onChange={(v) => set("shape", v)}
+            />
+          </PanelSection>
           <PanelSection title="Detalles">
             <Toggle
               label="Insignia verificada"
@@ -97,6 +120,7 @@ export function AdvancedPanel() {
           <PanelSection title="Encuadre">
             <PositionPad value={p.pos ?? "center"} onChange={(v) => set("pos", v)} />
           </PanelSection>
+          <MediaZoomPicker value={p["zoom"] ?? "1"} onChange={(v) => set("zoom", v)} />
         </>
       );
 
@@ -124,6 +148,12 @@ export function AdvancedPanel() {
     case "hero":
       specific = (
         <>
+          {ed.canonicalEditing && (
+            <HeroFusionPicker
+              value={heroFusionFromProps(p)}
+              onChange={(v) => set("fusion", v)}
+            />
+          )}
           <PanelSection title="Altura de la imagen">
             <Segmented
               ariaLabel="Altura"
@@ -136,9 +166,18 @@ export function AdvancedPanel() {
               onChange={(v) => set("height", v)}
             />
           </PanelSection>
-          <PanelSection title="Punto de enfoque">
+          <PanelSection title="Punto de enfoque" hint="Recorte: la parte de la foto que queda siempre visible.">
             <PositionPad value={p.pos ?? "center"} onChange={(v) => set("pos", v)} />
           </PanelSection>
+          <MediaZoomPicker value={p["zoom"] ?? "1"} onChange={(v) => set("zoom", v)} />
+          <MediaOverlayPicker value={overlay} onChange={(v) => set("overlay", v)} />
+          {overlay !== "none" && (
+            <MediaOverlayColorPicker
+              colors={t.swatches}
+              value={p["overlayColor"]}
+              onChange={(v) => set("overlayColor", v)}
+            />
+          )}
         </>
       );
 

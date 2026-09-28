@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import type {
   BlockStyle,
+  CTAStyle,
   CTAContent,
   DecorativeFramePreset,
   TemplateTheme,

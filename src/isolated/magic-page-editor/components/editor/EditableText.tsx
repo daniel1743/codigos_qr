@@ -14,6 +14,8 @@ interface EditableTextProps {
   style?: React.CSSProperties;
   selectable?: boolean;
   multiline?: boolean;
+  /** 'price' uses the price contract (edit, size, color, hide) but still edits inline. */
+  kind?: 'text' | 'price';
 }
 
 /** Text that edits inline: tap on desktop to type immediately, tap again on mobile to open the keyboard. */
@@ -25,10 +27,11 @@ export function EditableText({
   className,
   style,
   selectable = true,
-  multiline = false
+  multiline = false,
+  kind = 'text'
 }: EditableTextProps) {
   const ed = useEditor();
-  const { ref, handlers, removed } = useEditableElement(id, 'text', label, { selectable });
+  const { ref, handlers, removed } = useEditableElement(id, kind, label, { selectable });
   const text = ed.doc.texts[id] ?? value;
   const isEditing = ed.mode === 'edit' && ed.editingId === id;
 

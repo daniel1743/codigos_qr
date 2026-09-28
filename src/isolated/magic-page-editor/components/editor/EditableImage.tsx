@@ -2,6 +2,8 @@ import React from 'react';
 import { useEditor } from '../../contexts/EditorContext';
 import { Editable } from './Editable';
 import { cx } from '../../utils/cx';
+import { useFreeImagePan } from './controls/PositionPad';
+import { mediaOverlayStyleFromProps, mediaPhotoStyle } from '../../utils/styles';
 
 interface EditableImageProps {
   id: string;
@@ -13,10 +15,13 @@ interface EditableImageProps {
   children?: React.ReactNode;
 }
 
-/** An image that can be replaced, cropped and repositioned directly from the page. */
+/** An image that can be replaced, cropped, zoomed and repositioned directly from the page. */
 export function EditableImage({ id, src, alt, label = 'Imagen', className, style, children }: EditableImageProps) {
   const { doc } = useEditor();
   const p = doc.props[id] ?? {};
+  const overlay = mediaOverlayStyleFromProps(p);
+  const crop = useFreeImagePan(id, p['cropX'], p['cropY']);
+  const photoStyle = mediaPhotoStyle(p);
   return (
     <Editable
       id={id}
@@ -26,12 +31,14 @@ export function EditableImage({ id, src, alt, label = 'Imagen', className, style
       style={style}>
       
       <img
-        src={p.src ?? src}
-        alt={p.alt ?? alt}
+        src={p['src'] ?? src}
+        alt={p['alt'] ?? alt}
         draggable={false}
-        className="absolute inset-0 h-full w-full object-cover transition-transform duration-200 ease-out"
-        style={{ objectPosition: p.pos ?? 'center', transform: `scale(${p.zoom ?? '1'})` }} />
-      
+        {...crop.handlers}
+        className="absolute inset-0 h-full w-full touch-none object-cover transition-transform duration-200 ease-out"
+        style={p['cropX'] || p['cropY'] ? { ...photoStyle, objectPosition: crop.objectPosition } : photoStyle} />
+
+      {overlay && <div aria-hidden data-media-overlay={p['overlay']} style={overlay} />}
       {children}
     </Editable>);
 

@@ -7,6 +7,7 @@ import { DesktopCanvas } from "../components/editor/DesktopCanvas";
 import { MobileCanvas } from "../components/editor/MobileCanvas";
 import { BlockPicker } from "../components/editor/BlockPicker";
 import { PageSettings } from "../components/editor/PageSettings";
+import { CanonicalCanvas } from "./CanonicalReadOnlyPage";
 
 export function EditorPage() {
   const ed = useEditor();
@@ -15,7 +16,11 @@ export function EditorPage() {
       <TopBar />
       <StateTour />
       <main className="relative min-h-0 flex-1">
-        {ed.isMobile ? <MobileCanvas /> : <DesktopCanvas />}
+        {ed.canonicalDocument ? (
+           <CanonicalCanvas />
+        ) : (
+           ed.isMobile ? <MobileCanvas /> : <DesktopCanvas />
+        )}
         {ed.mode === "preview" && (
           <button
             type="button"

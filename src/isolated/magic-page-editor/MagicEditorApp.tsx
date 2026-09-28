@@ -4,6 +4,8 @@ import { EditorPage } from "./pages/Editor";
 import "./styles/magic-editor.css";
 import type { MagicEditorStateV1 } from "../../features/magic-page-editor-production/magic-document";
 import type { EditorMode } from "./types/editor";
+import type { BioTemplateConfig } from "../../premium-template-studio/types";
+import { CanonicalReadOnlyPage } from "./pages/CanonicalReadOnlyPage";
 
 export interface MagicEditorAppProps {
   defaultTemplate?: "bio" | "business" | "portfolio";
@@ -13,13 +15,13 @@ export interface MagicEditorAppProps {
   onDocumentChange?: (state: MagicEditorStateV1) => void;
   onPublish?: (state: MagicEditorStateV1) => Promise<void> | void;
   uploadAsset?: (file: File) => Promise<string>;
+  canonicalDocument?: BioTemplateConfig;
+  canonicalIsNew?: boolean;
+  onCanonicalDocumentChange?: (doc: BioTemplateConfig) => Promise<void> | void;
+  onCanonicalPublish?: (doc: BioTemplateConfig) => Promise<void> | void;
 }
 
-/**
- * Standalone Magic editor boundary.
- * It intentionally owns its local editor state and has no persistence or
- * dependency on any of Cripqer's existing editor systems.
- */
+/** Shared Magic-facing UI boundary for both Magic and canonical page documents. */
 export function MagicEditorApp({
   defaultTemplate = "bio",
   defaultDevice = "desktop",
@@ -28,6 +30,10 @@ export function MagicEditorApp({
   onDocumentChange,
   onPublish,
   uploadAsset,
+  canonicalDocument,
+  canonicalIsNew = false,
+  onCanonicalDocumentChange,
+  onCanonicalPublish,
 }: MagicEditorAppProps) {
   return (
     <div className="magic-editor-root h-screen w-full overflow-hidden">
@@ -39,6 +45,10 @@ export function MagicEditorApp({
         onDocumentChange={onDocumentChange}
         onPublish={onPublish}
         uploadAsset={uploadAsset}
+        canonicalDocument={canonicalDocument}
+        canonicalIsNew={canonicalIsNew}
+        onCanonicalDocumentChange={onCanonicalDocumentChange}
+        onCanonicalPublish={onCanonicalPublish}
       >
         <EditorPage />
         <Toaster

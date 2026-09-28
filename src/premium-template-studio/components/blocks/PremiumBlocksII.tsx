@@ -31,6 +31,13 @@ import type { BlockItem, TemplateBlock } from "../../types";
 import { ContextualItemTarget, InlineText } from "./primitives";
 import { ContextualEditingToolbar } from "../ContextualEditingToolbar";
 import { PremiumProductCardMagicV1 } from "./PremiumProductCardMagicV1";
+import { isElementVisible } from "../../state/elementVisibility";
+import {
+  cardLayoutStyle,
+  cardMediaStyle,
+  resolveCardLayout,
+  resolveCardPreset,
+} from "../../engine/cardEngine";
 
 // Dynamic Icon resolver
 function SmartIcon({
@@ -116,8 +123,9 @@ export function ProductCardBlock({
   collectionItemId?: string;
   isSelected?: boolean;
 }) {
-  const { theme, mode, onTrack, onSelectCollectionItem, onInlineEdit } = useRender();
+  const { theme, mode, breakpoint, onTrack, onSelectCollectionItem, onInlineEdit } = useRender();
   const c = block.content;
+  const item = c as unknown as BlockItem;
   const variant = block.variant ?? "card";
   const [selectedTextField, setSelectedTextField] = useState<string | null>(null);
   const [imageSelected, setImageSelected] = useState(false);
@@ -151,6 +159,15 @@ export function ProductCardBlock({
   const isMinimal = variant === "minimal";
   const isImageFirst = variant === "image-first";
   const isFeatured = variant === "featured";
+  const layout = resolveCardLayout(item, block);
+  const visualPreset = resolveCardPreset(item, block);
+  const cardMobile = breakpoint === "mobile";
+  const imageOnSide = !cardMobile && (layout === "image-left" || layout === "image-right");
+  const showBadge =
+    typeof c.badge === "string" && Boolean(c.badge) && isElementVisible(item.badgeElement);
+  const showPrice = Boolean(c.price) && isElementVisible(item.priceElement);
+  const showDescription = Boolean(c.description) && isElementVisible(item.descriptionElement);
+  const showCta = Boolean(c.ctaLabel) && isElementVisible(item.ctaElement);
 
   const wrapperStyle = isCatalogPremium
     ? {
@@ -174,6 +191,10 @@ export function ProductCardBlock({
       style={{
         ...wrapperStyle,
         position: "relative",
+        ...(visualPreset === "highlight"
+          ? { borderColor: theme.colors.accent, borderWidth: 2 }
+          : {}),
+        ...cardLayoutStyle(layout, cardMobile),
         display: "flex",
         flexDirection: "column",
         height: "100%",
@@ -210,6 +231,7 @@ export function ProductCardBlock({
       {mode === "edit" && isSelected && inlinePathPrefix && selectedTextField && onInlineEdit && (
         <ContextualEditingToolbar
           aria-label="Text styling"
+          ariaLabel="Text styling"
           onClick={(event) => event.stopPropagation()}
           style={{
             position: "absolute",
@@ -348,6 +370,7 @@ export function ProductCardBlock({
       {mode === "edit" && isSelected && inlinePathPrefix && imageSelected && (
         <ContextualEditingToolbar
           aria-label="Image controls"
+          ariaLabel="Image controls"
           onClick={(event) => event.stopPropagation()}
           style={{
             position: "absolute",
@@ -384,7 +407,7 @@ export function ProductCardBlock({
         </ContextualEditingToolbar>
       )}
       {/* Badge */}
-      {typeof c.badge === "string" && c.badge && (
+      {showBadge && (
         <span
           style={applyTypographyOverride(
             {
@@ -403,7 +426,11 @@ export function ProductCardBlock({
             c.typography,
           )}
         >
-          <InlineText path={inline("badge")} value={c.badge} onFocus={() => selectField("badge")} />
+          <InlineText
+            path={inline("badge")}
+            value={typeof c.badge === "string" ? c.badge : (c.badge?.label ?? "")}
+            onFocus={() => selectField("badge")}
+          />
         </span>
       )}
 
@@ -419,20 +446,38 @@ export function ProductCardBlock({
           }}
           style={{
             width: "100%",
-            height: isCatalogPremium ? "auto" : isFeatured ? 220 : 160,
+            height: isCatalogPremium ? "auto" : imageOnSide ? "100%" : isFeatured ? 220 : 160,
             aspectRatio: isCatalogPremium ? "4 / 3" : undefined,
             borderRadius: isCatalogPremium ? 14 : undefined,
             position: "relative",
             overflow: "hidden",
             background: isCatalogPremium ? "#efebe5" : undefined,
+            ...(imageOnSide ? { gridColumn: layout === "image-right" ? 2 : 1, gridRow: 1 } : {}),
           }}
         >
           <img
             src={c.imageUrl}
             alt={c.title ?? "Product Image"}
-            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            style={{ width: "100%", height: "100%", ...cardMediaStyle(item) }}
           />
-          {isCatalogPremium && c.imageProvenance?.origin === "reference_stock" && (
+          {item.media?.overlay && item.media.overlay !== "none" ? (
+            <div
+              aria-hidden
+              style={{
+                position: "absolute",
+                inset: 0,
+                background: item.media.overlayColor ?? "#111318",
+                opacity:
+                  item.media.overlay === "intense"
+                    ? 0.42
+                    : item.media.overlay === "medium"
+                      ? 0.26
+                      : 0.14,
+                pointerEvents: "none",
+              }}
+            />
+          ) : null}
+          {isCatalogPremium && item.imageProvenance?.origin === "reference_stock" && (
             <span
               style={{
                 position: "absolute",
@@ -461,6 +506,8 @@ export function ProductCardBlock({
           flex: 1,
           gap: 8,
           ...(isCatalogPremium ? { padding: 0, marginTop: 20, gap: 12 } : {}),
+          ...(imageOnSide ? { padding: 16 } : {}),
+          ...(imageOnSide ? { gridColumn: layout === "image-right" ? 1 : 2, gridRow: 1 } : {}),
         }}
       >
         <h3
@@ -477,7 +524,7 @@ export function ProductCardBlock({
           />
         </h3>
 
-        {c.description && (
+        {showDescription && (
           <div
             style={applyTypographyOverride(
               { fontSize: "12.5px", color: theme.colors.mutedText, lineHeight: 1.4, flex: 1 },
@@ -493,35 +540,37 @@ export function ProductCardBlock({
           </div>
         )}
 
-        <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "6px 0 2px" }}>
-          <span
-            style={applyTypographyOverride(
-              { fontSize: "16px", fontWeight: 700, color: theme.colors.text },
-              c.typography,
-            )}
-          >
-            <InlineText
-              path={inline("price")}
-              value={c.price ?? ""}
-              placeholder="$0.00"
-              onFocus={() => selectField("price")}
-            />
-          </span>
-          {c.comparePrice && (
+        {showPrice && (
+          <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "6px 0 2px" }}>
             <span
-              style={{
-                fontSize: "13px",
-                color: theme.colors.mutedText,
-                textDecoration: "line-through",
-                opacity: 0.7,
-              }}
+              style={applyTypographyOverride(
+                { fontSize: "16px", fontWeight: 700, color: theme.colors.text },
+                c.typography,
+              )}
             >
-              {c.comparePrice}
+              <InlineText
+                path={inline("price")}
+                value={c.price ?? ""}
+                placeholder="$0.00"
+                onFocus={() => selectField("price")}
+              />
             </span>
-          )}
-        </div>
+            {c.comparePrice && (
+              <span
+                style={{
+                  fontSize: "13px",
+                  color: theme.colors.mutedText,
+                  textDecoration: "line-through",
+                  opacity: 0.7,
+                }}
+              >
+                {c.comparePrice}
+              </span>
+            )}
+          </div>
+        )}
 
-        {c.ctaLabel && (
+        {showCta && (
           <button
             type="button"
             onClick={(event) => {

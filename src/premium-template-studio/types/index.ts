@@ -50,6 +50,49 @@ export interface ResponsiveVisibility {
   mobile: boolean;
 }
 
+/**
+ * Canonical element contract for future contextual remove/hide controls.
+ *
+ * Omission is intentional and backward compatible: an omitted element is
+ * optional=false, visible=true and protected=false. The contract is stored
+ * with the owning canonical object; it is not a parallel removed-state map.
+ */
+export interface ElementContract {
+  /** Whether the element may be removed by a future editor action. */
+  optional?: boolean;
+  /** Whether the element is enabled/renderable. Omitted means enabled. */
+  visible?: boolean;
+  /** Whether entitlement/structural rules protect the element from mutation. */
+  protected?: boolean;
+}
+
+export const DEFAULT_ELEMENT_CONTRACT = {
+  optional: false,
+  visible: true,
+  protected: false,
+} as const satisfies Required<ElementContract>;
+
+export type AvatarShape = "circle" | "rounded" | "square" | "none" | "arch";
+
+export type HeroFusionMode = "none" | "fade" | "halo" | "organic" | "dominant";
+
+/** Serializable media treatment contract. Omitted values preserve legacy output. */
+export interface MediaTreatment {
+  cropX?: number;
+  cropY?: number;
+  zoom?: number;
+  overlay?: "none" | "soft" | "medium" | "intense";
+  overlayColor?: string;
+}
+
+export const DEFAULT_MEDIA_TREATMENT = {
+  cropX: 50,
+  cropY: 50,
+  zoom: 1,
+  overlay: "none",
+  overlayColor: "#111318",
+} as const satisfies Required<MediaTreatment>;
+
 /* ------------------------------------------------------------------ */
 /* Theme                                                               */
 /* THEME EXTENSION POINT — add tokens here, then map them in           */
@@ -122,6 +165,18 @@ export interface ThemeTexture {
 }
 
 export type CardPreset = "minimal" | "soft" | "glass" | "elevated" | "flat" | "luxury";
+/** Canonical card compositions shared by compatible block families. */
+export type CardLayout =
+  | "image-left"
+  | "image-right"
+  | "image-top"
+  | "image-bottom"
+  | "balanced"
+  | "editorial"
+  | "compact"
+  | "highlight"
+  | "before-after";
+export type CardVisualPreset = "inherit" | "soft" | "flat" | "elevated" | "highlight";
 export type ButtonVariant = "solid" | "outline" | "ghost" | "glass" | "gradient" | "soft";
 
 export interface ThemeCards {
@@ -262,6 +317,7 @@ export interface TemplateProfile {
   locationTypography?: TypographyOverride;
   description?: string;
   descriptionTypography?: TypographyOverride;
+  descriptionElement?: ElementContract;
   verified?: boolean;
   /**
    * Trusted, system-controlled verification variant. Populated by the backend
@@ -270,6 +326,7 @@ export interface TemplateProfile {
    */
   verificationVariant?: "none" | "standard" | "official-gold";
   avatarUrl?: string;
+  avatarElement?: ElementContract;
   /** Whether the custom profile header participates in the layout. Missing means visible for legacy documents. */
   showAvatar?: boolean;
   avatar: {
@@ -279,6 +336,10 @@ export interface TemplateProfile {
     shadow: boolean;
     overlap: number;
     align: Alignment;
+    /** Omitted preserves the existing radius-based rendering. */
+    shape?: AvatarShape;
+    /** Optional canonical crop/zoom/overlay treatment for the profile avatar. */
+    media?: MediaTreatment;
     /**
      * Optional configurable rim. Absent ⇒ off (existing background-colored
      * border). Reuses `borderWidth` as the rim thickness.
@@ -407,6 +468,7 @@ export interface BlockItem {
   role?: string;
   quote?: string;
   source?: string;
+  badge?: string;
   rating?: number;
   recommended?: boolean;
   question?: string;
@@ -417,6 +479,12 @@ export interface BlockItem {
   location?: string;
   ctaLabel?: string;
   ctaUrl?: string;
+  /** Element-level contracts for future optional card controls. */
+  element?: ElementContract;
+  badgeElement?: ElementContract;
+  priceElement?: ElementContract;
+  descriptionElement?: ElementContract;
+  ctaElement?: ElementContract;
   linkUrl?: string;
   price?: string;
   period?: string;
@@ -431,6 +499,12 @@ export interface BlockItem {
   ctaStyle?: CTAStyle | undefined;
   /** Provenance for the product image; stock references are never publishable. */
   imageProvenance?: MediaProvenanceV1 | undefined;
+  /** Optional, opt-in L4 card composition. Missing preserves the legacy variant. */
+  cardLayout?: CardLayout;
+  cardVisualPreset?: CardVisualPreset;
+  cardEmphasis?: boolean;
+  /** Reuses the canonical L3 media treatment contract for card imagery. */
+  media?: MediaTreatment;
 }
 
 export interface HeroAvatarContent {
@@ -441,6 +515,9 @@ export interface HeroAvatarContent {
   overlap?: number;
   borderWidth?: number;
   shadow?: boolean | "none" | "soft" | "hard";
+  shape?: AvatarShape;
+  media?: MediaTreatment;
+  element?: ElementContract;
 }
 
 export type ImageFit = "cover" | "contain";
@@ -470,7 +547,7 @@ export interface MediaProvenanceV1 {
   attributionText?: string;
 }
 
-export interface HeroMediaContent {
+export interface HeroMediaContent extends MediaTreatment {
   url?: string;
   blur?: number;
   /** Absent → "cover" (current default). */
@@ -478,11 +555,13 @@ export interface HeroMediaContent {
   /** Absent → "center" (current default). */
   position?: ImagePosition;
   provenance?: MediaProvenanceV1;
+  element?: ElementContract;
 }
 
 export interface HeroBadgeContent {
   enabled?: boolean;
   label?: string;
+  element?: ElementContract;
 }
 
 export type BadgeContent = string | HeroBadgeContent;
@@ -512,6 +591,7 @@ export interface CTAContent {
    * remaining properties keep their theme/default values.
    */
   style?: CTAStyle;
+  element?: ElementContract;
 }
 
 export interface MapLocation {
@@ -556,6 +636,8 @@ export interface BlockStyle {
     angle?: number;
   };
   frame?: DecorativeFramePreset;
+  /** Declarative L0 contract only; rendering is intentionally unchanged. */
+  fusion?: HeroFusionMode;
 }
 
 export interface BlockLayout {
@@ -644,9 +726,12 @@ export interface TrustBadge {
 /** Free-form but serializable content bag, narrowed per block type. */
 export interface BlockContent {
   title?: string;
+  titleElement?: ElementContract;
   subtitle?: string;
+  subtitleElement?: ElementContract;
   body?: string;
   label?: string;
+  labelElement?: ElementContract;
   url?: string;
   imageUrl?: string;
   images?: { id: string; url: string; alt?: string }[];
@@ -665,6 +750,8 @@ export interface BlockContent {
   height?: number;
   alt?: string;
   description?: string;
+  descriptionElement?: ElementContract;
+  eyebrowElement?: ElementContract;
   typography?: TypographyOverride;
   descriptionTypography?: TypographyOverride;
   ctaStyle?: CTAStyle;
@@ -703,6 +790,8 @@ export interface BlockContent {
   disabledDates?: string[];
   location?: MapLocation;
   products?: BlockItem[];
+  /** Generic media treatment for future image/block controls. */
+  media?: MediaTreatment & { element?: ElementContract };
 }
 
 export interface TemplateBlock {
@@ -716,6 +805,8 @@ export interface TemplateBlock {
   interaction: BlockInteraction;
   motion?: BlockMotionOverride;
   locked?: boolean;
+  /** Canonical block-level removability/visibility contract. */
+  element?: ElementContract;
   responsive?: Record<
     Breakpoint,
     {

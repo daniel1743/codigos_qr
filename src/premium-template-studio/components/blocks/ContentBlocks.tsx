@@ -24,6 +24,7 @@ import {
   trustSignalLabel,
 } from "../../constants/trustSignals";
 import { BlockTitle, InlineText, SmartLink } from "./primitives";
+import { isElementVisible } from "../../state/elementVisibility";
 
 export interface BlockProps {
   block: TemplateBlock;
@@ -52,20 +53,22 @@ export function HeadingBlock({ block }: BlockProps) {
   const showTitle = mode === "edit" || !isUntouchedDefault;
   return (
     <header style={{ textAlign: align }}>
-      {block.variant === "eyebrow" && (block.content.subtitle || mode === "edit") && (
-        <div
-          style={{
-            fontSize: 11,
-            letterSpacing: "0.16em",
-            textTransform: "uppercase",
-            color: theme.colors.accent,
-            marginBottom: 8,
-            fontWeight: 600,
-          }}
-        >
-          {block.content.subtitle || (mode === "edit" ? "Section" : "")}
-        </div>
-      )}
+      {block.variant === "eyebrow" &&
+        (block.content.subtitle || mode === "edit") &&
+        isElementVisible(block.content.subtitleElement) && (
+          <div
+            style={{
+              fontSize: 11,
+              letterSpacing: "0.16em",
+              textTransform: "uppercase",
+              color: theme.colors.accent,
+              marginBottom: 8,
+              fontWeight: 600,
+            }}
+          >
+            {block.content.subtitle || (mode === "edit" ? "Section" : "")}
+          </div>
+        )}
       {showTitle && (
         <InlineText
           as="h2"
@@ -75,7 +78,9 @@ export function HeadingBlock({ block }: BlockProps) {
           style={{ ...headingStyle(theme, 0.62) }}
         />
       )}
-      {block.variant !== "eyebrow" && block.content.subtitle ? (
+      {block.variant !== "eyebrow" &&
+      block.content.subtitle &&
+      isElementVisible(block.content.subtitleElement) ? (
         <InlineText
           as="p"
           path={`blocks.${block.id}.content.subtitle`}

@@ -1,25 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { MagicEditorApp } from "../../isolated/magic-page-editor/MagicEditorApp";
-import type { TemplateId } from "../../isolated/magic-page-editor/types/editor";
-import {
-  createInitialMagicEditorState,
-  hydrateMagicEditorState,
-  serializeMagicEditorState,
-  type MagicEditorStateV1,
-} from "./magic-document";
+import { serializeMagicEditorState, type MagicEditorStateV1 } from "./magic-document";
+import { createPageEditorSession, type PageEditorSession } from "./document-session";
 import { getBrowserSupabaseClient } from "../../lib/supabase/client";
 import { magicPageService } from "../../services/magic-page.service";
+import { pageCanonicalService } from "../../services/page-canonical.service";
 import type { Page } from "../../types/database";
+import type { BioTemplateConfig } from "../../premium-template-studio/types";
 import MobilePlatformNav from "../../components/app-shell/MobilePlatformNav";
 
 const MEDIA_BUCKET = "avatars";
-
-function templateForPage(pageType: string): TemplateId {
-  if (pageType === "portfolio") return "portfolio";
-  if (pageType === "services" || pageType === "catalog") return "business";
-  return "bio";
-}
 
 function extensionOf(file: File): string {
   const extension = file.name.split(".").pop()?.toLowerCase();
@@ -36,20 +27,27 @@ export function MagicProductionEditorHost({ pageId }: { pageId: string }) {
   const [supabase] = useState(() => getBrowserSupabaseClient());
   const [session, setSession] = useState<Session | null>(null);
   const [page, setPage] = useState<Page | null>(null);
-  const [document, setDocument] = useState<MagicEditorStateV1 | null>(null);
+  const [editorSession, setEditorSession] = useState<PageEditorSession | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [revision, setRevision] = useState(0);
   const saveTimer = useRef<number | null>(null);
   const skipFirstChange = useRef(true);
   const pendingSave = useRef<{
-    state: MagicEditorStateV1;
+    state?: MagicEditorStateV1;
+    config?: BioTemplateConfig;
     resolve: Array<() => void>;
     reject: Array<(reason: unknown) => void>;
   } | null>(null);
 
   useEffect(() => {
     let active = true;
+    setLoading(true);
+    setError(null);
+    setSession(null);
+    setPage(null);
+    setEditorSession(null);
+    skipFirstChange.current = true;
     void (async () => {
       try {
         const { data } = await supabase.auth.getSession();
@@ -61,14 +59,16 @@ export function MagicProductionEditorHost({ pageId }: { pageId: string }) {
         );
         if (!ownedPage)
           throw new Error("La página no existe o no pertenece al usuario autenticado.");
-        const loaded = ownedPage.template_config
-          ? hydrateMagicEditorState(ownedPage.template_config)
-          : createInitialMagicEditorState(templateForPage(ownedPage.page_type));
+        const loaded = createPageEditorSession(
+          ownedPage.template_config,
+          ownedPage.title,
+          ownedPage.page_type,
+        );
         if (!active) return;
         setSession(data.session);
         setPage(ownedPage);
         setRevision(ownedPage.published_revision);
-        setDocument(loaded);
+        setEditorSession(loaded);
         setError(null);
       } catch (reason) {
         if (active)
@@ -91,7 +91,7 @@ export function MagicProductionEditorHost({ pageId }: { pageId: string }) {
 
   const save = useCallback(
     async (state: MagicEditorStateV1) => {
-      if (!page || !session) return;
+      if (!page || !session || editorSession?.kind !== "MAGIC_V1") return;
       await magicPageService.saveDraft(
         supabase,
         page.id,
@@ -99,7 +99,7 @@ export function MagicProductionEditorHost({ pageId }: { pageId: string }) {
         serializeMagicEditorState(state),
       );
     },
-    [page, session, supabase],
+    [editorSession?.kind, page, session, supabase],
   );
 
   const flushPendingSave = useCallback(
@@ -128,7 +128,8 @@ export function MagicProductionEditorHost({ pageId }: { pageId: string }) {
 
   const onDocumentChange = useCallback(
     (state: MagicEditorStateV1): Promise<void> => {
-      setDocument(state);
+      if (editorSession?.kind !== "MAGIC_V1") return Promise.resolve();
+      setEditorSession({ kind: "MAGIC_V1", document: state, canWrite: true });
       if (skipFirstChange.current) {
         skipFirstChange.current = false;
         return Promise.resolve();
@@ -154,12 +155,12 @@ export function MagicProductionEditorHost({ pageId }: { pageId: string }) {
       }, 650);
       return promise;
     },
-    [flushPendingSave],
+    [editorSession?.kind, flushPendingSave],
   );
 
   const onPublish = useCallback(
     async (state: MagicEditorStateV1) => {
-      if (!page || !session) return;
+      if (!page || !session || editorSession?.kind !== "MAGIC_V1") return;
       if (pendingSave.current) await flushPendingSave(state);
       else await save(state);
       const published = await magicPageService.publish(
@@ -172,7 +173,96 @@ export function MagicProductionEditorHost({ pageId }: { pageId: string }) {
       setRevision(published.published_revision);
       setPage(published);
     },
-    [flushPendingSave, page, revision, save, session, supabase],
+    [editorSession?.kind, flushPendingSave, page, revision, save, session, supabase],
+  );
+
+  const saveCanonical = useCallback(
+    async (config: BioTemplateConfig) => {
+      if (
+        !page ||
+        !session ||
+        (editorSession?.kind !== "CANONICAL_V1" && editorSession?.kind !== "NULL")
+      ) return;
+      await pageCanonicalService.saveDraft(supabase, page.id, session.user.id, config);
+    },
+    [editorSession?.kind, page, session, supabase],
+  );
+
+  const flushPendingCanonicalSave = useCallback(
+    async (configOverride?: BioTemplateConfig) => {
+      if (saveTimer.current) {
+        window.clearTimeout(saveTimer.current);
+        saveTimer.current = null;
+      }
+      const pending = pendingSave.current;
+      const config = configOverride ?? pending?.config;
+      if (!config) return;
+      try {
+        await saveCanonical(config);
+        pending?.resolve.forEach((resolve) => resolve());
+      } catch (reason) {
+        pending?.reject.forEach((reject) => reject(reason));
+        throw reason;
+      } finally {
+        if (pendingSave.current === pending) pendingSave.current = null;
+      }
+    },
+    [saveCanonical],
+  );
+
+  const onCanonicalDocumentChange = useCallback(
+    (config: BioTemplateConfig): Promise<void> => {
+      if (editorSession?.kind !== "CANONICAL_V1" && editorSession?.kind !== "NULL") {
+        return Promise.resolve();
+      }
+      setEditorSession({ kind: editorSession.kind, config, canWrite: true });
+      if (skipFirstChange.current) {
+        skipFirstChange.current = false;
+        return Promise.resolve();
+      }
+      if (pendingSave.current) {
+        pendingSave.current.config = config;
+      }
+      const promise = new Promise<void>((resolve, reject) => {
+        if (!pendingSave.current) {
+          pendingSave.current = { config, resolve: [resolve], reject: [reject] } as any;
+        } else {
+          pendingSave.current.resolve.push(resolve);
+          pendingSave.current.reject.push(reject);
+        }
+      });
+      if (saveTimer.current) window.clearTimeout(saveTimer.current);
+      saveTimer.current = window.setTimeout(() => {
+        saveTimer.current = null;
+        void flushPendingCanonicalSave().catch((reason) =>
+          setError(reason instanceof Error ? reason.message : "No se pudo guardar el borrador."),
+        );
+      }, 650);
+      return promise;
+    },
+    [editorSession?.kind, flushPendingCanonicalSave],
+  );
+
+  const onCanonicalPublish = useCallback(
+    async (config: BioTemplateConfig) => {
+      if (
+        !page ||
+        !session ||
+        (editorSession?.kind !== "CANONICAL_V1" && editorSession?.kind !== "NULL")
+      ) return;
+      if (pendingSave.current) await flushPendingCanonicalSave(config);
+      else await saveCanonical(config);
+      const published = await pageCanonicalService.publish(
+        supabase,
+        page.id,
+        session.user.id,
+        config,
+        revision,
+      );
+      setRevision(published.published_revision);
+      setPage(published);
+    },
+    [editorSession?.kind, flushPendingCanonicalSave, page, revision, saveCanonical, session, supabase],
   );
 
   const uploadAsset = useCallback(
@@ -195,7 +285,7 @@ export function MagicProductionEditorHost({ pageId }: { pageId: string }) {
         Cargando Magic Production…
       </div>
     );
-  if (error || !page || !session || !document) {
+  if (error || !page || !session || !editorSession) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-background px-6 text-foreground">
         <section className="max-w-lg rounded-2xl border border-border bg-card p-6 shadow-sm">
@@ -211,13 +301,43 @@ export function MagicProductionEditorHost({ pageId }: { pageId: string }) {
     );
   }
 
+  if (editorSession.kind === "DIRECT" || editorSession.kind === "UNKNOWN") {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-background px-6 text-foreground">
+        <section className="max-w-lg rounded-2xl border border-border bg-card p-6 shadow-sm">
+          <h1 className="text-xl font-semibold">Documento no compatible con este editor</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {editorSession.kind === "DIRECT"
+              ? "Esta página usa el formato Direct. No se modificó el documento."
+              : "El formato de esta página no se reconoce. No se modificó el documento."}
+          </p>
+        </section>
+      </main>
+    );
+  }
+
+  const canonicalSession = editorSession as Extract<
+    PageEditorSession,
+    { kind: "CANONICAL_V1" | "NULL" }
+  >;
+
   return (
     <>
       <MagicEditorApp
-        initialDocument={document}
-        onDocumentChange={onDocumentChange}
-        onPublish={onPublish}
-        uploadAsset={uploadAsset}
+        {...(editorSession.kind === "MAGIC_V1"
+          ? {
+              initialDocument: editorSession.document,
+              onDocumentChange,
+              onPublish,
+              uploadAsset,
+            }
+          : {
+              canonicalDocument: canonicalSession.config,
+              canonicalIsNew: canonicalSession.kind === "NULL",
+              onCanonicalDocumentChange,
+              onCanonicalPublish,
+              uploadAsset,
+            })}
       />
       <MobilePlatformNav editorPageId={pageId} />
     </>
