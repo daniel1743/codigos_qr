@@ -40,7 +40,7 @@ export default function MobileBottomNav({
   return (
     <nav
       aria-label="Navegación inferior"
-      className="fixed inset-x-3 bottom-3 z-30 grid min-h-[66px] grid-cols-5 rounded-2xl border border-[#e4ebf5] bg-white/95 p-1.5 shadow-[0_10px_30px_rgba(11,26,46,.12)] backdrop-blur lg:hidden"
+      className="fixed inset-x-3 bottom-[calc(14px+env(safe-area-inset-bottom))] z-30 mx-auto grid min-h-[68px] max-w-[440px] grid-cols-5 rounded-cq-2xl border border-cq-line/80 bg-white/95 p-1.5 shadow-nav backdrop-blur-sm lg:hidden"
     >
       {items.slice(0, 4).map((item) => {
         const Icon = item.icon;
@@ -51,9 +51,9 @@ export default function MobileBottomNav({
             to={item.to as never}
             params={item.params as never}
             aria-current={active ? "page" : undefined}
-            className={`flex min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 text-[10px] font-semibold ${active ? "bg-[#eaf2ff] text-[#0d47a1]" : "text-[#7a889b]"}`}
+            className={`relative flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 rounded-cq-lg px-1 text-[10.5px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cq-blue-200 ${active ? "bg-cq-blue-50 text-cq-blue ring-1 ring-inset ring-cq-blue-100" : "text-cq-muted"}`}
           >
-            <Icon className="h-5 w-5" aria-hidden />
+            <Icon className="h-[21px] w-[21px]" strokeWidth={active ? 2.3 : 1.7} aria-hidden />
             <span className="max-w-full truncate">{item.label}</span>
           </Link>
         );
@@ -61,10 +61,10 @@ export default function MobileBottomNav({
       <button
         type="button"
         onClick={onMenuClick}
-        className="flex min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 text-[10px] font-semibold text-[#7a889b]"
+        className="relative flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 rounded-cq-lg px-1 text-[10.5px] font-semibold text-cq-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cq-blue-200"
         aria-label="Abrir menú"
       >
-        <Menu className="h-5 w-5" aria-hidden />
+        <Menu className="h-[21px] w-[21px]" strokeWidth={1.7} aria-hidden />
         <span>Menú</span>
       </button>
     </nav>

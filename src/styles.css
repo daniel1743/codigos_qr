@@ -1,3 +1,6 @@
+/* CRIPQER MAGIC BRANDING (F1) — the webfont import must precede the Tailwind imports. */
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
+
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
@@ -9,6 +12,48 @@
 
 .scrollbar-none::-webkit-scrollbar {
   display: none;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Ultra-thin, low-contrast scrollbar for desktop panels (Magic parity). */
+.thin-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(91, 107, 140, 0.18) transparent;
+}
+
+.thin-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.thin-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.thin-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(91, 107, 140, 0.18);
+  border-radius: 999px;
+}
+
+.thin-scrollbar:hover::-webkit-scrollbar-thumb {
+  background: rgba(91, 107, 140, 0.3);
+}
+
+/* Mobile safe areas (Magic parity). */
+.pt-safe-top {
+  padding-top: max(24px, env(safe-area-inset-top));
+}
+
+.pb-safe-bottom {
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
 }
 
 /* Fonts */
@@ -74,6 +119,46 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+}
+
+/*
+ * CRIPQER MAGIC BRAND LAYER (F1) — canonical branding tokens for the
+ * authenticated application chrome (AppShell scope only).
+ *
+ * Tailwind v4 is CSS-first: the values declared here generate real
+ * utilities (bg-cq-blue, text-cq-ink, border-cq-line, rounded-cq-xl,
+ * shadow-soft, shadow-float, font-cq, max-w-cq-page).
+ */
+@theme {
+  --color-cq-blue: #1e56e0;
+  --color-cq-blue-700: #1745ba;
+  --color-cq-blue-200: #c9daff;
+  --color-cq-blue-100: #e3ecff;
+  --color-cq-blue-50: #f1f6ff;
+  --color-cq-gold: #d99a1e;
+  --color-cq-gold-50: #fdf5e3;
+  --color-cq-ink: #0b1733;
+  --color-cq-muted: #5b6b8c;
+  --color-cq-subtle: #8a97b2;
+  --color-cq-line: #e7ecf5;
+  --color-cq-canvas: #f8fafe;
+
+  --font-cq: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --radius-cq-xs: 12px;
+  --radius-cq-sm: 14px;
+  --radius-cq-md: 16px;
+  --radius-cq-lg: 20px;
+  --radius-cq-xl: 24px;
+  --radius-cq-2xl: 28px;
+  --radius-cq-drawer: 36px;
+
+  --shadow-soft: 0 1px 2px rgba(11, 23, 51, 0.04), 0 8px 24px -16px rgba(30, 86, 224, 0.18);
+  --shadow-float: 0 2px 4px rgba(11, 23, 51, 0.04), 0 24px 48px -20px rgba(30, 86, 224, 0.28);
+  --shadow-nav: 0 1px 2px rgba(11, 23, 51, 0.06), 0 10px 28px -10px rgba(11, 23, 51, 0.22), 0 20px 40px -20px rgba(30, 86, 224, 0.28);
+  --shadow-drawer: 24px 0 64px -24px rgba(11, 23, 51, 0.45);
+
+  --container-cq-page: 1240px;
 }
 
 :root {
@@ -185,4 +270,15 @@
 [data-platform-navbar="editor"] .logo-wordmark {
   font-size: 16px !important;
   letter-spacing: 0.12em !important;
+}
+
+/* Accessibility: honor the OS reduced-motion preference (Magic parity). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

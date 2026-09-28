@@ -55,7 +55,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#f7faff] text-[#111827]">
+    <div className="min-h-screen bg-cq-canvas font-cq text-cq-ink">
       <div className="flex min-h-screen">
         <DesktopSidebar user={user} pageState={pageState} />
         <div className="min-w-0 flex-1">

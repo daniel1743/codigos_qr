@@ -95,16 +95,27 @@ export default function MobileDrawer({
     };
   }, [open, onClose]);
 
+  const capturedPointer = useRef(false);
   const onPointerDown = (event: React.PointerEvent) => {
     startX.current = event.clientX;
-    event.currentTarget.setPointerCapture?.(event.pointerId);
+    capturedPointer.current = false;
   };
   const onPointerMove = (event: React.PointerEvent) => {
-    if (startX.current !== null) setDragX(Math.min(0, event.clientX - startX.current));
+    if (startX.current === null) return;
+    const deltaX = event.clientX - startX.current;
+    // Capture only once a real horizontal drag starts: capturing on
+    // pointerdown retargets the following click to the drawer itself and
+    // would swallow taps on its links (mobile navigation).
+    if (!capturedPointer.current && Math.abs(deltaX) > 8) {
+      capturedPointer.current = true;
+      event.currentTarget.setPointerCapture?.(event.pointerId);
+    }
+    setDragX(Math.min(0, deltaX));
   };
   const onPointerUp = () => {
     if (dragX < -80) onClose();
     startX.current = null;
+    capturedPointer.current = false;
     setDragX(0);
   };
   const onEdgePointerDown = (event: React.PointerEvent) => {
@@ -123,13 +134,14 @@ export default function MobileDrawer({
         <div
           aria-label="Abrir menú deslizando"
           className="fixed inset-y-0 left-0 z-30 w-6 lg:hidden"
+          style={{ touchAction: "pan-y" }}
           onPointerDown={onEdgePointerDown}
           onPointerUp={onEdgePointerUp}
         />
       )}
       <div
         aria-hidden={!open}
-        className={`fixed inset-0 z-40 bg-[#0b1a2e]/35 transition-opacity lg:hidden ${open ? "opacity-100" : "pointer-events-none opacity-0"}`}
+        className={`fixed inset-0 z-40 bg-cq-ink/35 transition-opacity lg:hidden ${open ? "opacity-100" : "pointer-events-none opacity-0"}`}
         style={{ opacity: overlayOpacity }}
         onClick={onClose}
       />
@@ -137,13 +149,13 @@ export default function MobileDrawer({
         ref={drawerRef}
         aria-label="Menú móvil"
         aria-hidden={!open}
-        className={`fixed inset-y-0 left-0 z-50 flex w-[min(88vw,350px)] flex-col rounded-r-[32px] bg-white shadow-[18px_0_40px_rgba(11,26,46,.18)] lg:hidden ${open ? "translate-x-0" : "-translate-x-full"} ${dragX !== 0 ? "transition-none" : "transition-transform duration-300 motion-reduce:transition-none"}`}
-        style={{ transform: open ? `translateX(${dragX}px)` : undefined }}
+        className={`fixed inset-y-0 left-0 z-50 flex w-[min(86vw,360px)] flex-col rounded-r-cq-drawer bg-white shadow-drawer ring-1 ring-cq-line/60 lg:hidden ${open ? "translate-x-0" : "-translate-x-full"} ${dragX !== 0 ? "transition-none" : "transition-transform duration-300 motion-reduce:transition-none"}`}
+        style={{ transform: open ? `translateX(${dragX}px)` : undefined, touchAction: "pan-y" }}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
       >
-        <div className="flex h-[76px] shrink-0 items-center justify-between border-b border-[#eef2f7] px-6">
+        <div className="flex min-h-[76px] shrink-0 items-center justify-between gap-3 border-b border-cq-line px-6 pt-[env(safe-area-inset-top)]">
           <Link to="/profile" onClick={onClose} aria-label="Cripqer">
             <Logo
               variant="horizontal"
@@ -157,7 +169,7 @@ export default function MobileDrawer({
             type="button"
             onClick={onClose}
             aria-label="Cerrar menú"
-            className="grid h-9 w-9 place-items-center rounded-full bg-[#f1f5fb] text-[#526176]"
+            className="grid h-9 w-9 place-items-center rounded-full bg-cq-canvas text-cq-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cq-blue"
           >
             <X className="h-4 w-4" />
           </button>
@@ -166,7 +178,7 @@ export default function MobileDrawer({
           className="scrollbar-none flex-1 overflow-y-auto px-5 py-6"
           aria-label="Menú principal"
         >
-          <p className="mb-3 px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-[#9aa7b8]">
+          <p className="mb-3 px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-cq-subtle">
             Espacio de trabajo
           </p>
           <div className="space-y-1">
@@ -180,23 +192,23 @@ export default function MobileDrawer({
                   params={item.params as never}
                   onClick={onClose}
                   aria-current={isActive ? "page" : undefined}
-                  className={`flex min-h-12 items-center gap-3 rounded-xl px-3.5 py-3 text-sm font-medium ${isActive ? "bg-[#eaf2ff] text-[#0d47a1]" : "text-[#526176] hover:bg-[#f4f7fb]"}`}
+                  className={`flex min-h-12 items-center gap-3 rounded-cq-sm px-3.5 py-3 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cq-blue-200 ${isActive ? "bg-cq-blue-50 text-cq-blue" : "text-cq-muted hover:bg-cq-canvas"}`}
                 >
-                  <Icon className="h-[18px] w-[18px]" aria-hidden />
+                  <Icon className="h-[18px] w-[18px]" strokeWidth={isActive ? 2 : 1.75} aria-hidden />
                   <span className="flex-1">{item.label}</span>
-                  <ChevronRight className="h-4 w-4 text-[#b0bbc8]" aria-hidden />
+                  <ChevronRight className="h-4 w-4 text-cq-subtle" aria-hidden />
                 </Link>
               );
             })}
           </div>
         </nav>
-        <div className="border-t border-[#eef2f7] p-5">
+        <div className="border-t border-cq-line p-5 pb-safe-bottom">
           <Link
             to="/account"
             onClick={onClose}
-            className="mb-4 flex items-center gap-3 rounded-xl p-2 hover:bg-[#f4f7fb]"
+            className="mb-4 flex items-center gap-3 rounded-cq-sm p-2 hover:bg-cq-canvas"
           >
-            <span className="grid h-10 w-10 place-items-center overflow-hidden rounded-full bg-[#eaf2ff] font-bold text-[#0d47a1]">
+            <span className="grid h-10 w-10 place-items-center overflow-hidden rounded-full bg-cq-blue-50 font-bold text-cq-blue">
               {user?.avatarUrl ? (
                 <img src={user.avatarUrl} alt="" className="h-full w-full object-cover" />
               ) : (
@@ -204,19 +216,19 @@ export default function MobileDrawer({
               )}
             </span>
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-sm font-semibold text-[#1a2433]">
+              <span className="block truncate text-sm font-semibold text-cq-ink">
                 {user?.name ?? "Tu cuenta"}
               </span>
-              <span className="block text-xs text-[#8290a3]">
+              <span className="block text-xs text-cq-subtle">
                 {user?.planLabel ?? "Plan gratuito"}
               </span>
             </span>
-            <Settings className="h-4 w-4 text-[#9aa7b8]" aria-hidden />
+            <Settings className="h-4 w-4 text-cq-subtle" aria-hidden />
           </Link>
           <Link
             to="/account"
             onClick={onClose}
-            className="flex items-center gap-2 px-2 text-xs text-[#8290a3]"
+            className="flex items-center gap-2 px-2 text-xs text-cq-subtle"
           >
             <HelpCircle className="h-4 w-4" aria-hidden />
             Ayuda y soporte

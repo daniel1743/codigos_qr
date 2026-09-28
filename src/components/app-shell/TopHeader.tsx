@@ -11,13 +11,13 @@ export default function TopHeader({
   onMenuClick: () => void;
 }) {
   return (
-    <header className="sticky top-0 z-20 flex h-[68px] items-center justify-between border-b border-[#e6edf7] bg-white/95 px-4 backdrop-blur lg:px-8">
+    <header className="sticky top-0 z-20 flex h-[68px] items-center justify-between border-b border-cq-line bg-white/85 px-4 backdrop-blur-md lg:px-10">
       <div className="flex items-center gap-3">
         <button
           type="button"
           onClick={onMenuClick}
           aria-label="Abrir menú"
-          className="grid h-10 w-10 place-items-center rounded-xl text-[#526176] hover:bg-[#f2f6fc] lg:hidden"
+          className="grid h-10 w-10 place-items-center rounded-cq-sm text-cq-muted hover:bg-cq-canvas focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cq-blue-200 lg:hidden"
         >
           <Menu className="h-5 w-5" aria-hidden />
         </button>
@@ -30,12 +30,12 @@ export default function TopHeader({
             className="h-7"
           />
         </Link>
-        <p className="hidden text-sm font-medium text-[#8290a3] lg:block">Inicio</p>
+        <p className="hidden text-sm font-medium text-cq-subtle lg:block">Inicio</p>
       </div>
       <div className="flex items-center gap-2 sm:gap-4">
         <Link
           to="/pages/new"
-          className="inline-flex h-10 items-center gap-2 rounded-xl bg-[#0d47a1] px-3 text-sm font-semibold text-white shadow-[0_5px_14px_rgba(13,71,161,.16)] transition-colors hover:bg-[#0a3b87] sm:px-4"
+          className="inline-flex h-10 items-center gap-2 rounded-cq-sm bg-cq-blue px-3 text-sm font-semibold text-white shadow-[0_10px_24px_-10px_rgba(30,86,224,0.6)] transition-[background-color,transform] hover:bg-cq-blue-700 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-cq-blue-200 sm:px-4"
         >
           <Plus className="h-4 w-4" aria-hidden />
           <span className="hidden sm:inline">Crear página</span>
@@ -43,7 +43,7 @@ export default function TopHeader({
         </Link>
         <Link
           to="/account"
-          className="hidden h-9 w-9 overflow-hidden rounded-full bg-[#eaf2ff] text-center text-sm font-bold leading-9 text-[#0d47a1] sm:block"
+          className="hidden h-9 w-9 overflow-hidden rounded-full bg-cq-blue-50 text-center text-sm font-bold leading-9 text-cq-blue sm:block"
           aria-label="Abrir cuenta"
         >
           {user?.avatarUrl ? (
