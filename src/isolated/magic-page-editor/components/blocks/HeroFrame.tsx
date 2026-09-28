@@ -6,7 +6,8 @@ import { useFreeImagePan } from '../editor/controls/PositionPad';
 import { Editable } from '../editor/Editable';
 import { mediaShapeStyle } from '../../utils/styles';
 
-export type HeroShape = 'curve' | 'straight' | 'inset';
+export type HeroShape = 'curve' | 'straight' | 'inset' | 'curve-deep' | 'curve-up' | 'curve-up-deep' | 'wave' | 'wave-double' | 'arch';
+export const heroShapeIds: readonly HeroShape[] = ['curve', 'straight', 'inset', 'curve-deep', 'curve-up', 'curve-up-deep', 'wave', 'wave-double', 'arch'];
 type HeroHeight = 'S' | 'M' | 'L';
 
 interface HeroContext {
@@ -33,6 +34,26 @@ interface HeroFrameProps {
 const HEIGHTS: Record<HeroHeight, number> = { S: 220, M: 320, L: 460 };
 const SCALE: Record<HeroHeight, number> = { S: 0.85, M: 1, L: 1.2 };
 
+/** New silhouettes only affect the visual media boundary; legacy shapes keep their exact styles. */
+export function heroFrameMediaShapeStyle(shape: HeroShape, curve: number): React.CSSProperties {
+  switch (shape) {
+    case 'curve-deep':
+      return { borderRadius: `0 0 50% 50% / 0 0 ${Math.round(curve * 1.8)}px ${Math.round(curve * 1.8)}px` };
+    case 'curve-up':
+      return { borderRadius: `50% 50% 0 0 / ${curve}px ${curve}px 0 0` };
+    case 'curve-up-deep':
+      return { borderRadius: `50% 50% 0 0 / ${Math.round(curve * 1.8)}px ${Math.round(curve * 1.8)}px 0 0` };
+    case 'wave':
+      return { borderRadius: '0 0 68% 32% / 0 0 28% 18%' };
+    case 'wave-double':
+      return { borderRadius: '0 0 32% 68% / 0 0 18% 28%' };
+    case 'arch':
+      return { borderRadius: '50% 50% 14% 14% / 38% 38% 14% 14%' };
+    default:
+      return {};
+  }
+}
+
 /** One hero structure, ten variants. Templates only supply the skin (content, avatar, decor). */
 export function HeroFrame({
   id,
@@ -51,7 +72,8 @@ export function HeroFrame({
   const { doc, isMobile: m } = useEditor();
   const p = doc.props[id] ?? {};
   const variant = p['variant'] as HeroVariant ?? defaultVariant;
-  const shape = p['shape'] as HeroShape ?? defaultShape;
+  const storedShape = p['shape'] as HeroShape | undefined;
+  const shape = storedShape && heroShapeIds.includes(storedShape) ? storedShape : defaultShape;
   const heightKey = p['height'] as HeroHeight ?? defaultHeight;
   const H = Math.round(HEIGHTS[heightKey] * (m ? 0.68 : 1));
   const curve = m ? 40 : 72;
@@ -67,8 +89,9 @@ export function HeroFrame({
   const photo = (url: string, position: string, interactive = false) =>
   <img src={url} alt={mediaAlt} draggable={false} {...(interactive ? crop.handlers : {})} className="absolute inset-0 h-full w-full object-cover" style={{ objectPosition: p['cropX'] || p['cropY'] ? crop.objectPosition : position, transform: `scale(${p['zoom'] ?? '1'})` }} />;
 
+  const newShapeStyle = heroFrameMediaShapeStyle(shape, curve);
   const img =
-  <Editable id={`${id}:hero-image`} kind="image" label="Imagen de portada" aria-label="Imagen de portada" className="pointer-events-auto absolute inset-0 z-0" style={{ ...mediaShapeStyle(p['mediaShape']) }}>
+  <Editable id={`${id}:hero-image`} kind="image" label="Imagen de portada" aria-label="Imagen de portada" className="pointer-events-auto absolute inset-0 z-0 overflow-hidden" style={{ ...mediaShapeStyle(p['mediaShape']), ...newShapeStyle }}>
     {photo(src, p['pos'] ?? 'center', true)}{overlay}{fusionLayer}
   </Editable>;
 
@@ -166,7 +189,7 @@ export function HeroFrame({
         <div
           {...data}
           className="flex flex-col items-center text-center"
-          style={{ background: 'var(--surface)', padding: m ? '52px 20px' : '84px 40px', ...(shape === 'inset' ? { borderRadius: radius, margin: inset } : {}) }}>
+          style={{ background: 'var(--surface)', padding: m ? '52px 20px' : '84px 40px', ...(shape === 'inset' ? { borderRadius: radius, margin: inset } : {}), ...newShapeStyle }}>
 
           {avatar && <div className="mb-6">{avatar}</div>}
           {children({ align: 'center', onMedia: false })}

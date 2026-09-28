@@ -45,6 +45,7 @@ import { FontPicker } from './controls/FontPicker';
 import { PalettePicker } from './controls/PalettePicker';
 import { DecorationPicker } from './controls/DecorationPicker';
 import { TypographyTreatmentPicker } from './controls/TypographyTreatmentPicker';
+import { HeroFrameShapePicker } from './controls/HeroFrameShapePicker';
 import { socialPlatforms } from '../../data/socialPlatforms';
 import { familyForBlockType } from '../../data/cardFamilies';
 import { CardLayoutPicker } from '../cards/CardLayoutPicker';
@@ -54,6 +55,7 @@ import type { CardLayout } from '../../types/editor';
 import type { EditorAction } from './editorAction';
 import type { CtaVariant } from './EditableCTA';
 import type { HeroVariant, SocialPlatform, TextAlign } from '../../types/editor';
+import type { HeroShape } from '../blocks/HeroFrame';
 
 /** The universal editing contract, per element kind. Same list feeds the desktop toolbar and the mobile sheet. */
 export function useSelectionActions(): EditorAction[] {
@@ -240,16 +242,12 @@ export function useSelectionActions(): EditorAction[] {
         key: 'shape',
         label: 'Forma',
         icon: ShapesIcon,
-        panel:
-        <Segmented
-          ariaLabel="Forma de la portada"
-          options={[
-          { value: 'curve', label: 'Curva' },
-          { value: 'straight', label: 'Recta' },
-          { value: 'inset', label: 'Enmarcada' }]
-          }
-          value={props.shape ?? el?.querySelector('[data-hero]')?.getAttribute('data-shape') as string ?? 'curve'}
-          onChange={(v) => set('shape', v)} />
+        showLabel: true,
+        panel: <PanelSection title="Forma de la portada">
+          <HeroFrameShapePicker
+            value={(props.shape ?? el?.querySelector('[data-hero]')?.getAttribute('data-shape') ?? 'curve') as HeroShape}
+            onChange={(v) => set('shape', v)} />
+        </PanelSection>
 
 
       },
