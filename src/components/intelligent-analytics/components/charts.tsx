@@ -137,7 +137,8 @@ export function AreaChart({
         >
           <defs>
             <linearGradient id="cqArea" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="var(--cq-accent)" stopOpacity="0.38" />
+              <stop offset="0%" stopColor="var(--cq-accent)" stopOpacity="0.32" />
+              <stop offset="55%" stopColor="var(--cq-accent)" stopOpacity="0.12" />
               <stop offset="100%" stopColor="var(--cq-accent)" stopOpacity="0" />
             </linearGradient>
           </defs>
@@ -150,15 +151,18 @@ export function AreaChart({
               y2={height * ratio}
               stroke="var(--cq-border)"
               strokeWidth="1"
+              strokeDasharray="2 8"
+              vectorEffect="non-scaling-stroke"
             />
           ))}
           {compare && compare.length > 0 ? (
             <path
               d={path(compare, width, height, max, false)}
               fill="none"
-              stroke="var(--cq-muted)"
-              strokeWidth="1.5"
-              strokeDasharray="5 5"
+              stroke="var(--cq-subtle)"
+              strokeWidth="1.75"
+              strokeDasharray="4 6"
+              strokeLinecap="round"
               vectorEffect="non-scaling-stroke"
             />
           ) : null}
@@ -167,7 +171,7 @@ export function AreaChart({
             d={path(series, width, height, max, false)}
             fill="none"
             stroke="var(--cq-accent)"
-            strokeWidth="2.5"
+            strokeWidth="2.4"
             strokeLinejoin="round"
             strokeLinecap="round"
             vectorEffect="non-scaling-stroke"
@@ -176,8 +180,10 @@ export function AreaChart({
             <circle
               cx={pointAt(peakIndex).x}
               cy={pointAt(peakIndex).y}
-              r="4"
+              r="4.5"
               fill="var(--cq-record)"
+              stroke="var(--cq-surface)"
+              strokeWidth="1.5"
               vectorEffect="non-scaling-stroke"
             />
           ) : null}
@@ -190,10 +196,17 @@ export function AreaChart({
                 y2={height}
                 stroke="var(--cq-accent)"
                 strokeWidth="1"
-                strokeDasharray="3 3"
+                strokeDasharray="2 6"
                 vectorEffect="non-scaling-stroke"
               />
-              <circle cx={activeCoords.x} cy={activeCoords.y} r="4.5" fill="var(--cq-accent)" />
+              <circle
+                cx={activeCoords.x}
+                cy={activeCoords.y}
+                r="5"
+                fill="var(--cq-accent)"
+                stroke="var(--cq-surface)"
+                strokeWidth="1.5"
+              />
             </>
           ) : null}
         </svg>
@@ -276,7 +289,7 @@ export function ProgressRing({
         cy={size / 2}
         r={radius}
         fill="none"
-        stroke="var(--cq-border)"
+        stroke="var(--cq-accent-faint)"
         strokeWidth="6"
       />
       <circle
@@ -297,6 +310,7 @@ export function ProgressRing({
         dominantBaseline="middle"
         fontSize={size / 4.2}
         fontWeight="700"
+        letterSpacing="-0.02em"
         fill="var(--cq-text)"
       >
         {Math.round(value * 100)}%
@@ -330,7 +344,7 @@ export function Sparkline({
         d={path(series, width, height, max, false)}
         fill="none"
         stroke={`var(--cq-${tone})`}
-        strokeWidth="2"
+        strokeWidth="1.75"
         strokeLinejoin="round"
         strokeLinecap="round"
         vectorEffect="non-scaling-stroke"
@@ -422,7 +436,7 @@ export function Donut({ items }: { items: RankedItemV1[] }) {
   ];
 
   return (
-    <div style={{ display: "flex", gap: 18, alignItems: "center", flexWrap: "wrap" }}>
+    <div className="cq-donut">
       <svg width="140" height="140" viewBox="0 0 140 140" role="img" aria-label="Distribution">
         {items.slice(0, 4).map((item, i) => {
           const fraction = item.value / total;
@@ -435,8 +449,8 @@ export function Donut({ items }: { items: RankedItemV1[] }) {
               r={radius}
               fill="none"
               stroke={palette[i % palette.length]}
-              strokeWidth="16"
-              strokeDasharray={`${dash} ${circumference - dash}`}
+              strokeWidth="14"
+              strokeDasharray={`${Math.max(dash - 3, 0.5)} ${circumference - dash + 3}`}
               strokeDashoffset={-offset}
               transform="rotate(-90 70 70)"
             />
@@ -445,14 +459,9 @@ export function Donut({ items }: { items: RankedItemV1[] }) {
           return element;
         })}
       </svg>
-      <ul
-        style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: 8, minWidth: 140 }}
-      >
+      <ul className="cq-donut__legend">
         {items.slice(0, 4).map((item, i) => (
-          <li
-            key={item.id}
-            style={{ fontSize: 13, display: "flex", justifyContent: "space-between", gap: 10 }}
-          >
+          <li key={item.id} className="cq-donut__item">
             <span>
               <span
                 className="cq-legend__dot"

@@ -6,7 +6,6 @@ import "../components/intelligent-analytics/analytics.css";
 import { AppShell } from "../components/app-shell/AppShell";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { getBrowserSupabaseClient } from "../lib/supabase/client";
 import {
   ANALYTICS_SCENARIOS,
@@ -40,17 +39,36 @@ const EMPTY: PageAnalyticsSummary = {
 
 function MetricCard({ label, value, icon }: { label: string; value: number; icon: ReactNode }) {
   return (
-    <Card>
-      <CardContent className="flex items-center justify-between gap-4 py-5">
-        <div>
-          <p className="text-sm text-muted-foreground">{label}</p>
-          <p className="mt-1 text-3xl font-semibold tracking-tight">
-            {value.toLocaleString("es-CL")}
-          </p>
-        </div>
-        <div className="rounded-full bg-primary/10 p-3 text-primary">{icon}</div>
-      </CardContent>
-    </Card>
+    <div className="flex items-start justify-between gap-4 rounded-cq-lg bg-cq-blue-50 p-4 sm:rounded-cq-xl sm:p-5">
+      <div className="min-w-0">
+        <p className="text-[12.5px] font-medium text-cq-muted">{label}</p>
+        <p className="mt-1.5 text-[26px] font-semibold leading-none tracking-[-0.03em] text-cq-ink tabular-nums">
+          {value.toLocaleString("es-CL")}
+        </p>
+      </div>
+      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white text-cq-blue shadow-soft">
+        {icon}
+      </span>
+    </div>
+  );
+}
+
+function Panel({
+  title,
+  children,
+  className,
+}: {
+  title: string;
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <section
+      className={`rounded-cq-lg border border-cq-line bg-white p-4 shadow-soft sm:rounded-cq-xl sm:p-5 ${className ?? ""}`}
+    >
+      <h3 className="text-[15px] font-semibold tracking-[-0.01em] text-cq-ink">{title}</h3>
+      <div className="mt-4">{children}</div>
+    </section>
   );
 }
 
@@ -169,40 +187,42 @@ function PageAnalytics() {
 
   return (
     <AppShell>
-      <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:py-12">
-        <Button asChild variant="ghost" size="sm" className="mb-6">
+      <main className="mx-auto w-full max-w-cq-page px-4 pb-16 pt-6 sm:px-6 lg:px-10 lg:pt-10">
+        <Button asChild variant="ghost" size="sm" className="rounded-full">
           <Link to="/pages">
             <ArrowLeft className="mr-2 h-4 w-4" /> Volver a mis páginas
           </Link>
         </Button>
 
         {loading ? (
-          <p className="text-sm text-muted-foreground">Cargando estadísticas…</p>
+          <p className="mt-6 text-[13.5px] text-cq-muted">Cargando estadísticas…</p>
         ) : error || !page ? (
-          <Card>
-            <CardContent className="py-10 text-center text-sm text-destructive">
-              {error ?? "No se encontró esta página."}
-            </CardContent>
-          </Card>
+          <section className="mt-6 rounded-cq-lg border border-cq-line bg-white p-8 text-center text-[13.5px] shadow-soft sm:rounded-cq-xl">
+            <p className="text-destructive">{error ?? "No se encontró esta página."}</p>
+          </section>
         ) : (
           <>
-            <header className="flex flex-col gap-3 border-b border-border pb-6 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h1 className="flex items-center gap-2 text-2xl font-semibold tracking-tight">
-                  <BarChart3 className="h-6 w-6" /> Estadísticas
+            <header className="mt-6 min-w-0">
+              <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-cq-subtle">
+                {days === 1 ? "Hoy" : `Últimos ${days} días`}
+              </p>
+              <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2">
+                <h1 className="flex items-center gap-2 text-[26px] font-bold leading-none tracking-[-0.035em] text-cq-ink sm:text-[34px]">
+                  <BarChart3 className="h-6 w-6 text-cq-blue" /> Estadísticas
                 </h1>
-                <p className="mt-1 text-sm text-muted-foreground">{page.title}</p>
+                <Badge variant={page.published ? "default" : "secondary"} className="rounded-full">
+                  {page.published ? "Publicada" : "Borrador"}
+                </Badge>
               </div>
-              <Badge variant={page.published ? "default" : "secondary"}>
-                {page.published ? "Publicada" : "Borrador"}
-              </Badge>
+              <p className="mt-3 max-w-2xl text-[14px] leading-relaxed text-cq-muted">{page.title}</p>
             </header>
 
             {import.meta.env.DEV ? (
-              <div className="mt-4 flex flex-wrap items-center gap-2 rounded-lg border border-dashed border-border bg-muted/30 p-3 text-sm">
-                <span className="font-medium">Analytics QA</span>
+              <div className="mt-4 flex flex-wrap items-center gap-2 rounded-cq-lg border border-dashed border-cq-blue-200 bg-cq-blue-50/70 p-3 text-[13px]">
+                <span className="font-semibold text-cq-ink">Analytics QA</span>
                 <Button
                   size="sm"
+                  className="rounded-full"
                   variant={mode === "fixtures" ? "default" : "outline"}
                   onClick={() => setMode("fixtures")}
                 >
@@ -210,6 +230,7 @@ function PageAnalytics() {
                 </Button>
                 <Button
                   size="sm"
+                  className="rounded-full"
                   variant={mode === "real" ? "default" : "outline"}
                   onClick={() => setMode("real")}
                 >
@@ -217,17 +238,18 @@ function PageAnalytics() {
                 </Button>
                 <Button
                   size="sm"
+                  className="rounded-full"
                   variant={mode === "legacy" ? "default" : "outline"}
                   onClick={() => setMode("legacy")}
                 >
                   Dashboard anterior
                 </Button>
                 {mode === "fixtures" ? (
-                  <label className="flex items-center gap-2">
+                  <label className="flex items-center gap-2 text-cq-muted">
                     Escenario
                     <select
                       aria-label="Escenario de analytics"
-                      className="rounded-md border border-border bg-background px-2 py-1"
+                      className="rounded-full border border-cq-line bg-white px-3 py-1.5 text-cq-ink"
                       value={fixture}
                       onChange={(event) => setFixture(event.target.value as ScenarioId)}
                     >
@@ -313,17 +335,33 @@ function PageAnalytics() {
             ) : null}
 
             {mode === "legacy" ? (
-              <div className="mt-6 flex flex-wrap gap-2" aria-label="Periodo de estadísticas">
-                {[1, 7, 30].map((range) => (
-                  <Button
-                    key={range}
-                    size="sm"
-                    variant={days === range ? "default" : "outline"}
-                    onClick={() => setDays(range)}
-                  >
-                    {range === 1 ? "Hoy" : `Últimos ${range} días`}
-                  </Button>
-                ))}
+              <div
+                className="mt-6 flex flex-wrap items-center gap-2 rounded-cq-lg border border-cq-line bg-white p-2 shadow-soft sm:rounded-cq-xl"
+                aria-label="Periodo de estadísticas"
+              >
+                <span
+                  className="px-2 text-[10.5px] font-bold uppercase tracking-[0.12em] text-cq-subtle"
+                  aria-hidden="true"
+                >
+                  Periodo
+                </span>
+                <div className="flex flex-wrap gap-2" role="group">
+                  {[1, 7, 30].map((range) => (
+                    <button
+                      key={range}
+                      type="button"
+                      aria-pressed={days === range}
+                      onClick={() => setDays(range)}
+                      className={
+                        days === range
+                          ? "rounded-full bg-cq-blue px-3.5 py-1.5 text-[13px] font-semibold text-white shadow-soft"
+                          : "rounded-full bg-cq-blue-50 px-3.5 py-1.5 text-[13px] font-semibold text-cq-muted transition-colors hover:text-cq-ink"
+                      }
+                    >
+                      {range === 1 ? "Hoy" : `Últimos ${range} días`}
+                    </button>
+                  ))}
+                </div>
               </div>
             ) : null}
 
@@ -360,66 +398,68 @@ function PageAnalytics() {
             ) : null}
 
             {mode === "legacy" && !hasEvents ? (
-              <Card className="mt-6">
-                <CardHeader>
-                  <CardTitle>Todavía no hay visitas</CardTitle>
-                </CardHeader>
-                <CardContent className="text-sm text-muted-foreground">
+              <section className="mt-6 rounded-cq-lg border border-dashed border-cq-blue-200 bg-cq-blue-50/60 p-6 text-center sm:rounded-cq-xl">
+                <h3 className="text-[15px] font-semibold tracking-[-0.01em] text-cq-ink">
+                  Todavía no hay visitas
+                </h3>
+                <p className="mx-auto mt-2 max-w-md text-[13.5px] leading-relaxed text-cq-muted">
                   Comparte tu página o tu QR y aquí podrás ver cómo interactúan las personas.
-                </CardContent>
-              </Card>
+                </p>
+              </section>
             ) : mode === "legacy" ? (
-              <div className="mt-6 grid gap-6 lg:grid-cols-2">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Visitas por día</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
+              <div className="mt-6 grid gap-4 lg:grid-cols-2">
+                <Panel title="Visitas por día">
+                  <div className="space-y-2">
                     {summary.dailyVisits.map((item) => (
-                      <div key={item.date} className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">{item.date}</span>
-                        <span className="font-medium">{item.count}</span>
+                      <div key={item.date} className="flex items-center justify-between text-[13px]">
+                        <span className="text-cq-muted">{item.date}</span>
+                        <span className="font-semibold text-cq-ink tabular-nums">{item.count}</span>
                       </div>
                     ))}
-                  </CardContent>
-                </Card>
-                {(summary.topProducts.length > 0 || summary.topServices.length > 0) && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Interés por producto o servicio</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4 text-sm">
-                      {summary.topProducts.length > 0 && (
+                  </div>
+                </Panel>
+                {summary.topProducts.length > 0 || summary.topServices.length > 0 ? (
+                  <Panel title="Interés por producto o servicio">
+                    <div className="space-y-4 text-[13px]">
+                      {summary.topProducts.length > 0 ? (
                         <div>
-                          <p className="mb-2 font-medium">Productos</p>
+                          <p className="mb-2 text-[12.5px] font-semibold uppercase tracking-[0.08em] text-cq-subtle">
+                            Productos
+                          </p>
                           {summary.topProducts.map((item) => (
                             <div
                               key={`product-${item.label}`}
                               className="flex justify-between gap-4 py-1"
                             >
-                              <span className="text-muted-foreground">{item.label}</span>
-                              <span>{item.count}</span>
+                              <span className="text-cq-muted">{item.label}</span>
+                              <span className="font-semibold text-cq-ink tabular-nums">
+                                {item.count}
+                              </span>
                             </div>
                           ))}
                         </div>
-                      )}
-                      {summary.topServices.length > 0 && (
+                      ) : null}
+                      {summary.topServices.length > 0 ? (
                         <div>
-                          <p className="mb-2 font-medium">Servicios</p>
+                          <p className="mb-2 text-[12.5px] font-semibold uppercase tracking-[0.08em] text-cq-subtle">
+                            Servicios
+                          </p>
                           {summary.topServices.map((item) => (
                             <div
                               key={`service-${item.label}`}
                               className="flex justify-between gap-4 py-1"
                             >
-                              <span className="text-muted-foreground">{item.label}</span>
-                              <span>{item.count}</span>
+                              <span className="text-cq-muted">{item.label}</span>
+                              <span className="font-semibold text-cq-ink tabular-nums">
+                                {item.count}
+                              </span>
                             </div>
                           ))}
                         </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                )}
+                      ) : null}
+                    </div>
+                  </Panel>
+                ) : null}
               </div>
             ) : null}
           </>

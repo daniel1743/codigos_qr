@@ -28,7 +28,7 @@ export function LockedWidget({
     <div className="cq-locked cq-card">
       <span className="cq-badge">{decision.reason}</span>
       <span className="cq-locked__title">{decision.title}</span>
-      <p className="cq-empty" style={{ margin: 0 }}>
+      <p className="cq-empty cq-empty--tight">
         Unlock this view to see the full picture. No sample numbers are shown here — only your real data
         once the plan includes it.
       </p>
@@ -114,7 +114,7 @@ export function OverviewWidget({
       series: liveWindow.series,
       hint:
         liveWindow.ratio !== null
-          ? `${liveWindow.ratio.toFixed(1)}\u00d7 usual \u00b7 last 60 min`
+          ? `${liveWindow.ratio.toFixed(1)}× usual · last 60 min`
           : "Last 60 min",
       live: true,
     });
@@ -173,11 +173,11 @@ export function RealtimeWidget({
         {rolling.windows.map((window) => (
           <div className="cq-kpi" key={window.windowMinutes}>
             <span className="cq-kpi__label">Last {window.windowMinutes} min</span>
-            <span className="cq-kpi__value" style={{ fontSize: 20 }}>
+            <span className="cq-kpi__value cq-kpi__value--sm">
               {window.total}
             </span>
             <span className="cq-kpi__hint">
-              {window.ratio === null ? "Baseline still building" : `${window.ratio.toFixed(1)}\u00d7 usual`}
+              {window.ratio === null ? "Baseline still building" : `${window.ratio.toFixed(1)}× usual`}
             </span>
           </div>
         ))}
@@ -185,7 +185,7 @@ export function RealtimeWidget({
       {spike ? (
         <div className="cq-insight" data-category="realtime">
           <span className="cq-insight__mark" aria-hidden="true" />
-          <div style={{ minWidth: 0, flex: 1 }}>
+          <div className="cq-grow">
             <h4 className="cq-insight__title">{spike.label} is heating up</h4>
             <p className="cq-insight__msg">
               {spike.clicks} clicks on your {spike.label} link from Cripqer
@@ -193,8 +193,7 @@ export function RealtimeWidget({
             </p>
             <button
               type="button"
-              className="cq-btn"
-              style={{ marginTop: 10 }}
+              className="cq-btn cq-insight__action"
               onClick={() => onAction?.({ type: "open_analytics", label: "View activity" })}
             >
               View activity
@@ -202,7 +201,7 @@ export function RealtimeWidget({
           </div>
         </div>
       ) : null}
-      <p className="cq-card__hint" style={{ marginTop: 4 }}>
+      <p className="cq-card__hint cq-card__hint--inset">
         Computed from the events already loaded in this session — no live socket is claimed.
       </p>
     </Card>
@@ -223,7 +222,7 @@ export function TrendWidget({ metrics }: { metrics: AnalyticsMetricsV1 }) {
           This period
         </span>
         <span>
-          <span className="cq-legend__dot" style={{ background: "var(--cq-muted)" }} />
+          <span className="cq-legend__dot" style={{ background: "var(--cq-subtle)" }} />
           Previous period
         </span>
       </div>
@@ -242,7 +241,7 @@ export function BriefWidget({ brief }: { brief: DailyBriefV1 }) {
         {brief.bullets.map((bullet) => (
           <div className="cq-kpi" key={bullet.label}>
             <span className="cq-kpi__label">{bullet.label}</span>
-            <span className="cq-kpi__value" style={{ fontSize: 18 }}>
+            <span className="cq-kpi__value cq-kpi__value--xs">
               {bullet.value}
             </span>
           </div>
@@ -262,11 +261,11 @@ export function InsightsWidget({
   return (
     <Card title="Cripqer intelligence" hint="Plain-language reading of your data" className="cq-grid__wide">
       {insights.length === 0 ? <p className="cq-empty">Nothing worth flagging in this period.</p> : null}
-      <div style={{ display: "grid", gap: 10 }}>
+      <div className="cq-stack">
         {insights.map((insight) => (
           <article className="cq-insight" data-category={insight.category} key={insight.id}>
             <span className="cq-insight__mark" aria-hidden="true" />
-            <div style={{ minWidth: 0, flex: 1 }}>
+            <div className="cq-grow">
               <h4 className="cq-insight__title">{insight.title}</h4>
               <p className="cq-insight__msg">{insight.message}</p>
               <div className="cq-insight__meta">
@@ -280,8 +279,7 @@ export function InsightsWidget({
               {insight.action && insight.action.type !== "none" ? (
                 <button
                   type="button"
-                  className="cq-btn"
-                  style={{ marginTop: 10 }}
+                  className="cq-btn cq-insight__action"
                   onClick={() => onAction?.(insight.action as RecommendedActionV1)}
                 >
                   {insight.action.label}
@@ -351,8 +349,8 @@ export function FunnelWidget({ metrics }: { metrics: AnalyticsMetricsV1 }) {
       <div className="cq-funnel">
         {metrics.funnel.map((step) => (
           <div className="cq-funnel__step" key={step.id}>
-            <span style={{ fontSize: 13, fontWeight: 600 }}>{step.label}</span>
-            <span style={{ display: "flex", gap: 10, alignItems: "baseline" }}>
+            <span className="cq-funnel__label">{step.label}</span>
+            <span className="cq-funnel__values">
               <strong>{step.value}</strong>
               {step.stepRate !== null ? (
                 <span className="cq-funnel__rate">{Math.round(step.stepRate * 100)}%</span>
@@ -432,13 +430,13 @@ export function ComparisonWidget({ metrics }: { metrics: AnalyticsMetricsV1 }) {
   ];
   return (
     <Card title="Period comparison" hint="This period versus the one before">
-      <div style={{ display: "grid", gap: 10 }}>
+      <div className="cq-stack">
         {rows.map((row) => (
-          <div key={row.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
-            <span style={{ fontSize: 13, fontWeight: 600 }}>{row.label}</span>
-            <span style={{ display: "flex", gap: 10, alignItems: "center" }}>
+          <div key={row.label} className="cq-compare__row">
+            <span className="cq-compare__label">{row.label}</span>
+            <span className="cq-compare__values">
               <span className="cq-card__hint">
-                {row.before} → <strong style={{ color: "var(--cq-text)" }}>{row.now}</strong>
+                {row.before} → <strong className="cq-compare__now">{row.now}</strong>
               </span>
               <Delta value={row.delta} />
             </span>
@@ -474,18 +472,18 @@ export function MomentumWidget({ metrics }: { metrics: AnalyticsMetricsV1 }) {
           {metrics.momentum.replace(/_/g, " ")}
         </span>
       </div>
-      <p style={{ margin: 0, fontSize: 14, lineHeight: 1.55 }}>{MOMENTUM_COPY[metrics.momentum]}</p>
-      <div className="cq-kpis" style={{ gridTemplateColumns: "repeat(2, minmax(0,1fr))" }}>
+      <p className="cq-copy">{MOMENTUM_COPY[metrics.momentum]}</p>
+      <div className="cq-kpis cq-kpis--pair">
         <div className="cq-kpi">
           <span className="cq-kpi__label">Best day</span>
-          <span className="cq-kpi__value" style={{ fontSize: 18 }}>
+          <span className="cq-kpi__value cq-kpi__value--xs">
             {metrics.records.bestDayValue}
           </span>
           <span className="cq-card__hint">{metrics.records.bestDayLabel ?? "—"}</span>
         </div>
         <div className="cq-kpi">
           <span className="cq-kpi__label">Daily average</span>
-          <span className="cq-kpi__value" style={{ fontSize: 18 }}>
+          <span className="cq-kpi__value cq-kpi__value--xs">
             {metrics.records.averageDailyValue.toFixed(1)}
           </span>
           <span className="cq-card__hint">Today: {metrics.records.todayValue}</span>
@@ -498,11 +496,11 @@ export function MomentumWidget({ metrics }: { metrics: AnalyticsMetricsV1 }) {
 export function GoalsWidget({ goals }: { goals: SmartGoalV1[] }) {
   return (
     <Card title="Smart goals" hint="Targets derived from your own history">
-      <div style={{ display: "grid", gap: 10 }}>
+      <div className="cq-stack">
         {goals.map((goal) => (
           <div className="cq-goal" key={goal.id}>
             <div className="cq-goal__head">
-              <strong style={{ fontSize: 13 }}>{goal.label}</strong>
+              <strong className="cq-goal__label">{goal.label}</strong>
               <span className="cq-badge" data-tone={goal.status}>
                 {goal.status.replace("_", " ")}
               </span>
@@ -514,7 +512,7 @@ export function GoalsWidget({ goals }: { goals: SmartGoalV1[] }) {
                   tone={goal.status === "behind" ? "danger" : goal.status === "at_risk" ? "warning" : "positive"}
                   caption={`${goal.label} progress`}
                 />
-                <div style={{ minWidth: 0, flex: 1, display: "grid", gap: 6 }}>
+                <div className="cq-grow cq-stack cq-stack--tight">
                   <span className="cq-bar__track">
                     <span className="cq-bar__fill" style={{ width: `${Math.round(goal.progress * 100)}%` }} />
                   </span>

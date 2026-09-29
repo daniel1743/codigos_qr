@@ -170,16 +170,25 @@ export function AnalyticsDashboard({
         <header className="cq-header">
           <div className="cq-header__top">
             <div className="cq-header__id">
+              <p className="cq-header__eyebrow">
+                {PERIODS.find((entry) => entry.id === period)?.label ?? ""}
+                {context.timezoneLabel ? ` · ${context.timezoneLabel}` : ""}
+              </p>
               <h1 className="cq-header__title">
                 {context.displayName ? `${context.displayName} · Analytics` : "Analytics"}
               </h1>
               <p className="cq-header__subtitle">
                 {metrics.sampleSize} signals in this period
-                {context.timezoneLabel ? ` · ${context.timezoneLabel}` : ""}
                 {rolling.state === "spike" ? " · unusual activity right now" : ""}
               </p>
             </div>
-            <div className="cq-controls">
+          </div>
+
+          <div className="cq-toolbar">
+            <div className="cq-toolbar__group">
+              <span className="cq-toolbar__label" aria-hidden="true">
+                Period
+              </span>
               <div className="cq-segment" role="group" aria-label="Period">
                 {PERIODS.map((entry) => (
                   <button
@@ -193,6 +202,28 @@ export function AnalyticsDashboard({
                   </button>
                 ))}
               </div>
+            </div>
+
+            {context.availableChannels.length > 1 ? (
+              <div className="cq-toolbar__group" role="group" aria-label="Channel filter">
+                <span className="cq-toolbar__label" aria-hidden="true">
+                  Channels
+                </span>
+                {context.availableChannels.map((channel) => (
+                  <button
+                    key={channel}
+                    type="button"
+                    className="cq-chip"
+                    aria-pressed={channelFilter.includes(channel)}
+                    onClick={() => toggleChannel(channel)}
+                  >
+                    {CHANNEL_LABEL[channel]}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+
+            <div className="cq-toolbar__group cq-toolbar__group--end">
               <NotificationCenter
                 items={items}
                 open={centerOpen}
@@ -204,22 +235,6 @@ export function AnalyticsDashboard({
               />
             </div>
           </div>
-
-          {context.availableChannels.length > 1 ? (
-            <div className="cq-controls" role="group" aria-label="Channel filter">
-              {context.availableChannels.map((channel) => (
-                <button
-                  key={channel}
-                  type="button"
-                  className="cq-chip"
-                  aria-pressed={channelFilter.includes(channel)}
-                  onClick={() => toggleChannel(channel)}
-                >
-                  {CHANNEL_LABEL[channel]}
-                </button>
-              ))}
-            </div>
-          ) : null}
         </header>
 
         {slot}

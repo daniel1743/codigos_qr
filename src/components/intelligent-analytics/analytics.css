@@ -5,45 +5,82 @@
  */
 
 .cq-analytics {
-  --cq-bg: #f6f7f9;
+  /* Magic branding (F1). Single source of truth: `src/styles.css` @theme.
+     Tailwind v4 prunes @theme variables that no utility references, so each
+     alias repeats the canonical F1 value as an explicit fallback. No second
+     brand palette is introduced here. */
+  --cq-font: var(--font-cq, "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif);
+
+  --cq-bg: transparent;
   --cq-surface: #ffffff;
-  --cq-surface-alt: #f1f3f6;
-  --cq-text: #0d1117;
-  --cq-muted: #626d7c;
-  --cq-border: #e5e8ee;
-  --cq-accent: #1c64f2;
-  --cq-accent-soft: rgba(28, 100, 242, 0.12);
+  --cq-surface-alt: var(--color-cq-blue-50, #f1f6ff);
+  --cq-panel: color-mix(in srgb, var(--color-cq-blue-50, #f1f6ff) 60%, #ffffff);
+
+  --cq-text: var(--color-cq-ink, #0b1733);
+  --cq-muted: var(--color-cq-muted, #5b6b8c);
+  --cq-subtle: var(--color-cq-subtle, #8a97b2);
+
+  --cq-border: var(--color-cq-line, #e7ecf5);
+  --cq-border-strong: color-mix(in srgb, var(--color-cq-blue, #1e56e0) 22%, var(--color-cq-line, #e7ecf5));
+
+  --cq-accent: var(--color-cq-blue, #1e56e0);
+  --cq-accent-strong: var(--color-cq-blue-700, #1745ba);
+  --cq-accent-line: var(--color-cq-blue-200, #c9daff);
+  --cq-accent-soft: var(--color-cq-blue-100, #e3ecff);
+  --cq-accent-faint: var(--color-cq-blue-50, #f1f6ff);
+  --cq-gold: var(--color-cq-gold, #d99a1e);
+  --cq-gold-soft: var(--color-cq-gold-50, #fdf5e3);
+
+  /* Semantic state tones only (status feedback, not brand palette). */
   --cq-positive: #0f8a55;
-  --cq-positive-soft: rgba(15, 138, 85, 0.12);
+  --cq-positive-soft: color-mix(in srgb, #0f8a55 14%, transparent);
   --cq-warning: #b45309;
-  --cq-warning-soft: rgba(180, 83, 9, 0.12);
+  --cq-warning-soft: color-mix(in srgb, #b45309 14%, transparent);
   --cq-danger: #b42318;
-  --cq-danger-soft: rgba(180, 35, 24, 0.12);
-  --cq-record: #7c3aed;
-  --cq-record-soft: rgba(124, 58, 237, 0.12);
-  --cq-radius: 18px;
-  --cq-radius-sm: 12px;
-  --cq-shadow: 0 1px 2px rgba(13, 17, 23, 0.05), 0 14px 34px -24px rgba(13, 17, 23, 0.3);
+  --cq-danger-soft: color-mix(in srgb, #b42318 14%, transparent);
+  --cq-record: var(--cq-gold);
+  --cq-record-soft: var(--cq-gold-soft);
+
+  /* Surfaces & rhythm (F1 radii + shadows). */
+  --cq-on-ink: var(--cq-surface);
+  --cq-radius: var(--radius-cq-lg, 20px);
+  --cq-radius-sm: var(--radius-cq-sm, 14px);
+  --cq-radius-xs: var(--radius-cq-xs, 12px);
+  --cq-shadow: var(--shadow-soft, 0 1px 2px rgba(11, 23, 51, 0.04), 0 8px 24px -16px rgba(30, 86, 224, 0.18));
+  --cq-shadow-float: var(--shadow-float, 0 2px 4px rgba(11, 23, 51, 0.04), 0 24px 48px -20px rgba(30, 86, 224, 0.28));
   --cq-gap: 16px;
 
   background: var(--cq-bg);
   color: var(--cq-text);
-  font-family: inherit;
+  font-family: var(--cq-font);
+  -webkit-font-smoothing: antialiased;
   min-height: 100%;
-  padding: 20px 16px 64px;
+  padding: 18px 16px 72px;
   box-sizing: border-box;
 }
 
+/* Dark host variant — same brand hues mapped onto ink surfaces (no second
+   palette). Production hosts render light; this only re-maps tone, never data. */
 .cq-analytics[data-theme="dark"] {
-  --cq-bg: #0b0e14;
-  --cq-surface: #131822;
-  --cq-surface-alt: #1a2130;
-  --cq-text: #f3f5f9;
-  --cq-muted: #98a3b4;
-  --cq-border: #232c3b;
-  --cq-accent: #6aa1ff;
-  --cq-accent-soft: rgba(106, 161, 255, 0.16);
-  --cq-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 18px 40px -26px rgba(0, 0, 0, 0.9);
+  --cq-surface: color-mix(in srgb, var(--color-cq-ink, #0b1733) 94%, #ffffff);
+  --cq-surface-alt: color-mix(in srgb, var(--color-cq-blue, #1e56e0) 22%, var(--color-cq-ink, #0b1733));
+  --cq-panel: color-mix(in srgb, var(--color-cq-blue, #1e56e0) 16%, transparent);
+  --cq-text: #f2f5ff;
+  --cq-on-ink: var(--color-cq-ink, #0b1733);
+  --cq-muted: color-mix(in srgb, #f2f5ff 64%, var(--color-cq-ink, #0b1733));
+  --cq-subtle: color-mix(in srgb, #f2f5ff 46%, var(--color-cq-ink, #0b1733));
+  --cq-border: color-mix(in srgb, #f2f5ff 14%, transparent);
+  --cq-border-strong: color-mix(in srgb, #f2f5ff 26%, transparent);
+  --cq-accent: var(--color-cq-blue-200, #c9daff);
+  --cq-accent-strong: #ffffff;
+  --cq-accent-line: color-mix(in srgb, var(--color-cq-blue, #1e56e0) 55%, transparent);
+  --cq-accent-soft: color-mix(in srgb, var(--color-cq-blue, #1e56e0) 32%, transparent);
+  --cq-accent-faint: color-mix(in srgb, var(--color-cq-blue, #1e56e0) 16%, transparent);
+  --cq-positive: color-mix(in srgb, #0f8a55 45%, #ffffff);
+  --cq-warning: color-mix(in srgb, #b45309 45%, #ffffff);
+  --cq-danger: color-mix(in srgb, #b42318 42%, #ffffff);
+  --cq-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 18px 40px -26px rgba(0, 0, 0, 0.9);
+  --cq-shadow-float: 0 2px 6px rgba(0, 0, 0, 0.55), 0 28px 56px -28px rgba(0, 0, 0, 0.95);
 }
 
 .cq-analytics *,
@@ -53,7 +90,7 @@
 }
 
 .cq-shell {
-  max-width: 1200px;
+  max-width: var(--container-cq-page, 1240px);
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -64,28 +101,78 @@
 .cq-header {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
 }
 
 .cq-header__top {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
+  gap: 14px;
   flex-wrap: wrap;
+}
+
+.cq-header__id {
+  min-width: 0;
+}
+
+.cq-header__eyebrow {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cq-subtle);
 }
 
 .cq-header__title {
   margin: 0;
-  font-size: clamp(20px, 4vw, 26px);
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-size: clamp(24px, 4.2vw, 34px);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.08;
+  color: var(--cq-text);
 }
 
 .cq-header__subtitle {
-  margin: 4px 0 0;
+  margin: 8px 0 0;
   color: var(--cq-muted);
-  font-size: 13px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  max-width: 68ch;
+}
+
+/* Soft toolbar panel: period pills + channel chips + notification bell. */
+.cq-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px 14px;
+  flex-wrap: wrap;
+  padding: 10px 12px;
+  border: 1px solid var(--cq-border);
+  border-radius: var(--cq-radius);
+  background: var(--cq-surface);
+  box-shadow: var(--cq-shadow);
+}
+
+.cq-toolbar__group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.cq-toolbar__group--end {
+  margin-left: auto;
+}
+
+.cq-toolbar__label {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cq-subtle);
 }
 
 .cq-controls {
@@ -97,7 +184,7 @@
 
 .cq-segment {
   display: inline-flex;
-  background: var(--cq-surface);
+  background: var(--cq-accent-faint);
   border: 1px solid var(--cq-border);
   border-radius: 999px;
   padding: 3px;
@@ -118,32 +205,39 @@
   font: inherit;
   font-size: 13px;
   font-weight: 600;
-  padding: 7px 14px;
+  padding: 7px 15px;
   border-radius: 999px;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.16s ease, color 0.16s ease;
+  transition: background 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
 }
 
 .cq-segment__btn:hover {
   color: var(--cq-text);
+  background: color-mix(in srgb, var(--cq-surface) 70%, transparent);
 }
 
 .cq-segment__btn[aria-pressed="true"] {
   background: var(--cq-accent);
   color: #fff;
+  box-shadow: 0 8px 18px -12px var(--cq-accent);
 }
 
 .cq-select {
   font: inherit;
   font-size: 13px;
   font-weight: 600;
-  padding: 8px 12px;
+  padding: 8px 14px;
   border-radius: 999px;
   border: 1px solid var(--cq-border);
   background: var(--cq-surface);
   color: var(--cq-text);
   cursor: pointer;
+  transition: border-color 0.16s ease;
+}
+
+.cq-select:hover {
+  border-color: var(--cq-border-strong);
 }
 
 .cq-chip {
@@ -158,12 +252,18 @@
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
+  transition: background 0.16s ease, color 0.16s ease, border-color 0.16s ease;
+}
+
+.cq-chip:hover {
+  color: var(--cq-text);
+  border-color: var(--cq-border-strong);
 }
 
 .cq-chip[aria-pressed="true"] {
   border-color: transparent;
   background: var(--cq-accent-soft);
-  color: var(--cq-accent);
+  color: var(--cq-accent-strong);
 }
 
 /* Grid ---------------------------------------------------------------- */
@@ -173,16 +273,25 @@
   gap: var(--cq-gap);
 }
 
+/* Premium card chrome — same recipe as F3/F4 (white surface, cq-line hairline,
+   soft float shadow, 20px radius). */
 .cq-card {
   background: var(--cq-surface);
   border: 1px solid var(--cq-border);
   border-radius: var(--cq-radius);
   box-shadow: var(--cq-shadow);
-  padding: 18px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 14px;
   min-width: 0;
+  transition: box-shadow 0.18s ease;
+}
+
+@media (hover: hover) {
+  .cq-card:hover {
+    box-shadow: var(--cq-shadow-float);
+  }
 }
 
 .cq-card__head {
@@ -194,14 +303,16 @@
 
 .cq-card__title {
   margin: 0;
-  font-size: 14px;
-  font-weight: 700;
+  font-size: 15px;
+  font-weight: 600;
   letter-spacing: -0.01em;
+  color: var(--cq-text);
 }
 
 .cq-card__hint {
   color: var(--cq-muted);
-  font-size: 12px;
+  font-size: 12.5px;
+  line-height: 1.5;
 }
 
 /* KPI ------------------------------------------------------------------ */
@@ -212,10 +323,10 @@
 }
 
 .cq-kpi {
-  border: 1px solid var(--cq-border);
+  border: 1px solid transparent;
   border-radius: var(--cq-radius-sm);
   padding: 14px;
-  background: var(--cq-surface-alt);
+  background: var(--cq-accent-faint);
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -223,25 +334,27 @@
 }
 
 .cq-kpi__label {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 12.5px;
+  font-weight: 500;
   color: var(--cq-muted);
 }
 
 .cq-kpi__value {
-  font-size: clamp(20px, 5vw, 26px);
-  font-weight: 700;
+  font-size: clamp(21px, 4.6vw, 26px);
+  font-weight: 600;
   letter-spacing: -0.03em;
   line-height: 1.05;
+  color: var(--cq-text);
+  font-variant-numeric: tabular-nums;
 }
 
 .cq-delta {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 700;
-  padding: 3px 8px;
+  padding: 3px 9px;
   border-radius: 999px;
   width: fit-content;
 }
@@ -257,7 +370,8 @@
 }
 
 .cq-delta[data-tone="flat"] {
-  background: var(--cq-surface-alt);
+  background: var(--cq-surface);
+  border: 1px solid var(--cq-border);
   color: var(--cq-muted);
 }
 
@@ -271,15 +385,15 @@
 
 .cq-legend {
   display: flex;
-  gap: 14px;
+  gap: 16px;
   flex-wrap: wrap;
-  font-size: 12px;
+  font-size: 12.5px;
   color: var(--cq-muted);
 }
 
 .cq-legend__dot {
-  width: 8px;
-  height: 8px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
   display: inline-block;
   margin-right: 6px;
@@ -288,19 +402,20 @@
 .cq-bars {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 }
 
 .cq-bar {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 4px 10px;
+  gap: 6px 10px;
   align-items: center;
 }
 
 .cq-bar__label {
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 600;
+  color: var(--cq-text);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -308,22 +423,24 @@
 
 .cq-bar__value {
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 600;
+  color: var(--cq-muted);
   font-variant-numeric: tabular-nums;
 }
 
 .cq-bar__track {
   grid-column: 1 / -1;
-  height: 8px;
+  height: 10px;
   border-radius: 999px;
-  background: var(--cq-surface-alt);
+  background: var(--cq-accent-faint);
+  box-shadow: inset 0 0 0 1px var(--cq-border);
   overflow: hidden;
 }
 
 .cq-bar__fill {
   height: 100%;
   border-radius: 999px;
-  background: var(--cq-accent);
+  background: linear-gradient(90deg, var(--cq-accent), var(--cq-accent-strong));
   transition: width 0.4s ease;
 }
 
@@ -331,7 +448,7 @@
 .cq-heatmap {
   display: grid;
   grid-template-columns: 34px repeat(24, minmax(0, 1fr));
-  gap: 3px;
+  gap: 2px;
   min-width: 0;
 }
 
@@ -340,7 +457,7 @@
 
 .cq-heatmap__label {
   font-size: 10px;
-  color: var(--cq-muted);
+  color: var(--cq-subtle);
   display: flex;
   align-items: center;
   font-weight: 600;
@@ -348,7 +465,7 @@
 
 .cq-heatmap__cell {
   aspect-ratio: 1;
-  border-radius: 3px;
+  border-radius: 4px;
   background: var(--cq-accent);
   min-width: 0;
 }
@@ -356,19 +473,19 @@
 .cq-heatmap__axis {
   display: grid;
   grid-template-columns: 34px repeat(24, minmax(0, 1fr));
-  gap: 3px;
+  gap: 2px;
   font-size: 9px;
-  color: var(--cq-muted);
-  margin-top: 4px;
+  color: var(--cq-subtle);
+  margin-top: 6px;
 }
 
 .cq-qa-banner {
   margin-bottom: 14px;
   padding: 9px 12px;
-  border: 1px dashed var(--cq-accent);
+  border: 1px dashed var(--cq-accent-line);
   border-radius: var(--cq-radius-sm);
   color: var(--cq-muted);
-  background: var(--cq-accent-soft);
+  background: var(--cq-accent-faint);
   font-size: 12px;
 }
 
@@ -380,20 +497,26 @@
 }
 
 .cq-funnel__step {
-  border: 1px solid var(--cq-border);
-  border-radius: var(--cq-radius-sm);
+  border: 1px solid transparent;
+  border-radius: var(--cq-radius-xs);
   padding: 12px 14px;
-  background: var(--cq-surface-alt);
+  background: var(--cq-accent-faint);
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--cq-text);
 }
 
 .cq-funnel__rate {
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 700;
-  color: var(--cq-accent);
+  color: var(--cq-accent-strong);
+  background: var(--cq-accent-soft);
+  border-radius: 999px;
+  padding: 2px 8px;
 }
 
 /* Insights ---------------------------------------------------------------- */
@@ -403,14 +526,14 @@
   padding: 14px;
   border-radius: var(--cq-radius-sm);
   border: 1px solid var(--cq-border);
-  background: var(--cq-surface-alt);
+  background: var(--cq-accent-faint);
 }
 
 .cq-insight__mark {
-  width: 6px;
+  width: 4px;
   border-radius: 999px;
   background: var(--cq-accent);
-  flex: 0 0 6px;
+  flex: 0 0 4px;
 }
 
 .cq-insight[data-category="positive"] .cq-insight__mark { background: var(--cq-positive); }
@@ -444,18 +567,30 @@
 .cq-btn {
   font: inherit;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 600;
   border-radius: 999px;
   border: 1px solid var(--cq-border);
   background: var(--cq-surface);
   color: var(--cq-text);
-  padding: 8px 14px;
+  padding: 8px 15px;
   cursor: pointer;
+  transition: background 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.cq-btn:hover {
+  border-color: var(--cq-border-strong);
+  background: var(--cq-accent-faint);
 }
 
 .cq-btn--primary {
   background: var(--cq-accent);
   border-color: transparent;
+  color: #fff;
+  box-shadow: 0 10px 22px -14px var(--cq-accent);
+}
+
+.cq-btn--primary:hover {
+  background: var(--cq-accent-strong);
   color: #fff;
 }
 
@@ -482,9 +617,9 @@
   justify-content: space-between;
   gap: 10px;
   font-size: 13px;
-  padding: 8px 10px;
-  border-radius: 10px;
-  background: var(--cq-surface-alt);
+  padding: 9px 11px;
+  border-radius: var(--cq-radius-xs);
+  background: var(--cq-panel);
 }
 
 .cq-feed__time {
@@ -516,7 +651,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  background: var(--cq-surface-alt);
+  background: var(--cq-panel);
 }
 
 .cq-goal__head {
@@ -529,6 +664,7 @@
 .cq-badge {
   font-size: 11px;
   font-weight: 700;
+  letter-spacing: 0.02em;
   padding: 3px 9px;
   border-radius: 999px;
   background: var(--cq-surface);
@@ -557,21 +693,22 @@
 
 /* Locked / empty --------------------------------------------------------------- */
 .cq-locked {
-  border: 1px dashed var(--cq-border);
+  border: 1px dashed var(--cq-accent-line);
   border-radius: var(--cq-radius);
-  padding: 20px;
+  padding: 24px 20px;
   text-align: center;
   color: var(--cq-muted);
-  background: var(--cq-surface);
+  background: linear-gradient(150deg, var(--cq-accent-faint), var(--cq-surface) 62%);
   display: flex;
   flex-direction: column;
   gap: 10px;
   align-items: center;
+  box-shadow: var(--cq-shadow);
 }
 
 .cq-locked__title {
-  font-size: 14px;
-  font-weight: 700;
+  font-size: 15px;
+  font-weight: 600;
   color: var(--cq-text);
 }
 
@@ -583,7 +720,11 @@
 
 /* Brief ------------------------------------------------------------------------- */
 .cq-brief {
-  background: linear-gradient(140deg, var(--cq-accent-soft), transparent 65%), var(--cq-surface);
+  background:
+    radial-gradient(120% 150% at 100% 0%, var(--cq-gold-soft), transparent 58%),
+    linear-gradient(140deg, var(--cq-accent-soft), transparent 68%),
+    var(--cq-surface);
+  border-color: var(--cq-accent-line);
 }
 
 .cq-brief__headline {
@@ -623,10 +764,10 @@
   pointer-events: auto;
   background: var(--cq-surface);
   border: 1px solid var(--cq-border);
-  border-left: 4px solid var(--cq-accent);
+  border-left: 3px solid var(--cq-accent);
   border-radius: var(--cq-radius-sm);
-  box-shadow: var(--cq-shadow);
-  padding: 12px 14px;
+  box-shadow: var(--cq-shadow-float);
+  padding: 13px 15px;
   display: flex;
   gap: 10px;
   align-items: flex-start;
@@ -679,9 +820,131 @@
   to { background-position: -200% 0; }
 }
 
+/* Presentation primitives (F5) ------------------------------------------------ */
+/* Tiny layout helpers used by the widgets instead of inline styles. They carry
+   no data, no aggregation and no gating — layout only. */
+.cq-stack {
+  display: grid;
+  gap: 10px;
+}
+
+.cq-stack--tight {
+  gap: 6px;
+}
+
+.cq-grow {
+  min-width: 0;
+  flex: 1;
+}
+
+.cq-copy {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.cq-kpi__value--sm { font-size: 20px; }
+.cq-kpi__value--xs { font-size: 18px; }
+
+.cq-kpis--pair {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.cq-card__hint--inset {
+  margin-top: 4px;
+}
+
+.cq-empty--tight {
+  margin: 0;
+}
+
+.cq-insight__action {
+  margin-top: 10px;
+}
+
+.cq-goal__label {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--cq-text);
+}
+
+.cq-funnel__label {
+  min-width: 0;
+}
+
+.cq-funnel__values {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  font-variant-numeric: tabular-nums;
+}
+
+.cq-compare__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.cq-compare__label {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--cq-text);
+}
+
+.cq-compare__values {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.cq-compare__now {
+  color: var(--cq-text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Distribution donut --------------------------------------------------------- */
+.cq-donut {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.cq-donut__legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+  min-width: 140px;
+}
+
+.cq-donut__item {
+  font-size: 13px;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--cq-muted);
+}
+
+.cq-donut__item strong {
+  color: var(--cq-text);
+  font-variant-numeric: tabular-nums;
+}
+
 /* Responsive ------------------------------------------------------------------------ */
+@media (min-width: 640px) {
+  .cq-analytics {
+    --cq-radius: var(--radius-cq-xl, 24px);
+    padding: 24px 20px 72px;
+  }
+  .cq-card { padding: 20px; }
+  .cq-locked { padding: 28px 24px; }
+}
+
 @media (min-width: 700px) {
-  .cq-analytics { padding: 28px 24px 72px; }
+  .cq-analytics { padding: 28px 24px 76px; }
   .cq-kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .cq-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .cq-grid__full { grid-column: 1 / -1; }
@@ -689,7 +952,7 @@
 }
 
 @media (min-width: 1080px) {
-  .cq-analytics { padding: 34px 32px 84px; }
+  .cq-analytics { padding: 32px 32px 88px; }
   .cq-kpis { grid-template-columns: repeat(6, minmax(0, 1fr)); }
   .cq-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .cq-grid__wide { grid-column: span 2; }
@@ -709,27 +972,7 @@
 /* V1.1 — premium realtime, notification centre and composition         */
 /* ==================================================================== */
 
-.cq-analytics[data-theme="dark"] {
-  --cq-bg: #070a11;
-  --cq-surface: #101724;
-  --cq-surface-alt: #17202f;
-  --cq-border: #212c3e;
-  --cq-accent: #38bdf8;
-  --cq-accent-soft: rgba(56, 189, 248, 0.16);
-  --cq-positive: #a3e635;
-  --cq-positive-soft: rgba(163, 230, 53, 0.16);
-  --cq-warning: #fbbf24;
-  --cq-warning-soft: rgba(251, 191, 36, 0.16);
-  --cq-danger: #fb7185;
-  --cq-danger-soft: rgba(251, 113, 133, 0.16);
-  --cq-record: #e879f9;
-  --cq-record-soft: rgba(232, 121, 249, 0.16);
-}
-
-.cq-analytics {
-  --cq-accent-soft: color-mix(in srgb, var(--cq-accent) 14%, transparent);
-  --cq-danger-soft: color-mix(in srgb, var(--cq-danger) 14%, transparent);
-}
+/* Dark host tokens live in the single block at the top of this file (F5). */
 
 /* Smart welcome ------------------------------------------------------ */
 .cq-welcome {
@@ -764,9 +1007,9 @@
 
 .cq-welcome__title {
   margin: 0;
-  font-size: clamp(17px, 3.4vw, 22px);
-  font-weight: 750;
-  letter-spacing: -0.02em;
+  font-size: clamp(19px, 3.4vw, 24px);
+  font-weight: 700;
+  letter-spacing: -0.025em;
   line-height: 1.25;
 }
 
@@ -845,16 +1088,17 @@
   top: 4px;
   transform: translateX(-50%);
   background: var(--cq-text);
-  color: var(--cq-bg);
-  border-radius: 10px;
-  padding: 7px 10px;
+  color: var(--cq-on-ink);
+  border-radius: var(--cq-radius-xs);
+  padding: 8px 11px;
   font-size: 11.5px;
+  font-weight: 600;
   display: grid;
   gap: 2px;
   pointer-events: none;
   white-space: nowrap;
   z-index: 3;
-  box-shadow: var(--cq-shadow);
+  box-shadow: var(--cq-shadow-float);
 }
 
 .cq-tooltip__muted { opacity: 0.72; }
@@ -871,9 +1115,9 @@
 .cq-pulsebars__bar {
   flex: 1;
   min-width: 3px;
-  border-radius: 3px;
-  background: var(--cq-accent);
-  opacity: 0.85;
+  border-radius: 4px;
+  background: linear-gradient(180deg, var(--cq-accent), var(--cq-accent-strong));
+  opacity: 0.9;
 }
 
 .cq-pulsebars__bar[data-tone="record"] { background: var(--cq-record); }
@@ -881,7 +1125,7 @@
 .cq-realtime__state {
   margin: 0;
   font-size: 14px;
-  font-weight: 650;
+  font-weight: 600;
 }
 
 .cq-realtime__state[data-state="spike"] { color: var(--cq-record); }
@@ -946,7 +1190,7 @@
 .cq-nc__scrim {
   position: fixed;
   inset: 0;
-  background: rgba(5, 8, 14, 0.45);
+  background: color-mix(in srgb, var(--cq-text) 38%, transparent);
   z-index: 70;
 }
 
