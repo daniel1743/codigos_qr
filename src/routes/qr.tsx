@@ -5,9 +5,12 @@ import { toast } from "sonner";
 import { AppShell } from "../components/app-shell/AppShell";
 import { QRStudio } from "../components/qr/QRStudio";
 import { CustomPublicLinkControl } from "../components/qr/CustomPublicLinkControl";
+import { QrStudioHeader } from "../components/qr/studio/QrStudioHeader";
+import { QrUrlBox } from "../components/qr/studio/QrUrlBox";
+import { QrStatStrip } from "../components/qr/studio/QrStatStrip";
 import { Button } from "../components/ui/button";
 import { getBrowserSupabaseClient } from "../lib/supabase/client";
-import { getAliasProfileUrl } from "../lib/url";
+import { getAliasProfileUrl, getPublicProfileUrl } from "../lib/url";
 import { profileService } from "../services/profile.service";
 import type { Profile } from "../types/database";
 
@@ -50,6 +53,7 @@ function QrPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [profile, setProfile] = useState<Partial<Profile> | null>(null);
+  const [copiedFeedback, setCopiedFeedback] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -86,49 +90,41 @@ function QrPage() {
     }
   };
 
+  /** Real URL encoded by the profile QR (canonical helper). */
+  const qrUrl = profile?.public_id ? getPublicProfileUrl(profile.public_id) : "";
+  const aliasUrl = profile?.slug ? getAliasProfileUrl(profile.slug) : null;
+
+  const copyQrUrl = async () => {
+    if (!qrUrl) return;
+    try {
+      await navigator.clipboard.writeText(qrUrl);
+      toast.success("Enlace del QR copiado");
+      setCopiedFeedback(true);
+      window.setTimeout(() => setCopiedFeedback(false), 2000);
+    } catch {
+      toast.error("No se pudo copiar el enlace");
+    }
+  };
+
   return (
     <AppShell>
-      <main className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 lg:py-12">
-        <header className="mb-6">
-          <h1 className="text-2xl font-semibold tracking-tight">Tu código QR</h1>
-          <p className="text-sm text-muted-foreground">
-            Este QR apunta permanentemente a tu página pública. Editar el diseño no cambia su
-            destino.
-          </p>
-        </header>
+      <main className="mx-auto w-full max-w-cq-page px-4 pb-16 pt-6 sm:px-6 lg:px-10 lg:pt-10">
+        <QrStudioHeader
+          title="Tu código QR"
+          description="Personaliza y administra el código QR de tu perfil. El destino es permanente: cambiar el diseño nunca cambia a dónde lleva."
+          published={!!profile?.published}
+          context={
+            qrUrl ? <span className="break-all font-mono text-[12px]">{qrUrl}</span> : undefined
+          }
+        />
 
         {loading ? (
-          <p className="text-sm text-muted-foreground">Cargando…</p>
+          <p className="mt-6 text-sm text-cq-muted">Cargando tu QR…</p>
         ) : profile?.public_id ? (
           <>
-            <CustomPublicLinkControl
-              currentAlias={profile?.slug ?? null}
-              publicUrlPrefix="cripqer.dev/"
-              getPublicUrl={getAliasProfileUrl}
-              checkAvailability={async (alias) => {
-                const id = profile?.id;
-                if (!id) return false;
-                const { data, error } = await supabase
-                  .from("profiles")
-                  .select("id")
-                  .eq("slug", alias)
-                  .neq("id", id)
-                  .maybeSingle();
-                if (error) throw error;
-                return data == null;
-              }}
-              saveAlias={async (alias) => {
-                const id = profile?.id;
-                if (!id) throw new Error("Perfil no disponible");
-                const saved = await profileService.updateProfile(supabase, id, {
-                  slug: alias ?? "",
-                });
-                setProfile((current) => (current ? { ...current, slug: saved.slug } : current));
-                return saved.slug;
-              }}
-            />
-            <div className="mt-6">
+            <div className="mt-6 sm:mt-10">
               <QRStudio
+                presentation="studio"
                 publicId={profile.public_id}
                 published={!!profile.published}
                 saving={saving}
@@ -138,17 +134,68 @@ function QrPage() {
                 onChange={onChange}
                 basicOnly
                 showSaveControls={false}
+                topSlot={
+                  <>
+                    <QrUrlBox
+                      url={qrUrl}
+                      description="Es la URL real que codifica tu QR (identidad pública inmutable del perfil)."
+                      onCopy={copyQrUrl}
+                      copied={copiedFeedback}
+                      secondary={{
+                        label: "Enlace público para compartir",
+                        url: aliasUrl ?? qrUrl,
+                        description:
+                          "El alias se usa al compartir en redes; el QR impreso siempre apunta a la URL del QR.",
+                      }}
+                    />
+                    <CustomPublicLinkControl
+                      currentAlias={profile?.slug ?? null}
+                      publicUrlPrefix="cripqer.dev/"
+                      getPublicUrl={getAliasProfileUrl}
+                      checkAvailability={async (alias) => {
+                        const id = profile?.id;
+                        if (!id) return false;
+                        const { data, error } = await supabase
+                          .from("profiles")
+                          .select("id")
+                          .eq("slug", alias)
+                          .neq("id", id)
+                          .maybeSingle();
+                        if (error) throw error;
+                        return data == null;
+                      }}
+                      saveAlias={async (alias) => {
+                        const id = profile?.id;
+                        if (!id) throw new Error("Perfil no disponible");
+                        const saved = await profileService.updateProfile(supabase, id, {
+                          slug: alias ?? "",
+                        });
+                        setProfile((current) => (current ? { ...current, slug: saved.slug } : current));
+                        return saved.slug;
+                      }}
+                    />
+                    <QrStatStrip
+                      items={[
+                        {
+                          label: "Aperturas",
+                          value: profile.scan_count ?? 0,
+                          hint: "Total de visitas a tu perfil",
+                        },
+                      ]}
+                    />
+                  </>
+                }
               />
             </div>
             <div className="mt-6 flex justify-end">
-              <Button onClick={saveDesign} disabled={saving}>
+              <Button onClick={saveDesign} disabled={saving} className="h-11 rounded-cq-sm px-5">
                 {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                 Guardar diseño
               </Button>
             </div>
           </>
         ) : (
-          <p className="text-sm text-muted-foreground">
+          <p className="mt-6 rounded-cq-lg border border-cq-line bg-white p-4 text-sm text-cq-muted shadow-soft">
             Aún no tienes una página pública. Crea tu página para generar tu QR.
           </p>
         )}

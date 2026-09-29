@@ -4,6 +4,7 @@ import {
   getPublicPageAliasUrl,
   getPublicPageUrl,
   getPublicProfileUrl,
+  getPublicQrUrl,
 } from "../url";
 
 describe("getPublicPageUrl (PAGES_5)", () => {
@@ -50,5 +51,24 @@ describe("getPublicPageAliasUrl (PAGES_6)", () => {
   it("keeps the stable /pg/{public_id} URL separate from the alias URL", () => {
     expect(getPublicPageUrl("yfLEdka")).toBe("https://www.cripqer.dev/pg/yfLEdka");
     expect(getPublicPageAliasUrl("yfLEdka")).toBe("https://www.cripqer.dev/pg/a/yfLEdka");
+  });
+});
+
+describe("getPublicQrUrl (F4 — canonical QR payload)", () => {
+  it("encodes the /q/{public_id} scan boundary, never the /pg destination", () => {
+    const url = getPublicQrUrl("yfLEdka");
+    expect(url).toBe("https://www.cripqer.dev/q/yfLEdka");
+    expect(url).not.toContain("/pg/");
+  });
+
+  it("strips a leading slash from the public id", () => {
+    expect(getPublicQrUrl("/yfLEdka")).toBe("https://www.cripqer.dev/q/yfLEdka");
+  });
+
+  it("never encodes an alias as the physical QR URL", () => {
+    const url = getPublicQrUrl("yfLEdka");
+    expect(url).not.toBe(getPublicPageAliasUrl("promo-septiembre"));
+    expect(url).not.toContain("/pg/a/");
+    expect(url).not.toBe(getPublicProfileUrl("yfLEdka"));
   });
 });

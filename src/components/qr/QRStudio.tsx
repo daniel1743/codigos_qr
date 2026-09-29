@@ -2,21 +2,22 @@ import { Button } from "../ui/button";
 import { QRCodeCanvas, QRCodeSVG } from "qrcode.react";
 import { QRCodeAdvanced, useQRAdvancedDownload } from "../qr/QRCodeAdvanced";
 import { QRFrameShell } from "../qr/QRFrameShell";
+import { QrStudioHeader } from "./studio/QrStudioHeader";
+import { QrPreviewCard } from "./studio/QrPreviewCard";
+import { QrStatStrip } from "./studio/QrStatStrip";
+import { QrExportPanel, type QrExportSizeOption, type QrExportState } from "./studio/QrExportPanel";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { requiresAdvancedRenderer } from "../../lib/qr-advanced-utils";
 import { downloadQR, downloadSVG } from "../../lib/downloadQR";
 import { getPublicProfileUrl, getAliasProfileUrl } from "../../lib/url";
 import {
-  Copy,
   Download,
-  ExternalLink,
   Loader2,
-  RefreshCw,
   Upload,
   Trash2,
   AlertTriangle,
   Image as ImageIcon,
   Clock,
-  Eye,
   Layers,
   Sparkles,
   Crown,
@@ -27,7 +28,7 @@ import {
   Square,
   Circle,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import { Profile, QRVisualVersion } from "../../types/database";
 import { CornerDotType, CornerSquareType, DotsType, QREffectType } from "../../types/qr-advanced";
@@ -67,6 +68,37 @@ const CORNER_STYLE_OPTIONS = [
   { value: "dot", label: "Circular" },
 ] as const;
 
+/**
+ * F4 — presentation-only grouping of the REAL control blocks into the Magic
+ * QR Studio tab structure. No capability is added or hidden here: each tab only
+ * re-hosts a control that already existed in this component.
+ */
+type QrTabId = "diseno" | "esquinas" | "marco" | "logo" | "exportar";
+
+const QR_TABS: ReadonlyArray<{ id: QrTabId; label: string }> = [
+  { id: "diseno", label: "Diseño" },
+  { id: "esquinas", label: "Esquinas" },
+  { id: "marco", label: "Marco" },
+  { id: "logo", label: "Logo" },
+  { id: "exportar", label: "Exportar" },
+];
+
+/** Export formats actually produced by the existing exporters. */
+const EXPORT_FORMATS = [
+  { value: "png", label: "PNG", hint: "Imagen lista para usar" },
+  { value: "svg", label: "SVG", hint: "Vectorial, ideal imprenta" },
+] as const;
+
+/** Export sizes actually produced by the existing exporters. */
+const EXPORT_SIZES: ReadonlyArray<QrExportSizeOption> = [
+  { value: 256, label: "256 px", hint: "Pruebas / pantalla" },
+  { value: 512, label: "512 px", hint: "Web y mensajes" },
+  { value: 1024, label: "1024 px", hint: "Recomendado" },
+  { value: 2048, label: "2048 px", hint: "Impresión" },
+  { value: 4096, label: "4096 px", hint: "Impresión grande" },
+];
+
+
 function getQrColorStatus(color: string, background: string) {
   return analyzeQrContrast(color, background);
 }
@@ -81,6 +113,15 @@ export interface QRStudioProps {
   onChange: (updates: Partial<Profile>) => void;
   basicOnly?: boolean;
   showSaveControls?: boolean;
+  /**
+   * F4 — layout only.
+   * `embedded` (default) keeps the historical single-column layout used by the
+   * Basic Editor share section. `studio` renders the Magic two-column layout
+   * (sticky preview + tabbed controls) used by the dedicated `/qr` route.
+   */
+  presentation?: "embedded" | "studio";
+  /** Extra content rendered above the controls in `studio` mode (e.g. the alias editor). */
+  topSlot?: ReactNode;
 }
 
 export function QRStudio({
@@ -93,6 +134,8 @@ export function QRStudio({
   onChange,
   basicOnly = false,
   showSaveControls = true,
+  presentation = "embedded",
+  topSlot,
 }: QRStudioProps) {
   const [publicUrl, setPublicUrl] = useState("");
   const [qrVersion, setQrVersion] = useState(0);
@@ -109,6 +152,12 @@ export function QRStudio({
   // Gallery state
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [isPremiumUser, setIsPremiumUser] = useState(false);
+
+  // F4 — presentation state only (no business logic, no fake jobs).
+  const [qrTab, setQrTab] = useState<QrTabId>("diseno");
+  const [copiedFeedback, setCopiedFeedback] = useState(false);
+  const [exportState, setExportState] = useState<QrExportState>("idle");
+  const [exportError, setExportError] = useState<string | null>(null);
 
   const fgColor = profile.qr_foreground_color || "#000000";
   const bgColor = profile.qr_background_color || "#FFFFFF";
@@ -160,6 +209,12 @@ export function QRStudio({
   };
 
   const aliasUrl = profile.slug ? getAliasProfileUrl(profile.slug) : publicUrl;
+
+  /**
+   * The URL the QR physically encodes (canonical helper), shown without the
+   * protocol so it matches the Magic preview caption.
+   */
+  const previewDisplayUrl = (publicUrl || aliasUrl || "").replace(/^https?:\/\//, "");
 
   useEffect(() => {
     rebuildPublicUrl();
@@ -224,6 +279,45 @@ export function QRStudio({
     if (!urlToCopy) return;
     navigator.clipboard.writeText(urlToCopy);
     toast.success("Enlace copiado", { description: "Listo para compartir" });
+    // Presentation feedback only (mirrors the Magic copy state). No fake work.
+    setCopiedFeedback(true);
+    window.setTimeout(() => setCopiedFeedback(false), 2000);
+  };
+
+  /**
+   * F4 — format/size changes are real user actions: clear the previous export
+   * result so the download button becomes actionable again (no fake timers).
+   */
+  const changeExportFormat = (next: "png" | "svg") => {
+    setExportFormat(next);
+    setExportState("idle");
+    setExportError(null);
+  };
+
+  const changeExportSize = (next: number) => {
+    setExportSize(next);
+    setExportState("idle");
+    setExportError(null);
+  };
+
+  /** F4 — real reset of every styling knob back to the classic QR. */
+  const restoreClassicQr = () => {
+    onChange({
+      qr_foreground_color: "#000000",
+      qr_background_color: "#FFFFFF",
+      qr_gradient: null,
+      qr_dots_type: "square",
+      qr_corners_square_type: "square",
+      qr_corners_dot_type: "square",
+      qr_corners_square_color: "#000000",
+      qr_corners_dot_color: "#000000",
+      qr_corner_top_left_color: "#000000",
+      qr_corner_top_right_color: "#000000",
+      qr_corner_bottom_left_color: "#000000",
+      qr_frame_style: "plain",
+      qr_logo_enabled: false,
+    });
+    setExportSize(1024);
   };
 
   const handleFixContrast = () => {
@@ -304,6 +398,8 @@ export function QRStudio({
   };
 
   const handleDownload = async () => {
+    setExportState("working");
+    setExportError(null);
     // Save version if not duplicate
     if (profile?.id) {
       const lastVersion = history[0];
@@ -375,8 +471,11 @@ export function QRStudio({
           exportFormat,
         );
         toast.success("QR avanzado descargado correctamente");
+        setExportState("done");
       } catch (error) {
         console.error("Advanced QR export failed:", error);
+        setExportState("error");
+        setExportError(error instanceof Error ? error.message : "Error desconocido");
         toast.error("Error al exportar QR avanzado", {
           description: error instanceof Error ? error.message : "Error desconocido",
         });
@@ -391,8 +490,11 @@ export function QRStudio({
         setIsPreparingDownload(true);
         await downloadSVG(publicId, "qr-preview-svg", `qr-${publicId}.svg`);
         toast.success("SVG descargado correctamente");
+        setExportState("done");
       } catch (error) {
         console.error("SVG export failed:", error);
+        setExportState("error");
+        setExportError(error instanceof Error ? error.message : "Error desconocido");
         toast.error("Error al exportar SVG", {
           description: error instanceof Error ? error.message : "Error desconocido",
         });
@@ -410,6 +512,8 @@ export function QRStudio({
             await loadImageDeterministic(logoUrl, { crossOrigin: "anonymous", timeout: 10000 });
           } catch (logoError) {
             console.error("Logo load failed:", logoError);
+            setExportState("error");
+            setExportError("No se pudo cargar el logo para la exportación.");
             toast.error("Error al cargar el logo para la exportación", {
               description: "Intenta sin logo o sube una imagen diferente.",
             });
@@ -417,11 +521,27 @@ export function QRStudio({
           }
         }
 
-        // Download QR (canvas should be ready now)
+        // F4 — deterministic wait for the hidden high-res canvas to mount.
+        // Previously the DOM was read in the same tick as the state update, so
+        // the canvas did not exist yet when no logo was involved.
+        await new Promise<void>((resolve) => {
+          window.requestAnimationFrame(() => window.requestAnimationFrame(() => resolve()));
+        });
+        const exportCanvas = document.getElementById("qr-export-canvas");
+        if (!exportCanvas) {
+          setExportState("error");
+          setExportError("El lienzo de exportación no está listo. Inténtalo de nuevo.");
+          toast.error("No se pudo preparar el QR para descargar");
+          return;
+        }
+
         downloadQR(publicId, "qr-export-canvas", `qr-${publicId}-${exportSize}px.png`);
         toast.success("QR descargado correctamente");
+        setExportState("done");
       } catch (error) {
         console.error("Export failed:", error);
+        setExportState("error");
+        setExportError(error instanceof Error ? error.message : "Error desconocido");
         toast.error("Error al exportar el QR", {
           description: error instanceof Error ? error.message : "Error desconocido",
         });
@@ -443,25 +563,21 @@ export function QRStudio({
 
   return (
     <div className="space-y-5 pb-20">
-      <div className="space-y-3">
-        <div>
-          <h2 className="text-xl font-semibold tracking-tight">Mi QR</h2>
-          <p className="text-sm text-muted-foreground">Administra y comparte tu página.</p>
-        </div>
-        <div className="flex items-center">
-          {published ? (
-            <span className="inline-flex items-center rounded-full bg-green-50 px-2.5 py-0.5 text-xs font-semibold text-green-700 ring-1 ring-inset ring-green-600/20">
-              <span className="h-1.5 w-1.5 rounded-full bg-green-600 mr-1.5"></span>
-              Publicado
-            </span>
-          ) : (
-            <span className="inline-flex items-center rounded-full bg-yellow-50 px-2.5 py-0.5 text-xs font-semibold text-yellow-800 ring-1 ring-inset ring-yellow-600/20">
-              <span className="h-1.5 w-1.5 rounded-full bg-yellow-600 mr-1.5"></span>
-              Sin publicar
-            </span>
-          )}
-        </div>
-      </div>
+      {/* F4 — in `studio` mode the dedicated /qr route owns the page header. */}
+      {presentation !== "studio" ? (
+        <QrStudioHeader
+          title="Mi QR"
+          description="Administra y comparte tu página."
+          published={published}
+          activeLabel="Publicado"
+          inactiveLabel="Sin publicar"
+          context={
+            previewDisplayUrl ? (
+              <span className="break-all font-mono text-[12px]">{previewDisplayUrl}</span>
+            ) : undefined
+          }
+        />
+      ) : null}
 
       {!published && (
         <Alert>
@@ -503,32 +619,48 @@ export function QRStudio({
 
       {published && publicId && publicUrl && (
         <div className="space-y-5">
-          {/* STATS CARD */}
-          <div className="rounded-2xl border bg-card p-4 shadow-sm">
-            <div>
-              <h4 className="font-semibold flex items-center gap-2">
-                <Eye className="w-4 h-4 text-muted-foreground" />
-                Aperturas
-              </h4>
-              <p className="text-sm text-muted-foreground mt-1">Total de visitas a tu perfil</p>
-            </div>
-            <div className="mt-3 text-4xl font-bold tracking-tight">
-              {profile.scan_count || 0}
-              <span className="ml-2 text-sm font-semibold text-muted-foreground">
-                {profile.scan_count === 1 ? "apertura" : "aperturas"}
-              </span>
-            </div>
-          </div>
+          {topSlot}
 
-          <div className="space-y-5">
-            <div className="flex flex-col items-center space-y-5 rounded-2xl border bg-card p-5 shadow-sm">
-              <h3 className="text-xl font-bold text-center">Tu código QR</h3>
-              <p className="text-center text-muted-foreground text-sm max-w-[280px]">
-                Este QR apunta permanentemente a tu página. Su destino no cambiará aunque edites el
-                diseño.
-              </p>
+          {/* STATS — real value only (profiles.scan_count). Hidden in studio mode
+              because the /qr route renders the shared stat strip above. */}
+          {presentation !== "studio" ? (
+            <QrStatStrip
+              items={[
+                {
+                  label: "Aperturas",
+                  value: profile.scan_count || 0,
+                  hint: "Total de visitas a tu perfil",
+                },
+              ]}
+            />
+          ) : null}
 
-              <QRFrameShell frameStyle={selectedFrame.id} className="w-full max-w-[260px]">
+          <div
+            className={
+              presentation === "studio"
+                ? "grid min-w-0 gap-8 lg:grid-cols-12 lg:items-start"
+                : "space-y-5"
+            }
+          >
+            <aside
+              className={
+                presentation === "studio"
+                  ? "min-w-0 lg:col-span-5 lg:col-start-8 lg:row-start-1 lg:sticky lg:top-24"
+                  : "min-w-0"
+              }
+            >
+              <QrPreviewCard
+                title="Tu código QR"
+                displayUrl={previewDisplayUrl}
+                published={published}
+                onCopy={handleCopy}
+                copied={copiedFeedback}
+                onOpen={aliasUrl || publicUrl}
+                onRegenerate={rebuildPublicUrl}
+                regenerateHint="Cambia el dibujo, no el destino."
+                note="El QR codifica la URL permanente; su destino no cambia aunque edites el diseño."
+              >
+                <QRFrameShell frameStyle={selectedFrame.id} className="w-full max-w-[260px]">
                 {usesAdvancedQR ? (
                   <QRCodeAdvanced
                     key={`adv-${publicUrl}-${qrVersion}-${JSON.stringify(profile.qr_gradient)}-${fgColor}-${bgColor}-${logoEnabled}-${profile.qr_effect}`}
@@ -594,41 +726,47 @@ export function QRStudio({
                     style={{ width: "100%", height: "100%" }}
                   />
                 )}
-              </QRFrameShell>
+                </QRFrameShell>
+              </QrPreviewCard>
+            </aside>
 
-              <div className="grid w-full gap-2">
-                <Button
-                  onClick={rebuildPublicUrl}
-                  variant="outline"
-                  className="h-11 w-full rounded-xl justify-start"
+            <div
+              className={
+                presentation === "studio"
+                  ? "min-w-0 space-y-5 lg:col-span-7 lg:col-start-1 lg:row-start-1"
+                  : "space-y-5"
+              }
+            >
+              <Tabs
+                value={qrTab}
+                onValueChange={(value) => setQrTab(value as QrTabId)}
+                className="space-y-4"
+              >
+                <TabsList
+                  aria-label="Secciones de personalización del QR"
+                  className="flex h-auto w-full flex-wrap justify-start gap-1 rounded-cq-sm bg-cq-canvas p-1 ring-1 ring-inset ring-cq-line"
                 >
-                  <RefreshCw className="w-4 h-4 mr-2" /> Regenerar patrón
-                </Button>
-                <Button
-                  onClick={handleCopy}
-                  variant="outline"
-                  className="h-11 w-full rounded-xl justify-start"
-                >
-                  <Copy className="w-4 h-4 mr-2" /> Copiar Enlace
-                </Button>
-                <Button variant="outline" className="h-11 w-full rounded-xl justify-start" asChild>
-                  <a href={aliasUrl || publicUrl} target="_blank" rel="noopener noreferrer">
-                    <ExternalLink className="w-4 h-4 mr-2" /> Abrir Página
-                  </a>
-                </Button>
-              </div>
-            </div>
+                  {QR_TABS.map((item) => (
+                    <TabsTrigger
+                      key={item.id}
+                      value={item.id}
+                      className="h-10 rounded-[10px] px-3.5 text-[13px] font-semibold text-cq-muted data-[state=active]:bg-white data-[state=active]:text-cq-ink data-[state=active]:shadow-soft sm:h-9"
+                    >
+                      {item.label}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
 
-            <div className="space-y-5">
-              {/* DISEÑOS QR - BANCO DE PLANTILLAS */}
-              <div className="space-y-4 rounded-2xl border bg-card p-4 shadow-sm">
-                <h4 className="font-semibold flex items-center gap-2">
-                  <Layers className="w-4 h-4 text-primary" />
-                  Diseños QR
-                </h4>
-                <p className="text-xs text-muted-foreground">
-                  Explora plantillas listas para usar. Gratis y Premium.
-                </p>
+                <TabsContent value="diseno" className="space-y-4 focus-visible:outline-none">
+                  {/* DISEÑOS QR - BANCO DE PLANTILLAS */}
+                  <div className="space-y-4 rounded-cq-xl border border-cq-line bg-white p-4 shadow-soft sm:p-5">
+                    <h4 className="font-semibold flex items-center gap-2 text-cq-ink">
+                      <Layers className="w-4 h-4 text-cq-blue" />
+                      Diseños QR
+                    </h4>
+                    <p className="text-xs text-cq-muted">
+                      Explora plantillas listas para usar. Gratis y Premium.
+                    </p>
                 <Button
                   onClick={() => setGalleryOpen(true)}
                   variant="outline"
@@ -640,13 +778,13 @@ export function QRStudio({
               </div>
 
               {/* COLORS */}
-              <div className="space-y-4 rounded-2xl border bg-card p-4 shadow-sm">
-                <div className="space-y-1">
-                  <h4 className="font-semibold flex items-center gap-2">Personalizar QR</h4>
-                  <p className="text-xs text-muted-foreground">
-                    Usa colores oscuros sobre fondo claro para mantener buen escaneo.
-                  </p>
-                </div>
+                  <div className="space-y-4 rounded-cq-xl border border-cq-line bg-white p-4 shadow-soft sm:p-5">
+                    <div className="space-y-1">
+                      <h4 className="font-semibold flex items-center gap-2 text-cq-ink">Personalizar QR</h4>
+                      <p className="text-xs text-cq-muted">
+                        Usa colores oscuros sobre fondo claro para mantener buen escaneo.
+                      </p>
+                    </div>
 
                 <div className="grid grid-cols-1 gap-4 min-[360px]:grid-cols-2">
                   <div className="space-y-2">
@@ -739,8 +877,8 @@ export function QRStudio({
                 )}
               </div>
 
-              <div className="space-y-4 rounded-2xl border bg-card p-4 shadow-sm">
-                <h4 className="font-semibold">Forma del QR</h4>
+                  <div className="space-y-4 rounded-cq-xl border border-cq-line bg-white p-4 shadow-soft sm:p-5">
+                    <h4 className="font-semibold text-cq-ink">Forma del QR</h4>
                 <div className="grid grid-cols-2 gap-2">
                   {DOT_STYLE_OPTIONS.map((option) => (
                     <Button
@@ -780,13 +918,16 @@ export function QRStudio({
                 </div>
               </div>
 
-              <div className="space-y-4 rounded-2xl border bg-card p-4 shadow-sm">
-                <div className="space-y-1">
-                  <h4 className="font-semibold">Colores de esquinas</h4>
-                  <p className="text-xs text-muted-foreground">
-                    Puedes dejar un solo color o diferenciar las tres esquinas principales.
-                  </p>
-                </div>
+                </TabsContent>
+
+                <TabsContent value="esquinas" className="space-y-4 focus-visible:outline-none">
+                  <div className="space-y-4 rounded-cq-xl border border-cq-line bg-white p-4 shadow-soft sm:p-5">
+                    <div className="space-y-1">
+                      <h4 className="font-semibold text-cq-ink">Colores de esquinas</h4>
+                      <p className="text-xs text-cq-muted">
+                        Puedes dejar un solo color o diferenciar las tres esquinas principales.
+                      </p>
+                    </div>
                 <div className="grid grid-cols-1 gap-4 min-[360px]:grid-cols-2">
                   <div className="space-y-2">
                     <Label className="text-xs text-muted-foreground">Arriba izquierda</Label>
@@ -824,8 +965,11 @@ export function QRStudio({
                 </div>
               </div>
 
-              <div className="space-y-4 rounded-2xl border bg-card p-4 shadow-sm">
-                <h4 className="font-semibold">Marco visual</h4>
+                </TabsContent>
+
+                <TabsContent value="marco" className="space-y-4 focus-visible:outline-none">
+                  <div className="space-y-4 rounded-cq-xl border border-cq-line bg-white p-4 shadow-soft sm:p-5">
+                    <h4 className="font-semibold text-cq-ink">Marco visual</h4>
                 <div className="grid grid-cols-2 gap-2 min-[420px]:grid-cols-3">
                   {QR_FRAME_OPTIONS.map((option) => {
                     const Icon = option.icon;
@@ -846,9 +990,9 @@ export function QRStudio({
 
               {/* EFECTOS AVANZADOS PREMIUM */}
               {!basicOnly && (
-                <div className="space-y-4 rounded-2xl border bg-gradient-to-br from-amber-500/10 to-yellow-500/5 p-4 shadow-sm border-amber-200/50">
-                  <h4 className="font-semibold flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-amber-500" />
+                <div className="space-y-4 rounded-cq-xl border border-cq-gold/30 bg-cq-gold-50/60 p-4 shadow-soft sm:p-5">
+                  <h4 className="font-semibold flex items-center gap-2 text-cq-ink">
+                    <Sparkles className="w-4 h-4 text-cq-gold" />
                     Efectos Premium
                     <Crown className="w-3 h-3 text-amber-500 fill-amber-500" />
                   </h4>
@@ -975,9 +1119,12 @@ export function QRStudio({
               )}
 
               {/* LOGO */}
-              <div className="space-y-4 rounded-2xl border bg-card p-4 shadow-sm">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-semibold flex items-center gap-2">Logo Central</h4>
+                </TabsContent>
+
+                <TabsContent value="logo" className="space-y-4 focus-visible:outline-none">
+                  <div className="space-y-4 rounded-cq-xl border border-cq-line bg-white p-4 shadow-soft sm:p-5">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-semibold text-cq-ink">Logo Central</h4>
                   <Switch
                     checked={logoEnabled}
                     onCheckedChange={(val) => onChange({ qr_logo_enabled: val })}
@@ -1030,97 +1177,33 @@ export function QRStudio({
                 </div>
               </div>
 
-              {/* DOWNLOAD OPTIONS */}
-              <div className="space-y-4 rounded-2xl border bg-card p-4 shadow-sm">
-                <h4 className="font-semibold flex items-center gap-2">Exportar</h4>
+                </TabsContent>
 
-                <div className="grid grid-cols-1 gap-4 min-[360px]:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label className="text-xs text-muted-foreground">Formato</Label>
-                    <Select
-                      value={exportFormat}
-                      onValueChange={(val: "png" | "svg") => setExportFormat(val)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="png">PNG (Imagen)</SelectItem>
-                        <SelectItem value="svg">SVG (Vectorial)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="text-xs text-muted-foreground">Resolución (PNG)</Label>
-                    <Select
-                      value={exportSize.toString()}
-                      onValueChange={(val) => setExportSize(parseInt(val))}
-                      disabled={exportFormat === "svg"}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="256">256 px (Pruebas / pantalla)</SelectItem>
-                        <SelectItem value="512">512 px (Web)</SelectItem>
-                        <SelectItem value="1024">1024 px (Recomendado)</SelectItem>
-                        <SelectItem value="2048">2048 px (Impresión)</SelectItem>
-                        <SelectItem value="4096">4096 px (Impresión grande)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <Button
-                  variant="outline"
-                  className="w-full mt-4 text-xs h-11 rounded-xl"
-                  onClick={() => {
-                    onChange({
-                      qr_foreground_color: "#000000",
-                      qr_background_color: "#FFFFFF",
-                      qr_gradient: null,
-                      qr_dots_type: "square",
-                      qr_corners_square_type: "square",
-                      qr_corners_dot_type: "square",
-                      qr_corners_square_color: "#000000",
-                      qr_corners_dot_color: "#000000",
-                      qr_corner_top_left_color: "#000000",
-                      qr_corner_top_right_color: "#000000",
-                      qr_corner_bottom_left_color: "#000000",
-                      qr_frame_style: "plain",
-                      qr_logo_enabled: false,
-                    });
-                    setExportSize(1024);
-                  }}
-                >
-                  <RefreshCw className="w-4 h-4 mr-2" />
-                  Restaurar QR clásico
-                </Button>
-
-                <Button
-                  onClick={handleDownload}
-                  className="w-full h-12 mt-2 rounded-xl"
-                  disabled={isPreparingDownload}
-                >
-                  {isPreparingDownload ? (
-                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  ) : (
-                    <Download className="w-5 h-5 mr-2" />
-                  )}
-                  Descargar QR {exportFormat.toUpperCase()}
-                </Button>
-              </div>
+                <TabsContent value="exportar" className="space-y-4 focus-visible:outline-none">
+                  <QrExportPanel
+                    format={exportFormat}
+                    formats={EXPORT_FORMATS}
+                    onFormatChange={changeExportFormat}
+                    size={exportSize}
+                    sizes={EXPORT_SIZES}
+                    onSizeChange={changeExportSize}
+                    onDownload={handleDownload}
+                    state={exportState}
+                    errorMessage={exportError}
+                    onReset={restoreClassicQr}
+                  />
+                </TabsContent>
+              </Tabs>
             </div>
           </div>
         </div>
       )}
 
-      {/* HISTORY SECTION */}
+      {/* HISTORY SECTION — real persisted records (profileService.getQRVisualVersions) */}
       {published && (
-        <div className="space-y-4 mt-8">
-          <h4 className="font-semibold flex items-center gap-2">
-            <Clock className="w-4 h-4 text-muted-foreground" />
+        <div className="mt-8 space-y-4">
+          <h4 className="font-semibold flex items-center gap-2 text-cq-ink">
+            <Clock className="w-4 h-4 text-cq-muted" />
             Versiones visuales recientes
           </h4>
 
@@ -1129,7 +1212,7 @@ export function QRStudio({
               {history.map((version) => (
                 <div
                   key={version.id}
-                  className="snap-start shrink-0 w-36 rounded-xl border bg-card p-3 shadow-sm flex flex-col gap-3"
+                  className="snap-start shrink-0 w-36 rounded-cq-lg border border-cq-line bg-white p-3 shadow-soft flex flex-col gap-3"
                 >
                   <div className="bg-white rounded-md p-2 aspect-square flex items-center justify-center border pointer-events-none relative">
                     <QRCodeSVG

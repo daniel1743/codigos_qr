@@ -49,3 +49,24 @@ export function getPublicPageAliasUrl(alias: string): string {
   const cleanAlias = alias.replace(/^\/+/, "");
   return `${baseUrl}/pg/a/${cleanAlias}`;
 }
+
+/**
+ * Generates the canonical QR entry URL for a child Page: `/q/{public_id}`.
+ *
+ * THIS is the URL a QR code must physically encode — never the direct
+ * `/pg/{public_id}` destination and never an alias:
+ *
+ *   /q/{public_id}  → identifies/resolves the published page (server-side)
+ *                   → emits ONE canonical `qr_scan`
+ *                   → redirects to `/pg/{public_id}`
+ *
+ * The `/q/` namespace exists ONLY for QR codes (C2B4B boundary). A direct
+ * `/pg/{public_id}` visit never emits a `qr_scan`, which is why the QR payload
+ * must point here. The immutable `public_id` keeps printed QR codes stable
+ * across title/alias changes.
+ */
+export function getPublicQrUrl(publicId: string): string {
+  const baseUrl = CANONICAL_PUBLIC_ORIGIN.replace(/\/$/, "");
+  const cleanPublicId = publicId.replace(/^\/+/, "");
+  return `${baseUrl}/q/${cleanPublicId}`;
+}
