@@ -3,8 +3,9 @@ import { useEffect, useState } from "react";
 import { ArrowLeft, Loader2, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "../components/app-shell/AppShell";
-import { Button } from "../components/ui/button";
-import { Card, CardContent } from "../components/ui/card";
+import { CqPageHeader } from "../components/cq-ui/CqPageHeader";
+import { CqPanel } from "../components/cq-ui/CqPanel";
+import { cqPrimaryButton, cqSecondaryButton } from "../components/cq-ui/buttonStyles";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import {
@@ -20,6 +21,16 @@ import { pageService } from "../services/page.service";
 import { profileService } from "../services/profile.service";
 import { createPageStarterConfig } from "../components/power-editor/pageStarterConfig";
 import type { PageType, Profile } from "../types/database";
+
+/**
+ * F7 — `/pages/new` visual closure.
+ *
+ * Presentation-only migration to the F1 tokens + the F6 `cq-ui` kit (header,
+ * panel, approved button recipes). Creation behaviour is untouched: the same
+ * `pageService.createPage` call, the same canonical starter template through
+ * `pageCanonicalService.saveDraft`, the same `toast` and the same
+ * `/pages/$pageId/edit` destination after success.
+ */
 
 const PAGE_TYPE_OPTIONS: { value: PageType; label: string }[] = [
   { value: "landing", label: "Landing" },
@@ -48,18 +59,18 @@ function CreatePage() {
 
   return (
     <AppShell>
-      <main className="mx-auto w-full max-w-2xl px-4 py-8 sm:px-6 lg:py-12">
-        <header className="mb-6 border-b border-border pb-6">
-          <h1 className="text-2xl font-semibold tracking-tight">Crear página</h1>
-          <p className="text-sm text-muted-foreground">
-            Empieza con una plantilla completa y edítala con Power Editor antes de publicar.
-          </p>
-        </header>
-        <PageForm
-          profile={profile}
-          onBack={() => void navigate({ to: "/pages" })}
-          onDone={(pageId) => void navigate({ to: "/pages/$pageId/edit", params: { pageId } })}
+      <main className="mx-auto w-full max-w-cq-page px-4 pb-16 pt-6 sm:px-6 lg:px-10 lg:pt-10">
+        <CqPageHeader
+          title="Crear página"
+          description="Empieza con una plantilla completa y edítala con Power Editor antes de publicar."
         />
+        <div className="mt-6 max-w-[720px]">
+          <PageForm
+            profile={profile}
+            onBack={() => void navigate({ to: "/pages" })}
+            onDone={(pageId) => void navigate({ to: "/pages/$pageId/edit", params: { pageId } })}
+          />
+        </div>
       </main>
     </AppShell>
   );
@@ -119,54 +130,52 @@ function PageForm({
   };
 
   return (
-    <Card>
-      <CardContent className="p-6">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="page_title">Nombre de la página</Label>
-            <Input
-              id="page_title"
-              value={title}
-              onChange={(event) => setTitle(event.target.value)}
-              placeholder="Ej. Promo septiembre"
-              autoComplete="off"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="page_type">Tipo de página</Label>
-            <Select value={pageType} onValueChange={(value) => setPageType(value as PageType)}>
-              <SelectTrigger id="page_type" className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {PAGE_TYPE_OPTIONS.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            La página se crea como borrador con una plantilla canónica editable. Podrás cambiar
-            plantilla, contenido, URL y publicación desde el Power Editor.
-          </p>
-          {error && <p className="text-sm text-destructive">{error}</p>}
-          <div className="flex flex-wrap items-center gap-3">
-            <Button type="submit" disabled={submitting}>
-              {submitting ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Plus className="mr-2 h-4 w-4" />
-              )}
-              Crear página
-            </Button>
-            <Button type="button" variant="ghost" onClick={onBack} disabled={submitting}>
-              <ArrowLeft className="mr-2 h-4 w-4" /> Volver
-            </Button>
-          </div>
-        </form>
-      </CardContent>
-    </Card>
+    <CqPanel headingId="create-page-form-heading" title="Datos de la página">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="space-y-2">
+          <Label htmlFor="page_title">Nombre de la página</Label>
+          <Input
+            id="page_title"
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
+            placeholder="Ej. Promo septiembre"
+            autoComplete="off"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="page_type">Tipo de página</Label>
+          <Select value={pageType} onValueChange={(value) => setPageType(value as PageType)}>
+            <SelectTrigger id="page_type" className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {PAGE_TYPE_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <p className="text-[13px] leading-relaxed text-cq-muted">
+          La página se crea como borrador con una plantilla canónica editable. Podrás cambiar
+          plantilla, contenido, URL y publicación desde el Power Editor.
+        </p>
+        {error && <p className="text-[13px] font-medium text-red-600">{error}</p>}
+        <div className="flex flex-wrap items-center gap-2">
+          <button type="submit" className={cqPrimaryButton} disabled={submitting}>
+            {submitting ? (
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <Plus className="h-4 w-4" aria-hidden="true" />
+            )}
+            Crear página
+          </button>
+          <button type="button" className={cqSecondaryButton} onClick={onBack} disabled={submitting}>
+            <ArrowLeft className="h-4 w-4 text-cq-muted" aria-hidden="true" /> Volver
+          </button>
+        </div>
+      </form>
+    </CqPanel>
   );
 }

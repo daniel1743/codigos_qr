@@ -3,7 +3,17 @@ import { FileLock2, Home, Pencil, QrCode, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getBrowserSupabaseClient } from "../../lib/supabase/client";
 import { resolveCanonicalMagicPageId } from "../../lib/editor-routing/resolveCanonicalMagicPage";
-import { PLATFORM_BRAND } from "../platform/platform-brand";
+
+/**
+ * F7 — mobile navigation for the Magic editor host.
+ *
+ * Presentation-only alignment with the F1 shell (`MobileBottomNav`): the same
+ * `cq-*` tokens (`border-cq-line`, `bg-white/95`, `shadow-nav`) plus `cq-blue` /
+ * `cq-gold` for the active state. Geometry (full-width bar, 5 columns,
+ * `min-h-14`, safe-area padding), the resolved editor destination and every
+ * `navigate()` call are unchanged, so the editor's bottom padding and the
+ * canonical page resolution keep working exactly as before.
+ */
 
 type MobilePlatformNavProps = { editorPageId?: string };
 
@@ -54,7 +64,7 @@ export default function MobilePlatformNav({ editorPageId }: MobilePlatformNavPro
     <>
       <nav
         aria-label="Navegación inferior de Cripqer"
-        className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-border bg-white/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-1px_8px_rgba(0,0,0,0.04)] backdrop-blur lg:hidden"
+        className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-cq-line bg-white/95 pb-[env(safe-area-inset-bottom)] font-cq shadow-nav backdrop-blur lg:hidden"
       >
         {items.map((item) => {
           const Icon = item.icon;
@@ -64,13 +74,14 @@ export default function MobilePlatformNav({ editorPageId }: MobilePlatformNavPro
               type="button"
               onClick={item.onClick}
               aria-current={item.active ? "page" : undefined}
-              className="relative flex min-h-14 flex-col items-center justify-center gap-1 px-1 text-[10px] font-medium transition-colors"
-              style={{ color: item.active ? PLATFORM_BRAND.colors.blue : PLATFORM_BRAND.colors.textSecondary }}
+              className={`relative flex min-h-14 flex-col items-center justify-center gap-1 px-1 text-[10px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-cq-blue-200 ${
+                item.active ? "text-cq-blue" : "text-cq-subtle"
+              }`}
             >
-              <Icon className="h-5 w-5" aria-hidden />
+              <Icon className="h-5 w-5" strokeWidth={item.active ? 2.3 : 1.8} aria-hidden="true" />
               <span className={item.id === "documents" ? "text-[9px] leading-3" : undefined}>{item.label}</span>
               {item.active && (
-                <span aria-hidden className="absolute top-0 h-0.5 w-8 rounded-full" style={{ backgroundColor: PLATFORM_BRAND.colors.gold }} />
+                <span aria-hidden="true" className="absolute top-0 h-0.5 w-8 rounded-full bg-cq-gold" />
               )}
             </button>
           );

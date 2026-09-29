@@ -1,15 +1,32 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowUpRight, Eye, Globe, Pencil, QrCode, Share2 } from "lucide-react";
+import { ArrowUpRight, Eye, Pencil } from "lucide-react";
 import { AppShell } from "../components/app-shell/AppShell";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
-import { Badge } from "../components/ui/badge";
-import { Button } from "../components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
-import { PLATFORM_BRAND } from "../components/platform/platform-brand";
+import { CqPageHeader } from "../components/cq-ui/CqPageHeader";
+import { CqPanel } from "../components/cq-ui/CqPanel";
+import { CqStatusPill } from "../components/cq-ui/CqStatusPill";
+import { cqPrimaryButton, cqSecondaryButton } from "../components/cq-ui/buttonStyles";
 import { getBrowserSupabaseClient } from "../lib/supabase/client";
 import { getPublicProfileUrl } from "../lib/url";
 import { resolveCanonicalMagicPageId } from "../lib/editor-routing/resolveCanonicalMagicPage";
+
+/**
+ * F7 — `/page` visual closure.
+ *
+ * `/page` is NOT a duplicate of `/pages/$pageId`: it stays the legacy "Mi página"
+ * hub that reads the owner's `profiles` row (root identity / BioLink) and only
+ * links out to the canonical Magic document through `resolveCanonicalMagicPageId`.
+ * The route path, the data source, the query fields and every destination are
+ * unchanged, so `/page` keeps working for existing links (`PLATFORM_NAV_ITEMS`,
+ * `BasicEditorShell`, `/account`) and for the frozen F1–F6 behaviour.
+ *
+ * Presentation-only migration to the F1 tokens + `cq-ui` kit. The old local tab
+ * strip (`LOCAL_NAV`) is removed: it was a dead control that only restyled itself
+ * (the panels below never changed with `activeTab`), so no navigation, data or
+ * behaviour is lost. The inline `PLATFORM_BRAND` hex CTA is replaced by the
+ * approved `cq-blue` button recipe.
+ */
 
 interface PageSummary {
   display_name: string;
@@ -22,21 +39,12 @@ interface PageSummary {
   slug: string;
 }
 
-const LOCAL_NAV = [
-  { id: "resumen", label: "Resumen", icon: Globe },
-  { id: "ver", label: "Ver página", icon: Eye },
-  { id: "publicacion", label: "Publicación", icon: ArrowUpRight },
-  { id: "qr", label: "QR", icon: QrCode },
-  { id: "compartir", label: "Compartir", icon: Share2 },
-] as const;
-
 export const Route = createFileRoute("/page")({ component: MyPageHub });
 
 function MyPageHub() {
   const supabase = getBrowserSupabaseClient();
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState<PageSummary | null>(null);
-  const [activeTab, setActiveTab] = useState("resumen");
   const [canonicalPageId, setCanonicalPageId] = useState<string | null>(null);
   const navigate = useNavigate();
 
@@ -66,114 +74,113 @@ function MyPageHub() {
 
   return (
     <AppShell>
-      <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:py-12">
-        <header className="flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-4">
-            <Avatar className="h-14 w-14 border border-border">
-              <AvatarImage src={page?.avatar_url ?? undefined} alt={name} />
-              <AvatarFallback className="text-xl">{name.charAt(0).toUpperCase()}</AvatarFallback>
-            </Avatar>
-            <div>
-              <h1 className="text-2xl font-semibold tracking-tight">{name}</h1>
-              <p className="text-sm text-muted-foreground">
-                {page?.profession || page?.bio || "Gestiona tu página pública"}
-              </p>
-            </div>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge variant={page?.published ? "default" : "secondary"}>{statusLabel}</Badge>
-            <Button asChild variant="outline">
-              <Link to="/pages">Ver todas mis páginas</Link>
-            </Button>
-            <Button asChild style={{ backgroundColor: PLATFORM_BRAND.colors.blue }}>
-              <button type="button" onClick={() => void navigate(canonicalPageId ? { to: "/pages/$pageId/edit", params: { pageId: canonicalPageId } } : { to: "/profile" })}>
-                <Pencil className="mr-2 h-4 w-4" /> Editar
-              </button>
-            </Button>
-          </div>
-        </header>
+      <main className="mx-auto w-full max-w-cq-page px-4 pb-16 pt-6 sm:px-6 lg:px-10 lg:pt-10">
+        <div className="flex min-w-0 items-start gap-4">
+          <Avatar className="h-14 w-14 shrink-0 rounded-cq-lg border border-cq-line">
+            <AvatarImage src={page?.avatar_url ?? undefined} alt={name} />
+            <AvatarFallback className="bg-cq-blue-50 text-[18px] font-bold text-cq-blue">
+              {name.charAt(0).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <CqPageHeader
+            title={name}
+            description={page?.profession || page?.bio || "Gestiona tu página pública"}
+            pill={
+              <CqStatusPill tone={page?.published ? "positive" : "neutral"} label={statusLabel} />
+            }
+            actions={
+              <>
+                <Link to="/pages" className={`${cqSecondaryButton} no-underline`}>
+                  Ver todas mis páginas
+                </Link>
+                <button
+                  type="button"
+                  className={cqPrimaryButton}
+                  onClick={() =>
+                    void navigate(
+                      canonicalPageId
+                        ? { to: "/pages/$pageId/edit", params: { pageId: canonicalPageId } }
+                        : { to: "/profile" },
+                    )
+                  }
+                >
+                  <Pencil className="h-4 w-4" aria-hidden="true" /> Editar
+                </button>
+              </>
+            }
+          />
+        </div>
 
-        <nav className="mt-6 flex gap-1 overflow-x-auto" aria-label="Navegación de la página">
-          {LOCAL_NAV.map((item) => {
-            const Icon = item.icon;
-            const active = activeTab === item.id;
-            return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => setActiveTab(item.id)}
-                className={`flex shrink-0 items-center gap-2 rounded-lg px-3.5 py-2 text-sm font-medium transition-colors ${
-                  active
-                    ? "bg-foreground text-background"
-                    : "text-muted-foreground hover:bg-accent hover:text-foreground"
-                }`}
-              >
-                <Icon className="h-4 w-4" aria-hidden />
-                {item.label}
-              </button>
-            );
-          })}
-        </nav>
-
-        <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(240px,0.6fr)]">
-          <Card>
-            <CardHeader>
-              <CardTitle>Resumen</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+        <div className="mt-6 grid gap-5 lg:grid-cols-[minmax(0,1.45fr)_minmax(260px,0.55fr)]">
+          <CqPanel
+            headingId="page-hub-summary-heading"
+            title="Resumen"
+            description="Tu identidad pública y el enlace real que Cripqer genera."
+          >
+            <div className="space-y-4">
               {publicUrl ? (
-                <div className="rounded-lg border border-border bg-muted/40 px-4 py-3">
-                  <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                    URL pública
-                  </p>
+                <a
+                  href={publicUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex w-full min-w-0 items-center justify-between gap-2 rounded-cq-sm bg-cq-canvas px-3 py-2.5 ring-1 ring-cq-line transition-colors hover:ring-cq-blue-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cq-blue"
+                >
+                  <span className="truncate text-[13px] font-medium text-cq-blue">{publicUrl}</span>
+                  <ArrowUpRight className="h-4 w-4 shrink-0 text-cq-subtle" aria-hidden="true" />
+                </a>
+              ) : (
+                <p className="text-[13.5px] leading-relaxed text-cq-muted">
+                  Aún no tienes una página pública.
+                </p>
+              )}
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  className={cqPrimaryButton}
+                  onClick={() =>
+                    void navigate(
+                      canonicalPageId
+                        ? { to: "/pages/$pageId/edit", params: { pageId: canonicalPageId } }
+                        : { to: "/profile" },
+                    )
+                  }
+                >
+                  <Pencil className="h-4 w-4" aria-hidden="true" /> Editar página
+                </button>
+                {publicUrl && page?.published && (
                   <a
                     href={publicUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="mt-1 flex items-center gap-1 truncate text-sm font-medium hover:underline"
+                    className={`${cqSecondaryButton} no-underline`}
                   >
-                    {publicUrl} <ArrowUpRight className="h-3.5 w-3.5" />
+                    <Eye className="h-4 w-4 text-cq-muted" aria-hidden="true" /> Ver página
                   </a>
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">Aún no tienes una página pública.</p>
-              )}
-              <div className="flex flex-wrap gap-3">
-                <Button asChild style={{ backgroundColor: PLATFORM_BRAND.colors.blue }}>
-                  <button type="button" onClick={() => void navigate(canonicalPageId ? { to: "/pages/$pageId/edit", params: { pageId: canonicalPageId } } : { to: "/profile" })}>
-                    <Pencil className="mr-2 h-4 w-4" /> Editar página
-                  </button>
-                </Button>
-                {publicUrl && page?.published && (
-                  <Button asChild variant="outline">
-                    <a href={publicUrl} target="_blank" rel="noreferrer">
-                      <Eye className="mr-2 h-4 w-4" /> Ver página
-                    </a>
-                  </Button>
                 )}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </CqPanel>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Estado</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 text-sm">
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Estado</span>
-                <span className="font-medium">{statusLabel}</span>
+          <CqPanel headingId="page-hub-status-heading" title="Estado">
+            <dl className="space-y-3 text-[13.5px]">
+              <div className="flex items-center justify-between gap-4">
+                <dt className="text-cq-muted">Estado</dt>
+                <dd className="font-semibold text-cq-ink">{statusLabel}</dd>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Escaneos</span>
-                <span className="font-medium">{page?.scan_count ?? 0}</span>
+              <div className="flex items-center justify-between gap-4">
+                <dt className="text-cq-muted">Escaneos</dt>
+                <dd className="font-semibold text-cq-ink">
+                  {page ? page.scan_count.toLocaleString("es-CL") : "—"}
+                </dd>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Enlace</span>
-                <span className="font-medium">{page?.slug ? `/${page.slug}` : "—"}</span>
+              <div className="flex items-center justify-between gap-4">
+                <dt className="text-cq-muted">Enlace</dt>
+                <dd className="min-w-0 truncate font-semibold text-cq-ink">
+                  {page?.slug ? `/${page.slug}` : "—"}
+                </dd>
               </div>
-            </CardContent>
-          </Card>
+            </dl>
+          </CqPanel>
         </div>
       </main>
     </AppShell>

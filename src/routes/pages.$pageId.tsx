@@ -1,11 +1,18 @@
 import { createFileRoute, Link, Outlet, useMatches } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Copy, Eye, Loader2, Rocket } from "lucide-react";
+import { ArrowLeft, Copy, Eye, Loader2, Rocket, SearchX } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "../components/app-shell/AppShell";
-import { Badge } from "../components/ui/badge";
-import { Button } from "../components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { CqEmptyState } from "../components/cq-ui/CqEmptyState";
+import { CqPageHeader } from "../components/cq-ui/CqPageHeader";
+import { CqPanel } from "../components/cq-ui/CqPanel";
+import { CqStatusPill } from "../components/cq-ui/CqStatusPill";
+import {
+  cqDangerButton,
+  cqPrimaryButton,
+  cqSecondaryButton,
+  cqSoftButton,
+} from "../components/cq-ui/buttonStyles";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { getBrowserSupabaseClient } from "../lib/supabase/client";
@@ -18,6 +25,20 @@ import { readCanonicalPageEnvelope } from "../lib/canonical-page";
 import { pageCanonicalService } from "../services/page-canonical.service";
 import { PageQrPanel } from "../components/qr/PageQrPanel";
 import type { Page } from "../types/database";
+
+/**
+ * F7 — `/pages/$pageId` visual closure.
+ *
+ * Presentation-only migration to the F1 tokens + the F6 `cq-ui` kit. Everything
+ * that defines this route stays byte-identical in behaviour: the `useMatches`
+ * nested-child `Outlet` short-circuit, the `{pageId}` prototype branch, the UUID
+ * guard before `pageService.getOwnPageById`, ownership (the service resolves the
+ * page by `owner_user_id`), the alias grammar (`isValidPageAlias` /
+ * `normalizePageAlias` → `pageAliasService.savePageAlias`), publication
+ * (`pageCanonicalService.publish` / `unpublish` with the real
+ * `published_revision`), the canonical envelope read, `PageQrPanel` and every
+ * canonical URL helper (`getPublicPageUrl` / `getPublicPageAliasUrl`).
+ */
 
 const PAGE_TYPE_LABELS: Record<string, string> = {
   landing: "Landing",
@@ -102,15 +123,16 @@ function PageAliasSection({
   };
 
   return (
-    <Card className="mt-6">
-      <CardHeader>
-        <CardTitle>Enlace personalizado</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3">
+    <CqPanel
+      headingId="page-alias-heading"
+      title="Enlace personalizado"
+      description="El alias corto de esta página, guardado en tu fila real."
+    >
+      <div className="space-y-3">
         <div className="space-y-2">
           <Label htmlFor="page_alias">Enlace personalizado</Label>
-          <div className="flex items-center gap-1">
-            <span className="shrink-0 text-sm text-muted-foreground">cripqer.dev/pg/a/</span>
+          <div className="flex min-w-0 items-center gap-1">
+            <span className="shrink-0 text-[13.5px] text-cq-subtle">cripqer.dev/pg/a/</span>
             <Input
               id="page_alias"
               value={draft}
@@ -126,13 +148,17 @@ function PageAliasSection({
         </div>
 
         {page.slug && (
-          <p className="break-all font-mono text-xs text-muted-foreground">{aliasUrl}</p>
+          <p className="break-all font-mono text-[12.5px] leading-relaxed text-cq-subtle">
+            {aliasUrl}
+          </p>
         )}
 
         {message && (
           <p
             className={
-              message.kind === "saved" ? "text-sm text-emerald-600" : "text-sm text-destructive"
+              message.kind === "saved"
+                ? "text-[13px] font-medium text-emerald-700"
+                : "text-[13px] font-medium text-red-600"
             }
           >
             {message.text}
@@ -140,23 +166,28 @@ function PageAliasSection({
         )}
 
         <div className="flex flex-wrap items-center gap-2">
-          <Button onClick={() => save(false)} disabled={saving}>
-            {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+          <button type="button" className={cqPrimaryButton} onClick={() => save(false)} disabled={saving}>
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
             Guardar
-          </Button>
+          </button>
           {page.slug && (
-            <Button variant="outline" onClick={copy}>
-              <Copy className="mr-2 h-4 w-4" /> Copiar
-            </Button>
+            <button type="button" className={cqSecondaryButton} onClick={copy}>
+              <Copy className="h-4 w-4 text-cq-muted" aria-hidden="true" /> Copiar
+            </button>
           )}
           {page.slug && (
-            <Button variant="ghost" onClick={() => save(true)} disabled={saving}>
+            <button
+              type="button"
+              className={cqDangerButton}
+              onClick={() => save(true)}
+              disabled={saving}
+            >
               Quitar
-            </Button>
+            </button>
           )}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </CqPanel>
   );
 }
 
@@ -244,116 +275,136 @@ function PageDetail() {
 
   return (
     <AppShell>
-      <main className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 lg:py-12">
-        <div className="mb-6">
-          <Button asChild variant="ghost" size="sm">
-            <Link to="/pages">
-              <ArrowLeft className="mr-2 h-4 w-4" /> Volver a mis páginas
-            </Link>
-          </Button>
-        </div>
+      <main className="mx-auto w-full max-w-cq-page px-4 pb-16 pt-6 sm:px-6 lg:px-10 lg:pt-10">
+        <Link to="/pages" className={`${cqSoftButton} no-underline`}>
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Volver a mis páginas
+        </Link>
 
         {loading ? (
-          <p className="text-sm text-muted-foreground">Cargando…</p>
+          <p className="mt-6 text-[13.5px] text-cq-muted">Cargando…</p>
         ) : notFound || !page ? (
-          <Card>
-            <CardContent className="py-10 text-center">
-              <p className="text-sm text-muted-foreground">
-                No se encontró esta página o no tienes acceso a ella.
-              </p>
-            </CardContent>
-          </Card>
+          <div className="mt-6">
+            <CqEmptyState
+              headingId="page-detail-missing-heading"
+              icon={<SearchX className="h-5 w-5" />}
+              title="Página no disponible"
+              description="No se encontró esta página o no tienes acceso a ella."
+              action={
+                <Link to="/pages" className={`${cqPrimaryButton} no-underline`}>
+                  Ver mis páginas
+                </Link>
+              }
+            />
+          </div>
         ) : (
           <>
-            <header className="flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h1 className="text-2xl font-semibold tracking-tight">{page.title}</h1>
-                <p className="text-sm text-muted-foreground">
-                  {PAGE_TYPE_LABELS[page.page_type] ?? page.page_type}
-                </p>
-              </div>
-              <div className="flex flex-wrap items-center gap-3">
-                <Button asChild variant="outline">
-                  <Link to="/pages/$pageId/edit" params={{ pageId: page.id }}>
-                    Editar con Power
-                  </Link>
-                </Button>
-                {page.published && (
-                  <Button asChild variant="outline">
-                    <a href={getPublicPageUrl(page.public_id)} target="_blank" rel="noreferrer">
-                      <Eye className="mr-2 h-4 w-4" /> Abrir página
-                    </a>
-                  </Button>
-                )}
-                <Button onClick={() => void togglePublication()} disabled={publicationBusy}>
-                  {publicationBusy ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Rocket className="mr-2 h-4 w-4" />
-                  )}
-                  {page.published ? "Despublicar" : "Publicar"}
-                </Button>
-                <Button variant="outline" onClick={() => setShowQr((v) => !v)}>
-                  QR / Compartir
-                </Button>
-                <Badge variant={page.published ? "default" : "secondary"}>
-                  {page.published ? "Publicada" : "Borrador"}
-                </Badge>
-              </div>
-            </header>
-
-            <Card className="mt-6">
-              <CardHeader>
-                <CardTitle>Detalles</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3 text-sm">
-                <div className="flex items-center justify-between gap-4">
-                  <span className="text-muted-foreground">Título</span>
-                  <span className="font-medium">{page.title}</span>
-                </div>
-                <div className="flex items-center justify-between gap-4">
-                  <span className="text-muted-foreground">Objetivo</span>
-                  <span className="font-medium">
-                    {PAGE_TYPE_LABELS[page.page_type] ?? page.page_type}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between gap-4">
-                  <span className="text-muted-foreground">ID público</span>
-                  <span className="font-mono text-sm font-medium">{page.public_id}</span>
-                </div>
-                <div className="flex items-center justify-between gap-4">
-                  <span className="text-muted-foreground">Estado</span>
-                  <span className="font-medium">{page.published ? "Publicada" : "Borrador"}</span>
-                </div>
-                <div className="flex items-center justify-between gap-4">
-                  <span className="text-muted-foreground">Creada</span>
-                  <span className="font-medium">{formatDate(page.created_at)}</span>
-                </div>
-                <div className="flex items-center justify-between gap-4">
-                  <span className="text-muted-foreground">Actualizada</span>
-                  <span className="font-medium">{formatDate(page.updated_at)}</span>
-                </div>
-              </CardContent>
-            </Card>
-
-            {userId && (
-              <PageAliasSection
-                page={page}
-                userId={userId}
-                onAliasChange={(slug) => setPage((p) => (p ? { ...p, slug } : p))}
+            <div className="mt-6">
+              <CqPageHeader
+                title={page.title}
+                description={PAGE_TYPE_LABELS[page.page_type] ?? page.page_type}
+                pill={
+                  <CqStatusPill
+                    tone={page.published ? "positive" : "neutral"}
+                    label={page.published ? "Publicada" : "Borrador"}
+                  />
+                }
+                actions={
+                  <>
+                    <Link
+                      to="/pages/$pageId/edit"
+                      params={{ pageId: page.id }}
+                      className={`${cqSecondaryButton} no-underline`}
+                    >
+                      Editar con Magic
+                    </Link>
+                    {page.published && (
+                      <a
+                        href={getPublicPageUrl(page.public_id)}
+                        target="_blank"
+                        rel="noreferrer"
+                        className={`${cqSecondaryButton} no-underline`}
+                      >
+                        <Eye className="h-4 w-4 text-cq-muted" aria-hidden="true" /> Abrir página
+                      </a>
+                    )}
+                    <button
+                      type="button"
+                      className={cqPrimaryButton}
+                      onClick={() => void togglePublication()}
+                      disabled={publicationBusy}
+                    >
+                      {publicationBusy ? (
+                        <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                      ) : (
+                        <Rocket className="h-4 w-4" aria-hidden="true" />
+                      )}
+                      {page.published ? "Despublicar" : "Publicar"}
+                    </button>
+                    <button
+                      type="button"
+                      className={cqSecondaryButton}
+                      onClick={() => setShowQr((v) => !v)}
+                      aria-expanded={showQr}
+                    >
+                      QR / Compartir
+                    </button>
+                  </>
+                }
               />
-            )}
+            </div>
 
-            {showQr && userId && (
-              <Card className="mt-6">
-                <CardHeader>
-                  <CardTitle>QR de esta página</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <PageQrPanel page={page} userId={userId} />
-                </CardContent>
-              </Card>
-            )}
+            <div className="mt-6 grid gap-5 lg:grid-cols-[minmax(0,1.35fr)_minmax(300px,0.65fr)]">
+              <CqPanel headingId="page-details-heading" title="Detalles">
+                <dl className="space-y-3 text-[13.5px]">
+                  <div className="flex items-center justify-between gap-4">
+                    <dt className="text-cq-muted">Título</dt>
+                    <dd className="min-w-0 truncate font-semibold text-cq-ink">{page.title}</dd>
+                  </div>
+                  <div className="flex items-center justify-between gap-4">
+                    <dt className="text-cq-muted">Objetivo</dt>
+                    <dd className="font-semibold text-cq-ink">
+                      {PAGE_TYPE_LABELS[page.page_type] ?? page.page_type}
+                    </dd>
+                  </div>
+                  <div className="flex items-center justify-between gap-4">
+                    <dt className="text-cq-muted">ID público</dt>
+                    <dd className="min-w-0 break-all font-mono text-[13px] font-semibold text-cq-ink">
+                      {page.public_id}
+                    </dd>
+                  </div>
+                  <div className="flex items-center justify-between gap-4">
+                    <dt className="text-cq-muted">Estado</dt>
+                    <dd className="font-semibold text-cq-ink">
+                      {page.published ? "Publicada" : "Borrador"}
+                    </dd>
+                  </div>
+                  <div className="flex items-center justify-between gap-4">
+                    <dt className="text-cq-muted">Creada</dt>
+                    <dd className="font-semibold text-cq-ink">{formatDate(page.created_at)}</dd>
+                  </div>
+                  <div className="flex items-center justify-between gap-4">
+                    <dt className="text-cq-muted">Actualizada</dt>
+                    <dd className="font-semibold text-cq-ink">{formatDate(page.updated_at)}</dd>
+                  </div>
+                </dl>
+              </CqPanel>
+
+              <div className="min-w-0 space-y-5">
+                {userId && (
+                  <PageAliasSection
+                    page={page}
+                    userId={userId}
+                    onAliasChange={(slug) => setPage((p) => (p ? { ...p, slug } : p))}
+                  />
+                )}
+
+                {showQr && userId && (
+                  <CqPanel headingId="page-qr-heading" title="QR de esta página">
+                    <PageQrPanel page={page} userId={userId} />
+                  </CqPanel>
+                )}
+              </div>
+            </div>
           </>
         )}
       </main>
