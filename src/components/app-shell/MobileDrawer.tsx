@@ -215,12 +215,10 @@ export default function MobileDrawer({
                 (user?.name?.charAt(0).toUpperCase() ?? "C")
               )}
             </span>
+            {/* F9: no plan/billing label — the shell has no entitlement source. */}
             <span className="min-w-0 flex-1">
               <span className="block truncate text-sm font-semibold text-cq-ink">
                 {user?.name ?? "Tu cuenta"}
-              </span>
-              <span className="block text-xs text-cq-subtle">
-                {user?.planLabel ?? "Plan gratuito"}
               </span>
             </span>
             <Settings className="h-4 w-4 text-cq-subtle" aria-hidden />

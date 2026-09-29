@@ -11,7 +11,6 @@ export type ShellUser = {
   name: string;
   email: string;
   avatarUrl?: string | null;
-  planLabel?: string;
 };
 
 export type ShellPageState = { count: number; primaryPageId: string | null };
@@ -40,7 +39,6 @@ export function AppShell({ children }: { children: ReactNode }) {
           typeof authUser.user_metadata?.avatar_url === "string"
             ? authUser.user_metadata.avatar_url
             : null,
-        planLabel: "Plan gratuito",
       });
       try {
         const pages = await pageService.listOwnPages(supabase, authUser.id);

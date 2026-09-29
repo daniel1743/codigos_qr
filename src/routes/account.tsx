@@ -49,6 +49,12 @@ import type { Profile } from "../types/database";
  * "Próximamente" rows of the previous version are gone for the same reason, and
  * so is the Premium/Gratis badge (`hasPremiumAccessByEmail` is a hard-coded
  * development email allowlist, not a subscription backend).
+ * F9 — the "Ver QR" action of the Acciones panel now points at `/qr`. It used to
+ * point at `/page`, but `/page` is the "Mi página" identity hub and never showed
+ * a QR: its old local tab strip carried a "QR" chip that only restyled itself
+ * (dead control, removed in F7). The label and the QrCode icon always described
+ * the QR surface, so F9 aligned the destination with the promise — no route was
+ * added, no routing semantics changed and `/page` is untouched.
  */
 export const Route = createFileRoute("/account")({
   component: AccountPage,
@@ -375,7 +381,7 @@ function AccountPage() {
                   </button>
                 )}
 
-                <Link to="/page" className={`${cqSecondaryButton} no-underline`}>
+                <Link to="/qr" className={`${cqSecondaryButton} no-underline`}>
                   <QrCode className="h-4 w-4 text-cq-muted" aria-hidden="true" />
                   Ver QR
                 </Link>

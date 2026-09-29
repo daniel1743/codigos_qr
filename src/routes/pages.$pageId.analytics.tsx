@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import "../components/intelligent-analytics/analytics.css";
 import { AppShell } from "../components/app-shell/AppShell";
-import { Badge } from "../components/ui/badge";
+import { CqStatusPill } from "../components/cq-ui/CqStatusPill";
 import { Button } from "../components/ui/button";
 import { getBrowserSupabaseClient } from "../lib/supabase/client";
 import {
@@ -210,9 +210,10 @@ function PageAnalytics() {
                 <h1 className="flex items-center gap-2 text-[26px] font-bold leading-none tracking-[-0.035em] text-cq-ink sm:text-[34px]">
                   <BarChart3 className="h-6 w-6 text-cq-blue" /> Estadísticas
                 </h1>
-                <Badge variant={page.published ? "default" : "secondary"} className="rounded-full">
-                  {page.published ? "Publicada" : "Borrador"}
-                </Badge>
+                <CqStatusPill
+                  tone={page.published ? "positive" : "neutral"}
+                  label={page.published ? "Publicada" : "Borrador"}
+                />
               </div>
               <p className="mt-3 max-w-2xl text-[14px] leading-relaxed text-cq-muted">{page.title}</p>
             </header>
