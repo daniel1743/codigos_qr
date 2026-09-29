@@ -3,7 +3,13 @@
  *
  * Maps a REAL publication state to the Magic visual treatment. No mock state:
  * callers pass the real `published` flag from the profile/page row.
+ *
+ * F6 consolidation: the markup now lives in `cq-ui/CqStatusPill.tsx` (shared with
+ * Documents/Account). This module keeps the original F2 public API and renders the
+ * identical approved markup, so F2/F3/F4 call sites are unchanged visually.
  */
+import { CqPublishPill } from "../cq-ui/CqStatusPill";
+
 export function StatusPill({
   published,
   activeLabel = "Publicada",
@@ -13,21 +19,7 @@ export function StatusPill({
   activeLabel?: string;
   inactiveLabel?: string;
 }) {
-  return (
-    <span
-      className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-[12px] font-semibold ${
-        published
-          ? "bg-emerald-50 text-emerald-700"
-          : "bg-cq-canvas text-cq-muted ring-1 ring-cq-line"
-      }`}
-    >
-      <span
-        className={`h-1.5 w-1.5 rounded-full ${published ? "bg-emerald-500" : "bg-cq-subtle"}`}
-        aria-hidden="true"
-      />
-      {published ? activeLabel : inactiveLabel}
-    </span>
-  );
+  return <CqPublishPill published={published} activeLabel={activeLabel} inactiveLabel={inactiveLabel} />;
 }
 
 export default StatusPill;

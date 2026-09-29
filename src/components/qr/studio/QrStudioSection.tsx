@@ -1,11 +1,16 @@
 import type { ReactNode } from "react";
-import { cn } from "../../../lib/utils";
+import { CqPanel } from "../../cq-ui/CqPanel";
 
 /**
  * F4 — Soft panel used to group QR controls (Magic "soft panel" treatment).
  *
  * Presentation only: it never owns state, it never gates capabilities. Callers
  * decide which real control goes inside.
+ *
+ * F6 consolidation: this now delegates to `cq-ui/CqPanel`, which carries the
+ * byte-identical approved markup (`rounded-cq-lg sm:rounded-cq-xl`,
+ * `border-cq-line`, `bg-white`, `shadow-soft`, `p-4 sm:p-5`, same header block).
+ * QR Studio keeps its public API while Documents/Account reuse the same source.
  */
 export function QrStudioSection({
   title,
@@ -22,32 +27,16 @@ export function QrStudioSection({
   children?: ReactNode;
   className?: string;
 }) {
-  const hasHeader = Boolean(title) || Boolean(description) || Boolean(actions);
   return (
-    <section
-      className={cn(
-        "min-w-0 rounded-cq-lg border border-cq-line bg-white p-4 shadow-soft sm:rounded-cq-xl sm:p-5",
-        className,
-      )}
+    <CqPanel
+      title={title}
+      description={description}
+      icon={icon}
+      actions={actions}
+      className={className}
     >
-      {hasHeader ? (
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            {title ? (
-              <h3 className="flex items-center gap-2 text-[15px] font-semibold tracking-[-0.01em] text-cq-ink">
-                {icon}
-                {title}
-              </h3>
-            ) : null}
-            {description ? (
-              <p className="mt-1 text-[12.5px] leading-relaxed text-cq-muted">{description}</p>
-            ) : null}
-          </div>
-          {actions ? <div className="shrink-0">{actions}</div> : null}
-        </div>
-      ) : null}
-      {children ? <div className={hasHeader ? "mt-4" : undefined}>{children}</div> : null}
-    </section>
+      {children}
+    </CqPanel>
   );
 }
 

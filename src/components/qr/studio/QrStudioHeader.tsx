@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import { StatusPill } from "../../home/StatusPill";
+import { CqPageHeader } from "../../cq-ui/CqPageHeader";
+import { CqPublishPill } from "../../cq-ui/CqStatusPill";
 
 /**
  * F4 — QR Studio header.
@@ -7,6 +8,9 @@ import { StatusPill } from "../../home/StatusPill";
  * Mirrors the Magic QR Studio header hierarchy (title + real publication state
  * + short explanation + context). `published` MUST come from the real row
  * (`profiles.published` / `pages.published`) — no fabricated state.
+ *
+ * F6 consolidation: delegates to `cq-ui/CqPageHeader` + `cq-ui/CqStatusPill`,
+ * keeping the exact approved markup and the original public API.
  */
 export function QrStudioHeader({
   title,
@@ -26,23 +30,21 @@ export function QrStudioHeader({
   actions?: ReactNode;
 }) {
   return (
-    <header className="min-w-0">
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-        <h1 className="text-[26px] font-bold leading-none tracking-[-0.035em] text-cq-ink sm:text-[36px]">
-          {title}
-        </h1>
-        {typeof published === "boolean" ? (
-          <StatusPill
+    <CqPageHeader
+      title={title}
+      description={description}
+      pill={
+        typeof published === "boolean" ? (
+          <CqPublishPill
             published={published}
             activeLabel={activeLabel ?? "Publicada"}
             inactiveLabel={inactiveLabel ?? "Borrador"}
           />
-        ) : null}
-      </div>
-      <p className="mt-3 max-w-2xl text-[14px] leading-relaxed text-cq-muted">{description}</p>
-      {context ? <div className="mt-3 text-[13px] leading-relaxed text-cq-subtle">{context}</div> : null}
-      {actions ? <div className="mt-4 flex flex-wrap gap-2">{actions}</div> : null}
-    </header>
+        ) : undefined
+      }
+      context={context}
+      actions={actions}
+    />
   );
 }
 
