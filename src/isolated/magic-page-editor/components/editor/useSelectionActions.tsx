@@ -26,7 +26,7 @@ import { ArrowUpIcon, ArrowDownIcon, MoreHorizontalIcon,
   BadgeCheckIcon,
   LayersIcon,
   ListIcon,
-  MoveHorizontalIcon } from
+  MoveHorizontalIcon, LockIcon, UnlockIcon } from
 'lucide-react';
 import { useEditor } from '../../contexts/EditorContext';
 import { useThemeTokens } from '../../hooks/useThemeTokens';
