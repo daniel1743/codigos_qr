@@ -396,6 +396,18 @@ export function useSelectionActions(): EditorAction[] {
               className="mt-2 w-full rounded-xl border border-line px-3 py-2 text-left text-[12.5px] font-medium text-ink transition-colors duration-150 hover:border-select hover:bg-select-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-select focus-visible:ring-offset-1">
               Quitar icono
             </button>
+            <button
+              type="button"
+              onClick={() => {
+                ed.updateDoc((d) => {
+                  const p = { ...(d.props[sel.id] ?? {}) };
+                  delete p.icon;
+                  return { ...d, props: { ...d.props, [sel.id]: p } };
+                });
+              }}
+              className="mt-2 w-full rounded-xl border border-line px-3 py-2 text-left text-[12.5px] font-medium text-ink transition-colors duration-150 hover:border-select hover:bg-select-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-select focus-visible:ring-offset-1">
+              Restaurar detección automática
+            </button>
           </PanelSection>
           <PanelSection title="Posición">
             <Segmented

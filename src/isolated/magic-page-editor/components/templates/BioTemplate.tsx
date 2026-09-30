@@ -21,6 +21,7 @@ import { bioFeatured, bioLinks, bioMoments, bioProfile, bioSocials , singleButto
 import { cx } from "../../utils/cx";
 import { blockPrefix } from "../../utils/styles";
 import { BlockRef } from "../../types/editor";
+import Logo from "../../../../components/brand/Logo";
 export function BioTemplate() {
   const {
     doc,
@@ -173,15 +174,21 @@ export function BioTemplate() {
             onClick={(event) => {
               if (mode === "edit") event.preventDefault();
             }}
-            className="inline-flex items-center gap-2 rounded-full px-2 py-1 transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--accent)]"
+            className="inline-flex items-center justify-center gap-2 rounded-full px-2 py-1 text-center transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--accent)]"
           >
-            <img
-              src="/brand-assets/cripqer-mark.png"
-              alt=""
-              aria-hidden="true"
-              className="h-4 w-4 object-contain"
+            <span>Visita</span>
+            <Logo
+              variant="symbol"
+              width={16}
+              height={16}
+              title="Cripqer"
             />
-            <span>Visita Cripqer</span>
+            <Logo
+              variant="wordmark"
+              showTagline={false}
+              title="Cripqer"
+              className="origin-center scale-[0.62]"
+            />
           </a>
         </div>
       </div>
