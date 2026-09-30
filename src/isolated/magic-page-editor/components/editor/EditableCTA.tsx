@@ -136,16 +136,22 @@ export function EditableCTA({
 
       }}>
 
-      {showLeading && leading}
+            {labelFill ? (
+        showLeading ? <span className="flex flex-1 justify-start min-w-0">{leading}</span> : (showTrailing ? <span className="flex flex-1 min-w-0" /> : null)
+      ) : (showLeading && leading)}
+      
       {sub !== undefined ?
-      <span className="flex min-w-0 flex-1 flex-col">
+      <span className={cx("flex min-w-0 flex-col", labelFill ? "shrink-0 items-center text-center" : "flex-1")}>
           {labelNode}
           <EditableText id={`${id}.sub`} value={sub} as="span" label="Descripción" className={subClassName} style={subStyle} />
         </span> :
 
-      labelFill ? <span className="flex min-w-0 flex-1 flex-col">{labelNode}</span> : labelNode
+      labelFill ? <span className="flex min-w-0 flex-col shrink-0 items-center text-center">{labelNode}</span> : labelNode
       }
-      {showTrailing && trailing}
+      
+      {labelFill ? (
+        showTrailing ? <span className="flex flex-1 justify-end min-w-0">{trailing}</span> : (showLeading ? <span className="flex flex-1 min-w-0" /> : null)
+      ) : (showTrailing && trailing)}
     </Editable>);
 
 }

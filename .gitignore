@@ -39,3 +39,10 @@ e2e/.auth/
 
 .vercel
 .env*
+
+# Vercel exclusions
+PROYECTO PARA INTEGRA A QR/
+.staging/
+scratch/
+tmp_lovable/
+DOCUMENTACION/
