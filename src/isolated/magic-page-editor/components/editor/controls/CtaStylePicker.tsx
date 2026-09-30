@@ -12,7 +12,11 @@ const styles: {value: CtaVariant;label: string;preview: string;}[] = [
 { value: 'outline', label: 'Contorno', preview: 'border border-ink text-ink' },
 { value: 'soft', label: 'Suave', preview: 'bg-[#EEF0F3] text-ink' },
 { value: 'ghost', label: 'Ghost', preview: 'text-ink' },
-{ value: 'glass', label: 'Glass', preview: 'bg-white/50 text-ink backdrop-blur' }];
+{ value: 'glass', label: 'Glass', preview: 'bg-white/50 text-ink backdrop-blur' },
+{ value: 'elevated', label: 'Elevado', preview: 'bg-white text-ink shadow-md' },
+{ value: 'apple', label: 'Apple', preview: 'bg-ink text-white' },
+{ value: 'minimal', label: 'Minimal', preview: 'text-ink border-b border-ink' },
+{ value: 'premium', label: 'Premium', preview: 'bg-ink text-white shadow-lg' }];
 
 
 export function CtaStylePicker({ value, onChange }: CtaStylePickerProps) {

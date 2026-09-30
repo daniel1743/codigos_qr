@@ -8,6 +8,8 @@ export const editingContract: {kind: ElementKind;element: string;tap: string;act
 { kind: 'hero', element: 'Portada', tap: 'Portada seleccionada', actions: ['Imagen', 'Variante', 'Forma', 'Fondo', 'Más'] },
 { kind: 'social', element: 'Icono social', tap: 'Icono seleccionado', actions: ['Red', 'Destino', 'Estilo', 'Quitar'] },
 { kind: 'card', element: 'Card de colección', tap: 'Card seleccionada', actions: ['Editar texto', 'Imagen', 'Enlace', 'Quitar', 'Más'] },
+{ kind: 'surface', element: 'Superficie de contenido', tap: 'Panel interior seleccionado', actions: ['Fondo', 'Borde', 'Radio', 'Relleno', 'Más'] },
+{ kind: 'icon', element: 'Icono', tap: 'Icono seleccionado', actions: ['Cambiar', 'Quitar', 'Restaurar'] },
 { kind: 'gallery', element: 'Galería', tap: 'Conjunto seleccionado', actions: ['Fotos', 'Diseño', 'Más'] },
 { kind: 'section', element: 'Bloque / sección', tap: 'Barra estructural', actions: ['Fondo', 'Subir', 'Bajar', 'Duplicar', 'Ocultar', 'Eliminar', 'Más'], mobileExtra: 'Añadir debajo' },
 { kind: 'page', element: 'Fondo de página', tap: 'Controles de página', actions: ['Fondo', 'Tipografía', 'Ajustes'] }];

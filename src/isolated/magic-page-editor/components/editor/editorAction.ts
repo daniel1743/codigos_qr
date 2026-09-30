@@ -49,6 +49,8 @@ export const kindIcons: Record<ElementKind, LucideIcon> = {
   section: LayersIcon,
   page: AppWindowIcon,
   familyCard: RectangleHorizontalIcon,
+  surface: SquareIcon,
+  icon: SquareIcon,
   price: EuroIcon,
   badge: BadgeIcon,
 };

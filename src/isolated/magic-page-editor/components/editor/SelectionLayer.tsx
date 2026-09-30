@@ -61,7 +61,7 @@ export function SelectionLayer({ container, scroller }: SelectionLayerProps) {
           <PlusIcon className="h-3.5 w-3.5" strokeWidth={2.5} /> Añadir bloque
         </button>
       }
-      {!ed.isMobile && <FloatingToolbar rect={rect} containerWidth={container.clientWidth} scrollTop={scrollTop} />}
+      {!ed.isMobile && <FloatingToolbar rect={rect} containerWidth={container.clientWidth} viewportHeight={scroller?.clientHeight} scrollTop={scrollTop} />}
     </div>);
 
 }

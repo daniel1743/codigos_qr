@@ -2,6 +2,9 @@ import React from 'react';
 import { ArrowDownRightIcon, ArrowUpRightIcon } from 'lucide-react';
 import { useEditor } from '../../contexts/EditorContext';
 import { useThemeTokens } from '../../hooks/useThemeTokens';
+import { ButtonGroup } from "../blocks/ButtonGroup";
+import { buttonGroupIdentity, readButtonGroup } from "../../utils/buttonGroup";
+import { singleButtonSeed } from "../../data/bioContent";
 import { Block } from '../editor/Block';
 import { Editable } from '../editor/Editable';
 import { EditableText } from '../editor/EditableText';
@@ -165,6 +168,11 @@ export function PortfolioTemplate() {
           </Block>);
 
         }
+            case 'button': {
+        return <Block key={b.key} block={b} defaultSpacing="S" label={buttonGroupIdentity(readButtonGroup(doc, b.key, singleButtonSeed).items.length)}>
+            <ButtonGroup blockKey={b.key} seeds={singleButtonSeed} variants={cta} maxWidth={colStyle.maxWidth as number} mobile={m} className={cx(col, 'items-stretch')} />
+          </Block>;
+      }
       case 'links':
         return (
           <Block key={b.key} block={b} defaultTone="hueso" defaultSpacing="L">

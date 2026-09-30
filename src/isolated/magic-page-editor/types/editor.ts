@@ -18,6 +18,8 @@ export type ElementKind =
   | "section"
   | "page"
   | "familyCard"
+  | "surface"
+  | "icon"
   | "price"
   | "badge";
 
@@ -26,6 +28,7 @@ export type BlockType =
   | "profile"
   | "text"
   | "links"
+  | "button"
   | "social"
   | "image"
   | "gallery"
@@ -84,7 +87,15 @@ export type CardLayout =
   | "editorial"
   | "compact"
   | "beforeAfter"
-  | "highlight";
+  | "highlight"
+  | "cover"
+  | "textOnly"
+  | "iconText"
+  | "image25"
+  | "image40"
+  | "imageRight"
+  | "split"
+  | "backgroundImage";
 
 export type CardRatio = "25" | "35" | "50";
 
@@ -195,6 +206,18 @@ export interface PalettePreset {
   accentFg: string;
   swatches: string[];
   radius?: number;
+}
+
+export interface CardPaletteValues {
+  cardBg: string;
+  cardSurface: string;
+  cardText: string;
+  cardMuted: string;
+  cardLine: string;
+  cardAccent: string;
+  cardAccentFg: string;
+  cardIconBg: string;
+  cardIconColor: string;
 }
 
 export interface ThemeTokens extends Theme {

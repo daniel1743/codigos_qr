@@ -1,6 +1,5 @@
 import React from "react";
-import { ArrowRightIcon, BookOpenIcon, CalendarDaysIcon, MailIcon, MessageCircleIcon, BoxIcon } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import { ArrowRightIcon } from "lucide-react";
 import { useEditor } from "../../contexts/EditorContext";
 import { useThemeTokens } from "../../hooks/useThemeTokens";
 import { Block } from "../editor/Block";
@@ -8,24 +7,20 @@ import { Editable } from "../editor/Editable";
 import { EditableText } from "../editor/EditableText";
 import { EditableImage } from "../editor/EditableImage";
 import { EditableAvatar, VerifiedNameCheck } from "../editor/EditableAvatar";
-import { EditableCTA, CtaVariants } from "../editor/EditableCTA";
+import { CtaVariants } from "../editor/EditableCTA";
 import { EditableSocial, EditableSocialGroup } from "../editor/EditableSocial";
 import { PageRoot, useFooterTone } from "../editor/PageRoot";
 import { AddBlockSlot } from "../editor/AddBlockSlot";
 import { HeroFrame } from "../blocks/HeroFrame";
 import { GalleryGrid } from "../blocks/GalleryGrid";
 import { GenericBlock } from "../blocks/GenericBlock";
+import { ButtonGroup } from "../blocks/ButtonGroup";
+import { buttonGroupIdentity, readButtonGroup } from '../../utils/buttonGroup';
 import { images } from "../../data/images";
-import { bioFeatured, bioLinks, bioMoments, bioProfile, bioSocials } from "../../data/bioContent";
+import { bioFeatured, bioLinks, bioMoments, bioProfile, bioSocials , singleButtonSeed } from "../../data/bioContent";
 import { cx } from "../../utils/cx";
 import { blockPrefix } from "../../utils/styles";
 import { BlockRef } from "../../types/editor";
-const linkIcons: Record<string, LucideIcon> = {
-  calendar: CalendarDaysIcon,
-  book: BookOpenIcon,
-  mail: MailIcon,
-  chat: MessageCircleIcon
-};
 export function BioTemplate() {
   const {
     doc,
@@ -88,22 +83,16 @@ export function BioTemplate() {
               <EditableSocialGroup className="flex items-center justify-center"><>{bioSocials.map((s, i) => <EditableSocial key={s.platform} id={`${p}social.${i}`} platform={s.platform} href={s.href} size={m ? 44 : 48} />)}</></EditableSocialGroup>
             </div>
           </Block>;
-      case 'links':
-        return <Block key={b.key} block={b} defaultSpacing="S">
-            <div className={cx(col, 'flex flex-col gap-3.5')} style={colStyle}>
-              {bioLinks.map((l, i) => {
-              const Icon = linkIcons[l.icon] ?? BoxIcon;
-              return <EditableCTA key={l.label} id={`${p}links.${i}`} label={l.label} sub={l.sub} href={l.href} variants={cta} defaultVariant={i === 0 ? 'solid' : 'soft'} fullDefault className={cx('flex items-center gap-4 rounded-[26px] text-left', m ? 'min-h-[78px] px-4 py-3' : 'min-h-[86px] px-5 py-4')} labelClassName={cx('leading-tight', m ? 'text-[19px]' : 'text-[22px]')} labelStyle={{
-                ...display,
-                fontWeight: 600
-              }} subClassName="mt-0.5 text-[12.5px] opacity-75" leading={<span className="grid h-12 w-12 shrink-0 place-items-center rounded-full" style={{
-                boxShadow: 'inset 0 0 0 1px currentColor'
-              }}>
-                        <Icon className="h-5 w-5" strokeWidth={1.6} />
-                      </span>} trailing={<ArrowRightIcon className="h-5 w-5 shrink-0 opacity-70" strokeWidth={1.6} />} />;
-            })}
-            </div>
+            case 'button': {
+        return <Block key={b.key} block={b} defaultSpacing="S" label={buttonGroupIdentity(readButtonGroup(doc, b.key, singleButtonSeed).items.length)}>
+            <ButtonGroup blockKey={b.key} seeds={singleButtonSeed} variants={cta} maxWidth={colStyle.maxWidth as number} mobile={m} className={cx(col, 'items-stretch')} />
           </Block>;
+      }
+      case 'links': {
+        return <Block key={b.key} block={b} defaultSpacing="S" label={buttonGroupIdentity(readButtonGroup(doc, b.key, bioLinks).items.length)}>
+            <ButtonGroup blockKey={b.key} seeds={bioLinks} variants={cta} maxWidth={colStyle.maxWidth as number} mobile={m} className={cx(col, 'items-stretch')} />
+          </Block>;
+      }
       case 'collection':
         {
           const layout = doc.props[`block:${b.key}`]?.layout ?? 'grid';
@@ -121,11 +110,11 @@ export function BioTemplate() {
                       borderRadius: t.radius
                     }}>
                         <EditableImage id={`${cid}.img`} src={c.img} alt={c.title} className="absolute inset-0" />
-                        <div className={cx('cq-surface absolute inset-x-2.5 bottom-2.5 rounded-[20px]', m ? 'p-3' : 'p-4')}>
+                        <Editable id={`${cid}.surface`} kind="surface" label="Superficie" className={cx('cq-surface absolute inset-x-2.5 bottom-2.5 rounded-[20px]', m ? 'p-3' : 'p-4')} style={{ background: doc.props[cid]?.cardBg, borderRadius: doc.props[cid]?.radius, padding: doc.props[cid]?.spacing === 'S' ? 12 : doc.props[cid]?.spacing === 'L' ? 24 : undefined, boxShadow: doc.props[cid]?.shadow === 'on' ? '0 10px 40px -10px rgba(0,0,0,0.2)' : undefined, border: doc.props[cid]?.cardLine ? `1px solid ${doc.props[cid].cardLine}` : undefined }}>
                           <EditableText id={`${cid}.tag`} value={c.tag} as="span" label="Etiqueta" className="cq-muted text-[11px] font-semibold uppercase tracking-[0.12em]" />
                           <EditableText id={`${cid}.title`} value={c.title} as="h3" label="Título" className={cx('cq-fg mt-1 leading-tight', m ? 'text-[18px]' : 'text-[22px]')} style={display} />
                           {!m && <EditableText id={`${cid}.desc`} value={c.desc} label="Descripción" className="cq-muted mt-1 text-[13px] leading-snug" />}
-                        </div>
+                        </Editable>
                       </Editable>;
                   }
                   return <Editable key={c.title} id={cid} kind="card" label="Card" className="cq-surface flex items-center gap-4 p-3" style={{

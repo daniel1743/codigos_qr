@@ -4,6 +4,7 @@ import { useEditor } from '../../contexts/EditorContext';
 import { useThemeTokens } from '../../hooks/useThemeTokens';
 import { EditableText } from '../editor/EditableText';
 import { EditableCTA, type CtaVariants } from '../editor/EditableCTA';
+import { Editable } from '../editor/Editable';
 import { EditableBadge } from './EditableBadge';
 import { cx } from '../../utils/cx';
 import type { CardFamilyDef, CardItem } from '../../types/editor';
@@ -20,12 +21,13 @@ interface CardBodyProps {
   sale: boolean;
   onAccent: boolean;
   className?: string;
+  cardProps?: Record<string, string>;
 }
 
 const justify: Record<string, string> = { left: 'justify-start', center: 'justify-center', right: 'justify-end', full: '' };
 
 /** Content column shared by every family: eyebrow → title → description → price / CTA footer. */
-export function CardBody({ id, family, item, size, show, inlineBadge, sale, onAccent, className }: CardBodyProps) {
+export function CardBody({ id, family, item, size, show, inlineBadge, sale, onAccent, className, cardProps = {} }: CardBodyProps) {
   const { doc, isMobile: m } = useEditor();
   const t = useThemeTokens();
   const display: React.CSSProperties = { fontFamily: t.displayFont };
@@ -35,11 +37,22 @@ export function CardBody({ id, family, item, size, show, inlineBadge, sale, onAc
   const titleSize =
   size === 'lg' ? m ? 'text-[26px]' : 'text-[38px]' : size === 'sm' ? 'text-[15.5px] font-semibold' : m ? 'text-[19px]' : 'text-[22px]';
   const ctaVariants: CtaVariants = {
-    solid: onAccent ? { background: 'var(--fg)', color: t.accent } : { background: t.accent, color: t.accentFg },
+    solid: onAccent ? { background: 'var(--fg)', color: 'var(--accent)' } : { background: 'var(--accent)', color: 'var(--accent-fg)' },
     outline: { boxShadow: 'inset 0 0 0 1px var(--fg)', color: 'var(--fg)' },
     soft: { background: 'var(--surface)', color: 'var(--fg)', boxShadow: '0 0 0 1px var(--line)' }
   };
-  const ctaAlign = doc.props[`${id}.cta`]?.align ?? 'left';
+  const ctaProps = doc.props[`${id}.cta`] ?? {};
+  const ctaAlign = ctaProps.align ?? 'left';
+  const surfaceId = `${id}.surface`;
+  const surfaceProps = doc.props[surfaceId] ?? {};
+  const surfacePadding = { S: 8, M: 16, L: 24 }[surfaceProps.padding ?? 'M'] ?? 16;
+  const surfaceStyle: React.CSSProperties | undefined = Object.keys(surfaceProps).length ? {
+    background: surfaceProps.bg || undefined,
+    border: `${Number(surfaceProps.borderWidth ?? 0)}px solid ${surfaceProps.borderColor || 'transparent'}`,
+    borderRadius: surfaceProps.radius === 'none' ? 0 : surfaceProps.radius === 'round' ? 24 : 14,
+    padding: surfaceProps.padding ? surfacePadding : undefined,
+    boxShadow: surfaceProps.shadow === 'soft' ? '0 8px 22px rgba(16,24,40,.08)' : surfaceProps.shadow === 'lifted' ? '0 16px 34px rgba(16,24,40,.14)' : undefined,
+  } : undefined;
 
   const price = show.price && item.price &&
   <EditableText
@@ -49,7 +62,7 @@ export function CardBody({ id, family, item, size, show, inlineBadge, sale, onAc
     kind="price"
     label="Precio"
     className={cx('cq-fg font-semibold tabular-nums', sale ? 'text-[20px]' : size === 'sm' ? 'text-[14.5px]' : 'text-[17px]')}
-    style={sale && !onAccent ? { color: t.accent } : undefined} />;
+    style={sale && !onAccent ? { color: 'var(--accent)' } : undefined} />;
 
 
   const prev = show.prev && item.previousPrice &&
@@ -57,7 +70,7 @@ export function CardBody({ id, family, item, size, show, inlineBadge, sale, onAc
 
 
   return (
-    <div className={cx('flex min-w-0 flex-col', className)}>
+    <Editable id={surfaceId} kind="surface" label="Superficie de contenido" className={cx('flex min-w-0 flex-col', className)} style={surfaceStyle}>
       {inlineBadge && show.badge && item.badge &&
       <EditableBadge id={`${id}.badge`} label={item.badge} defaultStyle={sale ? 'solid' : 'soft'} className="mb-2.5" />
       }
@@ -107,6 +120,7 @@ export function CardBody({ id, family, item, size, show, inlineBadge, sale, onAc
             variants={ctaVariants}
             defaultVariant={size === 'sm' ? 'soft' : 'solid'}
             fullDefault={ctaAlign === 'full'}
+            defaultProps={{ variant: cardProps.ctaVariant, shape: cardProps.ctaShape, size: cardProps.ctaSize, iconPosition: cardProps.ctaIconPosition, kind: cardProps.ctaKind }}
             className={cx('inline-flex items-center justify-center gap-1.5 whitespace-nowrap font-semibold', pill, size === 'sm' ? 'h-8 px-3.5 text-[12.5px]' : 'h-10 px-4 text-[13px]')}
             trailing={<ArrowRightIcon className="h-3.5 w-3.5" />} />
 
@@ -114,6 +128,6 @@ export function CardBody({ id, family, item, size, show, inlineBadge, sale, onAc
         }
         </div>
       }
-    </div>);
+    </Editable>);
 
 }

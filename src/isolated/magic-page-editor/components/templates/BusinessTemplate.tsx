@@ -3,6 +3,9 @@ import { ArrowRightIcon, CalendarDaysIcon, DropletIcon, HomeIcon, MailIcon, Phon
 import type { LucideIcon } from "lucide-react";
 import { useEditor } from "../../contexts/EditorContext";
 import { useThemeTokens } from "../../hooks/useThemeTokens";
+import { ButtonGroup } from "../blocks/ButtonGroup";
+import { buttonGroupIdentity, readButtonGroup } from "../../utils/buttonGroup";
+import { singleButtonSeed } from "../../data/bioContent";
 import { Block } from "../editor/Block";
 import { Editable } from "../editor/Editable";
 import { EditableText } from "../editor/EditableText";
@@ -17,6 +20,7 @@ import { HeroFrame } from "../blocks/HeroFrame";
 import { GalleryGrid } from "../blocks/GalleryGrid";
 import { LocationBlock } from "../blocks/LocationBlock";
 import { GenericBlock } from "../blocks/GenericBlock";
+import { iconForId } from "../editor/controls/IconPicker";
 import { images } from "../../data/images";
 import { bizCta, bizLocation, bizProfile, bizResults, bizServices, bizSocials } from "../../data/businessContent";
 import { cx } from "../../utils/cx";
@@ -122,7 +126,7 @@ export function BusinessTemplate() {
               align
             }) => <>
                   <EditableText id={`${p}hero.brand`} value={bizProfile.brand} label="Marca" className="cq-fg text-[13px] uppercase tracking-[0.26em]" style={display} />
-                  <EditableText id={`${p}hero.title`} value={bizProfile.title} as="h1" label="Título" className={cx('cq-fg mt-5 leading-[1.04]', m ? 'text-[38px]' : 'text-[62px]')} style={display} />
+                  <div className="flex items-center"><EditableText id={`${p}hero.title`} value={bizProfile.title} as="h1" label="Título" className={cx('cq-fg mt-5 leading-[1.04]', m ? 'text-[38px]' : 'text-[62px]')} style={display} /><VerifiedNameCheck avatarId={`${p}avatar`} /></div>
                   <EditableText id={`${p}hero.text`} value={bizProfile.text} label="Descripción" multiline className={cx('cq-muted mt-5 max-w-[480px] leading-relaxed', m ? 'text-[15px]' : 'text-[17px]')} />
                   <div className={cx('mt-8 flex flex-wrap gap-3', align === 'center' && 'justify-center')}>
                     <EditableCTA id={`${p}hero.cta`} label={bizProfile.cta} href="https://wa.me/34910000000" variants={cta} className="inline-flex h-[54px] items-center gap-2.5 whitespace-nowrap rounded-full px-7 text-[15px] font-semibold" leading={<CalendarDaysIcon className="h-[18px] w-[18px]" />} />
@@ -130,7 +134,7 @@ export function BusinessTemplate() {
                   </div>
                   <div className={cx('mt-9 flex flex-wrap items-center gap-2.5', align === 'center' && 'justify-center')}>
                     <EditableSocialGroup className="flex flex-wrap items-center"><>{bizSocials.map((s, i) => <EditableSocial key={s.platform} id={`${p}hero.social.${i}`} platform={s.platform} href={s.href} size={40} defaultStyle="square" />)}</></EditableSocialGroup>
-                    <span className="flex items-center"><EditableText id={`${p}hero.byline`} value={bizProfile.byline} label="Firma" className="cq-muted ml-2 text-[13px]" /><VerifiedNameCheck avatarId={`${p}avatar`} /></span>
+                    <span><EditableText id={`${p}hero.byline`} value={bizProfile.byline} label="Firma" className="cq-muted ml-2 text-[13px]" /></span>
                   </div>
                 </>}
             </HeroFrame>
@@ -147,7 +151,7 @@ export function BusinessTemplate() {
               <div data-collection={layout} className={cx('grid gap-5', layout === 'lista' ? m ? 'grid-cols-1' : 'grid-cols-2' : m ? 'grid-cols-1' : 'grid-cols-4')}>
                 {bizServices.map((s, i) => {
                   const cid = `${p}collection.${i}`;
-                  const Icon = serviceIcons[s.icon] ?? BoxIcon;
+                  const Icon = iconForId(doc.props[`${p}collection.${i}.icon`]?.icon ?? s.icon);
                   if (layout === 'lista') {
                     return <Editable key={s.title} id={cid} kind="card" label="Card de servicio" className="relative grid overflow-hidden" style={{
                       ...toneVars(petrol),
@@ -157,12 +161,12 @@ export function BusinessTemplate() {
                       minHeight: m ? 176 : 214
                     }}>
                         <div className={cx('flex flex-col items-start', m ? 'p-4' : 'p-6')}>
-                          <span className="grid h-10 w-10 place-items-center rounded-xl" style={{
+                          <Editable id={`${cid}.icon`} kind="icon" label="Icono" className="grid h-10 w-10 place-items-center rounded-xl" style={{
                           background: 'rgba(244,238,232,0.12)',
                           color: '#E9DCC8'
                         }}>
                             <Icon className="h-5 w-5" strokeWidth={1.7} />
-                          </span>
+                          </Editable>
                           <EditableText id={`${cid}.title`} value={s.title} as="h3" label="Título" className={cx('cq-fg mt-4 uppercase leading-tight tracking-[0.03em]', m ? 'text-[17px]' : 'text-[21px]')} style={display} />
                           <EditableText id={`${cid}.desc`} value={s.desc} label="Descripción" className="cq-muted mt-1.5 text-[13.5px] leading-snug" />
                           <div className="mt-auto flex flex-wrap items-center gap-3 pt-4">
@@ -192,6 +196,11 @@ export function BusinessTemplate() {
             </div>
           </Block>;
         }
+            case 'button': {
+        return <Block key={b.key} block={b} defaultSpacing="S" label={buttonGroupIdentity(readButtonGroup(doc, b.key, singleButtonSeed).items.length)}>
+            <ButtonGroup blockKey={b.key} seeds={singleButtonSeed} variants={cta} maxWidth={colStyle.maxWidth as number} mobile={m} className={cx(col, 'items-stretch')} />
+          </Block>;
+      }
       case 'links':
         return <Block key={b.key} block={b}>
             <div className={wrap} style={{
@@ -210,13 +219,13 @@ export function BusinessTemplate() {
                     </span>} />
               <div className={cx('mt-3 grid gap-3', m ? 'grid-cols-1' : 'grid-cols-2')}>
                 {bizCta.secondary.map((s, i) => {
-                const Icon = serviceIcons[s.icon] ?? BoxIcon;
-                return <EditableCTA key={s.label} id={`${p}links.${i + 1}`} label={s.label} sub={s.sub} href={i === 0 ? 'tel:+34910000000' : 'mailto:hola@clinicaaurea.es'} variants={surfaceCta} defaultVariant="soft" fullDefault className="flex min-h-[80px] items-center gap-4 rounded-[22px] px-5 py-4 text-left" labelClassName="text-[16px] font-semibold" subClassName="cq-muted mt-0.5 text-[13px]" leading={<span className="grid h-11 w-11 shrink-0 place-items-center rounded-full" style={{
+                const Icon = iconForId(doc.props[`${p}links.${i + 1}.icon`]?.icon ?? s.icon);
+                return <EditableCTA key={s.label} id={`${p}links.${i + 1}`} label={s.label} sub={s.sub} href={i === 0 ? 'tel:+34910000000' : 'mailto:hola@clinicaaurea.es'} variants={surfaceCta} defaultVariant="soft" fullDefault className="flex min-h-[80px] items-center gap-4 rounded-[22px] px-5 py-4 text-left" labelClassName="text-[16px] font-semibold" subClassName="cq-muted mt-0.5 text-[13px]" leading={<Editable id={`${p}links.${i + 1}.icon`} kind="icon" label="Icono" className="grid h-11 w-11 shrink-0 place-items-center rounded-full" style={{
                   background: 'var(--surface)',
                   boxShadow: '0 0 0 1px var(--line)'
                 }}>
                           <Icon className="h-5 w-5" strokeWidth={1.7} />
-                        </span>} trailing={<ArrowRightIcon className="h-5 w-5 shrink-0 opacity-60" />} />;
+                        </Editable>} trailing={<ArrowRightIcon className="h-5 w-5 shrink-0 opacity-60" />} />;
               })}
               </div>
             </div>

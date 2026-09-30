@@ -1,4 +1,4 @@
-import type { PalettePreset } from '../types/editor';
+import type { CardPaletteValues, PalettePreset } from '../types/editor';
 
 /** Shared M1 palettes. They are optional PageDoc props, so legacy pages keep their theme. */
 export const visualPalettes: PalettePreset[] = [
@@ -35,3 +35,31 @@ export const visualPalettes: PalettePreset[] = [
 ];
 
 export const visualPaletteById = Object.fromEntries(visualPalettes.map((palette) => [palette.id, palette]));
+
+/** Card-scoped tokens for the same six named visual directions. */
+export const cardPaletteTokens: Record<string, CardPaletteValues> = {
+  cream: {
+    cardBg: '#FBF7F0', cardSurface: '#EFE3D1', cardText: '#3A2A1E', cardMuted: '#6F5A48',
+    cardLine: '#E6D9C6', cardAccent: '#B8935A', cardAccentFg: '#F6EBD9', cardIconBg: '#EFE3D1', cardIconColor: '#7C5E35'
+  },
+  black: {
+    cardBg: '#161412', cardSurface: '#1F1A15', cardText: '#F4EBDD', cardMuted: '#BFAE96',
+    cardLine: '#3A2F24', cardAccent: '#D4AF6A', cardAccentFg: '#0B0A09', cardIconBg: '#1F1A15', cardIconColor: '#D4AF6A'
+  },
+  teal: {
+    cardBg: '#2B6570', cardSurface: '#F7F0E6', cardText: '#1F4E57', cardMuted: '#5B777A',
+    cardLine: '#2E626C', cardAccent: '#E4D2B5', cardAccentFg: '#1F4E57', cardIconBg: '#F7F0E6', cardIconColor: '#1F4E57'
+  },
+  sage: {
+    cardBg: '#FFFFFF', cardSurface: '#EEF2EA', cardText: '#111111', cardMuted: '#545D50',
+    cardLine: '#E3E8DF', cardAccent: '#6B7A4E', cardAccentFg: '#FFFFFF', cardIconBg: '#EEF2EA', cardIconColor: '#3F4A2E'
+  },
+  silver: {
+    cardBg: '#F5F6F8', cardSurface: '#E3E5EA', cardText: '#121316', cardMuted: '#50545C',
+    cardLine: '#D2D5DB', cardAccent: '#3A3D44', cardAccentFg: '#FFFFFF', cardIconBg: '#2A2C31', cardIconColor: '#FFFFFF'
+  },
+  caramel: {
+    cardBg: '#F7EEE4', cardSurface: '#F3E6D8', cardText: '#3B2618', cardMuted: '#6E4F3A',
+    cardLine: '#E4D2BF', cardAccent: '#B98A5A', cardAccentFg: '#F3E3CD', cardIconBg: '#F3E6D8', cardIconColor: '#7E5332'
+  }
+};

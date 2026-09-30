@@ -1,7 +1,9 @@
 import React from 'react';
-import {
+import { toast } from 'sonner';
+import { ArrowUpIcon, ArrowDownIcon, MoreHorizontalIcon,
   BoldIcon,
   CircleDashedIcon,
+  CopyIcon,
   CropIcon,
   ImageIcon,
   ImagesIcon,
@@ -20,12 +22,16 @@ import {
   ShapesIcon,
   Trash2Icon,
   TypeIcon,
+  StarIcon,
   BadgeCheckIcon,
-  LayersIcon } from
+  LayersIcon,
+  ListIcon,
+  MoveHorizontalIcon } from
 'lucide-react';
 import { useEditor } from '../../contexts/EditorContext';
 import { useThemeTokens } from '../../hooks/useThemeTokens';
 import { structureActions } from './structureActions';
+import { AdvancedPanel } from './AdvancedPanel';
 import { socialStyleScope, type SocialStyle, type SocialLayout, type SocialShape, type SocialFill, type SocialSize } from './EditableSocial';
 import { PanelSection } from './controls/PanelSection';
 import { Segmented } from './controls/Segmented';
@@ -35,6 +41,12 @@ import { SwatchRow } from './controls/SwatchRow';
 import { ImagePicker } from './controls/ImagePicker';
 import { FreeCropControl, PositionPad } from './controls/PositionPad';
 import { LinkEditor } from './controls/LinkEditor';
+import { CollapsibleSection } from './controls/CollapsibleSection';
+import { ConfirmButton } from './controls/ConfirmButton';
+import { ScopeNote } from './controls/ScopeNote';
+import { ButtonContentPanel } from './ButtonContentPanel';
+import { ButtonGroupStylePanel } from './ButtonGroupStylePanel';
+import { ButtonRoster } from './ButtonRoster';
 import { CtaStylePicker } from './controls/CtaStylePicker';
 import { CtaTreatmentPicker } from './controls/CtaTreatmentPicker';
 import { HeroVariantPicker } from './controls/HeroVariantPicker';
@@ -46,9 +58,13 @@ import { PalettePicker } from './controls/PalettePicker';
 import { DecorationPicker } from './controls/DecorationPicker';
 import { TypographyTreatmentPicker } from './controls/TypographyTreatmentPicker';
 import { HeroFrameShapePicker } from './controls/HeroFrameShapePicker';
+import { IconPicker, iconLibrary } from './controls/IconPicker';
 import { socialPlatforms } from '../../data/socialPlatforms';
+import { addButton, canDeleteButton, deleteButton, moveButton } from '../../utils/buttonOps';
+import { buttonCollectionFor, buttonIdentity, canonicalScope, commonButtonTextAlign, nextButtonId, normalizeButtonIcon, readButtonGroup, suggestButtonIcon } from '../../utils/buttonGroup';
 import { familyForBlockType } from '../../data/cardFamilies';
 import { CardLayoutPicker } from '../cards/CardLayoutPicker';
+import { CardSurfaceFields } from '../cards/CardSurfaceFields';
 import { galleryLayouts } from '../blocks/GalleryGrid';
 import { badgeActions, ctaAlignAction, familyCardActions, getCardContext, priceActions } from '../cards/cardActions';
 import type { CardLayout } from '../../types/editor';
@@ -72,6 +88,10 @@ export function useSelectionActions(): EditorAction[] {
   const set = (key: string, value: string) => ed.setProp(propId, key, value);
 
   switch (sel.kind) {
+    case 'surface': {
+      const ctx = getCardContext(ed, id, sel.blockKey) ?? { cardId: id.replace(/\.surface$/, '') } as any;
+      return [{ key: 'surface', label: 'Superficie', icon: PaintBucketIcon, showLabel: true, panel: <CardSurfaceFields ctx={ctx} /> }];
+    }
     case 'text':{
         const ts = ed.doc.textStyles[id] ?? {};
         const cs = el ? window.getComputedStyle(el) : null;
@@ -118,7 +138,7 @@ export function useSelectionActions(): EditorAction[] {
 
     case 'image':
       return [
-      { key: 'replace', label: 'Reemplazar', icon: RefreshCwIcon, showLabel: true, panel: <ImagePicker value={props.src} onChange={(v) => set('src', v)} /> },
+      { key: 'replace', label: 'Reemplazar', icon: RefreshCwIcon, showLabel: true, panel: <ImagePicker value={props.src} onChange={(v) => set('src', v)} onUpload={ed.uploadAsset} /> },
       {
         key: 'shape',
         label: 'Forma',
@@ -184,7 +204,7 @@ export function useSelectionActions(): EditorAction[] {
     case 'avatar':{
         const ringOn = (props.ring ?? 'on') === 'on';
         return [
-        { key: 'replace', label: 'Reemplazar', icon: RefreshCwIcon, showLabel: true, panel: <ImagePicker value={props.src} onChange={(v) => set('src', v)} /> },
+        { key: 'replace', label: 'Reemplazar', icon: RefreshCwIcon, showLabel: true, panel: <ImagePicker value={props.src} onChange={(v) => set('src', v)} onUpload={ed.uploadAsset} /> },
         {
           key: 'shape',
           label: 'Forma',
@@ -230,7 +250,7 @@ export function useSelectionActions(): EditorAction[] {
 
     case 'hero':
       return [
-      { key: 'media', label: 'Imagen', icon: ImageIcon, showLabel: true, panel: <ImagePicker value={props.src} onChange={(v) => set('src', v)} /> },
+      { key: 'media', label: 'Imagen', icon: ImageIcon, showLabel: true, panel: <ImagePicker value={props.src} onChange={(v) => set('src', v)} onUpload={ed.uploadAsset} /> },
       {
         key: 'variant',
         label: 'Variante',
@@ -268,42 +288,174 @@ export function useSelectionActions(): EditorAction[] {
     case 'badge':
       return badgeActions(ed, id, getCardContext(ed, id, sel.blockKey), el);
 
-    case 'cta':
-      return [
-      ...(getCardContext(ed, id, sel.blockKey) ? [ctaAlignAction(ed, id)] : []),
-      {
-        key: 'label',
-        label: 'Texto',
+        case 'cta': {
+      const collection = buttonCollectionFor(ed.doc, ed.templateId, sel.blockKey);
+      const model = collection ? readButtonGroup(ed.doc, collection.blockKey, collection.seeds) : undefined;
+      const item = model?.items.find((entry) => entry.scope === propId);
+      const identity = model && item ? buttonIdentity(model, item.stableId) : undefined;
+      const itemIndex = item && model ? model.order.indexOf(item.stableId) : -1;
+      const itemHref = props['href'] ?? item?.href ?? el?.getAttribute('href') ?? '';
+      const iconValue = props['icon'] ?? normalizeButtonIcon(item?.icon) ?? 'none';
+      const suggestedIcon = suggestButtonIcon(itemHref, item?.label ?? sel.label);
+      const autoIconLabel = suggestedIcon ? iconLibrary.find((entry) => entry.id === suggestedIcon)?.label ?? suggestedIcon : '';
+
+      const moveThisButton = (direction: -1 | 1) => {
+        if (!collection || !item) return;
+        ed.updateDoc((doc) => moveButton(doc, collection, item.stableId, direction));
+      };
+
+      const deleteThisButton = () => {
+        if (!collection || !item || !model) {
+          ed.removeElement(id, sel.label);
+          return;
+        }
+        if (!canDeleteButton(model)) {
+          toast.error('Debe existir al menos un botón.');
+          return;
+        }
+        ed.updateDoc((doc) => deleteButton(doc, collection, item.stableId));
+        toast('Botón eliminado', { action: { label: 'Deshacer', onClick: () => ed.undo() } });
+      };
+
+      const contentAction: EditorAction = {
+        key: 'content',
+        label: 'Contenido',
         icon: TypeIcon,
         showLabel: true,
-        onClick: () => {
-          ed.setEditingId(`${id}.label`);
-          if (ed.isMobile) ed.setKeyboard(true);
-        }
-      },
-      { key: 'url', label: 'Enlace', icon: Link2Icon, showLabel: true, panel: <LinkEditor value={props.href ?? el?.getAttribute('href') ?? ''} onChange={(v) => set('href', v)} /> },
+        panel: collection && identity ?
+        <ButtonContentPanel blockKey={collection.blockKey} seeds={collection.seeds} scope={propId} label={identity.label} /> :
+
+        <div className="space-y-4">
+            <ScopeNote scope="item" />
+            <PanelSection title="Texto" hint="También puedes hacer doble clic en el botón para editar en el lienzo.">
+              <input
+              type="text"
+              aria-label="Texto del botón"
+              className="w-full rounded-xl border border-line bg-transparent px-3 py-2 text-[14px] text-ink shadow-sm focus:border-select focus:outline-none focus:ring-1 focus:ring-select"
+              value={ed.doc.texts[`${propId}.label`] ?? props['label'] ?? el?.textContent ?? ''}
+              onChange={(e) => ed.updateDoc((d) => ({ ...d, texts: { ...d.texts, [`${propId}.label`]: e.target.value } }))} />
+            </PanelSection>
+            <PanelSection title="Enlace">
+              <LinkEditor
+              value={itemHref}
+              onChange={(v) => set('href', v)}
+              newTab={props['newTab']}
+              onNewTabChange={(v) => set('newTab', v)} />
+            </PanelSection>
+          </div>
+      };
+
+      const designAction: EditorAction = collection ?
       {
-        key: 'style',
-        label: 'Estilo',
+        key: 'design',
+        label: 'Diseño',
         icon: PaintbrushIcon,
         showLabel: true,
-        panel: <CtaStylePicker value={props.variant as CtaVariant ?? el?.dataset.variant as CtaVariant ?? 'solid'} onChange={(v) => set('variant', v)} />
-      },
+        panel: <ButtonGroupStylePanel blockKey={collection.blockKey} count={model?.items.length ?? 0} />
+      } :
       {
-        key: 'treatment',
-        label: 'Forma y tamaño',
+        key: 'design',
+        label: 'Diseño',
+        icon: PaintbrushIcon,
+        showLabel: true,
+        panel: <div className="space-y-4">
+            <ScopeNote scope="item" />
+            <PanelSection title="Estilo">
+              <CtaStylePicker value={(props['variant'] ?? el?.dataset.variant ?? 'solid') as CtaVariant} onChange={(v) => set('variant', v)} />
+            </PanelSection>
+            <PanelSection title="Color">
+              <SwatchRow colors={t.swatches} value={props['color']} onChange={(v) => set('color', v ?? '')} />
+            </PanelSection>
+            <PanelSection title="Forma y tamaño">
+              <CtaTreatmentPicker
+              hideIconPosition
+              hideKind
+              shape={props['shape'] as 'square' | 'soft' | 'pill' | 'circle' | 'rounded' | undefined}
+              size={props['size'] as 'sm' | 'md' | 'lg' | 'full' | undefined}
+              onChange={(key, value) => set(key, value)} />
+            </PanelSection>
+          </div>
+      } as EditorAction;
+
+      const iconAction: EditorAction = {
+        key: 'icon-panel',
+        label: 'Icono',
         icon: ShapesIcon,
         showLabel: true,
-        panel: <CtaTreatmentPicker
-          shape={props.shape as 'square' | 'soft' | 'pill' | 'circle' | undefined}
-          size={props.size as 'sm' | 'md' | 'lg' | 'full' | undefined}
-          iconPosition={props.iconPosition as 'none' | 'left' | 'right' | undefined}
-          kind={props.kind as 'standard' | 'card' | undefined}
-          onChange={(key, value) => set(key, value)} />
-      },
-      { key: 'remove', label: 'Eliminar', icon: Trash2Icon, danger: true, onClick: () => ed.removeElement(id, sel.label) }];
+        panel: <div className="space-y-4">
+          <ScopeNote scope="item" />
+          <PanelSection
+            title={`Icono de · ${identity?.label ?? sel.label}`}
+            hint={autoIconLabel ? `Detectamos ${autoIconLabel} por el enlace. Puedes cambiarlo manualmente.` : 'Puedes cambiarlo manualmente.'}>
+            <CollapsibleSection title="Cambiar icono" hint="Biblioteca de iconos">
+              <IconPicker value={iconValue} onChange={(v) => set('icon', v)} />
+            </CollapsibleSection>
+            <button
+              type="button"
+              onClick={() => set('icon', 'none')}
+              className="mt-2 w-full rounded-xl border border-line px-3 py-2 text-left text-[12.5px] font-medium text-ink transition-colors duration-150 hover:border-select hover:bg-select-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-select focus-visible:ring-offset-1">
+              Quitar icono
+            </button>
+          </PanelSection>
+          <PanelSection title="Posición">
+            <Segmented
+              ariaLabel="Posición del icono"
+              options={[{ value: 'left', label: 'Izquierda' }, { value: 'right', label: 'Derecha' }]}
+              value={props['iconPosition'] ?? 'left'}
+              onChange={(v) => set('iconPosition', v)} />
+          </PanelSection>
+        </div>
+      };
 
+      const primaryAction: EditorAction = {
+        key: 'primary',
+        label: 'Destacar',
+        icon: StarIcon,
+        showLabel: true,
+        active: props['isPrimary'] === 'on',
+        onClick: () => set('isPrimary', props['isPrimary'] === 'on' ? 'off' : 'on')
+      };
 
+      const moreAction: EditorAction = {
+        key: 'more-actions',
+        label: 'Más',
+        icon: MoreHorizontalIcon,
+        showLabel: true,
+        panel: <div className="space-y-4">
+          {collection && item && identity &&
+          <PanelSection title={`Orden · posición ${identity.position} de ${identity.total}`}>
+              <div className="flex items-center gap-2">
+                <button
+                type="button"
+                disabled={itemIndex <= 0}
+                onClick={() => moveThisButton(-1)}
+                className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-xl border border-line bg-white text-[12.5px] font-medium text-ink transition-colors duration-150 hover:bg-select-soft disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-select focus-visible:ring-offset-1">
+                  <ArrowUpIcon className="h-4 w-4" /> Subir
+                </button>
+                <button
+                type="button"
+                disabled={itemIndex >= (model?.items.length ?? 1) - 1}
+                onClick={() => moveThisButton(1)}
+                className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-xl border border-line bg-white text-[12.5px] font-medium text-ink transition-colors duration-150 hover:bg-select-soft disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-select focus-visible:ring-offset-1">
+                  <ArrowDownIcon className="h-4 w-4" /> Bajar
+                </button>
+              </div>
+            </PanelSection>}
+          {collection &&
+          <CollapsibleSection title="Gestionar botones" hint="Añadir, ordenar, duplicar y eliminar">
+              <ButtonRoster blockKey={collection.blockKey} seeds={collection.seeds} />
+            </CollapsibleSection>}
+          <PanelSection title="Zona peligrosa" hint="Esta acción se puede deshacer.">
+            <ConfirmButton
+              label={collection ? 'Eliminar este botón' : `Eliminar ${sel.label.toLowerCase()}`}
+              onConfirm={deleteThisButton}
+              className="w-full" />
+          </PanelSection>
+        </div>
+      };
+
+      return [contentAction, designAction, iconAction, primaryAction, moreAction];
+    }
     case 'social':{
         const scope = socialStyleScope(sel.blockKey, sel.parentId);
         const platform = props.platform as SocialPlatform ?? socialPlatforms.find((p) => p.label === sel.label)?.id ?? 'web';
@@ -343,7 +495,7 @@ export function useSelectionActions(): EditorAction[] {
         if (sel.label === 'Vídeo') {
           return [
             { key: 'video-url', label: 'Enlace', icon: Link2Icon, showLabel: true, panel: <LinkEditor value={props.href ?? ''} onChange={(v) => set('href', v)} /> },
-            { key: 'replace', label: 'Portada', icon: ImageIcon, panel: <ImagePicker value={props.src} onChange={(v) => set('src', v)} /> },
+            { key: 'replace', label: 'Portada', icon: ImageIcon, panel: <ImagePicker value={props.src} onChange={(v) => set('src', v)} onUpload={ed.uploadAsset} /> },
             { key: 'crop', label: 'Encuadre', icon: CropIcon, panel: <><PanelSection title="Encuadre libre"><FreeCropControl x={Number(props.cropX ?? 50)} y={Number(props.cropY ?? 50)} zoom={Number(props.zoom ?? 1)} onChange={set} /></PanelSection><PanelSection title="Posición rápida"><PositionPad value={props.pos ?? 'center'} onChange={(v) => set('pos', v)} /></PanelSection></> }
           ];
         }
@@ -357,7 +509,7 @@ export function useSelectionActions(): EditorAction[] {
             key: 'image',
             label: 'Imagen',
             icon: ImageIcon,
-            panel: <ImagePicker value={ed.doc.props[imgId]?.src} onChange={(v) => ed.setProp(imgId, 'src', v)} />
+            panel: <ImagePicker value={ed.doc.props[imgId]?.src} onChange={(v) => ed.setProp(imgId, 'src', v)} onUpload={ed.uploadAsset} />
           });
         }
         actions.push(
@@ -370,7 +522,7 @@ export function useSelectionActions(): EditorAction[] {
     case 'gallery':{
         const current = props.items ? props.items.split('|') : Array.from(el?.querySelectorAll('img') ?? []).map((img) => img.getAttribute('src') ?? '');
         return [
-        { key: 'photos', label: 'Fotos', icon: ImagesIcon, showLabel: true, panel: <GalleryPhotosPicker value={current} onChange={(v) => set('items', v.join('|'))} /> },
+        { key: 'photos', label: 'Fotos', icon: ImagesIcon, showLabel: true, panel: <GalleryPhotosPicker value={current} onChange={(v) => set('items', v.join('|'))} onUpload={ed.uploadAsset} /> },
         {
           key: 'layout',
           label: 'Diseño',
@@ -389,10 +541,99 @@ export function useSelectionActions(): EditorAction[] {
       }
 
     case 'section':{
-        const bg: EditorAction = { key: 'bg', label: 'Fondo', icon: PaintBucketIcon, showLabel: true, panel: <ToneGrid tones={t.tones} value={props.bg} onChange={(v) => set('bg', v)} /> };
+        const bg: EditorAction = { key: 'bg', label: 'Fondo', icon: PaintbrushIcon, showLabel: true, panel: <ToneGrid tones={t.tones} value={props.bg} onChange={(v) => set('bg', v)} /> };
         if (!sel.blockKey) return [bg];
         const key = sel.blockKey;
         const block = ed.doc.blocks.find((b) => b.key === key);
+        const collection = buttonCollectionFor(ed.doc, ed.templateId, key);
+        const groupModel = collection ? readButtonGroup(ed.doc, collection.blockKey, collection.seeds) : undefined;
+
+        /* ----- Button group: identity first, one obvious action per intent ----- */
+        if (collection && groupModel) {
+          const setGroup = (groupKey: string, value: string) => ed.setProp(`block:${collection.blockKey}`, groupKey, value);
+          const addButtonAction = () => {
+            const stableId = nextButtonId(groupModel);
+            ed.updateDoc((doc) => addButton(doc, collection));
+            toast('Botón añadido', { action: { label: 'Deshacer', onClick: () => ed.undo() } });
+            window.setTimeout(() => ed.select(canonicalScope(collection.blockKey, stableId), { reveal: true }), 80);
+          };
+          const setAllTextAlign = (value: TextAlign) => ed.updateDoc((doc) => {
+            const textStyles = { ...doc.textStyles };
+            groupModel.items.forEach((entry) => {
+              textStyles[`${entry.scope}.label`] = { ...textStyles[`${entry.scope}.label`], align: value };
+              if (entry.sub !== undefined) {
+                textStyles[`${entry.scope}.sub`] = { ...textStyles[`${entry.scope}.sub`], align: value };
+              }
+            });
+            return { ...doc, textStyles };
+          });
+          const structure = structureActions(ed, collection.blockKey);
+          const structureButton = (action: EditorAction) => {
+            const Icon = action.icon;
+            return (
+              <button
+                key={action.key}
+                type="button"
+                disabled={action.disabled}
+                onClick={() => action.onClick?.()}
+                className="inline-flex h-10 flex-1 items-center justify-center gap-1.5 rounded-xl border border-line bg-white px-2 text-[12.5px] font-medium text-ink transition-colors duration-150 hover:bg-select-soft disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-select focus-visible:ring-offset-1">
+                <Icon className="h-4 w-4" /> {action.label}
+              </button>);
+          };
+
+          return [
+          { key: 'add-button', label: 'Añadir botón', icon: PlusIcon, showLabel: true, onClick: addButtonAction },
+          { key: 'design', label: 'Diseño', icon: PaintbrushIcon, showLabel: true, panel: <ButtonGroupStylePanel blockKey={collection.blockKey} count={groupModel.items.length} /> },
+          {
+            key: 'spacing',
+            label: 'Espaciado',
+            icon: MoveHorizontalIcon,
+            showLabel: true,
+            panel: <div className="space-y-4">
+              <ScopeNote scope="group" count={groupModel.items.length} />
+              <PanelSection title="Entre botones">
+                <Segmented ariaLabel="Espaciado del grupo" options={[{ value: 'tight', label: 'Junto' }, { value: 'normal', label: 'Normal' }, { value: 'loose', label: 'Amplio' }]} value={props['groupSpacing'] ?? 'normal'} onChange={(v) => setGroup('groupSpacing', v)} />
+              </PanelSection>
+              <PanelSection title="Ancho de los botones">
+                <Segmented ariaLabel="Ancho de botones" options={[{ value: 'on', label: 'Ancho completo' }, { value: 'off', label: 'Ancho propio' }]} value={props['groupFullWidth'] ?? 'on'} onChange={(v) => setGroup('groupFullWidth', v)} />
+              </PanelSection>
+            </div>
+          },
+          {
+            key: 'align',
+            label: 'Alineación',
+            icon: alignOptions[0]!.icon,
+            showLabel: true,
+            panel: <div className="space-y-4">
+              <ScopeNote scope="group" count={groupModel.items.length} />
+              <PanelSection title="Alineación de los botones" hint="Posición de los botones dentro de la columna.">
+                <Segmented ariaLabel="Alineación del grupo" options={[{ value: 'left', label: 'Izquierda' }, { value: 'center', label: 'Centro' }, { value: 'right', label: 'Derecha' }]} value={props['groupAlignment'] ?? 'center'} onChange={(v) => setGroup('groupAlignment', v)} />
+              </PanelSection>
+              <PanelSection title="Alineación del texto" hint={`Aplica al texto y al subtexto de los ${groupModel.items.length} botones.`}>
+                <Segmented ariaLabel="Alineación del texto del grupo" options={alignOptions.map((option) => ({ value: option.value, label: option.label }))} value={commonButtonTextAlign(ed.doc, groupModel) || 'left'} onChange={(v) => setAllTextAlign(v as TextAlign)} />
+              </PanelSection>
+            </div>
+          },
+          { key: 'manage', label: 'Gestionar', icon: ListIcon, showLabel: true, panel: <ButtonRoster blockKey={collection.blockKey} seeds={collection.seeds} /> },
+          {
+            key: 'more-actions',
+            label: 'Más',
+            icon: MoreHorizontalIcon,
+            showLabel: true,
+            panel: <div className="space-y-4">
+              <PanelSection title="Fondo de la sección">
+                <ToneGrid tones={t.tones} value={props['bg']} onChange={(v) => set('bg', v)} />
+              </PanelSection>
+              <PanelSection title="Bloque" hint="La sección que contiene los botones.">
+                <div className="flex flex-wrap gap-2">{structure.filter((action) => !action.danger).map(structureButton)}</div>
+              </PanelSection>
+              <AdvancedPanel hideBlockNav />
+              <PanelSection title="Zona peligrosa" hint="Se puede deshacer.">
+                <div className="flex flex-wrap gap-2">{structure.filter((action) => action.danger).map(structureButton)}</div>
+              </PanelSection>
+            </div>
+          }];
+        }
         const actions: EditorAction[] = [bg];
         if (block?.type === 'collection') {
           actions.push({

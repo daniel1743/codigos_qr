@@ -7,6 +7,7 @@ import { AdvancedPanel } from './AdvancedPanel';
 import { kindIcons, type EditorAction } from './editorAction';
 import { cx } from '../../utils/cx';
 import { keepFocus } from '../../utils/styles';
+import { buttonCollectionFor, buttonGroupIdentity, readButtonGroup } from '../../utils/buttonGroup';
 
 const ease = [0.23, 1, 0.32, 1] as const;
 
@@ -19,6 +20,7 @@ function SheetTile({ action, onPress }: {action: Pick<EditorAction, 'label' | 'i
       disabled={action.disabled}
       className={cx(
         'flex min-h-[68px] min-w-[70px] shrink-0 flex-col items-center justify-center gap-1.5 rounded-2xl px-2 text-[11.5px] font-medium transition-colors duration-150 active:scale-[0.97] disabled:opacity-35',
+        'w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-select focus-visible:ring-offset-1',
         action.active ? 'bg-select-soft text-select' : action.danger ? 'bg-[#FFF4EE] text-[#C2410C]' : 'bg-[#F4F5F7] text-ink'
       )}>
       
@@ -41,6 +43,14 @@ export function MobileSheet() {
   const expanded = ed.sheet === 'expanded';
   const panelAction = actions.find((a) => a.key === ed.sheetPanel && a.panel);
   const parent = sel?.parentId ? ed.getInfo(sel.parentId) : null;
+  const linksCollection = sel?.blockKey ? buttonCollectionFor(ed.doc, ed.templateId, sel.blockKey) : undefined;
+  const linksModel = linksCollection ? readButtonGroup(ed.doc, linksCollection.blockKey, linksCollection.seeds) : undefined;
+  const identityLabel = sel
+    ? (sel.kind === 'section' && linksModel ? buttonGroupIdentity(linksModel.items.length) : sel.label)
+    : '';
+  /* The button owns the group entry inside its own "Más": no duplicated navigation. */
+  const hideParentNav = !!sel && sel.kind === 'cta' && !!linksCollection;
+  const hasOwnMore = actions.some((a) => a.key === 'more-actions');
 
   const press = (a: EditorAction) => {
     if (a.onClick) {
@@ -106,13 +116,13 @@ export function MobileSheet() {
               </span>
           }
             <div className="min-w-0 flex-1">
-              <p className="truncate text-[16px] font-semibold leading-tight">{panelAction ? panelAction.label : sel.label}</p>
-              {!panelAction && parent && parent.kind !== 'page' ?
+              <p className="truncate text-[16px] font-semibold leading-tight">{panelAction ? panelAction.label : identityLabel}</p>
+              {!panelAction && !hideParentNav && parent && parent.kind !== 'page' ?
             <button type="button" onClick={() => ed.select(parent.id)} className="mt-0.5 text-[12.5px] font-medium text-select">
                   Dentro de {parent.label} · seleccionar
                 </button> :
 
-            <p className="mt-0.5 text-[12.5px] text-mute">{panelAction ? sel.label : 'Toca una acción'}</p>
+            <p className="mt-0.5 text-[12.5px] text-mute">{panelAction ? identityLabel : 'Toca una acción'}</p>
             }
             </div>
             <button type="button" aria-label="Cerrar" onClick={ed.clearSelection} className="grid h-10 w-10 place-items-center rounded-full bg-[#F4F5F7]">
@@ -124,16 +134,17 @@ export function MobileSheet() {
         <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-8">{panelAction.panel}</div> :
 
         <>
-              <div className="cq-scroll-none flex gap-2 overflow-x-auto px-4 pb-4">
+              <div className="grid max-h-[42vh] grid-cols-3 gap-2 overflow-y-auto px-4 pb-4">
                 {actions.map((a) =>
             <SheetTile key={a.key} action={a} onPress={() => press(a)} />
             )}
-                <SheetTile
-              action={{ label: expanded ? 'Menos' : 'Más', icon: expanded ? ChevronUpIcon : EllipsisIcon, active: expanded }}
-              onPress={() => ed.setSheet(expanded ? 'compact' : 'expanded')} />
+                {!hasOwnMore &&
+            <SheetTile
+              action={{ label: expanded ? 'Menos' : 'Más opciones', icon: expanded ? ChevronUpIcon : EllipsisIcon, active: expanded }}
+              onPress={() => ed.setSheet(expanded ? 'compact' : 'expanded')} />}
             
               </div>
-              {expanded &&
+              {!hasOwnMore && expanded &&
           <div className="min-h-0 flex-1 overflow-y-auto border-t border-line px-4 pb-8 pt-4">
                   <AdvancedPanel />
                 </div>

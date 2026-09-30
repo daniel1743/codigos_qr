@@ -11,7 +11,7 @@ import type { BlockRef, SurfaceTone, TextStyle } from '../types/editor';
 
 export function textStyleToCss(ts?: TextStyle): CSSProperties {
   if (!ts) return {};
-  return {
+  const declared: CSSProperties = {
     fontSize: ts.size,
     fontWeight: ts.weight === 'medium' ? 500 : ts.weight === 'bold' || ts.bold ? 700 : ts.bold === false || ts.weight === 'regular' ? 400 : undefined,
     textAlign: ts.align,
@@ -20,6 +20,11 @@ export function textStyleToCss(ts?: TextStyle): CSSProperties {
     fontFamily: ts.typeStyle === 'editorial' ? "'Cormorant Garamond', serif" : ts.typeStyle === 'luxury' ? "'Bodoni Moda', serif" : ts.typeStyle === 'script' ? "'Caveat', cursive" : ts.typeStyle === 'mixed' ? "'Marcellus', serif" : undefined,
     color: ts.goldText ? 'var(--accent, #B8935A)' : ts.color
   };
+  // Undefined keys must not be forwarded: spreading `{textAlign: undefined}` over a
+  // caller style would silently erase group typography (weight/tracking/font).
+  return Object.fromEntries(
+    Object.entries(declared).filter(([, value]) => value !== undefined)
+  ) as CSSProperties;
 }
 
 export function toneVars(tone: SurfaceTone): CSSProperties {

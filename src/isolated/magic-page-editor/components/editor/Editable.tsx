@@ -23,7 +23,7 @@ export function Editable({ id, kind, label, blockKey, as = 'div', children, ...r
   const Tag = as as React.ElementType;
   return (
     <EditableParentContext.Provider value={childContext}>
-      <Tag ref={ref} {...rest} {...handlers}>
+      <Tag ref={ref} data-editor-id={id} {...rest} {...handlers}>
         {children}
       </Tag>
     </EditableParentContext.Provider>);

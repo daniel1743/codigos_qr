@@ -29,3 +29,5 @@ export const bioFeatured = [
 
 
 export const bioMoments = [images.bioStill, images.bioHero, images.bioStreet];
+
+export const singleButtonSeed = [{ label: 'Nuevo botón', href: '' }];

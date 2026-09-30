@@ -20,9 +20,11 @@ import { blockLabels } from "../../data/blockKit";
 import { CardAdvanced } from "../cards/CardAdvanced";
 import { getCardContext } from "../cards/cardActions";
 import { heroFusionFromProps, mediaOverlayFromProps } from "../../utils/styles";
+import { SwatchRow } from "./controls/SwatchRow";
+import { verificationPlacementFromProps } from "./EditableAvatar";
 
 /** "Más": the advanced layer. Same content on desktop (popover) and mobile (expanded sheet). */
-export function AdvancedPanel() {
+export function AdvancedPanel({ hideBlockNav = false }: { hideBlockNav?: boolean } = {}) {
   const ed = useEditor();
   const t = useThemeTokens();
   const sel = ed.selection;
@@ -94,9 +96,6 @@ export function AdvancedPanel() {
 
       break;
     case "avatar": {
-      const hasBadge = p.badge
-        ? p.badge === "on"
-        : !!el?.querySelector('[aria-label="Perfil verificado"]');
       specific = (
         <>
           <PanelSection title="Forma">
@@ -113,12 +112,21 @@ export function AdvancedPanel() {
             />
           </PanelSection>
           <PanelSection title="Detalles">
-            <Toggle
-              label="Insignia verificada"
-              description="Un pequeño sello sobre la foto"
-              checked={hasBadge}
-              onChange={(v) => set("badge", v ? "on" : "off")}
+            <Segmented
+              ariaLabel="Ubicación de verificación"
+              options={[
+                { value: "none", label: "Sin" },
+                { value: "name", label: "Junto al nombre" },
+                { value: "avatar", label: "Sobre la foto" },
+              ]}
+              value={verificationPlacementFromProps(p, "name")}
+              onChange={(v) => {
+                set("badgePlacement", v);
+                set("badge", v === "avatar" ? "on" : "off");
+                set("badgeByName", v === "name" ? "on" : "off");
+              }}
             />
+            <SwatchRow colors={t.swatches} value={p.badgeColor} onChange={(v) => set("badgeColor", v ?? t.accent)} />
           </PanelSection>
           <PanelSection title="Encuadre">
             <PositionPad value={p.pos ?? "center"} onChange={(v) => set("pos", v)} />
@@ -308,7 +316,7 @@ export function AdvancedPanel() {
   return (
     <div className="space-y-5">
       {specific}
-      {block && (sel.kind === "hero" || !isContainer) && (
+      {!hideBlockNav && block && (sel.kind === "hero" || !isContainer) && (
         <PanelSection
           title={`Bloque · ${blockLabels[block.type]}`}
           hint={sel.kind === "hero" ? undefined : "Este elemento vive dentro de este bloque."}

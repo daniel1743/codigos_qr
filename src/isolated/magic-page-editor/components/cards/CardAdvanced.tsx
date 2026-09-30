@@ -9,6 +9,8 @@ import { cardOrder, moveCard } from '../../utils/cardOps';
 import { layoutsForFamily, resolveCard } from '../../utils/cardLayout';
 import { cx } from '../../utils/cx';
 import type { CardContext } from './cardActions';
+import { CardPaletteFields } from './CardPaletteFields';
+import { CardPresetPicker } from './CardPresetPicker';
 
 /** «Más» for a full card: order, visibility, spacing, radius, border, shadow and optional fields. */
 export function CardAdvanced({ ctx }: {ctx: CardContext;}) {
@@ -58,6 +60,9 @@ export function CardAdvanced({ ctx }: {ctx: CardContext;}) {
           </div>
         </PanelSection>
       )}
+
+      <CardPresetPicker ctx={ctx} />
+      <CardPaletteFields ctx={ctx} />
 
       <PanelSection title="Elementos decorativos" hint="Siempre no interactivos; no interfieren con la selección.">
         <DecorationPicker values={cp} onChange={(key, value) => set(key, value)} />

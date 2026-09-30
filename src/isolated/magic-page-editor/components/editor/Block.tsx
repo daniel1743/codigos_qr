@@ -16,13 +16,15 @@ interface BlockProps {
   className?: string;
   defaultTone?: string;
   defaultSpacing?: Spacing;
+  /** Overrides the generic block label (e.g. "Grupo de botones · 4 elementos"). */
+  label?: string;
   children: React.ReactNode;
 }
 
 const SPACING: Record<Spacing, number> = { none: 0, S: 28, M: 60, L: 104 };
 
 /** Every block is a tappable section: structure (move, duplicate, hide, delete), background and spacing live here. */
-export function Block({ block, className, defaultTone, defaultSpacing = 'M', children }: BlockProps) {
+export function Block({ block, className, defaultTone, defaultSpacing = 'M', label, children }: BlockProps) {
   const ed = useEditor();
   const t = useThemeTokens();
   const id = `block:${block.key}`;
@@ -37,7 +39,7 @@ export function Block({ block, className, defaultTone, defaultSpacing = 'M', chi
     <Editable
       id={id}
       kind={block.type === 'hero' ? 'hero' : 'section'}
-      label={blockLabels[block.type]}
+      label={label ?? blockLabels[block.type]}
       blockKey={block.key}
       as="section"
       data-spacing={spacing}

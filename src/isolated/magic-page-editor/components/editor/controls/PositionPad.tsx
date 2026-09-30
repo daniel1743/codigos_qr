@@ -17,6 +17,13 @@ interface FreeCropControlProps {
 const xs = ['left', 'center', 'right'];
 const ys = ['top', 'center', 'bottom'];
 
+/** Maps the legacy position enum to the canonical crop contract consumed by renderers. */
+export function cropFromPosition(value: string): { cropX: string; cropY: string } {
+  const [x = 'center', y = 'center'] = value === 'center' ? ['center', 'center'] : value.split(' ');
+  const axis = (part: string) => part === 'left' || part === 'top' ? '0' : part === 'right' || part === 'bottom' ? '100' : '50';
+  return { cropX: axis(x), cropY: axis(y) };
+}
+
 export function PositionPad({ value, onChange }: PositionPadProps) {
   const current = value === 'center' ? 'center center' : value;
   return (
@@ -98,6 +105,14 @@ export function useFreeImagePan(id: string, cropX: string | undefined, cropY: st
   const start = useRef<{ pointerX: number; pointerY: number; x: number; y: number } | null>(null);
   const { setProp } = useEditorForCrop();
 
+  const positionAt = (event: React.PointerEvent<HTMLElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    return {
+      x: Math.max(0, Math.min(100, position.x - (event.clientX - (start.current?.pointerX ?? event.clientX)) / rect.width * 100)),
+      y: Math.max(0, Math.min(100, position.y - (event.clientY - (start.current?.pointerY ?? event.clientY)) / rect.height * 100))
+    };
+  };
+
   useEffect(() => setPosition({ x: Number(cropX ?? 50), y: Number(cropY ?? 50) }), [cropX, cropY]);
 
   return {
@@ -121,9 +136,11 @@ export function useFreeImagePan(id: string, cropX: string | undefined, cropY: st
       },
       onPointerUp: (event: React.PointerEvent<HTMLElement>) => {
         if (!start.current) return;
+        const next = positionAt(event);
         event.currentTarget.releasePointerCapture(event.pointerId);
-        setProp(id, 'cropX', String(Math.round(position.x)));
-        setProp(id, 'cropY', String(Math.round(position.y)));
+        setPosition(next);
+        setProp(id, 'cropX', String(Math.round(next.x)));
+        setProp(id, 'cropY', String(Math.round(next.y)));
         start.current = null;
       }
     }

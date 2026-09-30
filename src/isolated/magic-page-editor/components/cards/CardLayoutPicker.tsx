@@ -74,6 +74,42 @@ export function CardLayoutThumb({ layout }: {layout: CardLayout;}) {
           <span className={cx(line, 'h-1.5 w-2/3')} />
         </span>);
 
+    case 'cover':
+    case 'backgroundImage':
+      return <span className="relative flex h-full flex-col justify-end overflow-hidden p-1.5">
+        <span className="absolute inset-0 bg-[#9AA1AB]" />
+        <span className="relative z-[1] flex flex-col gap-1 rounded bg-black/45 p-1">
+          <span className="block h-1.5 w-3/4 rounded-full bg-white" />
+          <span className="block h-1 w-1/2 rounded-full bg-white/60" />
+        </span>
+      </span>;
+    case 'textOnly':
+      return <span className="flex h-full flex-col justify-center gap-1.5 p-2">
+        <span className={cx(line, 'h-2 w-4/5')} />
+        <span className={cx(line, 'h-1 w-full opacity-60')} />
+        <span className={cx(line, 'h-1 w-2/3 opacity-60')} />
+      </span>;
+    case 'iconText':
+      return <span className="flex h-full items-center gap-2 p-1.5">
+        <span className="h-6 w-6 shrink-0 rounded-lg bg-[#9AA1AB]" />
+        <Lines short />
+      </span>;
+    case 'image25':
+    case 'image40':
+    case 'imageRight':
+      return <span className={cx('flex h-full gap-1.5 p-1.5', layout === 'imageRight' && 'flex-row-reverse')}>
+        <span className={cx(img, layout === 'image25' ? 'w-1/4' : 'w-2/5')} />
+        <Lines />
+      </span>;
+    case 'split':
+      return <span className="flex h-full gap-0 p-1.5">
+        <span className={cx(img, 'w-1/2 rounded-none')} />
+        <span className="flex flex-1 flex-col justify-center gap-1 bg-[#F2F3F5] p-1">
+          <span className={cx(line, 'h-1.5 w-full')} />
+          <span className={cx(line, 'h-1 w-2/3 opacity-60')} />
+        </span>
+      </span>;
+
     default:
       return (
         <span className="flex h-full flex-col justify-center gap-1 rounded-[4px] bg-[#15171C] p-2">

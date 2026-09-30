@@ -1,4 +1,5 @@
 import {
+  RectangleHorizontalIcon,
   AlignLeftIcon,
   AtSignIcon,
   BriefcaseIcon,
@@ -58,6 +59,7 @@ const visibleCardTypes = new Set<BlockType>(
 );
 
 export const blockKit: BlockKitItem[] = [
+  { type: "button", label: "Botón", description: "Llamado a la acción simple", icon: RectangleHorizontalIcon },
   {
     type: "hero",
     label: "Portada",
@@ -108,6 +110,7 @@ export const blockLabels: Record<BlockType, string> = {
   profile: "Perfil",
   text: "Texto",
   links: "Enlaces",
+  button: "Botón",
   social: "Redes",
   image: "Imagen",
   gallery: "Galería",

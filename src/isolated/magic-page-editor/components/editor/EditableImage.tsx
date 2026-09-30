@@ -13,17 +13,18 @@ interface EditableImageProps {
   className?: string;
   style?: React.CSSProperties;
   children?: React.ReactNode;
+  defaultProps?: Record<string, string | undefined>;
 }
 
 /** An image that can be replaced, cropped, zoomed and repositioned directly from the page. */
-export function EditableImage({ id, src, alt, label = 'Imagen', className, style, children }: EditableImageProps) {
+export function EditableImage({ id, src, alt, label = 'Imagen', className, style, children, defaultProps = {} }: EditableImageProps) {
   const { doc } = useEditor();
   const p = doc.props[id] ?? {};
   const overlay = mediaOverlayStyleFromProps(p);
   const crop = useFreeImagePan(id, p['cropX'], p['cropY']);
   const photoStyle = mediaPhotoStyle(p);
-  const shapeStyle = mediaShapeStyle(p['shape']);
-  const fit = p['fit'] === 'contain' ? 'contain' : 'cover';
+  const shapeStyle = mediaShapeStyle(p['shape'] ?? defaultProps.shape);
+  const fit = (p['fit'] ?? defaultProps.fit) === 'contain' ? 'contain' : 'cover';
   return (
     <Editable
       id={id}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { EyeOffIcon } from 'lucide-react';
+import { EyeOffIcon, SparklesIcon } from 'lucide-react';
 import { useEditor } from '../../contexts/EditorContext';
 import { useThemeTokens } from '../../hooks/useThemeTokens';
 import { Editable } from '../editor/Editable';
@@ -35,7 +35,7 @@ export function FamilyCard({ id, family, item, blockProps, className, demo }: Fa
   const t = useThemeTokens();
   const m = ed.isMobile;
   const cp = ed.doc.props[id] ?? {};
-  const { layout, ratio, dense, sale } = resolveCard(family, blockProps, cp);
+  const { layout, ratio, dense, sale, props: cardProps } = resolveCard(family, blockProps, cp);
   const hidden = cp.hidden === 'on';
   if (hidden && ed.mode === 'preview') return null;
 
@@ -47,25 +47,38 @@ export function FamilyCard({ id, family, item, blockProps, className, demo }: Fa
     cta: on('showCta', !!item.cta)
   };
 
-  const surface = cp.surface ?? (layout === 'highlight' ? 'accent' : 'surface');
+  const surface = cardProps.surface ?? (layout === 'highlight' ? 'accent' : 'surface');
   const onAccent = surface === 'accent';
-  const radius = { none: 0, S: 8, M: t.radius, L: t.radius + 14 }[cp.radius ?? 'M'] ?? t.radius;
-  const pad = ({ S: 12, M: 20, L: 28 }[cp.spacing ?? (layout === 'compact' ? 'S' : 'M')] ?? 20) - (m ? 4 : 0);
-  const border = (cp.border ?? (surface === 'plain' ? 'off' : 'on')) === 'on' || surface === 'outline';
+  const cardBg = cardProps.cardBg ?? 'var(--surface)';
+  const cardSurface = cardProps.cardSurface ?? 'var(--surface)';
+  const cardFg = cardProps.cardText ?? 'var(--fg)';
+  const cardMuted = cardProps.cardMuted ?? 'var(--muted)';
+  const cardLine = cardProps.cardLine ?? 'var(--line)';
+  const cardAccent = cardProps.cardAccent ?? t.accent;
+  const cardAccentFg = cardProps.cardAccentFg ?? t.accentFg;
+  const cardIconBg = cardProps.cardIconBg ?? cardAccent;
+  const cardIconColor = cardProps.cardIconColor ?? cardAccentFg;
+  const radius = { none: 0, S: 8, M: t.radius, L: t.radius + 14 }[cardProps.radius ?? 'M'] ?? t.radius;
+  const pad = ({ S: 12, M: 20, L: 28 }[cardProps.spacing ?? (layout === 'compact' ? 'S' : 'M')] ?? 20) - (m ? 4 : 0);
+  const border = (cardProps.border ?? (surface === 'plain' ? 'off' : 'on')) === 'on' || surface === 'outline';
   const inner = Math.max(0, Math.round(radius - pad * 0.6));
 
   const surfaceCss: React.CSSProperties =
   surface === 'accent' ?
   {
-    background: t.accent,
-    '--fg': t.accentFg,
-    '--muted': `color-mix(in srgb, ${t.accentFg} 74%, transparent)`,
+    background: cardAccent,
+    '--fg': cardAccentFg,
+    '--muted': `color-mix(in srgb, ${cardAccentFg} 74%, transparent)`,
     '--surface': 'rgba(255,255,255,0.14)',
-    '--line': 'rgba(255,255,255,0.24)'
+    '--line': cardProps.cardLine ?? 'rgba(255,255,255,0.24)',
+    '--accent': cardAccent,
+    '--accent-fg': cardAccentFg,
+    '--icon-bg': cardIconBg,
+    '--icon-color': cardIconColor
   } as React.CSSProperties :
   surface === 'surface' ?
-  { background: 'var(--surface)' } :
-  { background: 'transparent' };
+  { background: cardBg, '--fg': cardFg, '--muted': cardMuted, '--surface': cardSurface, '--line': cardLine, '--accent': cardAccent, '--accent-fg': cardAccentFg, '--icon-bg': cardIconBg, '--icon-color': cardIconColor } as React.CSSProperties :
+  { background: 'transparent', '--fg': cardFg, '--muted': cardMuted, '--surface': cardSurface, '--line': cardLine, '--accent': cardAccent, '--accent-fg': cardAccentFg, '--icon-bg': cardIconBg, '--icon-color': cardIconColor } as React.CSSProperties;
 
   const badgeOnImage = family.badgeOnImage && layout !== 'compact' && layout !== 'highlight';
   const badgeOver =
@@ -74,21 +87,55 @@ export function FamilyCard({ id, family, item, blockProps, className, demo }: Fa
   null;
 
   const media = (cls: string, style?: React.CSSProperties, imgRadius = inner) =>
-  <div data-slot="image" className={cx('relative shrink-0', cls)} style={style}>
-      <EditableImage id={`${id}.img`} src={item.image} alt={item.title} className="h-full w-full" style={{ borderRadius: imgRadius }} />
+    <div data-slot="image" className={cx('relative shrink-0', cls)} style={style}>
+      <EditableImage id={`${id}.img`} src={item.image} alt={item.title} defaultProps={{ shape: cardProps.imageShape }} className="h-full w-full" style={{ borderRadius: imgRadius }} />
       {badgeOver}
     </div>;
 
 
   const body = (size: BodySize, cls?: string) =>
-  <CardBody id={id} family={family} item={item} size={size} show={show} inlineBadge={!badgeOnImage} sale={sale} onAccent={onAccent} className={cls} />;
+      <CardBody id={id} family={family} item={item} size={size} show={show} sale={sale} onAccent={onAccent} cardProps={cardProps} className={cls} />;
 
 
   let content: React.ReactNode;
   const horizontal = layout === 'left' || layout === 'right' || layout === 'balanced';
   const stackOnMobile = m && (layout === 'balanced' || ratio !== '25');
 
-  if (horizontal && !stackOnMobile) {
+  if (layout === 'cover') {
+    content = <div className="relative min-h-[300px] flex-1 overflow-hidden rounded-[inherit]">
+      {media('absolute inset-0 h-full w-full', undefined, 0)}
+      <div className="relative flex min-h-[300px] flex-col justify-end bg-gradient-to-t from-black/75 via-black/20 to-transparent p-5 text-white">
+        {body('md')}
+      </div>
+    </div>;
+  } else if (layout === 'textOnly') {
+    content = body('lg', 'flex-1 py-4');
+  } else if (layout === 'iconText') {
+    content = <div className="flex flex-1 items-start gap-4">
+      <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl" style={{ background: 'var(--icon-bg)', color: 'var(--icon-color)' }} aria-hidden="true">
+        <SparklesIcon className="h-5 w-5" />
+      </span>
+      {body('md', 'flex-1')}
+    </div>;
+  } else if (layout === 'image25' || layout === 'image40' || layout === 'imageRight') {
+    const imageWidth = layout === 'image25' ? '25%' : '40%';
+    content = <div className={cx('flex flex-1 items-stretch gap-4', layout === 'imageRight' && 'flex-row-reverse')}>
+      {media('min-h-[210px] shrink-0', { width: imageWidth, minWidth: m ? 96 : 120 })}
+      {body('md', 'flex-1 py-1')}
+    </div>;
+  } else if (layout === 'split') {
+    content = <div className="grid flex-1 grid-cols-2 items-stretch gap-0">
+      {media('min-h-[240px] rounded-none', undefined, 0)}
+      {body('md', 'justify-center p-5')}
+    </div>;
+  } else if (layout === 'backgroundImage') {
+    content = <div className="relative min-h-[320px] flex-1 overflow-hidden rounded-[inherit]">
+      {media('absolute inset-0 h-full w-full', undefined, 0)}
+      <div className="relative flex min-h-[320px] flex-col justify-end bg-gradient-to-t from-black/85 via-black/35 to-transparent p-6 text-white">
+        {body('md')}
+      </div>
+    </div>;
+  } else if (horizontal && !stackOnMobile) {
     const r = layout === 'balanced' ? '50' : ratio;
     content =
     <div className={cx('flex flex-1 items-stretch', layout === 'right' && 'flex-row-reverse')} style={{ gap: m ? 14 : pad }}>
@@ -167,7 +214,7 @@ export function FamilyCard({ id, family, item, blockProps, className, demo }: Fa
         ...surfaceCss,
         padding: layout === 'highlight' ? pad + 8 : pad,
         borderRadius: radius,
-        boxShadow: [border ? 'inset 0 0 0 1px var(--line)' : '', SHADOWS[cp.shadow ?? 'none'] !== 'none' ? SHADOWS[cp.shadow ?? 'none'] : ''].
+        boxShadow: [border ? 'inset 0 0 0 1px var(--line)' : '', SHADOWS[cardProps.shadow ?? 'none'] !== 'none' ? SHADOWS[cardProps.shadow ?? 'none'] : ''].
         filter(Boolean).
         join(', ') || undefined,
         color: 'var(--fg)'
@@ -178,8 +225,15 @@ export function FamilyCard({ id, family, item, blockProps, className, demo }: Fa
           <EyeOffIcon className="h-3 w-3" /> Oculta
         </span>
       }
-      <DecorationLayer id={id} />
-      {content}
+      <DecorationLayer id={id} values={cardProps} />
+      <Editable
+        id={`${id}.surface`}
+        kind="surface"
+        label="Fondo"
+        className="relative flex flex-1 flex-col"
+      >
+        {content}
+      </Editable>
     </Editable>);
 
 }

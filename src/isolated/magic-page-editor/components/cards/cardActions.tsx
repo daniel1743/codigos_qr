@@ -18,6 +18,9 @@ import { Segmented } from '../editor/controls/Segmented';
 import { SizeStepper } from '../editor/controls/SizeStepper';
 import { SwatchRow } from '../editor/controls/SwatchRow';
 import { CardLayoutPicker } from './CardLayoutPicker';
+import { CardPaletteFields } from './CardPaletteFields';
+import { CardPresetPicker } from './CardPresetPicker';
+import { MediaShapePicker } from '../editor/controls/MediaShapePicker';
 import { familyForBlockType } from '../../data/cardFamilies';
 import { deleteCard, duplicateCard, parseCardId } from '../../utils/cardOps';
 import { layoutsForFamily, resolveCard } from '../../utils/cardLayout';
@@ -38,7 +41,7 @@ export function getCardContext(ed: EditorValue, id: string, blockKey?: string): 
   const block = ed.doc.blocks.find((b) => b.key === blockKey);
   const family = block ? familyForBlockType(block.type) : undefined;
   if (!family) return null;
-  const cardId = id.replace(/\.(price|prev|badge|cta|img2?|title|desc|eyebrow|meta|beforeLabel|afterLabel)$/, '');
+  const cardId = id.replace(/\.(surface|icon|price|prev|badge|cta|img2?|title|desc|eyebrow|meta|beforeLabel|afterLabel)$/, '');
   const parsed = parseCardId(cardId);
   if (!parsed) return null;
   return { cardId, blockKey, family, ...parsed };
@@ -57,12 +60,20 @@ export function familyCardActions(ed: EditorValue, ctx: CardContext): EditorActi
   const cp = ed.doc.props[cardId] ?? {};
   const blockProps = ed.doc.props[`block:${blockKey}`] ?? {};
   const r = resolveCard(family, blockProps, cp);
+  const imageProps = ed.doc.props[`${cardId}.img`] ?? {};
   const set = (k: string, v: string) => ed.setProp(cardId, k, v);
   const count = family.items.length;
   const position = r.layout === 'right' ? 'right' : r.layout === 'top' ? 'top' : r.layout === 'bottom' ? 'bottom' : 'left';
   const horizontal = r.layout === 'left' || r.layout === 'right' || r.layout === 'balanced';
 
   return [
+  {
+    key: 'preset',
+    label: 'Preset',
+    icon: PaintbrushIcon,
+    showLabel: true,
+    panel: <CardPresetPicker ctx={ctx} />
+  },
   {
     key: 'layout',
     label: 'Diseño',
@@ -107,6 +118,12 @@ export function familyCardActions(ed: EditorValue, ctx: CardContext): EditorActi
           }} />
 
           </PanelSection>
+          <PanelSection title="Forma de la imagen" hint="Se aplica solo a la imagen de esta tarjeta.">
+            <MediaShapePicker
+              value={(imageProps.shape ?? 'rounded') as import('../editor/controls/MediaShapePicker').MediaShape}
+              onChange={(shape) => ed.setProp(`${cardId}.img`, 'shape', shape)}
+            />
+          </PanelSection>
         </div>
 
   },
@@ -119,6 +136,13 @@ export function familyCardActions(ed: EditorValue, ctx: CardContext): EditorActi
           <Segmented ariaLabel="Superficie" options={surfaceOptions} value={cp.surface ?? (r.layout === 'highlight' ? 'accent' : 'surface')} onChange={(v) => set('surface', v)} />
         </PanelSection>
 
+  },
+  {
+    key: 'colors',
+    label: 'Colores',
+    icon: PaletteIcon,
+    showLabel: true,
+    panel: <CardPaletteFields ctx={ctx} />
   },
   {
     key: 'dup',

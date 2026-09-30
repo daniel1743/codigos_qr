@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { ArrowUpRightIcon, PlayIcon } from 'lucide-react';
+import { PlayIcon } from 'lucide-react';
 import { useEditor } from '../../contexts/EditorContext';
 import { useThemeTokens } from '../../hooks/useThemeTokens';
 import { Editable } from '../editor/Editable';
 import { EditableText } from '../editor/EditableText';
 import { EditableImage } from '../editor/EditableImage';
 import { EditableAvatar } from '../editor/EditableAvatar';
-import { EditableCTA, type CtaVariants } from '../editor/EditableCTA';
-import { EditableSocial } from '../editor/EditableSocial';
+import { type CtaVariants } from '../editor/EditableCTA';
+import { ButtonGroup } from './ButtonGroup';
+import { EditableSocial, EditableSocialGroup } from '../editor/EditableSocial';
 import { HeroFrame } from './HeroFrame';
 import { GalleryGrid } from './GalleryGrid';
 import { LocationBlock } from './LocationBlock';
@@ -76,30 +77,21 @@ export function GenericBlock({ block, ctaVariants, maxWidth = 1080 }: GenericBlo
 
     case 'links':
       return (
-        <div className={cx(wrap, 'flex flex-col gap-3')} style={{ maxWidth: Math.min(maxWidth, 640) }}>
-          {['Nuevo enlace', 'Otro enlace'].map((label, i) =>
-          <EditableCTA
-            key={label}
-            id={`${p}links.${i}`}
-            label={label}
-            href="https://"
-            variants={ctaVariants}
-            defaultVariant={i === 0 ? 'solid' : 'soft'}
-            fullDefault
-            className="flex h-16 items-center justify-between px-6 text-[15px] font-semibold"
-            trailing={<ArrowUpRightIcon className="h-4 w-4" />}
-            labelClassName="flex-1" />
-
-          )}
-        </div>);
+        <ButtonGroup
+          blockKey={block.key}
+          seeds={[{ label: 'Nuevo enlace', href: 'https://' }, { label: 'Otro enlace', href: 'https://' }]}
+          variants={ctaVariants}
+          maxWidth={Math.min(maxWidth, 640)}
+          className={wrap} />
+      );
 
     case 'social':
       return (
-        <div className={cx(wrap, 'flex flex-wrap justify-center gap-3')} style={{ maxWidth }}>
+        <EditableSocialGroup className={cx(wrap, 'flex flex-wrap justify-center')} style={{ maxWidth }}>
           {genericSocials.map((pf, i) =>
           <EditableSocial key={pf} id={`${p}social.${i}`} platform={pf} href="https://" />
           )}
-        </div>);
+        </EditableSocialGroup>);
 
     case 'image':
       return (
