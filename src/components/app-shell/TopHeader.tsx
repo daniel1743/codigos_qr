@@ -33,14 +33,14 @@ export default function TopHeader({
         <p className="hidden text-sm font-medium text-cq-subtle lg:block">Inicio</p>
       </div>
       <div className="flex items-center gap-2 sm:gap-4">
-        <Link
+        {user?.isAdmin ? <Link
           to="/pages/new"
           className="inline-flex h-10 items-center gap-2 rounded-cq-sm bg-cq-blue px-3 text-sm font-semibold text-white shadow-[0_10px_24px_-10px_rgba(30,86,224,0.6)] transition-[background-color,transform] hover:bg-cq-blue-700 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-cq-blue-200 sm:px-4"
         >
           <Plus className="h-4 w-4" aria-hidden />
           <span className="hidden sm:inline">Crear página</span>
           <span className="sm:hidden">Crear</span>
-        </Link>
+        </Link> : null}
         <Link
           to="/account"
           className="hidden h-9 w-9 overflow-hidden rounded-full bg-cq-blue-50 text-center text-sm font-bold leading-9 text-cq-blue sm:block"

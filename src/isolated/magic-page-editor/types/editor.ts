@@ -21,7 +21,8 @@ export type ElementKind =
   | "surface"
   | "icon"
   | "price"
-  | "badge";
+  | "badge"
+  | "separator";
 
 export type BlockType =
   | "hero"
@@ -39,7 +40,8 @@ export type BlockType =
   | "cardPage"
   | "cardPortfolio"
   | "cardMenu"
-  | "cardStore";
+  | "cardStore"
+  | "separator";
 
 export type TextAlign = "left" | "center" | "right";
 export type HeroVariant =

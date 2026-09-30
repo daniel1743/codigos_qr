@@ -57,11 +57,6 @@ export function CardGroupStyleFields({ blockKey, family }: { blockKey: string; f
         kind={props.groupCardCtaKind as 'standard' | 'card' | undefined}
         onChange={(key, value) => set(`groupCardCta${key[0].toUpperCase()}${key.slice(1)}`, value)} />
     </PanelSection>
-    <PanelSection title="Decoraciones del grupo" hint="Decoración · este grupo · no interactiva.">
-      <DecorationPicker values={{
-        decorLine: props.groupDecorLine, decorArc: props.groupDecorArc, decorWave: props.groupDecorWave, decorRing: props.groupDecorRing,
-        decorColor: props.groupDecorColor, decorOpacity: props.groupDecorOpacity, decorWeight: props.groupDecorWeight, decorScale: props.groupDecorScale
-      }} onChange={(key, value) => set(`group${key[0].toUpperCase()}${key.slice(1)}`, value)} />
-    </PanelSection>
+    
   </div>;
 }

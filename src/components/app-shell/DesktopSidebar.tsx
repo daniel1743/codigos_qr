@@ -3,10 +3,11 @@ import { BarChart3, FileLock2, Globe2, HelpCircle, Home, QrCode, Settings } from
 import Logo from "../brand/Logo";
 import type { ShellPageState, ShellUser } from "./AppShell";
 
-type Props = { user: ShellUser | null; pageState: ShellPageState };
+type Props = { user: ShellUser | null; pageState: ShellPageState; isAdmin: boolean };
 
-function pageDestination(pageState: ShellPageState) {
-  if (pageState.count === 0) return { label: "Crear página", to: "/pages/new" as const };
+function pageDestination(pageState: ShellPageState, isAdmin: boolean) {
+  if (pageState.count === 0 && isAdmin) return { label: "Crear página", to: "/pages/new" as const };
+  if (pageState.count === 0) return { label: "Mi página", to: "/profile" as const };
   if (pageState.count === 1 && pageState.primaryPageId) {
     return {
       label: "Mi página",
@@ -47,9 +48,9 @@ function NavLink({
   );
 }
 
-export function DesktopSidebar({ user, pageState }: Props) {
+export function DesktopSidebar({ user, pageState, isAdmin }: Props) {
   const { pathname } = useLocation();
-  const page = pageDestination(pageState);
+  const page = pageDestination(pageState, isAdmin);
   return (
     <aside className="sticky top-0 hidden h-screen w-[256px] shrink-0 flex-col border-r border-cq-line bg-white lg:flex">
       <div className="flex h-[76px] shrink-0 items-center border-b border-cq-line px-6">

@@ -16,6 +16,7 @@ export function HomeHero({
   visits30d,
   onCreate,
   creating,
+  canCreatePage,
 }: {
   firstName: string;
   hasPage: boolean;
@@ -23,6 +24,7 @@ export function HomeHero({
   visits30d: number | null;
   onCreate: () => void;
   creating: boolean;
+  canCreatePage: boolean;
 }) {
   const audienceLine =
     visits30d !== null && visits30d > 0
@@ -59,7 +61,7 @@ export function HomeHero({
             Editar página
           </Link>
         ) : null}
-        {!editPageId ? (
+        {!editPageId && canCreatePage ? (
           <button type="button" onClick={onCreate} disabled={creating} className={primaryClass}>
             {creating ? (
               "Creando…"

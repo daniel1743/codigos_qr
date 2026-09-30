@@ -5,6 +5,7 @@ import { EditableText } from '../editor/EditableText';
 import { EditableCTA, type CtaVariants } from '../editor/EditableCTA';
 import { MapIllustration } from './MapIllustration';
 import { cx } from '../../utils/cx';
+import { mapsSearchUrl } from '../profile/QuickProfileInfo';
 
 interface LocationBlockProps {
   prefix: string;
@@ -19,7 +20,10 @@ interface LocationBlockProps {
 }
 
 export function LocationBlock({ prefix: p, title, name, address, hours, radius, accent, displayFont, ctaVariants }: LocationBlockProps) {
-  const { isMobile: m } = useEditor();
+  const { isMobile: m, mode, doc } = useEditor();
+  const resolvedAddress = doc.texts[`${p}location.address`] ?? address;
+  const mapsUrl = mapsSearchUrl(resolvedAddress);
+  const map = <MapIllustration accent={accent} radius={radius} />;
   return (
     <div className={cx('mx-auto grid w-full max-w-[1100px] items-center', m ? 'grid-cols-1 gap-8 px-5' : 'grid-cols-[0.9fr_1.1fr] gap-14 px-10')}>
       <div className="flex flex-col items-start">
@@ -30,14 +34,14 @@ export function LocationBlock({ prefix: p, title, name, address, hours, radius, 
         <EditableCTA
           id={`${p}location.cta`}
           label="Cómo llegar"
-          href="https://maps.google.com"
+          href={mapsUrl}
           variants={ctaVariants}
           defaultVariant="outline"
           className="mt-7 inline-flex h-12 items-center gap-2 rounded-full px-6 text-[14px] font-semibold"
           leading={<NavigationIcon className="h-4 w-4" />} />
         
       </div>
-      <MapIllustration accent={accent} radius={radius} />
+      {mode === 'preview' ? <a href={mapsUrl} target="_blank" rel="noreferrer" aria-label={`Abrir ubicación: ${resolvedAddress}`} className="block rounded-[inherit] outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--fg)]/50 focus-visible:ring-offset-2">{map}</a> : map}
     </div>);
 
 }

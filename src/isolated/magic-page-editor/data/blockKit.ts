@@ -1,4 +1,4 @@
-import {
+import { DivideIcon,
   RectangleHorizontalIcon,
   AlignLeftIcon,
   AtSignIcon,
@@ -85,6 +85,7 @@ export const blockKit: BlockKitItem[] = [
     description: "Iconos a tus perfiles",
     icon: AtSignIcon,
   },
+  { type: "separator", label: "Separador / Espacio", description: "Añade aire o una línea entre secciones.", icon: DivideIcon },
   { type: "image", label: "Imagen", description: "Una imagen destacada", icon: ImageIcon },
   { type: "gallery", label: "Galería", description: "Varias imágenes juntas", icon: ImagesIcon },
   { type: "video", label: "Vídeo", description: "YouTube, Vimeo o archivo", icon: PlayCircleIcon },
@@ -122,4 +123,5 @@ export const blockLabels: Record<BlockType, string> = {
   cardPortfolio: "Portafolio",
   cardMenu: "Menú",
   cardStore: "Tienda",
+  separator: "Separador",
 };

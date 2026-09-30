@@ -14,8 +14,9 @@ import { Link, useLocation } from "@tanstack/react-router";
 import Logo from "../brand/Logo";
 import type { ShellPageState, ShellUser } from "./AppShell";
 
-function pageDestination(pageState: ShellPageState) {
-  if (pageState.count === 0) return { label: "Crear página", to: "/pages/new" as const };
+function pageDestination(pageState: ShellPageState, isAdmin: boolean) {
+  if (pageState.count === 0 && isAdmin) return { label: "Crear página", to: "/pages/new" as const };
+  if (pageState.count === 0) return { label: "Mi página", to: "/profile" as const };
   if (pageState.count === 1 && pageState.primaryPageId)
     return {
       label: "Mi página",
@@ -31,12 +32,14 @@ export default function MobileDrawer({
   onClose,
   user,
   pageState,
+  isAdmin,
 }: {
   open: boolean;
   onOpen: () => void;
   onClose: () => void;
   user: ShellUser | null;
   pageState: ShellPageState;
+  isAdmin: boolean;
 }) {
   const { pathname } = useLocation();
   const drawerRef = useRef<HTMLElement>(null);
@@ -44,7 +47,7 @@ export default function MobileDrawer({
   const startX = useRef<number | null>(null);
   const edgeStartX = useRef<number | null>(null);
   const [dragX, setDragX] = useState(0);
-  const page = pageDestination(pageState);
+  const page = pageDestination(pageState, isAdmin);
   const navItems = [
     { label: "Inicio", to: "/profile", icon: Home },
     { label: page.label, to: page.to, params: page.params, icon: Globe2 },

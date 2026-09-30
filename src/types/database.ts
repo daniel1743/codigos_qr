@@ -106,10 +106,18 @@ export interface Profile {
   template_version?: number;
   template_config?: any;
   published_template_config?: any;
+  /** Immutable public presentation selected by the last profile publish. */
+  published_profile_config?: PublishedProfileConfig | null;
   published_revision?: number | null;
   published_at?: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface PublishedProfileConfig {
+  schemaVersion: 1;
+  profile: Partial<Profile>;
+  links: ProfileLink[];
 }
 
 export interface QRVisualVersion {

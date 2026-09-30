@@ -21,6 +21,8 @@ import { pageService } from "../services/page.service";
 import { profileService } from "../services/profile.service";
 import { createPageStarterConfig } from "../components/power-editor/pageStarterConfig";
 import type { PageType, Profile } from "../types/database";
+import { useAdminStatus } from "../lib/use-admin-status";
+import { isUserAdmin } from "../lib/admin-check";
 
 /**
  * F7 — `/pages/new` visual closure.
@@ -49,6 +51,11 @@ function CreatePage() {
   const supabase = getBrowserSupabaseClient();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
+  const { isAdmin, loading: adminLoading } = useAdminStatus();
+
+  useEffect(() => {
+    if (!adminLoading && !isAdmin) void navigate({ to: "/profile" });
+  }, [adminLoading, isAdmin, navigate]);
 
   useEffect(() => {
     void (async () => {
@@ -56,6 +63,10 @@ function CreatePage() {
       if (auth.user) setProfile(await profileService.getProfileByUserId(supabase, auth.user.id));
     })();
   }, [supabase]);
+
+  if (adminLoading || !isAdmin) {
+    return <AppShell><div className="flex min-h-[calc(100vh-68px)] items-center justify-center text-sm text-cq-subtle">Verificando permisos…</div></AppShell>;
+  }
 
   return (
     <AppShell>
@@ -98,19 +109,23 @@ function PageForm({
       setError("El nombre de la página es obligatorio.");
       return;
     }
-    if (!profile?.id) {
-      setError("No tienes un perfil activo. Crea tu página principal primero.");
-      return;
-    }
-
     setSubmitting(true);
     try {
       const { data: auth } = await supabase.auth.getUser();
       if (!auth.user) throw new Error("Debes iniciar sesión para crear una página.");
+      if (!(await isUserAdmin(supabase, auth.user.id))) {
+        throw new Error("Solo un administrador puede crear páginas estructuradas.");
+      }
+
+      const ensuredProfile = await profileService.ensurePrimaryProfileForUser(supabase, {
+        userId: auth.user.id,
+        email: auth.user.email,
+        userMetadata: auth.user.user_metadata,
+      });
 
       const page = await pageService.createPage(supabase, {
         userId: auth.user.id,
-        profileId: profile.id,
+        profileId: ensuredProfile.id,
         title,
         pageType,
       });

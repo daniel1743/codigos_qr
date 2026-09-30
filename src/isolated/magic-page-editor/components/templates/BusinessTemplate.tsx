@@ -6,6 +6,7 @@ import { useThemeTokens } from "../../hooks/useThemeTokens";
 import { ButtonGroup } from "../blocks/ButtonGroup";
 import { buttonGroupIdentity, readButtonGroup } from "../../utils/buttonGroup";
 import { singleButtonSeed } from "../../data/bioContent";
+import { SeparatorBlock } from '../blocks/SeparatorBlock';
 import { Block } from "../editor/Block";
 import { Editable } from "../editor/Editable";
 import { EditableText } from "../editor/EditableText";
@@ -13,6 +14,7 @@ import { EditableImage } from "../editor/EditableImage";
 import { EditableAvatar, VerifiedNameCheck } from "../editor/EditableAvatar";
 import { EditableCTA, CtaVariants } from "../editor/EditableCTA";
 import { EditableSocial, EditableSocialGroup } from "../editor/EditableSocial";
+import { QuickProfileInfo } from '../profile/QuickProfileInfo';
 import { PageRoot, useFooterTone } from "../editor/PageRoot";
 import { AddBlockSlot } from "../editor/AddBlockSlot";
 import { SocialIcon } from "../icons/SocialIcon";
@@ -127,7 +129,7 @@ export function BusinessTemplate() {
             }) => <>
                   <EditableText id={`${p}hero.brand`} value={bizProfile.brand} label="Marca" className="cq-fg text-[13px] uppercase tracking-[0.26em]" style={display} />
                   <div className="flex items-center"><EditableText id={`${p}hero.title`} value={bizProfile.title} as="h1" label="Título" className={cx('cq-fg mt-5 leading-[1.04]', m ? 'text-[38px]' : 'text-[62px]')} style={display} /><VerifiedNameCheck avatarId={`${p}avatar`} /></div>
-                  <EditableText id={`${p}hero.text`} value={bizProfile.text} label="Descripción" multiline className={cx('cq-muted mt-5 max-w-[480px] leading-relaxed', m ? 'text-[15px]' : 'text-[17px]')} />
+                  <QuickProfileInfo legacyDescription={doc.texts[`${p}hero.text`] ?? bizProfile.text} />
                   <div className={cx('mt-8 flex flex-wrap gap-3', align === 'center' && 'justify-center')}>
                     <EditableCTA id={`${p}hero.cta`} label={bizProfile.cta} href="https://wa.me/34910000000" variants={cta} className="inline-flex h-[54px] items-center gap-2.5 whitespace-nowrap rounded-full px-7 text-[15px] font-semibold" leading={<CalendarDaysIcon className="h-[18px] w-[18px]" />} />
                     <EditableCTA id={`${p}hero.cta2`} label={bizProfile.cta2} href="#tratamientos" variants={cta} defaultVariant="outline" className="inline-flex h-[54px] items-center whitespace-nowrap rounded-full px-7 text-[15px] font-semibold" />

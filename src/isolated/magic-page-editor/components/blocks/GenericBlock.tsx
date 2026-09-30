@@ -7,6 +7,7 @@ import { EditableText } from '../editor/EditableText';
 import { EditableImage } from '../editor/EditableImage';
 import { EditableAvatar } from '../editor/EditableAvatar';
 import { type CtaVariants } from '../editor/EditableCTA';
+import { SeparatorBlock } from './SeparatorBlock';
 import { ButtonGroup } from './ButtonGroup';
 import { EditableSocial, EditableSocialGroup } from '../editor/EditableSocial';
 import { HeroFrame } from './HeroFrame';
@@ -85,7 +86,9 @@ export function GenericBlock({ block, ctaVariants, maxWidth = 1080 }: GenericBlo
           className={wrap} />
       );
 
-    case 'social':
+    case 'separator':
+          return <SeparatorBlock key={b.key} block={b} mobile={m} />;
+        case 'social':
       return (
         <EditableSocialGroup className={cx(wrap, 'flex flex-wrap justify-center')} style={{ maxWidth }}>
           {genericSocials.map((pf, i) =>

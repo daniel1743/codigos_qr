@@ -6,11 +6,13 @@ import DesktopSidebar from "./DesktopSidebar";
 import MobileBottomNav from "./MobileBottomNav";
 import MobileDrawer from "./MobileDrawer";
 import TopHeader from "./TopHeader";
+import { isUserAdmin } from "../../lib/admin-check";
 
 export type ShellUser = {
   name: string;
   email: string;
   avatarUrl?: string | null;
+  isAdmin: boolean;
 };
 
 export type ShellPageState = { count: number; primaryPageId: string | null };
@@ -27,6 +29,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       const { data, error } = await supabase.auth.getUser();
       if (error || !data.user || !active) return;
       const authUser = data.user;
+      const admin = await isUserAdmin(supabase, authUser.id);
       setUser({
         name:
           (typeof authUser.user_metadata?.full_name === "string" &&
@@ -39,6 +42,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           typeof authUser.user_metadata?.avatar_url === "string"
             ? authUser.user_metadata.avatar_url
             : null,
+        isAdmin: admin,
       });
       try {
         const pages = await pageService.listOwnPages(supabase, authUser.id);
@@ -55,7 +59,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-cq-canvas font-cq text-cq-ink">
       <div className="flex min-h-screen">
-        <DesktopSidebar user={user} pageState={pageState} />
+        <DesktopSidebar user={user} pageState={pageState} isAdmin={user?.isAdmin ?? false} />
         <div className="min-w-0 flex-1">
           <TopHeader user={user} onMenuClick={() => setDrawerOpen(true)} />
           <main className="pb-24 lg:pb-0">{children}</main>
@@ -67,8 +71,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         onClose={() => setDrawerOpen(false)}
         user={user}
         pageState={pageState}
+        isAdmin={user?.isAdmin ?? false}
       />
-      <MobileBottomNav pageState={pageState} onMenuClick={() => setDrawerOpen(true)} />
+      <MobileBottomNav pageState={pageState} isAdmin={user?.isAdmin ?? false} onMenuClick={() => setDrawerOpen(true)} />
     </div>
   );
 }

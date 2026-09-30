@@ -1,11 +1,11 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Profile } from "../types/database";
-import { generatePublicId, getInternalSlugFromPublicId } from "../lib/publicId";
+import type { Profile, PublishedProfileConfig } from "../types/database";
 import {
   createBasicEditorPatch,
   hasBasicEditorTemplateConfigPatch,
   type BasicEditorTemplateConfigPatchV1,
 } from "../lib/basic-editor-persistence";
+import { generatePublicId, getInternalSlugFromPublicId } from "../lib/publicId";
 
 // Modified by ChatGPT Work — PROFILE-SAVE-REALITY-FIX-01
 const PROFILE_WRITABLE_COLUMNS = [
@@ -82,6 +82,16 @@ const PROFILE_WRITABLE_COLUMNS = [
   "template_config",
 ] as const;
 
+const PROFILE_UPDATE_BLOCKED_COLUMNS = new Set([
+  "id",
+  "user_id",
+  "public_id",
+  "published_profile_config",
+  "published_template_config",
+  "published_revision",
+  "published_at",
+]);
+
 type WritableProfileColumn = (typeof PROFILE_WRITABLE_COLUMNS)[number];
 
 function toWritableProfilePayload(updates: Partial<Profile>) {
@@ -97,7 +107,32 @@ function toWritableProfilePayload(updates: Partial<Profile>) {
   return payload;
 }
 
+function toWritableProfileUpdatePayload(updates: Partial<Profile>) {
+  const payload = toWritableProfilePayload(updates);
+  for (const key of PROFILE_UPDATE_BLOCKED_COLUMNS) {
+    delete payload[key as WritableProfileColumn];
+  }
+  return payload;
+}
+
 export const profileService = {
+  async getPublishedMagicPageByLegacyPublicId(
+    supabase: SupabaseClient,
+    legacyPublicId: string,
+  ): Promise<{ page_public_id: string; page_slug: string | null } | null> {
+    const { data, error } = await supabase.rpc("get_published_magic_page_by_legacy_public_id", {
+      p_legacy_public_id: legacyPublicId,
+    });
+    if (error) throw error;
+    const rows = Array.isArray(data) ? data : data ? [data] : [];
+    const row = rows[0] as { page_public_id?: unknown; page_slug?: unknown } | undefined;
+    if (!row || typeof row.page_public_id !== "string") return null;
+    return {
+      page_public_id: row.page_public_id,
+      page_slug: typeof row.page_slug === "string" ? row.page_slug : null,
+    };
+  },
+
   async getProfileByUserId(supabase: SupabaseClient, userId: string): Promise<Profile | null> {
     const { data, error } = await supabase
       .from("profiles")
@@ -136,7 +171,7 @@ export const profileService = {
     const metadataName = input.userMetadata?.["full_name"] ?? input.userMetadata?.["name"];
     const emailLocalPart = input.email?.split("@")[0]?.trim();
     const displayName =
-      (typeof metadataName === "string" && metadataName.trim()) || emailLocalPart || "Mi pagina";
+      (typeof metadataName === "string" && metadataName.trim()) || emailLocalPart || "Mi página";
     const publicId = generatePublicId();
 
     try {
@@ -280,7 +315,7 @@ export const profileService = {
     profileId: string,
     updates: Partial<Profile>,
   ): Promise<Profile> {
-    const payload = toWritableProfilePayload(updates);
+    const payload = toWritableProfileUpdatePayload(updates);
     const { data, error } = await supabase
       .from("profiles")
       .update(payload)
@@ -290,6 +325,21 @@ export const profileService = {
 
     if (error) throw error;
     return data;
+  },
+
+  /** Promote the current owner state into the stable public presentation. */
+  async publishProfileSnapshot(
+    supabase: SupabaseClient,
+    profileId: string,
+  ): Promise<Profile & { published_profile_config: PublishedProfileConfig }> {
+    const { data, error } = await supabase.rpc("publish_profile_snapshot", {
+      p_profile_id: profileId,
+    });
+    if (error) throw error;
+    if (!data?.published_profile_config) {
+      throw new Error("La publicación no devolvió un snapshot público válido.");
+    }
+    return data as Profile & { published_profile_config: PublishedProfileConfig };
   },
 
   async incrementScanCount(supabase: SupabaseClient, profileId: string): Promise<void> {

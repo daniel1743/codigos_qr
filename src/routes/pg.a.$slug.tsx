@@ -13,6 +13,7 @@ import { isCanonicalAnalyticsEnabled, resolveCanonicalClickType } from "../lib/a
 import { getBrowserCanonicalWriter } from "../lib/analytics/browser";
 import { isMagicPageDocument } from "../features/magic-page-editor-production/magic-document";
 import { MagicPublicRenderer } from "../features/magic-page-editor-production/MagicPublicRenderer";
+import { resolveSocialMetadata } from "../lib/seo/social-preview";
 
 /**
  * PUBLIC CHILD PAGE CUSTOM-ALIAS ROUTE.
@@ -33,10 +34,8 @@ export const Route = createFileRoute("/pg/a/$slug")({
     const { page } = loaderData;
     const baseUrl = "https://www.cripqer.dev";
     const stableUrl = `${baseUrl}/pg/${page.public_id}`;
-    const title = page.title ? `${page.title} | Cripqer` : `Página | Cripqer`;
-    const description = page.title
-      ? `${page.title} — página pública creada con Cripqer.`
-      : "Página pública creada con Cripqer.";
+    
+    const { title, description, imageUrl } = resolveSocialMetadata(page, baseUrl);
 
     return {
       meta: [
@@ -44,12 +43,14 @@ export const Route = createFileRoute("/pg/a/$slug")({
         { name: "description", content: description },
         { property: "og:title", content: title },
         { property: "og:description", content: description },
+        { property: "og:image", content: imageUrl },
         { property: "og:type", content: "website" },
         { property: "og:url", content: stableUrl },
         { property: "og:site_name", content: "Cripqer" },
-        { name: "twitter:card", content: "summary" },
+        { name: "twitter:card", content: "summary_large_image" },
         { name: "twitter:title", content: title },
         { name: "twitter:description", content: description },
+        { name: "twitter:image", content: imageUrl },
         { name: "robots", content: "index, follow" },
       ],
       links: [{ rel: "canonical", href: stableUrl }],

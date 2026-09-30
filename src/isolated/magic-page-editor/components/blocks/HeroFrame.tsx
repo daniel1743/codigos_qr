@@ -88,7 +88,7 @@ export function HeroFrame({
   const fusionLayer = fusion !== 'none' ? <span className={cx('pointer-events-none absolute z-[2]', fusion === 'halo' ? '-inset-x-12 -bottom-20 h-64' : fusion === 'organic' ? '-inset-x-8 bottom-0 h-48' : 'inset-x-0 bottom-0', fusion === 'fade' ? 'h-48' : 'h-32')} style={{ background: fusion === 'halo' ? 'radial-gradient(ellipse at 50% 100%, var(--surface) 0%, color-mix(in oklab, var(--surface) 72%, transparent) 38%, transparent 72%)' : fusion === 'dominant' ? 'linear-gradient(to bottom, transparent 0%, color-mix(in oklab, var(--surface) 72%, transparent) 45%, var(--surface) 100%)' : fusion === 'organic' ? 'linear-gradient(160deg, transparent 30%, color-mix(in oklab, var(--surface) 42%, transparent) 48%, var(--surface) 92%)' : 'linear-gradient(to bottom, transparent 0%, transparent 15%, var(--surface) 96%)' }} /> : null;
 
   const photo = (url: string, position: string, interactive = false) =>
-  <img src={url} alt={mediaAlt} draggable={false} {...(interactive ? crop.handlers : {})} className="absolute inset-0 h-full w-full object-cover" style={{ objectPosition: p['cropX'] || p['cropY'] ? crop.objectPosition : position, transform: `scale(${p['zoom'] ?? '1'})` }} />;
+  <img src={url} alt={mediaAlt} draggable={false} {...(interactive && !isLocked ? crop.handlers : {})} className={cx("absolute inset-0 h-full w-full object-cover", !isLocked && "touch-none")} style={{ objectPosition: p['cropX'] || p['cropY'] ? crop.objectPosition : position, transform: `scale(${p['zoom'] ?? '1'})` }} />;
 
   const newShapeStyle = heroFrameMediaShapeStyle(shape, curve);
   const img =

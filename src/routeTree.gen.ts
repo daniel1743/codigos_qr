@@ -40,6 +40,7 @@ import { Route as PgPublicIdRouteImport } from './routes/pg.$publicId'
 import { Route as QPublicIdRouteImport } from './routes/q.$publicId'
 import { Route as VsLinktreeRouteImport } from './routes/vs/linktree'
 import { Route as PagesPageIdAnalyticsRouteImport } from './routes/pages.$pageId.analytics'
+import { Route as PagesPageIdCatalogRouteImport } from './routes/pages.$pageId.catalog'
 import { Route as PagesPageIdEditRouteImport } from './routes/pages.$pageId.edit'
 import { Route as PagesPageIdEditPrototypeRouteImport } from './routes/pages.$pageId.edit-prototype'
 import { Route as PagesPageIdFuxionDemoRouteImport } from './routes/pages.$pageId.fuxion-demo'
@@ -200,6 +201,11 @@ const PagesPageIdAnalyticsRoute = PagesPageIdAnalyticsRouteImport.update({
   path: '/analytics',
   getParentRoute: () => PagesPageIdRoute,
 } as any)
+const PagesPageIdCatalogRoute = PagesPageIdCatalogRouteImport.update({
+  id: '/catalog',
+  path: '/catalog',
+  getParentRoute: () => PagesPageIdRoute,
+} as any)
 const PagesPageIdEditRoute = PagesPageIdEditRouteImport.update({
   id: '/edit',
   path: '/edit',
@@ -254,6 +260,7 @@ export interface FileRoutesByFullPath {
   '/q/$publicId': typeof QPublicIdRoute
   '/vs/linktree': typeof VsLinktreeRoute
   '/pages/$pageId/analytics': typeof PagesPageIdAnalyticsRoute
+  '/pages/$pageId/catalog': typeof PagesPageIdCatalogRoute
   '/pages/$pageId/edit': typeof PagesPageIdEditRoute
   '/pages/$pageId/edit-prototype': typeof PagesPageIdEditPrototypeRoute
   '/pages/$pageId/fuxion-demo': typeof PagesPageIdFuxionDemoRoute
@@ -291,6 +298,7 @@ export interface FileRoutesByTo {
   '/q/$publicId': typeof QPublicIdRoute
   '/vs/linktree': typeof VsLinktreeRoute
   '/pages/$pageId/analytics': typeof PagesPageIdAnalyticsRoute
+  '/pages/$pageId/catalog': typeof PagesPageIdCatalogRoute
   '/pages/$pageId/edit': typeof PagesPageIdEditRoute
   '/pages/$pageId/edit-prototype': typeof PagesPageIdEditPrototypeRoute
   '/pages/$pageId/fuxion-demo': typeof PagesPageIdFuxionDemoRoute
@@ -329,6 +337,7 @@ export interface FileRoutesById {
   '/q/$publicId': typeof QPublicIdRoute
   '/vs/linktree': typeof VsLinktreeRoute
   '/pages/$pageId/analytics': typeof PagesPageIdAnalyticsRoute
+  '/pages/$pageId/catalog': typeof PagesPageIdCatalogRoute
   '/pages/$pageId/edit': typeof PagesPageIdEditRoute
   '/pages/$pageId/edit-prototype': typeof PagesPageIdEditPrototypeRoute
   '/pages/$pageId/fuxion-demo': typeof PagesPageIdFuxionDemoRoute
@@ -368,6 +377,7 @@ export interface FileRouteTypes {
     | '/q/$publicId'
     | '/vs/linktree'
     | '/pages/$pageId/analytics'
+    | '/pages/$pageId/catalog'
     | '/pages/$pageId/edit'
     | '/pages/$pageId/edit-prototype'
     | '/pages/$pageId/fuxion-demo'
@@ -405,6 +415,7 @@ export interface FileRouteTypes {
     | '/q/$publicId'
     | '/vs/linktree'
     | '/pages/$pageId/analytics'
+    | '/pages/$pageId/catalog'
     | '/pages/$pageId/edit'
     | '/pages/$pageId/edit-prototype'
     | '/pages/$pageId/fuxion-demo'
@@ -442,6 +453,7 @@ export interface FileRouteTypes {
     | '/q/$publicId'
     | '/vs/linktree'
     | '/pages/$pageId/analytics'
+    | '/pages/$pageId/catalog'
     | '/pages/$pageId/edit'
     | '/pages/$pageId/edit-prototype'
     | '/pages/$pageId/fuxion-demo'
@@ -699,6 +711,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PagesPageIdAnalyticsRouteImport
       parentRoute: typeof PagesPageIdRoute
     }
+    '/pages/$pageId/catalog': {
+      id: '/pages/$pageId/catalog'
+      path: '/catalog'
+      fullPath: '/pages/$pageId/catalog'
+      preLoaderRoute: typeof PagesPageIdCatalogRouteImport
+      parentRoute: typeof PagesPageIdRoute
+    }
     '/pages/$pageId/edit': {
       id: '/pages/$pageId/edit'
       path: '/edit'
@@ -732,6 +751,7 @@ declare module '@tanstack/react-router' {
 
 interface PagesPageIdRouteChildren {
   PagesPageIdAnalyticsRoute: typeof PagesPageIdAnalyticsRoute
+  PagesPageIdCatalogRoute: typeof PagesPageIdCatalogRoute
   PagesPageIdEditRoute: typeof PagesPageIdEditRoute
   PagesPageIdEditPrototypeRoute: typeof PagesPageIdEditPrototypeRoute
   PagesPageIdFuxionDemoRoute: typeof PagesPageIdFuxionDemoRoute
@@ -739,6 +759,7 @@ interface PagesPageIdRouteChildren {
 
 const PagesPageIdRouteChildren: PagesPageIdRouteChildren = {
   PagesPageIdAnalyticsRoute: PagesPageIdAnalyticsRoute,
+  PagesPageIdCatalogRoute: PagesPageIdCatalogRoute,
   PagesPageIdEditRoute: PagesPageIdEditRoute,
   PagesPageIdEditPrototypeRoute: PagesPageIdEditPrototypeRoute,
   PagesPageIdFuxionDemoRoute: PagesPageIdFuxionDemoRoute,

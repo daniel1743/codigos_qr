@@ -159,9 +159,7 @@ export function AdvancedPanel({ hideBlockNav = false }: { hideBlockNav?: boolean
     case "hero":
       specific = (
         <>
-          <PanelSection title="Elementos decorativos" hint="Siempre no interactivos; no interfieren con la selección.">
-            <DecorationPicker values={p} onChange={(key, value) => set(key, value)} />
-          </PanelSection>
+          
           {ed.canonicalEditing && (
             <HeroFusionPicker
               value={heroFusionFromProps(p)}
@@ -277,9 +275,7 @@ export function AdvancedPanel({ hideBlockNav = false }: { hideBlockNav?: boolean
               onCommit={(v) => set("anchor", v)}
             />
           </PanelSection>
-          <PanelSection title="Elementos decorativos" hint="Siempre no interactivos; no interfieren con la selección.">
-            <DecorationPicker values={p} onChange={(key, value) => set(key, value)} />
-          </PanelSection>
+          
         </>
       ) : (
         <div className="flex items-start gap-2.5 rounded-xl bg-[#F7F8FA] p-3 text-[12.5px] leading-snug text-mute">
@@ -293,9 +289,7 @@ export function AdvancedPanel({ hideBlockNav = false }: { hideBlockNav?: boolean
     case "page":
       specific = (
         <>
-          <PanelSection title="Elementos decorativos" hint="Siempre no interactivos; no interfieren con la selección.">
-            <DecorationPicker values={ed.doc.props.page ?? {}} onChange={(key, value) => ed.setProp('page', key, value)} />
-          </PanelSection>
+          
           <button
             type="button"
             onClick={() => ed.setSettingsOpen(true)}

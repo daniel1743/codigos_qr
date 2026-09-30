@@ -52,9 +52,10 @@ describe('M2.1 media shape reachability and CTA shape cleanup', () => {
     act(() => root.unmount());
   });
 
-  it.each(['desktop', 'mobile'] as const)('exposes all six media shapes for Hero media on %s', (device) => {
+  it.each(['desktop', 'mobile'] as const)('exposes the canonical Hero frame shapes for Hero media on %s', (device) => {
     const { host, root } = mount('block:hero:hero-image', device);
-    expect(host.querySelector('[aria-label="Forma de imagen"]')?.querySelectorAll('button')).toHaveLength(6);
+    expect(host.querySelector('[data-testid="hero-frame-shape-grid"]')?.querySelectorAll('button')).toHaveLength(9);
+    expect(host.querySelector('[data-testid="hero-frame-shape-grid"]')?.textContent).toContain('Onda doble');
     act(() => root.unmount());
   });
 

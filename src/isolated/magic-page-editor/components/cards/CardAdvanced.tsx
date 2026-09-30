@@ -64,9 +64,7 @@ export function CardAdvanced({ ctx }: {ctx: CardContext;}) {
       <CardPresetPicker ctx={ctx} />
       <CardPaletteFields ctx={ctx} />
 
-      <PanelSection title="Elementos decorativos" hint="Siempre no interactivos; no interfieren con la selección.">
-        <DecorationPicker values={cp} onChange={(key, value) => set(key, value)} />
-      </PanelSection>
+      
 
       <PanelSection title="Campos">
         {sample.price !== undefined && <Toggle label="Precio" checked={flag('showPrice')} onChange={(v) => set('showPrice', v ? 'on' : 'off')} />}

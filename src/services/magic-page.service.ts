@@ -9,6 +9,18 @@ import {
 import type { PageType } from "../types/database";
 
 export const magicPageService = {
+  async getPrimaryPage(supabase: SupabaseClient, userId: string): Promise<Page | null> {
+    const { data, error } = await supabase
+      .from("pages")
+      .select("*")
+      .eq("owner_user_id", userId)
+      .order("created_at", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+    if (error) throw error;
+    return data as Page | null;
+  },
+
   async createPage(
     supabase: SupabaseClient,
     input: { userId: string; profileId: string; title: string; pageType: PageType },

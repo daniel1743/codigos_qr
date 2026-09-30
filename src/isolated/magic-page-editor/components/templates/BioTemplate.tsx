@@ -2,6 +2,7 @@ import React from "react";
 import { ArrowRightIcon } from "lucide-react";
 import { useEditor } from "../../contexts/EditorContext";
 import { useThemeTokens } from "../../hooks/useThemeTokens";
+import { SeparatorBlock } from '../blocks/SeparatorBlock';
 import { Block } from "../editor/Block";
 import { Editable } from "../editor/Editable";
 import { EditableText } from "../editor/EditableText";
@@ -22,6 +23,7 @@ import { cx } from "../../utils/cx";
 import { blockPrefix } from "../../utils/styles";
 import { BlockRef } from "../../types/editor";
 import Logo from "../../../../components/brand/Logo";
+import { QuickProfileInfo } from '../profile/QuickProfileInfo';
 export function BioTemplate() {
   const {
     doc,
@@ -75,11 +77,13 @@ export function BioTemplate() {
                 fontWeight: 500
               }} /><VerifiedNameCheck avatarId={`${p}avatar`} /></div>
                   <EditableText id={`${p}hero.role`} value={bioProfile.role} label="Subtítulo" className="cq-muted mt-3 text-[12.5px] font-medium uppercase tracking-[0.16em]" />
-                  <EditableText id={`${p}hero.bio`} value={bioProfile.bio} label="Descripción" multiline className={cx('cq-fg mt-4 max-w-[460px] text-[15px] leading-relaxed', align === 'center' ? 'text-center' : 'text-left')} />
+                  <QuickProfileInfo legacyDescription={doc.texts[`${p}hero.bio`] ?? bioProfile.bio} className={align === 'center' ? 'text-center' : 'text-left'} />
                 </>}
             </HeroFrame>
           </Block>;
-      case 'social':
+      case 'separator':
+          return <SeparatorBlock key={b.key} block={b} mobile={m} />;
+        case 'social':
         return <Block key={b.key} block={b} defaultSpacing="S">
             <div className={cx(col, 'flex justify-center gap-3')} style={colStyle}>
               <EditableSocialGroup className="flex items-center justify-center"><>{bioSocials.map((s, i) => <EditableSocial key={s.platform} id={`${p}social.${i}`} platform={s.platform} href={s.href} size={m ? 44 : 48} />)}</></EditableSocialGroup>
@@ -182,20 +186,20 @@ export function BioTemplate() {
             onClick={(event) => {
               if (mode === "edit") event.preventDefault();
             }}
-            className="inline-flex items-center justify-center gap-2 rounded-full px-2 py-1 text-center transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--accent)]"
+            className="inline-flex items-center justify-center gap-1.5 rounded-full px-2 py-1 text-center transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--accent)]"
           >
             <span>Visita</span>
             <Logo
               variant="symbol"
-              width={16}
-              height={16}
+              width={24}
+              height={24}
               title="Cripqer"
             />
             <Logo
               variant="wordmark"
               showTagline={false}
               title="Cripqer"
-              className="origin-center scale-[0.62]"
+              className="origin-left scale-[0.62] -mr-6"
             />
           </a>
         </div>

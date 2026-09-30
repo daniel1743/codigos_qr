@@ -1,4 +1,4 @@
-import { createFileRoute, notFound } from "@tanstack/react-router";
+import { createFileRoute, notFound, redirect } from "@tanstack/react-router";
 import { profileService } from "../services/profile.service";
 import { linkService } from "../services/link.service";
 import { getServerSupabaseClient } from "../lib/supabase/server";
@@ -51,10 +51,43 @@ export const Route = createFileRoute("/p/$publicId")({
       throw notFound();
     }
 
-    // Obtener los links para este perfil
-    const links = await linkService.getProfileLinks(supabase, profile.id);
+    // The historical QR remains /p/{profile.public_id}; only the current
+    // published presentation may move to the canonical Magic renderer.
+    let publishedMagic: Awaited<
+      ReturnType<typeof profileService.getPublishedMagicPageByLegacyPublicId>
+    > = null;
+    try {
+      publishedMagic = await profileService.getPublishedMagicPageByLegacyPublicId(
+        supabase,
+        profile.public_id,
+      );
+    } catch (error) {
+      // A bridge outage must never expose a draft or change the historical
+      // identity. Keep the legacy renderer as the safe fallback.
+      console.error("Legacy/Magic public bridge unavailable:", error);
+    }
+    if (publishedMagic) {
+      throw redirect({
+        to: "/pg/$publicId",
+        params: { publicId: publishedMagic.page_public_id },
+      });
+    }
 
-    return { profile, links: links.filter((l) => l.enabled) };
+    // Published profile snapshots are the public authority. Editable columns
+    // remain available to the owner but must never replace the last publication.
+    const publication = profile.published_profile_config;
+    const hasSnapshot =
+      publication?.schemaVersion === 1 && publication.profile && Array.isArray(publication.links);
+    if (!hasSnapshot && !profile.published_template_config) {
+      throw notFound();
+    }
+
+    const publicProfile = hasSnapshot ? { ...profile, ...publication!.profile } : profile;
+    const links = hasSnapshot
+      ? publication!.links.filter((link) => link.enabled)
+      : (await linkService.getProfileLinks(supabase, profile.id)).filter((l) => l.enabled);
+
+    return { profile: publicProfile, links };
   },
   component: PublicProfilePage,
 });

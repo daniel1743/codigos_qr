@@ -37,9 +37,20 @@ export const Route = createFileRoute("/$alias")({
       throw notFound();
     }
 
-    const links = await linkService.getProfileLinks(supabase, profile.id);
+    const publication = profile.published_profile_config;
+    const hasSnapshot =
+      publication?.schemaVersion === 1 &&
+      publication.profile &&
+      Array.isArray(publication.links);
+    if (!hasSnapshot && !profile.published_template_config) {
+      throw notFound();
+    }
+    const publicProfile = hasSnapshot ? { ...profile, ...publication!.profile } : profile;
+    const links = hasSnapshot
+      ? publication!.links.filter((link) => link.enabled)
+      : (await linkService.getProfileLinks(supabase, profile.id)).filter((l) => l.enabled);
 
-    return { profile, links: links.filter((l) => l.enabled) };
+    return { profile: publicProfile, links };
   },
   component: PublicProfilePageByAlias,
 });

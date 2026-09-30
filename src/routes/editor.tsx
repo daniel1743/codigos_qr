@@ -393,7 +393,7 @@ function EditorPage() {
         banner_fusion_strength: getSafeFusionStrength(profile.banner_fusion_strength),
         slug: internalSlug,
         public_id: publicId,
-        published: publish,
+        ...(publish ? { published: true } : {}),
       };
 
       let finalProfile: Profile;
@@ -464,6 +464,9 @@ function EditorPage() {
       }
 
       const refreshedLinks = await linkService.getProfileLinks(supabase, currentProfileId);
+      if (publish) {
+        finalProfile = await profileService.publishProfileSnapshot(supabase, currentProfileId);
+      }
       setProfile({
         ...DEFAULT_PROFILE,
         ...finalProfile,

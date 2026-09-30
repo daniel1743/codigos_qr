@@ -2,8 +2,9 @@ import { BarChart3, Globe2, Home, Menu, QrCode } from "lucide-react";
 import { Link, useLocation } from "@tanstack/react-router";
 import type { ShellPageState } from "./AppShell";
 
-function pageDestination(pageState: ShellPageState) {
-  if (pageState.count === 0) return { label: "Crear", to: "/pages/new" as const };
+function pageDestination(pageState: ShellPageState, isAdmin: boolean) {
+  if (pageState.count === 0 && isAdmin) return { label: "Crear", to: "/pages/new" as const };
+  if (pageState.count === 0) return { label: "Mi página", to: "/profile" as const };
   if (pageState.count === 1 && pageState.primaryPageId)
     return {
       label: "Mi página",
@@ -15,13 +16,15 @@ function pageDestination(pageState: ShellPageState) {
 
 export default function MobileBottomNav({
   pageState,
+  isAdmin,
   onMenuClick,
 }: {
   pageState: ShellPageState;
+  isAdmin: boolean;
   onMenuClick: () => void;
 }) {
   const { pathname } = useLocation();
-  const page = pageDestination(pageState);
+  const page = pageDestination(pageState, isAdmin);
   const items = [
     { label: "Inicio", to: "/profile", icon: Home },
     { label: page.label, to: page.to, params: page.params, icon: Globe2 },

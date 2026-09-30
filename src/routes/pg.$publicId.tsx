@@ -13,6 +13,7 @@ import { isCanonicalAnalyticsEnabled, resolveCanonicalClickType } from "../lib/a
 import { getBrowserCanonicalWriter } from "../lib/analytics/browser";
 import { isMagicPageDocument } from "../features/magic-page-editor-production/magic-document";
 import { MagicPublicRenderer } from "../features/magic-page-editor-production/MagicPublicRenderer";
+import { resolveSocialMetadata } from "../lib/seo/social-preview";
 
 /**
  * PUBLIC CHILD PAGE ROUTE.
@@ -34,10 +35,8 @@ export const Route = createFileRoute("/pg/$publicId")({
     const { page } = loaderData;
     const baseUrl = "https://www.cripqer.dev";
     const pageUrl = `${baseUrl}/pg/${page.public_id}`;
-    const title = page.title ? `${page.title} | Cripqer` : `Página ${page.public_id} | Cripqer`;
-    const description = page.title
-      ? `${page.title} — página pública creada con Cripqer.`
-      : `Página pública creada con Cripqer.`;
+    
+    const { title, description, imageUrl } = resolveSocialMetadata(page, baseUrl);
 
     return {
       meta: [
@@ -45,18 +44,18 @@ export const Route = createFileRoute("/pg/$publicId")({
         { name: "description", content: description },
         { property: "og:title", content: title },
         { property: "og:description", content: description },
+        { property: "og:image", content: imageUrl },
         { property: "og:type", content: "website" },
         { property: "og:url", content: pageUrl },
         { property: "og:site_name", content: "Cripqer" },
-        { name: "twitter:card", content: "summary" },
+        { name: "twitter:card", content: "summary_large_image" },
         { name: "twitter:title", content: title },
         { name: "twitter:description", content: description },
+        { name: "twitter:image", content: imageUrl },
         { name: "robots", content: "index, follow" },
       ],
       links: [
         { rel: "canonical", href: pageUrl },
-        // Slug is optional and must never be fabricated; only emit an alternate
-        // when the DB actually returned one.
         ...(page.slug ? [{ rel: "alternate", href: `${baseUrl}/${page.slug}` }] : []),
       ],
     };

@@ -1,11 +1,13 @@
 import React from 'react';
 import { toast } from 'sonner';
 import { ArrowUpIcon, ArrowDownIcon, MoreHorizontalIcon,
+  AlignCenterIcon,
   BoldIcon,
   CircleDashedIcon,
   CopyIcon,
   CropIcon,
   ImageIcon,
+  InfoIcon,
   ImagesIcon,
   LayoutGridIcon,
   LayoutTemplateIcon,
@@ -26,7 +28,7 @@ import { ArrowUpIcon, ArrowDownIcon, MoreHorizontalIcon,
   BadgeCheckIcon,
   LayersIcon,
   ListIcon,
-  MoveHorizontalIcon, LockIcon, UnlockIcon } from
+  MoveHorizontalIcon, MinusIcon, LockIcon, UnlockIcon } from
 'lucide-react';
 import { useEditor } from '../../contexts/EditorContext';
 import { useThemeTokens } from '../../hooks/useThemeTokens';
@@ -58,6 +60,9 @@ import { PalettePicker } from './controls/PalettePicker';
 import { DecorationPicker } from './controls/DecorationPicker';
 import { TypographyTreatmentPicker } from './controls/TypographyTreatmentPicker';
 import { HeroFrameShapePicker } from './controls/HeroFrameShapePicker';
+import { SeparatorStylePicker } from './controls/SeparatorStylePicker';
+import { resolveSeparatorStyle } from '../blocks/SeparatorBlock';
+import { QuickProfileInfoPanel } from './controls/QuickProfileInfoPanel';
 import { IconPicker, iconLibrary } from './controls/IconPicker';
 import { socialPlatforms } from '../../data/socialPlatforms';
 import { addButton, canDeleteButton, deleteButton, moveButton } from '../../utils/buttonOps';
@@ -81,8 +86,9 @@ export function useSelectionActions(): EditorAction[] {
   if (!sel) return [];
 
   const id = sel.id;
-  const propId = sel.kind === 'image' && id.endsWith(':hero-image') ? id.slice(0, -':hero-image'.length) : id;
-  const mediaShapeKey = sel.kind === 'image' && id.endsWith(':hero-image') ? 'mediaShape' : 'shape';
+  const isHeroImage = sel.kind === 'image' && id.endsWith(':hero-image');
+  const propId = isHeroImage ? id.slice(0, -':hero-image'.length) : id;
+  const mediaShapeKey = isHeroImage ? 'mediaShape' : 'shape';
   const props = ed.doc.props[propId] ?? {};
   const el = ed.getElement(id);
   const set = (key: string, value: string) => ed.setProp(propId, key, value);
@@ -144,7 +150,17 @@ export function useSelectionActions(): EditorAction[] {
         label: 'Forma',
         icon: ShapesIcon,
         showLabel: true,
-        panel: <PanelSection title="Forma de imagen">
+        panel: isHeroImage ? <PanelSection title="Forma de la portada">
+          <HeroFrameShapePicker
+            value={(props.shape ?? 'curve') as HeroShape}
+            onChange={(v) => {
+              // The hero silhouette is authoritative on `shape`. Clear the
+              // legacy mediaShape so old oval/rounded values cannot mask the
+              // first three hero options (curve, straight, inset).
+              set('shape', v);
+              if (props.mediaShape) set('mediaShape', '');
+            }} />
+        </PanelSection> : <PanelSection title="Forma de imagen">
           <Segmented ariaLabel="Forma de imagen" options={[
             { value: 'square', label: 'Cuadrada' },
             { value: 'rounded', label: 'Redondeada' },
@@ -227,8 +243,7 @@ export function useSelectionActions(): EditorAction[] {
         },
         { key: 'ring', label: 'Borde', icon: CircleDashedIcon, active: ringOn, onClick: () => set('ring', ringOn ? 'off' : 'on') },
         { key: 'crop', label: 'Encuadre', icon: CropIcon, panel: <><PanelSection title="Encuadre libre"><FreeCropControl x={Number(props.cropX ?? 50)} y={Number(props.cropY ?? 50)} zoom={Number(props.zoom ?? 1)} onChange={set} /></PanelSection><PanelSection title="Zoom rápido"><Segmented ariaLabel="Zoom del avatar" options={[{ value: '1', label: '100%' }, { value: '1.15', label: '115%' }, { value: '1.3', label: '130%' }, { value: '1.5', label: '150%' }]} value={props.zoom ?? '1'} onChange={(v) => set('zoom', v)} /></PanelSection><PanelSection title="Posición rápida"><PositionPad value={props.pos ?? 'center'} onChange={(v) => set('pos', v)} /></PanelSection></> },
-        { key: 'lock', label: props.locked === 'true' ? 'Desbloquear' : 'Bloquear', icon: props.locked === 'true' ? LockIcon : UnlockIcon, active: props.locked === 'true', onClick: () => set('locked', props.locked === 'true' ? 'false' : 'true') },
-        { key: 'lock', label: props.locked === 'true' ? 'Desbloquear' : 'Bloquear', icon: props.locked === 'true' ? LockIcon : UnlockIcon, active: props.locked === 'true', onClick: () => set('locked', props.locked === 'true' ? 'false' : 'true') },
+
         { key: 'overlay', label: 'Overlay', icon: LayersIcon, panel: <PanelSection title="Overlay del avatar"><Segmented ariaLabel="Overlay del avatar" options={[{ value: 'none', label: 'Sin' }, { value: 'soft', label: 'Suave' }, { value: 'medium', label: 'Medio' }, { value: 'intense', label: 'Intenso' }]} value={props.overlay ?? 'none'} onChange={(v) => set('overlay', v)} /></PanelSection> },
         { key: 'verified', label: 'Verificado', icon: BadgeCheckIcon, active: props.badge === 'on', panel: <><PanelSection title="Badge verificado"><Segmented ariaLabel="Mostrar badge" options={[{ value: 'off', label: 'Oculto' }, { value: 'on', label: 'Visible' }]} value={props.badge ?? 'on'} onChange={(v) => set('badge', v)} /><SwatchRow colors={t.swatches} value={props.badgeColor} onChange={(v) => set('badgeColor', v ?? t.accent)} /></PanelSection><PanelSection title="Junto al nombre"><Segmented ariaLabel="Verificado junto al nombre" options={[{ value: 'off', label: 'No' }, { value: 'on', label: 'Sí' }]} value={props.badgeByName ?? 'off'} onChange={(v) => set('badgeByName', v)} /></PanelSection></> },
         {
@@ -253,6 +268,7 @@ export function useSelectionActions(): EditorAction[] {
 
     case 'hero':
       return [
+      { key: 'information', label: 'Información', icon: InfoIcon, showLabel: true, panel: <QuickProfileInfoPanel /> },
       { key: 'media', label: 'Imagen', icon: ImageIcon, showLabel: true, panel: <ImagePicker value={props.src} onChange={(v) => set('src', v)} onUpload={ed.uploadAsset} /> },
       {
         key: 'variant',
@@ -269,13 +285,20 @@ export function useSelectionActions(): EditorAction[] {
         panel: <PanelSection title="Forma de la portada">
           <HeroFrameShapePicker
             value={(props.shape ?? el?.querySelector('[data-hero]')?.getAttribute('data-shape') ?? 'curve') as HeroShape}
-            onChange={(v) => set('shape', v)} />
+            onChange={(v) => {
+              // The hero silhouette is authoritative on `shape`. Clear the
+              // legacy mediaShape so old oval/rounded values cannot mask the
+              // first three hero options (curve, straight, inset).
+              set('shape', v);
+              if (props.mediaShape) set('mediaShape', '');
+            }} />
         </PanelSection>
 
 
       },
       { key: 'bg', label: 'Fondo', icon: PaintBucketIcon, panel: <ToneGrid tones={t.tones} value={props.bg} onChange={(v) => set('bg', v)} /> },
       { key: 'crop', label: 'Encuadre', icon: CropIcon, panel: <><PanelSection title="Encuadre libre"><FreeCropControl x={Number(props.cropX ?? 50)} y={Number(props.cropY ?? 50)} zoom={Number(props.zoom ?? 1)} onChange={set} /></PanelSection><PanelSection title="Posición rápida"><PositionPad value={props.pos ?? 'center'} onChange={(v) => set('pos', v)} /></PanelSection></> },
+        { key: 'lock', label: props.locked === 'true' ? 'Desbloquear' : 'Bloquear', icon: props.locked === 'true' ? LockIcon : UnlockIcon, active: props.locked === 'true', onClick: () => set('locked', props.locked === 'true' ? 'false' : 'true') },
       { key: 'lock', label: props.locked === 'true' ? 'Desbloquear' : 'Bloquear', icon: props.locked === 'true' ? LockIcon : UnlockIcon, active: props.locked === 'true', onClick: () => set('locked', props.locked === 'true' ? 'false' : 'true') },
         { key: 'overlay', label: 'Overlay', icon: LayersIcon, panel: <><PanelSection title="Intensidad"><Segmented ariaLabel="Overlay de portada" options={[{ value: 'none', label: 'Sin' }, { value: 'soft', label: 'Suave' }, { value: 'medium', label: 'Medio' }, { value: 'intense', label: 'Intenso' }]} value={props.overlay ?? 'none'} onChange={(v) => set('overlay', v)} /></PanelSection><PanelSection title="Color"><SwatchRow colors={t.swatches} value={props.overlayColor} onChange={(v) => set('overlayColor', v ?? '#111318')} /></PanelSection></> },
       { key: 'fusion', label: 'Fusión', icon: PaintbrushIcon, panel: <PanelSection title="Portada + fondo"><Segmented ariaLabel="Fusión de portada y fondo" options={[{ value: 'none', label: 'Sin' }, { value: 'fade', label: 'Fade' }, { value: 'dominant', label: 'Color' }, { value: 'halo', label: 'Halo' }, { value: 'organic', label: 'Orgánica' }]} value={props.fusion ?? 'none'} onChange={(v) => set('fusion', v)} /></PanelSection> }];
@@ -470,8 +493,87 @@ export function useSelectionActions(): EditorAction[] {
         </div>
       };
 
-      return [contentAction, designAction, iconAction, primaryAction, moreAction];
+      const quickAddAction = collection ? {
+          key: 'quick-add',
+          label: 'Añadir otro botón',
+          icon: PlusIcon,
+          showLabel: false,
+          onClick: () => {
+            if (model) {
+              const stableId = nextButtonId(model);
+              ed.updateDoc((doc) => addButton(doc, collection));
+              toast('Botón añadido', { action: { label: 'Deshacer', onClick: () => ed.undo() } });
+              window.setTimeout(() => ed.select(canonicalScope(collection.blockKey, stableId), { reveal: true }), 80);
+            }
+          }
+        } : null;
+
+        return [contentAction, designAction, iconAction, primaryAction, quickAddAction, moreAction].filter(Boolean) as EditorAction[];
     }
+        case 'separator':
+      return [
+        {
+          key: 'style',
+          label: 'Estilo',
+          icon: DivideIcon,
+          showLabel: true,
+          panel: <PanelSection title="Estilo de separador">
+            <SeparatorStylePicker value={resolveSeparatorStyle(props)} onChange={(v) => set('separatorStyle', v)} />
+          </PanelSection>
+        },
+        {
+          key: 'spacing',
+          label: 'Espacio',
+          icon: MoveIcon,
+          showLabel: true,
+          panel: <PanelSection title="Espacio alrededor">
+            <Segmented ariaLabel="Espacio" options={[
+              { value: 'sm', label: 'S' }, { value: 'md', label: 'M' }, { value: 'lg', label: 'L' }, { value: 'xl', label: 'XL' }
+            ]} value={props.separatorSpacing ?? props.spacing ?? 'md'} onChange={(v) => set('separatorSpacing', v)} />
+          </PanelSection>
+        },
+        {
+          key: 'thickness',
+          label: 'Grosor',
+          icon: MinusIcon,
+          showLabel: true,
+          panel: <PanelSection title="Grosor del separador"><Segmented ariaLabel="Grosor" options={[{ value: 'hairline', label: 'Fina' }, { value: 'medium', label: 'Media' }, { value: 'strong', label: 'Marcada' }]} value={props.thickness ?? 'hairline'} onChange={(v) => set('thickness', v)} /></PanelSection>
+        },
+        {
+          key: 'width',
+          label: 'Ancho',
+          icon: MoveHorizontalIcon,
+          showLabel: true,
+          panel: <PanelSection title="Ancho de la línea"><Segmented ariaLabel="Ancho" options={['25%', '40%', '60%', '80%', '100%'].map((value) => ({ value, label: value }))} value={props.width ?? '60%'} onChange={(v) => set('width', v)} /></PanelSection>
+        },
+        {
+          key: 'alignment',
+          label: 'Alineación',
+          icon: AlignCenterIcon,
+          panel: <PanelSection title="Alineación"><Segmented ariaLabel="Alineación" options={[{ value: 'left', label: 'Izquierda' }, { value: 'center', label: 'Centro' }, { value: 'right', label: 'Derecha' }]} value={props.alignment ?? 'center'} onChange={(v) => set('alignment', v)} /></PanelSection>
+        },
+        {
+          key: 'color',
+          label: 'Color',
+          icon: PaletteIcon,
+          active: !!props.color && props.color !== 'automatic',
+          panel: <PanelSection title="Color del separador">
+            <SwatchRow colors={['automatic', ...t.swatches]} value={props.color ?? 'automatic'} onChange={(v) => set('color', v ?? 'automatic')} />
+            {(!props.color || props.color !== 'automatic' || !t.swatches.includes(props.color)) && (
+              <div className="mt-3 flex items-center justify-between overflow-hidden rounded-xl border border-line bg-surface px-3 py-1.5 focus-within:border-select focus-within:ring-1 focus-within:ring-select">
+                <span className="text-[13px] font-medium text-ink">Color personalizado</span>
+                <input
+                  type="color"
+                  value={props.color === 'automatic' || !props.color ? '#000000' : props.color}
+                  onChange={(e) => set('color', e.target.value)}
+                  className="h-7 w-12 cursor-pointer border-0 bg-transparent p-0 [&::-webkit-color-swatch-wrapper]:p-0 [&::-webkit-color-swatch]:rounded-md [&::-webkit-color-swatch]:border [&::-webkit-color-swatch]:border-line"
+                />
+              </div>
+            )}
+          </PanelSection>
+        },
+        ...structureActions(ed, sel.blockKey)
+      ];
     case 'social':{
         const scope = socialStyleScope(sel.blockKey, sel.parentId);
         const platform = props.platform as SocialPlatform ?? socialPlatforms.find((p) => p.label === sel.label)?.id ?? 'web';
@@ -512,7 +614,8 @@ export function useSelectionActions(): EditorAction[] {
           return [
             { key: 'video-url', label: 'Enlace', icon: Link2Icon, showLabel: true, panel: <LinkEditor value={props.href ?? ''} onChange={(v) => set('href', v)} /> },
             { key: 'replace', label: 'Portada', icon: ImageIcon, panel: <ImagePicker value={props.src} onChange={(v) => set('src', v)} onUpload={ed.uploadAsset} /> },
-            { key: 'crop', label: 'Encuadre', icon: CropIcon, panel: <><PanelSection title="Encuadre libre"><FreeCropControl x={Number(props.cropX ?? 50)} y={Number(props.cropY ?? 50)} zoom={Number(props.zoom ?? 1)} onChange={set} /></PanelSection><PanelSection title="Posición rápida"><PositionPad value={props.pos ?? 'center'} onChange={(v) => set('pos', v)} /></PanelSection></> }
+            { key: 'crop', label: 'Encuadre', icon: CropIcon, panel: <><PanelSection title="Encuadre libre"><FreeCropControl x={Number(props.cropX ?? 50)} y={Number(props.cropY ?? 50)} zoom={Number(props.zoom ?? 1)} onChange={set} /></PanelSection><PanelSection title="Posición rápida"><PositionPad value={props.pos ?? 'center'} onChange={(v) => set('pos', v)} /></PanelSection></> },
+        { key: 'lock', label: props.locked === 'true' ? 'Desbloquear' : 'Bloquear', icon: props.locked === 'true' ? LockIcon : UnlockIcon, active: props.locked === 'true', onClick: () => set('locked', props.locked === 'true' ? 'false' : 'true') },
           ];
         }
         const imgId = `${id}.img`;
@@ -722,14 +825,7 @@ export function useSelectionActions(): EditorAction[] {
         showLabel: true,
         panel: <PalettePicker value={ed.doc.props['page']?.['palette']} onChange={(v) => ed.setProp('page', 'palette', v)} textColor={ed.doc.props['page']?.['textColor']} onTextColorChange={(v) => ed.setProp('page', 'textColor', v || '')} swatches={t.swatches} />
       },
-      {
-        key: 'decorations',
-        label: 'Decoración',
-        icon: ShapesIcon,
-        panel: <PanelSection title="Elementos decorativos" hint="No interfieren con la selección ni con los clics.">
-          <DecorationPicker values={ed.doc.props.page ?? {}} onChange={(key, value) => ed.setProp('page', key, value)} />
-        </PanelSection>
-      },
+      
       { key: 'settings', label: 'Ajustes', icon: Settings2Icon, showLabel: true, onClick: () => ed.setSettingsOpen(true) }];
 
 

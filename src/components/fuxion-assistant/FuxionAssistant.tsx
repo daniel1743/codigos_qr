@@ -1,12 +1,19 @@
 import React, { useState, useRef, useEffect } from "react";
 import { MessageSquare, X, Send, Bot, Sparkles, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import OpenAI from "openai";
 
 interface Message {
   id: string;
   sender: "user" | "assistant";
   text: string;
 }
+
+const openai = new OpenAI({
+  baseURL: "https://api.deepseek.com",
+  apiKey: import.meta.env.VITE_DEEPSEEK_API_KEY || "",
+  dangerouslyAllowBrowser: true, // Needed for client-side API requests
+});
 
 const SUGGESTED_PROMPTS = [
   "¿Para qué sirve este producto?",
@@ -33,7 +40,7 @@ export function FuxionAssistant() {
     scrollToBottom();
   }, [messages, isTyping, isOpen]);
 
-  const handleSend = (text: string) => {
+  const handleSend = async (text: string) => {
     if (!text.trim()) return;
 
     const newUserMsg: Message = {
@@ -42,20 +49,48 @@ export function FuxionAssistant() {
       text: text.trim(),
     };
 
-    setMessages((prev) => [...prev, newUserMsg]);
+    const newMessagesList = [...messages, newUserMsg];
+    setMessages(newMessagesList);
     setInputValue("");
     setIsTyping(true);
 
-    // Simulate local mock response with slight delay
-    setTimeout(() => {
+    try {
+      if (!import.meta.env.VITE_DEEPSEEK_API_KEY) {
+        throw new Error("API_KEY_MISSING");
+      }
+
+      const completion = await openai.chat.completions.create({
+        messages: [
+          { role: "system", content: "Eres el Asistente FuXion, un experto amable y profesional en productos y bienestar. Responde de forma concisa." },
+          ...newMessagesList.map((msg) => ({
+            role: msg.sender,
+            content: msg.text,
+          })),
+        ],
+        model: "deepseek-chat",
+      });
+
+      const responseText = completion.choices[0]?.message?.content || "Lo siento, no pude procesar tu solicitud.";
+
       const newAssistantMsg: Message = {
         id: (Date.now() + 1).toString(),
         sender: "assistant",
-        text: MOCK_RESPONSE,
+        text: responseText,
       };
       setMessages((prev) => [...prev, newAssistantMsg]);
+    } catch (error: any) {
+      console.error("DeepSeek API Error:", error);
+      const errorMsg: Message = {
+        id: (Date.now() + 1).toString(),
+        sender: "assistant",
+        text: error.message === "API_KEY_MISSING"
+          ? "⚠️ Falta la configuración de DeepSeek. Añade VITE_DEEPSEEK_API_KEY en tu archivo .env.local."
+          : "Hubo un error de conexión con la IA. Por favor intenta nuevamente.",
+      };
+      setMessages((prev) => [...prev, errorMsg]);
+    } finally {
       setIsTyping(false);
-    }, 1200);
+    }
   };
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {

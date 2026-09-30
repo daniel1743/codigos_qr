@@ -18,6 +18,7 @@ import { pageCanonicalService } from "../services/page-canonical.service";
 import { profileService } from "../services/profile.service";
 import { toast } from "sonner";
 import type { Page, Profile } from "../types/database";
+import { useAdminStatus } from "../lib/use-admin-status";
 
 /**
  * F3 - Mi Pagina / Identity.
@@ -41,6 +42,7 @@ function PagesList() {
   const [error, setError] = useState<string | null>(null);
   const [busyPageId, setBusyPageId] = useState<string | null>(null);
   const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
+  const { isAdmin } = useAdminStatus();
 
   // /pages is the parent of the nested child routes (/pages/$pageId, /pages/new,
   // /pages/$pageId/edit). When one of those children is the active match we must
@@ -165,9 +167,9 @@ function PagesList() {
               independientes: puedes publicar cada una por separado.
             </p>
           </div>
-          <Link to="/pages/new" className={createPageCta}>
+          {isAdmin ? <Link to="/pages/new" className={createPageCta}>
             <Plus className="h-4 w-4" aria-hidden /> Crear página
-          </Link>
+          </Link> : null}
         </header>
 
         {loading ? (
@@ -212,9 +214,9 @@ function PagesList() {
                     Crea una página para publicar contenido independiente de tu identidad, con su
                     propio enlace, su QR y sus estadísticas.
                   </p>
-                  <Link to="/pages/new" className={`${createPageCta} mt-5`}>
+                  {isAdmin ? <Link to="/pages/new" className={`${createPageCta} mt-5`}>
                     <Plus className="h-4 w-4" aria-hidden /> Crear página
-                  </Link>
+                  </Link> : null}
                 </div>
               ) : (
                 <div className="mt-3 grid gap-5 lg:grid-cols-2">

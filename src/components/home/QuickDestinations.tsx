@@ -12,7 +12,7 @@ const labelClass = "text-[12.5px] font-semibold text-cq-ink";
  * the same real state the shell uses (`pageId` from the owned pages query). No invented
  * modules, no dead links.
  */
-export function QuickDestinations({ pageId }: { pageId: string | null }) {
+export function QuickDestinations({ pageId, canCreatePage }: { pageId: string | null; canCreatePage: boolean }) {
   return (
     <section aria-labelledby="home-quick-heading" className="min-w-0">
       <h2 id="home-quick-heading" className="text-[12.5px] font-bold uppercase tracking-[0.16em] text-cq-subtle">
@@ -24,12 +24,12 @@ export function QuickDestinations({ pageId }: { pageId: string | null }) {
             <Globe2 className="h-5 w-5 text-cq-blue" aria-hidden />
             <span className={labelClass}>Mi página</span>
           </Link>
-        ) : (
+        ) : canCreatePage ? (
           <Link to="/pages/new" className={itemClass}>
             <Plus className="h-5 w-5 text-cq-blue" aria-hidden />
             <span className={labelClass}>Crear página</span>
           </Link>
-        )}
+        ) : null}
         <Link to="/qr" className={itemClass}>
           <QrCode className="h-5 w-5 text-cq-blue" aria-hidden />
           <span className={labelClass}>QR</span>

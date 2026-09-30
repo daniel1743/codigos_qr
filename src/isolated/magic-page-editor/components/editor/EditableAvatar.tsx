@@ -80,7 +80,7 @@ export function EditableAvatar({
       className={cx('relative shrink-0', className)}
       style={{ width: w, height: h, padding: ring, background: ring ? ringColor : 'transparent', borderRadius: radiusFor(shape, w), ...style }}>
       
-      <div className="relative h-full w-full touch-none overflow-hidden" style={{ borderRadius: radiusFor(shape, size) }} {...crop.handlers}>
+      <div className={cx("relative h-full w-full overflow-hidden", !isLocked && "touch-none")} style={{ borderRadius: radiusFor(shape, size) }} {...(isLocked ? {} : crop.handlers)}>
         <img
           src={p['src'] ?? src}
           alt={alt}

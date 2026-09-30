@@ -5,6 +5,7 @@ import { useThemeTokens } from '../../hooks/useThemeTokens';
 import { ButtonGroup } from "../blocks/ButtonGroup";
 import { buttonGroupIdentity, readButtonGroup } from "../../utils/buttonGroup";
 import { singleButtonSeed } from "../../data/bioContent";
+import { SeparatorBlock } from '../blocks/SeparatorBlock';
 import { Block } from '../editor/Block';
 import { Editable } from '../editor/Editable';
 import { EditableText } from '../editor/EditableText';
@@ -22,6 +23,7 @@ import { pfContact, pfGallery, pfProfile, pfProjects, pfSocials, pfStatement } f
 import { cx } from '../../utils/cx';
 import { blockPrefix } from '../../utils/styles';
 import type { BlockRef } from '../../types/editor';
+import { QuickProfileInfo } from '../profile/QuickProfileInfo';
 
 export function PortfolioTemplate() {
   const { doc, isMobile: m } = useEditor();
@@ -86,6 +88,7 @@ export function PortfolioTemplate() {
                   className={cx('cq-fg mt-4 italic leading-[0.94]', m ? 'text-[54px]' : 'text-[116px]', align === 'center' && 'text-center')}
                   style={display} /><VerifiedNameCheck avatarId={`${p}avatar`} /></div>
                 
+                  <QuickProfileInfo />
                   <div className={cx('mt-9 flex flex-wrap gap-3', align === 'center' && 'justify-center')}>
                     <EditableCTA id={`${p}hero.cta`} label={pfProfile.cta} href="#proyectos" variants={cta} defaultVariant="outline" className={btn} trailing={<ArrowDownRightIcon className="h-4 w-4" />} />
                   </div>
@@ -205,7 +208,9 @@ export function PortfolioTemplate() {
             </div>
           </Block>);
 
-      case 'social':
+      case 'separator':
+          return <SeparatorBlock key={b.key} block={b} mobile={m} />;
+        case 'social':
         return (
           <Block key={b.key} block={b} defaultSpacing="S">
             <div className={cx(wrap, 'flex flex-wrap items-center gap-2')} style={wrapStyle}>

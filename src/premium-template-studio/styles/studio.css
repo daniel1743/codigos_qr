@@ -351,7 +351,39 @@
 /* as polished metal catching light rather than a flashing animation.   */
 /* ------------------------------------------------------------------ */
 .pts-official-gold {
+  /* The badge owns its premium treatment; standard verification is untouched. */
   border-radius: 999px;
+  isolation: isolate;
+}
+
+.pts-official-gold::before {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  z-index: -1;
+  border-radius: inherit;
+  background: conic-gradient(
+    from 0deg,
+    rgba(212, 175, 55, 0.18),
+    rgba(249, 231, 160, 0.9),
+    rgba(212, 175, 55, 0.18) 34%,
+    rgba(138, 109, 31, 0.2) 62%,
+    rgba(249, 231, 160, 0.78),
+    rgba(212, 175, 55, 0.18)
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  padding: 1px;
+  opacity: 0.82;
+  animation: pts-gold-ring 5600ms linear infinite;
+}
+
+@keyframes pts-gold-ring {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .pts-gold-shimmer {
@@ -393,8 +425,16 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .pts-official-gold::before,
   .pts-gold-shimmer {
     animation: none !important;
+  }
+
+  .pts-official-gold::before {
+    opacity: 0.58;
+  }
+
+  .pts-gold-shimmer {
     opacity: 0 !important;
   }
 }

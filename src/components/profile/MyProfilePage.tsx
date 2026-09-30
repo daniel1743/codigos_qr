@@ -14,6 +14,7 @@ import { PerformancePanel } from "../home/PerformancePanel";
 import { QuickDestinations } from "../home/QuickDestinations";
 import { editRouteSearch } from "../home/editRouteSearch";
 import { useHomeAnalytics } from "../home/useHomeAnalytics";
+import { useAdminStatus } from "../../lib/use-admin-status";
 
 type UserProfile = {
   email: string;
@@ -62,7 +63,9 @@ export function MyProfilePage() {
   const [stats, setStats] = useState({ totalScans: 0, totalLinks: 0 });
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
-  const [copied, setCopied] = useState(false);  useEffect(() => {
+  const [copied, setCopied] = useState(false);
+  const { isAdmin } = useAdminStatus();
+  useEffect(() => {
     let active = true;
     void (async () => {
       try {
@@ -167,7 +170,7 @@ export function MyProfilePage() {
   const visits30d = analytics.status === "ready" && summary ? summary.visits : null;
 
   const createPage = async () => {
-    if (!user || creating) return;
+    if (!isAdmin || !user || creating) return;
     setCreating(true);
     try {
       const ensuredProfile = await profileService.ensurePrimaryProfileForUser(supabase, {
@@ -227,6 +230,7 @@ export function MyProfilePage() {
         visits30d={visits30d}
         onCreate={() => void createPage()}
         creating={creating}
+        canCreatePage={isAdmin}
       />
 
       <div className="mt-8 grid gap-5 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,0.7fr)] xl:items-start">
@@ -248,7 +252,7 @@ export function MyProfilePage() {
               copied={copied}
             />
           ) : (
-            <NoPageCard onCreate={() => void createPage()} creating={creating} />
+            <NoPageCard onCreate={() => void createPage()} creating={creating} canCreatePage={isAdmin} />
           )}
 
           <PerformancePanel
@@ -264,7 +268,7 @@ export function MyProfilePage() {
 
         <div className="flex min-w-0 flex-col gap-5">
           <ActivityPanel analyticsPageId={canonicalPage?.id ?? null} />
-          <QuickDestinations pageId={canonicalPage?.id ?? null} />
+          <QuickDestinations pageId={canonicalPage?.id ?? null} canCreatePage={isAdmin} />
         </div>
       </div>
     </div>
