@@ -25,6 +25,7 @@ export function EditableImage({ id, src, alt, label = 'Imagen', className, style
   const photoStyle = mediaPhotoStyle(p);
   const shapeStyle = mediaShapeStyle(p['shape'] ?? defaultProps.shape);
   const fit = (p['fit'] ?? defaultProps.fit) === 'contain' ? 'contain' : 'cover';
+  const isLocked = p['locked'] === 'true';
   return (
     <Editable
       id={id}
@@ -37,8 +38,8 @@ export function EditableImage({ id, src, alt, label = 'Imagen', className, style
         src={p['src'] ?? src}
         alt={p['alt'] ?? alt}
         draggable={false}
-        {...crop.handlers}
-        className="absolute inset-0 h-full w-full touch-none transition-transform duration-200 ease-out"
+        {...(isLocked ? {} : crop.handlers)}
+        className={cx("absolute inset-0 h-full w-full transition-transform duration-200 ease-out", !isLocked && "touch-none")}
         style={{ ...(p['cropX'] || p['cropY'] ? { ...photoStyle, objectPosition: crop.objectPosition } : photoStyle), objectFit: fit }} />
 
       {overlay && <div aria-hidden data-media-overlay={p['overlay']} style={overlay} />}

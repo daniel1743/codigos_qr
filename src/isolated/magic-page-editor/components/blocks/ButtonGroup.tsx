@@ -13,6 +13,7 @@ interface ButtonGroupProps {
   maxWidth?: number;
   className?: string;
   mobile?: boolean;
+  semanticContext?: string;
 }
 
 /** Per-size rhythm of the collection. Each size must be visibly different. */
@@ -31,7 +32,7 @@ const PRIMARY_STYLE: React.CSSProperties = {
 };
 
 /** Shared link/button collection. Legacy links.N are adapted without being rewritten. */
-export function ButtonGroup({ blockKey, seeds, variants, maxWidth = 640, className, mobile = false }: ButtonGroupProps) {
+export function ButtonGroup({ blockKey, seeds, variants, maxWidth = 640, className, mobile = false, semanticContext = '' }: ButtonGroupProps) {
   const { doc } = useEditor();
   const group = readButtonGroup(doc, blockKey, seeds);
   const groupVariant = group.groupProps['groupCardCtaVariant'] ?? 'soft';
@@ -66,15 +67,22 @@ export function ButtonGroup({ blockKey, seeds, variants, maxWidth = 640, classNa
     <div className={cx('mx-auto flex w-full flex-col', gap, align, className)} style={{ maxWidth }} data-button-group={blockKey} data-button-group-canonical={group.canonical ? 'true' : 'false'}>
       {group.items.map((item) => {
         const explicitIcon = normalizeButtonIcon(item.icon);
-        const iconId = explicitIcon === 'none' ? undefined : explicitIcon ?? suggestButtonIcon(item.href, item.label);
+        const iconId = explicitIcon === 'none' ? undefined : explicitIcon ?? suggestButtonIcon(item.href, item.label, `${item.sub ?? ''} ${semanticContext}`);
         const Icon = iconId ? iconForId(iconId) : null;
         const iconPosition = item.iconPosition ?? groupIconPosition;
         const showIcon = !!Icon && iconPosition !== 'none';
         /* Removing the icon must actually remove it: no implicit arrow afterwards. */
         const showArrow = explicitIcon !== 'none';
-        const leading = showIcon && iconPosition === 'left' ? <Icon className="h-5 w-5 shrink-0" strokeWidth={1.6} /> : undefined;
+        const iconBubble = (content: React.ReactNode) => (
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-current/30 bg-black/5 shadow-[inset_0_0_0_1px_rgb(255_255_255_/_8%)]">
+            {content}
+          </span>
+        );
+        const leading = showIcon && iconPosition === 'left'
+          ? iconBubble(<Icon className="h-5 w-5" strokeWidth={1.6} />)
+          : undefined;
         const trailing = showIcon && iconPosition === 'right'
-          ? <Icon className="h-5 w-5 shrink-0" strokeWidth={1.6} />
+          ? iconBubble(<Icon className="h-5 w-5" strokeWidth={1.6} />)
           : showArrow ? <ArrowRightIcon className="h-5 w-5 shrink-0 opacity-70" strokeWidth={1.6} /> : undefined;
         const primary = item.isPrimary === 'on';
         const identity = buttonIdentity(group, item.stableId);

@@ -69,6 +69,7 @@ export function EditableAvatar({
   const crop = useFreeImagePan(id, p['cropX'], p['cropY']);
   const w = size + ring * 2;
   const h = (shape === 'arch' ? Math.round(size * 1.25) : size) + ring * 2;
+  const isLocked = p['locked'] === 'true';
 
   return (
     <Editable

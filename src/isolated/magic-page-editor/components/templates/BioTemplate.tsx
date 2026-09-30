@@ -92,7 +92,15 @@ export function BioTemplate() {
       }
       case 'links': {
         return <Block key={b.key} block={b} defaultSpacing="S" label={buttonGroupIdentity(readButtonGroup(doc, b.key, bioLinks).items.length)}>
-            <ButtonGroup blockKey={b.key} seeds={bioLinks} variants={cta} maxWidth={colStyle.maxWidth as number} mobile={m} className={cx(col, 'items-stretch')} />
+            <ButtonGroup
+              blockKey={b.key}
+              seeds={bioLinks}
+              variants={cta}
+              maxWidth={colStyle.maxWidth as number}
+              mobile={m}
+              semanticContext={doc.texts[`${p}hero.role`] ?? bioProfile.role}
+              className={cx(col, 'items-stretch')}
+            />
           </Block>;
       }
       case 'collection':

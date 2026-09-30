@@ -116,8 +116,29 @@ export function canonicalScope(blockKey: string, stableId: string) {
   return itemScope(blockKey, stableId);
 }
 
-export function suggestButtonIcon(href: string, label: string): string | undefined {
-  const value = `${href} ${label}`.toLowerCase();
+function normalizeIconSearchText(value: string): string {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+}
+
+function hasSemanticKeyword(value: string, keywords: readonly string[]): boolean {
+  return keywords.some((keyword) => {
+    const normalized = normalizeIconSearchText(keyword);
+    return normalized.includes(' ')
+      ? value.includes(normalized)
+      : new RegExp(`(^|[^a-z0-9])${normalized}([^a-z0-9]|$)`).test(value);
+  });
+}
+
+/**
+ * Suggests a visual icon without persisting or overriding a manual choice.
+ * `context` is intentionally optional so legacy callers remain unchanged;
+ * templates can pass a profession/role when it is available.
+ */
+export function suggestButtonIcon(href: string, label: string, context = ''): string | undefined {
+  const value = normalizeIconSearchText(`${href} ${label} ${context}`);
   
   // Redes
   if (value.includes('wa.me') || value.includes('whatsapp')) return 'whatsapp';
@@ -130,15 +151,24 @@ export function suggestButtonIcon(href: string, label: string): string | undefin
   if (value.includes('mailto:') || value.includes('correo') || value.includes('email')) return 'mail';
   if (value.includes('tel:') || value.includes('llamar') || value.includes('teléfono') || value.includes('telefono')) return 'phone';
   if (value.includes('escribir') || value.includes('escríbe') || value.includes('escribe')) return 'write';
-  if (value.includes('carpintería') || value.includes('carpinteria') || value.includes('madera')) return 'carpentry';
-  if (value.includes('servicio') || value.includes('reparación') || value.includes('reparacion')) return 'services';
+  if (hasSemanticKeyword(value, ['carpintería', 'madera', 'ebanista'])) return 'carpentry';
+  if (hasSemanticKeyword(value, ['albañil', 'construcción', 'obra', 'obrero', 'fontanero', 'plomero', 'pintor', 'reformas', 'servicio', 'reparación'])) return 'services';
+  if (hasSemanticKeyword(value, ['casa', 'hogar', 'vivienda', 'interiorismo', 'arquitectura'])) return 'home';
+  if (hasSemanticKeyword(value, ['arquitecto', 'ingeniero', 'abogado', 'asesor', 'consultor', 'contador', 'empresa', 'negocio'])) return 'business';
+  if (hasSemanticKeyword(value, ['fotógrafo', 'fotógrafa', 'fotografía', 'fotógrafo', 'cámara', 'video', 'vídeo'])) return 'camera';
+  if (hasSemanticKeyword(value, ['médico', 'doctor', 'enfermero', 'clínica', 'salud', 'dentista', 'nutricionista'])) return 'health';
+  if (hasSemanticKeyword(value, ['profesor', 'maestro', 'docente', 'curso', 'clase', 'academia'])) return 'book';
+  if (hasSemanticKeyword(value, ['chef', 'cocinero', 'restaurante', 'panadero', 'repostería', 'comida'])) return 'food';
+  if (hasSemanticKeyword(value, ['veterinario', 'mascota', 'perro', 'gato'])) return 'pets';
+  if (hasSemanticKeyword(value, ['peluquería', 'estética', 'belleza', 'manicura', 'spa'])) return 'sparkles';
+  if (hasSemanticKeyword(value, ['viajes', 'turismo', 'hotel', 'guía', 'rutas'])) return 'location';
+  if (hasSemanticKeyword(value, ['tienda', 'venta', 'productos', 'ropa', 'comercio'])) return 'shopping';
   
   // Ubicación, Citas & Acción
   if (value.includes('maps.google') || value.includes('google.com/maps') || value.includes('ubicación') || value.includes('ubicacion') || value.includes('dirección') || value.includes('direccion')) return 'location';
   if (value.includes('reservar') || value.includes('reserva') || value.includes('agenda') || value.includes('booking')) return 'calendar';
   if (value.includes('visitar') || value.includes('ver ') || value.includes('conoce')) return 'eye';
   if (value.includes('http') && !value.includes('wa.me') && !value.includes('instagram') && !value.includes('facebook') && !value.includes('youtube') && !value.includes('tiktok')) return 'external';
-  
   return undefined;
 }
 

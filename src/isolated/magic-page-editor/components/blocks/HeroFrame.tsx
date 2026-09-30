@@ -80,6 +80,7 @@ export function HeroFrame({
   const inset = m ? 12 : 20;
   const src = p['src'] ?? media;
   const crop = useFreeImagePan(id, p['cropX'], p['cropY']);
+  const isLocked = p['locked'] === 'true';
   const data = { 'data-hero': variant, 'data-shape': shape };
   const overlayOpacity = { none: 0, soft: 0.16, medium: 0.32, intense: 0.52 }[p['overlay'] ?? 'none'] ?? 0;
   const overlay = overlayOpacity > 0 ? <span className="pointer-events-none absolute inset-0 z-[1]" style={{ background: p['overlayColor'] ?? '#111318', opacity: overlayOpacity }} /> : null;

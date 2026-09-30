@@ -35,6 +35,17 @@ describe('canonical ButtonGroup contract', () => {
     expect(suggestButtonIcon('https://example.com', 'Reserva')).toBe('calendar');
   });
 
+  it('suggests profession and semantic icons in Spanish, including accented words', () => {
+    expect(suggestButtonIcon('https://example.com', 'Solicita presupuesto', 'Albañil')).toBe('services');
+    expect(suggestButtonIcon('https://example.com', 'Consulta', 'Médica nutricionista')).toBe('health');
+    expect(suggestButtonIcon('https://example.com', 'Portfolio', 'Fotógrafa')).toBe('camera');
+    expect(suggestButtonIcon('https://example.com', 'Reserva', 'Chef y repostería')).toBe('food');
+  });
+
+  it('keeps destination recognition ahead of profession context', () => {
+    expect(suggestButtonIcon('https://wa.me/1', 'WhatsApp', 'Albañil')).toBe('whatsapp');
+  });
+
   it('keeps primary identity independent from array position', () => {
     const state = createInitialMagicEditorState('bio');
     state.doc.props['block:links'] = { buttonGroupOrder: 'btn_a,btn_b' };
