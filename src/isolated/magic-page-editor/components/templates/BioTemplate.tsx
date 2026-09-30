@@ -24,7 +24,8 @@ import { BlockRef } from "../../types/editor";
 export function BioTemplate() {
   const {
     doc,
-    isMobile: m
+    isMobile: m,
+    mode
   } = useEditor();
   const t = useThemeTokens();
   const footerTone = useFooterTone();
@@ -159,8 +160,30 @@ export function BioTemplate() {
         <Editable id="footer" kind="section" label="Pie de página" as="footer" className="px-6 pb-12 pt-8 text-center" style={footerTone}>
           <EditableText id="footer.name" value="Marina Solé" label="Nombre" className="cq-fg text-[24px]" style={display} />
           <EditableText id="footer.note" value="Hecho con calma · Barcelona, 2026" label="Nota" className="cq-muted mt-1 text-[12.5px]" />
-          <EditableText id="footer.brand" value="Hecho con Cripqer" label="Marca" className="cq-muted mt-6 text-[11px] font-medium uppercase tracking-[0.14em]" />
         </Editable>
+        <div
+          data-system-branding="cripqer"
+          className="flex items-center justify-center gap-2 px-6 pb-12 pt-1 text-[10px] font-medium uppercase tracking-[0.16em] text-[color:var(--fg)] opacity-60"
+          style={footerTone}
+        >
+          <a
+            href="/"
+            aria-label="Visita Cripqer"
+            title="Visita Cripqer"
+            onClick={(event) => {
+              if (mode === "edit") event.preventDefault();
+            }}
+            className="inline-flex items-center gap-2 rounded-full px-2 py-1 transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--accent)]"
+          >
+            <img
+              src="/brand-assets/cripqer-mark.png"
+              alt=""
+              aria-hidden="true"
+              className="h-4 w-4 object-contain"
+            />
+            <span>Visita Cripqer</span>
+          </a>
+        </div>
       </div>
     </PageRoot>;
 }

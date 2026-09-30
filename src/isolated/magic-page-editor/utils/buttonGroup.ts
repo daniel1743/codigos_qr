@@ -118,13 +118,27 @@ export function canonicalScope(blockKey: string, stableId: string) {
 
 export function suggestButtonIcon(href: string, label: string): string | undefined {
   const value = `${href} ${label}`.toLowerCase();
+  
+  // Redes
   if (value.includes('wa.me') || value.includes('whatsapp')) return 'whatsapp';
-  if (value.includes('mailto:') || value.includes('correo') || value.includes('email')) return 'mail';
   if (value.includes('instagram') || (value.includes('@') && !value.includes('.com'))) return 'instagram';
+  if (value.includes('facebook') || value.includes(' fb') || value.includes('fb.com')) return 'facebook';
+  if (value.includes('tiktok') || value.includes('tik tok')) return 'tiktok';
   if (value.includes('youtube') || value.includes('youtu.be')) return 'youtube';
-  if (value.includes('tel:') || value.includes('llamar') || value.includes('teléfono')) return 'phone';
-  if (value.includes('maps.google') || value.includes('google.com/maps') || value.includes('ubicación') || value.includes('dirección')) return 'location';
+  
+  // Contacto & Servicios
+  if (value.includes('mailto:') || value.includes('correo') || value.includes('email')) return 'mail';
+  if (value.includes('tel:') || value.includes('llamar') || value.includes('teléfono') || value.includes('telefono')) return 'phone';
+  if (value.includes('escribir') || value.includes('escríbe') || value.includes('escribe')) return 'write';
+  if (value.includes('carpintería') || value.includes('carpinteria') || value.includes('madera')) return 'carpentry';
+  if (value.includes('servicio') || value.includes('reparación') || value.includes('reparacion')) return 'services';
+  
+  // Ubicación, Citas & Acción
+  if (value.includes('maps.google') || value.includes('google.com/maps') || value.includes('ubicación') || value.includes('ubicacion') || value.includes('dirección') || value.includes('direccion')) return 'location';
   if (value.includes('reservar') || value.includes('reserva') || value.includes('agenda') || value.includes('booking')) return 'calendar';
+  if (value.includes('visitar') || value.includes('ver ') || value.includes('conoce')) return 'eye';
+  if (value.includes('http') && !value.includes('wa.me') && !value.includes('instagram') && !value.includes('facebook') && !value.includes('youtube') && !value.includes('tiktok')) return 'external';
+  
   return undefined;
 }
 
