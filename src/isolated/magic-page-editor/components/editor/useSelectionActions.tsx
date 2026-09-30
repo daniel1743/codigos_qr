@@ -704,7 +704,7 @@ export function useSelectionActions(): EditorAction[] {
         label: 'Paleta',
         icon: PaletteIcon,
         showLabel: true,
-        panel: <PalettePicker value={ed.doc.props['page']?.['palette']} onChange={(v) => ed.setProp('page', 'palette', v)} />
+        panel: <PalettePicker value={ed.doc.props['page']?.['palette']} onChange={(v) => ed.setProp('page', 'palette', v)} textColor={ed.doc.props['page']?.['textColor']} onTextColorChange={(v) => ed.setProp('page', 'textColor', v || '')} swatches={t.swatches} />
       },
       {
         key: 'decorations',

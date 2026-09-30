@@ -9,11 +9,15 @@ export function useThemeTokens(): ThemeTokens {
   const page = doc.props.page ?? {};
   const palette = page.palette ? visualPaletteById[page.palette] : undefined;
   const tone = base.tones.find((t) => t.id === page.bg) ?? base.tones[0];
+  let pageTone = palette?.page ?? tone;
+  if (page.textColor) {
+    pageTone = { ...pageTone, fg: page.textColor };
+  }
   const font = base.fonts.find((f) => f.id === page.font) ?? base.fonts[0];
   return {
     ...base,
     ...(palette ? { accent: palette.accent, accentFg: palette.accentFg, swatches: palette.swatches } : {}),
-    page: palette?.page ?? tone,
+    page: pageTone,
     radius: palette?.radius ?? base.radius,
     displayFont: font.display,
     bodyFont: font.body
