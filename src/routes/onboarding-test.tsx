@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, notFound } from "@tanstack/react-router";
 import { OnboardingTestProfileGate } from "../components/onboarding-v2";
 
 /**
@@ -8,6 +8,9 @@ import { OnboardingTestProfileGate } from "../components/onboarding-v2";
  * `/onboarding-preview`; it owns no state, generation or persistence logic.
  */
 export const Route = createFileRoute("/onboarding-test")({
+  beforeLoad: () => {
+    if (!import.meta.env.DEV) throw notFound();
+  },
   validateSearch: (search: Record<string, unknown>) => ({
     profileId: typeof search["profileId"] === "string" ? search["profileId"] : undefined,
   }),

@@ -14,7 +14,7 @@
  *   8. oversized metadata -> bounded (left() truncation) on readback
  *   9. qr_scan source is forced to 'qr' (never trusted from the browser)
  *  10. aggregate views (qr_analytics_daily / qr_top_links) honor RLS for anon
- *  11. legacy write RPC track_page_view still works (compatibility, hardened)
+ *  11. legacy public write RPCs are denied after their public access is retired
  *
  * It NEVER touches production and refuses unless QA_PROJECT_REF matches.
  */
@@ -188,22 +188,31 @@ async function main() {
     .limit(1);
   results.anonTopLinksReadDenied = Boolean(anonTopLinksErr) || (anonTopLinks ?? []).length === 0;
 
-  // ---- 11) legacy write RPC compatibility: track_page_view still works. ----
+  // ---- 11) legacy public write RPCs must be denied. ----
   const { data: pageProfileRows } = await service
     .from("pages")
     .select("profile_id")
     .eq("id", pageId)
     .limit(1);
   const pageProfileId = pageProfileRows?.[0]?.profile_id;
-  const legacyViewSession = `${PREFIX}-legacy-view`;
   const legacyView = pageProfileId
     ? await anon.rpc("track_page_view", {
         p_profile_id: pageProfileId,
-        p_session_id: legacyViewSession,
+        p_session_id: `${PREFIX}-legacy-view-denied`,
         p_device_type: "unknown",
       })
     : { data: null, error: { message: "no profile resolved" } };
-  results.legacyTrackPageViewAccepted = Boolean(legacyView.data) && !legacyView.error;
+  results.legacyTrackPageViewDenied = Boolean(legacyView.error);
+
+  const legacyClick = pageProfileId
+    ? await anon.rpc("track_link_click", {
+        p_profile_id: pageProfileId,
+        p_link_id: "00000000-0000-0000-0000-000000000000",
+        p_session_id: `${PREFIX}-legacy-click-denied`,
+        p_device_type: "unknown",
+      })
+    : { data: null, error: { message: "no profile resolved" } };
+  results.legacyTrackLinkClickDenied = Boolean(legacyClick.error);
 
   // ---- Cleanup: remove only this run's synthetic rows. ----
   const { error: cleanupErr } = await service
@@ -224,7 +233,8 @@ async function main() {
     results.qrScanSourceForcedToQr &&
     results.anonDailyReadDenied &&
     results.anonTopLinksReadDenied &&
-    results.legacyTrackPageViewAccepted;
+    results.legacyTrackPageViewDenied &&
+    results.legacyTrackLinkClickDenied;
 
   results.verdict = pass ? "C2B5_SECURITY_BOUNDARY_PASS" : "C2B5_SECURITY_BOUNDARY_FAIL";
 

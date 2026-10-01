@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { TemplateLabEditor } from "../components/template-lab/TemplateLabEditor";
+import { ProtectedRoute } from "../components/route-guards/ProtectedRoute";
 
 /**
  * /template-lab — development/review route for the Basic Template Lab.
@@ -11,5 +12,9 @@ export const Route = createFileRoute("/template-lab")({
 });
 
 function TemplateLabPage() {
-  return <TemplateLabEditor />;
+  return (
+    <ProtectedRoute access="admin">
+      <TemplateLabEditor />
+    </ProtectedRoute>
+  );
 }

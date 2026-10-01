@@ -20,7 +20,7 @@ type BrowserRequest = {
 };
 
 function loadEnvFile(): Record<string, string> {
-  const envPath = resolve(process.cwd(), ".env.local");
+  const envPath = resolve(process.cwd(), ".env.qa");
   try {
     return Object.fromEntries(
       readFileSync(envPath, "utf8")
@@ -36,6 +36,11 @@ function loadEnvFile(): Record<string, string> {
 
 function env(name: string): string | undefined {
   return process.env[name] || loadEnvFile()[name];
+}
+
+const configuredSupabaseUrl = env("VITE_SUPABASE_URL") ?? "";
+if (!configuredSupabaseUrl.includes("tjigzcyoogmvdkivypym.supabase.co")) {
+  throw new Error("HARD FAIL: Playwright persistence suite requires the QA Supabase project.");
 }
 
 function clone<T>(value: T): T {

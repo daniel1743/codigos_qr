@@ -13,6 +13,7 @@ import {
   Undo2Icon } from
 'lucide-react';
 import { useEditor } from '../../contexts/EditorContext';
+import Logo from '../../../../components/brand/Logo';
 import { cardFamilies } from '../../data/cardFamilies';
 import { accessForIndex, isVariantLocked, miniGalleryVariants, pageFamilyVariants, templates } from '../../data/templates';
 import { cx } from '../../utils/cx';
@@ -165,9 +166,13 @@ export function TopBar() {
   return (
     <header className="relative z-50 flex min-h-14 shrink-0 flex-wrap items-center gap-2 border-b border-line bg-white px-3 py-2 md:h-14 md:flex-nowrap md:py-0 lg:gap-3 lg:px-4">
       <div className="flex min-w-0 items-center gap-3">
-        <div className="grid h-8 w-8 shrink-0 place-items-center rounded-[9px] bg-ink text-[15px] font-bold text-white" aria-label="Cripqer">
-          C
-        </div>
+        <Logo
+          variant="symbol"
+          width={32}
+          height={32}
+          title="Cripqer"
+          className="shrink-0"
+        />
         <div className="hidden min-w-0 2xl:block">
           <p className="text-[13px] font-semibold leading-tight text-ink">Cripqer</p>
           <p className="truncate text-[11.5px] leading-tight text-mute">cripqer.com/{meta.slug}</p>

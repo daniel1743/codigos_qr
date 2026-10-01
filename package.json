@@ -4,9 +4,9 @@
   "sideEffects": false,
   "type": "module",
   "scripts": {
-    "dev": "vite dev --force",
+    "dev": "node scripts/dev-qa.mjs",
     "build": "vite build",
-    "build:dev": "vite build --mode development",
+    "build:dev": "node scripts/build-qa.mjs",
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write ."

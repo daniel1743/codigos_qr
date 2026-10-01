@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PremiumOnboardingFlow } from "../components/onboarding-v2";
+import { ProtectedRoute } from "../components/route-guards/ProtectedRoute";
 
 /**
  * Internal-only QA seam for the approved premium onboarding pack.
@@ -22,5 +23,9 @@ export const Route = createFileRoute("/onboarding-preview")({
 
 function OnboardingPreviewPage() {
   const { profileId } = Route.useSearch();
-  return <PremiumOnboardingFlow profileId={profileId ?? null} />;
+  return (
+    <ProtectedRoute access="authenticated">
+      <PremiumOnboardingFlow profileId={profileId ?? null} />
+    </ProtectedRoute>
+  );
 }

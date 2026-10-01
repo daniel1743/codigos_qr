@@ -15,7 +15,7 @@ const LIVE_QA_ENABLED = process.env.RUN_ONBOARDING_V2_LIVE_QA === "true";
 function loadEnvFile(): Record<string, string> {
   try {
     return Object.fromEntries(
-      readFileSync(resolve(process.cwd(), ".env.local"), "utf8")
+      readFileSync(resolve(process.cwd(), ".env.qa"), "utf8")
         .split(/\r?\n/)
         .map((line) => line.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)=(.*)\s*$/))
         .filter((match): match is RegExpMatchArray => Boolean(match))
@@ -28,6 +28,11 @@ function loadEnvFile(): Record<string, string> {
 
 function env(name: string): string | undefined {
   return process.env[name] || loadEnvFile()[name];
+}
+
+const liveQaUrl = env("VITE_SUPABASE_URL") ?? "";
+if (!liveQaUrl.includes("tjigzcyoogmvdkivypym.supabase.co")) {
+  throw new Error("HARD FAIL: live onboarding test requires the QA Supabase project.");
 }
 
 describe.skipIf(!LIVE_QA_ENABLED)("Onboarding V2 live canonical persistence QA", () => {

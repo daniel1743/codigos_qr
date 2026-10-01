@@ -1,12 +1,18 @@
 import { createClient } from "@supabase/supabase-js";
 import * as dotenv from "dotenv";
-dotenv.config({ path: ".env.local" });
+dotenv.config({ path: ".env.qa" });
+
+if (process.env.QA_PROJECT_REF !== "tjigzcyoogmvdkivypym") {
+  throw new Error(
+    `HARD FAIL: expected QA project tjigzcyoogmvdkivypym, got "${process.env.QA_PROJECT_REF ?? "missing"}".`,
+  );
+}
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseUrl || !serviceRoleKey) {
-  throw new Error("Missing Supabase credentials in .env.local");
+  throw new Error("Missing QA Supabase credentials in .env.qa");
 }
 
 const supabase = createClient(supabaseUrl, serviceRoleKey);

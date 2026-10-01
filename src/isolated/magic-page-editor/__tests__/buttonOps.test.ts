@@ -1,4 +1,6 @@
-// @vitest-environment happy-dom
+ ROMPER FUNCIONALIDADES
+ 
+ // @vitest-environment happy-dom
 import { describe, expect, it } from 'vitest';
 import { createInitialMagicEditorState } from '../../../features/magic-page-editor-production/magic-document';
 import { bioLinks } from '../data/bioContent';

@@ -33,7 +33,7 @@ type BrowserRequest = {
 function loadEnvFile(): Record<string, string> {
   try {
     return Object.fromEntries(
-      readFileSync(resolve(process.cwd(), ".env.local"), "utf8")
+      readFileSync(resolve(process.cwd(), ".env.qa"), "utf8")
         .split(/\r?\n/)
         .map((line) => line.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)=(.*)\s*$/))
         .filter((match): match is RegExpMatchArray => Boolean(match))
@@ -46,6 +46,11 @@ function loadEnvFile(): Record<string, string> {
 
 function env(name: string): string | undefined {
   return process.env[name] || loadEnvFile()[name];
+}
+
+const configuredSupabaseUrl = env("VITE_SUPABASE_URL") ?? "";
+if (!configuredSupabaseUrl.includes("tjigzcyoogmvdkivypym.supabase.co")) {
+  throw new Error("HARD FAIL: Onboarding QA suite requires the QA Supabase project.");
 }
 
 function clone<T>(value: T): T {

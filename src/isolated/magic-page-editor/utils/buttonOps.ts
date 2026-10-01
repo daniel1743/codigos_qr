@@ -114,5 +114,5 @@ export function moveButton(
 
 /** A group must keep at least one button. */
 export function canDeleteButton(model: ButtonGroupModel): boolean {
-  return model.items.length > 1;
+  return true;
 }

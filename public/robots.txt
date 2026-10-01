@@ -7,7 +7,13 @@ Disallow: /power-editor
 Disallow: /engine-lab
 Disallow: /template-lab
 Disallow: /onboarding-preview
-Disallow: /internal.power-editor
+Disallow: /onboarding-test
+Disallow: /internal/power-editor
+Disallow: /labs/magic-editor
+Disallow: /pages/*/edit-prototype
+Disallow: /pages/*/fuxion-demo
+Disallow: /power-editor-phase4-qa
+Disallow: /analytics-visual-qa
 
 # Permitir assets estáticos
 Allow: /brand-assets/

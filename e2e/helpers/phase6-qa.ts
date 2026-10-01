@@ -13,7 +13,7 @@ export type QaSnapshot = { profile: QaRecord; links: QaRecord[] };
 export function qaEnv(name: string): string {
   const value =
     process.env[name] ||
-    readFileSync(resolve(".env.local"), "utf8")
+    readFileSync(resolve(".env.qa"), "utf8")
       .split(/\r?\n/)
       .find((line) => line.startsWith(`${name}=`))
       ?.slice(name.length + 1)
@@ -21,6 +21,11 @@ export function qaEnv(name: string): string {
       .replace(/^['"]|['"]$/g, "");
   if (!value) throw new Error(`BLOCKED: missing QA variable ${name}`);
   return value;
+}
+
+const qaSupabaseUrl = qaEnv("VITE_SUPABASE_URL");
+if (!qaSupabaseUrl.includes("tjigzcyoogmvdkivypym.supabase.co")) {
+  throw new Error(`HARD FAIL: Playwright QA helper resolved non-QA Supabase URL.`);
 }
 
 export async function qaRequest(

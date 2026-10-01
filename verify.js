@@ -1,8 +1,8 @@
 import { createClient } from "@supabase/supabase-js";
 import fs from "fs";
 
-// Parse .env.local
-const envContent = fs.readFileSync(".env.local", "utf-8");
+// QA-only verification. Production is never a valid target for this helper.
+const envContent = fs.readFileSync(".env.qa", "utf-8");
 const env = {};
 envContent.split("\n").forEach((line) => {
   const [key, ...rest] = line.split("=");
@@ -14,11 +14,14 @@ envContent.split("\n").forEach((line) => {
 const url = env["VITE_SUPABASE_URL"];
 const key = env["VITE_SUPABASE_ANON_KEY"];
 
-console.log("URL:", url);
-console.log("KEY:", key.substring(0, 10) + "...");
+const ref = url?.match(/^https?:\/\/([a-z0-9]{20})\.supabase\.co\/?$/i)?.[1];
+if (env["QA_PROJECT_REF"] !== "tjigzcyoogmvdkivypym" || ref !== "tjigzcyoogmvdkivypym") {
+  console.error("HARD FAIL: verify.js requires the QA Supabase project.");
+  process.exit(1);
+}
 
 if (!url || !key) {
-  console.error("Faltan variables en .env.local");
+  console.error("Faltan variables en .env.qa");
   process.exit(1);
 }
 

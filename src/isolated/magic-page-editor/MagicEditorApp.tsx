@@ -6,6 +6,8 @@ import type { MagicEditorStateV1 } from "../../features/magic-page-editor-produc
 import type { EditorMode } from "./types/editor";
 import type { BioTemplateConfig } from "../../premium-template-studio/types";
 import { CanonicalReadOnlyPage } from "./pages/CanonicalReadOnlyPage";
+import type { PageDoc, TemplateId } from "./types/editor";
+import type { CatalogConversionResult } from "../../features/magic-page-editor-production/catalog-conversion.service";
 
 export interface MagicEditorAppProps {
   defaultTemplate?: "bio" | "business" | "portfolio";
@@ -15,6 +17,11 @@ export interface MagicEditorAppProps {
   onDocumentChange?: (state: MagicEditorStateV1) => void;
   onPublish?: (state: MagicEditorStateV1) => Promise<void> | void;
   uploadAsset?: (file: File) => Promise<string>;
+  catalogConversion?: (
+    document: PageDoc,
+    templateId: TemplateId,
+    blockKey: string,
+  ) => Promise<CatalogConversionResult>;
   canonicalDocument?: BioTemplateConfig;
   canonicalIsNew?: boolean;
   onCanonicalDocumentChange?: (doc: BioTemplateConfig) => Promise<void> | void;
@@ -30,6 +37,7 @@ export function MagicEditorApp({
   onDocumentChange,
   onPublish,
   uploadAsset,
+  catalogConversion,
   canonicalDocument,
   canonicalIsNew = false,
   onCanonicalDocumentChange,
@@ -45,6 +53,7 @@ export function MagicEditorApp({
         onDocumentChange={onDocumentChange}
         onPublish={onPublish}
         uploadAsset={uploadAsset}
+        catalogConversion={catalogConversion}
         canonicalDocument={canonicalDocument}
         canonicalIsNew={canonicalIsNew}
         onCanonicalDocumentChange={onCanonicalDocumentChange}

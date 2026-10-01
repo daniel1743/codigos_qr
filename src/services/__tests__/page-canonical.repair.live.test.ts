@@ -28,7 +28,7 @@ const EXPECTED_REVISION_AFTER = 3;
 function loadEnvFile(): Record<string, string> {
   try {
     return Object.fromEntries(
-      readFileSync(resolve(process.cwd(), ".env.local"), "utf8")
+      readFileSync(resolve(process.cwd(), ".env.qa"), "utf8")
         .split(/\r?\n/)
         .map((line) => line.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)=(.*)\s*$/))
         .filter((m): m is RegExpMatchArray => Boolean(m))
@@ -41,6 +41,11 @@ function loadEnvFile(): Record<string, string> {
 
 function env(name: string): string | undefined {
   return process.env[name] || loadEnvFile()[name];
+}
+
+const liveQaUrl = env("VITE_SUPABASE_URL") ?? "";
+if (!liveQaUrl.includes("tjigzcyoogmvdkivypym.supabase.co")) {
+  throw new Error("HARD FAIL: live page repair test requires the QA Supabase project.");
 }
 
 describe.skipIf(!RUN_ENABLED)("PAGES_3B controlled yfLEdka repair", () => {

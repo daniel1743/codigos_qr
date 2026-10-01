@@ -156,10 +156,7 @@ export function ButtonRoster({ blockKey, seeds }: ButtonRosterProps) {
               </li>);
           })}
         </ul>
-        {total === 1 &&
-        <p className="mt-2 flex items-center gap-1.5 text-[11.5px] text-mute">
-            <CheckIcon className="h-3.5 w-3.5" /> Un grupo necesita al menos 1 botón.
-          </p>}
+        
       </PanelSection>
     </div>);
 }

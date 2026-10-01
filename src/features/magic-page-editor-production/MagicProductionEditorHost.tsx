@@ -5,6 +5,7 @@ import { serializeMagicEditorState, type MagicEditorStateV1 } from "./magic-docu
 import { createPageEditorSession, type PageEditorSession } from "./document-session";
 import { getBrowserSupabaseClient } from "../../lib/supabase/client";
 import { magicPageService } from "../../services/magic-page.service";
+import { convertEmbeddedCatalogToFullCatalog } from "./catalog-conversion.service";
 import { pageCanonicalService } from "../../services/page-canonical.service";
 import type { Page } from "../../types/database";
 import type { BioTemplateConfig } from "../../premium-template-studio/types";
@@ -182,7 +183,8 @@ export function MagicProductionEditorHost({ pageId }: { pageId: string }) {
         !page ||
         !session ||
         (editorSession?.kind !== "CANONICAL_V1" && editorSession?.kind !== "NULL")
-      ) return;
+      )
+        return;
       await pageCanonicalService.saveDraft(supabase, page.id, session.user.id, config);
     },
     [editorSession?.kind, page, session, supabase],
@@ -249,7 +251,8 @@ export function MagicProductionEditorHost({ pageId }: { pageId: string }) {
         !page ||
         !session ||
         (editorSession?.kind !== "CANONICAL_V1" && editorSession?.kind !== "NULL")
-      ) return;
+      )
+        return;
       if (pendingSave.current) await flushPendingCanonicalSave(config);
       else await saveCanonical(config);
       const published = await pageCanonicalService.publish(
@@ -262,7 +265,15 @@ export function MagicProductionEditorHost({ pageId }: { pageId: string }) {
       setRevision(published.published_revision);
       setPage(published);
     },
-    [editorSession?.kind, flushPendingCanonicalSave, page, revision, saveCanonical, session, supabase],
+    [
+      editorSession?.kind,
+      flushPendingCanonicalSave,
+      page,
+      revision,
+      saveCanonical,
+      session,
+      supabase,
+    ],
   );
 
   const uploadAsset = useCallback(
@@ -275,6 +286,34 @@ export function MagicProductionEditorHost({ pageId }: { pageId: string }) {
       });
       if (uploadError) throw uploadError;
       return supabase.storage.from(MEDIA_BUCKET).getPublicUrl(path).data.publicUrl;
+    },
+    [page, session, supabase],
+  );
+
+  const catalogConversion = useCallback(
+    async (
+      document: MagicEditorStateV1["doc"],
+      templateId: MagicEditorStateV1["templateId"],
+      blockKey: string,
+    ) => {
+      if (!page || !session)
+        throw new Error("La sesión no está disponible para convertir el catálogo.");
+      return convertEmbeddedCatalogToFullCatalog({
+        supabase,
+        userId: session.user.id,
+        profileId: page.profile_id,
+        landingPageTitle: page.title ?? "Mi catálogo",
+        document,
+        blockKey,
+        saveLanding: async (nextDocument) => {
+          await magicPageService.saveDraft(
+            supabase,
+            page.id,
+            session.user.id,
+            serializeMagicEditorState({ templateId, doc: nextDocument }),
+          );
+        },
+      });
     },
     [page, session, supabase],
   );
@@ -330,6 +369,7 @@ export function MagicProductionEditorHost({ pageId }: { pageId: string }) {
               onDocumentChange,
               onPublish,
               uploadAsset,
+              catalogConversion,
             }
           : {
               canonicalDocument: canonicalSession.config,

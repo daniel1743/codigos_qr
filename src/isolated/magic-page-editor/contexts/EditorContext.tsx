@@ -1,6 +1,6 @@
-import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { toast } from 'sonner';
-import { templates } from '../data/templates';
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+import { templates } from "../data/templates";
 import type {
   BlockType,
   Device,
@@ -10,15 +10,16 @@ import type {
   PageDoc,
   SheetState,
   TemplateId,
-  TextStyle } from
-'../types/editor';
-import type { MagicEditorStateV1 } from '../../../features/magic-page-editor-production/magic-document';
-import type { BioTemplateConfig } from '../../../premium-template-studio/types';
-import type { SemanticTarget } from '../types/semantic-selection';
-import { createCanonicalSemanticTarget } from '../adapters/canonical-adapter';
-import { createMagicSemanticTarget } from '../adapters/magic-adapter';
-import { applyCanonicalPatch } from '../adapters/canonical-patcher';
-import type { SemanticCommand } from '../types/semantic-commands';
+  TextStyle,
+} from "../types/editor";
+import type { MagicEditorStateV1 } from "../../../features/magic-page-editor-production/magic-document";
+import type { BioTemplateConfig } from "../../../premium-template-studio/types";
+import type { SemanticTarget } from "../types/semantic-selection";
+import { createCanonicalSemanticTarget } from "../adapters/canonical-adapter";
+import { createMagicSemanticTarget } from "../adapters/magic-adapter";
+import { applyCanonicalPatch } from "../adapters/canonical-patcher";
+import type { SemanticCommand } from "../types/semantic-commands";
+import type { CatalogConversionResult } from "../../../features/magic-page-editor-production/catalog-conversion.service";
 
 interface History {
   past: PageDoc[];
@@ -50,7 +51,7 @@ export interface EditorValue {
   isMobile: boolean;
   isSmallScreen: boolean;
   selection: ElementInfo | null;
-  select: (id: string, opts?: {reveal?: boolean;}) => void;
+  select: (id: string, opts?: { reveal?: boolean }) => void;
   clearSelection: () => void;
   editingId: string | null;
   setEditingId: Setter<string | null>;
@@ -67,7 +68,7 @@ export interface EditorValue {
   closePicker: () => void;
   settingsOpen: boolean;
   setSettingsOpen: Setter<boolean>;
-  saveState: 'saved' | 'saving' | 'error';
+  saveState: "saved" | "saving" | "error";
   canUndo: boolean;
   canRedo: boolean;
   undo: () => void;
@@ -77,6 +78,7 @@ export interface EditorValue {
   setProp: (id: string, key: string, value: string) => void;
   /** Low-level document patch used by structural controls (card ordering). */
   updateDoc: (fn: (doc: PageDoc) => PageDoc) => void;
+  replaceDocument: (doc: PageDoc) => void;
   removeElement: (id: string, label: string) => void;
   moveBlock: (key: string, dir: -1 | 1) => void;
   duplicateBlock: (key: string) => void;
@@ -90,6 +92,11 @@ export interface EditorValue {
   publishing: boolean;
   publish: () => void;
   uploadAsset?: (file: File) => Promise<string>;
+  catalogConversion?: (
+    document: PageDoc,
+    templateId: TemplateId,
+    blockKey: string,
+  ) => Promise<CatalogConversionResult>;
   canonicalDocument?: BioTemplateConfig;
   canonicalIsNew?: boolean;
   /** True while a canonical config is open in the common UI (semantic command boundary). */
@@ -105,7 +112,7 @@ function createDoc(id: TemplateId): PageDoc {
     texts: {},
     textStyles: {},
     props: {},
-    removed: {}
+    removed: {},
   };
 }
 
@@ -135,22 +142,54 @@ interface EditorProviderProps {
   onDocumentChange?: (state: MagicEditorStateV1) => Promise<void> | void;
   onPublish?: (state: MagicEditorStateV1) => Promise<void> | void;
   uploadAsset?: (file: File) => Promise<string>;
+  catalogConversion?: (
+    document: PageDoc,
+    templateId: TemplateId,
+    blockKey: string,
+  ) => Promise<CatalogConversionResult>;
   canonicalDocument?: BioTemplateConfig;
   canonicalIsNew?: boolean;
   onCanonicalDocumentChange?: (doc: BioTemplateConfig) => Promise<void> | void;
   onCanonicalPublish?: (doc: BioTemplateConfig) => Promise<void> | void;
 }
 
-export function EditorProvider({ children, initialTemplate = 'bio', initialDevice = 'desktop', initialDocument, initialMode = 'edit', onDocumentChange, onPublish, uploadAsset, canonicalDocument, canonicalIsNew, onCanonicalDocumentChange, onCanonicalPublish }: EditorProviderProps) {
-  const [templateId, setTemplateIdState] = useState<TemplateId>(initialDocument?.templateId ?? initialTemplate);
-  const [histories, setHistories] = useState<Record<TemplateId, History>>(() => ({
-    bio: initialDocument?.templateId === 'bio' ? { past: [], present: initialDocument.doc, future: [] } : createHistory('bio'),
-    business: initialDocument?.templateId === 'business' ? { past: [], present: initialDocument.doc, future: [] } : createHistory('business'),
-    portfolio: initialDocument?.templateId === 'portfolio' ? { past: [], present: initialDocument.doc, future: [] } : createHistory('portfolio')
-  }));
-  const [canonicalHistory, setCanonicalHistory] = useState<{past: BioTemplateConfig[], present: BioTemplateConfig, future: BioTemplateConfig[]} | null>(
-    canonicalDocument ? { past: [], present: canonicalDocument, future: [] } : null
+export function EditorProvider({
+  children,
+  initialTemplate = "bio",
+  initialDevice = "desktop",
+  initialDocument,
+  initialMode = "edit",
+  onDocumentChange,
+  onPublish,
+  uploadAsset,
+  catalogConversion,
+  canonicalDocument,
+  canonicalIsNew,
+  onCanonicalDocumentChange,
+  onCanonicalPublish,
+}: EditorProviderProps) {
+  const [templateId, setTemplateIdState] = useState<TemplateId>(
+    initialDocument?.templateId ?? initialTemplate,
   );
+  const [histories, setHistories] = useState<Record<TemplateId, History>>(() => ({
+    bio:
+      initialDocument?.templateId === "bio"
+        ? { past: [], present: initialDocument.doc, future: [] }
+        : createHistory("bio"),
+    business:
+      initialDocument?.templateId === "business"
+        ? { past: [], present: initialDocument.doc, future: [] }
+        : createHistory("business"),
+    portfolio:
+      initialDocument?.templateId === "portfolio"
+        ? { past: [], present: initialDocument.doc, future: [] }
+        : createHistory("portfolio"),
+  }));
+  const [canonicalHistory, setCanonicalHistory] = useState<{
+    past: BioTemplateConfig[];
+    present: BioTemplateConfig;
+    future: BioTemplateConfig[];
+  } | null>(canonicalDocument ? { past: [], present: canonicalDocument, future: [] } : null);
   const [mode, setModeState] = useState<EditorMode>(initialMode);
   const [device, setDeviceState] = useState<Device>(initialDevice);
   const [mobileWidth, setMobileWidth] = useState<MobileWidth>(390);
@@ -158,16 +197,16 @@ export function EditorProvider({ children, initialTemplate = 'bio', initialDevic
   const [selection, setSelection] = useState<ElementInfo | null>(null);
   const [editingId, setEditingIdState] = useState<string | null>(null);
   const [keyboard, setKeyboardState] = useState(false);
-  const [sheet, setSheet] = useState<SheetState>('compact');
+  const [sheet, setSheet] = useState<SheetState>("compact");
   const [sheetPanel, setSheetPanel] = useState<string | null>(null);
   const [moreOpen, setMoreOpen] = useState(false);
   const [picker, setPicker] = useState<PickerState>({ open: false });
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [saveState, setSaveState] = useState<'saved' | 'saving' | 'error'>('saved');
+  const [saveState, setSaveState] = useState<"saved" | "saving" | "error">("saved");
   const [publishing, setPublishing] = useState(false);
   const registry = useRef(new Map<string, RegisteredElement>());
 
-  const isMobile = device === 'mobile' || isSmallScreen;
+  const isMobile = device === "mobile" || isSmallScreen;
   const history = histories[templateId];
   const doc = history.present;
 
@@ -175,45 +214,51 @@ export function EditorProvider({ children, initialTemplate = 'bio', initialDevic
     if (canonicalHistory && onCanonicalDocumentChange) {
       const request = onCanonicalDocumentChange(canonicalHistory.present);
       if (!request) return;
-      setSaveState('saving');
+      setSaveState("saving");
       void Promise.resolve(request)
-        .then(() => setSaveState('saved'))
-        .catch(() => setSaveState('error'));
+        .then(() => setSaveState("saved"))
+        .catch(() => setSaveState("error"));
       return;
     }
 
     const request = onDocumentChange?.({ templateId, doc });
     if (!request) return;
 
-    setSaveState('saving');
+    setSaveState("saving");
     void Promise.resolve(request)
-      .then(() => setSaveState('saved'))
-      .catch(() => setSaveState('error'));
+      .then(() => setSaveState("saved"))
+      .catch(() => setSaveState("error"));
   }, [doc, onDocumentChange, templateId, canonicalHistory?.present, onCanonicalDocumentChange]);
 
   useEffect(() => {
-    const mq = window.matchMedia('(max-width: 767px)');
+    const mq = window.matchMedia("(max-width: 767px)");
     const update = () => setIsSmallScreen(mq.matches);
     update();
-    mq.addEventListener('change', update);
-    return () => mq.removeEventListener('change', update);
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
   }, []);
 
-  const setEditingId = useCallback<Setter<string | null>>((val) => {
-    const next = typeof val === 'function' ? val(editingId) : val;
-    setEditingIdState(next);
-  }, [editingId]);
+  const setEditingId = useCallback<Setter<string | null>>(
+    (val) => {
+      const next = typeof val === "function" ? val(editingId) : val;
+      setEditingIdState(next);
+    },
+    [editingId],
+  );
 
-  const setKeyboard = useCallback<Setter<boolean>>((val) => {
-    const next = typeof val === 'function' ? val(keyboard) : val;
-    setKeyboardState(next);
-  }, [canonicalDocument, keyboard]);
+  const setKeyboard = useCallback<Setter<boolean>>(
+    (val) => {
+      const next = typeof val === "function" ? val(keyboard) : val;
+      setKeyboardState(next);
+    },
+    [canonicalDocument, keyboard],
+  );
 
   const resetTransient = useCallback(() => {
     setSelection(null);
     setEditingIdState(null);
     setKeyboardState(false);
-    setSheet('compact');
+    setSheet("compact");
     setSheetPanel(null);
     setMoreOpen(false);
   }, []);
@@ -224,11 +269,14 @@ export function EditorProvider({ children, initialTemplate = 'bio', initialDevic
         const cur = h[templateId];
         const next = fn(cur.present);
         if (next === cur.present) return h;
-        return { ...h, [templateId]: { past: [...cur.past.slice(-49), cur.present], present: next, future: [] } };
+        return {
+          ...h,
+          [templateId]: { past: [...cur.past.slice(-49), cur.present], present: next, future: [] },
+        };
       });
       return true;
     },
-    [templateId]
+    [templateId],
   );
 
   /**
@@ -241,7 +289,23 @@ export function EditorProvider({ children, initialTemplate = 'bio', initialDevic
       if (canonicalHistory) return;
       commit(fn);
     },
-    [canonicalHistory, commit]
+    [canonicalHistory, commit],
+  );
+
+  /** Replace local Magic state after an external atomic conversion has saved it. */
+  const replaceDocument = useCallback(
+    (next: PageDoc) => {
+      if (canonicalHistory) return;
+      setHistories((h) => ({
+        ...h,
+        [templateId]: {
+          past: [...h[templateId].past.slice(-49), h[templateId].present],
+          present: next,
+          future: [],
+        },
+      }));
+    },
+    [canonicalHistory, templateId],
   );
 
   const semanticSelection = React.useMemo(() => {
@@ -256,8 +320,8 @@ export function EditorProvider({ children, initialTemplate = 'bio', initialDevic
     (command: SemanticCommand) => {
       if (!canonicalHistory) return false;
       const target = semanticSelection;
-      if (!target || target.documentKind !== 'canonical') {
-        toast.error('Selección inválida para el comando canónico.');
+      if (!target || target.documentKind !== "canonical") {
+        toast.error("Selección inválida para el comando canónico.");
         return false;
       }
       try {
@@ -269,11 +333,11 @@ export function EditorProvider({ children, initialTemplate = 'bio', initialDevic
         });
         return true;
       } catch (err) {
-        toast.error(err instanceof Error ? err.message : 'No se pudo aplicar la acción.');
+        toast.error(err instanceof Error ? err.message : "No se pudo aplicar la acción.");
         return false;
       }
     },
-    [canonicalHistory, semanticSelection]
+    [canonicalHistory, semanticSelection],
   );
 
   const undo = useCallback(() => {
@@ -289,7 +353,14 @@ export function EditorProvider({ children, initialTemplate = 'bio', initialDevic
       const c = h[templateId];
       if (!c.past.length) return h;
       const prev = c.past[c.past.length - 1];
-      return { ...h, [templateId]: { past: c.past.slice(0, -1), present: prev, future: [c.present, ...c.future] } };
+      return {
+        ...h,
+        [templateId]: {
+          past: c.past.slice(0, -1),
+          present: prev,
+          future: [c.present, ...c.future],
+        },
+      };
     });
   }, [canonicalHistory, templateId]);
 
@@ -318,7 +389,7 @@ export function EditorProvider({ children, initialTemplate = 'bio', initialDevic
     const cur = registry.current.get(id);
     if (cur && cur.el === el) registry.current.delete(id);
     queueMicrotask(() => {
-      if (!registry.current.has(id)) setSelection((s) => s?.id === id ? null : s);
+      if (!registry.current.has(id)) setSelection((s) => (s?.id === id ? null : s));
     });
   }, []);
 
@@ -331,25 +402,31 @@ export function EditorProvider({ children, initialTemplate = 'bio', initialDevic
   }, []);
 
   const select = useCallback(
-    (id: string, opts?: {reveal?: boolean;}) => {
+    (id: string, opts?: { reveal?: boolean }) => {
       const r = registry.current.get(id);
       if (!r) return;
-      setSelection({ id: r.id, kind: r.kind, label: r.label, parentId: r.parentId, blockKey: r.blockKey });
+      setSelection({
+        id: r.id,
+        kind: r.kind,
+        label: r.label,
+        parentId: r.parentId,
+        blockKey: r.blockKey,
+      });
       setMoreOpen(false);
       setSheetPanel(null);
-      setSheet('compact');
+      setSheet("compact");
       setKeyboard(false);
 
-      if (!isMobile && r.kind === 'text') {
+      if (!isMobile && r.kind === "text") {
         if (!canonicalDocument) {
           setEditingId(id);
         }
       } else {
         setEditingId(null);
       }
-      if (opts?.reveal && !isMobile) r.el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      if (opts?.reveal && !isMobile) r.el.scrollIntoView({ block: "center", behavior: "smooth" });
     },
-    [isMobile, canonicalDocument]
+    [isMobile, canonicalDocument],
   );
 
   const clearSelection = useCallback(() => {
@@ -363,7 +440,7 @@ export function EditorProvider({ children, initialTemplate = 'bio', initialDevic
       setPicker({ open: false });
       setSettingsOpen(false);
     },
-    [resetTransient]
+    [resetTransient],
   );
 
   const setTemplateId = useCallback(
@@ -382,7 +459,7 @@ export function EditorProvider({ children, initialTemplate = 'bio', initialDevic
       setPicker({ open: false });
       setSettingsOpen(false);
     },
-    [resetTransient, templateId]
+    [resetTransient, templateId],
   );
 
   const setDevice = useCallback(
@@ -391,112 +468,172 @@ export function EditorProvider({ children, initialTemplate = 'bio', initialDevic
       resetTransient();
       setPicker({ open: false });
     },
-    [resetTransient]
+    [resetTransient],
   );
 
   const setText = useCallback(
     (id: string, value: string) => {
       if (canonicalHistory) {
-        dispatchCanonical({ type: 'SET_TEXT', payload: { value } });
+        dispatchCanonical({ type: "SET_TEXT", payload: { value } });
         return;
       }
-      if (!commit((d) => d.texts[id] === value ? d : { ...d, texts: { ...d.texts, [id]: value } })) return;
+      if (
+        !commit((d) => (d.texts[id] === value ? d : { ...d, texts: { ...d.texts, [id]: value } }))
+      )
+        return;
     },
-    [commit, canonicalHistory, dispatchCanonical]
+    [commit, canonicalHistory, dispatchCanonical],
   );
 
   const setTextStyle = useCallback(
     (id: string, patch: Partial<TextStyle>) => {
       if (canonicalHistory) return;
-      if (!commit((d) => ({ ...d, textStyles: { ...d.textStyles, [id]: { ...d.textStyles[id], ...patch } } }))) return;
+      if (
+        !commit((d) => ({
+          ...d,
+          textStyles: { ...d.textStyles, [id]: { ...d.textStyles[id], ...patch } },
+        }))
+      )
+        return;
     },
-    [canonicalHistory, commit]
+    [canonicalHistory, commit],
   );
 
   const setProp = useCallback(
     (id: string, key: string, value: string) => {
       if (canonicalHistory) {
-        if (key === 'src' || key === 'image') dispatchCanonical({ type: 'SET_IMAGE_SRC', payload: { src: value } });
-        else if (key === 'zoom') dispatchCanonical({ type: 'SET_MEDIA_ZOOM', payload: { zoom: parseFloat(value) } });
-        else if (key === 'cropX') dispatchCanonical({ type: 'SET_MEDIA_POSITION', payload: { cropX: parseFloat(value) } });
-        else if (key === 'cropY') dispatchCanonical({ type: 'SET_MEDIA_POSITION', payload: { cropY: parseFloat(value) } });
-        else if (key === 'overlay') dispatchCanonical({ type: 'SET_MEDIA_OVERLAY', payload: { overlay: value !== 'none' && value !== 'off' } });
-        else if (key === 'shape') dispatchCanonical({ type: 'SET_AVATAR_SHAPE', payload: { shape: value as 'circle' | 'square' | 'rounded' | 'arch' | 'none' } });
-        else if (key === 'fusion') dispatchCanonical({ type: 'SET_HERO_FUSION', payload: { mode: value as any } });
-        else if (key === 'variant') {
-          if (semanticSelection?.targetKind === 'hero') dispatchCanonical({ type: 'SET_HERO_VARIANT', payload: { variant: value } });
-          else if (semanticSelection?.targetKind === 'cta-primary' || semanticSelection?.targetKind === 'cta-secondary') dispatchCanonical({ type: 'SET_CTA_STYLE', payload: { variant: value } });
-          else dispatchCanonical({ type: 'SET_CARD_LAYOUT', payload: { layout: value } });
-        }
-        else if (key === 'href') dispatchCanonical({ type: 'SET_CTA_URL', payload: { url: value } });
-        else if (key === 'hidden' || key === 'show') {
-          const hidden = key === 'hidden' ? value === 'true' : value === 'off';
-          dispatchCanonical({ type: 'SET_ELEMENT_VISIBILITY', payload: { hidden } });
-        }
-        else if (key === 'showPrice') dispatchCanonical({ type: 'SET_CARD_PRICE_VISIBILITY', payload: { visible: value === 'on' } });
-        else if (key === 'showBadge') dispatchCanonical({ type: 'SET_CARD_BADGE_VISIBILITY', payload: { visible: value === 'on' } });
-        else if (key === 'showDesc') dispatchCanonical({ type: 'SET_CARD_DESCRIPTION_VISIBILITY', payload: { visible: value === 'on' } });
-        else if (key === 'showCta') dispatchCanonical({ type: 'SET_CARD_CTA_VISIBILITY', payload: { visible: value === 'on' } });
-        else if (key === 'emphasis') dispatchCanonical({ type: 'SET_CARD_EMPHASIS', payload: { emphasis: value === 'on' } });
+        if (key === "src" || key === "image")
+          dispatchCanonical({ type: "SET_IMAGE_SRC", payload: { src: value } });
+        else if (key === "zoom")
+          dispatchCanonical({ type: "SET_MEDIA_ZOOM", payload: { zoom: parseFloat(value) } });
+        else if (key === "cropX")
+          dispatchCanonical({ type: "SET_MEDIA_POSITION", payload: { cropX: parseFloat(value) } });
+        else if (key === "cropY")
+          dispatchCanonical({ type: "SET_MEDIA_POSITION", payload: { cropY: parseFloat(value) } });
+        else if (key === "overlay")
+          dispatchCanonical({
+            type: "SET_MEDIA_OVERLAY",
+            payload: { overlay: value !== "none" && value !== "off" },
+          });
+        else if (key === "shape")
+          dispatchCanonical({
+            type: "SET_AVATAR_SHAPE",
+            payload: { shape: value as "circle" | "square" | "rounded" | "arch" | "none" },
+          });
+        else if (key === "fusion")
+          dispatchCanonical({ type: "SET_HERO_FUSION", payload: { mode: value as any } });
+        else if (key === "variant") {
+          if (semanticSelection?.targetKind === "hero")
+            dispatchCanonical({ type: "SET_HERO_VARIANT", payload: { variant: value } });
+          else if (
+            semanticSelection?.targetKind === "cta-primary" ||
+            semanticSelection?.targetKind === "cta-secondary"
+          )
+            dispatchCanonical({ type: "SET_CTA_STYLE", payload: { variant: value } });
+          else dispatchCanonical({ type: "SET_CARD_LAYOUT", payload: { layout: value } });
+        } else if (key === "href")
+          dispatchCanonical({ type: "SET_CTA_URL", payload: { url: value } });
+        else if (key === "hidden" || key === "show") {
+          const hidden = key === "hidden" ? value === "true" : value === "off";
+          dispatchCanonical({ type: "SET_ELEMENT_VISIBILITY", payload: { hidden } });
+        } else if (key === "showPrice")
+          dispatchCanonical({
+            type: "SET_CARD_PRICE_VISIBILITY",
+            payload: { visible: value === "on" },
+          });
+        else if (key === "showBadge")
+          dispatchCanonical({
+            type: "SET_CARD_BADGE_VISIBILITY",
+            payload: { visible: value === "on" },
+          });
+        else if (key === "showDesc")
+          dispatchCanonical({
+            type: "SET_CARD_DESCRIPTION_VISIBILITY",
+            payload: { visible: value === "on" },
+          });
+        else if (key === "showCta")
+          dispatchCanonical({
+            type: "SET_CARD_CTA_VISIBILITY",
+            payload: { visible: value === "on" },
+          });
+        else if (key === "emphasis")
+          dispatchCanonical({ type: "SET_CARD_EMPHASIS", payload: { emphasis: value === "on" } });
         return;
       }
-      if (!commit((d) => d.props[id]?.[key] === value ? d : { ...d, props: { ...d.props, [id]: { ...d.props[id], [key]: value } } })) return;
+      if (
+        !commit((d) =>
+          d.props[id]?.[key] === value
+            ? d
+            : { ...d, props: { ...d.props, [id]: { ...d.props[id], [key]: value } } },
+        )
+      )
+        return;
     },
-    [commit, canonicalHistory, dispatchCanonical, semanticSelection]
+    [commit, canonicalHistory, dispatchCanonical, semanticSelection],
   );
 
   const removeElement = useCallback(
     (id: string, label: string) => {
       if (canonicalHistory) {
-        dispatchCanonical({ type: 'SET_ELEMENT_VISIBILITY', payload: { hidden: true } });
+        dispatchCanonical({ type: "SET_ELEMENT_VISIBILITY", payload: { hidden: true } });
         resetTransient();
-        toast(`${label} eliminado`, { action: { label: 'Deshacer', onClick: () => undo() } });
+        toast(`${label} eliminado`, { action: { label: "Deshacer", onClick: () => undo() } });
         return;
       }
       if (!commit((d) => ({ ...d, removed: { ...d.removed, [id]: true } }))) return;
       resetTransient();
-      toast(`${label} eliminado`, { action: { label: 'Deshacer', onClick: () => undo() } });
+      toast(`${label} eliminado`, { action: { label: "Deshacer", onClick: () => undo() } });
     },
-    [commit, resetTransient, undo, canonicalHistory, dispatchCanonical]
+    [commit, resetTransient, undo, canonicalHistory, dispatchCanonical],
   );
 
   const moveBlock = useCallback(
     (key: string, dir: -1 | 1) => {
       if (canonicalHistory) {
-        dispatchCanonical({ type: 'MOVE_BLOCK', payload: { dir } });
+        dispatchCanonical({ type: "MOVE_BLOCK", payload: { dir } });
         return;
       }
-      if (!commit((d) => {
-        const i = d.blocks.findIndex((b) => b.key === key);
-        const j = i + dir;
-        if (i < 0 || j < 0 || j >= d.blocks.length) return d;
-        const blocks = [...d.blocks];
-        [blocks[i], blocks[j]] = [blocks[j], blocks[i]];
-        return { ...d, blocks };
-      })) return;
+      if (
+        !commit((d) => {
+          const i = d.blocks.findIndex((b) => b.key === key);
+          const j = i + dir;
+          if (i < 0 || j < 0 || j >= d.blocks.length) return d;
+          const blocks = [...d.blocks];
+          [blocks[i], blocks[j]] = [blocks[j], blocks[i]];
+          return { ...d, blocks };
+        })
+      )
+        return;
     },
-    [commit, canonicalHistory, dispatchCanonical]
+    [commit, canonicalHistory, dispatchCanonical],
   );
 
   const duplicateBlock = useCallback(
     (key: string) => {
       if (canonicalHistory) {
-        dispatchCanonical({ type: 'DUPLICATE_BLOCK', payload: {} });
-        toast('Bloque duplicado');
+        dispatchCanonical({ type: "DUPLICATE_BLOCK", payload: {} });
+        toast("Bloque duplicado");
         return;
       }
-      const newKey = `${key.split('-')[0]}-${uid()}`;
-      if (!commit((d) => {
-        const i = d.blocks.findIndex((b) => b.key === key);
-        if (i < 0) return d;
-        const blocks = [...d.blocks];
-        blocks.splice(i + 1, 0, { key: newKey, type: d.blocks[i].type });
-        const sourceProps = d.props[`block:${key}`];
-        return { ...d, blocks, props: sourceProps ? { ...d.props, [`block:${newKey}`]: { ...sourceProps } } : d.props };
-      })) return;
-      toast('Bloque duplicado');
+      const newKey = `${key.split("-")[0]}-${uid()}`;
+      if (
+        !commit((d) => {
+          const i = d.blocks.findIndex((b) => b.key === key);
+          if (i < 0) return d;
+          const blocks = [...d.blocks];
+          blocks.splice(i + 1, 0, { key: newKey, type: d.blocks[i].type });
+          const sourceProps = d.props[`block:${key}`];
+          return {
+            ...d,
+            blocks,
+            props: sourceProps ? { ...d.props, [`block:${newKey}`]: { ...sourceProps } } : d.props,
+          };
+        })
+      )
+        return;
+      toast("Bloque duplicado");
     },
-    [commit, canonicalHistory, dispatchCanonical]
+    [commit, canonicalHistory, dispatchCanonical],
   );
 
   const toggleHidden = useCallback(
@@ -505,40 +642,49 @@ export function EditorProvider({ children, initialTemplate = 'bio', initialDevic
         // Not implemented for blocks natively yet
         return;
       }
-      if (!commit((d) => ({ ...d, blocks: d.blocks.map((b) => b.key === key ? { ...b, hidden: !b.hidden } : b) }))) return;
+      if (
+        !commit((d) => ({
+          ...d,
+          blocks: d.blocks.map((b) => (b.key === key ? { ...b, hidden: !b.hidden } : b)),
+        }))
+      )
+        return;
     },
-    [commit, canonicalHistory]
+    [commit, canonicalHistory],
   );
 
   const deleteBlock = useCallback(
     (key: string) => {
       if (canonicalHistory) {
-        dispatchCanonical({ type: 'DELETE_BLOCK', payload: {} });
+        dispatchCanonical({ type: "DELETE_BLOCK", payload: {} });
         resetTransient();
-        toast('Bloque eliminado', { action: { label: 'Deshacer', onClick: () => undo() } });
+        toast("Bloque eliminado", { action: { label: "Deshacer", onClick: () => undo() } });
         return;
       }
       if (!commit((d) => ({ ...d, blocks: d.blocks.filter((b) => b.key !== key) }))) return;
       resetTransient();
-      toast('Bloque eliminado', { action: { label: 'Deshacer', onClick: () => undo() } });
+      toast("Bloque eliminado", { action: { label: "Deshacer", onClick: () => undo() } });
     },
-    [commit, resetTransient, undo, canonicalHistory, dispatchCanonical]
+    [commit, resetTransient, undo, canonicalHistory, dispatchCanonical],
   );
 
   const addBlock = useCallback(
     (type: BlockType, afterKey?: string) => {
       if (canonicalHistory) return;
       const key = `${type}-${uid()}`;
-      if (!commit((d) => {
-        const i = afterKey ? d.blocks.findIndex((b) => b.key === afterKey) : -1;
-        const blocks = [...d.blocks];
-        blocks.splice(i >= 0 ? i + 1 : blocks.length, 0, { key, type });
-        return { ...d, blocks };
-      })) return;
+      if (
+        !commit((d) => {
+          const i = afterKey ? d.blocks.findIndex((b) => b.key === afterKey) : -1;
+          const blocks = [...d.blocks];
+          blocks.splice(i >= 0 ? i + 1 : blocks.length, 0, { key, type });
+          return { ...d, blocks };
+        })
+      )
+        return;
       setPicker({ open: false });
       window.setTimeout(() => select(`block:${key}`, { reveal: true }), 80);
     },
-    [canonicalHistory, commit, select]
+    [canonicalHistory, commit, select],
   );
 
   const openPicker = useCallback((afterKey?: string) => {
@@ -552,43 +698,50 @@ export function EditorProvider({ children, initialTemplate = 'bio', initialDevic
     setPublishing(true);
     if (canonicalHistory && onCanonicalPublish) {
       const result = onCanonicalPublish(canonicalHistory.present);
-      Promise.resolve(result).then(() => {
-        setPublishing(false);
-        toast.success('Página publicada');
-      }).catch((error) => {
-        setPublishing(false);
-        toast.error(error instanceof Error ? error.message : 'No se pudo publicar la página.');
-      });
+      Promise.resolve(result)
+        .then(() => {
+          setPublishing(false);
+          toast.success("Página publicada");
+        })
+        .catch((error) => {
+          setPublishing(false);
+          toast.error(error instanceof Error ? error.message : "No se pudo publicar la página.");
+        });
       return;
     }
     const result = onPublish?.({ templateId, doc });
-    Promise.resolve(result).then(() => {
-      setPublishing(false);
-      toast.success('Página publicada', { description: `cripqer.com/${templates[templateId].slug}` });
-    }).catch((error) => {
-      setPublishing(false);
-      toast.error(error instanceof Error ? error.message : 'No se pudo publicar la página.');
-    });
+    Promise.resolve(result)
+      .then(() => {
+        setPublishing(false);
+        toast.success("Página publicada", {
+          description: `cripqer.com/${templates[templateId].slug}`,
+        });
+      })
+      .catch((error) => {
+        setPublishing(false);
+        toast.error(error instanceof Error ? error.message : "No se pudo publicar la página.");
+      });
   }, [doc, onPublish, templateId, canonicalHistory, onCanonicalPublish]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
-      const typing = target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName);
-      if (e.key === 'Escape' && !typing) {
+      const typing =
+        target.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName);
+      if (e.key === "Escape" && !typing) {
         resetTransient();
         setPicker({ open: false });
         return;
       }
       if (typing) return;
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z') {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "z") {
         e.preventDefault();
-        if (e.shiftKey) redo();else
-        undo();
+        if (e.shiftKey) redo();
+        else undo();
       }
     };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   }, [undo, redo, resetTransient]);
 
   const activeCanonicalDocument = canonicalHistory?.present ?? canonicalDocument;
@@ -623,14 +776,19 @@ export function EditorProvider({ children, initialTemplate = 'bio', initialDevic
     settingsOpen,
     setSettingsOpen,
     saveState,
-    canUndo: canonicalHistory ? canonicalHistory.past.length > 0 : histories[templateId].past.length > 0,
-    canRedo: canonicalHistory ? canonicalHistory.future.length > 0 : histories[templateId].future.length > 0,
+    canUndo: canonicalHistory
+      ? canonicalHistory.past.length > 0
+      : histories[templateId].past.length > 0,
+    canRedo: canonicalHistory
+      ? canonicalHistory.future.length > 0
+      : histories[templateId].future.length > 0,
     undo,
     redo,
     setText,
     setTextStyle,
     setProp,
     updateDoc,
+    replaceDocument,
     removeElement,
     moveBlock,
     duplicateBlock,
@@ -644,6 +802,7 @@ export function EditorProvider({ children, initialTemplate = 'bio', initialDevic
     publishing,
     publish,
     uploadAsset,
+    catalogConversion,
     canonicalDocument: activeCanonicalDocument,
     canonicalIsNew,
     canonicalEditing: canonicalHistory !== null,
@@ -655,6 +814,6 @@ export function EditorProvider({ children, initialTemplate = 'bio', initialDevic
 
 export function useEditor(): EditorValue {
   const ctx = useContext(EditorContext);
-  if (!ctx) throw new Error('useEditor must be used inside EditorProvider');
+  if (!ctx) throw new Error("useEditor must be used inside EditorProvider");
   return ctx;
 }
