@@ -1,65 +1,248 @@
-import type { CardPaletteValues, PalettePreset } from '../types/editor';
+import type { CardPaletteValues, PaletteFamily, PalettePreset } from "../types/editor";
 
-/** Shared M1 palettes. They are optional PageDoc props, so legacy pages keep their theme. */
-export const visualPalettes: PalettePreset[] = [
+type FamilySpec = PaletteFamily & { hues: number[]; saturations: number[] };
+const profiles = [
+  { id: "light", page: 97, surface: 99, accent: 42 },
+  { id: "soft", page: 92, surface: 98, accent: 48 },
+  { id: "medium", page: 84, surface: 94, accent: 54 },
+  { id: "rich", page: 25, surface: 19, accent: 64 },
+  { id: "dark", page: 13, surface: 18, accent: 70 },
+  { id: "premium", page: 7, surface: 12, accent: 76 },
+] as const;
+
+export const colorFamilies: FamilySpec[] = [
   {
-    id: 'cream', label: 'Warm Cream', accent: '#B8935A', accentFg: '#F6EBD9',
-    swatches: ['#3A2A1E', '#6F5A48', '#B8935A', '#EFE3D1', '#FBF7F0'],
-    page: { id: 'warm-cream', label: 'Warm Cream', color: '#F4EFE7', fg: '#3A2A1E', muted: '#6F5A48', surface: '#FBF7F0', line: '#E6D9C6' }
+    id: "yellow-gold",
+    label: "Amarillo / Gold",
+    variants: ["Champagne", "Amber", "Mustard", "Gold", "Bronze", "Black Gold"],
+    hues: [38, 35, 48, 43, 28, 42],
+    saturations: [35, 78, 72, 88, 68, 82],
   },
   {
-    id: 'black', label: 'Luxury Black', accent: '#D4AF6A', accentFg: '#0B0A09',
-    swatches: ['#0E0D0C', '#2B221B', '#D4AF6A', '#BFAE96', '#F4EBDD'],
-    page: { id: 'luxury-black', label: 'Luxury Black', color: '#0E0D0C', fg: '#E9DCC6', muted: '#BFAE96', surface: '#161412', line: '#3A2F24' }
+    id: "white-premium",
+    label: "Blanco Premium",
+    variants: ["Ivory", "Pearl", "Warm White", "Editorial White", "White Silver", "White Gold"],
+    hues: [42, 30, 36, 0, 215, 45],
+    saturations: [24, 12, 18, 0, 8, 28],
   },
   {
-    id: 'teal', label: 'Deep Teal', accent: '#E4D2B5', accentFg: '#1F4E57',
-    swatches: ['#1F4E57', '#2B6570', '#E4D2B5', '#C9DAD9', '#F7F0E6'],
-    page: { id: 'deep-teal', label: 'Deep Teal', color: '#F3ECE6', fg: '#1F4E57', muted: '#5B777A', surface: '#2B6570', line: '#2E626C' }
+    id: "gray-premium",
+    label: "Gris Premium",
+    variants: ["Mist", "Silver", "Steel", "Graphite", "Charcoal", "Black Silver"],
+    hues: [210, 215, 205, 220, 210, 215],
+    saturations: [10, 12, 18, 18, 10, 22],
   },
   {
-    id: 'sage', label: 'Sage Editorial', accent: '#6B7A4E', accentFg: '#FFFFFF',
-    swatches: ['#111111', '#545D50', '#6B7A4E', '#EEF2EA', '#FFFFFF'],
-    page: { id: 'sage-editorial', label: 'Sage Editorial', color: '#C2CFBC', fg: '#111111', muted: '#545D50', surface: '#FFFFFF', line: '#E3E8DF' }
+    id: "red",
+    label: "Rojo",
+    variants: ["Rose", "Coral Red", "Classic Red", "Wine", "Burgundy", "Black Red"],
+    hues: [350, 4, 0, 345, 338, 355],
+    saturations: [58, 76, 86, 68, 64, 82],
   },
   {
-    id: 'silver', label: 'Silver Minimal', accent: '#3A3D44', accentFg: '#FFFFFF',
-    swatches: ['#121316', '#50545C', '#3A3D44', '#E3E5EA', '#F5F6F8'],
-    page: { id: 'silver-minimal', label: 'Silver Minimal', color: '#D9DBE0', fg: '#121316', muted: '#50545C', surface: '#F5F6F8', line: '#D2D5DB' }
+    id: "green",
+    label: "Verde",
+    variants: ["Sage", "Olive", "Emerald", "Forest", "Deep Green", "Black Emerald"],
+    hues: [100, 78, 158, 145, 150, 160],
+    saturations: [28, 48, 78, 62, 72, 82],
   },
   {
-    id: 'caramel', label: 'Caramel Beauty', accent: '#B98A5A', accentFg: '#F3E3CD',
-    swatches: ['#3B2618', '#6E4F3A', '#B98A5A', '#F3E6D8', '#F7EEE4'],
-    page: { id: 'caramel-beauty', label: 'Caramel Beauty', color: '#E9D8C4', fg: '#3B2618', muted: '#6E4F3A', surface: '#F7EEE4', line: '#E4D2BF' }
-  }
+    id: "blue",
+    label: "Azul",
+    variants: ["Ice Blue", "Sky", "Royal Blue", "Cobalt", "Navy", "Black Blue"],
+    hues: [202, 200, 224, 218, 220, 216],
+    saturations: [48, 72, 86, 88, 72, 82],
+  },
+  {
+    id: "purple",
+    label: "Morado",
+    variants: ["Lavender", "Lilac", "Violet", "Purple", "Plum", "Black Purple"],
+    hues: [265, 282, 275, 270, 320, 286],
+    saturations: [48, 58, 72, 78, 58, 82],
+  },
+  {
+    id: "cyan-teal",
+    label: "Turquesa / Cyan",
+    variants: ["Aqua", "Mint Cyan", "Cyan", "Teal", "Deep Teal", "Neon Dark"],
+    hues: [188, 165, 185, 180, 174, 160],
+    saturations: [66, 56, 88, 72, 76, 86],
+  },
+  {
+    id: "earth",
+    label: "Tierra",
+    variants: ["Sand", "Clay", "Terracotta", "Rust", "Chocolate", "Dark Earth"],
+    hues: [35, 24, 18, 14, 25, 20],
+    saturations: [44, 58, 70, 78, 62, 72],
+  },
+  {
+    id: "pink",
+    label: "Rosa",
+    variants: ["Blush", "Dusty Rose", "Pink", "Soft Fuchsia", "Berry", "Dark Pink"],
+    hues: [350, 345, 332, 320, 335, 325],
+    saturations: [48, 42, 78, 82, 64, 86],
+  },
+  {
+    id: "orange-copper",
+    label: "Naranja / Cobre",
+    variants: ["Peach", "Apricot", "Orange", "Copper", "Burnt Orange", "Black Copper"],
+    hues: [20, 28, 24, 22, 16, 20],
+    saturations: [58, 70, 88, 68, 78, 82],
+  },
+  {
+    id: "black-premium",
+    label: "Negro Premium",
+    variants: [
+      "Black White",
+      "Black Gold",
+      "Black Silver",
+      "Black Red",
+      "Black Emerald",
+      "Black Neon",
+    ],
+    hues: [0, 42, 215, 355, 158, 160],
+    saturations: [0, 82, 22, 82, 82, 88],
+  },
 ];
 
-export const visualPaletteById = Object.fromEntries(visualPalettes.map((palette) => [palette.id, palette]));
+function hsl(h: number, s: number, l: number): string {
+  const a = (s * Math.min(l, 100 - l)) / 100;
+  const f = (n: number) => {
+    const k = (n + h / 30) % 12;
+    return l / 100 - a * Math.max(-1, Math.min(k - 3, Math.min(9 - k, 1)));
+  };
+  return `#${[f(0), f(8), f(4)]
+    .map((v) =>
+      Math.round(255 * v)
+        .toString(16)
+        .padStart(2, "0"),
+    )
+    .join("")}`.toUpperCase();
+}
 
-/** Card-scoped tokens for the same six named visual directions. */
-export const cardPaletteTokens: Record<string, CardPaletteValues> = {
-  cream: {
-    cardBg: '#FBF7F0', cardSurface: '#EFE3D1', cardText: '#3A2A1E', cardMuted: '#6F5A48',
-    cardLine: '#E6D9C6', cardAccent: '#B8935A', cardAccentFg: '#F6EBD9', cardIconBg: '#EFE3D1', cardIconColor: '#7C5E35'
-  },
-  black: {
-    cardBg: '#161412', cardSurface: '#1F1A15', cardText: '#F4EBDD', cardMuted: '#BFAE96',
-    cardLine: '#3A2F24', cardAccent: '#D4AF6A', cardAccentFg: '#0B0A09', cardIconBg: '#1F1A15', cardIconColor: '#D4AF6A'
-  },
-  teal: {
-    cardBg: '#2B6570', cardSurface: '#F7F0E6', cardText: '#1F4E57', cardMuted: '#5B777A',
-    cardLine: '#2E626C', cardAccent: '#E4D2B5', cardAccentFg: '#1F4E57', cardIconBg: '#F7F0E6', cardIconColor: '#1F4E57'
-  },
-  sage: {
-    cardBg: '#FFFFFF', cardSurface: '#EEF2EA', cardText: '#111111', cardMuted: '#545D50',
-    cardLine: '#E3E8DF', cardAccent: '#6B7A4E', cardAccentFg: '#FFFFFF', cardIconBg: '#EEF2EA', cardIconColor: '#3F4A2E'
-  },
-  silver: {
-    cardBg: '#F5F6F8', cardSurface: '#E3E5EA', cardText: '#121316', cardMuted: '#50545C',
-    cardLine: '#D2D5DB', cardAccent: '#3A3D44', cardAccentFg: '#FFFFFF', cardIconBg: '#2A2C31', cardIconColor: '#FFFFFF'
-  },
-  caramel: {
-    cardBg: '#F7EEE4', cardSurface: '#F3E6D8', cardText: '#3B2618', cardMuted: '#6E4F3A',
-    cardLine: '#E4D2BF', cardAccent: '#B98A5A', cardAccentFg: '#F3E3CD', cardIconBg: '#F3E6D8', cardIconColor: '#7E5332'
-  }
+function readableOn(color: string): string {
+  const rgb = color
+    .match(/[A-Fa-f0-9]{2}/g)
+    ?.slice(-3)
+    .map((v) => parseInt(v, 16) / 255) ?? [0, 0, 0];
+  const lum = rgb.reduce((sum, value, index) => sum + value * [0.2126, 0.7152, 0.0722][index], 0);
+  return lum > 0.58 ? "#171717" : "#FFFFFF";
+}
+
+function mix(a: string, b: string, amount: number): string {
+  const aa = a.match(/[A-Fa-f0-9]{2}/g)?.map((v) => parseInt(v, 16)) ?? [255, 255, 255];
+  const bb = b.match(/[A-Fa-f0-9]{2}/g)?.map((v) => parseInt(v, 16)) ?? [0, 0, 0];
+  return `#${aa
+    .map((v, i) =>
+      Math.round(v * (1 - amount) + bb[i] * amount)
+        .toString(16)
+        .padStart(2, "0"),
+    )
+    .join("")}`.toUpperCase();
+}
+
+function makePalette(family: FamilySpec, index: number): PalettePreset {
+  const profile = profiles[index];
+  const accent = hsl(family.hues[index], family.saturations[index], profile.accent);
+  const page = hsl(family.hues[index], family.saturations[index], profile.page);
+  const surface = hsl(
+    family.hues[index],
+    Math.max(4, family.saturations[index] - 8),
+    profile.surface,
+  );
+  const secondarySurface = hsl(
+    family.hues[index],
+    Math.max(5, family.saturations[index] - 4),
+    Math.max(8, profile.surface - (index < 3 ? 7 : -6)),
+  );
+  const fg = readableOn(page);
+  const muted = fg === "#FFFFFF" ? mix("#FFFFFF", page, 0.62) : mix("#111111", page, 0.46);
+  const accentFg = readableOn(accent);
+  const line = mix(page, accent, index < 3 ? 0.18 : 0.45);
+  return {
+    id: `${family.id}-${profile.id}`,
+    label: family.variants[index],
+    familyId: family.id,
+    variantId: profile.id,
+    accent,
+    accentFg,
+    swatches: [page, surface, secondarySurface, accent, fg],
+    page: {
+      id: `${family.id}-${profile.id}`,
+      label: family.variants[index],
+      color: page,
+      fg,
+      muted,
+      surface,
+      line,
+    },
+    semantic: {
+      pageBackground: page,
+      surface,
+      secondarySurface,
+      text: fg,
+      muted,
+      accent,
+      accentFg,
+      line,
+      ctaBackground: accent,
+      ctaForeground: accentFg,
+      iconSurface: secondarySurface,
+      iconForeground: accentFg,
+    },
+  };
+}
+
+export const visualPalettes: PalettePreset[] = colorFamilies.flatMap((family) =>
+  family.variants.map((_, index) => makePalette(family, index)),
+);
+export const visualPaletteById: Record<string, PalettePreset> = Object.fromEntries(
+  visualPalettes.map((palette) => [palette.id, palette]),
+);
+
+export const legacyPaletteMap: Record<string, string> = {
+  cream: "white-premium-light",
+  black: "black-premium-rich",
+  teal: "cyan-teal-rich",
+  sage: "green-light",
+  silver: "gray-premium-soft",
+  caramel: "earth-rich",
+  "warm-cream": "white-premium-light",
+  "luxury-black": "black-premium-rich",
+  "deep-teal": "cyan-teal-rich",
+  "sage-editorial": "green-light",
+  "silver-minimal": "gray-premium-soft",
+  "caramel-beauty": "earth-rich",
+  "red-energy": "red-medium",
+  "amber-sunny": "yellow-gold-soft",
+  "lavender-soft": "purple-light",
+  "purple-editorial": "purple-rich",
+  "cyan-electric": "cyan-teal-medium",
+  "mono-editorial": "gray-premium-rich",
+  "ice-blue": "blue-light",
+  "emerald-deep": "green-medium",
+  terracotta: "earth-medium",
+  "neon-dark": "cyan-teal-premium",
 };
+
+for (const [legacyId, canonicalId] of Object.entries(legacyPaletteMap))
+  visualPaletteById[legacyId] = { ...visualPaletteById[canonicalId], id: legacyId };
+export const legacyVisualPalettes = Object.keys(legacyPaletteMap).map(
+  (id) => visualPaletteById[id],
+);
+
+export const cardPaletteTokens: Record<string, CardPaletteValues> = Object.fromEntries(
+  Object.values(visualPaletteById).map((palette) => [
+    palette.id,
+    {
+      cardBg: palette.semantic?.surface ?? palette.page.surface,
+      cardSurface: palette.semantic?.secondarySurface ?? palette.page.surface,
+      cardText: palette.page.fg,
+      cardMuted: palette.page.muted,
+      cardLine: palette.page.line,
+      cardAccent: palette.accent,
+      cardAccentFg: palette.accentFg,
+      cardIconBg: palette.semantic?.secondarySurface ?? palette.page.surface,
+      cardIconColor: palette.accent,
+    },
+  ]),
+);
