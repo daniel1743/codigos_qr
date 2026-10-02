@@ -58,10 +58,7 @@ export const Route = createFileRoute("/pg/$publicId")({
         { name: "twitter:image", content: imageUrl },
         { name: "robots", content: "index, follow" },
       ],
-      links: [
-        { rel: "canonical", href: pageUrl },
-        ...(page.slug ? [{ rel: "alternate", href: `${baseUrl}/${page.slug}` }] : []),
-      ],
+      links: [{ rel: "canonical", href: pageUrl }],
     };
   },
   loader: async ({ params }) => {

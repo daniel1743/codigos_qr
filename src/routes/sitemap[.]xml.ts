@@ -3,10 +3,22 @@ import { getServerSupabaseClient } from "../lib/supabase/server";
 
 const BASE_URL = "https://www.cripqer.dev";
 
+type SitemapEntry = {
+  loc: string;
+  lastmod: string | null;
+  changefreq: string;
+  priority: string;
+};
+
 type SitemapProfile = {
   public_id: string | null;
-  slug: string | null;
   updated_at: string | null;
+};
+
+type SitemapPage = {
+  public_id: string | null;
+  updated_at: string | null;
+  published_at: string | null;
 };
 
 function escapeXml(value: string): string {
@@ -18,56 +30,74 @@ function escapeXml(value: string): string {
     .replace(/'/g, "&apos;");
 }
 
-function toDateOnly(value: string | null | undefined, fallback: string): string {
-  if (!value) return fallback;
+/**
+ * Normalizes a timestamp to a `YYYY-MM-DD` lastmod. A missing or invalid date
+ * returns `null` so the `<lastmod>` tag is omitted entirely — a missing
+ * timestamp is never faked to "today".
+ */
+function toDateOnly(value: string | null | undefined): string | null {
+  if (!value) return null;
   const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? fallback : date.toISOString().split("T")[0]!;
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toISOString().split("T")[0]!;
 }
 
-function sitemapUrl(loc: string, lastmod: string, changefreq: string, priority: string): string {
-  return [
-    "  <url>",
-    `    <loc>${escapeXml(loc)}</loc>`,
-    `    <lastmod>${lastmod}</lastmod>`,
-    `    <changefreq>${changefreq}</changefreq>`,
-    `    <priority>${priority}</priority>`,
-    "  </url>",
-  ].join("\n");
+function sitemapUrl(entry: SitemapEntry): string {
+  const lines = ["  <url>", `    <loc>${escapeXml(entry.loc)}</loc>`];
+  if (entry.lastmod) lines.push(`    <lastmod>${entry.lastmod}</lastmod>`);
+  lines.push(`    <changefreq>${entry.changefreq}</changefreq>`);
+  lines.push(`    <priority>${entry.priority}</priority>`);
+  lines.push("  </url>");
+  return lines.join("\n");
 }
 
-export function buildSitemapXml(profiles: SitemapProfile[] = [], now = new Date()): string {
-  const today = now.toISOString().split("T")[0]!;
-  const urls = [
-    sitemapUrl(`${BASE_URL}/`, today, "weekly", "1.0"),
-    sitemapUrl(`${BASE_URL}/plataforma`, today, "weekly", "0.9"),
-    sitemapUrl(`${BASE_URL}/vs/linktree`, today, "monthly", "0.8"),
+/**
+ * Builds a canonical-only sitemap.
+ *
+ * Only canonical, indexable URLs are listed:
+ *   - the three static marketing pages,
+ *   - published public profiles at `/p/{public_id}`,
+ *   - published public pages at `/pg/{public_id}`.
+ *
+ * Aliases are intentionally EXCLUDED. `/{profile_alias}` canonicalizes to
+ * `/p/{public_id}` and `/pg/a/{slug}` canonicalizes to `/pg/{public_id}`, so
+ * submitting them would create "Duplicate, submitted URL not selected as
+ * canonical" reports. Private/utility routes are never listed.
+ */
+export function buildSitemapXml(
+  profiles: SitemapProfile[] = [],
+  pages: SitemapPage[] = [],
+): string {
+  const entries: SitemapEntry[] = [
+    { loc: `${BASE_URL}/`, lastmod: null, changefreq: "weekly", priority: "1.0" },
+    { loc: `${BASE_URL}/plataforma`, lastmod: null, changefreq: "weekly", priority: "0.9" },
+    { loc: `${BASE_URL}/vs/linktree`, lastmod: null, changefreq: "monthly", priority: "0.8" },
   ];
 
   for (const profile of profiles) {
-    const lastmod = toDateOnly(profile.updated_at, today);
+    if (!profile.public_id) continue;
+    entries.push({
+      loc: `${BASE_URL}/p/${encodeURIComponent(profile.public_id)}`,
+      lastmod: toDateOnly(profile.updated_at),
+      changefreq: "daily",
+      priority: "0.6",
+    });
+  }
 
-    if (profile.public_id) {
-      urls.push(
-        sitemapUrl(
-          `${BASE_URL}/p/${encodeURIComponent(profile.public_id)}`,
-          lastmod,
-          "daily",
-          "0.6",
-        ),
-      );
-    }
-
-    if (profile.slug) {
-      urls.push(
-        sitemapUrl(`${BASE_URL}/${encodeURIComponent(profile.slug)}`, lastmod, "daily", "0.6"),
-      );
-    }
+  for (const page of pages) {
+    if (!page.public_id) continue;
+    entries.push({
+      loc: `${BASE_URL}/pg/${encodeURIComponent(page.public_id)}`,
+      lastmod: toDateOnly(page.updated_at ?? page.published_at),
+      changefreq: "daily",
+      priority: "0.6",
+    });
   }
 
   return [
     '<?xml version="1.0" encoding="UTF-8"?>',
     '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
-    ...urls,
+    ...entries.map(sitemapUrl),
     "</urlset>",
     "",
   ].join("\n");
@@ -79,15 +109,26 @@ export const Route = createFileRoute("/sitemap.xml")({
       GET: async () => {
         const supabase = getServerSupabaseClient();
 
-        // Obtener perfiles públicos publicados
+        // Published public profiles (root identity / BioLink).
         const { data: profiles } = await supabase
           .from("profiles")
-          .select("public_id, slug, updated_at")
+          .select("public_id, updated_at")
           .eq("published", true)
           .order("updated_at", { ascending: false })
           .limit(5000);
 
-        const xml = buildSitemapXml((profiles ?? []) as SitemapProfile[]);
+        // Published public child pages.
+        const { data: pages } = await supabase
+          .from("pages")
+          .select("public_id, updated_at, published_at")
+          .eq("published", true)
+          .order("updated_at", { ascending: false })
+          .limit(5000);
+
+        const xml = buildSitemapXml(
+          (profiles ?? []) as SitemapProfile[],
+          (pages ?? []) as SitemapPage[],
+        );
 
         return new Response(xml, {
           status: 200,

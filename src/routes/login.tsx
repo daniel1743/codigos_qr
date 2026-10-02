@@ -2,6 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Auth } from "../components/Auth";
 
 export const Route = createFileRoute("/login")({
+  head: () => ({
+    meta: [{ name: "robots", content: "noindex,nofollow,noarchive" }],
+  }),
   validateSearch: (search: Record<string, unknown>) => ({
     mode: search.mode === "register" ? "register" : undefined,
   }),

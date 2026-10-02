@@ -127,6 +127,9 @@ function documentStatus(doc: EncryptedDocument): { tone: CqStatusTone; label: st
 }
 
 export const Route = createFileRoute("/encrypted-documents")({
+  head: () => ({
+    meta: [{ name: "robots", content: "noindex,nofollow,noarchive" }],
+  }),
   component: EncryptedDocumentsPage,
 });
 

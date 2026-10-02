@@ -3,6 +3,9 @@ import { ArrowLeft } from "lucide-react";
 import { PowerEditorHost } from "../components/power-editor/PowerEditorHost";
 
 export const Route = createFileRoute("/pages/$pageId/catalog")({
+  head: () => ({
+    meta: [{ name: "robots", content: "noindex,nofollow,noarchive" }],
+  }),
   validateSearch: (search: Record<string, unknown>) => ({
     sourceMagicPageId:
       typeof search.sourceMagicPageId === "string" ? search.sourceMagicPageId : undefined,

@@ -53,7 +53,12 @@ const PAGE_TYPE_LABELS: Record<string, string> = {
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-export const Route = createFileRoute("/pages/$pageId")({ component: PageDetail });
+export const Route = createFileRoute("/pages/$pageId")({
+  head: () => ({
+    meta: [{ name: "robots", content: "noindex,nofollow,noarchive" }],
+  }),
+  component: PageDetail,
+});
 
 function formatDate(value: string | null): string {
   if (!value) return "—";

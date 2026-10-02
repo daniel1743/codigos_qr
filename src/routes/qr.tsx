@@ -15,6 +15,9 @@ import { profileService } from "../services/profile.service";
 import type { Profile } from "../types/database";
 
 export const Route = createFileRoute("/qr")({
+  head: () => ({
+    meta: [{ name: "robots", content: "noindex,nofollow,noarchive" }],
+  }),
   component: QrPage,
 });
 

@@ -57,6 +57,9 @@ import type { Profile } from "../types/database";
  * added, no routing semantics changed and `/page` is untouched.
  */
 export const Route = createFileRoute("/account")({
+  head: () => ({
+    meta: [{ name: "robots", content: "noindex,nofollow,noarchive" }],
+  }),
   component: AccountPage,
 });
 

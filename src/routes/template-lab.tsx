@@ -8,6 +8,9 @@ import { ProtectedRoute } from "../components/route-guards/ProtectedRoute";
  * any public navigation.
  */
 export const Route = createFileRoute("/template-lab")({
+  head: () => ({
+    meta: [{ name: "robots", content: "noindex,nofollow,noarchive" }],
+  }),
   component: TemplateLabPage,
 });
 

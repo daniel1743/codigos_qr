@@ -1,30 +1,28 @@
 User-agent: *
 Allow: /
+
 Disallow: /editor
 Disallow: /profile
+Disallow: /account
+Disallow: /page
+Disallow: /qr
 Disallow: /admin
 Disallow: /power-editor
 Disallow: /engine-lab
 Disallow: /template-lab
+Disallow: /internal/
+Disallow: /labs/
 Disallow: /onboarding-preview
 Disallow: /onboarding-test
-Disallow: /internal/power-editor
-Disallow: /labs/magic-editor
-Disallow: /pages/*/edit-prototype
-Disallow: /pages/*/fuxion-demo
 Disallow: /power-editor-phase4-qa
 Disallow: /analytics-visual-qa
+Disallow: /pages
+Disallow: /encrypted-documents
+Disallow: /correo-confirmado
+Disallow: /login
+Disallow: /q/
+Disallow: /d/
 
-# Permitir assets estáticos
-Allow: /brand-assets/
-Allow: /*.css
-Allow: /*.js
-Allow: /*.png
-Allow: /*.jpg
-Allow: /*.svg
-Allow: /*.webp
-
-# Crawl delay para bots pesados
 User-agent: AhrefsBot
 Crawl-delay: 5
 
@@ -34,5 +32,4 @@ Crawl-delay: 5
 User-agent: MJ12bot
 Crawl-delay: 10
 
-# Sitemap
 Sitemap: https://www.cripqer.dev/sitemap.xml

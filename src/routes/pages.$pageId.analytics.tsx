@@ -24,7 +24,12 @@ import { pageService } from "../services/page.service";
 import type { Page } from "../types/database";
 import type { PageAnalyticsSummary } from "../types/analytics";
 
-export const Route = createFileRoute("/pages/$pageId/analytics")({ component: PageAnalytics });
+export const Route = createFileRoute("/pages/$pageId/analytics")({
+  head: () => ({
+    meta: [{ name: "robots", content: "noindex,nofollow,noarchive" }],
+  }),
+  component: PageAnalytics,
+});
 
 const EMPTY: PageAnalyticsSummary = {
   visits: 0,

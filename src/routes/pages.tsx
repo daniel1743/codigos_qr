@@ -28,7 +28,12 @@ import { useAdminStatus } from "../lib/use-admin-status";
  * collapsed into a single object. Data loading, services, persistence and the
  * canonical URL grammar are unchanged from the previous implementation.
  */
-export const Route = createFileRoute("/pages")({ component: PagesList });
+export const Route = createFileRoute("/pages")({
+  head: () => ({
+    meta: [{ name: "robots", content: "noindex,nofollow,noarchive" }],
+  }),
+  component: PagesList,
+});
 
 const createPageCta =
   "inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-cq-sm bg-cq-blue px-5 text-[14.5px] font-semibold text-white shadow-[0_10px_24px_-10px_rgba(30,86,224,0.6)] transition-colors hover:bg-cq-blue-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-cq-blue-200";

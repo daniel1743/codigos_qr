@@ -75,7 +75,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       {
         name: "viewport",
-        content: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0",
+        content: "width=device-width, initial-scale=1",
       },
       { name: "theme-color", content: "#0D47A1" },
       { name: "mobile-web-app-capable", content: "yes" },
@@ -95,6 +95,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://www.cripqer.dev/" },
+      { property: "og:site_name", content: "Cripqer" },
       {
         property: "og:image",
         content: "https://www.cripqer.dev/brand-assets/cripqer-icon-512.png",
@@ -112,7 +113,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
     ],
     links: [
-      { rel: "canonical", href: "https://www.cripqer.dev/" },
       {
         rel: "stylesheet",
         href: appCss,

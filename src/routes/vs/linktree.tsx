@@ -28,6 +28,18 @@ function VsLinktreePage() {
     <div
       style={{ minHeight: "100vh", background: "#FAF8F3", fontFamily: "-apple-system, sans-serif" }}
     >
+      <nav
+        aria-label="Navegación Cripqer"
+        style={{ padding: "16px 20px", display: "flex", gap: "16px", fontSize: "14px" }}
+      >
+        <a href="/" style={{ color: "#111" }}>
+          ← Inicio Cripqer
+        </a>
+        <a href="/plataforma" style={{ color: "#B08D57" }}>
+          Plataforma de Conversión
+        </a>
+      </nav>
+
       {/* Hero */}
       <section
         style={{

@@ -48,6 +48,9 @@ import { createCanonicalPageEnvelope } from "@/lib/canonical-page";
 import { createDemoConfig } from "@/premium-template-studio";
 
 export const Route = createFileRoute("/editor")({
+  head: () => ({
+    meta: [{ name: "robots", content: "noindex,nofollow,noarchive" }],
+  }),
   component: EditorPage,
 });
 

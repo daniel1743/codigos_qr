@@ -32,6 +32,18 @@ function PlataformaPage() {
         fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
       }}
     >
+      <nav
+        aria-label="Navegación Cripqer"
+        style={{ padding: "16px 20px", display: "flex", gap: "16px", fontSize: "14px" }}
+      >
+        <a href="/" style={{ color: "#111" }}>
+          ← Inicio Cripqer
+        </a>
+        <a href="/vs/linktree" style={{ color: "#B08D57" }}>
+          Cripqer vs Linktree
+        </a>
+      </nav>
+
       {/* Hero */}
       <section
         style={{

@@ -39,7 +39,12 @@ interface PageSummary {
   slug: string;
 }
 
-export const Route = createFileRoute("/page")({ component: MyPageHub });
+export const Route = createFileRoute("/page")({
+  head: () => ({
+    meta: [{ name: "robots", content: "noindex,nofollow,noarchive" }],
+  }),
+  component: MyPageHub,
+});
 
 function MyPageHub() {
   const supabase = getBrowserSupabaseClient();

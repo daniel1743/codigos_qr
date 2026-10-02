@@ -3,6 +3,9 @@ import { ArrowRight, CheckCircle2 } from "lucide-react";
 import Logo from "../components/brand/Logo";
 
 export const Route = createFileRoute("/correo-confirmado")({
+  head: () => ({
+    meta: [{ name: "robots", content: "noindex,nofollow,noarchive" }],
+  }),
   component: EmailConfirmationSuccess,
 });
 

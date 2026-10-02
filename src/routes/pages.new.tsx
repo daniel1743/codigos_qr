@@ -45,7 +45,12 @@ const PAGE_TYPE_OPTIONS: { value: PageType; label: string }[] = [
   { value: "portfolio", label: "Portafolio" },
 ];
 
-export const Route = createFileRoute("/pages/new")({ component: CreatePage });
+export const Route = createFileRoute("/pages/new")({
+  head: () => ({
+    meta: [{ name: "robots", content: "noindex,nofollow,noarchive" }],
+  }),
+  component: CreatePage,
+});
 
 function CreatePage() {
   const supabase = getBrowserSupabaseClient();

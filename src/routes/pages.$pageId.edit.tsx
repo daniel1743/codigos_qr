@@ -11,6 +11,9 @@ import { MagicProductionEditorHost } from "@/features/magic-page-editor-producti
  * (never mounted with someone else's data).
  */
 export const Route = createFileRoute("/pages/$pageId/edit")({
+  head: () => ({
+    meta: [{ name: "robots", content: "noindex,nofollow,noarchive" }],
+  }),
   validateSearch: (search: Record<string, unknown>) => ({
     directEditor: typeof search["directEditor"] === "string" ? search["directEditor"] : undefined,
     magicProduction: typeof search["magicProduction"] === "string" ? search["magicProduction"] : undefined,

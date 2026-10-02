@@ -18,6 +18,9 @@ import { getOrCreateAnalyticsCampaignContext } from "../lib/analytics";
  * visit never passes through here and therefore never emits a `qr_scan`.
  */
 export const Route = createFileRoute("/q/$publicId")({
+  head: () => ({
+    meta: [{ name: "robots", content: "noindex,nofollow,noarchive" }],
+  }),
   loader: async ({ params }) => {
     const supabase = getServerSupabaseClient();
     // getPublicPageByPublicId only returns PUBLISHED pages with a published

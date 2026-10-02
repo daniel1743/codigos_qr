@@ -7,6 +7,39 @@ import { PublicProfileView } from "../components/profile/PublicProfileView";
 import { useEffect, useRef } from "react";
 
 export const Route = createFileRoute("/$alias")({
+  head: ({ loaderData }) => {
+    const profile = loaderData?.profile;
+    if (!profile) return {};
+
+    const baseUrl = "https://www.cripqer.dev";
+    const canonicalUrl = `${baseUrl}/p/${profile.public_id}`;
+    const title = profile.display_name
+      ? `${profile.display_name}${profile.bio ? " - " + profile.bio.slice(0, 50) : ""} | Cripqer`
+      : `Perfil ${profile.public_id} | Cripqer`;
+    const description =
+      profile.bio?.slice(0, 155) ||
+      `Visita la página personalizada de ${profile.display_name || "este perfil"}. Enlaces, redes sociales y contacto en un solo lugar con Cripqer.`;
+    const imageUrl = profile.avatar_url || `${baseUrl}/brand-assets/cripqer-icon-512.png`;
+
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "profile" },
+        { property: "og:url", content: canonicalUrl },
+        { property: "og:image", content: imageUrl },
+        { property: "og:site_name", content: "Cripqer" },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: description },
+        { name: "twitter:image", content: imageUrl },
+        { name: "robots", content: "index, follow" },
+      ],
+      links: [{ rel: "canonical", href: canonicalUrl }],
+    };
+  },
   loader: async ({ params }) => {
     // Rutas reservadas
     const reservedRoutes = [

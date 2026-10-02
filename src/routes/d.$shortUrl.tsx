@@ -132,6 +132,9 @@ export const authorizeDownloadFn = createServerFn()
   });
 
 export const Route = createFileRoute("/d/$shortUrl")({
+  head: () => ({
+    meta: [{ name: "robots", content: "noindex,nofollow,noarchive" }],
+  }),
   component: PublicDownloadPage,
 });
 

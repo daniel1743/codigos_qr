@@ -658,7 +658,7 @@ function MediaSlot({
   return (
     <div className={cls} data-media-slot={label}>
       {url ? (
-        <img src={url} alt={label} loading="lazy" style={imgStyle} />
+        <img src={url} alt={label} loading="lazy" decoding="async" style={imgStyle} />
       ) : (
         <div className="cq-slot-ph" aria-hidden="true">
           {Icon.image}
@@ -958,7 +958,11 @@ export default function CripqerLanding() {
               {MEDIA.heroVisualUrl ? (
                 <img
                   src={MEDIA.heroVisualUrl}
-                  alt="Persona escaneando un QR que abre una experiencia Cripqer"
+                  alt="Persona escaneando un código QR que abre una experiencia Cripqer"
+                  width={1122}
+                  height={1402}
+                  fetchPriority="high"
+                  decoding="async"
                 />
               ) : (
                 <>
@@ -1490,6 +1494,8 @@ export default function CripqerLanding() {
           <a href="#producto">Producto</a>
           <a href="#disenos">Diseños</a>
           <a href="#seguridad">Documentos</a>
+          <Link to="/plataforma">Plataforma</Link>
+          <Link to="/vs/linktree">Cripqer vs Linktree</Link>
           <Link to="/login" data-cta="login">
             Iniciar sesión
           </Link>
