@@ -41,6 +41,11 @@ All direct and transitive runtime entries now dedupe to the compatible
   `/vs/linktree`, the supplied editor route, and `/sitemap.xml` returned HTTP
   200. `robots.txt` returned its expected body on GET. The first request took
   longer while Vite optimized dependencies, then completed normally.
+- Vercel preview: `https://codigos-2zqy53y2j-daniels-projects-29fb139e.vercel.app`
+  deployed and built successfully. Preview `/sitemap.xml` returned HTTP 200;
+  `/p/KTRdygd` was absent, but the expected `/pg/VvUsngW` was also absent.
+  This leaves the preview data contract unresolved and is reported as
+  `REGRESSION_FOUND`; no sitemap or application logic was changed to mask it.
 
 No deployment, Vercel bypass variable, push, Supabase schema/data change, or
 unrelated dependency upgrade was performed.
