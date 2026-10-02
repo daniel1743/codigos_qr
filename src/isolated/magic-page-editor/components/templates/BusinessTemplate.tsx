@@ -48,6 +48,8 @@ export function BusinessTemplate() {
   };
   const petrol = t.tones.find((x) => x.id === 'petroleo') ?? t.tones[0];
   const night = t.tones.find((x) => x.id === 'noche') ?? t.tones[0];
+  const serviceTone = doc.props.page?.palette ? t.page : petrol;
+  const footerBase = doc.props.page?.palette ? t.page : night;
   const cta: CtaVariants = {
     solid: {
       background: t.accent,
@@ -58,22 +60,22 @@ export function BusinessTemplate() {
       color: 'var(--fg)'
     },
     soft: {
-      background: '#E9DCC8',
-      color: '#1C2F33'
+      background: t.page.surface,
+      color: t.page.fg
     }
   };
   const cardCta: CtaVariants = {
     solid: {
-      background: '#F4EEE8',
-      color: '#1F4E55'
+      background: t.accent,
+      color: t.accentFg
     },
     outline: {
       boxShadow: 'inset 0 0 0 1px var(--fg)',
       color: 'var(--fg)'
     },
     soft: {
-      background: '#E9DCC8',
-      color: '#1C2F33'
+      background: t.page.surface,
+      color: t.page.fg
     }
   };
   const surfaceCta: CtaVariants = {
@@ -101,8 +103,8 @@ export function BusinessTemplate() {
       color: 'var(--fg)'
     },
     soft: {
-      background: '#E9DCC8',
-      color: '#1C2F33'
+      background: t.page.surface,
+      color: t.page.fg
     }
   };
   const wrap = cx('mx-auto w-full', m ? 'px-5' : 'px-10');
@@ -156,16 +158,16 @@ export function BusinessTemplate() {
                   const Icon = iconForId(doc.props[`${p}collection.${i}.icon`]?.icon ?? s.icon);
                   if (layout === 'lista') {
                     return <Editable key={s.title} id={cid} kind="card" label="Card de servicio" className="relative grid overflow-hidden" style={{
-                      ...toneVars(petrol),
-                      background: petrol.color,
+                      ...toneVars(serviceTone),
+                      background: serviceTone.color,
                       borderRadius: t.radius,
                       gridTemplateColumns: m ? '1fr 36%' : '1fr 40%',
                       minHeight: m ? 176 : 214
                     }}>
                         <div className={cx('flex flex-col items-start', m ? 'p-4' : 'p-6')}>
                           <Editable id={`${cid}.icon`} kind="icon" label="Icono" className="grid h-10 w-10 place-items-center rounded-xl" style={{
-                          background: 'rgba(244,238,232,0.12)',
-                          color: '#E9DCC8'
+                          background: t.media.surface,
+                          color: t.accent
                         }}>
                             <Icon className="h-5 w-5" strokeWidth={1.7} />
                           </Editable>
@@ -210,8 +212,8 @@ export function BusinessTemplate() {
           }}>
               <EditableText id={`${p}links.title`} value="¿Hablamos?" as="h2" label="Título" className={h2} style={display} />
               <EditableCTA id={`${p}links.cta`} elementLabel="Bloque CTA" label={bizCta.title} sub={bizCta.sub} href="https://wa.me/34910000000" variants={bigCta} fullDefault className={cx('mt-7 flex items-center gap-5 rounded-[28px] text-left', m ? 'px-5 py-6' : 'px-9 py-9')} labelClassName={cx('leading-tight', m ? 'text-[23px]' : 'text-[34px]')} labelStyle={display} subClassName="mt-2 text-[14px] opacity-75" leading={<span className={cx('grid shrink-0 place-items-center rounded-2xl', m ? 'h-12 w-12' : 'h-16 w-16')} style={{
-              background: '#C3A274',
-              color: '#13272B'
+              background: t.accent,
+              color: t.accentFg
             }}>
                     <SocialIcon platform="whatsapp" className={m ? 'h-6 w-6' : 'h-8 w-8'} />
                   </span>} trailing={m ? undefined : <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full" style={{
@@ -256,8 +258,8 @@ export function BusinessTemplate() {
       {doc.blocks.map(render)}
       <AddBlockSlot />
       <Editable id="footer" kind="section" label="Pie de página" as="footer" className={cx('flex gap-6', m ? 'flex-col px-5 py-10' : 'items-center justify-between px-10 py-12')} style={{
-      ...toneVars(night),
-      background: night.color,
+      ...toneVars(footerBase),
+      background: footerBase.color,
       ...footerTone
     }}>
         <div>

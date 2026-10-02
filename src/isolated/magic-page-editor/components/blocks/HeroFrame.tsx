@@ -5,6 +5,7 @@ import type { HeroVariant } from '../../types/editor';
 import { useFreeImagePan } from '../editor/controls/PositionPad';
 import { Editable } from '../editor/Editable';
 import { mediaShapeStyle } from '../../utils/styles';
+import { useThemeTokens } from '../../hooks/useThemeTokens';
 
 export type HeroShape = 'curve' | 'straight' | 'inset' | 'curve-deep' | 'curve-up' | 'curve-up-deep' | 'wave' | 'wave-double' | 'arch';
 export const heroShapeIds: readonly HeroShape[] = ['curve', 'straight', 'inset', 'curve-deep', 'curve-up', 'curve-up-deep', 'wave', 'wave-double', 'arch'];
@@ -70,6 +71,7 @@ export function HeroFrame({
   children
 }: HeroFrameProps) {
   const { doc, isMobile: m } = useEditor();
+  const t = useThemeTokens();
   const p = doc.props[id] ?? {};
   const variant = p['variant'] as HeroVariant ?? defaultVariant;
   const storedShape = p['shape'] as HeroShape | undefined;
@@ -83,7 +85,7 @@ export function HeroFrame({
   const isLocked = p['locked'] === 'true';
   const data = { 'data-hero': variant, 'data-shape': shape };
   const overlayOpacity = { none: 0, soft: 0.16, medium: 0.32, intense: 0.52 }[p['overlay'] ?? 'none'] ?? 0;
-  const overlay = overlayOpacity > 0 ? <span className="pointer-events-none absolute inset-0 z-[1]" style={{ background: p['overlayColor'] ?? '#111318', opacity: overlayOpacity }} /> : null;
+  const overlay = overlayOpacity > 0 ? <span className="pointer-events-none absolute inset-0 z-[1]" style={{ background: p['overlayColor'] ?? 'var(--media-overlay)', opacity: overlayOpacity }} /> : null;
   const fusion = p['fusion'] ?? 'none';
   const fusionLayer = fusion !== 'none' ? <span className={cx('pointer-events-none absolute z-[2]', fusion === 'halo' ? '-inset-x-12 -bottom-20 h-64' : fusion === 'organic' ? '-inset-x-8 bottom-0 h-48' : 'inset-x-0 bottom-0', fusion === 'fade' ? 'h-48' : 'h-32')} style={{ background: fusion === 'halo' ? 'radial-gradient(ellipse at 50% 100%, var(--surface) 0%, color-mix(in oklab, var(--surface) 72%, transparent) 38%, transparent 72%)' : fusion === 'dominant' ? 'linear-gradient(to bottom, transparent 0%, color-mix(in oklab, var(--surface) 72%, transparent) 45%, var(--surface) 100%)' : fusion === 'organic' ? 'linear-gradient(160deg, transparent 30%, color-mix(in oklab, var(--surface) 42%, transparent) 48%, var(--surface) 92%)' : 'linear-gradient(to bottom, transparent 0%, transparent 15%, var(--surface) 96%)' }} /> : null;
 
@@ -104,11 +106,11 @@ export function HeroFrame({
   {};
 
   const onMediaVars = {
-    '--fg': '#F7F4EE',
-    '--muted': 'rgba(247,244,238,0.8)',
-    '--line': 'rgba(247,244,238,0.35)',
-    '--surface': 'rgba(255,255,255,0.14)',
-    color: 'var(--fg)'
+    '--fg': t.media.fg,
+    '--muted': t.media.muted,
+    '--line': t.media.line,
+    '--surface': t.media.surface,
+    color: t.media.fg
   } as React.CSSProperties;
 
   switch (variant) {
