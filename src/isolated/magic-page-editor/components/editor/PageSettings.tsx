@@ -74,7 +74,15 @@ export function PageSettings({ variant }: PageSettingsProps) {
                 <FontPicker fonts={t.fonts} value={page.font ?? t.fonts[0].id} onChange={(v) => set('font', v)} />
               </PanelSection>
               <PanelSection title="Fondo de página">
-                <ToneGrid tones={t.tones.filter((x) => t.pageTones.includes(x.id))} value={page.bg ?? t.pageTones[0]} onChange={(v) => set('bg', v)} allowDefault={false} />
+                <ToneGrid 
+                  tones={t.tones.filter((x) => t.pageTones.includes(x.id))} 
+                  value={page.bgOverride ?? page.bg ?? t.pageTones[0]} 
+                  onChange={(v) => {
+                    set('bg', v);
+                    set('bgOverride', v);
+                  }} 
+                  allowDefault={false} 
+                />
               </PanelSection>
               {!ed.canonicalDocument && (
                 <PanelSection title={`${meta.short} · variante visual`} hint="Cambia el ritmo visual sin borrar tu contenido.">

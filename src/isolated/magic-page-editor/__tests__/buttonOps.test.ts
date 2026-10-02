@@ -1,10 +1,8 @@
- ROMPER FUNCIONALIDADES
- 
- // @vitest-environment happy-dom
+// @vitest-environment happy-dom
 import { describe, expect, it } from 'vitest';
 import { createInitialMagicEditorState } from '../../../features/magic-page-editor-production/magic-document';
 import { bioLinks } from '../data/bioContent';
-import { canonicalScope, readButtonGroup } from '../utils/buttonGroup';
+import { BUTTON_GROUP_INITIALIZED, canonicalScope, readButtonGroup } from '../utils/buttonGroup';
 import { addButton, canDeleteButton, deleteButton, duplicateButton, moveButton } from '../utils/buttonOps';
 
 const collection = { blockKey: 'links', seeds: bioLinks };
@@ -39,15 +37,83 @@ describe('Button group operations (UX recovery)', () => {
     expect(model.items.map((item) => item.href)).toEqual([bioLinks[0]!.href, bioLinks[1]!.href, bioLinks[3]!.href]);
   });
 
-  it('never deletes the last button of the group', () => {
+  it('deletes the last remaining button, leaving an explicitly empty group', () => {
     const single = {
       ...seedDoc(),
       props: { 'block:links': { buttonGroupOrder: 'btn_a' }, 'links.btn_a': { label: 'Único', href: 'https://a.com' } },
     };
-    const model = readButtonGroup(single, 'links', bioLinks);
+    const before = readButtonGroup(single, 'links', bioLinks);
+    expect(canDeleteButton(before)).toBe(true);
 
-    expect(canDeleteButton(model)).toBe(false);
-    expect(deleteButton(single, collection, 'btn_a')).toBe(single);
+    const doc = deleteButton(single, collection, 'btn_a');
+    const model = readButtonGroup(doc, 'links', bioLinks);
+
+    expect(model.items).toHaveLength(0);
+    expect(model.order).toEqual([]);
+    expect(model.canonical).toBe(true);
+    expect(doc.props['block:links']?.[BUTTON_GROUP_INITIALIZED]).toBe('1');
+    /* Re-reading the persisted document must NOT resurrect the legacy seeds. */
+    expect(readButtonGroup(doc, 'links', bioLinks).items).toHaveLength(0);
+  });
+
+  it('keeps the legacy seed fallback when the group was never initialized', () => {
+    const legacy = { ...seedDoc(), props: {} };
+    const model = readButtonGroup(legacy, 'links', bioLinks);
+
+    expect(model.canonical).toBe(false);
+    expect(model.items).toHaveLength(4);
+  });
+
+  it('does not hydrate seeds for an explicitly empty canonical group', () => {
+    const empty = {
+      ...seedDoc(),
+      props: { 'block:links': { buttonGroupInitialized: '1', buttonGroupOrder: '' } },
+    };
+    const model = readButtonGroup(empty, 'links', bioLinks);
+
+    expect(model.items).toHaveLength(0);
+    expect(model.canonical).toBe(true);
+  });
+
+  it('deletes one of two buttons and keeps exactly one', () => {
+    const two = {
+      ...seedDoc(),
+      props: {
+        'block:links': { buttonGroupInitialized: '1', buttonGroupOrder: 'btn_a,btn_b' },
+        'links.btn_a': { label: 'A', href: 'https://a.com' },
+        'links.btn_b': { label: 'B', href: 'https://b.com' },
+      },
+    };
+    const doc = deleteButton(two, collection, 'btn_a');
+    const model = readButtonGroup(doc, 'links', bioLinks);
+
+    expect(model.order).toEqual(['btn_b']);
+    expect(model.items).toHaveLength(1);
+  });
+
+  it('returns the same document when the id does not exist', () => {
+    const two = {
+      ...seedDoc(),
+      props: {
+        'block:links': { buttonGroupInitialized: '1', buttonGroupOrder: 'btn_a,btn_b' },
+        'links.btn_a': { label: 'A', href: 'https://a.com' },
+        'links.btn_b': { label: 'B', href: 'https://b.com' },
+      },
+    };
+    expect(deleteButton(two, collection, 'missing')).toBe(two);
+  });
+
+  it('allows adding a button again after the group became empty', () => {
+    const emptied = {
+      ...seedDoc(),
+      props: { 'block:links': { buttonGroupInitialized: '1', buttonGroupOrder: '' } },
+    };
+    const doc = addButton(emptied, collection, 'Renacido');
+    const model = readButtonGroup(doc, 'links', bioLinks);
+
+    expect(model.items).toHaveLength(1);
+    expect(model.items[0]!.label).toBe('Renacido');
+    expect(doc.props[canonicalScope('links', 'btn_1')]).toMatchObject({ label: 'Renacido' });
   });
 
   it('reorders the collection and updates the reported position', () => {

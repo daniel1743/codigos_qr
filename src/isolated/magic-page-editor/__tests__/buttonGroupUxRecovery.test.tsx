@@ -40,6 +40,7 @@ function Probe() {
       <button data-testid="select-2" onClick={() => ed.select('links.1')} />
       <button data-testid="select-group" onClick={() => ed.select('block:links')} />
       <button data-testid="undo" onClick={() => ed.undo()} />
+      <button data-testid="redo" onClick={() => ed.redo()} />
       <div data-testid="design-panel">{design?.panel}</div>
       <div data-testid="content-panel">{content?.panel}</div>
       <div data-testid="manage-panel">{manage?.panel}</div>
@@ -150,6 +151,52 @@ describe('Button group UX recovery', () => {
     expect(text('order')).toBe('legacy-0|legacy-1|legacy-3');
     click('undo');
     expect(text('order')).toBe('legacy-0|legacy-1|legacy-2|legacy-3');
+  });
+
+  it('deletes the last button, persists zero and can add + undo again', () => {
+    click('select-group');
+    const panel = host.querySelector('[data-testid="manage-panel"]')!;
+
+    const confirmDelete = (label: string) => {
+      act(() => {
+        panel.querySelector<HTMLButtonElement>(`[aria-label^="Eliminar ${label}"]`)!.click();
+      });
+      const confirm = Array.from(panel.querySelectorAll('button')).find(
+        (button) => button.textContent?.trim() === 'Sí, eliminar',
+      )!;
+      act(() => {
+        confirm.click();
+      });
+    };
+
+    confirmDelete('Botón 4 de 4');
+    confirmDelete('Botón 3 de 3');
+    confirmDelete('Botón 2 de 2');
+    confirmDelete('Botón 1 de 1');
+
+    expect(text('order')).toBe('');
+    expect(text('manage-panel')).toContain('Este grupo no tiene botones.');
+
+    /* Adding again after empty must work and must not resurrect the old seeds. */
+    act(() => {
+      const add = Array.from(panel.querySelectorAll('button')).find(
+        (button) => button.textContent?.trim().includes('Añadir botón'),
+      )!;
+      add.click();
+    });
+    expect(text('order')).toBe('btn_1');
+
+    /* Undo restores the emptied state, then the deleted button. */
+    click('undo');
+    expect(text('order')).toBe('');
+    click('undo');
+    expect(text('order')).toBe('legacy-0');
+
+    /* Redo removes the last button again. */
+    click('redo');
+    expect(text('order')).toBe('');
+    click('redo');
+    expect(text('order')).toBe('btn_1');
   });
 });
 

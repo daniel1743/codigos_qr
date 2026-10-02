@@ -16,7 +16,7 @@ import {
   suggestButtonIcon,
   type LegacyButtonSeed } from
 '../../utils/buttonGroup';
-import { addButton, canDeleteButton, deleteButton, duplicateButton, moveButton } from '../../utils/buttonOps';
+import { addButton, deleteButton, duplicateButton, moveButton } from '../../utils/buttonOps';
 
 interface ButtonRosterProps {
   blockKey: string;
@@ -48,11 +48,14 @@ export function ButtonRoster({ blockKey, seeds }: ButtonRosterProps) {
   };
 
   const remove = (stableId: string) => {
-    if (!canDeleteButton(readButtonGroup(ed.doc, blockKey, seeds))) {
-      toast.error('Debe existir al menos un botón.');
-      return;
-    }
-    ed.updateDoc((doc) => deleteButton(doc, collection, stableId));
+    const before = ed.doc;
+    let changed = false;
+    ed.updateDoc((doc) => {
+      const next = deleteButton(doc, collection, stableId);
+      changed = next !== doc;
+      return next;
+    });
+    if (!changed && ed.doc === before) return;
     toast('Botón eliminado', { action: { label: 'Deshacer', onClick: () => ed.undo() } });
   };
 
@@ -68,6 +71,11 @@ export function ButtonRoster({ blockKey, seeds }: ButtonRosterProps) {
         </button>
 
         <ul className="mt-3 space-y-2">
+          {total === 0 &&
+          <li className="rounded-xl border border-dashed border-line px-3 py-6 text-center">
+              <p className="text-[12.5px] font-medium text-ink-soft">Este grupo no tiene botones.</p>
+              <p className="mt-0.5 text-[11.5px] text-mute">Usa «Añadir botón» para crear el primero.</p>
+            </li>}
           {model.items.map((item, index) => {
             const identity = buttonIdentity(model, item.stableId);
             const iconId = normalizeButtonIcon(item.icon) ?? suggestButtonIcon(item.href, item.label);

@@ -60,7 +60,7 @@ export function BioTemplate() {
     switch (b.type) {
       case 'hero':
         return <Block key={b.key} block={b} defaultSpacing="none">
-            <HeroFrame id={`block:${b.key}`} media={images.bioHero} mediaAlt="Costa mediterránea al atardecer" defaultVariant="centered" defaultShape="curve" radius={t.radius} avatarOverlap={m ? 60 : 80} decor={<EditableText id={`${p}hero.script`} value={bioProfile.script} label="Frase" as="span" className={cx('absolute rounded-full bg-white/85 px-3.5 py-1.5 italic text-[#2A2521]', m ? 'right-4 top-4 text-[15px]' : 'right-6 top-6 text-[18px]')} style={display} />} avatar={<EditableAvatar id={`${p}avatar`} src={images.bioAvatar} alt="Marina Solé" sizes={m ? {
+            <HeroFrame id={`block:${b.key}`} media={images.bioHero} mediaAlt="Costa mediterránea al atardecer" defaultVariant="centered" defaultShape="curve" radius={t.radius} avatarOverlap={m ? 60 : 80} decor={<EditableText id={`${p}hero.script`} value={bioProfile.script} label="Frase" as="span" className={cx('absolute rounded-full px-3.5 py-1.5 italic', m ? 'right-4 top-4 text-[15px]' : 'right-6 top-6 text-[18px]')} style={{ ...display, background: t.page.surface, color: t.page.fg }} />} avatar={<EditableAvatar id={`${p}avatar`} src={images.bioAvatar} alt="Marina Solé" sizes={m ? {
             S: 92,
             M: 116,
             L: 140

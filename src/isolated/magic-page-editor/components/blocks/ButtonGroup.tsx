@@ -65,6 +65,14 @@ export function ButtonGroup({ blockKey, seeds, variants, maxWidth = 640, classNa
 
   return (
     <div className={cx('mx-auto flex w-full flex-col', gap, align, className)} style={{ maxWidth }} data-button-group={blockKey} data-button-group-canonical={group.canonical ? 'true' : 'false'}>
+      {group.items.length === 0 &&
+      <div
+        role="note"
+        className="flex w-full flex-col items-center gap-1 rounded-2xl border border-dashed border-line/80 px-4 py-6 text-center"
+        data-button-group-empty="true">
+          <span className="text-[13px] font-medium text-ink-soft">Sin botones</span>
+          <span className="text-[11.5px] text-mute">Añade un botón desde el editor para que aparezca aquí.</span>
+        </div>}
       {group.items.map((item) => {
         const explicitIcon = normalizeButtonIcon(item.icon);
         const iconId = explicitIcon === 'none' ? undefined : explicitIcon ?? suggestButtonIcon(item.href, item.label, `${item.sub ?? ''} ${semanticContext}`);

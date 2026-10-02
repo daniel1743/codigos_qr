@@ -78,7 +78,7 @@ import { resolveSeparatorStyle } from "../blocks/SeparatorBlock";
 import { QuickProfileInfoPanel } from "./controls/QuickProfileInfoPanel";
 import { IconPicker, iconLibrary } from "./controls/IconPicker";
 import { socialPlatforms } from "../../data/socialPlatforms";
-import { addButton, canDeleteButton, deleteButton, moveButton } from "../../utils/buttonOps";
+import { addButton, deleteButton, moveButton } from "../../utils/buttonOps";
 import {
   buttonCollectionFor,
   buttonIdentity,
@@ -733,11 +733,13 @@ export function useSelectionActions(): EditorAction[] {
           ed.removeElement(id, sel.label);
           return;
         }
-        if (!canDeleteButton(model)) {
-          toast.error("Debe existir al menos un botón.");
-          return;
-        }
-        ed.updateDoc((doc) => deleteButton(doc, collection, item.stableId));
+        let changed = false;
+        ed.updateDoc((doc) => {
+          const next = deleteButton(doc, collection, item.stableId);
+          changed = next !== doc;
+          return next;
+        });
+        if (!changed) return;
         toast("Botón eliminado", { action: { label: "Deshacer", onClick: () => ed.undo() } });
       };
 
@@ -1188,6 +1190,20 @@ export function useSelectionActions(): EditorAction[] {
                   ]}
                   value={(ed.doc.props[scope]?.socialFill as SocialFill) ?? "filled"}
                   onChange={(v) => ed.setProp(scope, "socialFill", v)}
+                />
+              </PanelSection>
+              <PanelSection title="Color de la burbuja">
+                <SwatchRow
+                  value={ed.doc.props[scope]?.socialBubbleColor as string | undefined}
+                  onChange={(c) => ed.setProp(scope, "socialBubbleColor", c)}
+                  colors={t.swatches}
+                />
+              </PanelSection>
+              <PanelSection title="Color del ícono">
+                <SwatchRow
+                  value={ed.doc.props[scope]?.socialIconColor as string | undefined}
+                  onChange={(c) => ed.setProp(scope, "socialIconColor", c)}
+                  colors={t.swatches}
                 />
               </PanelSection>
               <PanelSection title="Tamaño">
@@ -1647,7 +1663,7 @@ export function useSelectionActions(): EditorAction[] {
           panel: (
             <PalettePicker
               value={ed.doc.props["page"]?.["palette"]}
-              onChange={(v) => ed.setProp("page", "palette", v)}
+              onChange={(v) => { ed.setProp("page", "palette", v); ed.setProp("page", "bgOverride", undefined); }}
               textColor={ed.doc.props["page"]?.["textColor"]}
               onTextColorChange={(v) => ed.setProp("page", "textColor", v || "")}
               swatches={t.swatches}

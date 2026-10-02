@@ -47,9 +47,17 @@ describe('M2.4 Master Card parity controls', () => {
     act(() => cta.root.unmount());
   });
 
-  it('keeps six named card palettes and eight distinct reference compositions in the Magic contract', () => {
-    expect(visualPalettes.map((palette) => palette.id)).toEqual(['cream', 'black', 'teal', 'sage', 'silver', 'caramel']);
-    expect(Object.keys(cardPaletteTokens)).toEqual(['cream', 'black', 'teal', 'sage', 'silver', 'caramel']);
+  it('keeps the expanded named card palettes and eight distinct reference compositions in the Magic contract', () => {
+    expect(visualPalettes.map((palette) => palette.id)).toEqual([
+      'cream', 'black', 'teal', 'sage', 'silver', 'caramel',
+      'red-energy', 'amber-sunny', 'lavender-soft', 'purple-editorial', 'cyan-electric',
+      'mono-editorial', 'ice-blue', 'emerald-deep', 'terracotta', 'neon-dark'
+    ]);
+    expect(Object.keys(cardPaletteTokens)).toEqual([
+      'cream', 'black', 'teal', 'sage', 'silver', 'caramel',
+      'red-energy', 'amber-sunny', 'lavender-soft', 'purple-editorial', 'cyan-electric',
+      'mono-editorial', 'ice-blue', 'emerald-deep', 'terracotta', 'neon-dark'
+    ]);
     expect(referenceLayoutOptions.map((option) => option.value)).toEqual([
       'cover', 'textOnly', 'iconText', 'image25', 'image40', 'imageRight', 'split', 'backgroundImage'
     ]);

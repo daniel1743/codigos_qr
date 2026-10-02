@@ -37,14 +37,17 @@ export function EditableSocial({ id, platform, href, size = 44, defaultStyle = '
   const p = doc.props[id] ?? {};
   const pf = p.platform as SocialPlatform ?? platform;
 
+  const customBubble = doc.props[scope]?.['socialBubbleColor'] as string | undefined;
+  const customIcon = doc.props[scope]?.['socialIconColor'] as string | undefined;
+
   const shape: React.CSSProperties =
-  fill === 'plain' || style === 'plain' ? { color: 'var(--fg)' } :
-  fill === 'outline' ? { borderRadius: 12, border: '1px solid var(--line)', color: 'var(--fg)' } :
+  fill === 'plain' || style === 'plain' ? { color: customIcon || 'var(--fg)' } :
+  fill === 'outline' ? { borderRadius: 12, border: `1px solid ${customBubble || 'var(--line)'}`, color: customIcon || 'var(--fg)' } :
   style === 'circle' || socialShape === 'circle' ?
-  { borderRadius: 9999, border: '1px solid var(--line)', background: 'var(--surface)', color: 'var(--fg)' } :
+  { borderRadius: 9999, border: `1px solid ${customBubble || 'var(--line)'}`, background: customBubble || 'var(--surface)', color: customIcon || 'var(--fg)' } :
   style === 'square' ?
-  { borderRadius: socialShape === 'square' ? 0 : Math.round(renderedSize * 0.28), background: 'var(--fg)', color: 'var(--surface)' } :
-  { color: 'var(--fg)' };
+  { borderRadius: socialShape === 'square' ? 0 : Math.round(renderedSize * 0.28), background: customBubble || 'var(--fg)', color: customIcon || 'var(--surface)' } :
+  { color: customIcon || 'var(--fg)' };
 
   return (
     <Editable

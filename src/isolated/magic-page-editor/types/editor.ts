@@ -226,6 +226,13 @@ export interface ThemeTokens extends Theme {
   page: SurfaceTone;
   displayFont: string;
   bodyFont: string;
+  media: {
+    fg: string;
+    muted: string;
+    surface: string;
+    line: string;
+    overlay: string;
+  };
 }
 
 export type TourTarget = "text" | "hero" | "avatar" | "cta" | "card" | "gallery" | "section";

@@ -8,7 +8,11 @@ import { SwatchRow } from './SwatchRow';
 
 export function PalettePicker({ value, onChange, textColor, onTextColorChange, swatches = ['#111111', '#FFFFFF', '#6F5A48', '#1F4E57', '#3A3D44'] }: { value?: string | undefined; onChange: (value: string) => void; textColor?: string; onTextColorChange?: (v: string | undefined) => void; swatches?: string[] }) {
   return <div className="space-y-4">
-    <div className="grid grid-cols-2 gap-2">
+    <div className="flex items-center justify-between">
+      <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-mute">{visualPalettes.length} paletas disponibles</p>
+      <span className="text-[11px] text-mute">Desliza para ver todas</span>
+    </div>
+    <div data-palette-grid className="grid max-h-[360px] grid-cols-2 gap-2 overflow-y-auto pr-1">
     {visualPalettes.map((palette) => <button key={palette.id} type="button" aria-pressed={value === palette.id} onClick={() => onChange(palette.id)} className={cx('rounded-xl border p-2 text-left', value === palette.id ? 'border-select bg-select-soft' : 'border-line')}>
       <span className="mb-2 flex h-8 overflow-hidden rounded-lg">
         {palette.swatches.slice(0, 4).map((color) => <span key={color} className="flex-1" style={{ background: color }} />)}

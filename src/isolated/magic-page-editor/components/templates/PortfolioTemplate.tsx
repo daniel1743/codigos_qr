@@ -61,8 +61,8 @@ export function PortfolioTemplate() {
               radius={t.radius}
               decor={
               <div className={cx('absolute inset-x-0 top-0 flex items-center justify-between', m ? 'px-5 pt-5' : 'px-14 pt-8')}>
-                  <EditableText id={`${p}hero.studio`} value={pfProfile.studio} as="span" label="Marca" className={cx('italic text-[#F7F4EE]', m ? 'text-[20px]' : 'text-[24px]')} style={display} />
-                  <EditableText id={`${p}hero.place`} value={pfProfile.place} as="span" label="Lugar y año" className="text-[11.5px] uppercase tracking-[0.2em] text-[#F7F4EE]/80" />
+                  <EditableText id={`${p}hero.studio`} value={pfProfile.studio} as="span" label="Marca" className={cx('italic', m ? 'text-[20px]' : 'text-[24px]')} style={{ ...display, color: t.media.fg }} />
+                  <EditableText id={`${p}hero.place`} value={pfProfile.place} as="span" label="Lugar y año" className="text-[11.5px] uppercase tracking-[0.2em]" style={{ color: t.media.muted }} />
                 </div>
               }
               avatar={
@@ -71,9 +71,9 @@ export function PortfolioTemplate() {
                 src={images.pfAvatar}
                 alt="Andrés Olmo"
                 sizes={m ? { S: 44, M: 56, L: 72 } : { S: 52, M: 68, L: 88 }}
-                ringColor="#ECE6DB"
+                ringColor={t.page.color}
                 ringWidth={2}
-                badgeColor="#121211" />
+                badgeColor={t.accent} />
 
               }>
               

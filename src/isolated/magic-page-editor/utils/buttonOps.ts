@@ -1,5 +1,7 @@
 import type { PageDoc } from '../types/editor';
 import {
+  BUTTON_GROUP_INITIALIZED,
+  BUTTON_GROUP_INITIALIZED_VALUE,
   BUTTON_GROUP_ORDER,
   canonicalScope,
   ensureCanonicalButtonGroup,
@@ -18,9 +20,24 @@ function canonicalOf(doc: PageDoc, collection: ButtonCollection): PageDoc {
   return ensureCanonicalButtonGroup(doc, readButtonGroup(doc, collection.blockKey, collection.seeds));
 }
 
+/**
+ * Persists the order AND the initialized marker. The marker is what makes an
+ * empty order survive: without it, `readButtonGroup` would treat the empty
+ * order as legacy and resurrect the seeds.
+ */
 function withOrder(doc: PageDoc, blockKey: string, order: string[]): PageDoc {
   const id = `block:${blockKey}`;
-  return { ...doc, props: { ...doc.props, [id]: { ...doc.props[id], [BUTTON_GROUP_ORDER]: order.join(',') } } };
+  return {
+    ...doc,
+    props: {
+      ...doc.props,
+      [id]: {
+        ...doc.props[id],
+        [BUTTON_GROUP_INITIALIZED]: BUTTON_GROUP_INITIALIZED_VALUE,
+        [BUTTON_GROUP_ORDER]: order.join(','),
+      },
+    },
+  };
 }
 
 /**
@@ -38,6 +55,7 @@ export function addButton(doc: PageDoc, collection: ButtonCollection, label = 'N
       ...canonical.props,
       [`block:${collection.blockKey}`]: {
         ...canonical.props[`block:${collection.blockKey}`],
+        [BUTTON_GROUP_INITIALIZED]: BUTTON_GROUP_INITIALIZED_VALUE,
         [BUTTON_GROUP_ORDER]: [...model.order, stableId].join(','),
       },
       [scope]: { label, href: 'https://', icon: 'none', isPrimary: 'off' },
@@ -86,13 +104,14 @@ export function duplicateButton(doc: PageDoc, collection: ButtonCollection, stab
 }
 
 /**
- * Removes one button from the order. The last button of a group is never removed:
- * callers must explain that to the user instead of silently doing nothing.
+ * Removes one button from the order. Removing the last remaining button is
+ * allowed: it persists an explicitly empty, initialized group so the legacy
+ * seeds do NOT come back. Returns the same document when nothing changed.
  */
 export function deleteButton(doc: PageDoc, collection: ButtonCollection, stableId: string): PageDoc {
   const canonical = canonicalOf(doc, collection);
   const model = readButtonGroup(canonical, collection.blockKey, collection.seeds);
-  if (model.items.length <= 1) return doc;
+  if (!model.order.includes(stableId)) return doc;
   return withOrder(canonical, collection.blockKey, model.order.filter((id) => id !== stableId));
 }
 
@@ -112,7 +131,7 @@ export function moveButton(
   return withOrder(canonical, collection.blockKey, order);
 }
 
-/** A group must keep at least one button. */
-export function canDeleteButton(model: ButtonGroupModel): boolean {
+/** Zero buttons is a valid state: a group can always be emptied. */
+export function canDeleteButton(_model: ButtonGroupModel): boolean {
   return true;
 }

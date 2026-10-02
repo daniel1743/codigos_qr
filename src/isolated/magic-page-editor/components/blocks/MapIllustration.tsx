@@ -5,17 +5,19 @@ import { useEditor } from '../../contexts/EditorContext';
 interface MapIllustrationProps {
   accent: string;
   radius: number;
+  background?: string;
+  foreground?: string;
 }
 
 /** A calm, on-brand map placeholder (streets drawn with the section's own line color). */
-export function MapIllustration({ accent, radius }: MapIllustrationProps) {
+export function MapIllustration({ accent, radius, background = '#0B0B0A', foreground = '#FBF7EF' }: MapIllustrationProps) {
   const { isMobile } = useEditor();
   const id = React.useId().replace(/:/g, '');
   const fadeId = `luxury-map-fade-${id}`;
   const glowId = `luxury-map-glow-${id}`;
 
   return (
-    <div data-map-style="refined-map" className="relative aspect-[16/10] w-full overflow-hidden" style={{ borderRadius: radius, background: '#0B0B0A', boxShadow: `inset 0 0 0 1px ${accent}55` }}>
+    <div data-map-style="refined-map" className="relative aspect-[16/10] w-full overflow-hidden" style={{ borderRadius: radius, background, boxShadow: `inset 0 0 0 1px ${accent}55` }}>
       <svg viewBox="0 0 400 250" className="absolute inset-0 h-full w-full" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
         <defs>
           <linearGradient id={fadeId} x1="0" y1="0" x2="1" y2="0">
@@ -33,7 +35,7 @@ export function MapIllustration({ accent, radius }: MapIllustrationProps) {
             <rect width="400" height="250" fill={`url(#${fadeId})`} />
           </mask>
         </defs>
-        <rect width="400" height="250" fill="#0B0B0A" />
+        <rect width="400" height="250" fill={background} />
         <g mask={`url(#${fadeId}-mask)`} fill="none" stroke={accent} strokeLinecap="round">
           <g strokeWidth="1.8" opacity="0.27">
             <path d="M-20 48 L66 42 C102 40 123 58 157 61 L252 70 C297 75 335 59 430 43" />
@@ -58,7 +60,7 @@ export function MapIllustration({ accent, radius }: MapIllustrationProps) {
       <div className="absolute left-[58%] top-[43%] -translate-x-1/2 -translate-y-1/2">
         <span className="absolute -inset-2 rounded-full border" style={{ borderColor: `${accent}40` }} aria-hidden="true" />
         <span className="relative grid h-12 w-12 place-items-center rounded-full shadow-[0_8px_24px_rgba(0,0,0,0.32)]" style={{ background: accent }}>
-          <MapPinIcon className="h-5 w-5 text-[#FBF7EF]" strokeWidth={1.8} />
+          <MapPinIcon className="h-5 w-5" color={foreground} strokeWidth={1.8} />
         </span>
       </div>
     </div>);

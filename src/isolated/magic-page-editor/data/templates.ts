@@ -21,9 +21,16 @@ export const templates: Record<TemplateId, TemplateMeta> = {
       { id: 'arena', label: 'Arena', color: '#ECE3D5', fg: '#2A2521', muted: '#6F655B', surface: '#F7F2EA', line: '#DDD1BF' },
       { id: 'blanco', label: 'Blanco', color: '#FFFFFF', fg: '#2A2521', muted: '#7A6F65', surface: '#F6F1EA', line: '#ECE5DA' },
       { id: 'oliva', label: 'Oliva', color: '#56604A', fg: '#F6F2EA', muted: '#D4D6C8', surface: '#626D55', line: '#6E785F' },
-      { id: 'tinta', label: 'Tinta', color: '#2A2521', fg: '#F5F0E8', muted: '#B9AEA2', surface: '#362F2A', line: '#463E37' }],
+      { id: 'tinta', label: 'Tinta', color: '#2A2521', fg: '#F5F0E8', muted: '#B9AEA2', surface: '#362F2A', line: '#463E37' },
+      { id: 'mar', label: 'Mar', color: '#1B2A3A', fg: '#F5F5F5', muted: '#A0B0C0', surface: '#243547', line: '#3A4D61' },
+      { id: 'bosque', label: 'Bosque', color: '#2D3A2C', fg: '#E8EDE7', muted: '#9DAF9B', surface: '#384837', line: '#4F614E' },
+      { id: 'vino', label: 'Vino', color: '#4A1D23', fg: '#F7EBEB', muted: '#B8868A', surface: '#5E272F', line: '#7A3D46' },
+      { id: 'coral', label: 'Coral', color: '#F7E1D7', fg: '#3A2018', muted: '#A37E70', surface: '#FFF0EA', line: '#E8C7B8' },
+      { id: 'lavanda', label: 'Lavanda', color: '#EBE5F2', fg: '#2A1F3D', muted: '#857899', surface: '#F5F1FA', line: '#D5CBE6' },
+      { id: 'gris', label: 'Gris', color: '#F3F4F6', fg: '#1F2937', muted: '#6B7280', surface: '#FFFFFF', line: '#E5E7EB' },
+      { id: 'noche', label: 'Noche', color: '#0F172A', fg: '#F8FAFC', muted: '#94A3B8', surface: '#1E293B', line: '#334155' }],
 
-      pageTones: ['crema', 'arena', 'blanco'],
+      pageTones: ['crema', 'arena', 'blanco', 'oliva', 'tinta', 'mar', 'bosque', 'vino', 'coral', 'lavanda', 'gris', 'noche'],
       fonts: [
       { id: 'editorial', label: 'Editorial', display: "'Cormorant Garamond', serif", body: "'Inter', sans-serif" },
       { id: 'moderna', label: 'Moderna', display: "'Manrope', sans-serif", body: "'Manrope', sans-serif" },

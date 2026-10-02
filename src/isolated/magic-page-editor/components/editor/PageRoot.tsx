@@ -60,7 +60,7 @@ export function PageRoot({ children, className }: PageRootProps) {
       data-page-family={family}
       data-page-variant={variant}
       className={cx('relative flex w-full flex-1 flex-col', `page-family-${family}`, `page-variant-${variant}`, className)}
-      style={{ ...toneVars(t.page), '--accent': t.accent, '--accent-fg': t.accentFg, background: t.page.color, color: 'var(--fg)', fontFamily: t.bodyFont, '--page-content-width': `${profile.width}px`, '--page-variant-scale': profile.scale } as React.CSSProperties}>
+      style={{ ...toneVars(t.page), '--accent': t.accent, '--accent-fg': t.accentFg, '--media-fg': t.media.fg, '--media-muted': t.media.muted, '--media-surface': t.media.surface, '--media-line': t.media.line, '--media-overlay': t.media.overlay, background: t.page.color, color: 'var(--fg)', fontFamily: t.bodyFont, '--page-content-width': `${profile.width}px`, '--page-variant-scale': profile.scale } as React.CSSProperties}>
       <DecorationLayer />
       {children}
     </Editable>);
@@ -71,5 +71,6 @@ export function useFooterTone(): React.CSSProperties {
   const { doc } = useEditor();
   const t = useThemeTokens();
   const tone = t.tones.find((x) => x.id === doc.props.footer?.bg);
-  return tone ? { ...toneVars(tone), background: tone.color } : {};
+  const resolved = doc.props.page?.palette ? t.page : tone;
+  return resolved ? { ...toneVars(resolved), background: resolved.color } : {};
 }

@@ -80,4 +80,22 @@ describe('canonical ButtonGroup contract', () => {
     expect(state.doc.props['links.0']?.variant).toBeUndefined();
     act(() => root.unmount());
   });
+
+  it('renders an explicitly empty group safely, without falling back to seeds', () => {
+    const state = createInitialMagicEditorState('bio');
+    state.doc.props['block:links'] = {
+      ...state.doc.props['block:links'],
+      buttonGroupInitialized: '1',
+      buttonGroupOrder: '',
+    };
+    const host = document.createElement('div');
+    const root = createRoot(host);
+    act(() => root.render(React.createElement(EditorProvider, { initialDocument: state }, React.createElement(TemplateRenderer))));
+
+    const group = host.querySelector('[data-button-group="links"]');
+    expect(group).not.toBeNull();
+    expect(host.querySelectorAll('[data-button-group="links"] a')).toHaveLength(0);
+    expect(host.querySelector('[data-button-group="links"] [data-button-group-empty="true"]')).not.toBeNull();
+    act(() => root.unmount());
+  });
 });

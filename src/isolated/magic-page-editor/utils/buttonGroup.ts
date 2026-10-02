@@ -4,6 +4,14 @@ import { bioLinks, singleButtonSeed } from '../data/bioContent';
 export const BUTTON_GROUP_ORDER = 'buttonGroupOrder';
 export const BUTTON_GROUP_VERSION = 'buttonGroupVersion';
 export const BUTTON_GROUP_VERSION_VALUE = '1';
+/**
+ * Explicit marker meaning "this group was already materialised by the editor".
+ * It is the ONLY way to tell an intentionally empty group (the user deleted the
+ * last button) apart from a legacy block that never had a canonical order.
+ * Without it, an empty `buttonGroupOrder` would resurrect the legacy seeds.
+ */
+export const BUTTON_GROUP_INITIALIZED = 'buttonGroupInitialized';
+export const BUTTON_GROUP_INITIALIZED_VALUE = '1';
 /** Preset currently applied to the group style (surfaced so the control can show its state). */
 export const BUTTON_GROUP_PRESET = 'groupCardCtaPreset';
 
@@ -62,9 +70,11 @@ export function readButtonGroup(doc: PageDoc, blockKey: string, seeds: LegacyBut
   const groupScope = `block:${blockKey}`;
   const groupProps = doc.props[groupScope] ?? {};
   const order = (groupProps[BUTTON_GROUP_ORDER] ?? '').split(',').map((value) => value.trim()).filter(Boolean);
+  /* An initialized-but-empty group is a valid state: the user deleted every button. */
+  const initialized = groupProps[BUTTON_GROUP_INITIALIZED] === BUTTON_GROUP_INITIALIZED_VALUE;
   if (order.length === 0) {
-    const items = seeds.map((seed, index) => legacyItem(doc, index, seed, blockKey));
-    return { blockKey, scope: groupScope, order: items.map((item) => item.stableId), items, groupProps, canonical: false };
+    const items = initialized ? [] : seeds.map((seed, index) => legacyItem(doc, index, seed, blockKey));
+    return { blockKey, scope: groupScope, order: items.map((item) => item.stableId), items, groupProps, canonical: initialized };
   }
 
   const items = order.map((stableId) => {
@@ -88,7 +98,7 @@ export function readButtonGroup(doc: PageDoc, blockKey: string, seeds: LegacyBut
 /** Converts the current in-memory view to the canonical contract without deleting legacy props. */
 export function ensureCanonicalButtonGroup(doc: PageDoc, model: ButtonGroupModel): PageDoc {
   if (model.canonical) return doc;
-  const props = { ...doc.props, [model.scope]: { ...model.groupProps, [BUTTON_GROUP_VERSION]: BUTTON_GROUP_VERSION_VALUE, [BUTTON_GROUP_ORDER]: model.order.join(',') } };
+  const props = { ...doc.props, [model.scope]: { ...model.groupProps, [BUTTON_GROUP_VERSION]: BUTTON_GROUP_VERSION_VALUE, [BUTTON_GROUP_INITIALIZED]: BUTTON_GROUP_INITIALIZED_VALUE, [BUTTON_GROUP_ORDER]: model.order.join(',') } };
   const texts = { ...doc.texts };
   /* Per-line styles (alignment, size, colour) travel with the item, exactly like labels and hrefs. */
   const textStyles = { ...doc.textStyles };
