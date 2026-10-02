@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 import { getServerSupabaseClient } from "../lib/supabase/server";
 import { pageService } from "../services/page.service";
 import { getBrowserCanonicalWriter } from "../lib/analytics/browser";
+import { getOrCreateAnalyticsCampaignContext } from "../lib/analytics";
 
 /**
  * REAL QR SCAN REDIRECT BOUNDARY (C2B4B).
@@ -42,11 +43,13 @@ function QrScanRedirect() {
     emitted.current = true;
 
     void (async () => {
+      const campaignContext = getOrCreateAnalyticsCampaignContext();
       await getBrowserCanonicalWriter().track({
         eventType: "qr_scan",
         publicId: page.public_id,
         qrId: page.public_id,
         source: "qr",
+        ...campaignContext,
       });
       navigate({ to: "/pg/$publicId", params: { publicId: page.public_id } });
     })();

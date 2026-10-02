@@ -9,7 +9,11 @@ import { analyticsService } from "../services/analyticsService";
 import type { PageAnalyticsInteraction } from "../types/analytics";
 import { readDirectPageEnvelope } from "../lib/canonical-page";
 import { DirectPageRenderer } from "../components/direct-page-editor/DirectPageRenderer";
-import { isCanonicalAnalyticsEnabled, resolveCanonicalClickType } from "../lib/analytics";
+import {
+  getOrCreateAnalyticsCampaignContext,
+  isCanonicalAnalyticsEnabled,
+  resolveCanonicalClickType,
+} from "../lib/analytics";
 import { getBrowserCanonicalWriter } from "../lib/analytics/browser";
 import { isMagicPageDocument } from "../features/magic-page-editor-production/magic-document";
 import { MagicPublicRenderer } from "../features/magic-page-editor-production/MagicPublicRenderer";
@@ -99,6 +103,7 @@ function PublicChildPage() {
       }),
     [page.public_id],
   );
+  const campaignContext = useMemo(() => getOrCreateAnalyticsCampaignContext(), []);
 
   useEffect(() => {
     if (!useCanonical) {
@@ -106,12 +111,16 @@ function PublicChildPage() {
       return;
     }
     const writer = getBrowserCanonicalWriter();
-    void writer.track({ eventType: "session_start", publicId: page.public_id });
-    void writer.track({ eventType: "page_view", publicId: page.public_id });
-  }, [page.page_id, page.public_id, useCanonical]);
+    void writer.track({
+      eventType: "session_start",
+      publicId: page.public_id,
+      ...campaignContext,
+    });
+    void writer.track({ eventType: "page_view", publicId: page.public_id, ...campaignContext });
+  }, [campaignContext, page.page_id, page.public_id, useCanonical]);
 
   const handleTrack = useCallback(
-    (event: { type: string; blockId?: string; url?: string; itemId?: string; label?: string }) => {
+    async (event: { type: string; blockId?: string; url?: string; itemId?: string; label?: string }) => {
       if (!useCanonical) {
         const interaction: PageAnalyticsInteraction | undefined =
           event.type === "product_click"
@@ -122,7 +131,7 @@ function PublicChildPage() {
                   event.url?.toLowerCase().includes("whatsapp")
                 ? "whatsapp"
                 : "button";
-        void analyticsService.trackPageEvent(
+        await analyticsService.trackPageEvent(
           getBrowserSupabaseClient(),
           page.page_id,
           "link_click",
@@ -133,19 +142,20 @@ function PublicChildPage() {
         );
         return;
       }
-      void getBrowserCanonicalWriter().track({
+      await getBrowserCanonicalWriter().track({
         eventType: resolveCanonicalClickType(event.type, event.url),
         publicId: page.public_id,
+        ...campaignContext,
         ...(event.url ? { targetUrl: event.url } : {}),
         ...(event.itemId || event.blockId ? { itemId: event.itemId ?? event.blockId } : {}),
         ...(event.label ? { itemLabel: event.label } : {}),
       });
     },
-    [page.page_id, page.public_id, useCanonical],
+    [campaignContext, page.page_id, page.public_id, useCanonical],
   );
 
   return magicDocument ? (
-    <MagicPublicRenderer document={magicDocument} />
+    <MagicPublicRenderer document={magicDocument} onTrack={handleTrack} />
   ) : directDocument ? (
     <DirectPageRenderer
       document={directDocument}
