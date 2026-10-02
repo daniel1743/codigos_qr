@@ -1,92 +1,113 @@
 import type { CardPaletteValues, PaletteFamily, PalettePreset } from "../types/editor";
 
-type FamilySpec = PaletteFamily & { hues: number[]; saturations: number[] };
-const profiles = [
-  { id: "light", page: 97, surface: 99, accent: 42 },
-  { id: "soft", page: 92, surface: 98, accent: 48 },
-  { id: "medium", page: 84, surface: 94, accent: 54 },
-  { id: "rich", page: 25, surface: 19, accent: 64 },
-  { id: "dark", page: 13, surface: 18, accent: 70 },
-  { id: "premium", page: 7, surface: 12, accent: 76 },
-] as const;
+type FamilySpec = PaletteFamily & {
+  pageBackgrounds: string[];
+  surfaces: string[];
+  secondarySurfaces: string[];
+  accents: string[];
+};
+
+const variantIds = ["light", "soft", "medium", "rich", "dark", "premium"] as const;
 
 export const colorFamilies: FamilySpec[] = [
   {
     id: "yellow-gold",
     label: "Amarillo / Gold",
     variants: ["Champagne", "Amber", "Mustard", "Gold", "Bronze", "Black Gold"],
-    hues: [38, 35, 48, 43, 28, 42],
-    saturations: [35, 78, 72, 88, 68, 82],
+    pageBackgrounds: ["#FFF1D6", "#FFD27A", "#D9A72E", "#C98A16", "#85530D", "#11100D"],
+    surfaces: ["#FFF9EC", "#FFE8B3", "#F7D979", "#F1C45B", "#9A6418", "#211A11"],
+    secondarySurfaces: ["#F6E5C4", "#EFC060", "#C98A16", "#A9690E", "#5D370D", "#2F2618"],
+    accents: ["#B77A20", "#A86608", "#8E5F00", "#F2B72E", "#D89420", "#D7A646"],
   },
   {
     id: "white-premium",
     label: "Blanco Premium",
     variants: ["Ivory", "Pearl", "Warm White", "Editorial White", "White Silver", "White Gold"],
-    hues: [42, 30, 36, 0, 215, 45],
-    saturations: [24, 12, 18, 0, 8, 28],
+    pageBackgrounds: ["#FFF8E9", "#F8F4EB", "#FFF9F0", "#FFFFFF", "#EEF1F4", "#FFF7E2"],
+    surfaces: ["#FFFFFF", "#FFFFFF", "#FFFFFF", "#FFFFFF", "#FFFFFF", "#FFFDF7"],
+    secondarySurfaces: ["#F6EEDC", "#F0EEE8", "#F8F1E7", "#F5F5F5", "#DDE2E7", "#F4E3BB"],
+    accents: ["#B8935A", "#A78B65", "#C49A6C", "#222222", "#7B8794", "#B88A2B"],
   },
   {
     id: "gray-premium",
     label: "Gris Premium",
     variants: ["Mist", "Silver", "Steel", "Graphite", "Charcoal", "Black Silver"],
-    hues: [210, 215, 205, 220, 210, 215],
-    saturations: [10, 12, 18, 18, 10, 22],
+    pageBackgrounds: ["#E9EEF2", "#D5DCE2", "#B8C2CC", "#667381", "#303A45", "#171C22"],
+    surfaces: ["#F8FAFB", "#EEF2F5", "#DDE4EA", "#4A5662", "#202932", "#252D36"],
+    secondarySurfaces: ["#D7E0E7", "#C4CED7", "#98A7B5", "#35414D", "#151B21", "#303A45"],
+    accents: ["#6E879A", "#668093", "#526B7D", "#B8C4CF", "#D6DEE6", "#BBC8D4"],
   },
   {
     id: "red",
     label: "Rojo",
     variants: ["Rose", "Coral Red", "Classic Red", "Wine", "Burgundy", "Black Red"],
-    hues: [350, 4, 0, 345, 338, 355],
-    saturations: [58, 76, 86, 68, 64, 82],
+    pageBackgrounds: ["#F8DCE2", "#F18A83", "#D83A3A", "#76283B", "#701F32", "#1D0D12"],
+    surfaces: ["#FFF3F5", "#FFD4D0", "#F5A4A0", "#A65061", "#9D344D", "#32161E"],
+    secondarySurfaces: ["#F0BEC8", "#D95755", "#B9232D", "#5A1D2E", "#4B1423", "#471D29"],
+    accents: ["#B83D58", "#B52D3A", "#9F1725", "#D8798D", "#E05A73", "#D55A72"],
   },
   {
     id: "green",
     label: "Verde",
     variants: ["Sage", "Olive", "Emerald", "Forest", "Deep Green", "Black Emerald"],
-    hues: [100, 78, 158, 145, 150, 160],
-    saturations: [28, 48, 78, 62, 72, 82],
+    pageBackgrounds: ["#DCE8D9", "#9BAE63", "#159447", "#176B3A", "#0E4B32", "#0D1713"],
+    surfaces: ["#F1F7EE", "#D6E0AE", "#7ACB9A", "#28674A", "#28674A", "#18271F"],
+    secondarySurfaces: ["#C4D6BB", "#73873A", "#087B38", "#0F4E2B", "#0A3524", "#1E3B2B"],
+    accents: ["#5E7F50", "#536B24", "#0A7335", "#39A96B", "#52B77D", "#43D98D"],
   },
   {
     id: "blue",
     label: "Azul",
     variants: ["Ice Blue", "Sky", "Royal Blue", "Cobalt", "Navy", "Black Blue"],
-    hues: [202, 200, 224, 218, 220, 216],
-    saturations: [48, 72, 86, 88, 72, 82],
+    pageBackgrounds: ["#DCEFF8", "#69BCEB", "#2457D6", "#174BC2", "#102B68", "#0A111F"],
+    surfaces: ["#F1FAFE", "#D4F0FF", "#4A6FD0", "#214BAF", "#27458A", "#17263F"],
+    secondarySurfaces: ["#C1E2F1", "#318FCE", "#1239A8", "#103594", "#0B1E4B", "#1B345A"],
+    accents: ["#4B95BF", "#1479B8", "#123DB7", "#6C8DFF", "#7FA4FF", "#4B7CFF"],
   },
   {
     id: "purple",
     label: "Morado",
     variants: ["Lavender", "Lilac", "Violet", "Purple", "Plum", "Black Purple"],
-    hues: [265, 282, 275, 270, 320, 286],
-    saturations: [48, 58, 72, 78, 58, 82],
+    pageBackgrounds: ["#EEE6FA", "#D8C4F0", "#8956C9", "#67349B", "#51204F", "#160F1F"],
+    surfaces: ["#FAF7FF", "#F0E7FA", "#7445A6", "#6A3BA0", "#753D78", "#2B1835"],
+    secondarySurfaces: ["#D8C8EE", "#B998D6", "#6739A4", "#4A237A", "#381439", "#422052"],
+    accents: ["#8560AE", "#7949A8", "#6429A8", "#B786F1", "#D18BE8", "#B76AF5"],
   },
   {
     id: "cyan-teal",
     label: "Turquesa / Cyan",
     variants: ["Aqua", "Mint Cyan", "Cyan", "Teal", "Deep Teal", "Neon Dark"],
-    hues: [188, 165, 185, 180, 174, 160],
-    saturations: [66, 56, 88, 72, 76, 86],
+    pageBackgrounds: ["#D5F3F1", "#9CE3D8", "#0ABAC2", "#147F86", "#0D5962", "#0A1718"],
+    surfaces: ["#F0FFFD", "#D8F8F1", "#73E0DC", "#0E6870", "#247A7D", "#183034"],
+    secondarySurfaces: ["#B8E4DD", "#5BC7B8", "#078E97", "#0B5F68", "#0A3C44", "#1B4A4F"],
+    accents: ["#2A9993", "#168F7C", "#007B86", "#51D5D1", "#4BC9C3", "#5CFFD6"],
   },
   {
     id: "earth",
     label: "Tierra",
     variants: ["Sand", "Clay", "Terracotta", "Rust", "Chocolate", "Dark Earth"],
-    hues: [35, 24, 18, 14, 25, 20],
-    saturations: [44, 58, 70, 78, 62, 72],
+    pageBackgrounds: ["#F3E3CC", "#D6A77D", "#C36E45", "#A9492B", "#5A321F", "#21130E"],
+    surfaces: ["#FFF7EA", "#F0D4B6", "#E6A27D", "#8B3D23", "#875035", "#372219"],
+    secondarySurfaces: ["#E6CBAA", "#B97A4F", "#9F452B", "#7B301E", "#3D2117", "#4A2A1D"],
+    accents: ["#A97843", "#95562E", "#9E3D20", "#D17A4E", "#D28A50", "#B85B35"],
   },
   {
     id: "pink",
     label: "Rosa",
     variants: ["Blush", "Dusty Rose", "Pink", "Soft Fuchsia", "Berry", "Dark Pink"],
-    hues: [350, 345, 332, 320, 335, 325],
-    saturations: [48, 42, 78, 82, 64, 86],
+    pageBackgrounds: ["#F7DEE6", "#E7B8C5", "#D9437C", "#A42A86", "#762558", "#24101F"],
+    surfaces: ["#FFF3F6", "#F8E2E9", "#ED8DB0", "#8D246F", "#9B4D7E", "#3D1D35"],
+    secondarySurfaces: ["#EBC1CC", "#C98B9E", "#B92C65", "#812060", "#531A3D", "#55234A"],
+    accents: ["#B95876", "#A9536A", "#B51F5E", "#E15AC0", "#D94C9D", "#F064C2"],
   },
   {
     id: "orange-copper",
     label: "Naranja / Cobre",
     variants: ["Peach", "Apricot", "Orange", "Copper", "Burnt Orange", "Black Copper"],
-    hues: [20, 28, 24, 22, 16, 20],
-    saturations: [58, 70, 88, 68, 78, 82],
+    pageBackgrounds: ["#FFE6D7", "#FFC29E", "#F47A2C", "#C95B20", "#A83E12", "#24130B"],
+    surfaces: ["#FFF7F0", "#FFE2CB", "#FFB57E", "#F0A06A", "#A94415", "#3D2012"],
+    secondarySurfaces: ["#F8C9AD", "#E89A68", "#D85018", "#A44417", "#6E250D", "#5B2C16"],
+    accents: ["#C16A43", "#C4682C", "#D84A0F", "#EE9255", "#FF9B48", "#FF7738"],
   },
   {
     id: "black-premium",
@@ -99,33 +120,25 @@ export const colorFamilies: FamilySpec[] = [
       "Black Emerald",
       "Black Neon",
     ],
-    hues: [0, 42, 215, 355, 158, 160],
-    saturations: [0, 82, 22, 82, 82, 88],
+    pageBackgrounds: ["#17191C", "#0E0E0C", "#171A20", "#1C0D12", "#0B1711", "#111116"],
+    surfaces: ["#25282D", "#211A10", "#252B35", "#32151E", "#14261C", "#24212D"],
+    secondarySurfaces: ["#30343A", "#352713", "#303B4A", "#4D1A28", "#1C4A30", "#3C2A4C"],
+    accents: ["#E5E7EB", "#D7A646", "#AAB8CA", "#D55A72", "#43D98D", "#D868FF"],
   },
 ];
-
-function hsl(h: number, s: number, l: number): string {
-  const a = (s * Math.min(l, 100 - l)) / 100;
-  const f = (n: number) => {
-    const k = (n + h / 30) % 12;
-    return l / 100 - a * Math.max(-1, Math.min(k - 3, Math.min(9 - k, 1)));
-  };
-  return `#${[f(0), f(8), f(4)]
-    .map((v) =>
-      Math.round(255 * v)
-        .toString(16)
-        .padStart(2, "0"),
-    )
-    .join("")}`.toUpperCase();
-}
 
 function readableOn(color: string): string {
   const rgb = color
     .match(/[A-Fa-f0-9]{2}/g)
     ?.slice(-3)
     .map((v) => parseInt(v, 16) / 255) ?? [0, 0, 0];
-  const lum = rgb.reduce((sum, value, index) => sum + value * [0.2126, 0.7152, 0.0722][index], 0);
-  return lum > 0.58 ? "#171717" : "#FFFFFF";
+  const channels = rgb.map((value) =>
+    value <= 0.03928 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4,
+  );
+  const lum = 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
+  const whiteContrast = 1.05 / (lum + 0.05);
+  const darkContrast = (lum + 0.05) / 0.05;
+  return darkContrast >= whiteContrast ? "#171717" : "#FFFFFF";
 }
 
 function mix(a: string, b: string, amount: number): string {
@@ -141,33 +154,24 @@ function mix(a: string, b: string, amount: number): string {
 }
 
 function makePalette(family: FamilySpec, index: number): PalettePreset {
-  const profile = profiles[index];
-  const accent = hsl(family.hues[index], family.saturations[index], profile.accent);
-  const page = hsl(family.hues[index], family.saturations[index], profile.page);
-  const surface = hsl(
-    family.hues[index],
-    Math.max(4, family.saturations[index] - 8),
-    profile.surface,
-  );
-  const secondarySurface = hsl(
-    family.hues[index],
-    Math.max(5, family.saturations[index] - 4),
-    Math.max(8, profile.surface - (index < 3 ? 7 : -6)),
-  );
+  const page = family.pageBackgrounds[index];
+  const surface = family.surfaces[index];
+  const secondarySurface = family.secondarySurfaces[index];
+  const accent = family.accents[index];
   const fg = readableOn(page);
   const muted = fg === "#FFFFFF" ? mix("#FFFFFF", page, 0.62) : mix("#111111", page, 0.46);
   const accentFg = readableOn(accent);
-  const line = mix(page, accent, index < 3 ? 0.18 : 0.45);
+  const line = mix(page, accent, 0.5);
   return {
-    id: `${family.id}-${profile.id}`,
+    id: `${family.id}-${variantIds[index]}`,
     label: family.variants[index],
     familyId: family.id,
-    variantId: profile.id,
+    variantId: variantIds[index],
     accent,
     accentFg,
     swatches: [page, surface, secondarySurface, accent, fg],
     page: {
-      id: `${family.id}-${profile.id}`,
+      id: `${family.id}-${variantIds[index]}`,
       label: family.variants[index],
       color: page,
       fg,

@@ -99,7 +99,6 @@ export function ButtonGroup({ blockKey, seeds, variants, maxWidth = 640, classNa
             defaultProps={{ variant: groupVariant, shape: groupShape, size: groupSize, iconPosition, kind: groupKind }}
             isPrimary={primary}
             customStyle={{ ...groupColors, ...sizeStyle, ...(primary ? PRIMARY_STYLE : {}) }}
-            forceGroupStyles={true}
             labelFill
             fullDefault={fullWidth}
             className={cx('flex items-center gap-4', hoverClass)}
