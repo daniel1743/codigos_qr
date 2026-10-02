@@ -7,7 +7,7 @@ import { MediaShapePicker } from '../components/editor/controls/MediaShapePicker
 import { SocialLayoutPicker } from '../components/editor/controls/SocialLayoutPicker';
 import { TypographyTreatmentPicker } from '../components/editor/controls/TypographyTreatmentPicker';
 import { CtaTreatmentPicker } from '../components/editor/controls/CtaTreatmentPicker';
-import { cardPaletteTokens, visualPalettes } from '../data/visualPresets';
+import { cardPaletteTokens, legacyVisualPalettes, visualPalettes } from '../data/visualPresets';
 import { referenceLayoutOptions } from '../utils/cardLayout';
 import { createInitialMagicPageDocument, hydrateMagicEditorState, serializeMagicEditorState } from '../../../features/magic-page-editor-production/magic-document';
 
@@ -47,17 +47,16 @@ describe('M2.4 Master Card parity controls', () => {
     act(() => cta.root.unmount());
   });
 
-  it('keeps the expanded named card palettes and eight distinct reference compositions in the Magic contract', () => {
-    expect(visualPalettes.map((palette) => palette.id)).toEqual([
+  it('keeps the 12 by 6 palette matrix, legacy card palettes, and eight reference compositions in the Magic contract', () => {
+    expect(visualPalettes).toHaveLength(72);
+    expect(new Set(visualPalettes.map((palette) => palette.id)).size).toBe(72);
+    for (const palette of legacyVisualPalettes) expect(cardPaletteTokens[palette.id]).toBeDefined();
+    expect(['cream', 'black', 'teal', 'sage', 'silver', 'caramel'].every((id) => cardPaletteTokens[id])).toBe(true);
+    expect(legacyVisualPalettes.map((palette) => palette.id)).toEqual(expect.arrayContaining([
       'cream', 'black', 'teal', 'sage', 'silver', 'caramel',
       'red-energy', 'amber-sunny', 'lavender-soft', 'purple-editorial', 'cyan-electric',
       'mono-editorial', 'ice-blue', 'emerald-deep', 'terracotta', 'neon-dark'
-    ]);
-    expect(Object.keys(cardPaletteTokens)).toEqual([
-      'cream', 'black', 'teal', 'sage', 'silver', 'caramel',
-      'red-energy', 'amber-sunny', 'lavender-soft', 'purple-editorial', 'cyan-electric',
-      'mono-editorial', 'ice-blue', 'emerald-deep', 'terracotta', 'neon-dark'
-    ]);
+    ]));
     expect(referenceLayoutOptions.map((option) => option.value)).toEqual([
       'cover', 'textOnly', 'iconText', 'image25', 'image40', 'imageRight', 'split', 'backgroundImage'
     ]);

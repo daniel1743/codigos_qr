@@ -203,11 +203,35 @@ export interface Theme {
 export interface PalettePreset {
   id: string;
   label: string;
+  familyId?: string;
+  variantId?: string;
   page: SurfaceTone;
   accent: string;
   accentFg: string;
   swatches: string[];
   radius?: number;
+  semantic?: PaletteSemanticTokens;
+}
+
+export interface PaletteSemanticTokens {
+  pageBackground: string;
+  surface: string;
+  secondarySurface: string;
+  text: string;
+  muted: string;
+  accent: string;
+  accentFg: string;
+  line: string;
+  ctaBackground: string;
+  ctaForeground: string;
+  iconSurface: string;
+  iconForeground: string;
+}
+
+export interface PaletteFamily {
+  id: string;
+  label: string;
+  variants: string[];
 }
 
 export interface CardPaletteValues {

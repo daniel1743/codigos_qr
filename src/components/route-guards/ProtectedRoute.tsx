@@ -8,10 +8,10 @@ type Access = "authenticated" | "admin";
 /** Route-level access guard for internal surfaces that still have a purpose. */
 export function ProtectedRoute({ access, children }: { access: Access; children: ReactNode }) {
   const navigate = useNavigate();
-  const supabase = getBrowserSupabaseClient();
   const [allowed, setAllowed] = useState<boolean | null>(null);
 
   useEffect(() => {
+    const supabase = getBrowserSupabaseClient();
     let active = true;
     void (async () => {
       const { data } = await supabase.auth.getSession();
@@ -30,7 +30,7 @@ export function ProtectedRoute({ access, children }: { access: Access; children:
     return () => {
       active = false;
     };
-  }, [access, navigate, supabase]);
+  }, [access, navigate]);
 
   if (allowed !== true) {
     return <div className="flex min-h-screen items-center justify-center text-sm text-cq-subtle">Verificando acceso…</div>;

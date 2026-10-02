@@ -950,32 +950,11 @@ export function useSelectionActions(): EditorAction[] {
         ),
       };
 
-      const quickAddAction = collection
-        ? {
-            key: "quick-add",
-            label: "Añadir otro botón",
-            icon: PlusIcon,
-            showLabel: false,
-            onClick: () => {
-              if (model) {
-                const stableId = nextButtonId(model);
-                ed.updateDoc((doc) => addButton(doc, collection));
-                toast("Botón añadido", { action: { label: "Deshacer", onClick: () => ed.undo() } });
-                window.setTimeout(
-                  () => ed.select(canonicalScope(collection.blockKey, stableId), { reveal: true }),
-                  80,
-                );
-              }
-            },
-          }
-        : null;
-
       return [
         contentAction,
         designAction,
         iconAction,
         primaryAction,
-        quickAddAction,
         moreAction,
       ].filter(Boolean) as EditorAction[];
     }

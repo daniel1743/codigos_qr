@@ -117,9 +117,11 @@ describe('Button group UX recovery', () => {
     });
 
     expect(text('align-1')).toBe('center');
-    const label = host.querySelector('[data-editor-id="links.0"] span span')?.getAttribute('style') ?? '';
+    const button = host.querySelector('[data-editor-id="links.0"]')!;
+    const spans = Array.from(button.querySelectorAll('span'));
+    const label = spans.find((span) => span.textContent === 'Colaboremos')?.getAttribute('style') ?? '';
     expect(label).toContain('text-align: center');
-    const sub = host.querySelectorAll('[data-editor-id="links.0"] span span')[1]?.getAttribute('style') ?? '';
+    const sub = spans.find((span) => span.textContent === 'Marcas, hoteles y proyectos editoriales')?.getAttribute('style') ?? '';
     expect(label).toContain('font-size: 22px');
     expect(sub).toContain('text-align: center');
   });

@@ -47,7 +47,7 @@ describe('M1 shared visual engine', () => {
     expect(host.querySelector<HTMLElement>('[data-social-layout="arc"]')).not.toBeNull();
     expect(host.querySelector<HTMLElement>('[data-decoration-layer]')?.className).toContain('pointer-events-none');
     expect(host.querySelector<HTMLElement>('[data-editor-id="collection.0.img"]')?.style.borderRadius).toBe('50%');
-    expect(host.querySelector<HTMLElement>('[data-page-family]')?.style.background).toBe('#D9DBE0');
+    expect(host.querySelector<HTMLElement>('[data-page-family]')?.style.background).toBe('#D5DCE2');
 
     act(() => root.unmount());
   });

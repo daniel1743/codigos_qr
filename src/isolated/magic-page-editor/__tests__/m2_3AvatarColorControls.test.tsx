@@ -50,13 +50,13 @@ describe('M2.3 avatar identity and custom color controls', () => {
     expect(host.textContent).toContain('Automático');
     expect(host.textContent).toContain('Más colores');
     act(() => (host.querySelector('button[aria-haspopup="dialog"]') as HTMLButtonElement).click());
-    const hex = host.querySelector('input[aria-label="Color HEX"]') as HTMLInputElement;
+    const hex = document.body.querySelector('input[aria-label="Color HEX"]') as HTMLInputElement;
     act(() => {
       const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
       setter?.call(hex, '#0B1F3A');
       hex.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText', data: '#0B1F3A' }));
     });
-    act(() => (host.querySelector('[role="dialog"] button:last-child') as HTMLButtonElement).click());
+    act(() => (document.body.querySelector('[role="dialog"] button:last-child') as HTMLButtonElement).click());
     expect(selected).toBe('#0B1F3A');
     expect(normalizeHex('#abc')).toBe('#AABBCC');
     expect(normalizeHex('blue')).toBeUndefined();

@@ -107,7 +107,13 @@ export function ButtonGroup({ blockKey, seeds, variants, maxWidth = 640, classNa
             defaultProps={{ variant: groupVariant, shape: groupShape, size: groupSize, iconPosition, kind: groupKind }}
             isPrimary={primary}
             customStyle={{ ...groupColors, ...sizeStyle, ...(primary ? PRIMARY_STYLE : {}) }}
-            forceGroupStyles={true}
+            forceGroupStyles={Boolean(
+              group.groupProps['groupCardCtaVariant'] ||
+                group.groupProps['groupCardCtaShape'] ||
+                group.groupProps['groupCardCtaSize'] ||
+                group.groupProps['groupCardCtaIconPosition'] ||
+                group.groupProps['groupCardCtaKind'],
+            )}
             labelFill
             fullDefault={fullWidth}
             className={cx('flex items-center gap-4', hoverClass)}

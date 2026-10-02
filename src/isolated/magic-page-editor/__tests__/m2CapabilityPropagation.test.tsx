@@ -45,7 +45,7 @@ describe('M2 shared capability propagation', () => {
     const { host, root } = mountTemplate(templateId, family);
     expect(host.querySelector(`[data-page-family="${family}"]`)).not.toBeNull();
     expect(host.querySelector('[data-decoration-layer]')?.className).toContain('pointer-events-none');
-    expect(host.querySelector<HTMLElement>('[data-page-family]')?.style.background).toBe('#D9DBE0');
+    expect(host.querySelector<HTMLElement>('[data-page-family]')?.style.background).toBe('#D5DCE2');
     act(() => root.unmount());
   });
 
