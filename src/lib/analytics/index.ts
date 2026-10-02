@@ -39,7 +39,14 @@ export {
 } from "./feature-gate";
 export type { CanonicalAnalyticsEnvironment, CanonicalAnalyticsGateContext } from "./feature-gate";
 
-export { QR_SESSION_STORAGE_KEY, getOrCreateSessionId } from "./session";
+export {
+  QR_SESSION_STORAGE_KEY,
+  QR_UTM_CAMPAIGN_STORAGE_KEY,
+  QR_UTM_SOURCE_STORAGE_KEY,
+  getOrCreateAnalyticsCampaignContext,
+  getOrCreateSessionId,
+} from "./session";
+export type { AnalyticsCampaignContext } from "./session";
 
 export { classifyDeviceType } from "./device-classifier";
 export type { DeviceClassification } from "./device-classifier";
