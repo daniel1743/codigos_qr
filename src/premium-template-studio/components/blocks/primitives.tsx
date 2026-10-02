@@ -93,7 +93,14 @@ export function SmartLink({
       target={newTab ? "_blank" : undefined}
       rel={newTab ? "noopener noreferrer" : undefined}
       download={download}
-      onClick={() => onTrack?.({ type: "link_click", blockId: block?.id, url })}
+      onClick={(event) => {
+        const track = onTrack?.({ type: "link_click", blockId: block?.id, url });
+        if (newTab) return;
+        event.preventDefault();
+        void Promise.resolve(track).catch(() => undefined).finally(() => {
+          window.location.assign(url);
+        });
+      }}
     >
       {children}
     </a>

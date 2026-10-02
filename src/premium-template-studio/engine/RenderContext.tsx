@@ -69,7 +69,7 @@ export interface RenderContextValue {
         url?: string | undefined;
         itemId?: string | undefined;
         label?: string | undefined;
-      }) => void)
+      }) => void | Promise<void>)
     | undefined;
 }
 

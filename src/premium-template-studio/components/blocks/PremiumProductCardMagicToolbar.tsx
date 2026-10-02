@@ -542,9 +542,15 @@ function MagicToolbarContent({
   onUploadImage?: (file: File) => void;
   onRemoveImage?: () => void;
 }) {
-  const { onInlineEdit } = useRender();
+  const { onInlineEdit, theme } = useRender();
   const ctaLabelInput = useRef<HTMLInputElement>(null);
   const ctaUrlInput = useRef<HTMLInputElement>(null);
+
+  const { cardStyle } = require("../../engine/styleEngine");
+  const baseCardStyle = cardStyle(theme, blockStyle);
+  const defaultBackground = baseCardStyle.backgroundColor as string;
+  const defaultBorder = baseCardStyle.borderColor as string;
+
   if (field === "title" || field === "description" || field === "price")
     return (
       <TextControls
@@ -761,7 +767,7 @@ function MagicToolbarContent({
       <Popover label="Fondo" icon={<Palette size={16} />}>
         {() => (
           <Swatches
-            value={blockStyle.background ?? "#FFFFFF"}
+            value={blockStyle.background ?? defaultBackground}
             colors={CARD_BACKGROUNDS}
             onPick={(background) =>
               onInlineEdit?.(`blocks.${blockId}.style.background`, background)
@@ -772,7 +778,7 @@ function MagicToolbarContent({
       <Popover label="Borde" icon={<Square size={16} />}>
         {() => (
           <Swatches
-            value={blockStyle.accentColor ?? "#E6E1DA"}
+            value={blockStyle.accentColor ?? defaultBorder}
             colors={BORDERS}
             onPick={(accentColor) =>
               onInlineEdit?.(`blocks.${blockId}.style.accentColor`, accentColor)

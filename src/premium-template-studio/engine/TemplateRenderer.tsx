@@ -102,7 +102,7 @@ export interface TemplateRendererProps {
         url?: string | undefined;
         itemId?: string | undefined;
         label?: string | undefined;
-      }) => void)
+      }) => void | Promise<void>)
     | undefined;
   className?: string | undefined;
   style?: CSSProperties | undefined;

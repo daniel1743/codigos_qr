@@ -11,6 +11,18 @@ import { DirectProfileBlock as profile } from "./blocks/DirectProfileBlock";
 export type DirectBreakpoint = "desktop" | "tablet" | "mobile";
 export type DirectBlockMode = "edit" | "preview" | "public";
 
+function trackThenNavigate(
+  event: MouseEvent<HTMLElement>,
+  url: string | undefined,
+  track: (() => void | Promise<void>) | undefined,
+): void {
+  if (!url || url === "#") return;
+  event.preventDefault();
+  void Promise.resolve(track?.()).catch(() => undefined).finally(() => {
+    window.location.assign(url);
+  });
+}
+
 export interface DirectBlockContext {
   mode: DirectBlockMode;
   breakpoint: DirectBreakpoint;
@@ -23,7 +35,7 @@ export interface DirectBlockContext {
     itemId?: string | undefined;
     url?: string | undefined;
     label?: string | undefined;
-  }) => void;
+  }) => void | Promise<void>;
   selectedItemId?: string | null;
 }
 
@@ -76,8 +88,11 @@ export function cta(
   const onClick = (event: MouseEvent<HTMLElement>) => {
     event.stopPropagation();
     if (context.mode === "edit") context.onSelectCTA?.(blockId, itemId, path);
-    if (context.mode === "public")
-      context.onTrack?.({ type: "cta_click", blockId, itemId, url: value.url, label });
+    if (context.mode === "public") {
+      trackThenNavigate(event, value.url, () =>
+        context.onTrack?.({ type: "cta_click", blockId, itemId, url: value.url, label }),
+      );
+    }
   };
   if (context.mode === "public") {
     return (
@@ -122,16 +137,18 @@ const links: DirectBlockComponent = (block, context) => (
         <a
           key={item.id}
           href={context.mode === "public" ? (item.cta?.url ?? item.ctaUrl) : undefined}
-          onClick={() =>
-            context.mode === "public" &&
-            context.onTrack?.({
-              type: "link_click",
-              blockId: block.id,
-              itemId: item.id,
-              url: item.cta?.url ?? item.ctaUrl,
-              label: item.title,
-            })
-          }
+          onClick={(event) => {
+            if (context.mode !== "public") return;
+            trackThenNavigate(event, item.cta?.url ?? item.ctaUrl, () =>
+              context.onTrack?.({
+                type: "link_click",
+                blockId: block.id,
+                itemId: item.id,
+                url: item.cta?.url ?? item.ctaUrl,
+                label: item.title,
+              }),
+            );
+          }}
           onDoubleClick={() => context.onSelectItem?.(block.id, item.id)}
         >
           {editable(

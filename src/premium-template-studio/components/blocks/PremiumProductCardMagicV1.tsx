@@ -94,6 +94,7 @@ export function PremiumProductCardMagicV1({
   blockStyle: BlockStyle;
 }) {
   const {
+    theme,
     mode,
     selectedCollectionItem,
     onSelectCollectionItem,
@@ -122,9 +123,16 @@ export function PremiumProductCardMagicV1({
   const image = product.imageUrl;
   const hasReferenceImage = product.imageProvenance?.origin === "reference_stock";
 
+  const { cardStyle } = require("../../engine/styleEngine");
+  const baseCardStyle = cardStyle(theme, blockStyle);
+  const cardBackground = baseCardStyle.backgroundColor as string;
+  const cardBorder = baseCardStyle.borderColor as string;
+  const cardRadius = baseCardStyle.borderRadius as number;
+  const textColor = (baseCardStyle.color as string) ?? "#17140F";
+
   const titleStyle: CSSProperties = typographyStyle(product.typography, {
     margin: 0,
-    color: "#17140F",
+    color: textColor,
     fontFamily: 'Marcellus, "Playfair Display", Georgia, serif',
     fontSize: 24,
     fontWeight: 400,
@@ -135,7 +143,7 @@ export function PremiumProductCardMagicV1({
 
   const descriptionStyle: CSSProperties = typographyStyle(product.descriptionTypography, {
     margin: 0,
-    color: "#4A443C",
+    color: theme.colors?.mutedText ?? "#4A443C",
     fontFamily: "Inter, system-ui, sans-serif",
     fontSize: 15,
     fontWeight: 400,
@@ -144,7 +152,7 @@ export function PremiumProductCardMagicV1({
   });
 
   const priceStyle: CSSProperties = typographyStyle(product.priceTypography, {
-    color: "#17140F",
+    color: textColor,
     fontFamily: "Inter, system-ui, sans-serif",
     fontSize: 20,
     fontWeight: 600,
@@ -152,9 +160,6 @@ export function PremiumProductCardMagicV1({
     fontVariantNumeric: "tabular-nums",
   });
   const ctaStyle = product.ctaStyle ?? {};
-  const cardBackground = blockStyle.background ?? "#FFFFFF";
-  const cardBorder = blockStyle.accentColor ?? "#E6E1DA";
-  const cardRadius = blockStyle.radius ?? 18;
   const textAlign = ctaStyle.textAlign ?? "left";
   const selectCard = (event: MouseEvent<HTMLElement>) => {
     if (!editable) return;
@@ -180,7 +185,7 @@ export function PremiumProductCardMagicV1({
         borderRadius: cardRadius,
         background: cardBackground,
         boxShadow: "0 1px 2px rgba(23,20,15,.06), 0 4px 14px -8px rgba(23,20,15,.18)",
-        color: "#17140F",
+        color: textColor,
         outline: selected("card") ? "2px solid #2F6FED" : undefined,
         outlineOffset: selected("card") ? 3 : undefined,
       }}

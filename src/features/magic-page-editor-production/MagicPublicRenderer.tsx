@@ -15,7 +15,7 @@ type MagicPublicTrackEvent = {
 
 interface MagicPublicRendererProps {
   document: MagicPageDocumentV1;
-  onTrack?: (event: MagicPublicTrackEvent) => void;
+  onTrack?: (event: MagicPublicTrackEvent) => void | Promise<void>;
 }
 
 export function MagicPublicRenderer({ document, onTrack }: MagicPublicRendererProps) {
@@ -33,11 +33,17 @@ export function MagicPublicRenderer({ document, onTrack }: MagicPublicRendererPr
       anchor.textContent?.trim() ||
       undefined;
 
-    onTrack({
+    const track = onTrack({
       type: "link_click",
       url,
       ...(label ? { label } : {}),
     });
+    if (anchor.target !== "_blank") {
+      event.preventDefault();
+      void Promise.resolve(track).catch(() => undefined).finally(() => {
+        window.location.assign(url);
+      });
+    }
   };
 
   return (
