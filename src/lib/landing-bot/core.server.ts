@@ -2,29 +2,19 @@ import OpenAI from "openai";
 import { getServerSupabaseClient } from "../supabase/server";
 import { pageService } from "../../services/page.service";
 import { isMagicPageDocument } from "../../features/magic-page-editor-production/magic-document";
-import { LANDING_BOT_FREE_DAILY_LIMIT, normalizeLandingBot } from "./config";
+import { normalizeLandingBot } from "./config";
+import { createInMemoryQuota } from "./quota";
+import { consumeLandingBotQuota } from "./quota.server";
+import { applyLandingBotTierPolicy } from "./tier-policy";
+import { resolveLandingBotOwner } from "./owner.server";
+import { createRateLimiter } from "./rate-limit";
 import type { LandingBotConfig } from "../../isolated/magic-page-editor/types/editor";
 import type { LandingBotChatMessage } from "./server";
 
-// Per-instance daily quota. NOTE: memory only — swap for a DB-backed table
-// (`landing_bot_usage`) in F2 for durable, cross-instance enforcement.
-const quota = new Map<string, { day: string; count: number }>();
-
-function today(): string {
-  return new Date().toISOString().slice(0, 10);
-}
-
-function consumeQuota(publicId: string): boolean {
-  const day = today();
-  const entry = quota.get(publicId);
-  if (!entry || entry.day !== day) {
-    quota.set(publicId, { day, count: 1 });
-    return true;
-  }
-  if (entry.count >= LANDING_BOT_FREE_DAILY_LIMIT) return false;
-  entry.count += 1;
-  return true;
-}
+// Burst protection (per public_id). The durable monthly quota lives in Supabase
+// (`consume_landing_bot_quota`); the in-memory store is only a fail-safe fallback.
+const rateLimiter = createRateLimiter({ windowMs: 60_000, max: 20 });
+const inMemoryQuota = createInMemoryQuota();
 
 function toneInstruction(tone: LandingBotConfig["tone"]): string {
   if (tone === "formal") return "Usa un tono formal y profesional, tratando de 'usted'.";
@@ -76,14 +66,29 @@ export async function answerLandingBot(
     return { reply: "El asistente no está disponible en este momento." };
   }
 
-  const bot = normalizeLandingBot(page.published_template_config.bot);
-  if (!bot.enabled) return { reply: "El asistente aún no está disponible." };
-  if (!consumeQuota(publicId)) {
+  const storedBot = normalizeLandingBot(page.published_template_config.bot);
+  if (!storedBot.enabled) return { reply: "El asistente aún no está disponible." };
+
+  // Burst rate limit (does not consume quota when blocked).
+  if (!rateLimiter.check(publicId)) {
     return {
-      reply: "El asistente alcanzó su cupo gratuito por hoy. Vuelve a intentarlo más tarde.",
+      reply: "Demasiadas solicitudes seguidas. Espera un momento e intenta de nuevo.",
       limited: true,
     };
   }
+
+  // Server-side tier resolution + durable monthly quota (server-side authority).
+  const owner = await resolveLandingBotOwner(publicId);
+  const quotaDecision = await consumeLandingBotQuota(publicId, owner.tier, inMemoryQuota);
+  if (!quotaDecision.allowed) {
+    return {
+      reply: "El asistente alcanzó su cupo gratuito de este mes. Vuelve a intentarlo más tarde.",
+      limited: true,
+    };
+  }
+
+  // Never trust the client: strip Pro-only fields for non-Pro owners.
+  const bot = applyLandingBotTierPolicy(storedBot, owner.tier);
 
   const chatMessages = [
     { role: "system", content: buildSystemPrompt(bot) },
