@@ -696,6 +696,7 @@ export function SocialBlock({ block }: BlockProps) {
   if (socials.length === 0) return <EmptyBlockState label="No social profiles yet." />;
   const pills = block.variant === "pills";
   const outline = block.variant === "outline";
+  const iconSize = Math.min(48, Math.max(12, block.style.iconSize ?? 18));
   return (
     <div
       style={{
@@ -721,9 +722,9 @@ export function SocialBlock({ block }: BlockProps) {
                   display: "inline-flex",
                   alignItems: "center",
                   gap: 8,
-                  height: 44,
+                  height: iconSize + 26,
                   padding: pills ? "0 16px" : 0,
-                  width: pills ? undefined : 44,
+                  width: pills ? undefined : iconSize + 26,
                   justifyContent: "center",
                   borderRadius: pills ? 999 : theme.cards.radius,
                   border:
@@ -732,7 +733,7 @@ export function SocialBlock({ block }: BlockProps) {
                   color: theme.colors.text,
                 }}
               >
-                <Icon size={18} aria-hidden />
+                <Icon size={iconSize} aria-hidden />
                 {pills ? (
                   <span style={{ fontSize: 13, textTransform: "capitalize" }}>
                     {social.platform}

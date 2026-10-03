@@ -615,6 +615,8 @@ export interface BlockStyle {
   shadow?: "none" | "sm" | "md" | "lg" | "glow";
   borderWidth?: number;
   padding?: number;
+  /** Icon size in pixels for social blocks. */
+  iconSize?: number;
   minHeight?: number;
   titleTypography?: TypographyOverride | undefined;
   subtitleTypography?: TypographyOverride | undefined;

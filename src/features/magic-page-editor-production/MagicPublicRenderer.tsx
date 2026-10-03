@@ -63,7 +63,7 @@ export function MagicPublicRenderer({ document, onTrack, publicId, verificationV
         initialMode="preview"
       >
         <PageVerificationProvider variant={verificationVariant ?? "none"}>
-          <TemplateRenderer />
+          <TemplateRenderer showLandingBotPreview={false} />
         </PageVerificationProvider>
       </EditorProvider>
       {publicId && document.bot?.enabled && (

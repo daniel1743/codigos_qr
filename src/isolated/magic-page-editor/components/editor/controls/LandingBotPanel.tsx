@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { CrownIcon } from "lucide-react";
+import { toast } from "sonner";
 import { useEditor } from "../../../contexts/EditorContext";
 import { createDefaultLandingBot, isLandingBotProTier } from "../../../../../lib/landing-bot/config";
 import { getLandingBotPlanFn } from "../../../../../lib/landing-bot/server";
@@ -53,6 +54,12 @@ export function LandingBotPanel() {
       const base = { ...createDefaultLandingBot(), ...d.bot };
       return { ...d, bot: { ...base, prices: { ...base.prices, ...patch } } };
     });
+  };
+
+  const applyChanges = () => {
+    ed.updateDoc((d) => ({ ...d, bot: { ...createDefaultLandingBot(), ...d.bot } }));
+    toast.success("Cambios guardados");
+    ed.clearSelection();
   };
 
   return (
@@ -159,6 +166,17 @@ export function LandingBotPanel() {
           )}
         </>
       )}
+
+      <div className="sticky bottom-0 z-10 -mx-1 border-t border-line bg-white/95 px-1 pb-1 pt-3 backdrop-blur-sm">
+        <button
+          type="button"
+          onClick={applyChanges}
+          className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-ink px-4 py-2.5 text-[14px] font-semibold text-white shadow-sm transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-select focus-visible:ring-offset-2"
+          aria-live="polite"
+        >
+          Aplicar cambios
+        </button>
+      </div>
     </div>
   );
 }

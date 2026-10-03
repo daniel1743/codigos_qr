@@ -5,13 +5,22 @@ import { BusinessTemplate } from './BusinessTemplate';
 import { PortfolioTemplate } from './PortfolioTemplate';
 import { CatalogTemplate } from './CatalogTemplate';
 import { MiniGalleryTemplate } from './MiniGalleryTemplate';
+import { LandingBot } from '../../../../components/landing-bot/LandingBot';
+import { normalizeLandingBot } from '../../../../lib/landing-bot/config';
 
-export function TemplateRenderer() {
+export function TemplateRenderer({ showLandingBotPreview = true }: { showLandingBotPreview?: boolean }) {
   const { templateId, doc } = useEditor();
   const family = doc.props.page?.family;
-  if (family === 'catalog') return <CatalogTemplate />;
-  if (family === 'gallery') return <MiniGalleryTemplate />;
-  if (templateId === 'business') return <BusinessTemplate />;
-  if (templateId === 'portfolio') return <PortfolioTemplate />;
-  return <BioTemplate />;
+  const template = family === 'catalog' ? <CatalogTemplate /> :
+    family === 'gallery' ? <MiniGalleryTemplate /> :
+    templateId === 'business' ? <BusinessTemplate /> :
+    templateId === 'portfolio' ? <PortfolioTemplate /> :
+    <BioTemplate />;
+
+  return <>
+    {template}
+    {showLandingBotPreview && doc.bot?.enabled && (
+      <LandingBot config={normalizeLandingBot(doc.bot)} previewOnly />
+    )}
+  </>;
 }

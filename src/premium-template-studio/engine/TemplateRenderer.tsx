@@ -398,6 +398,35 @@ function BlockFrame({
             {block.type}
           </span>
           <span className="pts-block__actions">
+            {block.type === "social" ? (
+              <span className="pts-block__size-controls" role="group" aria-label="Tamaño de iconos">
+                <button
+                  type="button"
+                  aria-label="Achicar iconos"
+                  title="Achicar iconos"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const size = Math.max(12, (block.style.iconSize ?? 18) - 2);
+                    editing.onInlineEdit?.(`blocks.${block.id}.style.iconSize`, size);
+                  }}
+                >
+                  −
+                </button>
+                <span aria-hidden>{block.style.iconSize ?? 18}</span>
+                <button
+                  type="button"
+                  aria-label="Agrandar iconos"
+                  title="Agrandar iconos"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const size = Math.min(48, (block.style.iconSize ?? 18) + 2);
+                    editing.onInlineEdit?.(`blocks.${block.id}.style.iconSize`, size);
+                  }}
+                >
+                  +
+                </button>
+              </span>
+            ) : null}
             <button
               type="button"
               aria-label="Move up"

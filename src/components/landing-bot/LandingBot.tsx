@@ -77,7 +77,15 @@ function BotFace({ config }: { config: LandingBotConfig }) {
   return <BotIcon className="h-full w-full p-1.5" strokeWidth={1.8} />;
 }
 
-export function LandingBot({ publicId, config }: { publicId: string; config: LandingBotConfig }) {
+export function LandingBot({
+  publicId,
+  config,
+  previewOnly = false,
+}: {
+  publicId?: string;
+  config: LandingBotConfig;
+  previewOnly?: boolean;
+}) {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
@@ -94,7 +102,7 @@ export function LandingBot({ publicId, config }: { publicId: string; config: Lan
 
   const send = async (value: string) => {
     const text = value.trim();
-    if (!text || typing) return;
+    if (!text || typing || previewOnly || !publicId) return;
     const next = [...messages, { id: `${Date.now()}-u`, sender: "user" as const, text }];
     setMessages(next);
     setInput("");
@@ -116,7 +124,7 @@ export function LandingBot({ publicId, config }: { publicId: string; config: Lan
 
   return (
 
-    <div className="fixed bottom-5 right-5 z-[70] flex flex-col items-end gap-3">
+    <div className={`fixed bottom-5 right-5 flex flex-col items-end gap-3 ${previewOnly ? "z-[30]" : "z-[70]"}`}>
       {open && (
         <div className="flex h-[70vh] max-h-[560px] w-[min(92vw,360px)] flex-col overflow-hidden rounded-2xl border border-black/10 bg-white shadow-2xl">
           <header className="flex items-center gap-3 border-b border-black/5 bg-gradient-to-br from-blue-600 to-indigo-600 px-4 py-3 text-white">
@@ -125,7 +133,9 @@ export function LandingBot({ publicId, config }: { publicId: string; config: Lan
             </span>
             <div className="min-w-0 flex-1">
               <p className="truncate text-[14px] font-semibold">{config.name || "Asistente"}</p>
-              <p className="text-[11.5px] text-white/75">En línea · responde al instante</p>
+              <p className="text-[11.5px] text-white/75">
+                {previewOnly ? "Vista previa · no conecta con IA" : "En línea · responde al instante"}
+              </p>
             </div>
             <button type="button" aria-label="Cerrar" onClick={() => setOpen(false)} className="grid h-8 w-8 place-items-center rounded-full hover:bg-white/15">
               <XIcon className="h-4 w-4" />
@@ -171,7 +181,11 @@ export function LandingBot({ publicId, config }: { publicId: string; config: Lan
             </div>
           )}
 
-          <div className="flex items-end gap-2 border-t border-black/5 p-3">
+          {previewOnly ? (
+            <div className="border-t border-black/5 bg-slate-50 px-4 py-3 text-center text-[12px] text-slate-500">
+              Así verán el acceso al asistente tus visitantes.
+            </div>
+          ) : <div className="flex items-end gap-2 border-t border-black/5 p-3">
             <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -195,7 +209,7 @@ export function LandingBot({ publicId, config }: { publicId: string; config: Lan
             >
               <SendIcon className="h-4 w-4" />
             </button>
-          </div>
+          </div>}
         </div>
       )}
 

@@ -1686,6 +1686,7 @@ export function useSelectionActions(): EditorAction[] {
           key: "palette",
           label: "Tema de página",
           icon: PaletteIcon,
+          mobileOnly: true,
           showLabel: true,
           panel: (
             <PalettePicker
