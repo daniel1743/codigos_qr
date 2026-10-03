@@ -149,7 +149,7 @@ function PublicPageAlias() {
   );
 
   return magicDocument ? (
-    <MagicPublicRenderer document={magicDocument} onTrack={handleTrack} />
+    <MagicPublicRenderer document={magicDocument} onTrack={handleTrack} publicId={page.public_id} />
   ) : directDocument ? (
     <DirectPageRenderer
       document={directDocument}

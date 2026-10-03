@@ -33,6 +33,103 @@ const SUGGESTED_PROMPTS = [
 const MOCK_RESPONSE =
   "Esta es una respuesta de demostración. La conexión con el asesor asistente se habilitará después de aprobar esta interfaz.";
 
+/**
+ * Minimal, dependency-free inline parser.
+ * Converts **bold** markdown into <strong> nodes while leaving the rest as text.
+ * Returns plain React nodes (no dangerouslySetInnerHTML), so it is safe.
+ */
+function renderInline(text: string, keyPrefix: string): React.ReactNode[] {
+  const nodes: React.ReactNode[] = [];
+  const boldRegex = /\*\*([^*]+)\*\*/g;
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+  let i = 0;
+
+  while ((match = boldRegex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      nodes.push(text.slice(lastIndex, match.index));
+    }
+    nodes.push(
+      <strong key={`${keyPrefix}-b${i++}`} className="font-semibold">
+        {match[1] ?? ""}
+      </strong>,
+    );
+    lastIndex = boldRegex.lastIndex;
+  }
+
+  if (lastIndex < text.length) {
+    nodes.push(text.slice(lastIndex));
+  }
+
+  return nodes;
+}
+
+interface FormattedMessageProps {
+  text: string;
+  isUser: boolean;
+}
+
+/**
+ * Lightweight markdown-lite renderer for chat bubbles.
+ * - Renders **negrita** as bold text.
+ * - Renders lines starting with "- ", "* " or "• " as a bullet list.
+ * - Preserves blank lines as vertical spacing (proper paragraph separation).
+ * - Preserves line breaks within a line.
+ */
+function FormattedMessage({ text, isUser }: FormattedMessageProps) {
+  const lines = text.split("\n");
+  const blocks: React.ReactNode[] = [];
+  let listBuffer: string[] = [];
+  let key = 0;
+
+  const flushList = () => {
+    if (listBuffer.length === 0) return;
+    const items = listBuffer;
+    listBuffer = [];
+    blocks.push(
+      <ul
+        key={`ul-${key++}`}
+        className={`my-1 list-disc space-y-1 pl-4 ${
+          isUser ? "marker:text-white/80" : "marker:text-blue-500"
+        }`}
+      >
+        {items.map((item, idx) => (
+          <li key={idx} className="whitespace-pre-wrap">
+            {renderInline(item, `li-${key}-${idx}`)}
+          </li>
+        ))}
+      </ul>,
+    );
+  };
+
+  for (const rawLine of lines) {
+    const line = rawLine.replace(/\s+$/, "");
+    const bullet = /^\s*[-*•]\s+(.*)$/.exec(line);
+
+    if (bullet) {
+      listBuffer.push(bullet[1] ?? "");
+      continue;
+    }
+
+    flushList();
+
+    if (line.trim() === "") {
+      blocks.push(<div key={`sp-${key++}`} className="h-2" aria-hidden="true" />);
+      continue;
+    }
+
+    blocks.push(
+      <p key={`p-${key++}`} className="whitespace-pre-wrap">
+        {renderInline(line, `p-${key}`)}
+      </p>,
+    );
+  }
+
+  flushList();
+
+  return <>{blocks}</>;
+}
+
 interface FuxionAssistantProps {
   pageId: string;
 }
@@ -68,7 +165,17 @@ export function FuxionAssistant({ pageId: _pageId }: FuxionAssistantProps) {
 
 
     const matchedProduct = matchProduct(text);
-    let systemPrompt = "Eres el Asesor Asistente, un experto amable y profesional en productos y bienestar. Responde de forma concisa.";
+    let systemPrompt = [
+      "Eres el Asesor Asistente, un experto amable y profesional en productos y bienestar de FuXion. Responde siempre en español, de forma concisa, cálida y clara.",
+      "",
+      "FORMATO DE RESPUESTA (obligatorio):",
+      "- Comienza con un emoji relevante y usa algunos emojis para separar ideas (por ejemplo 🌿, ✨, 💧, ✅, 🌙, 🍵). No satures la respuesta de emojis.",
+      "- Separa las ideas en líneas cortas con saltos de línea y deja una línea en blanco entre párrafos.",
+      "- Cuando enumeres ingredientes, pasos o beneficios, usa una lista con guiones (\"- \").",
+      "- Usa **negrita** únicamente para resaltar el nombre del producto y datos clave como el precio. No abuses de los asteriscos ni dejes asteriscos sueltos.",
+      "- No uses encabezados con #, tablas ni bloques de código.",
+      "- Termina con una pregunta breve que invite a seguir conversando.",
+    ].join("\n");
 
     if (matchedProduct) {
       systemPrompt += "\n\nINFORMACIÓN DEL PRODUCTO CONSULTADO:\n" +
@@ -252,7 +359,7 @@ let responseText = "";
                               : "rounded-[20px] rounded-tl-[4px] border border-gray-100 bg-white text-gray-800 shadow-gray-200/40"
                           }`}
                         >
-                          {msg.text}
+                          <FormattedMessage text={msg.text} isUser={msg.sender === "user"} />
                         </div>
                       </motion.div>
                     ))}

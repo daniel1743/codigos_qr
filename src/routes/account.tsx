@@ -417,5 +417,3 @@ function AccountPage() {
     </AppShell>
   );
 }
-
-export default AccountPage;

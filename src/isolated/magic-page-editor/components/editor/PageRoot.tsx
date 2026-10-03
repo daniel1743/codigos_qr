@@ -52,6 +52,10 @@ export function PageRoot({ children, className }: PageRootProps) {
   const family = String(page['family'] ?? templateId);
   const variant = String(page['familyVariant'] ?? (family === 'catalog' ? doc.props['block:catalog']?.variant ?? 'left' : family === 'gallery' ? 'gallery-editorial' : templateId === 'business' ? 'atelier' : templateId === 'portfolio' ? 'archive' : 'signature'));
   const profile = PAGE_VARIANT_PROFILES[variant] ?? PAGE_VARIANT_PROFILES.left;
+  // Page-level "Unificar color de texto": set once here so the override cascades
+  // into every nested tone scope (blocks, cards, sections, footer). `toneVars`
+  // makes `--fg` / `--muted` read these first.
+  const unifiedText = page['textColor'];
   return (
     <Editable
       id="page"
@@ -60,7 +64,7 @@ export function PageRoot({ children, className }: PageRootProps) {
       data-page-family={family}
       data-page-variant={variant}
       className={cx('relative flex w-full flex-1 flex-col', `page-family-${family}`, `page-variant-${variant}`, className)}
-      style={{ ...toneVars(t.page), '--accent': t.accent, '--accent-fg': t.accentFg, '--media-fg': t.media.fg, '--media-muted': t.media.muted, '--media-surface': t.media.surface, '--media-line': t.media.line, '--media-overlay': t.media.overlay, background: t.page.color, color: 'var(--fg)', fontFamily: t.bodyFont, '--page-content-width': `${profile.width}px`, '--page-variant-scale': profile.scale } as React.CSSProperties}>
+      style={{ ...toneVars(t.page), ...(unifiedText ? { '--unify-fg': unifiedText, '--unify-muted': `color-mix(in srgb, ${unifiedText} 68%, ${t.page.color})` } : {}), '--accent': t.accent, '--accent-fg': t.accentFg, '--media-fg': t.media.fg, '--media-muted': t.media.muted, '--media-surface': t.media.surface, '--media-line': t.media.line, '--media-overlay': t.media.overlay, background: t.page.color, color: 'var(--fg)', fontFamily: t.bodyFont, '--page-content-width': `${profile.width}px`, '--page-variant-scale': profile.scale } as React.CSSProperties}>
       <DecorationLayer />
       {children}
     </Editable>);

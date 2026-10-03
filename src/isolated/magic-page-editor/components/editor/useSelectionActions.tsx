@@ -29,6 +29,7 @@ import {
   TypeIcon,
   StarIcon,
   BadgeCheckIcon,
+  BotIcon,
   LayersIcon,
   ListIcon,
   MoveHorizontalIcon,
@@ -70,6 +71,7 @@ import { GalleryPhotosPicker } from "./controls/GalleryPhotosPicker";
 import { ToneGrid } from "./controls/ToneGrid";
 import { FontPicker } from "./controls/FontPicker";
 import { PalettePicker } from "./controls/PalettePicker";
+import { LandingBotPanel } from "./controls/LandingBotPanel";
 import { DecorationPicker } from "./controls/DecorationPicker";
 import { TypographyTreatmentPicker } from "./controls/TypographyTreatmentPicker";
 import { HeroFrameShapePicker } from "./controls/HeroFrameShapePicker";
@@ -545,6 +547,31 @@ export function useSelectionActions(): EditorAction[] {
 
     case "hero":
       return [
+        {
+          key: "bot",
+          label: "Bot",
+          icon: BotIcon,
+          active: !!ed.doc.bot?.enabled,
+          mobileOnly: true,
+          showLabel: true,
+          panel: <LandingBotPanel />,
+        },
+        {
+          key: "palette",
+          label: "Tema de página",
+          icon: PaletteIcon,
+          mobileOnly: true,
+          showLabel: true,
+          panel: (
+            <PalettePicker
+              value={ed.doc.props["page"]?.["palette"]}
+              onChange={(v) => { ed.setProp("page", "palette", v); ed.setProp("page", "bgOverride", undefined); }}
+              textColor={ed.doc.props["page"]?.["textColor"]}
+              onTextColorChange={(v) => ed.setProp("page", "textColor", v || "")}
+              swatches={t.swatches}
+            />
+          ),
+        },
         {
           key: "information",
           label: "Información",
@@ -1657,7 +1684,7 @@ export function useSelectionActions(): EditorAction[] {
         },
         {
           key: "palette",
-          label: "Paleta",
+          label: "Tema de página",
           icon: PaletteIcon,
           showLabel: true,
           panel: (
@@ -1669,6 +1696,15 @@ export function useSelectionActions(): EditorAction[] {
               swatches={t.swatches}
             />
           ),
+        },
+
+        {
+          key: "bot",
+          label: "Bot",
+          icon: BotIcon,
+          active: !!ed.doc.bot?.enabled,
+          showLabel: true,
+          panel: <LandingBotPanel />,
         },
 
         {

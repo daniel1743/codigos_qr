@@ -157,12 +157,63 @@ export interface BlockRef {
   hidden?: boolean;
 }
 
+export type LandingBotTone = "cercano" | "formal" | "profesional";
+
+export interface LandingBotSocial {
+  instagram: string;
+  tiktok: string;
+  youtube: string;
+  facebook: string;
+  website: string;
+}
+
+export interface LandingBotPriceItem {
+  name: string;
+  price: string;
+}
+
+export interface LandingBotPrices {
+  enabled: boolean;
+  currency: string;
+  items: LandingBotPriceItem[];
+}
+
+/**
+ * Multi-tenant assistant configured by the landing owner (no provider/vertical
+ * dependency). Every field is required (empty string = "not set") so editing is
+ * deterministic and old documents without `bot` stay valid (the field is
+ * optional at the PageDoc level).
+ */
+export interface LandingBotConfig {
+  enabled: boolean;
+  /** "generic" keeps the free bot icon; "custom" is Pro (avatar image or icon). */
+  persona: "generic" | "custom";
+  avatarUrl: string;
+  avatarIcon: string;
+  name: string;
+  /** Who the owner is / what they do (feeds the assistant). */
+  about: string;
+  tone: LandingBotTone;
+  whatsapp: string;
+  whatsappEnabled: boolean;
+  // — Pro fields (fillable later) —
+  services: string;
+  hours: string;
+  address: string;
+  faq: string;
+  social: LandingBotSocial;
+  stores: string;
+  prices: LandingBotPrices;
+}
+
 export interface PageDoc {
   blocks: BlockRef[];
   texts: Record<string, string>;
   textStyles: Record<string, TextStyle>;
   props: Record<string, Record<string, string>>;
   removed: Record<string, boolean>;
+  /** Owner-configured landing assistant. Optional to keep legacy docs valid. */
+  bot?: LandingBotConfig;
 }
 
 export interface ElementInfo {

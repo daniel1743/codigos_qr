@@ -3,6 +3,8 @@ import { EditorProvider } from "../../isolated/magic-page-editor/contexts/Editor
 import { TemplateRenderer } from "../../isolated/magic-page-editor/components/templates/TemplateRenderer";
 import type { MagicPageDocumentV1 } from "./magic-document";
 import { hydrateMagicEditorState } from "./magic-document";
+import { LandingBot } from "../../components/landing-bot/LandingBot";
+import { normalizeLandingBot } from "../../lib/landing-bot/config";
 import "../../isolated/magic-page-editor/styles/magic-editor.css";
 
 type MagicPublicTrackEvent = {
@@ -16,9 +18,11 @@ type MagicPublicTrackEvent = {
 interface MagicPublicRendererProps {
   document: MagicPageDocumentV1;
   onTrack?: (event: MagicPublicTrackEvent) => void | Promise<void>;
+  /** Public id of the page; enables the owner-configured landing bot. */
+  publicId?: string;
 }
 
-export function MagicPublicRenderer({ document, onTrack }: MagicPublicRendererProps) {
+export function MagicPublicRenderer({ document, onTrack, publicId }: MagicPublicRendererProps) {
   const handleClickCapture = (event: MouseEvent<HTMLDivElement>) => {
     if (!onTrack || !(event.target instanceof Element)) return;
 
@@ -57,6 +61,9 @@ export function MagicPublicRenderer({ document, onTrack }: MagicPublicRendererPr
       >
         <TemplateRenderer />
       </EditorProvider>
+      {publicId && document.bot?.enabled && (
+        <LandingBot publicId={publicId} config={normalizeLandingBot(document.bot)} />
+      )}
     </div>
   );
 }

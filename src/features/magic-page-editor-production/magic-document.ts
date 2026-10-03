@@ -1,4 +1,4 @@
-import type { PageDoc, TemplateId, TextStyle } from "../../isolated/magic-page-editor/types/editor";
+import type { PageDoc, TemplateId, TextStyle, LandingBotConfig } from "../../isolated/magic-page-editor/types/editor";
 import { templates } from "../../isolated/magic-page-editor/data/templates";
 
 export const MAGIC_DOCUMENT_TYPE = "magic-page" as const;
@@ -15,6 +15,8 @@ export interface MagicPageDocumentV1 {
   props: PageDoc["props"];
   blocks: PageDoc["blocks"];
   removed: PageDoc["removed"];
+  /** Owner-configured landing assistant (optional; legacy documents omit it). */
+  bot?: LandingBotConfig;
   meta: {
     createdBy: "magic-editor";
     schemaVersion: 1;
@@ -113,6 +115,7 @@ export function serializeMagicEditorState(state: MagicEditorStateV1): MagicPageD
     props: { ...state.doc.props },
     blocks: state.doc.blocks.map((block) => ({ ...block })),
     removed: { ...state.doc.removed },
+    ...(state.doc.bot ? { bot: state.doc.bot } : {}),
     meta: { createdBy: "magic-editor", schemaVersion: 1 },
   };
 }
@@ -127,6 +130,7 @@ export function hydrateMagicEditorState(document: unknown): MagicEditorStateV1 {
       textStyles: { ...valid.textStyles },
       props: { ...valid.props },
       removed: { ...valid.removed },
+      ...(valid.bot ? { bot: valid.bot } : {}),
     },
   };
 }

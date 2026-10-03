@@ -27,10 +27,22 @@ export function textStyleToCss(ts?: TextStyle): CSSProperties {
   ) as CSSProperties;
 }
 
+/**
+ * Maps a surface tone to the `--fg` / `--muted` / `--surface` / `--line` CSS
+ * variables.
+ *
+ * `--fg` and `--muted` fall back to the tone's own colours, but a page-level
+ * "Unificar color de texto" override (`--unify-fg` / `--unify-muted`, set once
+ * on the page root) always wins — even inside nested tone scopes such as blocks,
+ * cards, sections and the footer. That is what makes the unification reach
+ * *every* text instead of only the nodes that inherit the page variables
+ * directly, and it keeps working for class-based and inline `var(--fg)` usage
+ * alike because the variable itself is what gets rewritten.
+ */
 export function toneVars(tone: SurfaceTone): CSSProperties {
   return {
-    '--fg': tone.fg,
-    '--muted': tone.muted,
+    '--fg': `var(--unify-fg, ${tone.fg})`,
+    '--muted': `var(--unify-muted, ${tone.muted})`,
     '--surface': tone.surface,
     '--line': tone.line
   } as CSSProperties;
