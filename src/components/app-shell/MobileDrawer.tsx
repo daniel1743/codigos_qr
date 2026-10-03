@@ -8,6 +8,7 @@ import {
   Home,
   QrCode,
   Settings,
+  Shield,
   X,
 } from "lucide-react";
 import { Link, useLocation } from "@tanstack/react-router";
@@ -63,6 +64,7 @@ export default function MobileDrawer({
         ]
       : []),
     { label: "Documentos", to: "/encrypted-documents", icon: FileLock2 },
+    ...(isAdmin ? [{ label: "Admin", to: "/admin" as const, icon: Shield }] : []),
   ];
 
   useEffect(() => {

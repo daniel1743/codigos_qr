@@ -4,6 +4,7 @@ import { TemplateRenderer } from "../../isolated/magic-page-editor/components/te
 import type { MagicPageDocumentV1 } from "./magic-document";
 import { hydrateMagicEditorState } from "./magic-document";
 import { LandingBot } from "../../components/landing-bot/LandingBot";
+import { PageVerificationProvider, type VerificationVariant } from "../../isolated/magic-page-editor/contexts/PageVerificationContext";
 import { normalizeLandingBot } from "../../lib/landing-bot/config";
 import "../../isolated/magic-page-editor/styles/magic-editor.css";
 
@@ -20,9 +21,11 @@ interface MagicPublicRendererProps {
   onTrack?: (event: MagicPublicTrackEvent) => void | Promise<void>;
   /** Public id of the page; enables the owner-configured landing bot. */
   publicId?: string;
+  /** Trusted verification variant for the page owner (resolved server-side). */
+  verificationVariant?: VerificationVariant;
 }
 
-export function MagicPublicRenderer({ document, onTrack, publicId }: MagicPublicRendererProps) {
+export function MagicPublicRenderer({ document, onTrack, publicId, verificationVariant }: MagicPublicRendererProps) {
   const handleClickCapture = (event: MouseEvent<HTMLDivElement>) => {
     if (!onTrack || !(event.target instanceof Element)) return;
 
@@ -59,7 +62,9 @@ export function MagicPublicRenderer({ document, onTrack, publicId }: MagicPublic
         initialDocument={hydrateMagicEditorState(document)}
         initialMode="preview"
       >
-        <TemplateRenderer />
+        <PageVerificationProvider variant={verificationVariant ?? "none"}>
+          <TemplateRenderer />
+        </PageVerificationProvider>
       </EditorProvider>
       {publicId && document.bot?.enabled && (
         <LandingBot publicId={publicId} config={normalizeLandingBot(document.bot)} />

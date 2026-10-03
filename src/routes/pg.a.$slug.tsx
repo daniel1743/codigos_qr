@@ -77,13 +77,24 @@ export const Route = createFileRoute("/pg/a/$slug")({
       throw notFound();
     }
 
-    return { page, config, directDocument: direct?.editorConfig ?? null, magicDocument };
+    // Trusted verification (server-only, fail-safe). Only relevant for Magic.
+    let verificationVariant: "none" | "standard" | "official-gold" = "none";
+    if (magicDocument) {
+      try {
+        const { resolvePageVerification } = await import("../lib/page-verification.server");
+        verificationVariant = await resolvePageVerification(page.public_id);
+      } catch {
+        verificationVariant = "none";
+      }
+    }
+
+    return { page, config, directDocument: direct?.editorConfig ?? null, magicDocument, verificationVariant };
   },
   component: PublicPageAlias,
 });
 
 function PublicPageAlias() {
-  const { page, config, directDocument, magicDocument } = Route.useLoaderData();
+  const { page, config, directDocument, magicDocument, verificationVariant } = Route.useLoaderData();
 
   // The canonical Analytics V1.1 writer is enabled in QA, and in production only
   // when the global flag is on AND this page is explicitly allowlisted. Any
@@ -149,7 +160,7 @@ function PublicPageAlias() {
   );
 
   return magicDocument ? (
-    <MagicPublicRenderer document={magicDocument} onTrack={handleTrack} publicId={page.public_id} />
+    <MagicPublicRenderer document={magicDocument} onTrack={handleTrack} publicId={page.public_id} verificationVariant={verificationVariant} />
   ) : directDocument ? (
     <DirectPageRenderer
       document={directDocument}

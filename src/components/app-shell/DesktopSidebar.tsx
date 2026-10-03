@@ -1,5 +1,5 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { BarChart3, FileLock2, Globe2, HelpCircle, Home, QrCode, Settings } from "lucide-react";
+import { BarChart3, FileLock2, Globe2, HelpCircle, Home, QrCode, Settings, Shield } from "lucide-react";
 import Logo from "../brand/Logo";
 import type { ShellPageState, ShellUser } from "./AppShell";
 
@@ -101,6 +101,14 @@ export function DesktopSidebar({ user, pageState, isAdmin }: Props) {
             icon={FileLock2}
             isActive={active(pathname, ["/encrypted-documents"])}
           />
+          {isAdmin && (
+            <NavLink
+              to="/admin"
+              label="Admin"
+              icon={Shield}
+              isActive={active(pathname, ["/admin"])}
+            />
+          )}
         </div>
       </nav>
       <div className="shrink-0 border-t border-cq-line p-4">
