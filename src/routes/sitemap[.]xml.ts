@@ -11,14 +11,14 @@ type SitemapEntry = {
 };
 
 type SitemapProfile = {
+  id: string;
   public_id: string | null;
   updated_at: string | null;
 };
 
-type SitemapPage = {
-  public_id: string | null;
-  updated_at: string | null;
-  published_at: string | null;
+type SitemapMagicPageMapping = {
+  profile_public_id: string;
+  page_public_id: string;
 };
 
 function escapeXml(value: string): string {
@@ -66,7 +66,7 @@ function sitemapUrl(entry: SitemapEntry): string {
  */
 export function buildSitemapXml(
   profiles: SitemapProfile[] = [],
-  pages: SitemapPage[] = [],
+  mappings: SitemapMagicPageMapping[] = [],
 ): string {
   const entries: SitemapEntry[] = [
     { loc: `${BASE_URL}/`, lastmod: null, changefreq: "weekly", priority: "1.0" },
@@ -74,8 +74,19 @@ export function buildSitemapXml(
     { loc: `${BASE_URL}/vs/linktree`, lastmod: null, changefreq: "monthly", priority: "0.8" },
   ];
 
+  // The /p route redirects when the profile has a published canonical Magic
+  // page. Emit that final /pg URL below and omit the intermediate /p URL.
+  const canonicalPageByProfile = new Map<string, string>();
+  const canonicalPageIds = new Set<string>();
+  for (const mapping of mappings) {
+    if (!mapping.profile_public_id || !mapping.page_public_id) continue;
+    if (canonicalPageByProfile.has(mapping.profile_public_id)) continue;
+    canonicalPageByProfile.set(mapping.profile_public_id, mapping.page_public_id);
+    canonicalPageIds.add(mapping.page_public_id);
+  }
+
   for (const profile of profiles) {
-    if (!profile.public_id) continue;
+    if (!profile.public_id || canonicalPageByProfile.has(profile.public_id)) continue;
     entries.push({
       loc: `${BASE_URL}/p/${encodeURIComponent(profile.public_id)}`,
       lastmod: toDateOnly(profile.updated_at),
@@ -84,20 +95,21 @@ export function buildSitemapXml(
     });
   }
 
-  for (const page of pages) {
-    if (!page.public_id) continue;
+  for (const pagePublicId of canonicalPageIds) {
     entries.push({
-      loc: `${BASE_URL}/pg/${encodeURIComponent(page.public_id)}`,
-      lastmod: toDateOnly(page.updated_at ?? page.published_at),
+      loc: `${BASE_URL}/pg/${encodeURIComponent(pagePublicId)}`,
+      lastmod: null,
       changefreq: "daily",
       priority: "0.6",
     });
   }
 
+  const uniqueEntries = [...new Map(entries.map((entry) => [entry.loc, entry])).values()];
+
   return [
     '<?xml version="1.0" encoding="UTF-8"?>',
     '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
-    ...entries.map(sitemapUrl),
+    ...uniqueEntries.map(sitemapUrl),
     "</urlset>",
     "",
   ].join("\n");
@@ -112,22 +124,23 @@ export const Route = createFileRoute("/sitemap.xml")({
         // Published public profiles (root identity / BioLink).
         const { data: profiles } = await supabase
           .from("profiles")
-          .select("public_id, updated_at")
+          .select("id, public_id, updated_at")
           .eq("published", true)
           .order("updated_at", { ascending: false })
           .limit(5000);
 
-        // Published public child pages.
-        const { data: pages } = await supabase
-          .from("pages")
-          .select("public_id, updated_at, published_at")
-          .eq("published", true)
-          .order("updated_at", { ascending: false })
-          .limit(5000);
+        const { data: mappings, error: resolverError } = await supabase.rpc(
+          "get_sitemap_published_magic_page_mappings",
+        );
+
+        if (resolverError) {
+          console.error("Sitemap canonical resolver failed", resolverError);
+          throw new Error("Unable to resolve canonical sitemap page URLs");
+        }
 
         const xml = buildSitemapXml(
           (profiles ?? []) as SitemapProfile[],
-          (pages ?? []) as SitemapPage[],
+          (mappings ?? []) as SitemapMagicPageMapping[],
         );
 
         return new Response(xml, {
