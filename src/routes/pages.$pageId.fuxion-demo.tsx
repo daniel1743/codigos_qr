@@ -14,7 +14,7 @@ function PremiumPrototypePage() {
   return (
     <div className="w-full h-[100dvh] flex flex-col relative">
       <PremiumPrototype initialState="default" showAdvancedPanel={false} pageId={pageId} />
-      <FuxionAssistant />
+      <FuxionAssistant pageId={pageId} />
     </div>
   );
 }

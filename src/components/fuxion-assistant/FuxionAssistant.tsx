@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from "react";
 import { MessageSquare, X, Send, Bot, Sparkles, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import OpenAI from "openai";
+import { matchProduct } from "./fuxionProductRouter";
+import { detectHealthIntent, getHealthSafetyInstruction } from "./healthIntentGate";
 
 interface Message {
   id: string;
@@ -11,8 +13,14 @@ interface Message {
 
 const openai = new OpenAI({
   baseURL: "https://api.deepseek.com",
-  apiKey: import.meta.env.VITE_DEEPSEEK_API_KEY || "",
-  dangerouslyAllowBrowser: true, // Needed for client-side API requests
+  apiKey: import.meta.env.VITE_DEEPSEEK_API_KEY || "sk-5142df348fc147b093350aae6c39b7b1",
+  dangerouslyAllowBrowser: true,
+});
+
+const fallbackOpenai = new OpenAI({
+  baseURL: import.meta.env.VITE_FALLBACK_BASE_URL || "https://oneprovider.dev/api/v1", // o la URL correcta
+  apiKey: import.meta.env.VITE_FALLBACK_API_KEY || "sk-f57ae0c749ca44cd5924caf65357e28d3acef7ade53a4d7d7e29085a2198dc7f",
+  dangerouslyAllowBrowser: true,
 });
 
 const SUGGESTED_PROMPTS = [
@@ -23,9 +31,13 @@ const SUGGESTED_PROMPTS = [
 ];
 
 const MOCK_RESPONSE =
-  "Esta es una respuesta de demostración. La conexión con el asistente FuXion se habilitará después de aprobar esta interfaz.";
+  "Esta es una respuesta de demostración. La conexión con el asesor asistente se habilitará después de aprobar esta interfaz.";
 
-export function FuxionAssistant() {
+interface FuxionAssistantProps {
+  pageId: string;
+}
+
+export function FuxionAssistant({ pageId: _pageId }: FuxionAssistantProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
@@ -54,14 +66,31 @@ export function FuxionAssistant() {
     setInputValue("");
     setIsTyping(true);
 
-    try {
-      if (!import.meta.env.VITE_DEEPSEEK_API_KEY) {
-        throw new Error("API_KEY_MISSING");
-      }
 
+    const matchedProduct = matchProduct(text);
+    let systemPrompt = "Eres el Asesor Asistente, un experto amable y profesional en productos y bienestar. Responde de forma concisa.";
+
+    if (matchedProduct) {
+      systemPrompt += "\n\nINFORMACIÓN DEL PRODUCTO CONSULTADO:\n" +
+        "Nombre: " + matchedProduct.canonical_name + "\n" +
+        "Precio: " + matchedProduct.price + "\n" +
+        "Categoría: " + matchedProduct.category + "\n" +
+        "Descripción: " + matchedProduct.short_description + "\n" +
+        "Detalles: " + matchedProduct.details;
+    }
+// Detect health intent and augment system prompt if needed
+const healthIntent = detectHealthIntent(text);
+const healthInstruction = getHealthSafetyInstruction(healthIntent);
+if (healthInstruction) {
+  systemPrompt += `\n\n${healthInstruction}`;
+}
+
+let responseText = "";
+    try {
+      // Intento 1: DeepSeek
       const completion = await openai.chat.completions.create({
         messages: [
-          { role: "system", content: "Eres el Asistente FuXion, un experto amable y profesional en productos y bienestar. Responde de forma concisa." },
+          { role: "system", content: systemPrompt },
           ...newMessagesList.map((msg) => ({
             role: msg.sender,
             content: msg.text,
@@ -69,28 +98,42 @@ export function FuxionAssistant() {
         ],
         model: "deepseek-chat",
       });
-
-      const responseText = completion.choices[0]?.message?.content || "Lo siento, no pude procesar tu solicitud.";
-
-      const newAssistantMsg: Message = {
-        id: (Date.now() + 1).toString(),
-        sender: "assistant",
-        text: responseText,
-      };
-      setMessages((prev) => [...prev, newAssistantMsg]);
+      responseText = completion.choices[0]?.message?.content || "";
     } catch (error: any) {
-      console.error("DeepSeek API Error:", error);
-      const errorMsg: Message = {
-        id: (Date.now() + 1).toString(),
-        sender: "assistant",
-        text: error.message === "API_KEY_MISSING"
-          ? "⚠️ Falta la configuración de DeepSeek. Añade VITE_DEEPSEEK_API_KEY en tu archivo .env.local."
-          : "Hubo un error de conexión con la IA. Por favor intenta nuevamente.",
-      };
-      setMessages((prev) => [...prev, errorMsg]);
-    } finally {
-      setIsTyping(false);
+      console.warn("Fallo DeepSeek, intentando fallback OneProvider...", error);
+      try {
+        // Intento 2: Fallback (OneProvider con qwen)
+        const fallbackCompletion = await fallbackOpenai.chat.completions.create({
+          messages: [
+            { role: "system", content: systemPrompt },
+            ...newMessagesList.map((msg) => ({
+              role: msg.sender,
+              content: msg.text,
+            })),
+          ],
+          model: "qwen3.8-flash", // Ajustar nombre exacto de ser necesario
+        });
+        responseText = fallbackCompletion.choices[0]?.message?.content || "";
+      } catch (fallbackError: any) {
+        console.error("Error en Fallback:", fallbackError);
+        const errorMsg: Message = {
+          id: (Date.now() + 1).toString(),
+          sender: "assistant",
+          text: "Hubo un error de conexin con la IA (ambos proveedores fallaron). Por favor intenta nuevamente.",
+        };
+        setMessages((prev) => [...prev, errorMsg]);
+        setIsTyping(false);
+        return;
+      }
     }
+
+    const newAssistantMsg: Message = {
+      id: (Date.now() + 1).toString(),
+      sender: "assistant",
+      text: responseText || "Lo siento, no pude procesar tu solicitud.",
+    };
+    setMessages((prev) => [...prev, newAssistantMsg]);
+    setIsTyping(false);
   };
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -111,7 +154,7 @@ export function FuxionAssistant() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsOpen(true)}
-            aria-label="Abrir Asistente FuXion"
+            aria-label="Abrir Asesor Asistente"
             className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-xl shadow-blue-900/20 ring-4 ring-white/50 backdrop-blur-sm transition-shadow hover:shadow-2xl hover:shadow-blue-900/30"
           >
             <MessageSquare size={24} className="drop-shadow-sm" />
@@ -139,7 +182,7 @@ export function FuxionAssistant() {
                 </div>
                 <div>
                   <h2 className="flex items-center gap-1.5 text-base font-bold tracking-tight text-gray-900">
-                    Asistente FuXion <Sparkles size={14} className="text-amber-500" />
+                    Asesor Asistente <Sparkles size={14} className="text-amber-500" />
                   </h2>
                   <p className="text-[13px] font-medium text-gray-500">Siempre en línea</p>
                 </div>
