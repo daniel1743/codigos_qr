@@ -13,7 +13,7 @@ export function EditorPage() {
   const ed = useEditor();
   const preview = ed.mode === "preview";
   return (
-    <div className="flex h-full w-full flex-col bg-canvas" data-cq-preview={preview ? "true" : undefined}>
+    <div className={`flex h-full w-full flex-col bg-canvas${preview ? " fixed inset-0 z-[100]" : ""}`} data-cq-preview={preview ? "true" : undefined}>
       {!preview && <TopBar />}
       <StateTour />
       <main className="relative min-h-0 flex-1">
