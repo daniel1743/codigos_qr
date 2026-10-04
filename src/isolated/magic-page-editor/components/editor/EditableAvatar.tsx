@@ -5,7 +5,8 @@ import { Editable } from './Editable';
 import { cx } from '../../utils/cx';
 import { useFreeImagePan } from './controls/PositionPad';
 import { usePageVerification } from '../../contexts/PageVerificationContext';
-import { STORY_FEATURE_LABEL, activeStoryIndex } from '../../utils/stories';
+import { STORY_FEATURE_LABEL, activeStoryEntry } from '../../utils/stories';
+import { StoryPulseViewer } from '../story/StoryPulseViewer';
 
 /**
  * Official (admin) verification treatment for the `official-gold` variant:
@@ -70,7 +71,7 @@ export function EditableAvatar({
   className,
   style
 }: EditableAvatarProps) {
-  const { doc } = useEditor();
+  const { doc, mode } = useEditor();
   const p = doc.props[id] ?? {};
   const size = sizes[p['size'] as AvatarSize ?? defaultSize];
   const shape = p['shape'] as AvatarShape ?? defaultShape;
@@ -83,9 +84,16 @@ export function EditableAvatar({
   const w = size + ring * 2;
   const h = (shape === 'arch' ? Math.round(size * 1.25) : size) + ring * 2;
   const isLocked = p['locked'] === 'true';
-  // E2 — "Pulso activo": the avatar shows a subtle 3-colour ring while a story is
-  // inside its 24 h window. Only one story can be active at a time.
-  const storyActive = !doc.removed[id] && activeStoryIndex(p, Date.now()) !== null;
+  // E2/E3 — "Pulso activo": the avatar shows a subtle 3-colour ring while a story is
+  // inside its 24 h window, and tapping the published avatar opens its photo.
+  // `activeStoryEntry` is the SINGLE active-state source shared with the viewer: an
+  // expired pulse returns null even if its `src` is still persisted, so neither the
+  // ring nor the viewer can be reached from a stale story.
+  const story = doc.removed[id] ? null : activeStoryEntry(p, Date.now());
+  const storyActive = story !== null;
+  const [pulseOpen, setPulseOpen] = React.useState(false);
+  // Editing keeps selecting the avatar instead of opening the viewer.
+  const canOpenPulse = storyActive && !!story?.src && mode !== 'edit';
 
   return (
     <Editable
@@ -99,6 +107,22 @@ export function EditableAvatar({
       style={{ width: w, height: h, padding: ring, background: ring ? ringColor : 'transparent', borderRadius: radiusFor(shape, w), ...style }}>
       {storyActive &&
       <span aria-hidden="true" data-story-ring-layer="spin" className="cq-story-ring" style={{ borderRadius: radiusFor(shape, w + 6) }} />
+      }
+      {canOpenPulse &&
+      <button
+        type="button"
+        data-story-tap="on"
+        aria-label={`Abrir ${STORY_FEATURE_LABEL}`}
+        onClick={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          setPulseOpen(true);
+        }}
+        style={{ position: 'absolute', inset: 0, border: 'none', padding: 0, background: 'transparent', cursor: 'pointer', zIndex: 2, borderRadius: radiusFor(shape, w) }}
+      />
+      }
+      {canOpenPulse && pulseOpen &&
+      <StoryPulseViewer src={story?.src ?? ''} alt={STORY_FEATURE_LABEL} onClose={() => setPulseOpen(false)} />
       }
       
       <div className={cx("relative h-full w-full overflow-hidden", !isLocked && "touch-none")} style={{ borderRadius: radiusFor(shape, size) }} {...(isLocked ? {} : crop.handlers)}>

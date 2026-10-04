@@ -39,10 +39,23 @@ export interface StoryEntry {
   remainingMs: number;
 }
 
-export type StoryField = 'at' | 'active' | 'label';
+export type StoryField = 'at' | 'active' | 'label' | 'src' | 'path';
 
 export function storyKey(index: number, field: StoryField): string {
   return `${STORY_INTERNAL_NAME}.${index}.${field}`;
+}
+
+export interface StoryEntry {
+  index: number;
+  at: string;
+  active: boolean;
+  expired: boolean;
+  /** Milliseconds left in the 24 h window (0 when inactive or expired). */
+  remainingMs: number;
+  /** Public URL of THIS pulse photo. Independent from `avatar.src` (never shared). */
+  src: string;
+  /** Storage path, kept only for future maintenance. Nothing deletes it today. */
+  path: string;
 }
 
 /** Every slot that carries a real activation timestamp, lowest index first. */
@@ -55,7 +68,15 @@ export function readStories(props: StoryProps | undefined, now: number): StoryEn
     if (!Number.isFinite(startedAt)) continue;
     const active = props?.[storyKey(index, 'active')] === 'on';
     const remainingMs = active ? Math.max(0, startedAt + STORY_TTL_MS - now) : 0;
-    entries.push({ index, at, active, expired: active && remainingMs <= 0, remainingMs });
+    entries.push({
+      index,
+      at,
+      active,
+      expired: active && remainingMs <= 0,
+      remainingMs,
+      src: props?.[storyKey(index, 'src')] ?? '',
+      path: props?.[storyKey(index, 'path')] ?? '',
+    });
   }
   return entries;
 }
@@ -64,6 +85,16 @@ export function readStories(props: StoryProps | undefined, now: number): StoryEn
 export function activeStoryIndex(props: StoryProps | undefined, now: number): number | null {
   const found = readStories(props, now).find((entry) => entry.active && !entry.expired);
   return found ? found.index : null;
+}
+
+/**
+ * SINGLE source of truth for "hay un Pulso activo": used by BOTH the ring and the
+ * viewer. An expired story returns `null` even when its `src` is still persisted,
+ * so the viewer cannot be opened from a stale URL.
+ */
+export function activeStoryEntry(props: StoryProps | undefined, now: number): StoryEntry | null {
+  const found = readStories(props, now).find((entry) => entry.active && !entry.expired);
+  return found ?? null;
 }
 
 export function hasActiveStory(props: StoryProps | undefined, now: number): boolean {
@@ -85,7 +116,15 @@ export function nextStorySlot(props: StoryProps | undefined): number | null {
  */
 export function storyPatch(
   props: StoryProps | undefined,
-  action: { activate?: number; deactivate?: number; clear?: number },
+  action: {
+    activate?: number;
+    deactivate?: number;
+    clear?: number;
+    /** Attaches the pulse photo to a slot. NEVER touches `avatar.src`: those keys
+     *  are different (`story.N.src` vs `src`), so uploading/replacing a pulse can
+     *  never modify the profile picture. */
+    setMedia?: { index: number; src: string; path?: string };
+  },
   now: number,
 ): StoryProps {
   const patch: StoryProps = {};
@@ -99,12 +138,21 @@ export function storyPatch(
     patch[storyKey(action.activate, 'at')] = new Date(now).toISOString();
     patch[storyKey(action.activate, 'active')] = 'on';
   }
+  if (action.setMedia) {
+    const { index, src, path } = action.setMedia;
+    patch[storyKey(index, 'src')] = src;
+    // Kept only for future maintenance: nothing deletes Storage today (the 24 h
+    // expiry is LOGICAL, and ownership of the object is never assumed here).
+    patch[storyKey(index, 'path')] = path ?? '';
+  }
   if (typeof action.deactivate === 'number') {
     patch[storyKey(action.deactivate, 'active')] = 'off';
   }
   if (typeof action.clear === 'number') {
     patch[storyKey(action.clear, 'at')] = '';
     patch[storyKey(action.clear, 'active')] = 'off';
+    patch[storyKey(action.clear, 'src')] = '';
+    patch[storyKey(action.clear, 'path')] = '';
   }
   return patch;
 }

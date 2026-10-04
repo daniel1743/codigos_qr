@@ -111,9 +111,23 @@ export function AdvancedPanel({ hideBlockNav = false }: { hideBlockNav?: boolean
       const activeEntry = storyEntries.find((entry) => entry.active && !entry.expired) ?? null;
       const activeStory = activeEntry ? activeEntry.index : null;
       const nextSlot = nextStorySlot(p);
-      const applyStory = (action: { activate?: number; deactivate?: number; clear?: number }) => {
+      const applyStory = (action: { activate?: number; deactivate?: number; clear?: number; setMedia?: { index: number; src: string; path?: string } }) => {
         const patch = storyPatch(p, action, Date.now());
         Object.entries(patch).forEach(([key, value]) => set(key, value));
+      };
+      // E3 — the pulse photo is uploaded with the editor's existing uploader and
+      // stored in its OWN keys (`story.N.src`). `src` (the profile picture) is never
+      // touched, and nothing is deleted from Storage (logical 24 h expiry only).
+      const uploadPulse = async (file: File) => {
+        if (!ed.uploadAsset) return;
+        try {
+          const src = await ed.uploadAsset(file);
+          if (!src) return;
+          const slot = activeStory ?? nextSlot ?? 0;
+          applyStory({ activate: slot, setMedia: { index: slot, src } });
+        } catch {
+          // A failed upload simply leaves the pulse off; nothing else changes.
+        }
       };
       specific = (
         <>
@@ -154,9 +168,27 @@ export function AdvancedPanel({ hideBlockNav = false }: { hideBlockNav?: boolean
           <PanelSection title={STORY_FEATURE_LABEL}>
             {activeStory !== null ?
             <div className="space-y-2">
-                <p data-story-state="active" className="text-[11.5px] leading-snug text-ink opacity-70">
-                  Activo · expira en {formatRemaining(activeEntry?.remainingMs ?? 0)}
-                </p>
+                <div className="flex items-center gap-2">
+                  {activeEntry?.src ?
+                  <img src={activeEntry.src} alt="" className="h-12 w-12 rounded-lg object-cover" />
+                  : null}
+                  <p data-story-state="active" className="text-[11.5px] leading-snug text-ink opacity-70">
+                    Activo · expira en {formatRemaining(activeEntry?.remainingMs ?? 0)}
+                  </p>
+                </div>
+                <label className="block w-full cursor-pointer rounded-xl border border-line px-3 py-2 text-center text-[12.5px] font-medium text-ink hover:border-[#CDD1D7]">
+                  Cambiar foto del pulso
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(event) => {
+                      const file = event.target.files?.[0];
+                      event.target.value = '';
+                      if (file) void uploadPulse(file);
+                    }}
+                  />
+                </label>
                 <button
                   type="button"
                   className="w-full rounded-xl border border-line px-3 py-2 text-[12.5px] font-medium text-ink hover:border-[#CDD1D7]"
@@ -166,16 +198,22 @@ export function AdvancedPanel({ hideBlockNav = false }: { hideBlockNav?: boolean
                 </button>
               </div> :
             <div className="space-y-2">
-                <button
-                  type="button"
-                  disabled={nextSlot === null}
-                  className="w-full rounded-xl border border-line px-3 py-2 text-[12.5px] font-medium text-ink hover:border-[#CDD1D7] disabled:opacity-40"
-                  onClick={() => applyStory({ activate: nextSlot ?? 0 })}
-                >
-                  Activar pulso (24 h)
-                </button>
+                <label className={`block w-full cursor-pointer rounded-xl border border-line px-3 py-2 text-center text-[12.5px] font-medium text-ink hover:border-[#CDD1D7]${nextSlot === null ? ' pointer-events-none opacity-40' : ''}`}>
+                  Subir foto y activar pulso (24 h)
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    disabled={nextSlot === null}
+                    onChange={(event) => {
+                      const file = event.target.files?.[0];
+                      event.target.value = '';
+                      if (file) void uploadPulse(file);
+                    }}
+                  />
+                </label>
                 <p className="text-[11.5px] leading-snug text-ink opacity-70">
-                  Máx. {STORY_UI_LIMIT} desde el editor · hasta {STORY_TOTAL_LIMIT} contemplados · 1 visible a la vez.
+                  Máx. {STORY_UI_LIMIT} desde el editor · hasta {STORY_TOTAL_LIMIT} contemplados · 1 visible a la vez. La foto se guarda aparte del avatar.
                 </p>
               </div>}
           </PanelSection>
