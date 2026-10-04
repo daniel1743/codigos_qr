@@ -6,6 +6,7 @@ import { useThemeTokens } from "../../hooks/useThemeTokens";
 import { TemplateRenderer } from "../templates/TemplateRenderer";
 import { LandingBot } from "../../../../components/landing-bot/LandingBot";
 import { normalizeLandingBot } from "../../../../lib/landing-bot/config";
+import { getLandingBotPreviewPublicId } from "../../utils/landingBotLive";
 import { SelectionLayer } from "./SelectionLayer";
 import { MobileSheet } from "./MobileSheet";
 import { MobileKeyboard } from "./MobileKeyboard";
@@ -20,6 +21,7 @@ const widths: MobileWidth[] = [360, 390, 430];
 export function MobileCanvas() {
   const ed = useEditor();
   const t = useThemeTokens();
+  const livePublicId = getLandingBotPreviewPublicId();
   const [scroller, setScroller] = useState<HTMLDivElement | null>(null);
   const [content, setContent] = useState<HTMLDivElement | null>(null);
   const bare = ed.isSmallScreen;
@@ -103,7 +105,13 @@ export function MobileCanvas() {
       </div>
 
       {ed.doc.bot?.enabled && (
-        <LandingBot overlay previewOnly config={normalizeLandingBot(ed.doc.bot)} />
+        <LandingBot
+          overlay
+          previewOnly={!livePublicId}
+          publicId={livePublicId || undefined}
+          mobilePreview={bare}
+          config={normalizeLandingBot(ed.doc.bot)}
+        />
       )}
 
       <AnimatePresence>

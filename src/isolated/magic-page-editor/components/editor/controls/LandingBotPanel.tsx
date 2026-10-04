@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { CrownIcon } from "lucide-react";
+import { CrownIcon, Loader2Icon, UploadIcon } from "lucide-react";
 import { toast } from "sonner";
 import { useEditor } from "../../../contexts/EditorContext";
 import { createDefaultLandingBot, isLandingBotProTier } from "../../../../../lib/landing-bot/config";
 import { getLandingBotPlanFn } from "../../../../../lib/landing-bot/server";
 import type { LandingBotConfig, LandingBotTone } from "../../../types/editor";
+import { useLandingBotPublishedEnabled } from "../../../utils/landingBotPublishState";
 import { PanelSection } from "./PanelSection";
 import { TextField } from "./TextField";
 import { Toggle } from "./Toggle";
@@ -27,6 +28,7 @@ export function LandingBotPanel() {
   const bot = ed.doc.bot ?? createDefaultLandingBot();
   const [tier, setTier] = useState<string>("free");
   const isPro = isLandingBotProTier(tier);
+  const publishedBotEnabled = useLandingBotPublishedEnabled();
 
   useEffect(() => {
     let active = true;
@@ -70,6 +72,23 @@ export function LandingBotPanel() {
       >
         <Toggle label="Activar bot en mi página" checked={bot.enabled} onChange={(v) => update({ enabled: v })} />
       </PanelSection>
+
+      {bot.enabled && publishedBotEnabled === false && (
+        <PanelSection title="Aún no publicado">
+          <div className="space-y-2.5 rounded-xl border border-amber-500/30 bg-amber-50/60 p-3 text-[12.5px] leading-snug text-amber-800">
+            <p>Tu asistente está activado, pero estos cambios aún no están publicados.</p>
+            <button
+              type="button"
+              onClick={ed.publish}
+              disabled={ed.publishing}
+              className="flex min-h-10 w-full items-center justify-center gap-2 rounded-xl bg-ink px-3 text-[13px] font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {ed.publishing ? <Loader2Icon className="h-4 w-4 animate-spin" /> : <UploadIcon className="h-4 w-4" />}
+              Publicar ahora
+            </button>
+          </div>
+        </PanelSection>
+      )}
 
       {bot.enabled && (
         <>

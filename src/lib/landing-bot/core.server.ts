@@ -96,6 +96,12 @@ export async function answerLandingBot(
   ];
 
   const deepseekKey = process.env.DEEPSEEK_API_KEY || "";
+  const fallbackKey = process.env.FALLBACK_API_KEY || "";
+  if (!deepseekKey && !fallbackKey && process.env["NODE_ENV"] !== "production") {
+    console.warn(
+      "[landing-bot] Sin proveedor de IA: define DEEPSEEK_API_KEY o FALLBACK_API_KEY (p. ej. en .env.local) para probar el asistente en local.",
+    );
+  }
   if (deepseekKey) {
     try {
       const primary = createClient(
@@ -113,7 +119,6 @@ export async function answerLandingBot(
     }
   }
 
-  const fallbackKey = process.env.FALLBACK_API_KEY || "";
   if (fallbackKey) {
     try {
       const fallback = createClient(

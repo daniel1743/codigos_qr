@@ -5,12 +5,14 @@ import { useEditor } from '../../contexts/EditorContext';
 import { TemplateRenderer } from '../templates/TemplateRenderer';
 import { LandingBot } from '../../../../components/landing-bot/LandingBot';
 import { normalizeLandingBot } from '../../../../lib/landing-bot/config';
+import { getLandingBotPreviewPublicId } from '../../utils/landingBotLive';
 import { SelectionLayer } from './SelectionLayer';
 import { cx } from '../../utils/cx';
 
 /** Desktop: the page fills the canvas. No sidebars — tools appear only next to what you touch. */
 export function DesktopCanvas() {
   const ed = useEditor();
+  const livePublicId = getLandingBotPreviewPublicId();
   const [scroller, setScroller] = useState<HTMLDivElement | null>(null);
   const [content, setContent] = useState<HTMLDivElement | null>(null);
   const showHint = ed.mode === 'edit' && !ed.selection && !ed.picker.open;
@@ -24,7 +26,12 @@ export function DesktopCanvas() {
         </div>
       </div>
       {ed.doc.bot?.enabled && (
-        <LandingBot overlay previewOnly config={normalizeLandingBot(ed.doc.bot)} />
+        <LandingBot
+          overlay
+          previewOnly={!livePublicId}
+          publicId={livePublicId || undefined}
+          config={normalizeLandingBot(ed.doc.bot)}
+        />
       )}
       <AnimatePresence>
         {showHint &&

@@ -82,12 +82,15 @@ export function LandingBot({
   config,
   previewOnly = false,
   overlay = false,
+  mobilePreview = false,
 }: {
   publicId?: string;
   config: LandingBotConfig;
   previewOnly?: boolean;
   /** Anchors the launcher to the nearest positioned ancestor instead of the viewport (editor canvases). */
   overlay?: boolean;
+  /** Reserves the fixed platform navigation in the small-screen editor. */
+  mobilePreview?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -104,26 +107,14 @@ export function LandingBot({
     : null;
 
   const send = async (value: string) => {
+    // Preview never talks to the backend: no history change, no simulated
+    // replies and no AI call (matches "Vista previa · no conecta con IA").
+    if (previewOnly) return;
     const text = value.trim();
-    if (!text || typing) return;
+    if (!text || typing || !publicId) return;
     const next = [...messages, { id: `${Date.now()}-u`, sender: "user" as const, text }];
     setMessages(next);
     setInput("");
-    if (previewOnly || !publicId) {
-      setTyping(true);
-      window.setTimeout(() => {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: `${Date.now()}-a`,
-            sender: "assistant",
-            text: "Estás viendo una **vista previa**. Cuando publiques la página responderé con IA usando la información de tu página.",
-          },
-        ]);
-        setTyping(false);
-      }, 600);
-      return;
-    }
     setTyping(true);
     try {
       const res = await askLandingBotFn({
@@ -142,7 +133,10 @@ export function LandingBot({
 
   return (
 
-    <div className={`${overlay ? "absolute" : "fixed"} bottom-5 right-5 flex flex-col items-end gap-3 ${overlay ? "z-[55]" : previewOnly ? "z-[30]" : "z-[70]"}`}>
+    <div
+      className={`${overlay || previewOnly ? "absolute right-4" : "fixed bottom-5 right-5"} flex flex-col items-end gap-3 ${overlay ? "z-[20]" : previewOnly ? "z-[30]" : "z-[70]"}`}
+      style={overlay || previewOnly ? { bottom: mobilePreview ? "calc(3.5rem + env(safe-area-inset-bottom) + 16px)" : "1rem" } : undefined}
+    >
       {open && (
         <div className="flex h-[70vh] max-h-[560px] w-[min(92vw,360px)] flex-col overflow-hidden rounded-2xl border border-black/10 bg-white shadow-2xl">
           <header className="flex items-center gap-3 border-b border-black/5 bg-gradient-to-br from-blue-600 to-indigo-600 px-4 py-3 text-white">
@@ -199,6 +193,12 @@ export function LandingBot({
             </div>
           )}
 
+          {previewOnly && (
+            <p className="px-3.5 pb-2 text-center text-[11.5px] leading-snug text-slate-500">
+              Vista previa. El asistente podrá conversar con tus visitantes cuando publiques la página.
+            </p>
+          )}
+
           <div className="flex items-end gap-2 border-t border-black/5 p-3">
             <textarea
               value={input}
@@ -210,14 +210,15 @@ export function LandingBot({
                 }
               }}
               rows={1}
-              placeholder="Escribe un mensaje…"
+              disabled={previewOnly}
+              placeholder={previewOnly ? "Disponible en la página publicada" : "Escribe un mensaje…"}
               aria-label="Mensaje"
-              className="max-h-24 min-h-[42px] w-full resize-none rounded-xl border border-gray-200 px-3 py-2.5 text-[14px] outline-none focus:border-blue-400"
+              className="max-h-24 min-h-[42px] w-full resize-none rounded-xl border border-gray-200 px-3 py-2.5 text-[14px] outline-none focus:border-blue-400 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400"
             />
             <button
               type="button"
               onClick={() => void send(input)}
-              disabled={!input.trim() || typing}
+              disabled={previewOnly || !input.trim() || typing}
               aria-label="Enviar"
               className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-blue-600 text-white transition-colors hover:bg-indigo-600 disabled:bg-gray-200 disabled:text-gray-400"
             >

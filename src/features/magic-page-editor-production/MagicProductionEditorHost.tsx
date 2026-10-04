@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { MagicEditorApp } from "../../isolated/magic-page-editor/MagicEditorApp";
-import { serializeMagicEditorState, type MagicEditorStateV1 } from "./magic-document";
+import { setLandingBotPreviewPublicId } from "../../isolated/magic-page-editor/utils/landingBotLive";
+import { setLandingBotPublishedEnabled } from "../../isolated/magic-page-editor/utils/landingBotPublishState";
+import { isMagicPageDocument, serializeMagicEditorState, type MagicEditorStateV1 } from "./magic-document";
 import { createPageEditorSession, type PageEditorSession } from "./document-session";
 import { getBrowserSupabaseClient } from "../../lib/supabase/client";
 import { magicPageService } from "../../services/magic-page.service";
@@ -12,6 +14,11 @@ import type { BioTemplateConfig } from "../../premium-template-studio/types";
 import MobilePlatformNav from "../../components/app-shell/MobilePlatformNav";
 
 const MEDIA_BUCKET = "avatars";
+
+/** True only when the PUBLISHED snapshot already ships an enabled assistant. */
+function isLandingBotPublished(document: unknown): boolean {
+  return isMagicPageDocument(document) && document.bot?.enabled === true;
+}
 
 function extensionOf(file: File): string {
   const extension = file.name.split(".").pop()?.toLowerCase();
@@ -67,6 +74,7 @@ export function MagicProductionEditorHost({ pageId }: { pageId: string }) {
         );
         if (!active) return;
         setSession(data.session);
+        setLandingBotPublishedEnabled(isLandingBotPublished(ownedPage.published_template_config));
         setPage(ownedPage);
         setRevision(ownedPage.published_revision);
         setEditorSession(loaded);
@@ -173,6 +181,7 @@ export function MagicProductionEditorHost({ pageId }: { pageId: string }) {
       );
       setRevision(published.published_revision);
       setPage(published);
+      setLandingBotPublishedEnabled(isLandingBotPublished(published.published_template_config));
     },
     [editorSession?.kind, flushPendingSave, page, revision, save, session, supabase],
   );
@@ -359,6 +368,10 @@ export function MagicProductionEditorHost({ pageId }: { pageId: string }) {
     PageEditorSession,
     { kind: "CANONICAL_V1" | "NULL" }
   >;
+
+  // Dev-only: hand the page id to the in-canvas assistant so it can answer for
+  // real while developing on localhost. No-op in production builds.
+  if (editorSession.kind === "MAGIC_V1") setLandingBotPreviewPublicId(page.public_id);
 
   return (
     <>
