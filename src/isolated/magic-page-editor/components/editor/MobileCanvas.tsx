@@ -4,6 +4,8 @@ import { BatteryFullIcon, PointerIcon, SignalIcon, WifiIcon } from "lucide-react
 import { useEditor } from "../../contexts/EditorContext";
 import { useThemeTokens } from "../../hooks/useThemeTokens";
 import { TemplateRenderer } from "../templates/TemplateRenderer";
+import { LandingBot } from "../../../../components/landing-bot/LandingBot";
+import { normalizeLandingBot } from "../../../../lib/landing-bot/config";
 import { SelectionLayer } from "./SelectionLayer";
 import { MobileSheet } from "./MobileSheet";
 import { MobileKeyboard } from "./MobileKeyboard";
@@ -94,11 +96,15 @@ export function MobileCanvas() {
           ref={setContent}
           className={cx("relative flex min-h-full flex-col", ed.mode === "edit" && "cq-edit")}
         >
-          <TemplateRenderer />
+          <TemplateRenderer showLandingBotPreview={false} />
           <SelectionLayer container={content} scroller={scroller} />
         </div>
         <div style={{ height: spacer, background: t.page.color }} aria-hidden />
       </div>
+
+      {ed.doc.bot?.enabled && (
+        <LandingBot overlay previewOnly config={normalizeLandingBot(ed.doc.bot)} />
+      )}
 
       <AnimatePresence>
         {ed.mode === "edit" && !ed.selection && !ed.picker.open && !ed.settingsOpen && (

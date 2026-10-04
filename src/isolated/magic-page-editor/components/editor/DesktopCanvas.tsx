@@ -3,6 +3,8 @@ import { MousePointerClickIcon } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEditor } from '../../contexts/EditorContext';
 import { TemplateRenderer } from '../templates/TemplateRenderer';
+import { LandingBot } from '../../../../components/landing-bot/LandingBot';
+import { normalizeLandingBot } from '../../../../lib/landing-bot/config';
 import { SelectionLayer } from './SelectionLayer';
 import { cx } from '../../utils/cx';
 
@@ -17,10 +19,13 @@ export function DesktopCanvas() {
     <div className="relative h-full">
       <div ref={setScroller} className="h-full overflow-y-auto overflow-x-hidden">
         <div ref={setContent} className={cx('relative flex min-h-full flex-col', ed.mode === 'edit' && 'cq-edit')}>
-          <TemplateRenderer />
+          <TemplateRenderer showLandingBotPreview={false} />
           <SelectionLayer container={content} scroller={scroller} />
         </div>
       </div>
+      {ed.doc.bot?.enabled && (
+        <LandingBot overlay previewOnly config={normalizeLandingBot(ed.doc.bot)} />
+      )}
       <AnimatePresence>
         {showHint &&
         <motion.div

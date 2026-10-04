@@ -81,10 +81,13 @@ export function LandingBot({
   publicId,
   config,
   previewOnly = false,
+  overlay = false,
 }: {
   publicId?: string;
   config: LandingBotConfig;
   previewOnly?: boolean;
+  /** Anchors the launcher to the nearest positioned ancestor instead of the viewport (editor canvases). */
+  overlay?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -102,10 +105,25 @@ export function LandingBot({
 
   const send = async (value: string) => {
     const text = value.trim();
-    if (!text || typing || previewOnly || !publicId) return;
+    if (!text || typing) return;
     const next = [...messages, { id: `${Date.now()}-u`, sender: "user" as const, text }];
     setMessages(next);
     setInput("");
+    if (previewOnly || !publicId) {
+      setTyping(true);
+      window.setTimeout(() => {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `${Date.now()}-a`,
+            sender: "assistant",
+            text: "Estás viendo una **vista previa**. Cuando publiques la página responderé con IA usando la información de tu página.",
+          },
+        ]);
+        setTyping(false);
+      }, 600);
+      return;
+    }
     setTyping(true);
     try {
       const res = await askLandingBotFn({
@@ -124,7 +142,7 @@ export function LandingBot({
 
   return (
 
-    <div className={`fixed bottom-5 right-5 flex flex-col items-end gap-3 ${previewOnly ? "z-[30]" : "z-[70]"}`}>
+    <div className={`${overlay ? "absolute" : "fixed"} bottom-5 right-5 flex flex-col items-end gap-3 ${overlay ? "z-[55]" : previewOnly ? "z-[30]" : "z-[70]"}`}>
       {open && (
         <div className="flex h-[70vh] max-h-[560px] w-[min(92vw,360px)] flex-col overflow-hidden rounded-2xl border border-black/10 bg-white shadow-2xl">
           <header className="flex items-center gap-3 border-b border-black/5 bg-gradient-to-br from-blue-600 to-indigo-600 px-4 py-3 text-white">
@@ -181,11 +199,7 @@ export function LandingBot({
             </div>
           )}
 
-          {previewOnly ? (
-            <div className="border-t border-black/5 bg-slate-50 px-4 py-3 text-center text-[12px] text-slate-500">
-              Así verán el acceso al asistente tus visitantes.
-            </div>
-          ) : <div className="flex items-end gap-2 border-t border-black/5 p-3">
+          <div className="flex items-end gap-2 border-t border-black/5 p-3">
             <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -209,7 +223,7 @@ export function LandingBot({
             >
               <SendIcon className="h-4 w-4" />
             </button>
-          </div>}
+          </div>
         </div>
       )}
 
