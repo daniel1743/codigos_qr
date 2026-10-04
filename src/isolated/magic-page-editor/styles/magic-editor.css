@@ -87,3 +87,25 @@ body:has([data-cq-preview="true"]) nav[aria-label="Navegación inferior de Cripq
     transition-duration: 0.01ms !important;
   }
 }
+
+/* E2 — "Pulso activo": 3-colour ring in subtle motion around the public avatar.
+   Decorative only (aria-hidden): it marks a story that is inside its 24 h window.
+   Colours: Cripqer blue + Cripqer gold + the page accent. Motion is paused for
+   visitors who ask for reduced motion. */
+.cq-story-ring {
+  position: absolute;
+  inset: -3px;
+  pointer-events: none;
+  background: conic-gradient(from 0deg, #0D47A1 0deg, #D4AF37 120deg, var(--accent, #B8935A) 240deg, #0D47A1 360deg);
+  animation: cq-story-spin 7.5s linear infinite;
+  opacity: 0.95;
+  filter: saturate(1.05);
+}
+
+@keyframes cq-story-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cq-story-ring { animation: none; }
+}

@@ -5,6 +5,7 @@ import { Editable } from './Editable';
 import { cx } from '../../utils/cx';
 import { useFreeImagePan } from './controls/PositionPad';
 import { usePageVerification } from '../../contexts/PageVerificationContext';
+import { STORY_FEATURE_LABEL, activeStoryIndex } from '../../utils/stories';
 
 /**
  * Official (admin) verification treatment for the `official-gold` variant:
@@ -82,6 +83,9 @@ export function EditableAvatar({
   const w = size + ring * 2;
   const h = (shape === 'arch' ? Math.round(size * 1.25) : size) + ring * 2;
   const isLocked = p['locked'] === 'true';
+  // E2 — "Pulso activo": the avatar shows a subtle 3-colour ring while a story is
+  // inside its 24 h window. Only one story can be active at a time.
+  const storyActive = !doc.removed[id] && activeStoryIndex(p, Date.now()) !== null;
 
   return (
     <Editable
@@ -89,8 +93,13 @@ export function EditableAvatar({
       kind="avatar"
       label="Avatar"
       data-shape={shape}
+      data-story-ring={storyActive ? 'active' : 'off'}
+      {...(storyActive ? { title: `${STORY_FEATURE_LABEL} · 24 h` } : {})}
       className={cx('relative shrink-0', className)}
       style={{ width: w, height: h, padding: ring, background: ring ? ringColor : 'transparent', borderRadius: radiusFor(shape, w), ...style }}>
+      {storyActive &&
+      <span aria-hidden="true" data-story-ring-layer="spin" className="cq-story-ring" style={{ borderRadius: radiusFor(shape, w + 6) }} />
+      }
       
       <div className={cx("relative h-full w-full overflow-hidden", !isLocked && "touch-none")} style={{ borderRadius: radiusFor(shape, size) }} {...(isLocked ? {} : crop.handlers)}>
         <img

@@ -16,6 +16,15 @@ import { StructureRow } from "./StructureRow";
 import { HeroFusionPicker } from "./controls/HeroFusionPicker";
 import { DecorationPicker } from "./controls/DecorationPicker";
 import { TypographyTreatmentPicker } from "./controls/TypographyTreatmentPicker";
+import {
+  STORY_FEATURE_LABEL,
+  STORY_TOTAL_LIMIT,
+  STORY_UI_LIMIT,
+  formatRemaining,
+  nextStorySlot,
+  readStories,
+  storyPatch,
+} from "../../utils/stories";
 import { blockLabels } from "../../data/blockKit";
 import { CardAdvanced } from "../cards/CardAdvanced";
 import { getCardContext } from "../cards/cardActions";
@@ -96,6 +105,16 @@ export function AdvancedPanel({ hideBlockNav = false }: { hideBlockNav?: boolean
 
       break;
     case "avatar": {
+      // E2 — "Pulso activo": one 24 h story at a time, written with `setProp` as
+      // flat keys (`story.N.at` / `story.N.active`) inside this avatar's props.
+      const storyEntries = readStories(p, Date.now());
+      const activeEntry = storyEntries.find((entry) => entry.active && !entry.expired) ?? null;
+      const activeStory = activeEntry ? activeEntry.index : null;
+      const nextSlot = nextStorySlot(p);
+      const applyStory = (action: { activate?: number; deactivate?: number; clear?: number }) => {
+        const patch = storyPatch(p, action, Date.now());
+        Object.entries(patch).forEach(([key, value]) => set(key, value));
+      };
       specific = (
         <>
           <PanelSection title="Forma">
@@ -132,6 +151,34 @@ export function AdvancedPanel({ hideBlockNav = false }: { hideBlockNav?: boolean
             <PositionPad value={p.pos ?? "center"} onChange={(v) => set("pos", v)} />
           </PanelSection>
           <MediaZoomPicker value={p["zoom"] ?? "1"} onChange={(v) => set("zoom", v)} />
+          <PanelSection title={STORY_FEATURE_LABEL}>
+            {activeStory !== null ?
+            <div className="space-y-2">
+                <p data-story-state="active" className="text-[11.5px] leading-snug text-ink opacity-70">
+                  Activo · expira en {formatRemaining(activeEntry?.remainingMs ?? 0)}
+                </p>
+                <button
+                  type="button"
+                  className="w-full rounded-xl border border-line px-3 py-2 text-[12.5px] font-medium text-ink hover:border-[#CDD1D7]"
+                  onClick={() => applyStory({ deactivate: activeStory })}
+                >
+                  Desactivar pulso
+                </button>
+              </div> :
+            <div className="space-y-2">
+                <button
+                  type="button"
+                  disabled={nextSlot === null}
+                  className="w-full rounded-xl border border-line px-3 py-2 text-[12.5px] font-medium text-ink hover:border-[#CDD1D7] disabled:opacity-40"
+                  onClick={() => applyStory({ activate: nextSlot ?? 0 })}
+                >
+                  Activar pulso (24 h)
+                </button>
+                <p className="text-[11.5px] leading-snug text-ink opacity-70">
+                  Máx. {STORY_UI_LIMIT} desde el editor · hasta {STORY_TOTAL_LIMIT} contemplados · 1 visible a la vez.
+                </p>
+              </div>}
+          </PanelSection>
         </>
       );
 
