@@ -54,6 +54,7 @@ import { Segmented } from "./controls/Segmented";
 import { SizeStepper } from "./controls/SizeStepper";
 import { AlignGroup, alignOptions } from "./controls/AlignGroup";
 import { SwatchRow } from "./controls/SwatchRow";
+import { TextColorPanel } from "./controls/TextColorPanel";
 import { ImagePicker } from "./controls/ImagePicker";
 import { FreeCropControl, PositionPad } from "./controls/PositionPad";
 import { LinkEditor } from "./controls/LinkEditor";
@@ -109,6 +110,12 @@ import type { CtaVariant } from "./EditableCTA";
 import type { HeroVariant, SocialPlatform, TextAlign } from "../../types/editor";
 import type { HeroShape } from "../blocks/HeroFrame";
 
+/**
+ * Only title / main texts expose the page-wide colour shortcut in the panel.
+ * Keys are the leaf segment of the element id (e.g. `hero.name` → `name`).
+ */
+const mainTextLeafKeys = ["title", "name", "heading", "headline", "subtitle"];
+
 /** The universal editing contract, per element kind. Same list feeds the desktop toolbar and the mobile sheet. */
 export function useSelectionActions(): EditorAction[] {
   const ed = useEditor();
@@ -140,6 +147,8 @@ export function useSelectionActions(): EditorAction[] {
     }
     case "text": {
       const ts = ed.doc.textStyles[id] ?? {};
+      const isMainText = mainTextLeafKeys.includes(id.split(".").pop() ?? "") ||
+        /t[ií]tulo|nombre|titular/i.test(sel.label ?? "");
       const cs = el ? window.getComputedStyle(el) : null;
       const size = ts.size ?? Math.round(parseFloat(cs?.fontSize ?? "16"));
       const bold = ts.bold ?? (cs ? parseInt(cs.fontWeight, 10) >= 600 : false);
@@ -184,11 +193,15 @@ export function useSelectionActions(): EditorAction[] {
           icon: PaletteIcon,
           swatch: ts.color ?? cs?.color,
           panel: (
-            <SwatchRow
-              colors={t.swatches}
-              value={ts.color}
-              onChange={(c) => ed.setTextStyle(id, { color: c })}
-            />
+            isMainText ? (
+              <TextColorPanel id={id} swatches={t.swatches} />
+            ) : (
+              <SwatchRow
+                colors={t.swatches}
+                value={ts.color}
+                onChange={(c) => ed.setTextStyle(id, { color: c })}
+              />
+            )
           ),
         },
         {
