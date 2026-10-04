@@ -8,6 +8,34 @@ interface ChatMessage {
   id: string;
   sender: "user" | "assistant";
   text: string;
+  /** Assistant reply that should surface the contextual WhatsApp CTA below it. */
+  contact?: boolean;
+}
+
+/**
+ * Deterministic, local contact-intent detector.
+ *
+ * It never calls the model, never invents a phone number and never decides
+ * authorization: it only answers "does this visitor clearly want to get in
+ * touch / buy / book?". Ambiguous text returns false (no CTA).
+ */
+function normalizeForContactIntent(text: string): string {
+  return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+const CONTACT_INTENT_KEYWORDS = [
+  "whatsapp", "wsp", "wpp", "whats",
+  "contact", "comunicar", "llamar", "telefono", "celular",
+  "comprar", "pedido", "pedir", "reservar", "reserva",
+  "cotizar", "cotizacion", "presupuesto", "contratar", "adquirir",
+  "hablar con", "hablarle", "conversar", "escribirle", "escribirme",
+  "escribeme", "mandarle", "pasame", "dame su", "dame tu",
+];
+
+function detectContactIntent(text: string): boolean {
+  const value = normalizeForContactIntent(text).trim();
+  if (!value) return false;
+  return CONTACT_INTENT_KEYWORDS.some((keyword) => value.includes(keyword));
 }
 
 function renderInline(text: string, keyPrefix: string): React.ReactNode[] {
@@ -116,16 +144,26 @@ export function LandingBot({
     const next = [...messages, { id: `${Date.now()}-u`, sender: "user" as const, text }];
     setMessages(next);
     setInput("");
+    // Deterministic and local: the model never decides whether WhatsApp is offered.
+    const offerContact = !!waLink && detectContactIntent(text);
     setTyping(true);
     try {
       const res = await askLandingBotFn({
         data: { publicId, messages: next.map((m) => ({ role: m.sender, content: m.text })) },
       });
-      setMessages((prev) => [...prev, { id: `${Date.now()}-a`, sender: "assistant", text: res.reply }]);
+      setMessages((prev) => [
+        ...prev,
+        { id: `${Date.now()}-a`, sender: "assistant", text: res.reply, ...(offerContact ? { contact: true } : {}) },
+      ]);
     } catch {
       setMessages((prev) => [
         ...prev,
-        { id: `${Date.now()}-e`, sender: "assistant", text: "No pude responder ahora. Intenta de nuevo." },
+        {
+          id: `${Date.now()}-e`,
+          sender: "assistant",
+          text: "No pude responder ahora. Intenta de nuevo.",
+          ...(offerContact ? { contact: true } : {}),
+        },
       ]);
     } finally {
       setTyping(false);
@@ -160,15 +198,26 @@ export function LandingBot({
               <p>👋 ¡Hola! Soy {config.name || "el asistente"}. ¿En qué te puedo ayudar?</p>
             </div>
             {messages.map((msg) => (
-              <div
-                key={msg.id}
-                className={
-                  msg.sender === "user"
-                    ? "ml-auto max-w-[85%] rounded-2xl rounded-tr-md bg-blue-600 px-3.5 py-2.5 font-medium text-white shadow-sm"
-                    : "mr-auto max-w-[85%] rounded-2xl rounded-tl-md border border-gray-100 bg-white px-3.5 py-2.5 shadow-sm"
-                }
-              >
-                <FormattedMessage text={msg.text} />
+              <div key={msg.id} className="space-y-2">
+                <div
+                  className={
+                    msg.sender === "user"
+                      ? "ml-auto max-w-[85%] rounded-2xl rounded-tr-md bg-blue-600 px-3.5 py-2.5 font-medium text-white shadow-sm"
+                      : "mr-auto max-w-[85%] rounded-2xl rounded-tl-md border border-gray-100 bg-white px-3.5 py-2.5 shadow-sm"
+                  }
+                >
+                  <FormattedMessage text={msg.text} />
+                </div>
+                {msg.contact && waLink && (
+                  <a
+                    href={waLink}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-3.5 py-2 text-[13px] font-semibold text-white shadow-sm transition-colors hover:bg-emerald-600"
+                  >
+                    <MessageCircleIcon className="h-4 w-4" /> Hablar por WhatsApp
+                  </a>
+                )}
               </div>
             ))}
             {typing && (
@@ -180,19 +229,6 @@ export function LandingBot({
             )}
             <div ref={endRef} className="h-1" />
           </div>
-
-          {waLink && (
-            <div className="px-3.5 pb-2">
-              <a
-                href={waLink}
-                target="_blank"
-                rel="noreferrer"
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 px-3 py-2.5 text-[13.5px] font-semibold text-white transition-colors hover:bg-emerald-600"
-              >
-                <MessageCircleIcon className="h-4 w-4" /> Escribir por WhatsApp
-              </a>
-            </div>
-          )}
 
           {previewOnly && (
             <p className="px-3.5 pb-2 text-center text-[11.5px] leading-snug text-slate-500">
