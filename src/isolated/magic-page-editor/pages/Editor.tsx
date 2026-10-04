@@ -11,9 +11,10 @@ import { CanonicalCanvas } from "./CanonicalReadOnlyPage";
 
 export function EditorPage() {
   const ed = useEditor();
+  const preview = ed.mode === "preview";
   return (
-    <div className="flex h-full w-full flex-col bg-canvas">
-      <TopBar />
+    <div className="flex h-full w-full flex-col bg-canvas" data-cq-preview={preview ? "true" : undefined}>
+      {!preview && <TopBar />}
       <StateTour />
       <main className="relative min-h-0 flex-1">
         {ed.canonicalDocument ? (
@@ -25,9 +26,9 @@ export function EditorPage() {
           <button
             type="button"
             onClick={() => ed.setMode("edit")}
-            className="absolute right-5 top-4 z-40 inline-flex h-9 items-center gap-2 rounded-full bg-ink px-4 text-[12.5px] font-semibold text-white shadow-toolbar transition-opacity duration-150 hover:opacity-90"
+            className="absolute right-4 top-4 z-40 inline-flex h-8 items-center gap-1.5 rounded-full border border-line bg-white/90 px-3 text-[12px] font-semibold text-ink shadow-sm backdrop-blur transition-colors duration-150 hover:bg-white"
           >
-            <PenLineIcon className="h-4 w-4" /> Volver a editar
+            <PenLineIcon className="h-3.5 w-3.5" /> Volver a editar
           </button>
         )}
       </main>

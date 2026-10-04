@@ -109,7 +109,6 @@ export function MobileCanvas() {
           overlay
           previewOnly={!livePublicId}
           publicId={livePublicId || undefined}
-          mobilePreview={bare}
           config={normalizeLandingBot(ed.doc.bot)}
         />
       )}

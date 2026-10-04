@@ -82,15 +82,12 @@ export function LandingBot({
   config,
   previewOnly = false,
   overlay = false,
-  mobilePreview = false,
 }: {
   publicId?: string;
   config: LandingBotConfig;
   previewOnly?: boolean;
   /** Anchors the launcher to the nearest positioned ancestor instead of the viewport (editor canvases). */
   overlay?: boolean;
-  /** Reserves the fixed platform navigation in the small-screen editor. */
-  mobilePreview?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -135,7 +132,7 @@ export function LandingBot({
 
     <div
       className={`${overlay || previewOnly ? "absolute right-4" : "fixed bottom-5 right-5"} flex flex-col items-end gap-3 ${overlay ? "z-[20]" : previewOnly ? "z-[30]" : "z-[70]"}`}
-      style={overlay || previewOnly ? { bottom: mobilePreview ? "calc(3.5rem + env(safe-area-inset-bottom) + 16px)" : "1rem" } : undefined}
+      style={overlay || previewOnly ? { bottom: "calc(1rem + env(safe-area-inset-bottom))" } : undefined}
     >
       {open && (
         <div className="flex h-[70vh] max-h-[560px] w-[min(92vw,360px)] flex-col overflow-hidden rounded-2xl border border-black/10 bg-white shadow-2xl">

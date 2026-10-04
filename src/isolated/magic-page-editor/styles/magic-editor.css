@@ -72,6 +72,16 @@
 @media (prefers-reduced-motion: reduce) {
   .magic-editor-root *,
   .magic-editor-root *::before,
+
+/*
+ * Preview = ver la página pública. La navegación inferior del shell autenticado
+ * la renderiza el host (fuera de este editor), así que se oculta en preview en
+ * lugar de compensarla con offsets mágicos en el Landing Bot.
+ */
+body:has([data-cq-preview="true"]) nav[aria-label="Navegación inferior de Cripqer"] {
+  display: none;
+}
+
   .magic-editor-root *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
