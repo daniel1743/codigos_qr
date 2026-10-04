@@ -6,11 +6,14 @@ import { cx } from '../../utils/cx';
 import { useFreeImagePan } from './controls/PositionPad';
 import { usePageVerification } from '../../contexts/PageVerificationContext';
 
-/** Metallic gold treatment reserved for official (admin) verified profiles. */
+/**
+ * Official (admin) verification treatment for the `official-gold` variant:
+ * bright emerald with a very light check mark. The variant id is unchanged.
+ */
 const GOLD_BADGE_STYLE: React.CSSProperties = {
-  background: 'linear-gradient(135deg,#FCEFC0 0%,#E6C766 45%,#B8860B 100%)',
-  color: '#2A1B00',
-  boxShadow: '0 1px 2px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.65)',
+  background: 'linear-gradient(135deg,#34D399 0%,#10B981 45%,#047857 100%)',
+  color: '#FFFFFF',
+  boxShadow: '0 1px 2px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.55)',
 };
 
 type AvatarSize = 'S' | 'M' | 'L';
@@ -101,7 +104,7 @@ export function EditableAvatar({
       </div>
       {badge && verificationPlacement === 'avatar' &&
       <span
-        className={cx('absolute grid h-7 w-7 place-items-center rounded-full', verificationVariant === 'official-gold' ? 'text-[#2A1B00]' : 'text-white')}
+        className={cx('absolute grid h-7 w-7 place-items-center rounded-full text-white')}
         style={{ right: shape === 'circle' ? '6%' : -4, bottom: shape === 'circle' ? '6%' : -4, boxShadow: `0 0 0 3px ${ringColor}`, ...(verificationVariant === 'official-gold' ? GOLD_BADGE_STYLE : { background: badgeTone }) }}
         aria-label={verificationVariant === 'official-gold' ? 'Perfil verificado oficial' : 'Perfil verificado'}>
         
@@ -118,5 +121,5 @@ export function VerifiedNameCheck({ avatarId, defaultPlacement = 'none' }: { ava
   const verificationVariant = usePageVerification();
   if (verificationPlacementFromProps(p, defaultPlacement) !== 'name') return null;
   const isGold = verificationVariant === 'official-gold';
-  return <span className={`pointer-events-none ml-2 inline-grid h-5 w-5 shrink-0 place-items-center rounded-full ${isGold ? 'text-[#2A1B00]' : 'text-white'}`} style={isGold ? GOLD_BADGE_STYLE : { background: p['badgeColor'] ?? '#56604A' }} aria-label={isGold ? 'Perfil verificado oficial' : 'Nombre verificado'}><CheckIcon className="h-3 w-3" strokeWidth={3} /></span>;
+  return <span className={`pointer-events-none ml-2 inline-grid h-5 w-5 shrink-0 place-items-center rounded-full text-white`} style={isGold ? GOLD_BADGE_STYLE : { background: p['badgeColor'] ?? '#56604A' }} aria-label={isGold ? 'Perfil verificado oficial' : 'Nombre verificado'}><CheckIcon className="h-3 w-3" strokeWidth={3} /></span>;
 }

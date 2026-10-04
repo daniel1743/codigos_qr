@@ -38,7 +38,13 @@ export function resolveVerificationVariant(
   return verified ? "standard" : "none";
 }
 
-/** Premium metallic gold badge reserved for official Cripqer profiles. */
+/**
+ * Premium verification badge for official Cripqer profiles.
+ *
+ * The variant id stays `official-gold` (persisted contract, unchanged), but its
+ * visual tone is a bright, clean emerald that reads premium and stays legible
+ * over both light and dark backgrounds.
+ */
 function OfficialGoldBadge() {
   // Stable, unique gradient id per instance (avoids SVG id collisions).
   const gradientId = useRef(`cripqer-gold-${Math.random().toString(36).slice(2, 9)}`).current;
@@ -53,11 +59,11 @@ function OfficialGoldBadge() {
       <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
         <defs>
           <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#8a6d1f" />
-            <stop offset="32%" stopColor="#d4af37" />
-            <stop offset="50%" stopColor="#f9e7a0" />
-            <stop offset="68%" stopColor="#d4af37" />
-            <stop offset="100%" stopColor="#8a6d1f" />
+            <stop offset="0%" stopColor="#047857" />
+            <stop offset="32%" stopColor="#10B981" />
+            <stop offset="50%" stopColor="#34D399" />
+            <stop offset="68%" stopColor="#10B981" />
+            <stop offset="100%" stopColor="#047857" />
           </linearGradient>
         </defs>
         <path
@@ -67,7 +73,7 @@ function OfficialGoldBadge() {
         <path
           d="m9 12 2 2 4-4"
           fill="none"
-          stroke="#5b4300"
+          stroke="#FFFFFF"
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
