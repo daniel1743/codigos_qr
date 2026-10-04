@@ -99,16 +99,27 @@ describe('E1.2 card body — hidden content does not count', () => {
     act(() => root.unmount());
   });
 
-  it('keeps the editor able to restore/edit hidden content', () => {
+  it('collapses in the editor when every text is hidden (the surface is not the recovery path)', () => {
     const { host, root } = mountCard(
       EMPTY_SEED,
       'edit',
       { [`${cardId}.title`]: 'Título oculto', [`${cardId}.desc`]: 'Descripción oculta' },
       { [`${cardId}.title`]: true, [`${cardId}.desc`]: true },
     );
-    // the bottom surface (its own editable element) stays selectable in the editor
+    expect(host.querySelector('[data-slot="body"]')).toBeNull();
+    act(() => root.unmount());
+  });
+
+  it('brings the surface back in the editor when a visible text exists', () => {
+    const { host, root } = mountCard(
+      EMPTY_SEED,
+      'edit',
+      { [`${cardId}.title`]: 'Título oculto', [`${cardId}.desc`]: 'Descripción visible' },
+      { [`${cardId}.title`]: true },
+    );
     expect(host.querySelector('[data-slot="body"]')).not.toBeNull();
-    expect(host.querySelector(`[data-editor-id="${cardId}.surface"]`)).not.toBeNull();
+    expect(host.querySelector('[data-slot="title"]')).toBeNull();
+    expect(host.querySelector('[data-slot="body"]')?.textContent ?? '').toContain('Descripción visible');
     act(() => root.unmount());
   });
 });

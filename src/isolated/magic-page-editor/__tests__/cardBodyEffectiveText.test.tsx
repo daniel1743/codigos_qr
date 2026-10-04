@@ -85,10 +85,24 @@ describe('E1.2 card body — effective text decides the collapse', () => {
     act(() => root.unmount());
   });
 
-  it('keeps the empty slots editable in the editor even with no text anywhere', () => {
+  it('collapses in the editor when neither the item nor doc.texts carry content', () => {
+    // Final contract: no empty surface is kept as an editing crutch.
     const { host, root } = mountCard(EMPTY_SEED, 'edit');
+    expect(host.querySelector('[data-slot="body"]')).toBeNull();
+    act(() => root.unmount());
+  });
+
+  it('restores the surface in the editor when a title exists', () => {
+    const { host, root } = mountCard(EMPTY_SEED, 'edit', { [`${cardId}.title`]: 'Solo en texts' });
     expect(host.querySelector('[data-slot="body"]')).not.toBeNull();
     expect(host.querySelector('[data-slot="title"]')).not.toBeNull();
+    act(() => root.unmount());
+  });
+
+  it('restores the surface in the editor when only a description exists', () => {
+    const { host, root } = mountCard(EMPTY_SEED, 'edit', { [`${cardId}.desc`]: 'Solo descripción' });
+    expect(host.querySelector('[data-slot="body"]')).not.toBeNull();
+    expect(host.querySelector('[data-slot="title"]')).toBeNull();
     act(() => root.unmount());
   });
 });

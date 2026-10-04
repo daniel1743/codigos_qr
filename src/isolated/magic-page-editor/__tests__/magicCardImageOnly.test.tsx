@@ -83,10 +83,18 @@ describe('E1.2 card that renders only its image', () => {
     act(() => root.unmount());
   });
 
-  it('keeps the empty slots editable in the editor', () => {
-    // The editor intentionally keeps the empty title/description slots so authors
-    // can type into them; only the public renderer collapses them.
+  it('collapses in the editor too when the card has no visible content', () => {
+    // Final contract: an image-only card shows ONLY the image in every mode; an
+    // empty surface is not the editing mechanism. Title/description are restored
+    // from the existing card controls / Inspector, not from a white patch.
     const { host, root } = mountCard(IMAGE_ONLY, 'edit');
+    expect(host.querySelector('[data-slot="body"]')).toBeNull();
+    expect(host.querySelector(`[data-editor-id="${cardId}.img"]`)).not.toBeNull();
+    act(() => root.unmount());
+  });
+
+  it('brings the surface back in the editor as soon as there is a title', () => {
+    const { host, root } = mountCard({ ...IMAGE_ONLY, title: 'Proyecto' }, 'edit');
     expect(host.querySelector('[data-slot="body"]')).not.toBeNull();
     expect(host.querySelector('[data-slot="title"]')).not.toBeNull();
     act(() => root.unmount());

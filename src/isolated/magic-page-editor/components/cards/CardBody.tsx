@@ -33,7 +33,7 @@ const justify: Record<string, string> = { left: 'justify-start', center: 'justif
 
 /** Content column shared by every family: eyebrow → title → description → price / CTA footer. */
 export function CardBody({ id, family, item, size, show, inlineBadge, sale, onAccent, className, cardProps = {}, unifyEligible = true }: CardBodyProps) {
-  const { doc, isMobile: m, mode } = useEditor();
+  const { doc, isMobile: m } = useEditor();
   const t = useThemeTokens();
   const display: React.CSSProperties = { fontFamily: t.displayFont };
   const isMenu = family.id === 'menu';
@@ -80,24 +80,23 @@ export function CardBody({ id, family, item, size, show, inlineBadge, sale, onAc
   //     `doc.texts`; checking the seed item alone would hide written content.
   //   - a text that exists but is HIDDEN (`doc.removed[id]`) is not visible
   //     content and must not keep an otherwise empty bottom zone alive.
-  // The editor keeps the empty slots on purpose (and never collapses) so authors
-  // can type again or restore a hidden element; only "preview"/"view" collapse.
+  // FINAL CONTRACT: the surface exists ONLY while there is visible content, in the
+  // editor too — an image-only card never shows a white patch. Restoring a title or
+  // a description does NOT depend on an empty surface: it goes through the existing
+  // card controls / Inspector (visibility + title/description editors).
   const effectiveTitle = doc.texts[`${id}.title`] ?? item.title;
   const effectiveDescription = doc.texts[`${id}.desc`] ?? item.description;
   const effectiveBadge = doc.texts[`${id}.badge`] ?? item.badge;
   const effectiveEyebrow = doc.texts[`${id}.eyebrow`] ?? item.eyebrow;
   const effectiveMeta = doc.texts[`${id}.meta`] ?? item.meta;
   const hidden = (key: string) => doc.removed[`${id}.${key}`] === true;
-  const editing = mode === 'edit';
   const hasTitle = !hidden('title') && !!effectiveTitle?.trim();
   const hasDescription = !hidden('desc') && !!effectiveDescription?.trim();
   const hasBadge = !hidden('badge') && !!effectiveBadge?.trim();
   const hasEyebrow = !hidden('eyebrow') && !!effectiveEyebrow?.trim();
   const hasMeta = !hidden('meta') && !!effectiveMeta?.trim();
   const hasFooter = !!((!isMenu && (price || prev)) || (show.cta && item.cta));
-  const showTitle = hasTitle || editing;
-  const showDescription = hasDescription || editing;
-  const hasBodyContent = showTitle || showDescription || hasFooter || (inlineBadge && show.badge && hasBadge) || hasEyebrow || hasMeta;
+  const hasBodyContent = hasTitle || hasDescription || hasFooter || (inlineBadge && show.badge && hasBadge) || hasEyebrow || hasMeta;
   if (!hasBodyContent) return null;
 
   return (
@@ -121,14 +120,14 @@ export function CardBody({ id, family, item, size, show, inlineBadge, sale, onAc
         </div>
       }
 
-      {showTitle &&
+      {hasTitle &&
       <div data-slot="title" className={cx(isMenu && 'flex items-baseline justify-between gap-3')}>
         <EditableText id={`${id}.title`} value={item.title} as="h3" label="Título" unifyEligible={unifyEligible} className={cx('cq-fg leading-tight', titleSize, isMenu && 'min-w-0 flex-1')} style={size === 'sm' ? undefined : display} />
         {isMenu && price && <span className="shrink-0">{price}</span>}
       </div>
       }
 
-      {showDescription &&
+      {hasDescription &&
       <EditableText
         id={`${id}.desc`}
         value={item.description}
