@@ -75,35 +75,42 @@ export function CardBody({ id, family, item, size, show, inlineBadge, sale, onAc
   <EditableText id={`${id}.prev`} value={item.previousPrice} as="span" kind="price" label="Precio anterior" unifyEligible={unifyEligible} className="cq-muted text-[13.5px] tabular-nums line-through" />;
 
   // E1.2 — product rule: a card may render ONLY its image. Presence must be
-  // decided on the EFFECTIVE text, never on the seed item alone: `EditableText`
-  // renders `doc.texts[id] ?? value`, so a title typed by the owner lives in
-  // `doc.texts`. The editor keeps empty slots on purpose so authors can type into
-  // them; the public renderer (mode "preview") collapses them.
+  // decided on the EFFECTIVE text and on the element's own visibility:
+  //   - `EditableText` renders `doc.texts[id] ?? value`, so owner text lives in
+  //     `doc.texts`; checking the seed item alone would hide written content.
+  //   - a text that exists but is HIDDEN (`doc.removed[id]`) is not visible
+  //     content and must not keep an otherwise empty bottom zone alive.
+  // The editor keeps the empty slots on purpose (and never collapses) so authors
+  // can type again or restore a hidden element; only "preview"/"view" collapse.
   const effectiveTitle = doc.texts[`${id}.title`] ?? item.title;
   const effectiveDescription = doc.texts[`${id}.desc`] ?? item.description;
   const effectiveBadge = doc.texts[`${id}.badge`] ?? item.badge;
   const effectiveEyebrow = doc.texts[`${id}.eyebrow`] ?? item.eyebrow;
   const effectiveMeta = doc.texts[`${id}.meta`] ?? item.meta;
+  const hidden = (key: string) => doc.removed[`${id}.${key}`] === true;
   const editing = mode === 'edit';
-  const hasTitle = !!effectiveTitle?.trim();
-  const hasDescription = !!effectiveDescription?.trim();
+  const hasTitle = !hidden('title') && !!effectiveTitle?.trim();
+  const hasDescription = !hidden('desc') && !!effectiveDescription?.trim();
+  const hasBadge = !hidden('badge') && !!effectiveBadge?.trim();
+  const hasEyebrow = !hidden('eyebrow') && !!effectiveEyebrow?.trim();
+  const hasMeta = !hidden('meta') && !!effectiveMeta?.trim();
   const hasFooter = !!((!isMenu && (price || prev)) || (show.cta && item.cta));
   const showTitle = hasTitle || editing;
   const showDescription = hasDescription || editing;
-  const hasBodyContent = showTitle || showDescription || hasFooter || (inlineBadge && show.badge && !!effectiveBadge) || !!(effectiveEyebrow || effectiveMeta);
+  const hasBodyContent = showTitle || showDescription || hasFooter || (inlineBadge && show.badge && hasBadge) || hasEyebrow || hasMeta;
   if (!hasBodyContent) return null;
 
   return (
     <Editable id={surfaceId} kind="surface" label="Superficie de contenido" data-slot="body" className={cx('flex min-w-0 flex-col', className)} style={surfaceStyle}>
-      {inlineBadge && show.badge && effectiveBadge &&
+      {inlineBadge && show.badge && hasBadge &&
       <EditableBadge id={`${id}.badge`} label={effectiveBadge} defaultStyle={sale ? 'solid' : 'soft'} className="mb-2.5" />
       }
-      {(effectiveEyebrow || effectiveMeta) &&
+      {(hasEyebrow || hasMeta) &&
       <div className="mb-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
-          {effectiveEyebrow &&
+          {hasEyebrow &&
         <EditableText id={`${id}.eyebrow`} value={item.eyebrow} as="span" label={family.id === 'portfolio' ? 'Categoría' : 'Antetítulo'} unifyEligible={unifyEligible} className="cq-muted text-[11.5px] font-semibold uppercase tracking-[0.12em]" />
         }
-          {effectiveMeta &&
+          {hasMeta &&
         <>
               <span className="cq-muted text-[11px]" aria-hidden>
                 ·
