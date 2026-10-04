@@ -94,9 +94,12 @@ export function FamilyCard({ id, family, item, blockProps, className, demo }: Fa
     </div>;
 
 
-  // E1.3 — a card that ships its own palette (card.0 style) keeps its colours:
-  // "Unificar color de texto" must not recolor its persisted text colours.
+  // E1.3 — a card that ships its own palette (card.0 style), sits on its own accent
+  // surface (highlight) or paints content over media (cover) keeps its colours:
+  // "Unificar color de texto" must not recolour its persisted text colours there.
   const independentPalette = !!(
+    surface === 'accent' ||
+    layout === 'cover' ||
     cardProps.cardText || cardProps.cardMuted || cardProps.cardPalette ||
     cardProps.cardSurface || cardProps.cardAccent || cardProps.cardBg
   );
