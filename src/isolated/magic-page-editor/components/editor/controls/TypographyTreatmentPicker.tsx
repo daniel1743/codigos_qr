@@ -5,7 +5,7 @@ import { Toggle } from './Toggle';
 import type { TextStyle } from '../../../types/editor';
 import { cx } from '../../../utils/cx';
 
-export function TypographyTreatmentPicker({ value, onChange }: { value: TextStyle; onChange: (patch: Partial<TextStyle>) => void }) {
+export function TypographyTreatmentPicker({ value, onChange, unifyActive = false }: { value: TextStyle; onChange: (patch: Partial<TextStyle>) => void; unifyActive?: boolean }) {
   return <div className="space-y-4">
     <PanelSection title="Familia">
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-5" role="radiogroup" aria-label="Tratamiento tipográfico">
@@ -36,5 +36,13 @@ export function TypographyTreatmentPicker({ value, onChange }: { value: TextStyl
     </PanelSection>
     <Toggle label="Mayúsculas" checked={!!value.upper} onChange={(v) => onChange({ upper: v })} />
     <Toggle label="Acento local / dorado" checked={!!value.goldText} onChange={(v) => onChange({ goldText: v })} />
+    {value.goldText ?
+    <p data-gold-precedence="kept" className="text-[11.5px] leading-snug text-ink opacity-70">
+        Este texto conserva el acento dorado local. “Unificar color de texto” no lo cambia.
+      </p> :
+    unifyActive &&
+    <p data-gold-precedence="unified" className="text-[11.5px] leading-snug text-ink opacity-70">
+        “Unificar color de texto” está activo: este texto usa el color unificado del contenido.
+      </p>}
   </div>;
 }

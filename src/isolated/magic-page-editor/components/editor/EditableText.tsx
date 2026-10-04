@@ -16,6 +16,12 @@ interface EditableTextProps {
   multiline?: boolean;
   /** 'price' uses the price contract (edit, size, color, hide) but still edits inline. */
   kind?: 'text' | 'price';
+  /**
+   * `false` for scopes whose palette is deliberately independent (a card with its
+   * own background/text colours): their persisted colours are NOT overridden by
+   * "Unificar color de texto". Content text leaves this at the default.
+   */
+  unifyEligible?: boolean;
 }
 
 /** Text that edits inline: tap on desktop to type immediately, tap again on mobile to open the keyboard. */
@@ -28,12 +34,16 @@ export function EditableText({
   style,
   selectable = true,
   multiline = false,
-  kind = 'text'
+  kind = 'text',
+  unifyEligible = true
 }: EditableTextProps) {
   const ed = useEditor();
   const { ref, handlers, removed } = useEditableElement(id, kind, label, { selectable });
   const text = ed.doc.texts[id] ?? value;
   const isEditing = ed.mode === 'edit' && ed.editingId === id;
+  // E1.3 — content text follows the page-level "Unificar color de texto" even when
+  // it carries its own persisted colour; independent-palette scopes opt out.
+  const unifyFg = unifyEligible ? ed.doc.props['page']?.['textColor'] : undefined;
 
   useEffect(() => {
     if (!isEditing && ref.current && ref.current.innerText !== text) {
@@ -68,7 +78,7 @@ export function EditableText({
     <Tag
       ref={ref}
       className={className}
-      style={{ whiteSpace: 'pre-line', ...style, ...textStyleToCss(ed.doc.textStyles[id]) }}
+      style={{ whiteSpace: 'pre-line', ...style, ...textStyleToCss(ed.doc.textStyles[id], { unifyEligible, unifyFg }) }}
       {...handlers}
       contentEditable={isEditing || undefined}
       suppressContentEditableWarning

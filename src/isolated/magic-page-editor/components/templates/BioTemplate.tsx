@@ -21,6 +21,7 @@ import { images } from "../../data/images";
 import { bioFeatured, bioLinks, bioMoments, bioProfile, bioSocials , singleButtonSeed } from "../../data/bioContent";
 import { cx } from "../../utils/cx";
 import { blockPrefix } from "../../utils/styles";
+import { resolveBrandingTone } from '../../utils/brandingContrast';
 import { BlockRef } from "../../types/editor";
 import Logo from "../../../../components/brand/Logo";
 import { QuickProfileInfo } from '../profile/QuickProfileInfo';
@@ -32,6 +33,10 @@ export function BioTemplate() {
   } = useEditor();
   const t = useThemeTokens();
   const footerTone = useFooterTone();
+  // E1.1 — the system branding resolves its OWN contrast token from the surface it
+  // sits on, instead of inheriting the page foreground at 60% opacity.
+  // `useFooterTone()` returns the tone's CSS variables, hence `--surface`.
+  const branding = resolveBrandingTone((footerTone as Record<string, string | undefined>)['--surface']);
   const display: React.CSSProperties = {
     fontFamily: t.displayFont
   };
@@ -176,8 +181,9 @@ export function BioTemplate() {
         </Editable>
         <div
           data-system-branding="cripqer"
-          className="flex items-center justify-center gap-2 px-6 pb-12 pt-1 text-[10px] font-medium uppercase tracking-[0.16em] text-[color:var(--fg)] opacity-60"
-          style={footerTone}
+          data-branding-tone={branding.logoTheme}
+          className="flex items-center justify-center gap-2 px-6 pb-12 pt-1 text-[10px] font-medium uppercase tracking-[0.16em] text-[color:var(--branding-fg)]"
+          style={{ ...footerTone, '--branding-fg': branding.color } as React.CSSProperties}
         >
           <a
             href="/"
@@ -197,6 +203,7 @@ export function BioTemplate() {
             />
             <Logo
               variant="wordmark"
+              theme={branding.logoTheme}
               showTagline={false}
               title="Cripqer"
               className="origin-left scale-[0.62] -mr-6"

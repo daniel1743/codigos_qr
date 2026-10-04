@@ -227,6 +227,7 @@ export function useSelectionActions(): EditorAction[] {
             <TypographyTreatmentPicker
               value={ts}
               onChange={(patch) => ed.setTextStyle(id, patch)}
+              unifyActive={!!ed.doc.props['page']?.['textColor']}
             />
           ),
         },

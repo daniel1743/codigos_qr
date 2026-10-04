@@ -22,13 +22,18 @@ interface CardBodyProps {
   onAccent: boolean;
   className?: string;
   cardProps?: Record<string, string>;
+  /**
+   * E1.3 — `false` when the card ships its own palette (card.0 style): its
+   * persisted per-element colours are NOT overridden by "Unificar color".
+   */
+  unifyEligible?: boolean;
 }
 
 const justify: Record<string, string> = { left: 'justify-start', center: 'justify-center', right: 'justify-end', full: '' };
 
 /** Content column shared by every family: eyebrow → title → description → price / CTA footer. */
-export function CardBody({ id, family, item, size, show, inlineBadge, sale, onAccent, className, cardProps = {} }: CardBodyProps) {
-  const { doc, isMobile: m } = useEditor();
+export function CardBody({ id, family, item, size, show, inlineBadge, sale, onAccent, className, cardProps = {}, unifyEligible = true }: CardBodyProps) {
+  const { doc, isMobile: m, mode } = useEditor();
   const t = useThemeTokens();
   const display: React.CSSProperties = { fontFamily: t.displayFont };
   const isMenu = family.id === 'menu';
@@ -61,46 +66,65 @@ export function CardBody({ id, family, item, size, show, inlineBadge, sale, onAc
     as="span"
     kind="price"
     label="Precio"
+    unifyEligible={unifyEligible}
     className={cx('cq-fg font-semibold tabular-nums', sale ? 'text-[20px]' : size === 'sm' ? 'text-[14.5px]' : 'text-[17px]')}
     style={sale && !onAccent ? { color: 'var(--accent)' } : undefined} />;
 
 
   const prev = show.prev && item.previousPrice &&
-  <EditableText id={`${id}.prev`} value={item.previousPrice} as="span" kind="price" label="Precio anterior" className="cq-muted text-[13.5px] tabular-nums line-through" />;
+  <EditableText id={`${id}.prev`} value={item.previousPrice} as="span" kind="price" label="Precio anterior" unifyEligible={unifyEligible} className="cq-muted text-[13.5px] tabular-nums line-through" />;
 
+  // E1.2 — product rule: a card may render ONLY its image. The title slot renders
+  // when there is a title, the description slot when there is a description, and
+  // when neither exists (and there is no other content) the bottom zone/surface is
+  // not rendered at all. The editor keeps empty slots on purpose so authors can
+  // type into them; the public renderer (mode "preview") collapses them.
+  const editing = mode === 'edit';
+  const hasTitle = !!item.title?.trim();
+  const hasDescription = !!item.description?.trim();
+  const hasFooter = !!((!isMenu && (price || prev)) || (show.cta && item.cta));
+  const showTitle = hasTitle || editing;
+  const showDescription = hasDescription || editing;
+  const hasBodyContent = showTitle || showDescription || hasFooter || (inlineBadge && show.badge && !!item.badge) || !!(item.eyebrow || item.meta);
+  if (!hasBodyContent) return null;
 
   return (
-    <Editable id={surfaceId} kind="surface" label="Superficie de contenido" className={cx('flex min-w-0 flex-col', className)} style={surfaceStyle}>
+    <Editable id={surfaceId} kind="surface" label="Superficie de contenido" data-slot="body" className={cx('flex min-w-0 flex-col', className)} style={surfaceStyle}>
       {inlineBadge && show.badge && item.badge &&
       <EditableBadge id={`${id}.badge`} label={item.badge} defaultStyle={sale ? 'solid' : 'soft'} className="mb-2.5" />
       }
       {(item.eyebrow || item.meta) &&
       <div className="mb-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
           {item.eyebrow &&
-        <EditableText id={`${id}.eyebrow`} value={item.eyebrow} as="span" label={family.id === 'portfolio' ? 'Categoría' : 'Antetítulo'} className="cq-muted text-[11.5px] font-semibold uppercase tracking-[0.12em]" />
+        <EditableText id={`${id}.eyebrow`} value={item.eyebrow} as="span" label={family.id === 'portfolio' ? 'Categoría' : 'Antetítulo'} unifyEligible={unifyEligible} className="cq-muted text-[11.5px] font-semibold uppercase tracking-[0.12em]" />
         }
           {item.meta &&
         <>
               <span className="cq-muted text-[11px]" aria-hidden>
                 ·
               </span>
-              <EditableText id={`${id}.meta`} value={item.meta} as="span" label="Fecha" className="cq-muted text-[12px] tabular-nums" />
+              <EditableText id={`${id}.meta`} value={item.meta} as="span" label="Fecha" unifyEligible={unifyEligible} className="cq-muted text-[12px] tabular-nums" />
             </>
         }
         </div>
       }
 
+      {showTitle &&
       <div data-slot="title" className={cx(isMenu && 'flex items-baseline justify-between gap-3')}>
-        <EditableText id={`${id}.title`} value={item.title} as="h3" label="Título" className={cx('cq-fg leading-tight', titleSize, isMenu && 'min-w-0 flex-1')} style={size === 'sm' ? undefined : display} />
+        <EditableText id={`${id}.title`} value={item.title} as="h3" label="Título" unifyEligible={unifyEligible} className={cx('cq-fg leading-tight', titleSize, isMenu && 'min-w-0 flex-1')} style={size === 'sm' ? undefined : display} />
         {isMenu && price && <span className="shrink-0">{price}</span>}
       </div>
+      }
 
+      {showDescription &&
       <EditableText
         id={`${id}.desc`}
         value={item.description}
         label="Descripción"
         multiline
+        unifyEligible={unifyEligible}
         className={cx('cq-muted mt-1.5 leading-relaxed', size === 'sm' ? 'line-clamp-2 text-[13px]' : size === 'lg' ? 'text-[15.5px]' : 'text-[14px]')} />
+      }
 
 
       {(!isMenu && (price || prev) || show.cta && item.cta) &&

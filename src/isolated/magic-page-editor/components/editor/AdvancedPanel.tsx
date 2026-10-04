@@ -43,7 +43,7 @@ export function AdvancedPanel({ hideBlockNav = false }: { hideBlockNav?: boolean
       const ts = ed.doc.textStyles[id] ?? {};
       specific = (
         <PanelSection title="Estilo del texto">
-          <TypographyTreatmentPicker value={ts} onChange={(patch) => ed.setTextStyle(id, patch)} />
+          <TypographyTreatmentPicker value={ts} onChange={(patch) => ed.setTextStyle(id, patch)} unifyActive={!!ed.doc.props['page']?.['textColor']} />
           <Toggle
             label="Mayúsculas"
             checked={!!ts.upper}

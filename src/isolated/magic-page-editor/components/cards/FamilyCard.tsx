@@ -94,8 +94,14 @@ export function FamilyCard({ id, family, item, blockProps, className, demo }: Fa
     </div>;
 
 
+  // E1.3 — a card that ships its own palette (card.0 style) keeps its colours:
+  // "Unificar color de texto" must not recolor its persisted text colours.
+  const independentPalette = !!(
+    cardProps.cardText || cardProps.cardMuted || cardProps.cardPalette ||
+    cardProps.cardSurface || cardProps.cardAccent || cardProps.cardBg
+  );
   const body = (size: BodySize, cls?: string) =>
-      <CardBody id={id} family={family} item={item} size={size} show={show} sale={sale} onAccent={onAccent} cardProps={cardProps} className={cls} />;
+      <CardBody id={id} family={family} item={item} size={size} show={show} sale={sale} onAccent={onAccent} cardProps={cardProps} unifyEligible={!independentPalette} className={cls} />;
 
 
   let content: React.ReactNode;
@@ -210,6 +216,7 @@ export function FamilyCard({ id, family, item, blockProps, className, demo }: Fa
       label="Tarjeta"
       as={cardHref ? 'a' : 'div'}
       {...(cardHref ? { href: cardHref, ...((cp.newTab ?? 'on') !== 'off' ? { target: '_blank', rel: 'noreferrer' } : {}) } : {})}
+      {...(cardHref && !item.title?.trim() ? { 'aria-label': item.description?.trim() || 'Abrir contenido de la tarjeta' } : {})}
       data-layout={layout}
       data-demo={demo}
       className={cx('relative flex flex-col', hidden && 'opacity-40', className)}

@@ -9,8 +9,39 @@ import {
 import type { HeroFusionMode, MediaTreatment } from '../../../premium-template-studio/types';
 import type { BlockRef, SurfaceTone, TextStyle } from '../types/editor';
 
-export function textStyleToCss(ts?: TextStyle): CSSProperties {
+export interface TextStyleCssOptions {
+  /**
+   * Active "Unificar color de texto" value for CONTENT text. When present, a
+   * persisted per-element colour yields to it, so unification reaches ordinary
+   * content even when the element carries an individual colour. Resolved in JS
+   * (a literal colour) instead of a CSS `var()` so the contract is identical in
+   * every engine and easy to assert.
+   */
+  unifyFg?: string;
+  /**
+   * `false` marks a deliberately independent scope (a card that ships its own
+   * palette / surface): its persisted colours are never overridden by the
+   * unification. The map base, branding and functional chips do not use this
+   * helper at all and keep their own colours.
+   */
+  unifyEligible?: boolean;
+}
+
+/**
+ * `goldText` ("Acento local / dorado") is an EXPLICIT semantic exception, not an
+ * invisible one: the element always keeps the brand accent
+ * (`var(--accent, #B8935A)`) and that precedence is documented and surfaced in
+ * the UI (`TypographyTreatmentPicker`). Everything else follows "Unificar color".
+ */
+export function textStyleToCss(ts?: TextStyle, options: TextStyleCssOptions = {}): CSSProperties {
   if (!ts) return {};
+  const unifyEligible = options.unifyEligible ?? true;
+  const unifyFg = options.unifyFg?.trim();
+  const color = ts.goldText
+    ? 'var(--accent, #B8935A)'
+    : unifyFg && unifyEligible && ts.color
+      ? unifyFg
+      : ts.color;
   const declared: CSSProperties = {
     fontSize: ts.size,
     fontWeight: ts.weight === 'medium' ? 500 : ts.weight === 'bold' || ts.bold ? 700 : ts.bold === false || ts.weight === 'regular' ? 400 : undefined,
@@ -18,7 +49,7 @@ export function textStyleToCss(ts?: TextStyle): CSSProperties {
     textTransform: ts.upper ? 'uppercase' : undefined,
     letterSpacing: ts.tracking === 'tight' ? '-0.02em' : ts.tracking === 'wide' ? '0.14em' : undefined,
     fontFamily: ts.typeStyle === 'editorial' ? "'Cormorant Garamond', serif" : ts.typeStyle === 'luxury' ? "'Bodoni Moda', serif" : ts.typeStyle === 'script' ? "'Caveat', cursive" : ts.typeStyle === 'mixed' ? "'Marcellus', serif" : undefined,
-    color: ts.goldText ? 'var(--accent, #B8935A)' : ts.color
+    color
   };
   // Undefined keys must not be forwarded: spreading `{textAlign: undefined}` over a
   // caller style would silently erase group typography (weight/tracking/font).
