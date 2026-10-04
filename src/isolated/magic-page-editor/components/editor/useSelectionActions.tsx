@@ -365,17 +365,20 @@ export function useSelectionActions(): EditorAction[] {
             </PanelSection>
           ),
         },
-        ...(sel.label === "Vídeo"
-          ? [
-              {
-                key: "video-url",
-                label: "Enlace",
-                icon: Link2Icon,
-                showLabel: true,
-                panel: <LinkEditor value={props.href ?? ""} onChange={(v) => set("href", v)} />,
-              } as EditorAction,
-            ]
-          : []),
+        {
+          key: "link",
+          label: "Enlace",
+          icon: Link2Icon,
+          showLabel: true,
+          panel: (
+            <LinkEditor
+              value={props.href ?? ""}
+              onChange={(v) => set("href", v)}
+              newTab={props.newTab}
+              onNewTabChange={(v) => set("newTab", v)}
+            />
+          ),
+        },
         {
           key: "remove",
           label: "Quitar",
@@ -1382,6 +1385,21 @@ export function useSelectionActions(): EditorAction[] {
               options={galleryLayouts}
               value={props.layout ?? (el?.dataset.layout as string) ?? "fila"}
               onChange={(v) => set("layout", v)}
+            />
+          ),
+        },
+        {
+          key: "link",
+          label: "Enlace",
+          icon: Link2Icon,
+          showLabel: true,
+          panel: (
+            <LinkEditor
+              value={props.href ?? ""}
+              onChange={(v) => set("href", v)}
+              newTab={props.newTab}
+              onNewTabChange={(v) => set("newTab", v)}
+              helper="Todas las fotos abrirán este destino. También puedes darle un enlace propio a cada foto tocándola."
             />
           ),
         },

@@ -47,6 +47,7 @@ export function FamilyCard({ id, family, item, blockProps, className, demo }: Fa
     cta: on('showCta', !!item.cta)
   };
 
+  const cardHref = cp.href ?? '';
   const surface = cardProps.surface ?? (layout === 'highlight' ? 'accent' : 'surface');
   const onAccent = surface === 'accent';
   const cardBg = cardProps.cardBg ?? 'var(--surface)';
@@ -207,10 +208,13 @@ export function FamilyCard({ id, family, item, blockProps, className, demo }: Fa
       id={id}
       kind="familyCard"
       label="Tarjeta"
+      as={cardHref ? 'a' : 'div'}
+      {...(cardHref ? { href: cardHref, ...((cp.newTab ?? 'on') !== 'off' ? { target: '_blank', rel: 'noreferrer' } : {}) } : {})}
       data-layout={layout}
       data-demo={demo}
       className={cx('relative flex flex-col', hidden && 'opacity-40', className)}
       style={{
+        textDecoration: 'none',
         ...surfaceCss,
         padding: layout === 'highlight' ? pad + 8 : pad,
         borderRadius: radius,

@@ -39,15 +39,22 @@ export function GalleryGrid({ id, items, defaultLayout, radius, altPrefix, rowHe
   const layout = pageLayouts[pageVariant ?? ''] ?? p['layout'] as GalleryLayout ?? defaultLayout;
   const gap = Math.round((GAPS[p['gap'] ?? 'M'] ?? 12) * (m ? 0.7 : 1));
 
-  const photo = (src: string, i: number, cls = '', style: React.CSSProperties = {}) =>
-  <EditableImage
-    key={`${i}-${src}`}
-    id={`${id}.${i}`}
-    src={src}
-    alt={`${altPrefix} ${i + 1}`}
-    label="Foto"
-    className={cls}
-    style={{ borderRadius: radius, ...style }} />;
+  const photo = (src: string, i: number, cls = '', style: React.CSSProperties = {}) => {
+    const photoProps = doc.props[`${id}.${i}`] ?? {};
+    const href = photoProps['href'] ?? p['href'] ?? '';
+    const newTab = (photoProps['newTab'] ?? p['newTab'] ?? 'on') !== 'off';
+    return (
+      <EditableImage
+        key={`${i}-${src}`}
+        id={`${id}.${i}`}
+        src={src}
+        alt={`${altPrefix} ${i + 1}`}
+        label="Foto"
+        className={cls}
+        style={{ borderRadius: radius, ...style }}
+        {...(href ? { href, ...(newTab ? { target: '_blank', rel: 'noreferrer' } : {}) } : {})} />
+    );
+  };
 
 
 

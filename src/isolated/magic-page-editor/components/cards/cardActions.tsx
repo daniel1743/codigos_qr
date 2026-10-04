@@ -6,6 +6,7 @@ import {
   EyeOffIcon,
   ImageIcon,
   LayoutTemplateIcon,
+  Link2Icon,
   PaintbrushIcon,
   PenLineIcon,
   PaletteIcon,
@@ -18,6 +19,7 @@ import { Segmented } from '../editor/controls/Segmented';
 import { SizeStepper } from '../editor/controls/SizeStepper';
 import { SwatchRow } from '../editor/controls/SwatchRow';
 import { CardLayoutPicker } from './CardLayoutPicker';
+import { LinkEditor } from '../editor/controls/LinkEditor';
 import { CardPaletteFields } from './CardPaletteFields';
 import { CardPresetPicker } from './CardPresetPicker';
 import { MediaShapePicker } from '../editor/controls/MediaShapePicker';
@@ -143,6 +145,20 @@ export function familyCardActions(ed: EditorValue, ctx: CardContext): EditorActi
     icon: PaletteIcon,
     showLabel: true,
     panel: <CardPaletteFields ctx={ctx} />
+  },
+  {
+    key: 'link',
+    label: 'Enlace',
+    icon: Link2Icon,
+    showLabel: true,
+    panel:
+    <LinkEditor
+      value={cp.href ?? ''}
+      onChange={(v) => set('href', v)}
+      newTab={cp.newTab}
+      onNewTabChange={(v) => set('newTab', v)}
+      helper="Toda la tarjeta abrirá este destino." />
+
   },
   {
     key: 'dup',

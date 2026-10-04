@@ -14,10 +14,14 @@ interface EditableImageProps {
   style?: React.CSSProperties;
   children?: React.ReactNode;
   defaultProps?: Record<string, string | undefined>;
+  /** Optional destination; renders an anchor instead of a div so the photo can be tapped. */
+  href?: string;
+  target?: string;
+  rel?: string;
 }
 
 /** An image that can be replaced, cropped, zoomed and repositioned directly from the page. */
-export function EditableImage({ id, src, alt, label = 'Imagen', className, style, children, defaultProps = {} }: EditableImageProps) {
+export function EditableImage({ id, src, alt, label = 'Imagen', className, style, children, defaultProps = {}, href, target, rel }: EditableImageProps) {
   const { doc } = useEditor();
   const p = doc.props[id] ?? {};
   const overlay = mediaOverlayStyleFromProps(p);
@@ -31,6 +35,8 @@ export function EditableImage({ id, src, alt, label = 'Imagen', className, style
       id={id}
       kind="image"
       label={label}
+      as={href ? 'a' : 'div'}
+      {...(href ? { href, ...(target ? { target, rel: rel ?? 'noreferrer' } : {}) } : {})}
       className={cx(!className?.includes('absolute') && 'relative', 'overflow-hidden', className)}
       style={{ ...style, ...shapeStyle }}>
       
