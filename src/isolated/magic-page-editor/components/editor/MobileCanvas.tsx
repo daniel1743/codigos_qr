@@ -107,6 +107,7 @@ export function MobileCanvas() {
       {ed.doc.bot?.enabled && (
         <LandingBot
           overlay
+          mobileCanvas
           previewOnly={!livePublicId}
           publicId={livePublicId || undefined}
           config={normalizeLandingBot(ed.doc.bot)}

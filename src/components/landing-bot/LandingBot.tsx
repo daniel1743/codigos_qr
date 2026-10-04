@@ -82,18 +82,22 @@ export function LandingBot({
   config,
   previewOnly = false,
   overlay = false,
+  mobileCanvas = false,
 }: {
   publicId?: string;
   config: LandingBotConfig;
   previewOnly?: boolean;
   /** Anchors the launcher to the nearest positioned ancestor instead of the viewport (editor canvases). */
   overlay?: boolean;
+  /** The editor is showing its phone canvas: an open chat should use the near-fullscreen mobile layout. */
+  mobileCanvas?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [typing, setTyping] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
+  const fullscreenOpen = open && mobileCanvas;
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -131,11 +135,11 @@ export function LandingBot({
   return (
 
     <div
-      className={`${overlay || previewOnly ? "absolute right-4" : "fixed bottom-5 right-5"} flex flex-col items-end gap-3 ${overlay ? "z-[20]" : previewOnly ? "z-[30]" : "z-[70]"}`}
+      className={`${overlay || previewOnly ? "absolute right-4" : "fixed bottom-5 right-5"} flex flex-col items-end gap-3 ${fullscreenOpen ? "z-[90]" : overlay ? "z-[20]" : previewOnly ? "z-[30]" : "z-[70]"} ${open ? "max-sm:z-[90]" : ""}`}
       style={overlay || previewOnly ? { bottom: "calc(1rem + env(safe-area-inset-bottom))" } : undefined}
     >
       {open && (
-        <div className="flex h-[70vh] max-h-[560px] w-[min(92vw,360px)] flex-col overflow-hidden rounded-2xl border border-black/10 bg-white shadow-2xl">
+        <div className={`flex flex-col overflow-hidden rounded-2xl border border-black/10 bg-white shadow-2xl max-sm:fixed max-sm:inset-x-3 max-sm:top-[max(0.75rem,env(safe-area-inset-top))] max-sm:bottom-[max(0.75rem,env(safe-area-inset-bottom))] max-sm:h-auto max-sm:max-h-none max-sm:w-auto ${fullscreenOpen ? "fixed inset-x-3 top-[max(0.75rem,env(safe-area-inset-top))] bottom-[max(0.75rem,env(safe-area-inset-bottom))] h-auto max-h-none w-auto" : "h-[70vh] max-h-[560px] w-[min(92vw,360px)]"}`}>
           <header className="flex items-center gap-3 border-b border-black/5 bg-gradient-to-br from-blue-600 to-indigo-600 px-4 py-3 text-white">
             <span className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-full bg-white/15">
               <BotFace config={config} />
