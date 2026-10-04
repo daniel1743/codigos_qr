@@ -5,8 +5,14 @@ import { getServerSupabaseClient } from "../lib/supabase/server";
 import { getBrowserSupabaseClient } from "../lib/supabase/client";
 import { PublicProfileView } from "../components/profile/PublicProfileView";
 import { useEffect, useRef } from "react";
+import { requestCanonicalPublicEntry } from "../lib/public-entry-resolution/canonicalPublicResolution-server";
+import { pickTrackingSearch } from "../lib/public-entry-resolution/publicEntryRouting";
 
 export const Route = createFileRoute("/p/$publicId")({
+  // PHASE 3C: pure and env-free — the flag lives server-side only. Without
+  // tracking params the dep is `undefined` (exactly today's loader cache key).
+  loaderDeps: ({ search }) => ({ tracking: pickTrackingSearch(search) }),
+  validateSearch: (search: Record<string, unknown>) => search,
   head: ({ loaderData }) => {
     if (!loaderData?.profile) return {};
 
@@ -43,13 +49,33 @@ export const Route = createFileRoute("/p/$publicId")({
       ],
     };
   },
-  loader: async ({ params }) => {
+  loader: async ({ params, deps }) => {
     const supabase = getServerSupabaseClient();
     const profile = await profileService.getPublicProfileByPublicId(supabase, params.publicId);
 
     if (!profile) {
       throw notFound();
     }
+
+    // PHASE 3C — decision made ENTIRELY server-side behind a createServerFn.
+    // `render-legacy` (flag OFF, identity outside the allowlist, or an
+    // unmigrated profile) falls through to the historical QR bridge below, which
+    // stays byte-for-byte what it is today. `not-found` and infrastructure
+    // errors stay explicit for allowlisted profiles: never a silent, possibly
+    // wrong public landing.
+    const decision = await requestCanonicalPublicEntry({
+      identifier: { kind: "legacy-profile-public-id", value: profile.public_id },
+      identifiers: [params.publicId, profile.public_id],
+      search: deps.tracking,
+    });
+    if (decision.kind === "redirect-to-page") {
+      throw redirect({
+        to: "/pg/$publicId",
+        params: { publicId: decision.pagePublicId },
+        ...(decision.search ? { search: decision.search } : {}),
+      });
+    }
+    if (decision.kind === "not-found") throw notFound();
 
     // The historical QR remains /p/{profile.public_id}; only the current
     // published presentation may move to the canonical Magic renderer.
