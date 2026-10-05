@@ -113,6 +113,48 @@ describe('Canonical Patcher', () => {
     expect(patchedZoom.blocks[0].content.avatar?.media?.zoom).toBe(1.5);
   });
 
+  it('updates a canonical collection image href without touching sibling fields', () => {
+    const config = createMockConfig();
+    config.blocks.push({
+      id: 'collection1',
+      type: 'collection',
+      variant: 'cards',
+      visibility: { desktop: true, tablet: true, mobile: true },
+      style: {},
+      layout: { constraints: { maxWidth: '100%' }, sticky: false },
+      interaction: {},
+      content: {
+        items: [{ id: 'item1', label: 'Producto', imageUrl: 'product.jpg', url: '', description: 'Detalle' }],
+      },
+    } as any);
+    const target: SemanticTarget = {
+      documentKind: 'canonical',
+      id: 'collection1:items:item1:image',
+      targetKind: 'media',
+      label: 'Imagen',
+    };
+
+    const linked = applyCanonicalPatch(config, target, {
+      type: 'SET_IMAGE_HREF',
+      payload: { href: 'https://wa.me/56912345678', newTab: true },
+    });
+    const item = linked.blocks[2].content.items?.[0];
+    expect(item).toMatchObject({
+      id: 'item1',
+      label: 'Producto',
+      imageUrl: 'product.jpg',
+      url: 'https://wa.me/56912345678',
+      newTab: true,
+      description: 'Detalle',
+    });
+
+    const cleared = applyCanonicalPatch(linked, target, {
+      type: 'SET_IMAGE_HREF',
+      payload: { href: '', newTab: false },
+    });
+    expect(cleared.blocks[2].content.items?.[0]).toMatchObject({ url: '', newTab: false });
+  });
+
   it('updates hero fusion', () => {
     const config = createMockConfig();
     const target: SemanticTarget = { documentKind: 'canonical', id: 'block1', targetKind: 'hero', label: 'Hero' };

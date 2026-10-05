@@ -10,6 +10,7 @@ export type SemanticCommand =
   | { type: "SET_HERO_FUSION"; payload: { mode: "none" | "fade" | "halo" | "organic" | "dominant" } }
   | { type: "SET_CTA_LABEL"; payload: { label: string } }
   | { type: "SET_CTA_URL"; payload: { url: string } }
+  | { type: "SET_IMAGE_HREF"; payload: { href?: string; newTab?: boolean } }
   | { type: "SET_CTA_STYLE"; payload: { variant: string; size?: string } }
   | { type: "SET_CARD_LAYOUT"; payload: { layout: string } }
   | { type: "SET_CARD_EMPHASIS"; payload: { emphasis: boolean } }

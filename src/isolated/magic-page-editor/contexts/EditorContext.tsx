@@ -531,8 +531,12 @@ export function EditorProvider({
           )
             dispatchCanonical({ type: "SET_CTA_STYLE", payload: { variant: value } });
           else dispatchCanonical({ type: "SET_CARD_LAYOUT", payload: { layout: value } });
-        } else if (key === "href")
-          dispatchCanonical({ type: "SET_CTA_URL", payload: { url: value } });
+        } else if (key === "href") {
+          if (semanticSelection?.targetKind === "media")
+            dispatchCanonical({ type: "SET_IMAGE_HREF", payload: { href: value } });
+          else dispatchCanonical({ type: "SET_CTA_URL", payload: { url: value } });
+        } else if (key === "newTab" && semanticSelection?.targetKind === "media")
+          dispatchCanonical({ type: "SET_IMAGE_HREF", payload: { newTab: value !== "off" } });
         else if (key === "hidden" || key === "show") {
           const hidden = key === "hidden" ? value === "true" : value === "off";
           dispatchCanonical({ type: "SET_ELEMENT_VISIBILITY", payload: { hidden } });

@@ -119,4 +119,38 @@ describe('E1.2 card that renders only its image', () => {
     expect(card?.getAttribute('aria-label')).toBe('Visitar la web');
     act(() => root.unmount());
   });
+
+  it('renders the configured image link with its target and rel in preview', () => {
+    const { host, root } = mountCard(IMAGE_ONLY, 'preview', {
+      [`${cardId}.img`]: { href: 'https://www.cripqer.dev/', newTab: 'on' },
+    });
+    const image = host.querySelector<HTMLElement>(`[data-editor-id="${cardId}.img"]`);
+    expect(image?.tagName.toLowerCase()).toBe('a');
+    expect(image?.getAttribute('href')).toBe('https://www.cripqer.dev/');
+    expect(image?.getAttribute('target')).toBe('_blank');
+    expect(image?.getAttribute('rel')).toBe('noopener noreferrer');
+    act(() => root.unmount());
+  });
+
+  it('keeps the image selectable and prevents navigation in edit mode', () => {
+    const { host, root } = mountCard(IMAGE_ONLY, 'edit', {
+      [`${cardId}.img`]: { href: 'https://www.cripqer.dev/', newTab: 'on' },
+    });
+    const image = host.querySelector<HTMLElement>(`[data-editor-id="${cardId}.img"]`);
+    expect(image?.tagName.toLowerCase()).toBe('a');
+    const event = new MouseEvent('click', { bubbles: true, cancelable: true });
+    image?.dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(true);
+    act(() => root.unmount());
+  });
+
+  it('removes the image anchor when its href is cleared', () => {
+    const { host, root } = mountCard(IMAGE_ONLY, 'preview', {
+      [`${cardId}.img`]: { href: '', newTab: 'on' },
+    });
+    const image = host.querySelector<HTMLElement>(`[data-editor-id="${cardId}.img"]`);
+    expect(image?.tagName.toLowerCase()).toBe('div');
+    expect(image?.getAttribute('href')).toBeNull();
+    act(() => root.unmount());
+  });
 });

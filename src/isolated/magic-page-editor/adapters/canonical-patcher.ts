@@ -206,6 +206,17 @@ export function applyCanonicalPatch(
       }
       break;
     }
+    case "SET_IMAGE_HREF": {
+      if (target.targetKind === "media" && parts.length >= 4 && parts[1] === "items") {
+        const itemId = parts[2];
+        updateBlockItem(itemId, (item) => ({
+          ...item,
+          ...(command.payload.href === undefined ? {} : { url: command.payload.href }),
+          ...(command.payload.newTab === undefined ? {} : { newTab: command.payload.newTab }),
+        }));
+      }
+      break;
+    }
     case "SET_CTA_STYLE": {
       if (parts.length === 2 && (parts[1] === "hero-cta" || parts[1] === "cta-primary")) {
         updateBlockContent((c) => ({

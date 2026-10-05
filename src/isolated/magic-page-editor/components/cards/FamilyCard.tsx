@@ -48,6 +48,9 @@ export function FamilyCard({ id, family, item, blockProps, className, demo }: Fa
   };
 
   const cardHref = cp.href ?? '';
+  const imageProps = ed.doc.props[`${id}.img`] ?? {};
+  const imageHref = (imageProps.href ?? '').trim();
+  const imageNewTab = (imageProps.newTab ?? 'on') !== 'off';
   const surface = cardProps.surface ?? (layout === 'highlight' ? 'accent' : 'surface');
   const onAccent = surface === 'accent';
   const cardBg = cardProps.cardBg ?? 'var(--surface)';
@@ -89,7 +92,18 @@ export function FamilyCard({ id, family, item, blockProps, className, demo }: Fa
 
   const media = (cls: string, style?: React.CSSProperties, imgRadius = inner) =>
     <div data-slot="image" className={cx('relative shrink-0', cls)} style={style}>
-      <EditableImage id={`${id}.img`} src={item.image} alt={item.title} defaultProps={{ shape: cardProps.imageShape }} className="h-full w-full" style={{ borderRadius: imgRadius }} />
+      <EditableImage
+        id={`${id}.img`}
+        src={item.image}
+        alt={item.title}
+        defaultProps={{ shape: cardProps.imageShape }}
+        className="h-full w-full"
+        style={{ borderRadius: imgRadius }}
+        {...(!cardHref && imageHref ? {
+          href: imageHref,
+          ...(imageNewTab ? { target: '_blank', rel: 'noopener noreferrer' } : {}),
+        } : {})}
+      />
       {badgeOver}
     </div>;
 
