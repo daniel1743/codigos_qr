@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { getBrowserSupabaseClient } from "../../lib/supabase/client";
+import { selectLandingPage } from "../../lib/editor-routing/resolveCanonicalMagicPage";
 import { pageService } from "../../services/page.service";
 import DesktopSidebar from "./DesktopSidebar";
 import MobileBottomNav from "./MobileBottomNav";
@@ -46,7 +47,9 @@ export function AppShell({ children }: { children: ReactNode }) {
       });
       try {
         const pages = await pageService.listOwnPages(supabase, authUser.id);
-        if (active) setPageState({ count: pages.length, primaryPageId: pages[0]?.id ?? null });
+        // C3.2.1 — the shell's primary page is the landing, never the full
+        // catalog child (`page_type = "catalog"`) that C3.2 made editable.
+        if (active) setPageState({ count: pages.length, primaryPageId: selectLandingPage(pages)?.id ?? null });
       } catch (pageError) {
         console.error("Error resolving shell pages:", pageError);
       }

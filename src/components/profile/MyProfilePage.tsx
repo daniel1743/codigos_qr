@@ -3,6 +3,7 @@ import type { User as SupabaseUser } from "@supabase/supabase-js";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { getBrowserSupabaseClient } from "../../lib/supabase/client";
+import { selectLandingPage } from "../../lib/editor-routing/resolveCanonicalMagicPage";
 import { getPublicPageAliasUrl, getPublicPageUrl, getPublicProfileUrl } from "../../lib/url";
 import { magicPageService } from "../../services/magic-page.service";
 import { profileService } from "../../services/profile.service";
@@ -119,7 +120,9 @@ export function MyProfilePage() {
             slug: primary.slug,
             created_at: primary.created_at,
           });
-        setCanonicalPage((pagesData?.[0] as Page | undefined) ?? null);
+        // C3.2.1 — the landing is the primary page; the full catalog (a child
+        // `page_type = "catalog"` row) must never become "Editar página".
+        setCanonicalPage(selectLandingPage((pagesData ?? []) as Page[]));
         const profileIds = (profilesData ?? []).map((item: { id: string }) => item.id);
         const { count } = profileIds.length
           ? await supabase
