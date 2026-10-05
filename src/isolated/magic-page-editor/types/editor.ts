@@ -23,6 +23,7 @@ export type ElementKind =
   | "price"
   | "badge"
   | "imageCard"
+  | "review"
   | "separator";
 
 export type BlockType =
@@ -43,6 +44,7 @@ export type BlockType =
   | "cardMenu"
   | "cardStore"
   | "imageCards"
+  | "reviews"
   | "separator";
 
 export type TextAlign = "left" | "center" | "right";

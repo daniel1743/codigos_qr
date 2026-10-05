@@ -36,6 +36,9 @@ import {
   MinusIcon,
   LockIcon,
   UnlockIcon,
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  CircleUserRoundIcon,
 } from "lucide-react";
 import { useEditor } from "../../contexts/EditorContext";
 import { useThemeTokens } from "../../hooks/useThemeTokens";
@@ -93,6 +96,17 @@ import {
   resolveImageCardShape,
   type ImageCardShape,
 } from "../../utils/imageCardOps";
+import {
+  REVIEWS_MAX,
+  REVIEW_RATINGS,
+  canDeleteReview,
+  deleteReview,
+  duplicateReview,
+  moveReview,
+  parseReviewSlot,
+  readReview,
+  reviewsOrder,
+} from "../../utils/reviewsOps";
 import {
   buttonCollectionFor,
   buttonIdentity,
@@ -858,6 +872,151 @@ export function useSelectionActions(): EditorAction[] {
             if (!canRemove) return;
             ed.updateDoc((doc) => deleteImageCard(doc, blockKey, slot));
             toast("Tarjeta eliminada", { action: { label: "Deshacer", onClick: () => ed.undo() } });
+          },
+        },
+      ];
+    }
+
+    case "review": {
+      const blockKey = sel.blockKey;
+      const slot = blockKey ? parseReviewSlot(blockKey, id) : null;
+      if (!blockKey || !slot) return [];
+      const order = reviewsOrder(ed.doc, blockKey);
+      const index = order.indexOf(slot);
+      const view = readReview(ed.doc, blockKey, slot, index < 0 ? 0 : index);
+      const atMax = order.length >= REVIEWS_MAX;
+      const canRemove = canDeleteReview(ed.doc, blockKey);
+      const rowAction =
+        "inline-flex h-10 flex-1 items-center justify-center gap-1.5 rounded-xl border border-line bg-white px-2 text-[12.5px] font-medium text-ink transition-colors duration-150 hover:bg-select-soft disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-select focus-visible:ring-offset-1";
+      return [
+        {
+          key: "photo",
+          label: "Foto",
+          icon: ImageIcon,
+          showLabel: true,
+          panel: (
+            <PanelSection title="Foto o avatar (opcional)">
+              <ImagePicker
+                value={props["avatar"]}
+                onChange={(v) => set("avatar", v)}
+                onUpload={ed.uploadAsset}
+              />
+            </PanelSection>
+          ),
+        },
+        {
+          key: "name",
+          label: "Nombre",
+          icon: CircleUserRoundIcon,
+          showLabel: true,
+          panel: (
+            <PanelSection title="Nombre">
+              <TextField
+                label="Nombre"
+                value={view.name}
+                placeholder="Nombre del cliente"
+                onCommit={(v) => set("name", v)}
+              />
+            </PanelSection>
+          ),
+        },
+        {
+          key: "text",
+          label: "Testimonio",
+          icon: TypeIcon,
+          showLabel: true,
+          panel: (
+            <PanelSection title="Testimonio">
+              <TextField
+                label="Testimonio"
+                multiline
+                value={view.text}
+                placeholder="Escribe aquí la reseña"
+                onCommit={(v) => set("text", v)}
+              />
+            </PanelSection>
+          ),
+        },
+        {
+          key: "rating",
+          label: "Valoración",
+          icon: StarIcon,
+          showLabel: true,
+          panel: (
+            <PanelSection title="Valoración" hint="De 1 a 5 estrellas.">
+              <div role="radiogroup" aria-label="Valoración" className="flex gap-1">
+                {REVIEW_RATINGS.map((stars) => {
+                  const filled = stars <= view.rating;
+                  return (
+                    <button
+                      key={stars}
+                      type="button"
+                      role="radio"
+                      aria-checked={stars === view.rating}
+                      aria-label={`${stars} ${stars === 1 ? "estrella" : "estrellas"}`}
+                      onClick={() => set("rating", String(stars))}
+                      className="grid h-10 w-10 place-items-center rounded-xl border border-line bg-white transition-colors duration-150 hover:bg-select-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-select focus-visible:ring-offset-1">
+                      <StarIcon
+                        className="h-4 w-4"
+                        style={{ color: filled ? "var(--accent)" : "var(--line)" }}
+                        fill={filled ? "var(--accent)" : "none"}
+                      />
+                    </button>
+                  );
+                })}
+              </div>
+            </PanelSection>
+          ),
+        },
+        {
+          key: "duplicate",
+          label: "Duplicar",
+          icon: CopyIcon,
+          disabled: atMax,
+          onClick: () => {
+            if (atMax) return;
+            ed.updateDoc((doc) => duplicateReview(doc, blockKey, slot));
+            toast("Reseña duplicada", { action: { label: "Deshacer", onClick: () => ed.undo() } });
+          },
+        },
+        {
+          key: "order",
+          label: "Orden",
+          icon: MoveHorizontalIcon,
+          showLabel: true,
+          panel: (
+            <PanelSection
+              title={`Orden · reseña ${index + 1} de ${order.length}`}
+              hint="Reordena las reseñas dentro del bloque.">
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  disabled={index <= 0}
+                  onClick={() => ed.updateDoc((doc) => moveReview(doc, blockKey, slot, -1))}
+                  className={rowAction}>
+                  <ArrowLeftIcon className="h-4 w-4" /> Mover antes
+                </button>
+                <button
+                  type="button"
+                  disabled={index < 0 || index >= order.length - 1}
+                  onClick={() => ed.updateDoc((doc) => moveReview(doc, blockKey, slot, 1))}
+                  className={rowAction}>
+                  Mover después <ArrowRightIcon className="h-4 w-4" />
+                </button>
+              </div>
+            </PanelSection>
+          ),
+        },
+        {
+          key: "remove",
+          label: "Eliminar",
+          icon: Trash2Icon,
+          danger: true,
+          disabled: !canRemove,
+          onClick: () => {
+            if (!canRemove) return;
+            ed.updateDoc((doc) => deleteReview(doc, blockKey, slot));
+            toast("Reseña eliminada", { action: { label: "Deshacer", onClick: () => ed.undo() } });
           },
         },
       ];

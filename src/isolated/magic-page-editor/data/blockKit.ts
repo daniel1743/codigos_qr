@@ -14,6 +14,7 @@ import { DivideIcon,
   MousePointerClickIcon,
   PlayCircleIcon,
   ShoppingBagIcon,
+  StarIcon,
   UtensilsIcon,
 } from "lucide-react";
 import { cardFamilies } from "./cardFamilies";
@@ -101,6 +102,12 @@ export const blockKit: BlockKitItem[] = [
     description: "Muestra proyectos, productos o servicios con una imagen y un enlace.",
     icon: ImagesIcon,
   },
+  {
+    type: "reviews",
+    label: "Reseñas",
+    description: "Testimonios de clientes con foto, nombre y valoración.",
+    icon: StarIcon,
+  },
   { type: "location", label: "Ubicación", description: "Mapa y dirección", icon: MapPinIcon },
   ...cardBlockKit.filter((b) => visibleCardTypes.has(b.type)),
 ];
@@ -130,5 +137,6 @@ export const blockLabels: Record<BlockType, string> = {
   cardMenu: "Menú",
   cardStore: "Tienda",
   imageCards: "Tarjetas de imagen",
+  reviews: "Reseñas",
   separator: "Separador",
 };

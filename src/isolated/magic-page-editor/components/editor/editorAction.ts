@@ -13,6 +13,7 @@ import {
   LayoutPanelTopIcon,
   MousePointerClickIcon,
   SquareIcon,
+  StarIcon,
   TypeIcon,
 } from "lucide-react";
 import type { ElementKind } from "../../types/editor";
@@ -54,4 +55,5 @@ export const kindIcons: Record<ElementKind, LucideIcon> = {
   price: EuroIcon,
   badge: BadgeIcon,
   imageCard: ImagesIcon,
+  review: StarIcon,
 };
