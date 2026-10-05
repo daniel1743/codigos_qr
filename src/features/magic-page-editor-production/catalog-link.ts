@@ -47,6 +47,26 @@ export interface CatalogAccess {
   resolve: (catalogPublicId: string) => Promise<CatalogAccessResult>;
 }
 
+/**
+ * Minimal owned-catalog record the resolver needs to answer the landing/summary
+ * UI: the owned page id, whether it is published, and every stored product.
+ */
+export interface OwnedCatalogRecord {
+  id: string;
+  published: boolean;
+  products: CatalogProduct[];
+}
+
+/**
+ * Lookup ports used to resolve an OWNED catalog page (draft OR published).
+ * `byPublicId` is the canonical identity; `byId` accepts a legacy reference that
+ * stored the page id instead of the public id.
+ */
+export interface OwnedCatalogLookup {
+  byPublicId: (publicId: string) => Promise<OwnedCatalogRecord | null>;
+  byId?: (pageId: string) => Promise<OwnedCatalogRecord | null>;
+}
+
 /** Stable public child-page path for a linked catalog (public_id identity). */
 export function catalogPublicHref(catalogPublicId: string): string {
   return `/pg/${catalogPublicId}`;
@@ -188,4 +208,46 @@ export function toggleFeaturedProduct(
   if (!selected) return current.filter((entry) => entry !== id);
   if (current.includes(id)) return current;
   return uniqueStringIds([...current, id]);
+}
+
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** True when a reference is a catalog page UUID (a legacy link stored the id). */
+export function looksLikePageId(value: string): boolean {
+  return UUID_PATTERN.test(value.trim());
+}
+
+/**
+ * Resolve an OWNED catalog page for the landing's PRIVATE (editor) context.
+ *
+ * A draft catalog owned by the current user MUST resolve here; publishing only
+ * controls PUBLIC availability. We resolve through the canonical `public_id`
+ * first. When that misses we accept a legacy reference that stored the page `id`
+ * (a UUID), so an existing owned catalog is never reported as missing. We NEVER
+ * fabricate products and NEVER fall back to the landing's embedded copies.
+ */
+export async function resolveOwnedCatalogPage(
+  catalogPublicId: string,
+  lookup: OwnedCatalogLookup,
+): Promise<CatalogAccessResult> {
+  const reference = catalogPublicId.trim();
+  if (!reference) return { pageId: null, products: null, published: false };
+
+  const byPublicId = await lookup.byPublicId(reference);
+  if (byPublicId) {
+    return {
+      pageId: byPublicId.id,
+      products: byPublicId.products,
+      published: byPublicId.published,
+    };
+  }
+
+  if (lookup.byId && looksLikePageId(reference)) {
+    const byId = await lookup.byId(reference);
+    if (byId) {
+      return { pageId: byId.id, products: byId.products, published: byId.published };
+    }
+  }
+
+  return { pageId: null, products: null, published: false };
 }

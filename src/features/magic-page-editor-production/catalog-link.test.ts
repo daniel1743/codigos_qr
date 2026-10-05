@@ -1,17 +1,20 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { PageDoc } from "../../isolated/magic-page-editor/types/editor";
 import {
   catalogPublicHref,
   isLinkedCatalog,
+  looksLikePageId,
   normalizeCatalogLink,
   parseFeaturedProductIds,
   readCatalogLink,
   resolveFeaturedProducts,
+  resolveOwnedCatalogPage,
   serializeFeaturedProductIds,
   toggleFeaturedProduct,
   writeCatalogLink,
   type CatalogLinkConfig,
   type CatalogProduct,
+  type OwnedCatalogRecord,
 } from "./catalog-link";
 import { hydrateMagicEditorState, serializeMagicEditorState } from "./magic-document";
 
@@ -162,5 +165,58 @@ describe("catalog link contract", () => {
       featuredProductIds: ["p1", "p2", "p3"],
       ctaLabel: "Ver catálogo completo",
     });
+  });
+});
+
+describe("resolveOwnedCatalogPage (draft-aware private resolution)", () => {
+  const record = (
+    id: string,
+    published: boolean,
+    products: CatalogProduct[],
+  ): OwnedCatalogRecord => ({ id, published, products });
+
+  it("resolves an OWNED DRAFT by public id (publishing only gates the public link)", async () => {
+    const byPublicId = vi.fn(async () => record("catalog-1", false, [product("p1")]));
+    const result = await resolveOwnedCatalogPage("PUB123", { byPublicId });
+    expect(byPublicId).toHaveBeenCalledWith("PUB123");
+    expect(result).toEqual({ pageId: "catalog-1", products: [product("p1")], published: false });
+  });
+
+  it("falls back to a legacy page-id reference only when it is a UUID", async () => {
+    const uuid = "11111111-2222-3333-4444-555555555555";
+    const byPublicId = vi.fn(async () => null);
+    const byId = vi.fn(async () => record(uuid, true, [product("p2")]));
+    const result = await resolveOwnedCatalogPage(uuid, { byPublicId, byId });
+    expect(byId).toHaveBeenCalledWith(uuid);
+    expect(result.pageId).toBe(uuid);
+    expect(result.published).toBe(true);
+
+    // A non-UUID reference never hits byId (it would be a Postgres cast error).
+    const byId2 = vi.fn(async () => record("x", true, []));
+    await resolveOwnedCatalogPage("not-a-uuid", { byPublicId, byId: byId2 });
+    expect(byId2).not.toHaveBeenCalled();
+  });
+
+  it("returns an unresolved result — never embedded data — when nothing matches", async () => {
+    const result = await resolveOwnedCatalogPage("missing", {
+      byPublicId: async () => null,
+      byId: async () => null,
+    });
+    expect(result).toEqual({ pageId: null, products: null, published: false });
+  });
+
+  it("treats an empty reference as unresolved without any lookup", async () => {
+    const byPublicId = vi.fn(async () => record("x", false, []));
+    expect(await resolveOwnedCatalogPage("  ", { byPublicId })).toEqual({
+      pageId: null,
+      products: null,
+      published: false,
+    });
+    expect(byPublicId).not.toHaveBeenCalled();
+  });
+
+  it("identifies page-id references", () => {
+    expect(looksLikePageId("11111111-2222-3333-4444-555555555555")).toBe(true);
+    expect(looksLikePageId("ABC123")).toBe(false);
   });
 });

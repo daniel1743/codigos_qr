@@ -94,28 +94,45 @@ export function CatalogConversionPanel({ blockKey }: { blockKey: string }) {
           hint={`Elige hasta ${CATALOG_LINK_MAX_FEATURED_PRODUCTS} productos para la landing.`}
         >
           {products && products.length > 0 ? (
-            <ul className="space-y-1.5">
-              {products.map((product) => {
-                const checked = featured.includes(product.id);
-                const disabled = !checked && featured.length >= CATALOG_LINK_MAX_FEATURED_PRODUCTS;
-                return (
-                  <li key={product.id}>
-                    <button
-                      type="button"
-                      onClick={() => toggleFeatured(product.id, !checked)}
-                      disabled={disabled}
-                      aria-pressed={checked}
-                      className="flex w-full items-center gap-2.5 rounded-xl border border-line px-3 py-2 text-left text-[12.5px] text-ink disabled:cursor-not-allowed disabled:opacity-50 aria-pressed:border-select aria-pressed:bg-black/5"
-                    >
-                      <span className="grid h-4 w-4 shrink-0 place-items-center rounded border border-line">
-                        {checked ? <CheckIcon className="h-3 w-3" /> : null}
-                      </span>
-                      <span className="min-w-0 flex-1 truncate">{product.title ?? product.id}</span>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
+            <>
+              <p className="mb-2 text-[12px] leading-snug text-mute">
+                {`En la landing: ${featured.length} de ${CATALOG_LINK_MAX_FEATURED_PRODUCTS}`}
+                {featured.length > 0
+                  ? ` · ${featured
+                      .map((id) => products.find((product) => product.id === id)?.title ?? id)
+                      .join(", ")}`
+                  : ""}
+              </p>
+              {featured.length >= CATALOG_LINK_MAX_FEATURED_PRODUCTS &&
+              products.some((product) => !featured.includes(product.id)) ? (
+                <p className="mb-2 text-[12px] leading-snug text-mute" role="status">
+                  Ya tienes {CATALOG_LINK_MAX_FEATURED_PRODUCTS} productos destacados. Desmarca uno
+                  para elegir otro.
+                </p>
+              ) : null}
+              <ul className="space-y-1.5">
+                {products.map((product) => {
+                  const checked = featured.includes(product.id);
+                  const disabled = !checked && featured.length >= CATALOG_LINK_MAX_FEATURED_PRODUCTS;
+                  return (
+                    <li key={product.id}>
+                      <button
+                        type="button"
+                        onClick={() => toggleFeatured(product.id, !checked)}
+                        disabled={disabled}
+                        aria-pressed={checked}
+                        className="flex w-full items-center gap-2.5 rounded-xl border border-line px-3 py-2 text-left text-[12.5px] text-ink disabled:cursor-not-allowed disabled:opacity-50 aria-pressed:border-select aria-pressed:bg-black/5"
+                      >
+                        <span className="grid h-4 w-4 shrink-0 place-items-center rounded border border-line">
+                          {checked ? <CheckIcon className="h-3 w-3" /> : null}
+                        </span>
+                        <span className="min-w-0 flex-1 truncate">{product.title ?? product.id}</span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </>
           ) : (
             <p className="text-[12.5px] text-mute" role="status">
               {resolution.status === "ready"

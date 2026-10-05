@@ -9,7 +9,7 @@ import { getBrowserSupabaseClient } from "../../lib/supabase/client";
 import { magicPageService } from "../../services/magic-page.service";
 import { convertEmbeddedCatalogToFullCatalog } from "./catalog-conversion.service";
 import { extractCatalogProducts } from "./catalog-products";
-import type { CatalogAccess } from "./catalog-link";
+import { resolveOwnedCatalogPage, type CatalogAccess, type OwnedCatalogRecord } from "./catalog-link";
 import { pageCanonicalService } from "../../services/page-canonical.service";
 import type { Page } from "../../types/database";
 import type { BioTemplateConfig } from "../../premium-template-studio/types";
@@ -330,24 +330,29 @@ export function MagicProductionEditorHost({ pageId }: { pageId: string }) {
   );
 
   /**
-   * Resolve a linked catalog from its public id: the owned page id powers
-   * "Administrar catálogo" and its draft products feed the landing summary.
+   * Resolve a linked catalog in the PRIVATE editor context. An owned draft must
+   * resolve here (publishing only controls public availability): the owned page
+   * id powers "Editar catálogo" and its draft products feed the landing summary.
    */
   const catalogAccess = useMemo<CatalogAccess>(
     () => ({
       resolve: async (catalogPublicId: string) => {
         if (!session) return { pageId: null, products: null, published: false };
-        const owned = await pageService.getOwnedPageByPublicId(
-          supabase,
-          catalogPublicId,
-          session.user.id,
-        );
-        if (!owned) return { pageId: null, products: null, published: false };
-        return {
-          pageId: owned.id,
-          products: extractCatalogProducts(owned.template_config),
-          published: owned.published === true,
-        };
+        const userId = session.user.id;
+        const toRecord = (owned: Page | null): OwnedCatalogRecord | null =>
+          owned
+            ? {
+                id: owned.id,
+                published: owned.published === true,
+                products: extractCatalogProducts(owned.template_config),
+              }
+            : null;
+        return resolveOwnedCatalogPage(catalogPublicId, {
+          byPublicId: async (publicId) =>
+            toRecord(await pageService.getOwnedPageByPublicId(supabase, publicId, userId)),
+          byId: async (pageId) =>
+            toRecord(await pageService.getOwnPageById(supabase, pageId, userId)),
+        });
       },
     }),
     [session, supabase],
