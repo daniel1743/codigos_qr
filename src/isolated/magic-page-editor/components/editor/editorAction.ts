@@ -53,4 +53,5 @@ export const kindIcons: Record<ElementKind, LucideIcon> = {
   icon: SquareIcon,
   price: EuroIcon,
   badge: BadgeIcon,
+  imageCard: ImagesIcon,
 };

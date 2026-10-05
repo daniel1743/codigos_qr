@@ -1,5 +1,5 @@
 import React from "react";
-import { CornerLeftUpIcon, LockIcon, RotateCcwIcon, Settings2Icon } from "lucide-react";
+import { ArrowLeftIcon, ArrowRightIcon, CornerLeftUpIcon, LockIcon, PlusIcon, RotateCcwIcon, Settings2Icon } from "lucide-react";
 import { useEditor } from "../../contexts/EditorContext";
 import { useThemeTokens } from "../../hooks/useThemeTokens";
 import { PanelSection } from "./controls/PanelSection";
@@ -28,6 +28,13 @@ import {
 import { blockLabels } from "../../data/blockKit";
 import { CardAdvanced } from "../cards/CardAdvanced";
 import { getCardContext } from "../cards/cardActions";
+import {
+  IMAGE_CARDS_MAX,
+  addImageCard,
+  imageCardsOrder,
+  moveImageCard,
+  parseImageCardSlot,
+} from "../../utils/imageCardOps";
 import { heroFusionFromProps, mediaOverlayFromProps } from "../../utils/styles";
 import { SwatchRow } from "./controls/SwatchRow";
 import { verificationPlacementFromProps } from "./EditableAvatar";
@@ -332,6 +339,46 @@ export function AdvancedPanel({ hideBlockNav = false }: { hideBlockNav?: boolean
       );
 
       break;
+    case "imageCard": {
+      const blockKey = sel.blockKey;
+      const slot = blockKey ? parseImageCardSlot(blockKey, id) : null;
+      const order = blockKey ? imageCardsOrder(ed.doc, blockKey) : [];
+      const index = slot ? order.indexOf(slot) : -1;
+      const canAdd = !!blockKey && order.length < IMAGE_CARDS_MAX;
+      const btn =
+        "inline-flex h-10 flex-1 items-center justify-center gap-1.5 rounded-xl border border-line bg-white px-2 text-[12.5px] font-medium text-ink transition-colors duration-150 hover:bg-select-soft disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-select focus-visible:ring-offset-1";
+      specific = blockKey && slot ? (
+        <PanelSection
+          title={`Orden · tarjeta ${index + 1} de ${order.length}`}
+          hint="Reordena las tarjetas o añade una nueva. El máximo es 4.">
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              disabled={index <= 0}
+              onClick={() => ed.updateDoc((doc) => moveImageCard(doc, blockKey, slot, -1))}
+              className={btn}>
+              <ArrowLeftIcon className="h-4 w-4" /> Mover antes
+            </button>
+            <button
+              type="button"
+              disabled={index < 0 || index >= order.length - 1}
+              onClick={() => ed.updateDoc((doc) => moveImageCard(doc, blockKey, slot, 1))}
+              className={btn}>
+              Mover después <ArrowRightIcon className="h-4 w-4" />
+            </button>
+            {canAdd &&
+            <button
+              type="button"
+              onClick={() => ed.updateDoc((doc) => addImageCard(doc, blockKey))}
+              className={btn}>
+              <PlusIcon className="h-4 w-4" /> Agregar tarjeta
+            </button>}
+          </div>
+        </PanelSection>
+      ) : null;
+
+      break;
+    }
     case "section":
       specific = sel.blockKey ? (
         <>

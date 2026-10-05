@@ -95,6 +95,12 @@ export const blockKit: BlockKitItem[] = [
     description: "Servicios, productos, proyectos…",
     icon: LayoutGridIcon,
   },
+  {
+    type: "imageCards",
+    label: "Tarjetas de imagen",
+    description: "Muestra proyectos, productos o servicios con una imagen y un enlace.",
+    icon: ImagesIcon,
+  },
   { type: "location", label: "Ubicación", description: "Mapa y dirección", icon: MapPinIcon },
   ...cardBlockKit.filter((b) => visibleCardTypes.has(b.type)),
 ];
@@ -123,5 +129,6 @@ export const blockLabels: Record<BlockType, string> = {
   cardPortfolio: "Portafolio",
   cardMenu: "Menú",
   cardStore: "Tienda",
+  imageCards: "Tarjetas de imagen",
   separator: "Separador",
 };

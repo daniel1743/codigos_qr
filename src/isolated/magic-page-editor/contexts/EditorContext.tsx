@@ -133,6 +133,20 @@ function uid(): string {
   return Math.random().toString(36).slice(2, 7);
 }
 
+/**
+ * Copies every element record scoped to a block key (`<blockKey>/...`) to a new
+ * block key, so duplicating a block also duplicates its per-element content
+ * (texts, styles, props, removed flags) instead of leaving the copy empty.
+ */
+function cloneScoped<T>(record: Record<string, T>, from: string, to: string): Record<string, T> {
+  const next = { ...record };
+  const prefix = `${from}/`;
+  for (const key of Object.keys(record)) {
+    if (key.startsWith(prefix)) next[`${to}${key.slice(from.length)}`] = record[key]!;
+  }
+  return next;
+}
+
 interface EditorProviderProps {
   children: React.ReactNode;
   initialTemplate?: TemplateId;
@@ -627,10 +641,14 @@ export function EditorProvider({
           const blocks = [...d.blocks];
           blocks.splice(i + 1, 0, { key: newKey, type: d.blocks[i].type });
           const sourceProps = d.props[`block:${key}`];
+          const props = cloneScoped(d.props, key, newKey);
           return {
             ...d,
             blocks,
-            props: sourceProps ? { ...d.props, [`block:${newKey}`]: { ...sourceProps } } : d.props,
+            props: sourceProps ? { ...props, [`block:${newKey}`]: { ...sourceProps } } : props,
+            texts: cloneScoped(d.texts, key, newKey),
+            textStyles: cloneScoped(d.textStyles, key, newKey),
+            removed: cloneScoped(d.removed, key, newKey),
           };
         })
       )

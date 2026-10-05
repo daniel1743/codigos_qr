@@ -14,6 +14,7 @@ import { HeroFrame } from './HeroFrame';
 import { GalleryGrid } from './GalleryGrid';
 import { LocationBlock } from './LocationBlock';
 import { CardFamilyBlock } from '../cards/CardFamilyBlock';
+import { ImageCardsBlock } from './ImageCardsBlock';
 import { familyForBlockType } from '../../data/cardFamilies';
 import { images } from '../../data/images';
 import { cx } from '../../utils/cx';
@@ -129,6 +130,9 @@ export function GenericBlock({ block, ctaVariants, maxWidth = 1080 }: GenericBlo
           </Editable>
         </div>);
       }
+
+    case 'imageCards':
+      return <ImageCardsBlock block={block} />;
 
     case 'collection':
       return (

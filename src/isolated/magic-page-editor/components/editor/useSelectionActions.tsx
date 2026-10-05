@@ -82,6 +82,17 @@ import { QuickProfileInfoPanel } from "./controls/QuickProfileInfoPanel";
 import { IconPicker, iconLibrary } from "./controls/IconPicker";
 import { socialPlatforms } from "../../data/socialPlatforms";
 import { addButton, deleteButton, moveButton } from "../../utils/buttonOps";
+import { applyCardFamilyVariant } from "../../utils/cardOps";
+import {
+  IMAGE_CARDS_MAX,
+  canDeleteImageCard,
+  deleteImageCard,
+  duplicateImageCard,
+  imageCardsOrder,
+  parseImageCardSlot,
+  resolveImageCardShape,
+  type ImageCardShape,
+} from "../../utils/imageCardOps";
 import {
   buttonCollectionFor,
   buttonIdentity,
@@ -763,6 +774,93 @@ export function useSelectionActions(): EditorAction[] {
     case "familyCard": {
       const ctx = getCardContext(ed, id, sel.blockKey);
       return ctx ? familyCardActions(ed, ctx) : [];
+    }
+
+    case "imageCard": {
+      const blockKey = sel.blockKey;
+      const slot = blockKey ? parseImageCardSlot(blockKey, id) : null;
+      if (!blockKey || !slot) return [];
+      const order = imageCardsOrder(ed.doc, blockKey);
+      const atMax = order.length >= IMAGE_CARDS_MAX;
+      const canRemove = canDeleteImageCard(ed.doc, blockKey);
+      return [
+        {
+          key: "image",
+          label: "Imagen",
+          icon: ImageIcon,
+          showLabel: true,
+          panel: (
+            <PanelSection title="Reemplazar imagen">
+              <ImagePicker
+                value={props["src"]}
+                onChange={(v) => set("src", v)}
+                onUpload={ed.uploadAsset}
+              />
+            </PanelSection>
+          ),
+        },
+        {
+          key: "shape",
+          label: "Forma",
+          icon: ShapesIcon,
+          showLabel: true,
+          panel: (
+            <PanelSection title="Esquinas de la tarjeta">
+              <Segmented<ImageCardShape>
+                ariaLabel="Forma de la tarjeta"
+                options={[
+                  { value: "square", label: "Cuadrada" },
+                  { value: "rounded", label: "Redondeada" },
+                  { value: "extra", label: "Muy redondeada" },
+                ]}
+                value={resolveImageCardShape(props["shape"])}
+                onChange={(v) => set("shape", v)}
+              />
+            </PanelSection>
+          ),
+        },
+        {
+          key: "link",
+          label: "Enlace",
+          icon: Link2Icon,
+          showLabel: true,
+          panel: (
+            <PanelSection
+              title="Enlace de la tarjeta"
+              hint="En Vista previa, tocar la tarjeta abre este destino.">
+              <LinkEditor
+                value={props["href"] ?? ""}
+                onChange={(v) => set("href", v)}
+                newTab={props["newTab"]}
+                onNewTabChange={(v) => set("newTab", v)}
+              />
+            </PanelSection>
+          ),
+        },
+        {
+          key: "duplicate",
+          label: "Duplicar",
+          icon: CopyIcon,
+          disabled: atMax,
+          onClick: () => {
+            if (atMax) return;
+            ed.updateDoc((doc) => duplicateImageCard(doc, blockKey, slot));
+            toast("Tarjeta duplicada", { action: { label: "Deshacer", onClick: () => ed.undo() } });
+          },
+        },
+        {
+          key: "remove",
+          label: "Eliminar",
+          icon: Trash2Icon,
+          danger: true,
+          disabled: !canRemove,
+          onClick: () => {
+            if (!canRemove) return;
+            ed.updateDoc((doc) => deleteImageCard(doc, blockKey, slot));
+            toast("Tarjeta eliminada", { action: { label: "Deshacer", onClick: () => ed.undo() } });
+          },
+        },
+      ];
     }
 
     case "price":
@@ -1678,7 +1776,15 @@ export function useSelectionActions(): EditorAction[] {
                   label: v.label,
                 }))}
                 value={(props.variant ?? family.variants[0].id) as CardLayout}
-                onChange={(v) => set("variant", v)}
+                onChange={(v) => {
+                  if (ed.canonicalEditing) {
+                    set("variant", v);
+                  } else {
+                    family.id === "catalog"
+                      ? ed.updateDoc((doc) => applyCardFamilyVariant(doc, key, v))
+                      : set("variant", v);
+                  }
+                }}
                 thumbFor={(v) => family.variants.find((x) => x.id === v)?.layout ?? "left"}
               />
             </PanelSection>
