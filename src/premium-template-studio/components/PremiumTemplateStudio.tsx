@@ -20,7 +20,7 @@ import {
   PanelRightClose,
   PanelRightOpen,
 } from "lucide-react";
-import type { BioTemplateConfig, BlockItem, Breakpoint, SaveState } from "../types";
+import type { BioTemplateConfig, Breakpoint, SaveState } from "../types";
 import type { ProductTier } from "../../lib/product-entitlements/capabilities";
 import { StudioProvider, useStudio } from "../state/StudioProvider";
 import type { StudioAdapters } from "../adapters";
@@ -51,7 +51,7 @@ import { isPersistenceDebugEnabled, PersistenceDebugPanel } from "../diagnostics
 import { formatBreakpoint } from "../i18n/messages";
 import { DiscoveryHintHost } from "../microux/DiscoveryHint";
 import { ContextualEditorActions, ContextualEditorMobileSheet } from "./ContextualEditorActions";
-import { cloneProductItem } from "./blocks/productGridCollection";
+import { appendProducts, applyProductGridItemAction } from "./blocks/productGridCollection";
 import "../styles/studio.css";
 
 function Toolbar({ onExport }: { onExport: () => void }) {
@@ -427,61 +427,61 @@ function Canvas({
                 if (collection !== "product-grid") return;
                 const block = state.config.blocks.find((candidate) => candidate.id === blockId);
                 if (!block) return;
-                const products = [...(block.content.products ?? [])];
-                const index = products.findIndex((product) => product.id === itemId);
-                if (index < 0) return;
-                if (action === "delete") {
-                  products.splice(index, 1);
-                  onSelectedCollectionItemChange(null);
-                }
-                if (action === "up" && index > 0) {
-                  [products[index - 1], products[index]] = [products[index], products[index - 1]];
-                }
-                if (action === "down" && index < products.length - 1) {
-                  [products[index], products[index + 1]] = [products[index + 1], products[index]];
-                }
-                if (action === "duplicate") {
-                  const copy = cloneProductItem(products[index] as BlockItem);
-                  products.splice(index + 1, 0, copy);
+                const result = applyProductGridItemAction(
+                  block.content.products ?? [],
+                  itemId,
+                  action,
+                );
+                if (!result.changed) return;
+                if (action === "delete") onSelectedCollectionItemChange(null);
+                dispatch({
+                  type: "patchBlockField",
+                  id: blockId,
+                  path: "content.products",
+                  value: result.products,
+                });
+                if (action === "duplicate" && result.selectedItemId) {
                   onSelectedCollectionItemChange({
                     blockId,
                     collection,
-                    itemId: copy.id,
+                    itemId: result.selectedItemId,
                     field: "item",
                   });
+                  requestInspectorFocus(
+                    collectionTarget(blockId, collection, result.selectedItemId, "item"),
+                  );
                 }
+              },
+              onAddCollectionItem: (blockId, collection, count = 1) => {
+                if (collection !== "product-grid") return;
+                const sourceBlock = state.config.blocks.find(
+                  (candidate) => candidate.id === blockId,
+                );
+                if (!sourceBlock) return;
+                const sourceProducts = sourceBlock.content.products ?? [];
+                // The canonical catalog (catalog-premium-card-v1) adds safe, empty
+                // placeholders so an add/bulk-add never duplicates real commercial
+                // data. Other product-grid documents keep the historical clone of
+                // the last card's full payload.
+                const placeholder = sourceBlock.variant === "catalog-premium-card-v1";
+                const { products, addedIds } = appendProducts(sourceProducts, count, {
+                  placeholder,
+                });
                 dispatch({
                   type: "patchBlockField",
                   id: blockId,
                   path: "content.products",
                   value: products,
                 });
-                if (action === "duplicate")
-                  requestInspectorFocus(
-                    collectionTarget(blockId, collection, products[index + 1]!.id!, "item"),
-                  );
-              },
-              onAddCollectionItem: (blockId, collection) => {
-                if (collection !== "product-grid") return;
-                const sourceBlock = state.config.blocks.find(
-                  (candidate) => candidate.id === blockId,
-                );
-                const sourceProducts = sourceBlock?.content.products ?? [];
-                const source = sourceProducts[sourceProducts.length - 1];
-                const next = cloneProductItem(source);
-                dispatch({
-                  type: "patchBlockField",
-                  id: blockId,
-                  path: "content.products",
-                  value: [...sourceProducts, next],
-                });
+                const created = addedIds[0];
+                if (!created) return;
                 onSelectedCollectionItemChange({
                   blockId,
                   collection,
-                  itemId: next.id,
+                  itemId: created,
                   field: "item",
                 });
-                requestInspectorFocus(collectionTarget(blockId, collection, next.id, "item"));
+                requestInspectorFocus(collectionTarget(blockId, collection, created, "item"));
               },
               onUploadCollectionItemImage: (blockId, itemId, file) => {
                 void (async () => {

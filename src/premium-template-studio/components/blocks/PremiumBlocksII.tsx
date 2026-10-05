@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, type CSSProperties } from "react";
 import {
   Play,
   Pause,
@@ -28,6 +28,7 @@ import {
 } from "../../engine/styleEngine";
 import { hexToRgba, safeUrl } from "../../utils";
 import type { BlockItem, TemplateBlock } from "../../types";
+import { MAX_BULK_PRODUCTS } from "./productGridCollection";
 import { ContextualItemTarget, InlineText } from "./primitives";
 import { ContextualEditingToolbar } from "../ContextualEditingToolbar";
 import { PremiumProductCardMagicV1 } from "./PremiumProductCardMagicV1";
@@ -616,6 +617,166 @@ export function ProductCardBlock({
 /* ------------------------------------------------------------------ */
 /* 2. Product Grid                                                    */
 /* ------------------------------------------------------------------ */
+
+const CATALOG_ADD_PRESETS = [1, 3, 5, 10] as const;
+
+const catalogAddButton = (active: boolean): CSSProperties => ({
+  minWidth: 34,
+  height: 30,
+  borderRadius: 8,
+  border: "1px solid currentColor",
+  background: active ? "rgba(0,0,0,.07)" : "transparent",
+  color: "inherit",
+  fontWeight: 600,
+  cursor: "pointer",
+});
+
+/**
+ * In-canvas "add products" affordance for the canonical catalog variant. The
+ * single "+ Añadir producto" button stays for every other product-grid document;
+ * this one adds a quantity selector so the owner can create N empty products at
+ * once. It only ever emits a count — the actual (safe) placeholder generation
+ * lives in the editor pipeline, so the new rows never clone real commerce data.
+ */
+function CatalogAddProductsTile({
+  minHeight,
+  onAdd,
+}: {
+  minHeight: number;
+  onAdd: (count: number) => void;
+}) {
+  const [count, setCount] = useState(3);
+  const [customOpen, setCustomOpen] = useState(false);
+  const safeCount = Math.max(1, Math.min(MAX_BULK_PRODUCTS, Math.floor(count) || 1));
+
+  return (
+    <div
+      data-catalog-add-products="true"
+      style={{
+        minHeight,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 12,
+        padding: 16,
+        border: "1px dashed currentColor",
+        borderRadius: 18,
+        background: "transparent",
+        color: "inherit",
+        textAlign: "center",
+      }}
+    >
+      <button
+        type="button"
+        data-catalog-add-single="true"
+        onClick={() => onAdd(1)}
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 8,
+          border: 0,
+          background: "transparent",
+          color: "inherit",
+          fontWeight: 600,
+          cursor: "pointer",
+        }}
+      >
+        <span
+          aria-hidden
+          style={{
+            display: "inline-flex",
+            width: 28,
+            height: 28,
+            alignItems: "center",
+            justifyContent: "center",
+            borderRadius: "50%",
+            border: "1px solid currentColor",
+          }}
+        >
+          +
+        </span>
+        Añadir producto
+      </button>
+
+      <div
+        role="group"
+        aria-label="Cantidad a agregar"
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 6,
+        }}
+      >
+        {CATALOG_ADD_PRESETS.map((preset) => (
+          <button
+            key={preset}
+            type="button"
+            aria-pressed={!customOpen && safeCount === preset}
+            onClick={() => {
+              setCustomOpen(false);
+              setCount(preset);
+            }}
+            style={catalogAddButton(!customOpen && safeCount === preset)}
+          >
+            {preset}
+          </button>
+        ))}
+        <button
+          type="button"
+          aria-pressed={customOpen}
+          onClick={() => setCustomOpen(true)}
+          style={{ ...catalogAddButton(customOpen), padding: "0 10px" }}
+        >
+          Personalizada
+        </button>
+      </div>
+
+      {customOpen ? (
+        <label style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13 }}>
+          Cantidad
+          <input
+            type="number"
+            min={1}
+            max={MAX_BULK_PRODUCTS}
+            value={safeCount}
+            onChange={(event) => setCount(Number(event.target.value))}
+            style={{
+              width: 72,
+              height: 30,
+              borderRadius: 8,
+              border: "1px solid currentColor",
+              background: "transparent",
+              color: "inherit",
+              padding: "0 8px",
+            }}
+          />
+        </label>
+      ) : null}
+
+      <button
+        type="button"
+        data-catalog-add-bulk="true"
+        onClick={() => onAdd(safeCount)}
+        style={{
+          minHeight: 36,
+          borderRadius: 10,
+          border: 0,
+          background: "#17140F",
+          color: "#fff",
+          fontWeight: 600,
+          padding: "0 16px",
+          cursor: "pointer",
+        }}
+      >
+        Agregar {safeCount} {safeCount === 1 ? "producto" : "productos"}
+      </button>
+    </div>
+  );
+}
+
 export function ProductGridBlock({ block }: { block: TemplateBlock }) {
   const {
     breakpoint,
@@ -631,9 +792,6 @@ export function ProductGridBlock({ block }: { block: TemplateBlock }) {
     breakpoint === "mobile" ? 1 : breakpoint === "tablet" ? Math.min(3, columns) : columns;
   const [detailProduct, setDetailProduct] = useState<BlockItem | null>(null);
   const isCatalogPremium = block.variant === "catalog-premium-card-v1";
-  // Phase 1 intentionally proves one faithful Magic card at the same desktop
-  // grid-cell width it will occupy when the full catalog grid is introduced.
-  const productsForPhase = isCatalogPremium ? products.slice(0, 1) : products;
 
   return (
     <div
@@ -644,7 +802,7 @@ export function ProductGridBlock({ block }: { block: TemplateBlock }) {
         width: "100%",
       }}
     >
-      {productsForPhase.map((prod: BlockItem, idx: number) => {
+      {products.map((prod: BlockItem, idx: number) => {
         // Build a mock child block definition to render child cards
         const prodBlock: TemplateBlock = {
           id: prod.id ?? `prod-${idx}`,
@@ -815,22 +973,29 @@ export function ProductGridBlock({ block }: { block: TemplateBlock }) {
           </div>
         );
       })}
-      {mode === "edit" && onAddCollectionItem && (
-        <button
-          type="button"
-          onClick={() => onAddCollectionItem(block.id, "product-grid")}
-          style={{
-            minHeight: isCatalogPremium ? 180 : 48,
-            border: "1px dashed currentColor",
-            borderRadius: isCatalogPremium ? 18 : 12,
-            background: "transparent",
-            color: "inherit",
-            fontWeight: 600,
-          }}
-        >
-          + Añadir producto
-        </button>
-      )}
+      {mode === "edit" &&
+        onAddCollectionItem &&
+        (isCatalogPremium ? (
+          <CatalogAddProductsTile
+            minHeight={180}
+            onAdd={(count) => onAddCollectionItem(block.id, "product-grid", count)}
+          />
+        ) : (
+          <button
+            type="button"
+            onClick={() => onAddCollectionItem(block.id, "product-grid")}
+            style={{
+              minHeight: 48,
+              border: "1px dashed currentColor",
+              borderRadius: 12,
+              background: "transparent",
+              color: "inherit",
+              fontWeight: 600,
+            }}
+          >
+            + Añadir producto
+          </button>
+        ))}
       {detailProduct && (
         <div
           role="dialog"

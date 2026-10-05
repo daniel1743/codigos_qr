@@ -1,6 +1,7 @@
 import type { CSSProperties, FormEvent, KeyboardEvent, MouseEvent } from "react";
 import type { BlockItem, BlockStyle, TypographyOverride } from "../../types";
 import { useRender } from "../../engine/RenderContext";
+import { cardStyle } from "../../engine/styleEngine";
 import { PremiumProductCardMagicToolbar } from "./PremiumProductCardMagicToolbar";
 
 type MagicField = "card" | "image" | "title" | "description" | "price" | "cta";
@@ -122,8 +123,6 @@ export function PremiumProductCardMagicV1({
   const selected = (field: MagicField) => selectedField === field;
   const image = product.imageUrl;
   const hasReferenceImage = product.imageProvenance?.origin === "reference_stock";
-
-  const { cardStyle } = require("../../engine/styleEngine");
   const baseCardStyle = cardStyle(theme, blockStyle);
   const cardBackground = baseCardStyle.backgroundColor as string;
   const cardBorder = baseCardStyle.borderColor as string;

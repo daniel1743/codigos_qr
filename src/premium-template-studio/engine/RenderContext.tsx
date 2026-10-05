@@ -51,7 +51,7 @@ export interface RenderContextValue {
         action: "duplicate" | "delete" | "up" | "down",
       ) => void)
     | undefined;
-  onAddCollectionItem?: ((blockId: string, collection: string) => void) | undefined;
+  onAddCollectionItem?: ((blockId: string, collection: string, count?: number) => void) | undefined;
   onUploadCollectionItemImage?: ((blockId: string, itemId: string, file: File) => void) | undefined;
   onListCollectionItemImages?: (() => Promise<UploadedAsset[]>) | undefined;
   onRemoveCollectionItemImage?: ((blockId: string, itemId: string) => void) | undefined;
