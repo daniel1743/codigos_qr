@@ -6,7 +6,12 @@ import { Segmented } from '../editor/controls/Segmented';
 import { SwatchRow } from '../editor/controls/SwatchRow';
 import type { CardContext } from './cardActions';
 
-export function CardSurfaceFields({ ctx }: { ctx: CardContext }) {
+/**
+ * Only `cardId` is used, so the panel also works for a surface that has no card
+ * family (e.g. the Bio "collection" overlay): the caller passes the enclosing
+ * item id without having to fabricate a full `CardContext`.
+ */
+export function CardSurfaceFields({ ctx }: { ctx: Pick<CardContext, 'cardId'> }) {
   const ed = useEditor();
   const theme = useThemeTokens();
   const id = ctx.cardId;

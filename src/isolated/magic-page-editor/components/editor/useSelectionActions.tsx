@@ -133,15 +133,34 @@ export function useSelectionActions(): EditorAction[] {
 
   switch (sel.kind) {
     case "surface": {
-      const ctx =
-        getCardContext(ed, id, sel.blockKey) ?? ({ cardId: id.replace(/\.surface$/, "") } as any);
+      // `getCardContext` resolves only for a surface that belongs to a structured
+      // family card. Other surfaces (e.g. the Bio "collection" overlay that floats
+      // on top of an image) legitimately have no card family, so we never assume a
+      // `family` exists here.
+      const cardCtx = getCardContext(ed, id, sel.blockKey);
+      // The styling panel only needs `cardId`: a family-less surface still resolves
+      // to its enclosing item id (e.g. `collection.0.surface` → `collection.0`).
+      const panelCtx = cardCtx ?? { cardId: id.replace(/\.surface$/, "") };
       return [
         {
           key: "surface",
           label: "Superficie",
           icon: PaintBucketIcon,
           showLabel: true,
-          panel: <CardSurfaceFields ctx={ctx} />,
+          panel: <CardSurfaceFields ctx={panelCtx} />,
+        },
+        // Trash removes ONLY this surface (a background panel): never the card, its
+        // image nor the elements around it. `removeElement` hides it by id
+        // (`doc.removed`), clears the selection and is fully undoable. We do NOT
+        // reuse `familyCardActions` here — that deletes the whole card, and calling
+        // it with the family-less fallback crashed the toolbar (P0 — `family.variants`
+        // of undefined), which is exactly what must not happen again.
+        {
+          key: "remove",
+          label: "Eliminar",
+          icon: Trash2Icon,
+          danger: true,
+          onClick: () => ed.removeElement(id, "Superficie"),
         },
       ];
     }
