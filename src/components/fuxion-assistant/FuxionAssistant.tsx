@@ -1,27 +1,15 @@
 import React, { useState, useRef, useEffect } from "react";
 import { MessageSquare, X, Send, Bot, Sparkles, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import OpenAI from "openai";
 import { matchProduct } from "./fuxionProductRouter";
 import { detectHealthIntent, getHealthSafetyInstruction } from "./healthIntentGate";
+import { askFuxionAssistantFn } from "../../lib/fuxion-assistant/server";
 
 interface Message {
   id: string;
   sender: "user" | "assistant";
   text: string;
 }
-
-const openai = new OpenAI({
-  baseURL: "https://api.deepseek.com",
-  apiKey: import.meta.env.VITE_DEEPSEEK_API_KEY || "sk-5142df348fc147b093350aae6c39b7b1",
-  dangerouslyAllowBrowser: true,
-});
-
-const fallbackOpenai = new OpenAI({
-  baseURL: import.meta.env.VITE_FALLBACK_BASE_URL || "https://oneprovider.dev/api/v1", // o la URL correcta
-  apiKey: import.meta.env.VITE_FALLBACK_API_KEY || "sk-f57ae0c749ca44cd5924caf65357e28d3acef7ade53a4d7d7e29085a2198dc7f",
-  dangerouslyAllowBrowser: true,
-});
 
 const SUGGESTED_PROMPTS = [
   "¿Para qué sirve este producto?",
@@ -158,7 +146,7 @@ export function FuxionAssistant({ pageId: _pageId }: FuxionAssistantProps) {
       text: text.trim(),
     };
 
-    const newMessagesList = [...messages, newUserMsg];
+    const newMessagesList = [...messages, newUserMsg].slice(-8);
     setMessages(newMessagesList);
     setInputValue("");
     setIsTyping(true);
@@ -192,54 +180,27 @@ if (healthInstruction) {
   systemPrompt += `\n\n${healthInstruction}`;
 }
 
-let responseText = "";
     try {
-      // Intento 1: DeepSeek
-      const completion = await openai.chat.completions.create({
-        messages: [
-          { role: "system", content: systemPrompt },
-          ...newMessagesList.map((msg) => ({
-            role: msg.sender,
-            content: msg.text,
-          })),
-        ],
-        model: "deepseek-chat",
+      const result = await askFuxionAssistantFn({
+        data: {
+          systemPrompt,
+          messages: newMessagesList.map((msg) => ({ role: msg.sender, content: msg.text })),
+        },
       });
-      responseText = completion.choices[0]?.message?.content || "";
-    } catch (error: any) {
-      console.warn("Fallo DeepSeek, intentando fallback OneProvider...", error);
-      try {
-        // Intento 2: Fallback (OneProvider con qwen)
-        const fallbackCompletion = await fallbackOpenai.chat.completions.create({
-          messages: [
-            { role: "system", content: systemPrompt },
-            ...newMessagesList.map((msg) => ({
-              role: msg.sender,
-              content: msg.text,
-            })),
-          ],
-          model: "qwen3.8-flash", // Ajustar nombre exacto de ser necesario
-        });
-        responseText = fallbackCompletion.choices[0]?.message?.content || "";
-      } catch (fallbackError: any) {
-        console.error("Error en Fallback:", fallbackError);
-        const errorMsg: Message = {
-          id: (Date.now() + 1).toString(),
-          sender: "assistant",
-          text: "Hubo un error de conexin con la IA (ambos proveedores fallaron). Por favor intenta nuevamente.",
-        };
-        setMessages((prev) => [...prev, errorMsg]);
-        setIsTyping(false);
-        return;
-      }
+      setMessages((prev) => [...prev, {
+        id: (Date.now() + 1).toString(),
+        sender: "assistant",
+        text: result.reply || "Lo siento, no pude procesar tu solicitud.",
+      }]);
+    } catch (error) {
+      console.error("Error en Asesor Asistente:", error);
+      const errorMsg: Message = {
+        id: (Date.now() + 1).toString(),
+        sender: "assistant",
+        text: "Hubo un error de conexión con el asistente. Por favor intenta nuevamente.",
+      };
+      setMessages((prev) => [...prev, errorMsg]);
     }
-
-    const newAssistantMsg: Message = {
-      id: (Date.now() + 1).toString(),
-      sender: "assistant",
-      text: responseText || "Lo siento, no pude procesar tu solicitud.",
-    };
-    setMessages((prev) => [...prev, newAssistantMsg]);
     setIsTyping(false);
   };
 

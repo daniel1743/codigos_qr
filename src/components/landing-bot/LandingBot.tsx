@@ -124,8 +124,28 @@ export function LandingBot({
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [typing, setTyping] = useState(false);
+  const [mobileViewport, setMobileViewport] = useState<{ height: number; top: number } | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
   const fullscreenOpen = open && mobileCanvas;
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 639px)");
+    const viewport = window.visualViewport;
+    if (!viewport) return;
+
+    const syncViewport = () => {
+      setMobileViewport(media.matches ? { height: viewport.height, top: viewport.offsetTop } : null);
+    };
+    syncViewport();
+    viewport.addEventListener("resize", syncViewport);
+    viewport.addEventListener("scroll", syncViewport);
+    media.addEventListener("change", syncViewport);
+    return () => {
+      viewport.removeEventListener("resize", syncViewport);
+      viewport.removeEventListener("scroll", syncViewport);
+      media.removeEventListener("change", syncViewport);
+    };
+  }, []);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -177,7 +197,14 @@ export function LandingBot({
       style={overlay || previewOnly ? { bottom: "calc(1rem + env(safe-area-inset-bottom))" } : undefined}
     >
       {open && (
-        <div className={`flex flex-col overflow-hidden rounded-2xl border border-black/10 bg-white shadow-2xl max-sm:fixed max-sm:inset-x-3 max-sm:top-[max(0.75rem,env(safe-area-inset-top))] max-sm:bottom-[max(0.75rem,env(safe-area-inset-bottom))] max-sm:h-auto max-sm:max-h-none max-sm:w-auto ${fullscreenOpen ? "fixed inset-x-3 top-[max(0.75rem,env(safe-area-inset-top))] bottom-[max(0.75rem,env(safe-area-inset-bottom))] h-auto max-h-none w-auto" : "h-[70vh] max-h-[560px] w-[min(92vw,360px)]"}`}>
+        <div
+          className={`flex min-h-0 flex-col overflow-hidden rounded-2xl border border-black/10 bg-white shadow-2xl max-sm:fixed max-sm:inset-x-3 max-sm:top-[max(0.75rem,env(safe-area-inset-top))] max-sm:bottom-[max(0.75rem,env(safe-area-inset-bottom))] max-sm:h-auto max-sm:max-h-none max-sm:w-auto ${fullscreenOpen ? "fixed inset-x-3 top-[max(0.75rem,env(safe-area-inset-top))] bottom-[max(0.75rem,env(safe-area-inset-bottom))] h-auto max-h-none w-auto" : "h-[70vh] max-h-[560px] w-[min(92vw,360px)]"}`}
+          style={mobileViewport ? {
+            top: `calc(${mobileViewport.top}px + max(0.75rem, env(safe-area-inset-top)))`,
+            bottom: "auto",
+            height: `calc(${mobileViewport.height}px - max(0.75rem, env(safe-area-inset-top)) - max(0.75rem, env(safe-area-inset-bottom)))`,
+          } : undefined}
+        >
           <header className="flex items-center gap-3 border-b border-black/5 bg-gradient-to-br from-blue-600 to-indigo-600 px-4 py-3 text-white">
             <span className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-full bg-white/15">
               <BotFace config={config} />
@@ -193,7 +220,7 @@ export function LandingBot({
             </button>
           </header>
 
-          <div className="flex-1 space-y-3 overflow-y-auto px-3.5 py-4 text-[14px] text-gray-800">
+          <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-3.5 py-4 text-[14px] text-gray-800">
             <div className="mr-auto max-w-[85%] rounded-2xl rounded-tl-md border border-gray-100 bg-white px-3.5 py-2.5 shadow-sm">
               <p>👋 ¡Hola! Soy {config.name || "el asistente"}. ¿En qué te puedo ayudar?</p>
             </div>

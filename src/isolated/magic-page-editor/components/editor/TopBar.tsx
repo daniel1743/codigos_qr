@@ -18,6 +18,7 @@ import { cardFamilies } from '../../data/cardFamilies';
 import { accessForIndex, isVariantLocked, miniGalleryVariants, pageFamilyVariants, templates } from '../../data/templates';
 import { cx } from '../../utils/cx';
 import type { TemplateId } from '../../types/editor';
+import { applyCardFamilyVariant } from '../../utils/cardOps';
 
 type PageFamily = 'bio' | 'business' | 'catalog' | 'portfolio' | 'gallery';
 
@@ -58,8 +59,9 @@ function PageVariantSelectors() {
   const storedFamily = ed.doc.props.page?.family as PageFamily | undefined;
   const [selectedFamily, setSelectedFamily] = useState<PageFamily>(storedFamily ?? ed.templateId);
   const [open, setOpen] = useState<'family' | 'variant' | null>(null);
+  const catalogBlockKey = ed.doc.blocks.find((block) => block.type === 'catalog')?.key ?? 'catalog';
   const variants = familyVariants(selectedFamily);
-  const selectedVariant = selectedFamily === 'catalog' ? ed.doc.props['block:catalog']?.variant ?? variants[0].id : ed.doc.props.page?.familyVariant ?? variants[0].id;
+  const selectedVariant = selectedFamily === 'catalog' ? ed.doc.props[`block:${catalogBlockKey}`]?.variant ?? variants[0].id : ed.doc.props.page?.familyVariant ?? variants[0].id;
   const family = pageFamilies.find((item) => item.id === selectedFamily) ?? pageFamilies[0];
   const variant = variants.find((item) => item.id === selectedVariant) ?? variants[0];
 
@@ -86,7 +88,9 @@ function PageVariantSelectors() {
   };
 
   const chooseVariant = (id: string) => {
-    if (selectedFamily === 'catalog') ed.setProp('block:catalog', 'variant', id);
+    if (selectedFamily === 'catalog') {
+      ed.updateDoc((doc) => applyCardFamilyVariant(doc, catalogBlockKey, id));
+    }
     else ed.setProp('page', 'familyVariant', id);
     setOpen(null);
   };

@@ -71,6 +71,23 @@ export function CardAdvanced({ ctx }: {ctx: CardContext;}) {
         {sample.previousPrice !== undefined && <Toggle label="Precio anterior" checked={flag('showPrev')} onChange={(v) => set('showPrev', v ? 'on' : 'off')} />}
         {family.items.some((i) => i.badge) && <Toggle label="Etiqueta" checked={flag('showBadge')} onChange={(v) => set('showBadge', v ? 'on' : 'off')} />}
         {family.items.some((i) => i.cta) && <Toggle label="Botón" checked={flag('showCta')} onChange={(v) => set('showCta', v ? 'on' : 'off')} />}
+        {/*
+          Título y Descripción: la superficie de la tarjeta solo existe mientras haya
+          contenido visible, así que estos dos textos se muestran/ocultan con el mismo
+          mecanismo de elementos (`doc.removed` + `ed.toggleHidden`). Ocultar NO borra el
+          texto: al volver a mostrarlo recupera exactamente el valor anterior y CardBody
+          reaparece automáticamente.
+        */}
+        <Toggle
+          label="Título"
+          checked={ed.doc.removed[`${cardId}.title`] !== true}
+          onChange={() => ed.toggleHidden(`${cardId}.title`)}
+        />
+        <Toggle
+          label="Descripción"
+          checked={ed.doc.removed[`${cardId}.desc`] !== true}
+          onChange={() => ed.toggleHidden(`${cardId}.desc`)}
+        />
       </PanelSection>
 
       <PanelSection title="Espaciado interior">

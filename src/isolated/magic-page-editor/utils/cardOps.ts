@@ -17,6 +17,34 @@ export function cardOrder(doc: PageDoc, blockKey: string, count: number): string
   return raw ? raw.split(",").filter(Boolean) : Array.from({ length: count }, (_, i) => String(i));
 }
 
+/** Applies a family-wide layout and clears older per-card overrides so every
+ * card visibly follows the newly selected variant. Cards can be customized
+ * individually again after this operation.
+ */
+export function applyCardFamilyVariant(
+  d: PageDoc,
+  blockKey: string,
+  variantId: string,
+): PageDoc {
+  const blockId = `block:${blockKey}`;
+  const cardPrefix = `${blockId}.card.`;
+  const props = {
+    ...d.props,
+    [blockId]: { ...d.props[blockId], variant: variantId },
+  };
+
+  for (const key of Object.keys(props)) {
+    if (!key.startsWith(cardPrefix) || key.slice(cardPrefix.length).includes(".")) continue;
+    const cardProps = props[key];
+    if (!cardProps || !("layout" in cardProps)) continue;
+    const remaining = { ...cardProps };
+    delete remaining.layout;
+    props[key] = remaining;
+  }
+
+  return { ...d, props };
+}
+
 function withOrder(d: PageDoc, blockKey: string, order: string[]): PageDoc {
   const id = `block:${blockKey}`;
   return { ...d, props: { ...d.props, [id]: { ...d.props[id], order: order.join(",") } } };

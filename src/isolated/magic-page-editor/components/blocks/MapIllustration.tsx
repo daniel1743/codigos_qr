@@ -9,60 +9,55 @@ interface MapIllustrationProps {
   foreground?: string;
 }
 
-/** A calm, on-brand map placeholder (streets drawn with the section's own line color). */
-export function MapIllustration({ accent, radius, background = '#0B0B0A', foreground = '#FBF7EF' }: MapIllustrationProps) {
+/** A quiet, parchment-toned map placeholder that keeps the location pin prominent. */
+export function MapIllustration({ accent, radius, background = '#F4F1E8', foreground = '#FBF7EF' }: MapIllustrationProps) {
   const { isMobile } = useEditor();
   const id = React.useId().replace(/:/g, '');
-  const fadeId = `luxury-map-fade-${id}`;
-  const glowId = `luxury-map-glow-${id}`;
+  const shadeId = `map-shade-${id}`;
 
   return (
-    <div data-map-style="refined-map" className="relative aspect-[16/10] w-full overflow-hidden" style={{ borderRadius: radius, background, boxShadow: `inset 0 0 0 1px ${accent}55` }}>
+    <div
+      data-map-style="refined-map"
+      className="relative aspect-[16/10] w-full overflow-hidden"
+      style={{ borderRadius: radius, background, boxShadow: 'inset 0 0 0 1px rgba(91, 79, 57, 0.12)' }}
+    >
       <svg viewBox="0 0 400 250" className="absolute inset-0 h-full w-full" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
         <defs>
-          <linearGradient id={fadeId} x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0" stopColor="white" stopOpacity="0.18" />
-            <stop offset="0.2" stopColor="white" stopOpacity="0.9" />
-            <stop offset="0.82" stopColor="white" stopOpacity="0.9" />
-            <stop offset="1" stopColor="white" stopOpacity="0.12" />
+          <linearGradient id={shadeId} x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor="#fff" stopOpacity="0.24" />
+            <stop offset="1" stopColor="#B8AA8E" stopOpacity="0.08" />
           </linearGradient>
-          <radialGradient id={glowId} cx="58%" cy="43%" r="50%">
-            <stop offset="0" stopColor={accent} stopOpacity="0.16" />
-            <stop offset="0.55" stopColor={accent} stopOpacity="0.04" />
-            <stop offset="1" stopColor={accent} stopOpacity="0" />
-          </radialGradient>
-          <mask id={`${fadeId}-mask`}>
-            <rect width="400" height="250" fill={`url(#${fadeId})`} />
-          </mask>
         </defs>
         <rect width="400" height="250" fill={background} />
-        <g mask={`url(#${fadeId}-mask)`} fill="none" stroke={accent} strokeLinecap="round">
-          <g strokeWidth="1.8" opacity="0.27">
-            <path d="M-20 48 L66 42 C102 40 123 58 157 61 L252 70 C297 75 335 59 430 43" />
-            <path d="M-20 106 L70 103 C103 102 129 119 164 124 L246 137 C304 146 352 132 430 116" />
-            <path d="M-15 196 L72 181 C112 174 143 190 178 193 L270 201 C324 205 362 191 430 177" />
-            <path d="M78 -20 L89 47 L108 91 L124 147 L118 205 L139 270" />
-            <path d="M205 -20 L211 48 L198 93 L207 143 L194 198 L222 270" />
-            <path d="M314 -20 L300 45 L315 92 L284 143 L294 198 L276 270" />
+        {/* A few broad blocks make the street pattern read like a place, not a grid. */}
+        <path d="M0 0h104l20 72-32 62-92 8zM238 0h162v74l-72 25-68-18zM0 185l84-20 47 85H0zM270 157l130-22v115H296z" fill="#E9E3D6" opacity="0.65" />
+        <g fill="none" stroke="#C9C0AE" strokeLinecap="round" strokeLinejoin="round" opacity="0.72">
+          <g strokeWidth="1.5">
+            <path d="M-12 48 58 43l49 12 45-7 63 15 59-5 67 12 72-9" />
+            <path d="M-12 112 54 105l52 13 48-8 61 16 59-6 67 13 71-10" />
+            <path d="M-12 184 62 171l45 10 48-8 63 16 58-5 67 14 75-12" />
+            <path d="M68-12 77 48l-8 56 16 57-7 60 16 53" />
+            <path d="M181-12 188 46l-12 59 19 58-11 58 18 53" />
+            <path d="M300-12 287 47l13 58-21 57 16 59-8 53" />
           </g>
-          {!isMobile && <g strokeWidth="1" opacity="0.15">
-            <path d="M-20 78 L54 73 L116 83 L180 76 L246 88 L315 78 L430 85" />
-            <path d="M-20 151 L45 143 L96 154 L160 148 L231 162 L310 151 L430 161" />
-            <path d="M-20 225 L62 215 L119 229 L188 218 L255 232 L331 219 L430 228" />
-            <path d="M38 -20 L51 46 L45 102 L61 162 L49 221 L58 270" />
-            <path d="M158 -20 L171 44 L158 94 L174 151 L160 211 L175 270" />
-            <path d="M366 -20 L350 43 L363 96 L344 151 L360 211 L348 270" />
+          {!isMobile && <g strokeWidth="1" opacity="0.55">
+            <path d="M-10 78 44 72l56 9 54-8 59 10 61-7 58 9 80-8" />
+            <path d="M-10 148 46 139l53 11 58-7 57 12 60-8 57 12 82-10" />
+            <path d="M130-10 141 48l-8 57 17 57-8 60 13 56" />
+            <path d="M247-10 238 48l13 59-18 56 14 59-7 56" />
           </g>}
-          <path d="M-10 228 C61 204 115 215 160 184 S235 116 285 123 S358 157 420 112" strokeWidth="2.4" opacity="0.34" strokeDasharray="3 7" />
         </g>
-        <rect width="400" height="250" fill={`url(#${glowId})`} />
+        {/* Main road */}
+        <path d="M-10 222 C65 204 104 201 153 172 S238 129 278 137 344 158 414 117" fill="none" stroke="#FFFDF8" strokeWidth="9" strokeLinecap="round" opacity="0.9" />
+        <path d="M-10 222 C65 204 104 201 153 172 S238 129 278 137 344 158 414 117" fill="none" stroke="#D5C5A3" strokeWidth="1.4" strokeLinecap="round" opacity="0.85" />
+        <rect width="400" height="250" fill={`url(#${shadeId})`} />
       </svg>
       <div className="absolute left-[58%] top-[43%] -translate-x-1/2 -translate-y-1/2">
-        <span className="absolute -inset-2 rounded-full border" style={{ borderColor: `${accent}40` }} aria-hidden="true" />
-        <span className="relative grid h-12 w-12 place-items-center rounded-full shadow-[0_8px_24px_rgba(0,0,0,0.32)]" style={{ background: accent }}>
-          <MapPinIcon className="h-5 w-5" color={foreground} strokeWidth={1.8} />
+        <span className="absolute -inset-2 rounded-full bg-white/50" aria-hidden="true" />
+        <span className="relative grid h-11 w-11 place-items-center rounded-full shadow-[0_5px_16px_rgba(39,34,24,0.24)] ring-4 ring-white/70" style={{ background: accent }}>
+          <MapPinIcon className="h-5 w-5" color={foreground} strokeWidth={2} fill="currentColor" fillOpacity={0.12} />
         </span>
       </div>
-    </div>);
-
+    </div>
+  );
 }
