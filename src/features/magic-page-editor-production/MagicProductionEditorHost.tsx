@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { MagicEditorApp } from "../../isolated/magic-page-editor/MagicEditorApp";
 import { setLandingBotPreviewPublicId } from "../../isolated/magic-page-editor/utils/landingBotLive";
@@ -8,6 +8,8 @@ import { createPageEditorSession, type PageEditorSession } from "./document-sess
 import { getBrowserSupabaseClient } from "../../lib/supabase/client";
 import { magicPageService } from "../../services/magic-page.service";
 import { convertEmbeddedCatalogToFullCatalog } from "./catalog-conversion.service";
+import { extractCatalogProducts } from "./catalog-products";
+import type { CatalogAccess } from "./catalog-link";
 import { pageCanonicalService } from "../../services/page-canonical.service";
 import type { Page } from "../../types/database";
 import type { BioTemplateConfig } from "../../premium-template-studio/types";
@@ -327,6 +329,26 @@ export function MagicProductionEditorHost({ pageId }: { pageId: string }) {
     [page, session, supabase],
   );
 
+  /**
+   * Resolve a linked catalog from its public id: the owned page id powers
+   * "Administrar catálogo" and its draft products feed the landing summary.
+   */
+  const catalogAccess = useMemo<CatalogAccess>(
+    () => ({
+      resolve: async (catalogPublicId: string) => {
+        if (!session) return { pageId: null, products: null };
+        const owned = await pageService.getOwnedPageByPublicId(
+          supabase,
+          catalogPublicId,
+          session.user.id,
+        );
+        if (!owned) return { pageId: null, products: null };
+        return { pageId: owned.id, products: extractCatalogProducts(owned.template_config) };
+      },
+    }),
+    [session, supabase],
+  );
+
   if (loading)
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -376,6 +398,7 @@ export function MagicProductionEditorHost({ pageId }: { pageId: string }) {
   return (
     <>
       <MagicEditorApp
+        catalogAccess={catalogAccess}
         {...(editorSession.kind === "MAGIC_V1"
           ? {
               initialDocument: editorSession.document,

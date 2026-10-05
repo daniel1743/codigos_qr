@@ -1,18 +1,60 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { PlusIcon } from 'lucide-react';
 import { useEditor } from '../../contexts/EditorContext';
 import { useThemeTokens } from '../../hooks/useThemeTokens';
 import { EditableText } from '../editor/EditableText';
 import { FamilyCard } from './FamilyCard';
+import { LinkedCatalogPreview } from './LinkedCatalogPreview';
 import { baseIndex, cardOrder } from '../../utils/cardOps';
 import { cardSpan, resolveCard } from '../../utils/cardLayout';
 import { blockPrefix } from '../../utils/styles';
 import { cx } from '../../utils/cx';
+import {
+  isLinkedCatalog,
+  readCatalogLink,
+  type CatalogAccess,
+  type CatalogLinkConfig,
+  type CatalogProduct,
+} from '../../../../features/magic-page-editor-production/catalog-link';
 import type { BlockRef, CardFamilyDef } from '../../types/editor';
 
 interface CardFamilyBlockProps {
   block: BlockRef;
   family: CardFamilyDef;
+}
+
+/**
+ * Resolve the linked catalog's product list for a catalog block. Returns null
+ * while no linked catalog (or no resolver) is available, so the block keeps
+ * rendering its own embedded cards instead.
+ */
+function useLinkedCatalogProducts(
+  link: CatalogLinkConfig | null,
+  access: CatalogAccess | undefined,
+): CatalogProduct[] | null {
+  const publicId = link && isLinkedCatalog(link) ? link.catalogPublicId : null;
+  const [products, setProducts] = useState<CatalogProduct[] | null>(null);
+
+  useEffect(() => {
+    if (!publicId || !access) {
+      setProducts(null);
+      return;
+    }
+    let active = true;
+    void access
+      .resolve(publicId)
+      .then((result) => {
+        if (active) setProducts(result.products);
+      })
+      .catch(() => {
+        if (active) setProducts(null);
+      });
+    return () => {
+      active = false;
+    };
+  }, [publicId, access]);
+
+  return publicId ? products : null;
 }
 
 /** A block of structured cards. Each card picks its own layout; the 12-col grid keeps mixed layouts aligned. */
@@ -24,6 +66,15 @@ export function CardFamilyBlock({ block, family }: CardFamilyBlockProps) {
   const blockId = `block:${block.key}`;
   const blockProps = ed.doc.props[blockId] ?? {};
   const order = cardOrder(ed.doc, block.key, family.items.length);
+  const link = family.id === 'catalog' ? readCatalogLink(ed.doc, block.key) : null;
+  const linkedProducts = useLinkedCatalogProducts(link, ed.catalogAccess);
+
+  // A linked catalog is the landing's source of truth: show its featured
+  // products (max 3) instead of the landing's own duplicated cards. When the
+  // linked catalog cannot be resolved, fall back to the embedded cards.
+  if (link && isLinkedCatalog(link) && linkedProducts) {
+    return <LinkedCatalogPreview block={block} family={family} link={link} products={linkedProducts} />;
+  }
 
   return (
     <div className={cx('mx-auto w-full', m ? 'px-5' : 'px-10')} style={{ maxWidth: 1120 }}>

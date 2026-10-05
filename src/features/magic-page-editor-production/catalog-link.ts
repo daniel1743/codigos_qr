@@ -12,6 +12,45 @@ export interface CatalogLinkConfig {
   sectionTitle?: string;
 }
 
+/**
+ * The minimal product projection the landing shows for a linked catalog. It is
+ * intentionally a read-only view of what the full catalog stores: the landing
+ * never edits catalog products, it only displays the featured subset.
+ */
+export interface CatalogProduct {
+  id: string;
+  title?: string;
+  description?: string;
+  price?: string;
+  imageUrl?: string;
+  ctaLabel?: string;
+  ctaUrl?: string;
+  badge?: string;
+}
+
+/** Resolved availability of one linked catalog for the landing/summary UI. */
+export interface CatalogAccessResult {
+  /** Owned page id when resolvable (powers "Administrar catálogo"). */
+  pageId: string | null;
+  /** Every product stored in the catalog, or null when it cannot be resolved. */
+  products: CatalogProduct[] | null;
+}
+
+/** Host-provided resolver: maps a catalog public id to its page + products. */
+export interface CatalogAccess {
+  resolve: (catalogPublicId: string) => Promise<CatalogAccessResult>;
+}
+
+/** Stable public child-page path for a linked catalog (public_id identity). */
+export function catalogPublicHref(catalogPublicId: string): string {
+  return `/pg/${catalogPublicId}`;
+}
+
+/** A valid full catalog exists only when the block holds a linked public id. */
+export function isLinkedCatalog(link: CatalogLinkConfig): boolean {
+  return link.mode === "linked" && Boolean(link.catalogPublicId);
+}
+
 const CATALOG_LINK_PROPS = (blockKey: string): string => `block:${blockKey}`;
 
 function uniqueStringIds(value: readonly string[]): string[] {
@@ -108,4 +147,39 @@ export function writeCatalogLink(
       [blockPropsKey]: nextBlockProps,
     },
   };
+}
+
+/**
+ * The products the landing must show for a linked catalog: the catalog's own
+ * products filtered/ordered by `featuredProductIds`, deduplicated and capped at
+ * three. Ids that no longer resolve (e.g. a product deleted from the full
+ * catalog) are silently ignored so the landing degrades without empty cards.
+ */
+export function resolveFeaturedProducts(
+  link: CatalogLinkConfig,
+  products: readonly CatalogProduct[],
+): CatalogProduct[] {
+  if (!isLinkedCatalog(link)) return [];
+  const byId = new Map(products.map((product) => [product.id, product]));
+  return uniqueStringIds(link.featuredProductIds)
+    .map((id) => byId.get(id))
+    .filter((product): product is CatalogProduct => Boolean(product));
+}
+
+/**
+ * Toggle one catalog product in the featured set while preserving order and
+ * uniqueness. Selecting past the three-product cap is a no-op, so the landing
+ * can never hold more than the allowed number of featured products.
+ */
+export function toggleFeaturedProduct(
+  featuredProductIds: readonly string[],
+  productId: string,
+  selected: boolean,
+): string[] {
+  const id = productId.trim();
+  if (!id) return uniqueStringIds(featuredProductIds);
+  const current = uniqueStringIds(featuredProductIds);
+  if (!selected) return current.filter((entry) => entry !== id);
+  if (current.includes(id)) return current;
+  return uniqueStringIds([...current, id]);
 }

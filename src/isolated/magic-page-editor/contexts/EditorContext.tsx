@@ -20,6 +20,7 @@ import { createMagicSemanticTarget } from "../adapters/magic-adapter";
 import { applyCanonicalPatch } from "../adapters/canonical-patcher";
 import type { SemanticCommand } from "../types/semantic-commands";
 import type { CatalogConversionResult } from "../../../features/magic-page-editor-production/catalog-conversion.service";
+import type { CatalogAccess } from "../../../features/magic-page-editor-production/catalog-link";
 
 interface History {
   past: PageDoc[];
@@ -97,6 +98,8 @@ export interface EditorValue {
     templateId: TemplateId,
     blockKey: string,
   ) => Promise<CatalogConversionResult>;
+  /** Resolves a linked catalog's page id + products (landing summary + admin). */
+  catalogAccess?: CatalogAccess;
   canonicalDocument?: BioTemplateConfig;
   canonicalIsNew?: boolean;
   /** True while a canonical config is open in the common UI (semantic command boundary). */
@@ -161,6 +164,8 @@ interface EditorProviderProps {
     templateId: TemplateId,
     blockKey: string,
   ) => Promise<CatalogConversionResult>;
+  /** Resolves a linked catalog's page id + products (landing summary + admin). */
+  catalogAccess?: CatalogAccess;
   canonicalDocument?: BioTemplateConfig;
   canonicalIsNew?: boolean;
   onCanonicalDocumentChange?: (doc: BioTemplateConfig) => Promise<void> | void;
@@ -177,6 +182,7 @@ export function EditorProvider({
   onPublish,
   uploadAsset,
   catalogConversion,
+  catalogAccess,
   canonicalDocument,
   canonicalIsNew,
   onCanonicalDocumentChange,
@@ -825,6 +831,7 @@ export function EditorProvider({
     publish,
     uploadAsset,
     catalogConversion,
+    catalogAccess,
     canonicalDocument: activeCanonicalDocument,
     canonicalIsNew,
     canonicalEditing: canonicalHistory !== null,

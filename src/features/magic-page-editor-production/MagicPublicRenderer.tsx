@@ -1,8 +1,12 @@
-import type { MouseEvent } from "react";
+import { useMemo, type MouseEvent } from "react";
 import { EditorProvider } from "../../isolated/magic-page-editor/contexts/EditorContext";
 import { TemplateRenderer } from "../../isolated/magic-page-editor/components/templates/TemplateRenderer";
 import type { MagicPageDocumentV1 } from "./magic-document";
 import { hydrateMagicEditorState } from "./magic-document";
+import { extractCatalogProducts } from "./catalog-products";
+import type { CatalogAccess } from "./catalog-link";
+import { pageService } from "../../services/page.service";
+import { getBrowserSupabaseClient } from "../../lib/supabase/client";
 import { LandingBot } from "../../components/landing-bot/LandingBot";
 import { PageVerificationProvider, type VerificationVariant } from "../../isolated/magic-page-editor/contexts/PageVerificationContext";
 import { normalizeLandingBot } from "../../lib/landing-bot/config";
@@ -26,6 +30,33 @@ interface MagicPublicRendererProps {
 }
 
 export function MagicPublicRenderer({ document, onTrack, publicId, verificationVariant }: MagicPublicRendererProps) {
+  /**
+   * Public landing resolution for linked catalogs: only the catalog's PUBLISHED
+   * snapshot is readable here, so a landing linked to an unpublished/missing
+   * catalog simply keeps its embedded cards and hides the "Ver catálogo
+   * completo" CTA.
+   */
+  const catalogAccess = useMemo<CatalogAccess>(
+    () => ({
+      resolve: async (catalogPublicId: string) => {
+        try {
+          const resolved = await pageService.getPublicPageByPublicId(
+            getBrowserSupabaseClient(),
+            catalogPublicId,
+          );
+          if (!resolved) return { pageId: null, products: null };
+          return {
+            pageId: resolved.page_id,
+            products: extractCatalogProducts(resolved.published_template_config),
+          };
+        } catch {
+          return { pageId: null, products: null };
+        }
+      },
+    }),
+    [],
+  );
+
   const handleClickCapture = (event: MouseEvent<HTMLDivElement>) => {
     if (!onTrack || !(event.target instanceof Element)) return;
 
@@ -61,6 +92,7 @@ export function MagicPublicRenderer({ document, onTrack, publicId, verificationV
       <EditorProvider
         initialDocument={hydrateMagicEditorState(document)}
         initialMode="preview"
+        catalogAccess={catalogAccess}
       >
         <PageVerificationProvider variant={verificationVariant ?? "none"}>
           <TemplateRenderer showLandingBotPreview={false} />

@@ -8,6 +8,7 @@ import type { BioTemplateConfig } from "../../premium-template-studio/types";
 import { CanonicalReadOnlyPage } from "./pages/CanonicalReadOnlyPage";
 import type { PageDoc, TemplateId } from "./types/editor";
 import type { CatalogConversionResult } from "../../features/magic-page-editor-production/catalog-conversion.service";
+import type { CatalogAccess } from "../../features/magic-page-editor-production/catalog-link";
 
 export interface MagicEditorAppProps {
   defaultTemplate?: "bio" | "business" | "portfolio";
@@ -22,6 +23,8 @@ export interface MagicEditorAppProps {
     templateId: TemplateId,
     blockKey: string,
   ) => Promise<CatalogConversionResult>;
+  /** Resolves a linked catalog's page id + products (landing summary + admin). */
+  catalogAccess?: CatalogAccess;
   canonicalDocument?: BioTemplateConfig;
   canonicalIsNew?: boolean;
   onCanonicalDocumentChange?: (doc: BioTemplateConfig) => Promise<void> | void;
@@ -38,6 +41,7 @@ export function MagicEditorApp({
   onPublish,
   uploadAsset,
   catalogConversion,
+  catalogAccess,
   canonicalDocument,
   canonicalIsNew = false,
   onCanonicalDocumentChange,
@@ -54,6 +58,7 @@ export function MagicEditorApp({
         onPublish={onPublish}
         uploadAsset={uploadAsset}
         catalogConversion={catalogConversion}
+        catalogAccess={catalogAccess}
         canonicalDocument={canonicalDocument}
         canonicalIsNew={canonicalIsNew}
         onCanonicalDocumentChange={onCanonicalDocumentChange}

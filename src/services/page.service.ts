@@ -103,6 +103,27 @@ export const pageService = {
   },
 
   /**
+   * Resolve an OWNED child page by its public_id. Used to re-connect a landing
+   * block to a catalog it already links to (e.g. after reload), so admin
+   * actions keep working without ever trusting a public_id alone.
+   */
+  async getOwnedPageByPublicId(
+    supabase: SupabaseClient,
+    publicId: string,
+    userId: string,
+  ): Promise<Page | null> {
+    const { data, error } = await supabase
+      .from("pages")
+      .select("*")
+      .eq("public_id", publicId)
+      .eq("owner_user_id", userId)
+      .maybeSingle();
+
+    if (error) throw error;
+    return data;
+  },
+
+  /**
    * Permanently delete one owned child Page.
    *
    * The page table is the child-page authority; the primary profile is never

@@ -1,12 +1,27 @@
 import { describe, expect, it } from "vitest";
 import type { PageDoc } from "../../isolated/magic-page-editor/types/editor";
 import {
+  catalogPublicHref,
+  isLinkedCatalog,
   normalizeCatalogLink,
   parseFeaturedProductIds,
   readCatalogLink,
+  resolveFeaturedProducts,
   serializeFeaturedProductIds,
+  toggleFeaturedProduct,
   writeCatalogLink,
+  type CatalogLinkConfig,
+  type CatalogProduct,
 } from "./catalog-link";
+import { hydrateMagicEditorState, serializeMagicEditorState } from "./magic-document";
+
+const linkedLink = (featuredProductIds: string[]): CatalogLinkConfig => ({
+  mode: "linked",
+  catalogPublicId: "catalog-public-1",
+  featuredProductIds,
+});
+
+const product = (id: string, title = id): CatalogProduct => ({ id, title });
 
 function catalogDoc(): PageDoc {
   return {
@@ -86,6 +101,66 @@ describe("catalog link contract", () => {
       mode: "embedded",
       catalogPublicId: null,
       featuredProductIds: ["prod-1"],
+    });
+  });
+
+  it("only treats a linked public id as a valid full catalog", () => {
+    expect(isLinkedCatalog(linkedLink([]))).toBe(true);
+    expect(isLinkedCatalog({ mode: "embedded", catalogPublicId: "ABC", featuredProductIds: [] })).toBe(false);
+    expect(isLinkedCatalog({ mode: "linked", catalogPublicId: null, featuredProductIds: [] })).toBe(false);
+    expect(catalogPublicHref("ABC123")).toBe("/pg/ABC123");
+  });
+
+  it("resolves only the featured products, in order and capped at three", () => {
+    const link = linkedLink(["p2", "p1", "p3", "p4"]);
+    const products = [product("p1"), product("p2"), product("p3"), product("p4")];
+
+    expect(resolveFeaturedProducts(link, products).map((entry) => entry.id)).toEqual([
+      "p2",
+      "p1",
+      "p3",
+    ]);
+  });
+
+  it("ignores featured ids whose product was deleted from the catalog", () => {
+    const link = linkedLink(["p1", "gone", "p2"]);
+    const products = [product("p1"), product("p2")];
+
+    expect(resolveFeaturedProducts(link, products).map((entry) => entry.id)).toEqual(["p1", "p2"]);
+  });
+
+  it("never resolves featured products for an embedded block", () => {
+    const embedded: CatalogLinkConfig = {
+      mode: "embedded",
+      catalogPublicId: null,
+      featuredProductIds: ["p1"],
+    };
+    expect(resolveFeaturedProducts(embedded, [product("p1")])).toEqual([]);
+  });
+
+  it("toggles featured products without duplicates and never past three", () => {
+    expect(toggleFeaturedProduct([], "p1", true)).toEqual(["p1"]);
+    expect(toggleFeaturedProduct(["p1", "p2"], "p1", true)).toEqual(["p1", "p2"]);
+    expect(toggleFeaturedProduct(["p1", "p2"], "p1", false)).toEqual(["p2"]);
+    expect(toggleFeaturedProduct(["p1", "p2", "p3"], "p4", true)).toEqual(["p1", "p2", "p3"]);
+    expect(toggleFeaturedProduct(["p1", "p1", "p2"], "p3", true)).toEqual(["p1", "p2", "p3"]);
+  });
+
+  it("keeps public id and featured products across save and reload (tests 4, 5, 13)", () => {
+    const doc = writeCatalogLink(catalogDoc(), "catalog", {
+      mode: "linked",
+      catalogPublicId: "ABC123",
+      featuredProductIds: ["p1", "p2", "p3"],
+      ctaLabel: "Ver catálogo completo",
+    });
+
+    const reloaded = hydrateMagicEditorState(serializeMagicEditorState({ templateId: "bio", doc }));
+
+    expect(readCatalogLink(reloaded.doc, "catalog")).toEqual({
+      mode: "linked",
+      catalogPublicId: "ABC123",
+      featuredProductIds: ["p1", "p2", "p3"],
+      ctaLabel: "Ver catálogo completo",
     });
   });
 });
