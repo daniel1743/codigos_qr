@@ -30,10 +30,16 @@ export interface CatalogProduct {
 
 /** Resolved availability of one linked catalog for the landing/summary UI. */
 export interface CatalogAccessResult {
-  /** Owned page id when resolvable (powers "Administrar catálogo"). */
+  /** Owned page id when resolvable (powers "Editar catálogo"). */
   pageId: string | null;
   /** Every product stored in the catalog, or null when it cannot be resolved. */
   products: CatalogProduct[] | null;
+  /**
+   * Whether the linked catalog is published. "Ver catálogo" points to the public
+   * page (`/pg/{catalogPublicId}`), which only resolves for a PUBLISHED catalog,
+   * so the UI must gate that action on this flag to avoid a 404.
+   */
+  published: boolean;
 }
 
 /** Host-provided resolver: maps a catalog public id to its page + products. */

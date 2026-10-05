@@ -44,13 +44,14 @@ export function MagicPublicRenderer({ document, onTrack, publicId, verificationV
             getBrowserSupabaseClient(),
             catalogPublicId,
           );
-          if (!resolved) return { pageId: null, products: null };
+          if (!resolved) return { pageId: null, products: null, published: false };
           return {
             pageId: resolved.page_id,
             products: extractCatalogProducts(resolved.published_template_config),
+            published: true,
           };
         } catch {
-          return { pageId: null, products: null };
+          return { pageId: null, products: null, published: false };
         }
       },
     }),

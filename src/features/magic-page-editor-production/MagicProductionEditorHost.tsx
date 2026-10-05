@@ -336,14 +336,18 @@ export function MagicProductionEditorHost({ pageId }: { pageId: string }) {
   const catalogAccess = useMemo<CatalogAccess>(
     () => ({
       resolve: async (catalogPublicId: string) => {
-        if (!session) return { pageId: null, products: null };
+        if (!session) return { pageId: null, products: null, published: false };
         const owned = await pageService.getOwnedPageByPublicId(
           supabase,
           catalogPublicId,
           session.user.id,
         );
-        if (!owned) return { pageId: null, products: null };
-        return { pageId: owned.id, products: extractCatalogProducts(owned.template_config) };
+        if (!owned) return { pageId: null, products: null, published: false };
+        return {
+          pageId: owned.id,
+          products: extractCatalogProducts(owned.template_config),
+          published: owned.published === true,
+        };
       },
     }),
     [session, supabase],

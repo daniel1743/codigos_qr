@@ -80,7 +80,7 @@ describe("CatalogConversionPanel", () => {
 
     expect(conversion).toHaveBeenCalledTimes(1);
     expect(host.textContent).toContain("Catálogo conectado");
-    expect(host.textContent).toContain("Administrar catálogo");
+    expect(host.textContent).toContain("Editar catálogo");
     act(() => root.unmount());
   });
 

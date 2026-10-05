@@ -20,18 +20,23 @@ interface LinkedCatalogPreviewProps {
   link: CatalogLinkConfig;
   /** Every product the linked full catalog stores. */
   products: readonly CatalogProduct[];
+  /**
+   * Whether the linked catalog is published. The public link (`/pg/{publicId}`)
+   * only resolves for a published catalog, so the CTA is only clickable then.
+   */
+  published: boolean;
 }
 
 /**
  * Landing summary for a LINKED catalog. It shows at most three featured
  * products taken from the full catalog (never the landing's own copies) and a
- * "Ver catálogo completo" call to action that opens the public catalog page.
+ * "Ver catálogo" call to action that opens the public catalog page.
  *
  * This component is deliberately non-administrative: it never renders editor
  * controls (create/manage/feature pickers), so preview and public renders stay
  * identical to what visitors see.
  */
-export function LinkedCatalogPreview({ block, family, link, products }: LinkedCatalogPreviewProps) {
+export function LinkedCatalogPreview({ block, family, link, products, published }: LinkedCatalogPreviewProps) {
   const ed = useEditor();
   const t = useThemeTokens();
   const m = ed.isMobile;
@@ -110,7 +115,7 @@ export function LinkedCatalogPreview({ block, family, link, products }: LinkedCa
         </p>
       )}
 
-      {href ? (
+      {href && published ? (
         <div className="mt-6">
           <a
             href={href}
@@ -124,6 +129,19 @@ export function LinkedCatalogPreview({ block, family, link, products }: LinkedCa
             {link.ctaLabel ?? "Ver catálogo completo"}
             <ArrowRightIcon className="h-4 w-4" />
           </a>
+        </div>
+      ) : href && ed.mode === "edit" ? (
+        <div className="mt-6" data-catalog-cta="disabled">
+          <span
+            aria-disabled="true"
+            className="cq-muted inline-flex h-11 cursor-not-allowed items-center justify-center gap-2 rounded-full border border-line px-5 text-[14px] font-semibold"
+          >
+            {link.ctaLabel ?? "Ver catálogo completo"}
+            <ArrowRightIcon className="h-4 w-4" />
+          </span>
+          <p className="cq-muted mt-1.5 text-[12.5px]" role="status">
+            Publica el catálogo para activar este enlace público.
+          </p>
         </div>
       ) : null}
     </div>

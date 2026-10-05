@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { PlusIcon } from 'lucide-react';
+import React from 'react';
+import { PlusIcon, TriangleAlertIcon } from 'lucide-react';
 import { useEditor } from '../../contexts/EditorContext';
 import { useThemeTokens } from '../../hooks/useThemeTokens';
+import { useCatalogLinkResolution } from '../../hooks/useCatalogLinkResolution';
 import { EditableText } from '../editor/EditableText';
 import { FamilyCard } from './FamilyCard';
 import { LinkedCatalogPreview } from './LinkedCatalogPreview';
@@ -12,9 +13,6 @@ import { cx } from '../../utils/cx';
 import {
   isLinkedCatalog,
   readCatalogLink,
-  type CatalogAccess,
-  type CatalogLinkConfig,
-  type CatalogProduct,
 } from '../../../../features/magic-page-editor-production/catalog-link';
 import type { BlockRef, CardFamilyDef } from '../../types/editor';
 
@@ -24,37 +22,37 @@ interface CardFamilyBlockProps {
 }
 
 /**
- * Resolve the linked catalog's product list for a catalog block. Returns null
- * while no linked catalog (or no resolver) is available, so the block keeps
- * rendering its own embedded cards instead.
+ * Explicit editor state for a LINKED catalog whose full products are still
+ * loading or cannot be resolved. It replaces the previous silent fallback to
+ * the landing's embedded cards, so the owner never sees stale commerce data
+ * presented as the real catalog.
  */
-function useLinkedCatalogProducts(
-  link: CatalogLinkConfig | null,
-  access: CatalogAccess | undefined,
-): CatalogProduct[] | null {
-  const publicId = link && isLinkedCatalog(link) ? link.catalogPublicId : null;
-  const [products, setProducts] = useState<CatalogProduct[] | null>(null);
-
-  useEffect(() => {
-    if (!publicId || !access) {
-      setProducts(null);
-      return;
-    }
-    let active = true;
-    void access
-      .resolve(publicId)
-      .then((result) => {
-        if (active) setProducts(result.products);
-      })
-      .catch(() => {
-        if (active) setProducts(null);
-      });
-    return () => {
-      active = false;
-    };
-  }, [publicId, access]);
-
-  return publicId ? products : null;
+function CatalogLinkNotice({ loading }: { loading: boolean }) {
+  const ed = useEditor();
+  const t = useThemeTokens();
+  const m = ed.isMobile;
+  return (
+    <div className={cx('mx-auto w-full', m ? 'px-5' : 'px-10')} style={{ maxWidth: 1120 }}>
+      <div
+        role="status"
+        className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-line bg-white/60 px-6 py-12 text-center"
+        style={{ borderRadius: t.radius }}
+      >
+        {loading ? (
+          <p className="cq-muted text-[13.5px] font-medium">Cargando productos del catálogo…</p>
+        ) : (
+          <>
+            <TriangleAlertIcon className="h-5 w-5 text-mute" />
+            <p className="cq-fg text-[14px] font-semibold">Catálogo no disponible</p>
+            <p className="cq-muted max-w-[420px] text-[13px] leading-relaxed">
+              No se pudieron cargar los productos del catálogo vinculado. Los productos se editan en
+              el catálogo completo.
+            </p>
+          </>
+        )}
+      </div>
+    </div>
+  );
 }
 
 /** A block of structured cards. Each card picks its own layout; the 12-col grid keeps mixed layouts aligned. */
@@ -67,13 +65,30 @@ export function CardFamilyBlock({ block, family }: CardFamilyBlockProps) {
   const blockProps = ed.doc.props[blockId] ?? {};
   const order = cardOrder(ed.doc, block.key, family.items.length);
   const link = family.id === 'catalog' ? readCatalogLink(ed.doc, block.key) : null;
-  const linkedProducts = useLinkedCatalogProducts(link, ed.catalogAccess);
+  const linked = Boolean(link && isLinkedCatalog(link));
+  const catalog = useCatalogLinkResolution(link, ed.catalogAccess);
 
-  // A linked catalog is the landing's source of truth: show its featured
-  // products (max 3) instead of the landing's own duplicated cards. When the
-  // linked catalog cannot be resolved, fall back to the embedded cards.
-  if (link && isLinkedCatalog(link) && linkedProducts) {
-    return <LinkedCatalogPreview block={block} family={family} link={link} products={linkedProducts} />;
+  // A LINKED catalog is the landing's single source of truth. When the full
+  // catalog resolves we render its featured products (max 3). Otherwise we show
+  // an explicit state — never the landing's own embedded copies, which could
+  // ship different prices, images or CTAs.
+  if (linked && link) {
+    if (catalog.status === 'ready') {
+      return (
+        <LinkedCatalogPreview
+          block={block}
+          family={family}
+          link={link}
+          products={catalog.products}
+          published={catalog.published}
+        />
+      );
+    }
+    if (ed.mode === 'edit') {
+      return <CatalogLinkNotice loading={catalog.status !== 'unavailable'} />;
+    }
+    // Preview/public: never resurrect stale embedded commerce data.
+    return null;
   }
 
   return (

@@ -76,6 +76,7 @@ describe("linked catalog landing summary", () => {
         block={block}
         family={family}
         link={linkedLink(["p2", "p1", "p3", "p4"])}
+        published
         products={[
           product("p1", "Producto uno"),
           product("p2", "Producto dos"),
@@ -99,6 +100,7 @@ describe("linked catalog landing summary", () => {
         block={block}
         family={family}
         link={linkedLink(["p1"])}
+        published
         products={[product("p1", "Producto uno")]}
       />,
     );
@@ -114,6 +116,7 @@ describe("linked catalog landing summary", () => {
         block={block}
         family={family}
         link={linkedLink(["p1", "deleted", "p2"])}
+        published
         products={[product("p1", "Producto uno"), product("p2", "Producto dos")]}
       />,
     );
@@ -130,12 +133,13 @@ describe("linked catalog landing summary", () => {
         block={block}
         family={family}
         link={linkedLink(["p1"])}
+        published
         products={[product("p1", "Producto uno")]}
       />,
       { mode: "preview" },
     );
 
-    expect(host.textContent).not.toContain("Administrar catálogo");
+    expect(host.textContent).not.toContain("Editar catálogo");
     expect(host.textContent).not.toContain("Crear catálogo completo");
     act(() => root.unmount());
   });
@@ -153,7 +157,7 @@ describe("catalog block ↔ catalog link wiring", () => {
   it("never renders administrative controls in an embedded block render (test 15)", () => {
     const { host, root } = mount(<CardFamilyBlock block={block} family={family} />);
 
-    expect(host.textContent).not.toContain("Administrar catálogo");
+    expect(host.textContent).not.toContain("Editar catálogo");
     expect(host.textContent).not.toContain("Crear catálogo completo");
     act(() => root.unmount());
   });
@@ -162,6 +166,7 @@ describe("catalog block ↔ catalog link wiring", () => {
     const resolve = vi.fn<CatalogAccess["resolve"]>(async () => ({
       pageId: "catalog-page-1",
       products: [product("p1", "Producto uno"), product("p2", "Producto dos")],
+      published: true,
     }));
     const { host, root } = mount(<CardFamilyBlock block={block} family={family} />, {
       props: {
@@ -182,8 +187,13 @@ describe("catalog block ↔ catalog link wiring", () => {
     act(() => root.unmount());
   });
 
-  it("keeps the embedded cards when the linked catalog cannot be resolved", async () => {
-    const resolve = vi.fn<CatalogAccess["resolve"]>(async () => ({ pageId: null, products: null }));
+  it("never resurrects embedded cards when the linked catalog cannot be resolved (source of truth)", async () => {
+    const embeddedTitle = cardFamilies.catalog.items[0].title;
+    const resolve = vi.fn<CatalogAccess["resolve"]>(async () => ({
+      pageId: null,
+      products: null,
+      published: false,
+    }));
     const { host, root } = mount(<CardFamilyBlock block={block} family={family} />, {
       props: {
         "block:catalog": {
@@ -197,8 +207,11 @@ describe("catalog block ↔ catalog link wiring", () => {
 
     await flush();
 
+    // No embedded commerce data, no public CTA, and an explicit editor state.
+    expect(host.textContent).not.toContain(embeddedTitle);
     expect(ctaHref(host)).toBeNull();
     expect(host.textContent).not.toContain("Ver catálogo completo");
+    expect(host.textContent).toContain("Catálogo no disponible");
     act(() => root.unmount());
   });
 });
