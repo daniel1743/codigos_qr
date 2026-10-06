@@ -27,7 +27,8 @@ export function SelectionLayer({ container, scroller }: SelectionLayerProps) {
   const isPage = sel.kind === 'page';
   const inset = isPage ? 3 : -3;
   const radius = isPage ? '10px' : ringRadius(el ? window.getComputedStyle(el).borderRadius : '');
-  const isBlock = (sel.kind === 'section' || sel.kind === 'hero') && !!sel.blockKey;
+  const isBlock =
+    !ed.catalogMode && (sel.kind === "section" || sel.kind === "hero") && !!sel.blockKey;
   const chipTop = Math.max(rect.top - 24, scrollTop + 6);
 
   return (
@@ -61,7 +62,7 @@ export function SelectionLayer({ container, scroller }: SelectionLayerProps) {
           <PlusIcon className="h-3.5 w-3.5" strokeWidth={2.5} /> Añadir bloque
         </button>
       }
-      {!ed.isMobile && <FloatingToolbar rect={rect} containerWidth={container.clientWidth} viewportHeight={scroller?.clientHeight} scrollTop={scrollTop} />}
+      {!ed.isMobile && !ed.catalogMode && <FloatingToolbar rect={rect} containerWidth={container.clientWidth} viewportHeight={scroller?.clientHeight} scrollTop={scrollTop} />}
     </div>);
 
 }

@@ -2,6 +2,7 @@ import React from "react";
 import { PenLineIcon } from "lucide-react";
 import { useEditor } from "../contexts/EditorContext";
 import { TopBar } from "../components/editor/TopBar";
+import { CatalogTopBar } from "../components/editor/CatalogTopBar";
 import { StateTour } from "../components/editor/StateTour";
 import { DesktopCanvas } from "../components/editor/DesktopCanvas";
 import { MobileCanvas } from "../components/editor/MobileCanvas";
@@ -14,7 +15,7 @@ export function EditorPage() {
   const preview = ed.mode === "preview";
   return (
     <div className={`flex h-full w-full flex-col bg-canvas${preview ? " fixed inset-0 z-[100]" : ""}`} data-cq-preview={preview ? "true" : undefined}>
-      {!preview && <TopBar />}
+      {!preview && (ed.catalogMode ? <CatalogTopBar /> : <TopBar />)}
       <StateTour />
       <main className="relative min-h-0 flex-1">
         {ed.canonicalDocument ? (
@@ -32,8 +33,8 @@ export function EditorPage() {
           </button>
         )}
       </main>
-      <BlockPicker variant="dialog" />
-      <PageSettings variant="drawer" />
+      {!ed.catalogMode && <BlockPicker variant="dialog" />}
+      {!ed.catalogMode && <PageSettings variant="drawer" />}
     </div>
   );
 }

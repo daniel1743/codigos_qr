@@ -21,6 +21,14 @@ import { applyCanonicalPatch } from "../adapters/canonical-patcher";
 import type { SemanticCommand } from "../types/semantic-commands";
 import type { CatalogConversionResult } from "../../../features/magic-page-editor-production/catalog-conversion.service";
 import type { CatalogAccess } from "../../../features/magic-page-editor-production/catalog-link";
+import type { SelectedCollectionItem } from "../../../premium-template-studio/engine/RenderContext";
+import {
+  applyCanonicalCollectionItemAction,
+  applyCanonicalInlinePatch,
+  appendCanonicalCollectionItems,
+  updateCanonicalCollectionItem,
+  type CollectionItemAction,
+} from "../adapters/canonical-collection";
 
 interface History {
   past: PageDoc[];
@@ -105,6 +113,28 @@ export interface EditorValue {
   /** True while a canonical config is open in the common UI (semantic command boundary). */
   canonicalEditing: boolean;
   semanticSelection: SemanticTarget | null;
+  /** C3.3-B — catalog workspace mode: full-screen, minimal header, product CRUD. */
+  catalogMode: boolean;
+  catalogBackHref?: string;
+  /** Selected product card item of a canonical collection (productGrid). */
+  selectedCollectionItem: SelectedCollectionItem | null;
+  selectCollectionItem: (
+    blockId: string,
+    collection: string,
+    itemId: string,
+    field?: string,
+  ) => void;
+  collectionItemAction: (
+    blockId: string,
+    collection: string,
+    itemId: string,
+    action: CollectionItemAction,
+  ) => void;
+  addCollectionItems: (blockId: string, collection: string, count?: number) => void;
+  /** Canvas/toolbar inline edit routed into the canonical document by path. */
+  inlineEdit: (path: string, value: unknown) => void;
+  uploadCollectionItemImage: (blockId: string, itemId: string, file: File) => void;
+  removeCollectionItemImage: (blockId: string, itemId: string) => void;
 }
 
 const EditorContext = createContext<EditorValue | null>(null);
@@ -170,6 +200,9 @@ interface EditorProviderProps {
   canonicalIsNew?: boolean;
   onCanonicalDocumentChange?: (doc: BioTemplateConfig) => Promise<void> | void;
   onCanonicalPublish?: (doc: BioTemplateConfig) => Promise<void> | void;
+  /** C3.3-B — open the editor as the full catalog workspace. */
+  catalog?: boolean;
+  catalogBackHref?: string;
 }
 
 export function EditorProvider({
@@ -187,6 +220,8 @@ export function EditorProvider({
   canonicalIsNew,
   onCanonicalDocumentChange,
   onCanonicalPublish,
+  catalog = false,
+  catalogBackHref,
 }: EditorProviderProps) {
   const [templateId, setTemplateIdState] = useState<TemplateId>(
     initialDocument?.templateId ?? initialTemplate,
@@ -215,6 +250,8 @@ export function EditorProvider({
   const [mobileWidth, setMobileWidth] = useState<MobileWidth>(390);
   const [isSmallScreen, setIsSmallScreen] = useState(false);
   const [selection, setSelection] = useState<ElementInfo | null>(null);
+  const [selectedCollectionItem, setSelectedCollectionItem] =
+    useState<SelectedCollectionItem | null>(null);
   const [editingId, setEditingIdState] = useState<string | null>(null);
   const [keyboard, setKeyboardState] = useState(false);
   const [sheet, setSheet] = useState<SheetState>("compact");
@@ -276,6 +313,7 @@ export function EditorProvider({
 
   const resetTransient = useCallback(() => {
     setSelection(null);
+    setSelectedCollectionItem(null);
     setEditingIdState(null);
     setKeyboardState(false);
     setSheet("compact");
@@ -359,6 +397,117 @@ export function EditorProvider({
     },
     [canonicalHistory, semanticSelection],
   );
+
+  /**
+   * C3.3-B — select one product card item inside a canonical productGrid.
+   *
+   * The full catalog is a canonical document, so its items have no Magic DOM
+   * registry entry. Selection is therefore tracked directly (not via `select`)
+   * and exposed to the renderer as `selectedCollectionItem`, which is exactly the
+   * seam the shared product card/toolbar already uses.
+   */
+  const selectCollectionItem = useCallback(
+    (blockId: string, collection: string, itemId: string, field = "item") => {
+      setSelection(null);
+      setEditingIdState(null);
+      setSheetPanel(null);
+      setMoreOpen(false);
+      setKeyboardState(false);
+      setSelectedCollectionItem({ blockId, collection, itemId, field });
+    },
+    [],
+  );
+
+  /** Route a canvas/toolbar inline edit into the canonical document by path. */
+  const inlineEdit = useCallback((path: string, value: unknown) => {
+    setCanonicalHistory((h) => {
+      if (!h) return h;
+      const next = applyCanonicalInlinePatch(h.present, path, value);
+      if (next === h.present) return h;
+      return { past: [...h.past.slice(-49), h.present], present: next, future: [] };
+    });
+  }, []);
+
+  /** Duplicate/delete/reorder one product item through the canonical CRUD. */
+  const collectionItemAction = useCallback(
+    (blockId: string, collection: string, itemId: string, action: CollectionItemAction) => {
+      if (collection !== "product-grid" || !canonicalHistory) return;
+      const result = applyCanonicalCollectionItemAction(
+        canonicalHistory.present,
+        blockId,
+        itemId,
+        action,
+      );
+      if (!result.changed) return;
+      setCanonicalHistory({
+        past: [...canonicalHistory.past.slice(-49), canonicalHistory.present],
+        present: result.config,
+        future: [],
+      });
+      if (action === "delete") setSelectedCollectionItem(null);
+      else if (action === "duplicate" && result.selectedItemId)
+        setSelectedCollectionItem({ blockId, collection, itemId: result.selectedItemId, field: "item" });
+    },
+    [canonicalHistory],
+  );
+
+  /** Append one or several products (safe placeholders) to the catalog. */
+  const addCollectionItems = useCallback(
+    (blockId: string, collection: string, count = 1) => {
+      if (collection !== "product-grid" || !canonicalHistory) return;
+      const { config, addedIds } = appendCanonicalCollectionItems(
+        canonicalHistory.present,
+        blockId,
+        count,
+      );
+      if (config === canonicalHistory.present) return;
+      setCanonicalHistory({
+        past: [...canonicalHistory.past.slice(-49), canonicalHistory.present],
+        present: config,
+        future: [],
+      });
+      const created = addedIds[0];
+      if (created) setSelectedCollectionItem({ blockId, collection, itemId: created, field: "item" });
+    },
+    [canonicalHistory],
+  );
+
+  const uploadCollectionItemImage = useCallback(
+    (blockId: string, itemId: string, file: File) => {
+      if (!uploadAsset) return;
+      void (async () => {
+        try {
+          const url = await uploadAsset(file);
+          setCanonicalHistory((h) => {
+            if (!h) return h;
+            const next = updateCanonicalCollectionItem(h.present, blockId, itemId, (item) => ({
+              ...item,
+              imageUrl: url,
+              imageProvenance: { origin: "owner" as const },
+            }));
+            if (next === h.present) return h;
+            return { past: [...h.past.slice(-49), h.present], present: next, future: [] };
+          });
+        } catch (err) {
+          toast.error(err instanceof Error ? err.message : "No se pudo subir la imagen.");
+        }
+      })();
+    },
+    [uploadAsset],
+  );
+
+  const removeCollectionItemImage = useCallback((blockId: string, itemId: string) => {
+    setCanonicalHistory((h) => {
+      if (!h) return h;
+      const next = updateCanonicalCollectionItem(h.present, blockId, itemId, (item) => ({
+        ...item,
+        imageUrl: "",
+        imageProvenance: undefined,
+      }));
+      if (next === h.present) return h;
+      return { past: [...h.past.slice(-49), h.present], present: next, future: [] };
+    });
+  }, []);
 
   const undo = useCallback(() => {
     if (canonicalHistory) {
@@ -836,6 +985,15 @@ export function EditorProvider({
     canonicalIsNew,
     canonicalEditing: canonicalHistory !== null,
     semanticSelection,
+    catalogMode: catalog,
+    ...(catalogBackHref ? { catalogBackHref } : {}),
+    selectedCollectionItem,
+    selectCollectionItem,
+    collectionItemAction,
+    addCollectionItems,
+    inlineEdit,
+    uploadCollectionItemImage,
+    removeCollectionItemImage,
   };
 
   return <EditorContext.Provider value={value}>{children}</EditorContext.Provider>;

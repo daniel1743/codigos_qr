@@ -10,6 +10,7 @@ import { magicPageService } from "../../services/magic-page.service";
 import { convertEmbeddedCatalogToFullCatalog } from "./catalog-conversion.service";
 import { extractCatalogProducts } from "./catalog-products";
 import { resolveOwnedCatalogPage, type CatalogAccess, type OwnedCatalogRecord } from "./catalog-link";
+import { pageService } from "../../services/page.service";
 import { pageCanonicalService } from "../../services/page-canonical.service";
 import type { Page } from "../../types/database";
 import type { BioTemplateConfig } from "../../premium-template-studio/types";
@@ -33,7 +34,17 @@ function safeName(file: File): string {
     .slice(0, 40);
 }
 
-export function MagicProductionEditorHost({ pageId }: { pageId: string }) {
+export function MagicProductionEditorHost({
+  pageId,
+  catalog = false,
+  catalogBackHref,
+}: {
+  pageId: string;
+  /** C3.3-B — open as the full-screen catalog workspace. */
+  catalog?: boolean;
+  /** Back target for the catalog header (`← Volver a la página`). */
+  catalogBackHref?: string;
+}) {
   const [supabase] = useState(() => getBrowserSupabaseClient());
   const [session, setSession] = useState<Session | null>(null);
   const [page, setPage] = useState<Page | null>(null);
@@ -407,6 +418,8 @@ export function MagicProductionEditorHost({ pageId }: { pageId: string }) {
   return (
     <>
       <MagicEditorApp
+        catalog={catalog}
+        {...(catalogBackHref ? { catalogBackHref } : {})}
         catalogAccess={catalogAccess}
         {...(editorSession.kind === "MAGIC_V1"
           ? {
@@ -424,7 +437,8 @@ export function MagicProductionEditorHost({ pageId }: { pageId: string }) {
               uploadAsset,
             })}
       />
-      <MobilePlatformNav editorPageId={pageId} />
+      {/* The catalog workspace is a focused full-screen editor: no global nav. */}
+      {!catalog && <MobilePlatformNav editorPageId={pageId} />}
     </>
   );
 }

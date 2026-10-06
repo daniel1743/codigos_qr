@@ -29,6 +29,9 @@ export interface MagicEditorAppProps {
   canonicalIsNew?: boolean;
   onCanonicalDocumentChange?: (doc: BioTemplateConfig) => Promise<void> | void;
   onCanonicalPublish?: (doc: BioTemplateConfig) => Promise<void> | void;
+  /** C3.3-B — full-screen catalog workspace (minimal header + product CRUD). */
+  catalog?: boolean;
+  catalogBackHref?: string;
 }
 
 /** Shared Magic-facing UI boundary for both Magic and canonical page documents. */
@@ -46,6 +49,8 @@ export function MagicEditorApp({
   canonicalIsNew = false,
   onCanonicalDocumentChange,
   onCanonicalPublish,
+  catalog = false,
+  catalogBackHref,
 }: MagicEditorAppProps) {
   return (
     <div className="magic-editor-root h-screen w-full overflow-hidden">
@@ -63,6 +68,8 @@ export function MagicEditorApp({
         canonicalIsNew={canonicalIsNew}
         onCanonicalDocumentChange={onCanonicalDocumentChange}
         onCanonicalPublish={onCanonicalPublish}
+        catalog={catalog}
+        {...(catalogBackHref ? { catalogBackHref } : {})}
       >
         <EditorPage />
         <Toaster

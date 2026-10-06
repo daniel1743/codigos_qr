@@ -28,14 +28,30 @@ export function CanonicalCanvas() {
             mode={ed.mode === "preview" ? "view" : "edit"}
             breakpoint={ed.isMobile ? "mobile" : "desktop"}
             editing={{
+              selectedCollectionItem: ed.catalogMode ? ed.selectedCollectionItem : null,
               onSelect: (id) => ed.select(id),
               onSelectHeroImage: (id) => ed.select(`${id}:hero-image`),
               onSelectHeroBackground: (id) => ed.select(`${id}:hero-background`),
               onSelectHeroText: (id, target) => ed.select(`${id}:hero-${target}`),
               onSelectHeroCta: (id, target) => ed.select(`${id}:hero-${target}`),
-              onSelectCollectionItem: (id, collection, itemId, field) =>
-                ed.select(`${id}:${collection}:${itemId}:${field ?? "item"}`),
               onSelectPageBackground: () => ed.select("page-background"),
+              // C3.3-B — catalog workspace: product image/title/description/price/
+              // CTA/URL editing and add / add-several / duplicate / delete /
+              // reorder are wired to the shared product-grid controls, which
+              // persist through the canonical document (no parallel model).
+              ...(ed.catalogMode
+                ? {
+                    onSelectCollectionItem: ed.selectCollectionItem,
+                    onCollectionItemAction: ed.collectionItemAction,
+                    onAddCollectionItem: ed.addCollectionItems,
+                    onInlineEdit: ed.inlineEdit,
+                    onUploadCollectionItemImage: ed.uploadCollectionItemImage,
+                    onRemoveCollectionItemImage: ed.removeCollectionItemImage,
+                  }
+                : {
+                    onSelectCollectionItem: (id: string, collection: string, itemId: string, field?: string) =>
+                      ed.select(`${id}:${collection}:${itemId}:${field ?? "item"}`),
+                  }),
             }}
           />
           <SelectionLayer container={content} scroller={scroller} />
