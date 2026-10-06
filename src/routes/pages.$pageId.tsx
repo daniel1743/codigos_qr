@@ -127,6 +127,7 @@ function PageAliasSection({
       headingId="page-alias-heading"
       title="Enlace personalizado"
       description="El alias corto de esta página, guardado en tu fila real."
+      visual="magic"
     >
       <div className="space-y-3">
         <div className="space-y-2">
@@ -148,7 +149,7 @@ function PageAliasSection({
         </div>
 
         {page.slug && (
-          <p className="break-all font-mono text-[12.5px] leading-relaxed text-cq-subtle">
+          <p className="break-all rounded-cq-md bg-cq-canvas px-4 py-3 font-mono text-[13px] font-medium leading-relaxed text-cq-ink ring-1 ring-cq-line">
             {aliasUrl}
           </p>
         )}
@@ -275,15 +276,15 @@ function PageDetail() {
 
   return (
     <AppShell>
-      <main className="mx-auto w-full max-w-cq-page px-4 pb-16 pt-6 sm:px-6 lg:px-10 lg:pt-10">
+      <main className="mx-auto w-full max-w-cq-page px-4 pb-16 pt-8 sm:px-6 sm:pt-10 lg:px-10 lg:pt-14">
         <Link to="/pages" className={`${cqSoftButton} no-underline`}>
           <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Volver a mis páginas
         </Link>
 
         {loading ? (
-          <p className="mt-6 text-[13.5px] text-cq-muted">Cargando…</p>
+          <p className="mt-8 text-[13.5px] text-cq-muted">Cargando…</p>
         ) : notFound || !page ? (
-          <div className="mt-6">
+          <div className="mt-8">
             <CqEmptyState
               headingId="page-detail-missing-heading"
               icon={<SearchX className="h-5 w-5" />}
@@ -298,10 +299,11 @@ function PageDetail() {
           </div>
         ) : (
           <>
-            <div className="mt-6">
+            <div className="mt-8">
               <CqPageHeader
                 title={page.title}
                 description={PAGE_TYPE_LABELS[page.page_type] ?? page.page_type}
+                visual="magic"
                 pill={
                   <CqStatusPill
                     tone={page.published ? "positive" : "neutral"}
@@ -309,7 +311,7 @@ function PageDetail() {
                   />
                 }
                 actions={
-                  <>
+                  <div className="grid w-full grid-cols-2 gap-2 sm:w-auto sm:flex sm:flex-wrap sm:items-center">
                     <Link
                       to="/pages/$pageId/edit"
                       params={{ pageId: page.id }}
@@ -348,48 +350,48 @@ function PageDetail() {
                     >
                       QR / Compartir
                     </button>
-                  </>
+                  </div>
                 }
               />
             </div>
 
-            <div className="mt-6 grid gap-5 lg:grid-cols-[minmax(0,1.35fr)_minmax(300px,0.65fr)]">
-              <CqPanel headingId="page-details-heading" title="Detalles">
-                <dl className="space-y-3 text-[13.5px]">
-                  <div className="flex items-center justify-between gap-4">
+            <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(300px,0.65fr)] lg:items-start lg:gap-8">
+              <CqPanel headingId="page-details-heading" title="Detalles" visual="magic">
+                <dl className="divide-y divide-cq-line text-[13.5px]">
+                  <div className="flex items-center justify-between gap-4 py-3.5 first:pt-0">
                     <dt className="text-cq-muted">Título</dt>
                     <dd className="min-w-0 truncate font-semibold text-cq-ink">{page.title}</dd>
                   </div>
-                  <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center justify-between gap-4 py-3.5">
                     <dt className="text-cq-muted">Objetivo</dt>
                     <dd className="font-semibold text-cq-ink">
                       {PAGE_TYPE_LABELS[page.page_type] ?? page.page_type}
                     </dd>
                   </div>
-                  <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center justify-between gap-4 py-3.5">
                     <dt className="text-cq-muted">ID público</dt>
                     <dd className="min-w-0 break-all font-mono text-[13px] font-semibold text-cq-ink">
                       {page.public_id}
                     </dd>
                   </div>
-                  <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center justify-between gap-4 py-3.5">
                     <dt className="text-cq-muted">Estado</dt>
                     <dd className="font-semibold text-cq-ink">
                       {page.published ? "Publicada" : "Borrador"}
                     </dd>
                   </div>
-                  <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center justify-between gap-4 py-3.5">
                     <dt className="text-cq-muted">Creada</dt>
                     <dd className="font-semibold text-cq-ink">{formatDate(page.created_at)}</dd>
                   </div>
-                  <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center justify-between gap-4 py-3.5 last:pb-0">
                     <dt className="text-cq-muted">Actualizada</dt>
                     <dd className="font-semibold text-cq-ink">{formatDate(page.updated_at)}</dd>
                   </div>
                 </dl>
               </CqPanel>
 
-              <div className="min-w-0 space-y-5">
+              <div className="min-w-0 space-y-6">
                 {userId && (
                   <PageAliasSection
                     page={page}
@@ -399,7 +401,11 @@ function PageDetail() {
                 )}
 
                 {showQr && userId && (
-                  <CqPanel headingId="page-qr-heading" title="QR de esta página">
+                  <CqPanel
+                    headingId="page-qr-heading"
+                    title="QR de esta página"
+                    visual="magic"
+                  >
                     <PageQrPanel page={page} userId={userId} />
                   </CqPanel>
                 )}
