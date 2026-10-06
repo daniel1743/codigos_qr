@@ -1,21 +1,29 @@
 /**
  * CRIPQER Analytics V1.1 — production feature gate for the canonical writer.
  *
- * Replaces the old hard QA-only guard. Canonical tracking is now allowed only
- * when:
- *   - the runtime resolves to the dedicated QA project (existing QA semantics),
- *     OR
- *   - the runtime resolves to production AND the global flag is enabled AND the
- *     current page is explicitly allowlisted.
+ * QA keeps its existing permissive semantics. Production is fail-closed:
+ * canonical writes are allowed only when an explicit and valid configuration
+ * exists.
  *
- * The production default is OFF: an absent/malformed flag or an absent/empty
- * allowlist denies canonical writes. Unknown projects are always denied.
+ * Production contract:
+ *   1. VITE_ANALYTICS_CANONICAL_ENABLED must be exactly "true".
+ *   2. Then either:
+ *      a. VITE_ANALYTICS_CANONICAL_GLOBAL_ENABLED is exactly "true"
+ *         (explicit global rollout), OR
+ *      b. the page's public_id is present in a non-empty, well-formed
+ *         VITE_ANALYTICS_CANONICAL_PAGE_ALLOWLIST.
+ *
+ * Missing, empty, whitespace-only, non-string or malformed allowlists deny
+ * canonical writes. "*" is a literal entry, never a wildcard. Unknown runtimes
+ * are always denied.
  */
 
 import { classifyRuntime } from "./qa-runtime-guard";
 
 export const CANONICAL_ANALYTICS_ENABLED_KEY = "VITE_ANALYTICS_CANONICAL_ENABLED";
 export const CANONICAL_ANALYTICS_PAGE_ALLOWLIST_KEY = "VITE_ANALYTICS_CANONICAL_PAGE_ALLOWLIST";
+export const CANONICAL_ANALYTICS_GLOBAL_ENABLED_KEY =
+  "VITE_ANALYTICS_CANONICAL_GLOBAL_ENABLED";
 
 /** Minimal environment contract for the gate (kept dependency-free for tests). */
 export interface CanonicalAnalyticsEnvironment {
@@ -53,13 +61,27 @@ export function isCanonicalAnalyticsEnabled(context: CanonicalAnalyticsGateConte
   // always denied (never "production just because it isn't QA").
   if (verdict !== "production") return false;
 
-  // Production requires BOTH the global flag and an explicit page allowlist.
+  // Production requires the global flag.
   const environment = context.environment ?? {};
   if (environment[CANONICAL_ANALYTICS_ENABLED_KEY] !== "true") return false;
+
+  // A global rollout requires its own explicit flag. It is never inferred from
+  // an empty, malformed or wildcard allowlist.
+  const rawAllowlist = environment[CANONICAL_ANALYTICS_PAGE_ALLOWLIST_KEY];
+  if (
+    environment[CANONICAL_ANALYTICS_GLOBAL_ENABLED_KEY] === "true" &&
+    (rawAllowlist === undefined || typeof rawAllowlist === "string")
+  ) {
+    return true;
+  }
+
+  // Production otherwise requires an explicit page allowlist.
+  const allowlist = parseCanonicalPageAllowlist(rawAllowlist);
+  if (allowlist.size === 0) return false;
+
+  // Allowlist is defined and non-empty: require the page to be in it.
   if (!context.publicId) return false;
-  return parseCanonicalPageAllowlist(environment[CANONICAL_ANALYTICS_PAGE_ALLOWLIST_KEY]).has(
-    context.publicId,
-  );
+  return allowlist.has(context.publicId);
 }
 
 /** Throw unless canonical tracking is allowed for the given runtime + page. */
@@ -67,7 +89,8 @@ export function assertCanonicalAnalyticsAllowed(context: CanonicalAnalyticsGateC
   if (!isCanonicalAnalyticsEnabled(context)) {
     throw new Error(
       "Canonical Analytics V1.1 is disabled for this runtime/page. " +
-        "Production writes require VITE_ANALYTICS_CANONICAL_ENABLED=true and an allowlisted page.",
+        "Production writes require VITE_ANALYTICS_CANONICAL_ENABLED=true and either " +
+        "VITE_ANALYTICS_CANONICAL_GLOBAL_ENABLED=true or an allowlisted page public_id.",
     );
   }
 }

@@ -32,6 +32,7 @@ export type { QaRuntimeVerdict } from "./qa-runtime-guard";
 
 export {
   CANONICAL_ANALYTICS_ENABLED_KEY,
+  CANONICAL_ANALYTICS_GLOBAL_ENABLED_KEY,
   CANONICAL_ANALYTICS_PAGE_ALLOWLIST_KEY,
   assertCanonicalAnalyticsAllowed,
   isCanonicalAnalyticsEnabled,
