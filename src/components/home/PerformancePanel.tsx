@@ -69,59 +69,66 @@ export function PerformancePanel({
   return (
     <section
       aria-labelledby="home-performance-heading"
-      className="min-w-0 rounded-cq-xl border border-cq-line bg-white p-5 shadow-soft sm:p-6"
+      className="min-w-0 rounded-cq-xl border border-cq-line bg-white p-6 shadow-soft sm:p-7"
     >
-      <header className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 id="home-performance-heading" className="text-[15px] font-bold text-cq-ink">
-          Rendimiento
-        </h2>
-        <p className="text-[12.5px] text-cq-subtle">Últimos {days} días · datos reales</p>
+      <header className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <div className="min-w-0">
+          <h2
+            id="home-performance-heading"
+            className="text-[20px] font-bold tracking-[-0.02em] text-cq-ink"
+          >
+            Rendimiento
+          </h2>
+          <p className="mt-1 text-[13.5px] text-cq-muted">Últimos {days} días · datos reales</p>
+        </div>
       </header>
 
       {truncated ? (
-        <p className="mt-3 rounded-cq-sm bg-cq-blue-50 px-3 py-2 text-[12px] text-cq-muted">
+        <p className="mt-4 rounded-cq-sm bg-cq-blue-50 px-3.5 py-2.5 text-[12.5px] text-cq-muted">
           Datos parciales: se alcanzó el límite de lectura de Analytics.
         </p>
       ) : null}
 
       {status === "loading" ? (
-        <p className="mt-4 text-[13.5px] text-cq-muted">Cargando tu rendimiento…</p>
+        <p className="mt-6 text-[13.5px] text-cq-muted">Cargando tu rendimiento…</p>
       ) : status === "error" ? (
-        <p className="mt-4 text-[13.5px] text-cq-muted">
+        <p className="mt-6 text-[13.5px] text-cq-muted">
           No pudimos cargar tu rendimiento ahora mismo.
         </p>
       ) : !hasActivity ? (
-        <div className="mt-4 rounded-cq-md border border-dashed border-cq-line bg-cq-canvas px-4 py-6 text-center">
-          <Activity className="mx-auto h-5 w-5 text-cq-subtle" aria-hidden />
-          <p className="mt-2 text-[13.5px] font-medium text-cq-ink">
+        <div className="mt-6 rounded-cq-lg border border-dashed border-cq-line bg-cq-canvas px-6 py-10 text-center">
+          <span className="mx-auto grid h-12 w-12 place-items-center rounded-cq-md bg-white text-cq-blue ring-1 ring-cq-line">
+            <Activity className="h-5 w-5" aria-hidden />
+          </span>
+          <p className="mt-3 text-[14.5px] font-semibold text-cq-ink">
             Aún no hay actividad registrada en los últimos {days} días.
           </p>
-          <p className="mt-1 text-[12.5px] text-cq-muted">
+          <p className="mt-1 text-[13px] text-cq-muted">
             Comparte tu enlace o tu QR y aquí verás visitas y clics reales.
           </p>
         </div>
       ) : (
         <>
-          <dl className="mt-4 grid grid-cols-2 gap-px overflow-hidden rounded-cq-md border border-cq-line bg-cq-line sm:grid-cols-3">
+          <dl className="mt-6 grid grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-4">
             {kpis.map((kpi) => {
               const Icon = kpi.icon;
               return (
-                <div key={kpi.id} className="min-w-0 bg-white px-4 py-3.5">
-                  <dt className="flex items-center gap-1.5 text-[11.5px] font-medium text-cq-muted">
+                <div key={kpi.id} className="min-w-0">
+                  <dt className="flex items-center gap-1.5 text-[12.5px] font-medium text-cq-muted">
                     <Icon className="h-3.5 w-3.5 text-cq-blue" aria-hidden />
                     {kpi.label}
                   </dt>
-                  <dd className="mt-1 text-[24px] font-semibold leading-none tracking-[-0.03em] text-cq-ink tabular-nums">
+                  <dd className="mt-1.5 text-[26px] font-semibold leading-none tracking-[-0.03em] text-cq-ink tabular-nums">
                     {kpi.value.toLocaleString("es-CL")}
                   </dd>
-                  <dd className="mt-1 truncate text-[11.5px] text-cq-subtle">{kpi.hint}</dd>
+                  <dd className="mt-1 truncate text-[12px] text-cq-subtle">{kpi.hint}</dd>
                 </div>
               );
             })}
           </dl>
 
           {points.length > 1 && max > 0 ? (
-            <div className="mt-5">
+            <div className="mt-6 border-t border-cq-line pt-5">
               <div
                 role="img"
                 aria-label={`Visitas por día en los últimos ${days} días. Mejor día: ${best?.date ?? "—"} con ${best?.count ?? 0} visitas.`}

@@ -47,18 +47,18 @@ export function PageAssetCard({
   return (
     <section
       aria-labelledby="home-page-heading"
-      className="min-w-0 rounded-cq-xl border border-cq-line bg-white p-5 shadow-soft sm:p-6"
+      className="min-w-0 rounded-cq-xl border border-cq-line bg-white p-6 shadow-soft sm:p-7"
     >
       <header className="flex items-center justify-between gap-3">
-        <h2 id="home-page-heading" className="text-[15px] font-bold text-cq-ink">
+        <h2 id="home-page-heading" className="text-[13px] font-semibold text-cq-muted">
           Mi página
         </h2>
         <StatusPill published={published} />
       </header>
 
-      <div className="mt-4 flex min-w-0 flex-col gap-5 min-[480px]:flex-row">
+      <div className="mt-5 flex min-w-0 flex-col gap-5 min-[480px]:flex-row min-[480px]:gap-6">
         <div className="flex shrink-0 flex-col items-center gap-2 self-center min-[480px]:self-start">
-          <span className="grid h-24 w-24 place-items-center overflow-hidden rounded-cq-lg bg-cq-blue-50 text-2xl font-bold text-cq-blue ring-1 ring-cq-line">
+          <span className="grid h-24 w-24 place-items-center overflow-hidden rounded-cq-xl bg-cq-blue-50 text-2xl font-bold text-cq-blue ring-1 ring-cq-line">
             {avatarUrl ? (
               <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
             ) : (
@@ -101,7 +101,7 @@ export function PageAssetCard({
             </p>
           )}
 
-          <dl className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[12px] text-cq-subtle">
+          <dl className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-[12px] text-cq-subtle">
             <div className="flex items-center gap-1.5">
               <dt>Enlaces activos</dt>
               <dd className="font-semibold text-cq-ink">{links.toLocaleString("es-CL")}</dd>
@@ -120,7 +120,7 @@ export function PageAssetCard({
             ) : null}
           </dl>
 
-          <div className="mt-4 grid grid-cols-2 gap-2 sm:flex">
+          <div className="mt-5 grid grid-cols-2 gap-2 sm:flex">
             {pageId ? (
               <Link
                 to="/pages/$pageId/edit"
@@ -159,7 +159,7 @@ export function NoPageCard({ onCreate, creating, canCreatePage }: { onCreate: ()
   return (
     <section
       aria-labelledby="home-no-page-heading"
-      className="min-w-0 rounded-cq-xl border border-cq-line bg-white p-6 shadow-soft sm:p-8"
+      className="min-w-0 rounded-cq-xl border border-cq-line bg-white p-7 shadow-soft sm:p-9"
     >
       <span className="grid h-12 w-12 place-items-center rounded-cq-md bg-cq-blue-50 text-cq-blue">
         <QrCode className="h-6 w-6" aria-hidden />

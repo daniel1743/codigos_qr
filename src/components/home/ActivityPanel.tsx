@@ -13,10 +13,13 @@ export function ActivityPanel({ analyticsPageId }: { analyticsPageId: string | n
   return (
     <section
       aria-labelledby="home-activity-heading"
-      className="min-w-0 rounded-cq-xl border border-cq-line bg-white p-5 shadow-soft sm:p-6"
+      className="min-w-0 rounded-cq-xl border border-cq-line bg-white p-6 shadow-soft sm:p-7"
     >
-      <header className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 id="home-activity-heading" className="text-[15px] font-bold text-cq-ink">
+      <header className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <h2
+          id="home-activity-heading"
+          className="text-[20px] font-bold tracking-[-0.02em] text-cq-ink"
+        >
           Actividad reciente
         </h2>
         {analyticsPageId ? (
@@ -31,12 +34,14 @@ export function ActivityPanel({ analyticsPageId }: { analyticsPageId: string | n
         ) : null}
       </header>
 
-      <div className="mt-4 rounded-cq-md border border-dashed border-cq-line bg-cq-canvas px-4 py-6 text-center">
-        <Activity className="mx-auto h-5 w-5 text-cq-subtle" aria-hidden />
-        <p className="mt-2 text-[13.5px] font-medium text-cq-ink">
+      <div className="mt-6 rounded-cq-lg border border-dashed border-cq-line bg-cq-canvas px-6 py-10 text-center">
+        <span className="mx-auto grid h-12 w-12 place-items-center rounded-cq-md bg-white text-cq-blue ring-1 ring-cq-line">
+          <Activity className="h-5 w-5" aria-hidden />
+        </span>
+        <p className="mt-3 text-[14.5px] font-semibold text-cq-ink">
           Aún no hay actividad reciente disponible.
         </p>
-        <p className="mt-1 text-[12.5px] text-cq-muted">
+        <p className="mt-1 text-[13px] text-cq-muted">
           Cuando tu página reciba las primeras visitas, aparecerán aquí.
         </p>
       </div>

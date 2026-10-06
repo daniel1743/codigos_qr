@@ -2,8 +2,8 @@ import { BarChart3, FileLock2, Globe2, Plus, QrCode, Settings } from "lucide-rea
 import { Link } from "@tanstack/react-router";
 
 const itemClass =
-  "flex min-w-0 flex-col items-center gap-2 rounded-cq-md bg-white px-3 py-4 text-center ring-1 ring-cq-line transition-colors hover:bg-cq-canvas focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cq-blue-200";
-const labelClass = "text-[12.5px] font-semibold text-cq-ink";
+  "flex min-h-[92px] min-w-0 flex-col items-center justify-center gap-2.5 rounded-cq-lg bg-white px-4 py-5 text-center ring-1 ring-cq-line transition-colors hover:bg-cq-canvas hover:ring-cq-blue-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cq-blue-200";
+const labelClass = "text-[13px] font-semibold text-cq-ink";
 
 /**
  * F2 — Home / Command Center: quick access row.
@@ -18,7 +18,7 @@ export function QuickDestinations({ pageId, canCreatePage }: { pageId: string | 
       <h2 id="home-quick-heading" className="text-[12.5px] font-bold uppercase tracking-[0.16em] text-cq-subtle">
         Accesos rápidos
       </h2>
-      <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+      <div className="mt-4 grid grid-cols-2 gap-3.5 sm:grid-cols-3 lg:grid-cols-5">
         {pageId ? (
           <Link to="/pages/$pageId" params={{ pageId }} className={itemClass}>
             <Globe2 className="h-5 w-5 text-cq-blue" aria-hidden />

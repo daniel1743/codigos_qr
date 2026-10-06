@@ -225,7 +225,7 @@ export function MyProfilePage() {
     );
 
   return (
-    <div className="mx-auto w-full max-w-cq-page px-4 py-7 sm:px-6 lg:px-10 lg:py-10">
+    <div className="mx-auto w-full max-w-cq-page px-4 pb-16 pt-8 sm:px-6 sm:pt-10 lg:px-10 lg:pt-14">
       <HomeHero
         firstName={firstName}
         hasPage={Boolean(canonicalPage)}
@@ -236,8 +236,8 @@ export function MyProfilePage() {
         canCreatePage={isAdmin}
       />
 
-      <div className="mt-8 grid gap-5 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,0.7fr)] xl:items-start">
-        <div className="flex min-w-0 flex-col gap-5">
+      <div className="mt-12 grid gap-8 sm:mt-16 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,0.7fr)] xl:items-start xl:gap-10">
+        <div className="flex min-w-0 flex-col gap-6">
           {canonicalPage ? (
             <PageAssetCard
               displayName={displayName}
@@ -270,7 +270,7 @@ export function MyProfilePage() {
           />
         </div>
 
-        <div className="flex min-w-0 flex-col gap-5">
+        <div className="flex min-w-0 flex-col gap-6">
           <ActivityPanel analyticsPageId={canonicalPage?.id ?? null} />
           <QuickDestinations pageId={canonicalPage?.id ?? null} canCreatePage={isAdmin} />
         </div>
