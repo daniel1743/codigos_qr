@@ -83,6 +83,9 @@ const QR_TABS: ReadonlyArray<{ id: QrTabId; label: string }> = [
   { id: "exportar", label: "Exportar" },
 ];
 
+const MAGIC_CONTROL_PANEL =
+  "space-y-5 rounded-cq-xl border border-cq-line bg-white p-5 shadow-soft sm:rounded-cq-2xl sm:p-6";
+
 /** Export formats actually produced by the existing exporters. */
 const EXPORT_FORMATS = [
   { value: "png", label: "PNG", hint: "Imagen lista para usar" },
@@ -562,7 +565,7 @@ export function QRStudio({
       : undefined;
 
   return (
-    <div className="space-y-5 pb-20">
+    <div className="space-y-6 pb-24">
       {/* F4 — in `studio` mode the dedicated /qr route owns the page header. */}
       {presentation !== "studio" ? (
         <QrStudioHeader
@@ -591,7 +594,7 @@ export function QRStudio({
         <>
           <div className="grid grid-cols-1 gap-2">
             <Button
-              className="h-11 w-full rounded-xl"
+              className="h-11 w-full rounded-cq-md"
               disabled={saving || !isValid}
               onClick={() => onSave(false)}
               variant="secondary"
@@ -600,7 +603,7 @@ export function QRStudio({
               Guardar borrador
             </Button>
             <Button
-              className="h-11 w-full rounded-xl"
+              className="h-11 w-full rounded-cq-md"
               disabled={saving || !isValid}
               onClick={() => onSave(true)}
             >
@@ -638,7 +641,7 @@ export function QRStudio({
           <div
             className={
               presentation === "studio"
-                ? "grid min-w-0 gap-8 lg:grid-cols-12 lg:items-start"
+                ? "grid min-w-0 gap-8 lg:grid-cols-12 lg:items-start lg:gap-x-10 lg:gap-y-12"
                 : "space-y-5"
             }
           >
@@ -653,6 +656,7 @@ export function QRStudio({
                 title="Tu código QR"
                 displayUrl={previewDisplayUrl}
                 published={published}
+                visual="magic"
                 onCopy={handleCopy}
                 copied={copiedFeedback}
                 onOpen={aliasUrl || publicUrl}
@@ -733,7 +737,7 @@ export function QRStudio({
             <div
               className={
                 presentation === "studio"
-                  ? "min-w-0 space-y-5 lg:col-span-7 lg:col-start-1 lg:row-start-1"
+                  ? "min-w-0 space-y-6 lg:col-span-7 lg:col-start-1 lg:row-start-1"
                   : "space-y-5"
               }
             >
@@ -744,13 +748,13 @@ export function QRStudio({
               >
                 <TabsList
                   aria-label="Secciones de personalización del QR"
-                  className="flex h-auto w-full flex-wrap justify-start gap-1 rounded-cq-sm bg-cq-canvas p-1 ring-1 ring-inset ring-cq-line"
+                  className="flex h-auto w-full flex-wrap justify-start gap-1.5 rounded-cq-md bg-cq-canvas p-1.5 ring-1 ring-inset ring-cq-line"
                 >
                   {QR_TABS.map((item) => (
                     <TabsTrigger
                       key={item.id}
                       value={item.id}
-                      className="h-10 rounded-[10px] px-3.5 text-[13px] font-semibold text-cq-muted data-[state=active]:bg-white data-[state=active]:text-cq-ink data-[state=active]:shadow-soft sm:h-9"
+                      className="h-11 rounded-cq-sm px-4 text-[13.5px] font-semibold text-cq-muted data-[state=active]:bg-white data-[state=active]:text-cq-ink data-[state=active]:shadow-soft sm:h-10"
                     >
                       {item.label}
                     </TabsTrigger>
@@ -759,7 +763,7 @@ export function QRStudio({
 
                 <TabsContent value="diseno" className="space-y-4 focus-visible:outline-none">
                   {/* DISEÑOS QR - BANCO DE PLANTILLAS */}
-                  <div className="space-y-4 rounded-cq-xl border border-cq-line bg-white p-4 shadow-soft sm:p-5">
+                  <div className={MAGIC_CONTROL_PANEL}>
                     <h4 className="font-semibold flex items-center gap-2 text-cq-ink">
                       <Layers className="w-4 h-4 text-cq-blue" />
                       Diseños QR
@@ -770,7 +774,7 @@ export function QRStudio({
                 <Button
                   onClick={() => setGalleryOpen(true)}
                   variant="outline"
-                  className="w-full h-11 rounded-xl justify-start"
+                  className="w-full h-11 rounded-cq-md justify-start"
                 >
                   <Layers className="w-4 h-4 mr-2" />
                   Explorar diseños
@@ -778,7 +782,7 @@ export function QRStudio({
               </div>
 
               {/* COLORS */}
-                  <div className="space-y-4 rounded-cq-xl border border-cq-line bg-white p-4 shadow-soft sm:p-5">
+                  <div className={MAGIC_CONTROL_PANEL}>
                     <div className="space-y-1">
                       <h4 className="font-semibold flex items-center gap-2 text-cq-ink">Personalizar QR</h4>
                       <p className="text-xs text-cq-muted">
@@ -815,7 +819,7 @@ export function QRStudio({
                 <div className="grid grid-cols-2 gap-2">
                   <Button
                     variant="outline"
-                    className="h-11 rounded-xl justify-start"
+                    className="h-11 rounded-cq-md justify-start"
                     onClick={() =>
                       onChange({
                         qr_gradient: null,
@@ -834,7 +838,7 @@ export function QRStudio({
                   </Button>
                   <Button
                     variant="outline"
-                    className="h-11 rounded-xl justify-start"
+                    className="h-11 rounded-cq-md justify-start"
                     onClick={() =>
                       onChange({
                         qr_gradient: null,
@@ -877,14 +881,14 @@ export function QRStudio({
                 )}
               </div>
 
-                  <div className="space-y-4 rounded-cq-xl border border-cq-line bg-white p-4 shadow-soft sm:p-5">
+                  <div className={MAGIC_CONTROL_PANEL}>
                     <h4 className="font-semibold text-cq-ink">Forma del QR</h4>
                 <div className="grid grid-cols-2 gap-2">
                   {DOT_STYLE_OPTIONS.map((option) => (
                     <Button
                       key={option.value}
                       variant="outline"
-                      className={`h-12 rounded-xl justify-start ${profile.qr_dots_type === option.value ? "border-primary bg-primary/5" : ""}`}
+                      className={`h-12 rounded-cq-md justify-start ${profile.qr_dots_type === option.value ? "border-primary bg-primary/5" : ""}`}
                       onClick={() =>
                         onChange({
                           qr_dots_type: option.value,
@@ -921,7 +925,7 @@ export function QRStudio({
                 </TabsContent>
 
                 <TabsContent value="esquinas" className="space-y-4 focus-visible:outline-none">
-                  <div className="space-y-4 rounded-cq-xl border border-cq-line bg-white p-4 shadow-soft sm:p-5">
+                  <div className={MAGIC_CONTROL_PANEL}>
                     <div className="space-y-1">
                       <h4 className="font-semibold text-cq-ink">Colores de esquinas</h4>
                       <p className="text-xs text-cq-muted">
@@ -968,7 +972,7 @@ export function QRStudio({
                 </TabsContent>
 
                 <TabsContent value="marco" className="space-y-4 focus-visible:outline-none">
-                  <div className="space-y-4 rounded-cq-xl border border-cq-line bg-white p-4 shadow-soft sm:p-5">
+                  <div className={MAGIC_CONTROL_PANEL}>
                     <h4 className="font-semibold text-cq-ink">Marco visual</h4>
                 <div className="grid grid-cols-2 gap-2 min-[420px]:grid-cols-3">
                   {QR_FRAME_OPTIONS.map((option) => {
@@ -977,7 +981,7 @@ export function QRStudio({
                       <Button
                         key={option.id}
                         variant="outline"
-                        className={`h-16 flex-col rounded-xl gap-1 ${qrFrameStyle === option.id ? "border-primary bg-primary/5" : ""}`}
+                        className={`h-16 flex-col rounded-cq-md gap-1 ${qrFrameStyle === option.id ? "border-primary bg-primary/5" : ""}`}
                         onClick={() => onChange({ qr_frame_style: option.id })}
                       >
                         <Icon className="h-5 w-5" />
@@ -990,7 +994,7 @@ export function QRStudio({
 
               {/* EFECTOS AVANZADOS PREMIUM */}
               {!basicOnly && (
-                <div className="space-y-4 rounded-cq-xl border border-cq-gold/30 bg-cq-gold-50/60 p-4 shadow-soft sm:p-5">
+                <div className="space-y-5 rounded-cq-xl border border-cq-gold/30 bg-cq-gold-50/60 p-5 shadow-soft sm:rounded-cq-2xl sm:p-6">
                   <h4 className="font-semibold flex items-center gap-2 text-cq-ink">
                     <Sparkles className="w-4 h-4 text-cq-gold" />
                     Efectos Premium
@@ -1003,7 +1007,7 @@ export function QRStudio({
                   <div className="grid grid-cols-2 min-[400px]:grid-cols-3 gap-2">
                     <Button
                       variant="outline"
-                      className={`h-16 flex flex-col gap-1 rounded-xl border-2 ${!profile.qr_gradient && !profile.qr_effect ? "border-amber-400 bg-amber-50" : "border-transparent"}`}
+                      className={`h-16 flex flex-col gap-1 rounded-cq-md border-2 ${!profile.qr_gradient && !profile.qr_effect ? "border-amber-400 bg-amber-50" : "border-transparent"}`}
                       onClick={() => onChange({ qr_gradient: null, qr_effect: null })}
                     >
                       <div className="w-5 h-5 rounded-full bg-black"></div>
@@ -1012,7 +1016,7 @@ export function QRStudio({
 
                     <Button
                       variant="outline"
-                      className={`h-16 flex flex-col gap-1 rounded-xl border-2 ${profile.qr_effect === "neon" && profile.qr_foreground_color === "#ec4899" ? "border-amber-400 bg-amber-50" : "border-transparent"}`}
+                      className={`h-16 flex flex-col gap-1 rounded-cq-md border-2 ${profile.qr_effect === "neon" && profile.qr_foreground_color === "#ec4899" ? "border-amber-400 bg-amber-50" : "border-transparent"}`}
                       onClick={() =>
                         onChange({
                           qr_gradient: null,
@@ -1029,7 +1033,7 @@ export function QRStudio({
 
                     <Button
                       variant="outline"
-                      className={`h-16 flex flex-col gap-1 rounded-xl border-2 ${profile.qr_effect === "neon" && profile.qr_foreground_color === "#06b6d4" ? "border-amber-400 bg-amber-50" : "border-transparent"}`}
+                      className={`h-16 flex flex-col gap-1 rounded-cq-md border-2 ${profile.qr_effect === "neon" && profile.qr_foreground_color === "#06b6d4" ? "border-amber-400 bg-amber-50" : "border-transparent"}`}
                       onClick={() =>
                         onChange({
                           qr_gradient: null,
@@ -1046,7 +1050,7 @@ export function QRStudio({
 
                     <Button
                       variant="outline"
-                      className={`h-16 flex flex-col gap-1 rounded-xl border-2 ${profile.qr_gradient?.colorStops?.[0]?.color === "#f59e0b" ? "border-amber-400 bg-amber-50" : "border-transparent"}`}
+                      className={`h-16 flex flex-col gap-1 rounded-cq-md border-2 ${profile.qr_gradient?.colorStops?.[0]?.color === "#f59e0b" ? "border-amber-400 bg-amber-50" : "border-transparent"}`}
                       onClick={() =>
                         onChange({
                           qr_effect: null,
@@ -1070,7 +1074,7 @@ export function QRStudio({
 
                     <Button
                       variant="outline"
-                      className={`h-16 flex flex-col gap-1 rounded-xl border-2 ${profile.qr_gradient?.colorStops?.[0]?.color === "#8b5cf6" ? "border-amber-400 bg-amber-50" : "border-transparent"}`}
+                      className={`h-16 flex flex-col gap-1 rounded-cq-md border-2 ${profile.qr_gradient?.colorStops?.[0]?.color === "#8b5cf6" ? "border-amber-400 bg-amber-50" : "border-transparent"}`}
                       onClick={() =>
                         onChange({
                           qr_effect: null,
@@ -1094,7 +1098,7 @@ export function QRStudio({
 
                     <Button
                       variant="outline"
-                      className={`h-16 flex flex-col gap-1 rounded-xl border-2 ${profile.qr_gradient?.type === "radial" ? "border-amber-400 bg-amber-50" : "border-transparent"}`}
+                      className={`h-16 flex flex-col gap-1 rounded-cq-md border-2 ${profile.qr_gradient?.type === "radial" ? "border-amber-400 bg-amber-50" : "border-transparent"}`}
                       onClick={() =>
                         onChange({
                           qr_effect: null,
@@ -1122,7 +1126,7 @@ export function QRStudio({
                 </TabsContent>
 
                 <TabsContent value="logo" className="space-y-4 focus-visible:outline-none">
-                  <div className="space-y-4 rounded-cq-xl border border-cq-line bg-white p-4 shadow-soft sm:p-5">
+                  <div className={MAGIC_CONTROL_PANEL}>
                     <div className="flex items-center justify-between">
                       <h4 className="font-semibold text-cq-ink">Logo Central</h4>
                   <Switch
@@ -1145,7 +1149,7 @@ export function QRStudio({
                     <div className="flex flex-col gap-2 min-[360px]:flex-row">
                       <Button
                         variant="outline"
-                        className="relative h-11 flex-1 rounded-xl"
+                        className="relative h-11 flex-1 rounded-cq-md"
                         disabled={uploadingLogo}
                       >
                         {uploadingLogo ? (
@@ -1166,7 +1170,7 @@ export function QRStudio({
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="w-11 h-11 rounded-xl text-destructive hover:text-destructive hover:bg-destructive/10"
+                          className="w-11 h-11 rounded-cq-md text-destructive hover:text-destructive hover:bg-destructive/10"
                           onClick={() => onChange({ qr_logo_url: null, qr_logo_enabled: false })}
                         >
                           <Trash2 className="w-5 h-5" />
@@ -1191,6 +1195,7 @@ export function QRStudio({
                     state={exportState}
                     errorMessage={exportError}
                     onReset={restoreClassicQr}
+                    visual="magic"
                   />
                 </TabsContent>
               </Tabs>
@@ -1212,7 +1217,7 @@ export function QRStudio({
               {history.map((version) => (
                 <div
                   key={version.id}
-                  className="snap-start shrink-0 w-36 rounded-cq-lg border border-cq-line bg-white p-3 shadow-soft flex flex-col gap-3"
+                  className="snap-start shrink-0 w-36 rounded-cq-xl border border-cq-line bg-white p-3 shadow-soft flex flex-col gap-3"
                 >
                   <div className="bg-white rounded-md p-2 aspect-square flex items-center justify-center border pointer-events-none relative">
                     <QRCodeSVG
@@ -1264,7 +1269,7 @@ export function QRStudio({
               ))}
             </div>
           ) : (
-            <div className="rounded-xl border border-dashed p-6 flex flex-col items-center justify-center text-center text-muted-foreground bg-muted/20">
+            <div className="rounded-cq-xl border border-dashed p-6 flex flex-col items-center justify-center text-center text-muted-foreground bg-muted/20">
               <Clock className="w-8 h-8 mb-3 opacity-20" />
               <p className="font-medium text-sm text-foreground">
                 Aún no tienes versiones guardadas

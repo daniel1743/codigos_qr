@@ -19,6 +19,7 @@ export function QrStudioSection({
   actions,
   children,
   className,
+  visual = "default",
 }: {
   title?: string;
   description?: string;
@@ -26,6 +27,7 @@ export function QrStudioSection({
   actions?: ReactNode;
   children?: ReactNode;
   className?: string;
+  visual?: "default" | "magic";
 }) {
   return (
     <CqPanel
@@ -34,6 +36,7 @@ export function QrStudioSection({
       icon={icon}
       actions={actions}
       className={className}
+      visual={visual}
     >
       {children}
     </CqPanel>

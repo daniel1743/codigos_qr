@@ -16,8 +16,15 @@ import { cn } from "../../lib/utils";
 
 const PANEL_BASE = "min-w-0 border border-cq-line bg-white shadow-soft";
 const PADDED = "rounded-cq-lg p-4 sm:rounded-cq-xl sm:p-5";
+const PADDED_MAGIC = "rounded-cq-xl p-5 sm:rounded-cq-2xl sm:p-6";
 const FLUSH = "overflow-hidden rounded-cq-xl";
+const FLUSH_MAGIC = "overflow-hidden rounded-cq-2xl";
 const TITLE = "flex items-center gap-2 text-[15px] font-semibold tracking-[-0.01em] text-cq-ink";
+const TITLE_MAGIC =
+  "flex items-center gap-2 text-[16px] font-semibold tracking-[-0.01em] text-cq-ink";
+const DESCRIPTION_MAGIC = "mt-1 text-[13px] leading-relaxed text-cq-muted";
+
+export type CqPanelVisual = "default" | "magic";
 
 export function CqPanel({
   title,
@@ -26,6 +33,7 @@ export function CqPanel({
   actions,
   headingId,
   variant = "padded",
+  visual = "default",
   as = "section",
   className,
   children,
@@ -39,6 +47,8 @@ export function CqPanel({
   headingId?: string | undefined;
   /** "padded" = content panel; "flush" = bordered container with self-padded rows. */
   variant?: "padded" | "flush" | undefined;
+  /** "magic" applies the roomier Magic Patterns card treatment. */
+  visual?: CqPanelVisual | undefined;
   as?: "section" | "div" | undefined;
   className?: string | undefined;
   children?: ReactNode | undefined;
@@ -47,12 +57,12 @@ export function CqPanel({
 
   const heading =
     title && headingId ? (
-      <h2 id={headingId} className={TITLE}>
+      <h2 id={headingId} className={visual === "magic" ? TITLE_MAGIC : TITLE}>
         {icon}
         {title}
       </h2>
     ) : title ? (
-      <h3 className={TITLE}>
+      <h3 className={visual === "magic" ? TITLE_MAGIC : TITLE}>
         {icon}
         {title}
       </h3>
@@ -68,7 +78,9 @@ export function CqPanel({
       <div className="min-w-0">
         {heading}
         {description ? (
-          <p className="mt-1 text-[12.5px] leading-relaxed text-cq-muted">{description}</p>
+          <p className={visual === "magic" ? DESCRIPTION_MAGIC : "mt-1 text-[12.5px] leading-relaxed text-cq-muted"}>
+            {description}
+          </p>
         ) : null}
       </div>
       {actions ? <div className="shrink-0">{actions}</div> : null}
@@ -79,7 +91,17 @@ export function CqPanel({
     <div className={hasHeader && variant === "padded" ? "mt-4" : undefined}>{children}</div>
   ) : null;
 
-  const shellClass = cn(PANEL_BASE, variant === "padded" ? PADDED : FLUSH, className);
+  const shellClass = cn(
+    PANEL_BASE,
+    variant === "padded"
+      ? visual === "magic"
+        ? PADDED_MAGIC
+        : PADDED
+      : visual === "magic"
+        ? FLUSH_MAGIC
+        : FLUSH,
+    className,
+  );
 
   return as === "div" ? (
     <div className={shellClass}>

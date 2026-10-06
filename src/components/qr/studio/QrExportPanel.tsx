@@ -10,9 +10,9 @@ export interface QrExportSizeOption {
 }
 
 const primaryButton =
-  "inline-flex h-12 w-full items-center justify-center gap-2 rounded-cq-sm bg-cq-blue px-4 text-[14px] font-semibold text-white transition-colors hover:bg-cq-blue-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-cq-blue-200 disabled:cursor-not-allowed disabled:opacity-60";
+  "inline-flex h-12 w-full items-center justify-center gap-2 rounded-cq-md bg-cq-blue px-4 text-[14px] font-semibold text-white transition-colors hover:bg-cq-blue-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-cq-blue-200 disabled:cursor-not-allowed disabled:opacity-60";
 const ghostButton =
-  "inline-flex h-11 w-full items-center justify-center gap-2 rounded-cq-sm border border-cq-line bg-white px-4 text-[13px] font-semibold text-cq-ink transition-colors hover:bg-cq-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-cq-blue-200";
+  "inline-flex h-11 w-full items-center justify-center gap-2 rounded-cq-md border border-cq-line bg-white px-4 text-[13px] font-semibold text-cq-ink transition-colors hover:bg-cq-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-cq-blue-200";
 
 /**
  * F4 — Export section (Magic ExportPanel UX).
@@ -35,6 +35,7 @@ export function QrExportPanel({
   onReset,
   resetLabel = "Restaurar QR clásico",
   note,
+  visual = "default",
 }: {
   format: "png" | "svg";
   formats: ReadonlyArray<{ value: "png" | "svg"; label: string; hint?: string }>;
@@ -48,6 +49,7 @@ export function QrExportPanel({
   onReset?: () => void;
   resetLabel?: string;
   note?: string;
+  visual?: "default" | "magic";
 }) {
   const working = state === "working";
 
@@ -56,6 +58,7 @@ export function QrExportPanel({
       title="Exportar"
       description="Archivos generados con el motor de QR real de Cripqer."
       icon={<Download className="h-4 w-4 text-cq-blue" aria-hidden />}
+      visual={visual}
     >
       <fieldset className="min-w-0">
         <legend className="text-[12.5px] font-medium text-cq-muted">Formato</legend>
@@ -68,7 +71,7 @@ export function QrExportPanel({
                 type="button"
                 aria-pressed={selected}
                 onClick={() => onFormatChange(option.value)}
-                className={`flex min-h-14 min-w-0 flex-col items-start justify-center rounded-cq-sm px-3 py-2 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-cq-blue-200 ${
+                className={`flex min-h-14 min-w-0 flex-col items-start justify-center rounded-cq-md px-3 py-2 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-cq-blue-200 ${
                   selected
                     ? "bg-cq-blue-50 ring-2 ring-cq-blue"
                     : "bg-white ring-1 ring-cq-line hover:ring-cq-blue-200"
@@ -94,7 +97,7 @@ export function QrExportPanel({
                   type="button"
                   aria-pressed={selected}
                   onClick={() => onSizeChange(option.value)}
-                  className={`flex min-h-14 min-w-0 flex-col items-start justify-center rounded-cq-sm px-3 py-2 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-cq-blue-200 ${
+                  className={`flex min-h-14 min-w-0 flex-col items-start justify-center rounded-cq-md px-3 py-2 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-cq-blue-200 ${
                     selected
                       ? "bg-cq-blue-50 ring-2 ring-cq-blue"
                       : "bg-white ring-1 ring-cq-line hover:ring-cq-blue-200"

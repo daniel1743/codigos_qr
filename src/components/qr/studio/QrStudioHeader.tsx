@@ -33,6 +33,7 @@ export function QrStudioHeader({
     <CqPageHeader
       title={title}
       description={description}
+      visual="magic"
       pill={
         typeof published === "boolean" ? (
           <CqPublishPill
