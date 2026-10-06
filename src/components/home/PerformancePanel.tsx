@@ -18,6 +18,7 @@ export function PerformancePanel({
   whatsappClicks,
   interest,
   daily,
+  truncated = false,
 }: {
   status: HomeAnalyticsStatus;
   days: number;
@@ -26,15 +27,16 @@ export function PerformancePanel({
   whatsappClicks: number;
   interest: number;
   daily: Array<{ date: string; count: number }>;
+  truncated?: boolean;
 }) {
   const hasActivity = visits + buttonClicks + whatsappClicks + interest > 0;
   const kpis = [
     { id: "visits", label: "Visitas", value: visits, hint: "páginas vistas", icon: Eye },
     {
       id: "clicks",
-      label: "Clics en botones",
+      label: "Clics totales",
       value: buttonClicks,
-      hint: "en tus enlaces y botones",
+      hint: "en enlaces, WhatsApp y CTAs",
       icon: Link2,
     },
     {
@@ -75,6 +77,12 @@ export function PerformancePanel({
         </h2>
         <p className="text-[12.5px] text-cq-subtle">Últimos {days} días · datos reales</p>
       </header>
+
+      {truncated ? (
+        <p className="mt-3 rounded-cq-sm bg-cq-blue-50 px-3 py-2 text-[12px] text-cq-muted">
+          Datos parciales: se alcanzó el límite de lectura de Analytics.
+        </p>
+      ) : null}
 
       {status === "loading" ? (
         <p className="mt-4 text-[13.5px] text-cq-muted">Cargando tu rendimiento…</p>

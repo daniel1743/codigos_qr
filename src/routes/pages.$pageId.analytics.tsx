@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { BarChart3, ArrowLeft, Eye, MousePointerClick } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import "../components/intelligent-analytics/analytics.css";
 import { AppShell } from "../components/app-shell/AppShell";
@@ -11,16 +11,20 @@ import {
   ANALYTICS_SCENARIOS,
   AnalyticsDashboard,
   buildScenarioEvents,
-  inferAvailability,
   type AnalyticsEventV1,
   type RealDataAvailabilityV1,
   type ScenarioId,
 } from "../components/intelligent-analytics";
 import type { PlanId } from "../components/intelligent-analytics/analytics.types";
 import { getAnalyticsEffectiveTierFn } from "../lib/billing/analytics-entitlement-server";
-import { analyticsService } from "../services/analyticsService";
-import { analyticsRealDataService, realDataPeriodBounds } from "../services/analyticsRealDataService";
+import {
+  ANALYTICS_READ_TIMEZONE,
+  analyticsPeriodFromDays,
+  analyticsSummaryFromReadModel,
+  readAnalyticsForPage,
+} from "../services/analyticsRealDataService";
 import { pageService } from "../services/page.service";
+import { isCanonicalAnalyticsEnabled } from "../lib/analytics";
 import type { Page } from "../types/database";
 import type { PageAnalyticsSummary } from "../types/analytics";
 
@@ -28,6 +32,7 @@ export const Route = createFileRoute("/pages/$pageId/analytics")({ component: Pa
 
 const EMPTY: PageAnalyticsSummary = {
   visits: 0,
+  sessions: 0,
   buttonClicks: 0,
   whatsappClicks: 0,
   productClicks: 0,
@@ -35,6 +40,7 @@ const EMPTY: PageAnalyticsSummary = {
   topProducts: [],
   topServices: [],
   dailyVisits: [],
+  truncated: false,
 };
 
 function MetricCard({ label, value, icon }: { label: string; value: number; icon: ReactNode }) {
@@ -75,14 +81,19 @@ function Panel({
 type AnalyticsMode = "fixtures" | "real" | "legacy";
 
 function initialMode(): AnalyticsMode {
-  if (!import.meta.env.DEV) return "legacy";
-  const param =
-    typeof window === "undefined"
-      ? null
-      : new URLSearchParams(window.location.search).get("analytics");
-  if (param === "legacy") return "legacy";
-  if (param === "real") return "real";
-  return "fixtures";
+  // In DEV, honour the ?analytics= query param so QA can force any mode.
+  if (import.meta.env.DEV) {
+    const param =
+      typeof window === "undefined"
+        ? null
+        : new URLSearchParams(window.location.search).get("analytics");
+    if (param === "legacy") return "legacy";
+    if (param === "real") return "real";
+    return "fixtures";
+  }
+  // In production, start with "legacy" until the page loads and we can check
+  // whether the canonical writer is active for this page (see the effect below).
+  return "legacy";
 }
 
 function PageAnalytics() {
@@ -111,15 +122,22 @@ function PageAnalytics() {
 
   const qaNow = "2026-09-22T15:00:00.000Z";
   const qaTimezone = "America/Santiago";
-  const timezone = useMemo(() => {
-    try {
-      return Intl.DateTimeFormat().resolvedOptions().timeZone || qaTimezone;
-    } catch {
-      return qaTimezone;
-    }
-  }, []);
+  const timezone = ANALYTICS_READ_TIMEZONE;
 
   const isLegacy = mode === "legacy";
+
+  // In production: once the page is loaded, switch to "real" mode automatically
+  // if the canonical analytics writer is active for this page. In DEV the mode
+  // is already set via query param (or defaults to "fixtures").
+  useEffect(() => {
+    if (import.meta.env.DEV || !page) return;
+    const canonicalActive = isCanonicalAnalyticsEnabled({
+      supabaseUrl: import.meta.env["VITE_SUPABASE_URL"],
+      publicId: page.public_id,
+      environment: import.meta.env as Record<string, unknown>,
+    });
+    setMode(canonicalActive ? "real" : "legacy");
+  }, [page]);
 
   useEffect(() => {
     let active = true;
@@ -134,16 +152,25 @@ function PageAnalytics() {
         setPage(ownedPage);
 
         if (mode === "legacy") {
-          const analytics = await analyticsService.getPageAnalytics(supabase, pageId, days);
-          if (active) setSummary(analytics);
+          const model = await readAnalyticsForPage({
+            supabase,
+            pageId,
+            period: analyticsPeriodFromDays(days),
+            timezone,
+          });
+          if (active) setSummary(analyticsSummaryFromReadModel(model));
         } else if (mode === "real") {
-          const bounds = realDataPeriodBounds("90d", new Date(), timezone);
-          const result = await analyticsRealDataService.getRealPageEvents(supabase, pageId, bounds);
+          const model = await readAnalyticsForPage({
+            supabase,
+            pageId,
+            period: "90d",
+            timezone,
+          });
           if (active) {
-            setRealEvents(result.events);
-            setRealRows(result.rows);
-            setRealTruncated(result.truncated);
-            setRealAvailability(inferAvailability(result.events));
+            setRealEvents(model.events);
+            setRealRows(model.rows);
+            setRealTruncated(model.truncated);
+            setRealAvailability(model.availability);
           }
         }
         if (active) setError(null);
@@ -217,6 +244,12 @@ function PageAnalytics() {
               </div>
               <p className="mt-3 max-w-2xl text-[14px] leading-relaxed text-cq-muted">{page.title}</p>
             </header>
+
+            {mode === "legacy" && summary.truncated ? (
+              <p className="mt-4 rounded-cq-lg bg-cq-blue-50 px-3 py-2 text-[12.5px] text-cq-muted">
+                Datos parciales: se alcanzó el límite de lectura de Analytics.
+              </p>
+            ) : null}
 
             {import.meta.env.DEV ? (
               <div className="mt-4 flex flex-wrap items-center gap-2 rounded-cq-lg border border-dashed border-cq-blue-200 bg-cq-blue-50/70 p-3 text-[13px]">
@@ -377,7 +410,7 @@ function PageAnalytics() {
                   icon={<Eye className="h-5 w-5" />}
                 />
                 <MetricCard
-                  label="Clics en botones"
+                  label="Clics totales"
                   value={summary.buttonClicks}
                   icon={<MousePointerClick className="h-5 w-5" />}
                 />
@@ -386,15 +419,17 @@ function PageAnalytics() {
                   value={summary.whatsappClicks}
                   icon={<span className="text-sm font-bold">WA</span>}
                 />
-                <MetricCard
-                  label="Interés en productos/servicios"
-                  value={summary.productClicks + summary.serviceClicks}
-                  icon={
-                    <span className="text-sm font-bold">
-                      {summary.productClicks + summary.serviceClicks}
-                    </span>
-                  }
-                />
+                {summary.productClicks + summary.serviceClicks > 0 ? (
+                  <MetricCard
+                    label="Interés en productos/servicios"
+                    value={summary.productClicks + summary.serviceClicks}
+                    icon={
+                      <span className="text-sm font-bold">
+                        {summary.productClicks + summary.serviceClicks}
+                      </span>
+                    }
+                  />
+                ) : null}
               </section>
             ) : null}
 

@@ -40,6 +40,7 @@ export interface AnalyticsFilters {
 
 export interface PageAnalyticsSummary {
   visits: number;
+  sessions?: number;
   buttonClicks: number;
   whatsappClicks: number;
   productClicks: number;
@@ -47,6 +48,7 @@ export interface PageAnalyticsSummary {
   topProducts: Array<{ label: string; count: number }>;
   topServices: Array<{ label: string; count: number }>;
   dailyVisits: Array<{ date: string; count: number }>;
+  truncated?: boolean;
 }
 
 export interface AggregatedAnalytics {

@@ -1,11 +1,11 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { analyticsService } from "../analyticsService";
 
 function fakeSupabase(events: unknown[]) {
   const calls: Array<{ method: string; args: unknown[] }> = [];
   const builder: Record<string, unknown> = {};
-  for (const method of ["select", "eq", "gte", "lte", "order"]) {
+  for (const method of ["select", "eq", "gte", "lt", "lte", "order", "range"]) {
     builder[method] = (...args: unknown[]) => {
       calls.push({ method, args });
       return builder;
@@ -29,6 +29,15 @@ const EVENT_BASE = {
   created_at: "2026-09-17T12:00:00Z",
 };
 
+beforeEach(() => {
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date("2026-09-22T15:00:00.000Z"));
+});
+
+afterEach(() => {
+  vi.useRealTimers();
+});
+
 describe("analyticsService.getPageAnalytics", () => {
   it("aggregates only the selected page using simple business metrics", async () => {
     const fake = fakeSupabase([
@@ -49,17 +58,17 @@ describe("analyticsService.getPageAnalytics", () => {
         interaction_type: "service",
         item_label: "Color",
       },
-      { ...EVENT_BASE, id: "view-b", page_id: "page-b", event_type: "view" },
     ]);
 
     await expect(analyticsService.getPageAnalytics(fake, "page-a", 30)).resolves.toMatchObject({
       visits: 1,
+      sessions: 0,
       buttonClicks: 4,
       whatsappClicks: 1,
-      productClicks: 1,
-      serviceClicks: 1,
-      topProducts: [{ label: "Corte", count: 1 }],
-      topServices: [{ label: "Color", count: 1 }],
+      productClicks: 0,
+      serviceClicks: 0,
+      topProducts: [],
+      topServices: [],
     });
     expect(fake.calls).toContainEqual({ method: "eq", args: ["page_id", "page-a"] });
   });

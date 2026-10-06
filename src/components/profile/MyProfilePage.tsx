@@ -266,6 +266,7 @@ export function MyProfilePage() {
             whatsappClicks={summary?.whatsappClicks ?? 0}
             interest={(summary?.productClicks ?? 0) + (summary?.serviceClicks ?? 0)}
             daily={summary?.dailyVisits ?? []}
+            truncated={analytics.truncated}
           />
         </div>
 

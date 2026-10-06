@@ -10,6 +10,12 @@ import type {
   PageAnalyticsInteraction,
   PageAnalyticsSummary,
 } from "../types/analytics";
+import {
+  ANALYTICS_READ_TIMEZONE,
+  analyticsPeriodFromDays,
+  analyticsSummaryFromReadModel,
+  readAnalyticsForPage,
+} from "./analyticsRealDataService";
 
 /**
  * Generate a simple session ID based on timestamp and random
@@ -282,56 +288,13 @@ export const analyticsService = {
     pageId: string,
     days = 30,
   ): Promise<PageAnalyticsSummary> {
-    const startDate = new Date();
-    startDate.setHours(0, 0, 0, 0);
-    startDate.setDate(startDate.getDate() - Math.max(0, days - 1));
-
-    const events = await this.getProfileAnalytics(supabase, "", {
+    const model = await readAnalyticsForPage({
+      supabase,
       pageId,
-      startDate: startDate.toISOString(),
+      period: analyticsPeriodFromDays(days),
+      timezone: ANALYTICS_READ_TIMEZONE,
     });
-    const pageEvents = events.filter((event) => event.page_id === pageId);
-    const daily = new Map<string, number>();
-    const items = {
-      product: new Map<string, number>(),
-      service: new Map<string, number>(),
-    };
-    pageEvents
-      .filter((event) => event.event_type === "view")
-      .forEach((event) => {
-        const date = event.created_at.split("T")[0] ?? event.created_at;
-        daily.set(date, (daily.get(date) ?? 0) + 1);
-      });
-
-    pageEvents.forEach((event) => {
-      if (
-        (event.interaction_type === "product" || event.interaction_type === "service") &&
-        event.item_label
-      ) {
-        const counts = items[event.interaction_type];
-        counts.set(event.item_label, (counts.get(event.item_label) ?? 0) + 1);
-      }
-    });
-
-    const rankItems = (counts: Map<string, number>) =>
-      Array.from(counts.entries())
-        .map(([label, count]) => ({ label, count }))
-        .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
-
-    return {
-      visits: pageEvents.filter((event) => event.event_type === "view").length,
-      buttonClicks: pageEvents.filter(
-        (event) => event.event_type === "link_click" || event.interaction_type === "button",
-      ).length,
-      whatsappClicks: pageEvents.filter((event) => event.interaction_type === "whatsapp").length,
-      productClicks: pageEvents.filter((event) => event.interaction_type === "product").length,
-      serviceClicks: pageEvents.filter((event) => event.interaction_type === "service").length,
-      topProducts: rankItems(items.product),
-      topServices: rankItems(items.service),
-      dailyVisits: Array.from(daily.entries())
-        .map(([date, count]) => ({ date, count }))
-        .sort((a, b) => a.date.localeCompare(b.date)),
-    };
+    return analyticsSummaryFromReadModel(model);
   },
 
   /**
