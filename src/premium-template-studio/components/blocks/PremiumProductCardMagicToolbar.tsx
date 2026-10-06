@@ -24,6 +24,7 @@ import {
 import type { CSSProperties, ReactNode } from "react";
 import type { BlockItem, TypographyOverride, UploadedAsset } from "../../types";
 import { useRender } from "../../engine/RenderContext";
+import { cardStyle } from "../../engine/styleEngine";
 import { collectionTarget, requestInspectorFocus } from "../inspector/inspectorFocus";
 
 const COLORS = [
@@ -546,7 +547,6 @@ function MagicToolbarContent({
   const ctaLabelInput = useRef<HTMLInputElement>(null);
   const ctaUrlInput = useRef<HTMLInputElement>(null);
 
-  const { cardStyle } = require("../../engine/styleEngine");
   const baseCardStyle = cardStyle(theme, blockStyle);
   const defaultBackground = baseCardStyle.backgroundColor as string;
   const defaultBorder = baseCardStyle.borderColor as string;
