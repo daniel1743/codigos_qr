@@ -65,7 +65,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <DesktopSidebar user={user} pageState={pageState} isAdmin={user?.isAdmin ?? false} />
         <div className="min-w-0 flex-1">
           <TopHeader user={user} onMenuClick={() => setDrawerOpen(true)} />
-          <main className="pb-24 lg:pb-0">{children}</main>
+          <main className="pb-28 lg:pb-0">{children}</main>
         </div>
       </div>
       <MobileDrawer

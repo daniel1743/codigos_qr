@@ -43,7 +43,7 @@ export default function MobileBottomNav({
   return (
     <nav
       aria-label="Navegación inferior"
-      className="fixed inset-x-3 bottom-[calc(14px+env(safe-area-inset-bottom))] z-30 mx-auto grid min-h-[68px] max-w-[440px] grid-cols-5 rounded-cq-2xl border border-cq-line/80 bg-white/95 p-1.5 shadow-nav backdrop-blur-sm lg:hidden"
+      className="fixed inset-x-3 bottom-[calc(14px+env(safe-area-inset-bottom))] z-30 mx-auto grid min-h-[68px] max-w-[440px] grid-cols-5 rounded-cq-2xl bg-white/95 p-1.5 shadow-nav ring-1 ring-cq-line/80 backdrop-blur-sm lg:hidden"
     >
       {items.slice(0, 4).map((item) => {
         const Icon = item.icon;
@@ -54,21 +54,30 @@ export default function MobileBottomNav({
             to={item.to as never}
             params={item.params as never}
             aria-current={active ? "page" : undefined}
-            className={`relative flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 rounded-cq-lg px-1 text-[10.5px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cq-blue-200 ${active ? "bg-cq-blue-50 text-cq-blue ring-1 ring-inset ring-cq-blue-100" : "text-cq-muted"}`}
+            className={`relative flex h-14 min-w-0 flex-col items-center justify-center gap-1 rounded-cq-lg px-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cq-blue-200 ${active ? "bg-cq-blue-50 ring-1 ring-inset ring-cq-blue-100" : ""}`}
           >
-            <Icon className="h-[21px] w-[21px]" strokeWidth={active ? 2.3 : 1.7} aria-hidden />
-            <span className="max-w-full truncate">{item.label}</span>
+            <Icon
+              className={`h-[21px] w-[21px] transition-colors ${active ? "text-cq-blue" : "text-cq-subtle"}`}
+              strokeWidth={active ? 2.3 : 1.7}
+              fill={active ? "rgba(30, 86, 224, 0.14)" : "none"}
+              aria-hidden
+            />
+            <span
+              className={`max-w-full truncate text-[10.5px] leading-none transition-colors ${active ? "font-semibold text-cq-blue" : "font-medium text-cq-muted"}`}
+            >
+              {item.label}
+            </span>
           </Link>
         );
       })}
       <button
         type="button"
         onClick={onMenuClick}
-        className="relative flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 rounded-cq-lg px-1 text-[10.5px] font-semibold text-cq-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cq-blue-200"
+        className="relative flex h-14 min-w-0 flex-col items-center justify-center gap-1 rounded-cq-lg px-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cq-blue-200"
         aria-label="Abrir menú"
       >
-        <Menu className="h-[21px] w-[21px]" strokeWidth={1.7} aria-hidden />
-        <span>Menú</span>
+        <Menu className="h-[21px] w-[21px] text-cq-subtle" strokeWidth={1.7} aria-hidden />
+        <span className="text-[10.5px] font-medium leading-none text-cq-muted">Menú</span>
       </button>
     </nav>
   );

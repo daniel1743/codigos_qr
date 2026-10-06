@@ -7,7 +7,6 @@ import {
   HelpCircle,
   Home,
   QrCode,
-  Settings,
   Shield,
   X,
 } from "lucide-react";
@@ -160,7 +159,7 @@ export default function MobileDrawer({
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
       >
-        <div className="flex min-h-[76px] shrink-0 items-center justify-between gap-3 border-b border-cq-line px-6 pt-[env(safe-area-inset-top)]">
+        <div className="flex shrink-0 items-center justify-between gap-3 px-5 pb-4 pt-[max(24px,env(safe-area-inset-top))]">
           <Link to="/profile" onClick={onClose} aria-label="Cripqer">
             <Logo
               variant="horizontal"
@@ -174,16 +173,16 @@ export default function MobileDrawer({
             type="button"
             onClick={onClose}
             aria-label="Cerrar menú"
-            className="grid h-9 w-9 place-items-center rounded-full bg-cq-canvas text-cq-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cq-blue"
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-cq-canvas text-cq-muted ring-1 ring-cq-line transition-colors hover:text-cq-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cq-blue"
           >
-            <X className="h-4 w-4" />
+            <X className="h-5 w-5" strokeWidth={1.75} />
           </button>
         </div>
         <nav
-          className="scrollbar-none flex-1 overflow-y-auto px-5 py-6"
+          className="scrollbar-none min-h-0 flex-1 overflow-y-auto px-3 py-2"
           aria-label="Menú principal"
         >
-          <p className="mb-3 px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-cq-subtle">
+          <p className="mb-2 px-3 pt-2 text-[10px] font-bold uppercase tracking-[0.18em] text-cq-subtle">
             Espacio de trabajo
           </p>
           <div className="space-y-1">
@@ -197,23 +196,51 @@ export default function MobileDrawer({
                   params={item.params as never}
                   onClick={onClose}
                   aria-current={isActive ? "page" : undefined}
-                  className={`flex min-h-12 items-center gap-3 rounded-cq-sm px-3.5 py-3 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cq-blue-200 ${isActive ? "bg-cq-blue-50 text-cq-blue" : "text-cq-muted hover:bg-cq-canvas"}`}
+                  className={`flex min-h-[60px] items-center gap-3.5 rounded-cq-lg px-3 py-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cq-blue-200 ${isActive ? "bg-cq-blue-50" : "active:bg-cq-canvas"}`}
                 >
-                  <Icon className="h-[18px] w-[18px]" strokeWidth={isActive ? 2 : 1.75} aria-hidden />
-                  <span className="flex-1">{item.label}</span>
-                  <ChevronRight className="h-4 w-4 text-cq-subtle" aria-hidden />
+                  <span
+                    className={`grid h-11 w-11 shrink-0 place-items-center rounded-cq-md text-cq-blue ${isActive ? "bg-white shadow-soft" : "bg-cq-blue-50"}`}
+                  >
+                    <Icon className="h-5 w-5" strokeWidth={isActive ? 2 : 1.75} aria-hidden />
+                  </span>
+                  <span
+                    className={`flex-1 truncate text-[15.5px] ${isActive ? "font-semibold text-cq-blue" : "font-medium text-cq-ink"}`}
+                  >
+                    {item.label}
+                  </span>
+                  <ChevronRight
+                    className={`h-4 w-4 shrink-0 ${isActive ? "text-cq-blue" : "text-cq-subtle"}`}
+                    aria-hidden
+                  />
                 </Link>
               );
             })}
           </div>
+          <div className="mx-3 my-4 h-px bg-cq-line" />
+          <ul className="space-y-0.5">
+            <li>
+              <Link
+                to="/account"
+                onClick={onClose}
+                className="flex min-h-12 items-center gap-3 rounded-cq-lg px-3 py-2 transition-colors active:bg-cq-canvas"
+              >
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-cq-xs bg-cq-canvas text-cq-muted">
+                  <HelpCircle className="h-[17px] w-[17px]" strokeWidth={1.75} aria-hidden />
+                </span>
+                <span className="flex-1 text-[14.5px] font-medium text-cq-ink">
+                  Ayuda y soporte
+                </span>
+              </Link>
+            </li>
+          </ul>
         </nav>
-        <div className="border-t border-cq-line p-5 pb-safe-bottom">
+        <div className="shrink-0 border-t border-cq-line p-3 pb-safe-bottom">
           <Link
             to="/account"
             onClick={onClose}
-            className="mb-4 flex items-center gap-3 rounded-cq-sm p-2 hover:bg-cq-canvas"
+            className="flex items-center gap-3 rounded-cq-lg bg-white p-3 ring-1 ring-cq-line transition-colors hover:bg-cq-canvas active:bg-cq-canvas"
           >
-            <span className="grid h-10 w-10 place-items-center overflow-hidden rounded-full bg-cq-blue-50 font-bold text-cq-blue">
+            <span className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-full bg-cq-blue-50 font-bold text-cq-blue">
               {user?.avatarUrl ? (
                 <img src={user.avatarUrl} alt="" className="h-full w-full object-cover" />
               ) : (
@@ -221,20 +248,12 @@ export default function MobileDrawer({
               )}
             </span>
             {/* F9: no plan/billing label — the shell has no entitlement source. */}
-            <span className="min-w-0 flex-1">
-              <span className="block truncate text-sm font-semibold text-cq-ink">
+            <span className="min-w-0 flex-1 leading-tight">
+              <span className="block truncate text-[15px] font-semibold text-cq-ink">
                 {user?.name ?? "Tu cuenta"}
               </span>
             </span>
-            <Settings className="h-4 w-4 text-cq-subtle" aria-hidden />
-          </Link>
-          <Link
-            to="/account"
-            onClick={onClose}
-            className="flex items-center gap-2 px-2 text-xs text-cq-subtle"
-          >
-            <HelpCircle className="h-4 w-4" aria-hidden />
-            Ayuda y soporte
+            <ChevronRight className="h-4 w-4 shrink-0 text-cq-subtle" aria-hidden />
           </Link>
         </div>
       </aside>

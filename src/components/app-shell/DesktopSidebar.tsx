@@ -1,5 +1,14 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { BarChart3, FileLock2, Globe2, HelpCircle, Home, QrCode, Settings, Shield } from "lucide-react";
+import {
+  BarChart3,
+  ChevronRight,
+  FileLock2,
+  Globe2,
+  HelpCircle,
+  Home,
+  QrCode,
+  Shield,
+} from "lucide-react";
 import Logo from "../brand/Logo";
 import type { ShellPageState, ShellUser } from "./AppShell";
 
@@ -40,7 +49,7 @@ function NavLink({
       to={to as never}
       params={params as never}
       aria-current={isActive ? "page" : undefined}
-      className={`flex min-h-11 items-center gap-3 rounded-cq-sm px-3.5 py-2.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cq-blue-200 ${isActive ? "bg-cq-blue-50 text-cq-blue" : "text-cq-muted hover:bg-cq-canvas hover:text-cq-blue"}`}
+      className={`flex h-10 items-center gap-3 rounded-cq-sm px-3 text-[14px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cq-blue-200 ${isActive ? "bg-cq-blue-50 text-cq-blue" : "text-cq-muted hover:bg-cq-canvas hover:text-cq-ink"}`}
     >
       <Icon className="h-[18px] w-[18px] shrink-0" strokeWidth={isActive ? 2 : 1.75} aria-hidden />
       <span className="truncate">{label}</span>
@@ -52,8 +61,8 @@ export function DesktopSidebar({ user, pageState, isAdmin }: Props) {
   const { pathname } = useLocation();
   const page = pageDestination(pageState, isAdmin);
   return (
-    <aside className="sticky top-0 hidden h-screen w-[256px] shrink-0 flex-col border-r border-cq-line bg-white lg:flex">
-      <div className="flex h-[76px] shrink-0 items-center border-b border-cq-line px-6">
+    <aside className="sticky top-0 hidden h-screen w-[256px] shrink-0 flex-col border-r border-cq-line bg-white px-5 py-6 lg:flex">
+      <div className="shrink-0 px-2">
         <Link to="/profile" aria-label="Cripqer" className="flex items-center">
           <Logo
             variant="horizontal"
@@ -65,7 +74,7 @@ export function DesktopSidebar({ user, pageState, isAdmin }: Props) {
         </Link>
       </div>
       <nav
-        className="scrollbar-none flex-1 overflow-y-auto px-4 py-6"
+        className="scrollbar-none mt-10 min-h-0 flex-1 overflow-y-auto"
         aria-label="Navegación principal"
       >
         <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-cq-subtle">
@@ -110,13 +119,17 @@ export function DesktopSidebar({ user, pageState, isAdmin }: Props) {
             />
           )}
         </div>
+        <div className="my-5 h-px bg-cq-line" />
+        <div className="space-y-1">
+          <NavLink to="/account" label="Ayuda y soporte" icon={HelpCircle} isActive={false} />
+        </div>
       </nav>
-      <div className="shrink-0 border-t border-cq-line p-4">
+      <div className="shrink-0 pt-4">
         <Link
           to="/account"
-          className="mb-3 flex items-center gap-3 rounded-cq-sm p-2 transition-colors hover:bg-cq-canvas"
+          className="flex items-center gap-3 rounded-cq-md bg-white p-2.5 ring-1 ring-cq-line transition-colors hover:bg-cq-canvas"
         >
-          <span className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-full bg-cq-blue-50 text-sm font-bold text-cq-blue">
+          <span className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-full bg-cq-blue-50 text-sm font-bold text-cq-blue">
             {user?.avatarUrl ? (
               <img src={user.avatarUrl} alt="" className="h-full w-full object-cover" />
             ) : (
@@ -124,19 +137,12 @@ export function DesktopSidebar({ user, pageState, isAdmin }: Props) {
             )}
           </span>
           {/* F9: no plan/billing label — the shell has no entitlement source. */}
-          <span className="min-w-0 flex-1">
-            <span className="block truncate text-sm font-semibold text-cq-ink">
+          <span className="min-w-0 flex-1 leading-tight">
+            <span className="block truncate text-[13.5px] font-semibold text-cq-ink">
               {user?.name ?? "Tu cuenta"}
             </span>
           </span>
-          <Settings className="h-4 w-4 shrink-0 text-cq-subtle" aria-hidden />
-        </Link>
-        <Link
-          to="/account"
-          className="flex items-center gap-2 px-2 text-xs text-cq-subtle hover:text-cq-blue"
-        >
-          <HelpCircle className="h-4 w-4" aria-hidden />
-          Ayuda y soporte
+          <ChevronRight className="h-4 w-4 shrink-0 text-cq-subtle" aria-hidden />
         </Link>
       </div>
     </aside>

@@ -11,7 +11,7 @@ export default function TopHeader({
   onMenuClick: () => void;
 }) {
   return (
-    <header className="sticky top-0 z-20 flex h-[68px] items-center justify-between border-b border-cq-line bg-white/85 px-4 backdrop-blur-md lg:px-10">
+    <header className="sticky top-0 z-20 flex h-[68px] items-center justify-between border-b border-cq-line/70 bg-white/85 px-4 backdrop-blur-md sm:px-6 lg:px-10">
       <div className="flex items-center gap-3">
         <button
           type="button"
@@ -30,7 +30,7 @@ export default function TopHeader({
             className="h-7"
           />
         </Link>
-        <p className="hidden text-sm font-medium text-cq-subtle lg:block">Inicio</p>
+        <p className="hidden text-[14px] font-semibold text-cq-ink lg:block">Inicio</p>
       </div>
       <div className="flex items-center gap-2 sm:gap-4">
         {user?.isAdmin ? <Link
