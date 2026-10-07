@@ -27,6 +27,7 @@ export function CanonicalCanvas() {
             documentKind="page"
             mode={ed.mode === "preview" ? "view" : "edit"}
             breakpoint={ed.isMobile ? "mobile" : "desktop"}
+            hideProfileChrome={ed.catalogMode}
             editing={{
               selectedCollectionItem: ed.catalogMode ? ed.selectedCollectionItem : null,
               onSelect: (id) => ed.select(id),

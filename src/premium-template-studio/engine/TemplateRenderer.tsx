@@ -94,6 +94,12 @@ export interface TemplateRendererProps {
   mode?: "edit" | "public" | undefined;
   /** Trusted owner tier from the entitlement authority; absent values are Free. */
   brandingTier?: ProductTier | undefined;
+  /**
+   * Catalog workspace only: the page-level profile cover + identity header are
+   * landing chrome, not catalog content, and are not editable there. When true
+   * they are not rendered, so the catalog starts directly with its own blocks.
+   */
+  hideProfileChrome?: boolean | undefined;
   editing?: EditingHandlers | undefined;
   onTrack?:
     | ((event: {
@@ -493,6 +499,7 @@ function TemplateRendererImpl({
   breakpoint = "desktop",
   mode = "public",
   brandingTier,
+  hideProfileChrome,
   editing,
   onTrack,
   className,
@@ -503,7 +510,13 @@ function TemplateRendererImpl({
   const banner = profile.banner;
   const showAvatar = profile.showAvatar !== false;
   const hasAuthoredHero = blocks.some((block) => block.type === "hero");
-  const fullBleed = !hasAuthoredHero && banner.enabled && banner.widthMode === "full-bleed";
+  // The catalog workspace hides the landing's profile cover + identity header:
+  // they are page chrome, not catalog content, and are not editable there. With
+  // the chrome hidden the cover never bleeds and the header never renders, so
+  // the catalog starts directly with its own blocks (header/hero then the grid).
+  const showProfileChrome = hideProfileChrome !== true;
+  const fullBleed =
+    showProfileChrome && !hasAuthoredHero && banner.enabled && banner.widthMode === "full-bleed";
   const fullBleedOverlap = fullBleed && layout.header === "overlap" && showAvatar;
 
   const isGridOrBento = layout.type === "grid" || layout.type === "bento";
@@ -657,7 +670,9 @@ function TemplateRendererImpl({
             gap: theme.spacing.section,
           }}
         >
-          {hasAuthoredHero ? null : <ProfileHeader profile={profile} layout={layout} />}
+          {hasAuthoredHero || !showProfileChrome ? null : (
+            <ProfileHeader profile={profile} layout={layout} />
+          )}
 
           <div
             style={{
