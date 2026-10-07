@@ -43,12 +43,12 @@
 
   /* Surfaces & rhythm (F1 radii + shadows). */
   --cq-on-ink: var(--cq-surface);
-  --cq-radius: var(--radius-cq-lg, 20px);
+  --cq-radius: var(--radius-cq-xl, 24px);
   --cq-radius-sm: var(--radius-cq-sm, 14px);
   --cq-radius-xs: var(--radius-cq-xs, 12px);
   --cq-shadow: var(--shadow-soft, 0 1px 2px rgba(11, 23, 51, 0.04), 0 8px 24px -16px rgba(30, 86, 224, 0.18));
   --cq-shadow-float: var(--shadow-float, 0 2px 4px rgba(11, 23, 51, 0.04), 0 24px 48px -20px rgba(30, 86, 224, 0.28));
-  --cq-gap: 16px;
+  --cq-gap: 20px;
 
   background: var(--cq-bg);
   color: var(--cq-text);
@@ -127,10 +127,10 @@
 
 .cq-header__title {
   margin: 0;
-  font-size: clamp(24px, 4.2vw, 34px);
-  font-weight: 800;
+  font-size: clamp(30px, 4.6vw, 40px);
+  font-weight: 700;
   letter-spacing: -0.035em;
-  line-height: 1.08;
+  line-height: 1.05;
   color: var(--cq-text);
 }
 
@@ -273,25 +273,18 @@
   gap: var(--cq-gap);
 }
 
-/* Premium card chrome — same recipe as F3/F4 (white surface, cq-line hairline,
-   soft float shadow, 20px radius). */
+/* Premium card chrome — same recipe as F2–F6 (white surface, cq-line hairline,
+   soft shadow, 24px Magic radius, calmer spacing). */
 .cq-card {
   background: var(--cq-surface);
   border: 1px solid var(--cq-border);
   border-radius: var(--cq-radius);
   box-shadow: var(--cq-shadow);
-  padding: 16px;
+  padding: 18px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
   min-width: 0;
-  transition: box-shadow 0.18s ease;
-}
-
-@media (hover: hover) {
-  .cq-card:hover {
-    box-shadow: var(--cq-shadow-float);
-  }
 }
 
 .cq-card__head {
@@ -303,7 +296,7 @@
 
 .cq-card__title {
   margin: 0;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
   letter-spacing: -0.01em;
   color: var(--cq-text);
@@ -693,12 +686,12 @@
 
 /* Locked / empty --------------------------------------------------------------- */
 .cq-locked {
-  border: 1px dashed var(--cq-accent-line);
+  border: 1px solid var(--cq-accent-line);
   border-radius: var(--cq-radius);
   padding: 24px 20px;
   text-align: center;
   color: var(--cq-muted);
-  background: linear-gradient(150deg, var(--cq-accent-faint), var(--cq-surface) 62%);
+  background: var(--cq-accent-faint);
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -720,10 +713,7 @@
 
 /* Brief ------------------------------------------------------------------------- */
 .cq-brief {
-  background:
-    radial-gradient(120% 150% at 100% 0%, var(--cq-gold-soft), transparent 58%),
-    linear-gradient(140deg, var(--cq-accent-soft), transparent 68%),
-    var(--cq-surface);
+  background: var(--cq-accent-faint);
   border-color: var(--cq-accent-line);
 }
 
@@ -984,16 +974,12 @@
   padding: 18px 20px;
   border-radius: var(--cq-radius);
   border: 1px solid var(--cq-border);
-  background:
-    radial-gradient(120% 160% at 0% 0%, var(--cq-accent-soft), transparent 60%),
-    var(--cq-surface);
+  background: var(--cq-surface);
   box-shadow: var(--cq-shadow);
 }
 
 .cq-welcome[data-state="spike"] {
-  background:
-    radial-gradient(120% 160% at 0% 0%, var(--cq-record-soft), transparent 62%),
-    var(--cq-surface);
+  background: var(--cq-record-soft);
 }
 
 .cq-welcome__eyebrow {

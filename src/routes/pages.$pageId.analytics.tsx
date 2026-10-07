@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import "../components/intelligent-analytics/analytics.css";
 import { AppShell } from "../components/app-shell/AppShell";
+import { CqEmptyState } from "../components/cq-ui/CqEmptyState";
+import { CqPageHeader } from "../components/cq-ui/CqPageHeader";
+import { CqPanel } from "../components/cq-ui/CqPanel";
 import { CqStatusPill } from "../components/cq-ui/CqStatusPill";
 import { Button } from "../components/ui/button";
 import { getBrowserSupabaseClient } from "../lib/supabase/client";
@@ -43,40 +46,25 @@ const EMPTY: PageAnalyticsSummary = {
   truncated: false,
 };
 
-function MetricCard({ label, value, icon }: { label: string; value: number; icon: ReactNode }) {
+/**
+ * KPI cell — same approved recipe as F3 `PerformancePanel` (value protagonist,
+ * secondary label, no per-KPI card chrome). Presentation only.
+ */
+function KpiCell({ label, value, icon }: { label: string; value: number; icon?: ReactNode }) {
   return (
-    <div className="flex items-start justify-between gap-4 rounded-cq-lg bg-cq-blue-50 p-4 sm:rounded-cq-xl sm:p-5">
-      <div className="min-w-0">
-        <p className="text-[12.5px] font-medium text-cq-muted">{label}</p>
-        <p className="mt-1.5 text-[26px] font-semibold leading-none tracking-[-0.03em] text-cq-ink tabular-nums">
-          {value.toLocaleString("es-CL")}
-        </p>
-      </div>
-      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white text-cq-blue shadow-soft">
+    <div className="min-w-0">
+      <dt className="flex items-center gap-1.5 text-[12.5px] font-medium text-cq-muted">
         {icon}
-      </span>
+        {label}
+      </dt>
+      <dd className="mt-1.5 text-[26px] font-semibold leading-none tracking-[-0.03em] text-cq-ink tabular-nums">
+        {value.toLocaleString("es-CL")}
+      </dd>
     </div>
   );
 }
 
-function Panel({
-  title,
-  children,
-  className,
-}: {
-  title: string;
-  children: ReactNode;
-  className?: string;
-}) {
-  return (
-    <section
-      className={`rounded-cq-lg border border-cq-line bg-white p-4 shadow-soft sm:rounded-cq-xl sm:p-5 ${className ?? ""}`}
-    >
-      <h3 className="text-[15px] font-semibold tracking-[-0.01em] text-cq-ink">{title}</h3>
-      <div className="mt-4">{children}</div>
-    </section>
-  );
-}
+const kpiIconClass = "h-3.5 w-3.5 shrink-0 text-cq-blue";
 
 type AnalyticsMode = "fixtures" | "real" | "legacy";
 
@@ -214,7 +202,7 @@ function PageAnalytics() {
 
   return (
     <AppShell>
-      <main className="mx-auto w-full max-w-cq-page px-4 pb-16 pt-6 sm:px-6 lg:px-10 lg:pt-10">
+      <main className="mx-auto w-full max-w-cq-page px-4 pb-16 pt-8 sm:px-6 sm:pt-10 lg:px-10 lg:pt-14">
         <Button asChild variant="ghost" size="sm" className="rounded-full">
           <Link to="/pages">
             <ArrowLeft className="mr-2 h-4 w-4" /> Volver a mis páginas
@@ -222,28 +210,37 @@ function PageAnalytics() {
         </Button>
 
         {loading ? (
-          <p className="mt-6 text-[13.5px] text-cq-muted">Cargando estadísticas…</p>
+          <p className="mt-8 text-[13.5px] text-cq-muted">Cargando estadísticas…</p>
         ) : error || !page ? (
-          <section className="mt-6 rounded-cq-lg border border-cq-line bg-white p-8 text-center text-[13.5px] shadow-soft sm:rounded-cq-xl">
+          <section className="mt-8 rounded-cq-2xl border border-cq-line bg-white p-8 text-center text-[13.5px] shadow-soft">
             <p className="text-destructive">{error ?? "No se encontró esta página."}</p>
           </section>
         ) : (
           <>
-            <header className="mt-6 min-w-0">
-              <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-cq-subtle">
-                {days === 1 ? "Hoy" : `Últimos ${days} días`}
-              </p>
-              <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2">
-                <h1 className="flex items-center gap-2 text-[26px] font-bold leading-none tracking-[-0.035em] text-cq-ink sm:text-[34px]">
-                  <BarChart3 className="h-6 w-6 text-cq-blue" /> Estadísticas
-                </h1>
-                <CqStatusPill
-                  tone={page.published ? "positive" : "neutral"}
-                  label={page.published ? "Publicada" : "Borrador"}
-                />
+            {/* Page header owns the title only for the legacy view. In fixtures/real the
+                Intelligent Analytics dashboard renders its own header, so duplicating the
+                title here would fight the Magic hierarchy. Presentation only. */}
+            {mode === "legacy" ? (
+              <div className="mt-8 min-w-0">
+                <p className="text-[12.5px] font-semibold uppercase tracking-[0.16em] text-cq-blue">
+                  {days === 1 ? "Hoy" : `Últimos ${days} días`}
+                </p>
+                <div className="mt-3">
+                  <CqPageHeader
+                    title="Analytics"
+                    description="Entiende cómo las personas encuentran e interactúan con tu página."
+                    visual="magic"
+                    pill={
+                      <CqStatusPill
+                        tone={page.published ? "positive" : "neutral"}
+                        label={page.published ? "Publicada" : "Borrador"}
+                      />
+                    }
+                    context={page.title}
+                  />
+                </div>
               </div>
-              <p className="mt-3 max-w-2xl text-[14px] leading-relaxed text-cq-muted">{page.title}</p>
-            </header>
+            ) : null}
 
             {mode === "legacy" && summary.truncated ? (
               <p className="mt-4 rounded-cq-lg bg-cq-blue-50 px-3 py-2 text-[12.5px] text-cq-muted">
@@ -370,7 +367,7 @@ function PageAnalytics() {
 
             {mode === "legacy" ? (
               <div
-                className="mt-6 flex flex-wrap items-center gap-2 rounded-cq-lg border border-cq-line bg-white p-2 shadow-soft sm:rounded-cq-xl"
+                className="mt-6 flex flex-wrap items-center gap-2 rounded-cq-2xl border border-cq-line bg-white p-2 shadow-soft"
                 aria-label="Periodo de estadísticas"
               >
                 <span
@@ -388,8 +385,8 @@ function PageAnalytics() {
                       onClick={() => setDays(range)}
                       className={
                         days === range
-                          ? "rounded-full bg-cq-blue px-3.5 py-1.5 text-[13px] font-semibold text-white shadow-soft"
-                          : "rounded-full bg-cq-blue-50 px-3.5 py-1.5 text-[13px] font-semibold text-cq-muted transition-colors hover:text-cq-ink"
+                          ? "inline-flex min-h-11 items-center justify-center whitespace-nowrap rounded-cq-xs bg-cq-blue px-3.5 text-[13px] font-semibold text-white shadow-[0_10px_24px_-10px_rgba(30,86,224,0.6)]"
+                          : "inline-flex min-h-11 items-center justify-center whitespace-nowrap rounded-cq-xs px-3.5 text-[13px] font-semibold text-cq-muted transition-colors hover:bg-cq-canvas hover:text-cq-ink"
                       }
                     >
                       {range === 1 ? "Hoy" : `Últimos ${range} días`}
@@ -400,62 +397,67 @@ function PageAnalytics() {
             ) : null}
 
             {mode === "legacy" ? (
-              <section
-                className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
-                aria-label="Resumen"
+              <CqPanel
+                visual="magic"
+                headingId="analytics-summary-heading"
+                title="Resumen"
+                className="mt-6"
               >
-                <MetricCard
-                  label="Visitas"
-                  value={summary.visits}
-                  icon={<Eye className="h-5 w-5" />}
-                />
-                <MetricCard
-                  label="Clics totales"
-                  value={summary.buttonClicks}
-                  icon={<MousePointerClick className="h-5 w-5" />}
-                />
-                <MetricCard
-                  label="Clics en WhatsApp"
-                  value={summary.whatsappClicks}
-                  icon={<span className="text-sm font-bold">WA</span>}
-                />
-                {summary.productClicks + summary.serviceClicks > 0 ? (
-                  <MetricCard
-                    label="Interés en productos/servicios"
-                    value={summary.productClicks + summary.serviceClicks}
-                    icon={
-                      <span className="text-sm font-bold">
-                        {summary.productClicks + summary.serviceClicks}
-                      </span>
-                    }
+                <dl className="grid grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-4">
+                  <KpiCell
+                    label="Visitas"
+                    value={summary.visits}
+                    icon={<Eye className={kpiIconClass} aria-hidden="true" />}
                   />
-                ) : null}
-              </section>
+                  <KpiCell
+                    label="Clics totales"
+                    value={summary.buttonClicks}
+                    icon={<MousePointerClick className={kpiIconClass} aria-hidden="true" />}
+                  />
+                  <KpiCell
+                    label="Clics en WhatsApp"
+                    value={summary.whatsappClicks}
+                    icon={<span className="text-[11px] font-bold text-cq-blue">WA</span>}
+                  />
+                  {summary.productClicks + summary.serviceClicks > 0 ? (
+                    <KpiCell
+                      label="Interés en productos/servicios"
+                      value={summary.productClicks + summary.serviceClicks}
+                    />
+                  ) : null}
+                </dl>
+              </CqPanel>
             ) : null}
 
             {mode === "legacy" && !hasEvents ? (
-              <section className="mt-6 rounded-cq-lg border border-dashed border-cq-blue-200 bg-cq-blue-50/60 p-6 text-center sm:rounded-cq-xl">
-                <h3 className="text-[15px] font-semibold tracking-[-0.01em] text-cq-ink">
-                  Todavía no hay visitas
-                </h3>
-                <p className="mx-auto mt-2 max-w-md text-[13.5px] leading-relaxed text-cq-muted">
-                  Comparte tu página o tu QR y aquí podrás ver cómo interactúan las personas.
-                </p>
-              </section>
+              <CqEmptyState
+                className="mt-6"
+                headingId="analytics-empty-heading"
+                icon={<BarChart3 className="h-6 w-6" />}
+                title="Todavía no hay visitas"
+                description="Comparte tu página o tu QR y aquí podrás ver cómo interactúan las personas."
+              />
             ) : mode === "legacy" ? (
               <div className="mt-6 grid gap-4 lg:grid-cols-2">
-                <Panel title="Visitas por día">
-                  <div className="space-y-2">
+                <CqPanel visual="magic" headingId="analytics-daily-heading" title="Visitas por día">
+                  <ul className="divide-y divide-cq-line">
                     {summary.dailyVisits.map((item) => (
-                      <div key={item.date} className="flex items-center justify-between text-[13px]">
+                      <li
+                        key={item.date}
+                        className="flex items-center justify-between gap-4 py-2.5 text-[13px] first:pt-0 last:pb-0"
+                      >
                         <span className="text-cq-muted">{item.date}</span>
                         <span className="font-semibold text-cq-ink tabular-nums">{item.count}</span>
-                      </div>
+                      </li>
                     ))}
-                  </div>
-                </Panel>
+                  </ul>
+                </CqPanel>
                 {summary.topProducts.length > 0 || summary.topServices.length > 0 ? (
-                  <Panel title="Interés por producto o servicio">
+                  <CqPanel
+                    visual="magic"
+                    headingId="analytics-interest-heading"
+                    title="Interés por producto o servicio"
+                  >
                     <div className="space-y-4 text-[13px]">
                       {summary.topProducts.length > 0 ? (
                         <div>
@@ -494,7 +496,7 @@ function PageAnalytics() {
                         </div>
                       ) : null}
                     </div>
-                  </Panel>
+                  </CqPanel>
                 ) : null}
               </div>
             ) : null}
