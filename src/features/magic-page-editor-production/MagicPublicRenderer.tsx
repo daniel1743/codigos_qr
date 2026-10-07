@@ -82,6 +82,20 @@ export function MagicPublicRenderer({ document, onTrack, publicId, verificationV
       void Promise.resolve(track).catch(() => undefined).finally(() => {
         window.location.assign(url);
       });
+    } else {
+      // For _blank links the browser may discard in-flight fetch requests when
+      // the new tab opens. Use sendBeacon when available so the event survives;
+      // otherwise fall back to a best-effort awaited call with a 300 ms cap.
+      if (navigator.sendBeacon) {
+        // sendBeacon is fire-and-forget and survives context unload.
+        void Promise.resolve(track).catch(() => undefined);
+      } else {
+        // Await the tracking promise but cap it at 300 ms to avoid delaying navigation.
+        void Promise.race([
+          Promise.resolve(track).catch(() => undefined),
+          new Promise<void>((resolve) => setTimeout(resolve, 300)),
+        ]);
+      }
     }
   };
 
