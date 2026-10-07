@@ -451,6 +451,7 @@ export function MagicProductionEditorHost({
           fillParent
           catalog={catalog}
           {...(catalogBackHref ? { catalogBackHref } : {})}
+          platformHomeHref={PLATFORM_HOME_HREF}
           catalogAccess={catalogAccess}
           {...(editorSession.kind === "MAGIC_V1"
             ? {

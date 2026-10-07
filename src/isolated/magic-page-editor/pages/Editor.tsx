@@ -10,12 +10,15 @@ import { BlockPicker } from "../components/editor/BlockPicker";
 import { PageSettings } from "../components/editor/PageSettings";
 import { CanonicalCanvas } from "./CanonicalReadOnlyPage";
 
-export function EditorPage() {
+export function EditorPage({ platformHomeHref }: { platformHomeHref?: string } = {}) {
   const ed = useEditor();
   const preview = ed.mode === "preview";
   return (
     <div className={`flex h-full w-full flex-col bg-canvas${preview ? " fixed inset-0 z-[100]" : ""}`} data-cq-preview={preview ? "true" : undefined}>
-      {!preview && (ed.catalogMode ? <CatalogTopBar /> : <TopBar />)}
+      {!preview &&
+        (ed.catalogMode ?
+          <CatalogTopBar /> :
+          <TopBar {...(platformHomeHref ? { platformHomeHref } : {})} />)}
       <StateTour />
       <main className="relative min-h-0 flex-1">
         {ed.canonicalDocument ? (

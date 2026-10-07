@@ -37,6 +37,12 @@ export interface MagicEditorAppProps {
    * navigation above the editor; the parent then owns a definite height.
    */
   fillParent?: boolean;
+  /**
+   * Destination for the toolbar's brand mark, handed down by the embedding
+   * platform shell. Left unset in standalone use (labs, prototypes), where the
+   * editor adds no navigation of its own.
+   */
+  platformHomeHref?: string;
 }
 
 /** Shared Magic-facing UI boundary for both Magic and canonical page documents. */
@@ -57,6 +63,7 @@ export function MagicEditorApp({
   catalog = false,
   catalogBackHref,
   fillParent = false,
+  platformHomeHref,
 }: MagicEditorAppProps) {
   return (
     // `h-screen` by default: the editor owns the viewport when it is the route's
@@ -84,7 +91,7 @@ export function MagicEditorApp({
         catalog={catalog}
         {...(catalogBackHref ? { catalogBackHref } : {})}
       >
-        <EditorPage />
+        <EditorPage {...(platformHomeHref ? { platformHomeHref } : {})} />
         <Toaster
           position="bottom-center"
           toastOptions={{ style: { fontFamily: "Inter, sans-serif" } }}
