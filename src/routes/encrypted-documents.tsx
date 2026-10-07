@@ -117,7 +117,11 @@ function encryptionLabel(level: EncryptionLevel | string | undefined): string {
  * An expiry date in the past or a reached download cap blocks the link.
  * Nothing else is invented.
  */
-function documentStatus(doc: EncryptedDocument): { tone: CqStatusTone; label: string; active: boolean } {
+function documentStatus(doc: EncryptedDocument): {
+  tone: CqStatusTone;
+  label: string;
+  active: boolean;
+} {
   const isExpired = Boolean(doc.expire_at && new Date(doc.expire_at) < new Date());
   const isLimitReached = Boolean(doc.max_downloads && doc.current_downloads >= doc.max_downloads);
   if (doc.revoked) return { tone: "danger", label: "Revocado", active: false };
@@ -159,7 +163,7 @@ function EncryptedDocumentsPage() {
   if (loading) {
     return (
       <AppShell>
-        <main className="mx-auto w-full max-w-cq-page px-4 pb-16 pt-6 sm:px-6 lg:px-10 lg:pt-10">
+        <main className="mx-auto w-full max-w-cq-page px-4 pb-16 pt-8 sm:px-6 sm:pt-10 lg:px-10 lg:pt-14">
           <p className="text-sm text-cq-muted" role="status">
             Cargando tus documentos…
           </p>
@@ -171,7 +175,7 @@ function EncryptedDocumentsPage() {
   if (!session) {
     return (
       <AppShell>
-        <main className="mx-auto w-full max-w-cq-page px-4 pb-16 pt-6 sm:px-6 lg:px-10 lg:pt-10">
+        <main className="mx-auto w-full max-w-cq-page px-4 pb-16 pt-8 sm:px-6 sm:pt-10 lg:px-10 lg:pt-14">
           <p className="text-sm text-cq-muted" role="status">
             Redirigiendo a iniciar sesión…
           </p>
@@ -339,17 +343,18 @@ function EncryptedDocumentsApp({ userId }: { userId: string }) {
 
   return (
     <AppShell>
-      <main className="mx-auto w-full max-w-cq-page px-4 pb-16 pt-6 sm:px-6 lg:px-10 lg:pt-10">
+      <main className="mx-auto w-full max-w-cq-page px-4 pb-16 pt-8 sm:px-6 sm:pt-10 lg:px-10 lg:pt-14">
         <CqPageHeader
           title="Documentos encriptados"
           description="Cifra archivos en el navegador y compártelos con un enlace privado de un solo uso."
+          visual="magic"
           context={
             <span className="inline-flex items-center gap-1.5">
               <Lock className="h-3.5 w-3.5" aria-hidden="true" />
               {MAX_ENCRYPTED_DOCUMENT_SIZE_LABEL} por archivo · el cifrado ocurre antes de subir
             </span>
           }
-          pill={
+          actions={
             <div className={segmentShellClass} role="group" aria-label="Vista de documentos">
               <button
                 type="button"
@@ -373,7 +378,7 @@ function EncryptedDocumentsApp({ userId }: { userId: string }) {
           }
         />
 
-        <div className="mt-6 sm:mt-10">
+        <div className="mt-8 sm:mt-10">
           {view === "list" ? (
             <DocumentsList
               userId={userId}
@@ -525,7 +530,7 @@ function DocumentsList({
       {/* Stats — honest labels for the real counters (no storage/quota guesses). */}
       <div className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-2 sm:gap-4 lg:grid-cols-4">
         {stats.map(({ id, label, value, icon: Icon }) => (
-          <CqPanel key={id} as="div" className="p-4 sm:p-6">
+          <CqPanel key={id} as="div" visual="magic" className="p-4 sm:p-6">
             <div className="flex items-center gap-3">
               <CqIconTile size="sm" className="h-10 w-10 rounded-cq-sm sm:h-12 sm:w-12">
                 <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
@@ -559,6 +564,7 @@ function DocumentsList({
         /* Documents list — one premium panel, self-padded rows (Magic parity). */
         <CqPanel
           variant="flush"
+          visual="magic"
           headingId="documents-list-heading"
           title="Tus documentos"
           actions={
@@ -633,7 +639,10 @@ function DocumentsList({
                   </button>
 
                   {isExpanded && (
-                    <div id={detailsId} className="mt-4 rounded-cq-md bg-cq-canvas p-4 ring-1 ring-inset ring-cq-line">
+                    <div
+                      id={detailsId}
+                      className="mt-4 rounded-cq-md bg-cq-canvas p-4 ring-1 ring-inset ring-cq-line"
+                    >
                       <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-[13px]">
                         <div>
                           <dt className="text-[11.5px] text-cq-subtle">Seguridad</dt>
@@ -643,7 +652,9 @@ function DocumentsList({
                               <span className="ml-1 font-medium text-cq-muted">· 2FA</span>
                             )}
                             {doc.password_required && (
-                              <span className="ml-1 font-medium text-cq-muted">· Con contraseña</span>
+                              <span className="ml-1 font-medium text-cq-muted">
+                                · Con contraseña
+                              </span>
                             )}
                           </dd>
                         </div>
@@ -735,12 +746,18 @@ function DocumentsList({
                             rel="noreferrer"
                             className={`${rowActionClass} no-underline`}
                           >
-                            <ExternalLink className="h-3.5 w-3.5 text-cq-muted" aria-hidden="true" />
+                            <ExternalLink
+                              className="h-3.5 w-3.5 text-cq-muted"
+                              aria-hidden="true"
+                            />
                             Abrir enlace
                           </a>
                         ) : (
                           <button type="button" className={rowActionClass} disabled>
-                            <ExternalLink className="h-3.5 w-3.5 text-cq-muted" aria-hidden="true" />
+                            <ExternalLink
+                              className="h-3.5 w-3.5 text-cq-muted"
+                              aria-hidden="true"
+                            />
                             Abrir enlace
                           </button>
                         )}
@@ -760,187 +777,159 @@ function DocumentsList({
             })}
           </div>
 
-          {/* Desktop: real table, same status/encryption pills. */}
-          <div className="hidden overflow-x-auto lg:block">
-            <table className="w-full border-collapse text-left">
-              <thead>
-                <tr className="border-b border-cq-line bg-cq-canvas text-[11px] font-bold uppercase tracking-[0.08em] text-cq-subtle">
-                  <th scope="col" className="px-5 py-3 font-bold">
-                    Documento
-                  </th>
-                  <th scope="col" className="px-5 py-3 font-bold">
-                    Seguridad
-                  </th>
-                  <th scope="col" className="px-5 py-3 font-bold">
-                    Estado
-                  </th>
-                  <th scope="col" className="px-5 py-3 font-bold">
-                    Expiración
-                  </th>
-                  <th scope="col" className="px-5 py-3 font-bold">
-                    Descargas
-                  </th>
-                  <th scope="col" className="px-5 py-3 text-right font-bold">
-                    Acciones
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-cq-line text-[13px]">
-                {documents.map((doc) => {
-                  const status = documentStatus(doc);
-                  const isExpired = doc.expire_at && new Date(doc.expire_at) < new Date();
-                  const isLimitReached =
-                    doc.max_downloads && doc.current_downloads >= doc.max_downloads;
-                  const isLinkActive = status.active;
-                  const sessionPassword = documentPasswords[doc.id];
+          {/* Desktop: Magic card rows — same real data and actions, far less density. */}
+          <ul className="hidden divide-y divide-cq-line lg:block">
+            {documents.map((doc) => {
+              const status = documentStatus(doc);
+              const isExpired = Boolean(doc.expire_at && new Date(doc.expire_at) < new Date());
+              const isLimitReached = Boolean(
+                doc.max_downloads && doc.current_downloads >= doc.max_downloads,
+              );
+              const isLinkActive = status.active;
+              const sessionPassword = documentPasswords[doc.id];
+              const fileTheme = getFileTypeQrTheme(normalizeDocumentCategory(doc.file_type));
+              const createdLabel = doc.created_at
+                ? new Date(doc.created_at).toLocaleDateString("es-CL", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                  })
+                : null;
 
-                  return (
-                    <tr key={doc.id} className="transition-colors hover:bg-cq-canvas">
-                      <td className="px-5 py-4">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className="grid h-10 w-10 shrink-0 place-items-center rounded-cq-sm ring-1 ring-cq-line"
-                            style={{
-                              backgroundColor: getFileTypeQrTheme(
-                                normalizeDocumentCategory(doc.file_type),
-                              ).accentBackground,
-                            }}
-                          >
-                            <FileTypeIcon fileType={doc.file_type} />
-                          </div>
-                          <div className="min-w-0">
-                            <p className="max-w-[240px] truncate text-[14px] font-semibold text-cq-ink">
-                              {doc.name}
-                            </p>
-                            <p className="max-w-[240px] truncate text-[12px] text-cq-muted">
-                              {doc.original_filename} •{" "}
-                              {EncryptionService.formatFileSize(doc.file_size_bytes)}
-                            </p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-5 py-4">
-                        <div className="flex flex-col items-start gap-1.5">
-                          <CqStatusPill
-                            tone={encryptionTone(doc.encryption_level)}
-                            label={encryptionLabel(doc.encryption_level)}
-                          />
-                          {doc.password_required ? (
-                            <span className="inline-flex items-center gap-1 text-[11.5px] font-medium text-cq-muted">
-                              <Lock className="h-3.5 w-3.5" aria-hidden="true" />
-                              Con contraseña
-                            </span>
-                          ) : null}
-                        </div>
-                      </td>
-                      <td className="px-5 py-4">
-                        <CqStatusPill tone={status.tone} label={status.label} />
-                      </td>
-                      <td className="px-5 py-4">
-                        {doc.expire_at ? (
-                          <div className="flex flex-col">
-                            <span
-                              className={`text-[12.5px] ${isExpired ? "font-semibold text-red-600" : "text-cq-ink"}`}
-                            >
-                              {new Date(doc.expire_at).toLocaleDateString()}
-                            </span>
-                            <span className="text-[11px] text-cq-subtle">
-                              {isExpired
-                                ? "Expirado"
-                                : new Date(doc.expire_at).toLocaleTimeString()}
-                            </span>
-                          </div>
-                        ) : (
-                          <span className="text-[12.5px] text-cq-muted">Nunca expira</span>
-                        )}
-                      </td>
-                      <td className="px-5 py-4">
-                        <div className="flex flex-col">
-                          <span
-                            className={`text-[12.5px] font-semibold tabular-nums ${isLimitReached ? "text-red-600" : "text-cq-ink"}`}
-                          >
-                            {doc.current_downloads} / {doc.max_downloads || "∞"}
-                          </span>
-                          {doc.one_time_download ? (
-                            <span className="text-[11px] font-medium text-cq-muted">
-                              Un solo uso
-                            </span>
-                          ) : null}
-                        </div>
-                      </td>
-                      <td className="px-5 py-4 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          <button
-                            type="button"
-                            className={iconControlClass}
-                            disabled={!isLinkActive}
-                            onClick={() => {
-                              const url = `${CANONICAL_PUBLIC_ORIGIN}/d/${doc.short_url}`;
-                              navigator.clipboard.writeText(url);
-                              toast.success("Enlace copiado al portapapeles");
-                            }}
-                            aria-label={`Copiar enlace de ${doc.name}`}
-                            title="Copiar enlace"
-                          >
-                            <Copy className="h-4 w-4" />
-                          </button>
-                          {doc.password_required ? (
-                            <button
-                              type="button"
-                              className={iconControlClass}
-                              disabled={!sessionPassword}
-                              onClick={() => {
-                                if (!sessionPassword) return;
-                                navigator.clipboard.writeText(sessionPassword);
-                                toast.success("Contraseña copiada al portapapeles");
-                              }}
-                              aria-label={`Copiar contraseña de ${doc.name}`}
-                              title={
-                                sessionPassword
-                                  ? "Copiar contraseña"
-                                  : "Contraseña no disponible en esta sesión"
-                              }
-                            >
-                              <Key className="h-4 w-4" />
-                            </button>
-                          ) : null}
-                          <button
-                            type="button"
-                            className={iconControlClass}
-                            disabled={!isLinkActive}
-                            onClick={() => setSelectedQrDoc(doc)}
-                            aria-label={`Ver código QR de ${doc.name}`}
-                            title="Ver código QR"
-                          >
-                            <QrCodeIcon className="h-4 w-4" />
-                          </button>
-                          <a
-                            href={`${CANONICAL_PUBLIC_ORIGIN}/d/${doc.short_url}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className={iconControlClass}
-                            aria-label={`Abrir ${doc.name}`}
-                            title="Abrir enlace"
-                          >
-                            <ExternalLink className="h-4 w-4" />
-                          </a>
-                          <button
-                            type="button"
-                            className={`${iconControlClass} hover:bg-red-50 hover:text-red-600`}
-                            onClick={() => handleDelete(doc.id, doc.encrypted_file_path)}
-                            aria-label={`Eliminar ${doc.name}`}
-                            title="Eliminar documento"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+              return (
+                <li
+                  key={doc.id}
+                  className="flex min-w-0 gap-4 px-5 py-5 transition-colors hover:bg-cq-canvas sm:px-6"
+                >
+                  <div
+                    className="grid h-12 w-12 shrink-0 place-items-center rounded-cq-md ring-1 ring-cq-line"
+                    style={{ backgroundColor: fileTheme.accentBackground }}
+                  >
+                    <FileTypeIcon fileType={doc.file_type} className="h-6 w-6" />
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <div className="flex min-w-0 items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="truncate text-[15px] font-semibold text-cq-ink">{doc.name}</p>
+                        <p className="mt-0.5 truncate text-[12.5px] text-cq-muted">
+                          <span className="font-semibold text-cq-ink/70">{fileTheme.label}</span>
+                          {" · "}
+                          {EncryptionService.formatFileSize(doc.file_size_bytes)}
+                          {doc.original_filename && doc.original_filename !== doc.name
+                            ? ` · ${doc.original_filename}`
+                            : ""}
+                          {createdLabel ? ` · Creado el ${createdLabel}` : ""}
+                        </p>
+                      </div>
+                      <CqStatusPill tone={status.tone} label={status.label} />
+                    </div>
+
+                    <div className="mt-2.5 flex min-w-0 flex-wrap items-center gap-x-4 gap-y-1.5 text-[11.5px] text-cq-subtle">
+                      <CqStatusPill
+                        tone={encryptionTone(doc.encryption_level)}
+                        label={encryptionLabel(doc.encryption_level)}
+                      />
+                      <span
+                        className={`inline-flex items-center gap-1 ${isExpired ? "font-semibold text-red-600" : ""}`}
+                      >
+                        <Clock className="h-3.5 w-3.5" aria-hidden="true" />
+                        {isExpired
+                          ? "Expirado"
+                          : doc.expire_at
+                            ? `Expira ${new Date(doc.expire_at).toLocaleDateString()}`
+                            : "Nunca expira"}
+                      </span>
+                      <span
+                        className={`inline-flex items-center gap-1 tabular-nums ${isLimitReached ? "font-semibold text-red-600" : ""}`}
+                      >
+                        <Download className="h-3.5 w-3.5" aria-hidden="true" />
+                        {doc.current_downloads} / {doc.max_downloads || "∞"} descargas
+                      </span>
+                      {doc.password_required ? (
+                        <span className="inline-flex items-center gap-1">
+                          <Lock className="h-3.5 w-3.5" aria-hidden="true" />
+                          {sessionPassword ? "Contraseña disponible" : "Con contraseña"}
+                        </span>
+                      ) : null}
+                      {doc.one_time_download ? <span>Un solo uso</span> : null}
+                    </div>
+
+                    <p className="mt-3 flex h-10 min-w-0 items-center gap-1 truncate rounded-cq-sm bg-cq-canvas px-3.5 text-[13px] ring-1 ring-inset ring-cq-line">
+                      <span className="shrink-0 text-cq-subtle">{CANONICAL_PUBLIC_ORIGIN}/d/</span>
+                      <span className="min-w-0 truncate font-semibold text-cq-ink">
+                        {doc.short_url}
+                      </span>
+                    </p>
+
+                    <div className="mt-3 grid grid-cols-2 gap-2 sm:inline-flex sm:flex-wrap sm:items-center">
+                      <button
+                        type="button"
+                        className={rowActionClass}
+                        disabled={!isLinkActive}
+                        onClick={() => {
+                          const url = `${CANONICAL_PUBLIC_ORIGIN}/d/${doc.short_url}`;
+                          navigator.clipboard.writeText(url);
+                          toast.success("Enlace copiado al portapapeles");
+                        }}
+                      >
+                        <Copy className="h-3.5 w-3.5 text-cq-muted" aria-hidden="true" />
+                        Copiar enlace
+                      </button>
+                      {doc.password_required ? (
+                        <button
+                          type="button"
+                          className={rowActionClass}
+                          disabled={!sessionPassword}
+                          onClick={() => {
+                            if (!sessionPassword) return;
+                            navigator.clipboard.writeText(sessionPassword);
+                            toast.success("Contraseña copiada al portapapeles");
+                          }}
+                        >
+                          <Key className="h-3.5 w-3.5 text-cq-muted" aria-hidden="true" />
+                          Copiar contraseña
+                        </button>
+                      ) : null}
+                      <button
+                        type="button"
+                        className={rowActionClass}
+                        disabled={!isLinkActive}
+                        onClick={() => setSelectedQrDoc(doc)}
+                      >
+                        <QrCodeIcon className="h-3.5 w-3.5 text-cq-muted" aria-hidden="true" />
+                        Ver código QR
+                      </button>
+                      {isLinkActive ? (
+                        <a
+                          href={`${CANONICAL_PUBLIC_ORIGIN}/d/${doc.short_url}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className={`${rowActionClass} no-underline`}
+                        >
+                          <ExternalLink className="h-3.5 w-3.5 text-cq-muted" aria-hidden="true" />
+                          Abrir enlace
+                        </a>
+                      ) : (
+                        <button type="button" className={rowActionClass} disabled>
+                          <ExternalLink className="h-3.5 w-3.5 text-cq-muted" aria-hidden="true" />
+                          Abrir enlace
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        className={deleteActionClass}
+                        onClick={() => handleDelete(doc.id, doc.encrypted_file_path)}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                        Eliminar documento
+                      </button>
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
         </CqPanel>
       )}
 
@@ -1366,24 +1355,23 @@ function CreateDocument({ userId, onSuccess, onPasswordCaptured }: CreateDocumen
         {/* Left Column - Upload & Basic Info */}
         <div className="lg:col-span-2 space-y-6">
           {/* Upload Area */}
-          <div className="rounded-cq-xl border border-cq-line bg-white p-5 shadow-soft sm:p-6">
-            <h3 className="text-[15px] font-bold tracking-[-0.01em] flex items-center gap-2 text-cq-ink">
-              <Upload className="w-5 h-5" />
-              Subir Archivo
-            </h3>
-
+          <CqPanel
+            visual="magic"
+            title="Subir archivo"
+            icon={<Upload className="h-5 w-5 text-cq-blue" />}
+          >
             {!file ? (
-              <label className="flex h-64 w-full cursor-pointer flex-col items-center justify-center rounded-cq-xl border-2 border-dashed border-cq-line bg-cq-canvas p-5 text-center transition-colors hover:border-cq-blue-200 hover:bg-cq-blue-50">
-                <div className="flex flex-col items-center justify-center">
-                  <Upload className="mb-3 h-8 w-8 text-cq-muted" />
-                  <p className="mb-2 text-[14px] font-semibold text-cq-ink">
-                    Arrastra un archivo o haz clic para subirlo
-                  </p>
-                  <p className="text-[12.5px] text-cq-muted">
-                    Excel, PDF, Word, PowerPoint, imágenes y ZIP. Hasta{" "}
-                    {MAX_ENCRYPTED_DOCUMENT_SIZE_LABEL} por archivo.
-                  </p>
-                </div>
+              <label className="flex h-64 w-full cursor-pointer flex-col items-center justify-center gap-3 rounded-cq-2xl border-2 border-dashed border-cq-line bg-cq-canvas p-6 text-center transition-colors hover:border-cq-blue-200 hover:bg-cq-blue-50">
+                <span className="grid h-12 w-12 place-items-center rounded-cq-md bg-white text-cq-blue ring-1 ring-cq-line">
+                  <Upload className="h-6 w-6" aria-hidden="true" />
+                </span>
+                <p className="text-[15px] font-semibold text-cq-ink">
+                  Arrastra un archivo o haz clic para subirlo
+                </p>
+                <p className="max-w-[420px] text-[12.5px] leading-relaxed text-cq-muted">
+                  Excel, PDF, Word, PowerPoint, imágenes y ZIP. Hasta{" "}
+                  {MAX_ENCRYPTED_DOCUMENT_SIZE_LABEL} por archivo.
+                </p>
                 <input
                   type="file"
                   className="hidden"
@@ -1393,65 +1381,70 @@ function CreateDocument({ userId, onSuccess, onPasswordCaptured }: CreateDocumen
               </label>
             ) : (
               <div
-                className="flex min-w-0 items-center gap-4 rounded-cq-md p-4 ring-1 ring-inset ring-cq-line"
+                className="flex min-w-0 items-center gap-4 rounded-cq-lg p-4 ring-1 ring-inset ring-cq-line"
                 style={{ backgroundColor: fileTheme.accentBackground }}
               >
-                <div className="grid h-16 w-16 shrink-0 place-items-center rounded-cq-sm bg-white shadow-soft ring-1 ring-cq-line">
+                <div className="grid h-16 w-16 shrink-0 place-items-center rounded-cq-md bg-white shadow-soft ring-1 ring-cq-line">
                   <FileTypeIcon fileType={fileTypeInfo?.category || "other"} />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold truncate">{file.name}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-semibold">{file.name}</p>
                   <p className="text-[13px] text-cq-muted">
                     {fileTypeInfo?.label} • {EncryptionService.formatFileSize(file.size)}
                   </p>
                 </div>
-                <button type="button" className={cqIconButton} onClick={() => setFile(null)} aria-label="Quitar archivo seleccionada">
+                <button
+                  type="button"
+                  className={cqIconButton}
+                  onClick={() => setFile(null)}
+                  aria-label="Quitar archivo seleccionado"
+                >
                   <Trash2 className="h-4 w-4" />
                 </button>
               </div>
             )}
-          </div>
+          </CqPanel>
 
           {/* Basic Info */}
-          <div className="rounded-cq-xl border border-cq-line bg-white p-5 shadow-soft space-y-6 sm:p-6">
-            <h3 className="text-[15px] font-bold tracking-[-0.01em] flex items-center gap-2 text-cq-ink">
-              <FileText className="h-5 w-5 text-cq-blue" />
-              Información del Documento
-            </h3>
+          <CqPanel
+            visual="magic"
+            title="Información del documento"
+            icon={<FileText className="h-5 w-5 text-cq-blue" />}
+          >
+            <div className="space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="name">Nombre del Documento *</Label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="Ej: Nómina Enero 2026"
+                  required
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="name">Nombre del Documento *</Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="Ej: Nómina Enero 2026"
-                required
-              />
+              <div className="space-y-2">
+                <Label htmlFor="description">Descripción (opcional)</Label>
+                <Textarea
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Describe el contenido del documento..."
+                  rows={3}
+                />
+              </div>
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="description">Descripción (opcional)</Label>
-              <Textarea
-                id="description"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Describe el contenido del documento..."
-                rows={3}
-              />
-            </div>
-          </div>
+          </CqPanel>
         </div>
 
         {/* Right Column - Security Settings */}
         <div className="space-y-6">
           {/* Encryption Level */}
-          <div className="rounded-cq-xl border border-cq-line bg-white p-5 shadow-soft space-y-6 sm:p-6">
-            <h3 className="text-[15px] font-bold tracking-[-0.01em] flex items-center gap-2 text-cq-ink">
-              <ShieldCheck className="w-5 h-5 text-cq-blue" />
-              Nivel de Seguridad
-            </h3>
-
+          <CqPanel
+            visual="magic"
+            title="Nivel de seguridad"
+            icon={<ShieldCheck className="h-5 w-5 text-cq-blue" />}
+          >
             <div className="space-y-3">
               {[
                 {
@@ -1488,7 +1481,7 @@ function CreateDocument({ userId, onSuccess, onPasswordCaptured }: CreateDocumen
                         encryption_level: level.value as EncryptionLevel,
                       })
                     }
-                    className={`w-full flex items-center gap-3 p-3 rounded-lg border-2 transition-all ${
+                    className={`w-full flex items-center gap-3 p-3 rounded-cq-md border-2 transition-all ${
                       isActive
                         ? "border-cq-blue bg-cq-blue-50 shadow-soft"
                         : "border-cq-line hover:border-cq-blue-200"
@@ -1504,15 +1497,14 @@ function CreateDocument({ userId, onSuccess, onPasswordCaptured }: CreateDocumen
                 );
               })}
             </div>
-          </div>
+          </CqPanel>
 
           {/* Password Protection */}
-          <div className="rounded-cq-xl border border-cq-line bg-white p-5 shadow-soft space-y-6 sm:p-6">
-            <h3 className="text-[15px] font-bold tracking-[-0.01em] flex items-center gap-2 text-cq-ink">
-              <Key className="w-5 h-5 text-amber-600" />
-              Protección con Contraseña
-            </h3>
-
+          <CqPanel
+            visual="magic"
+            title="Protección con contraseña"
+            icon={<Key className="h-5 w-5 text-amber-600" />}
+          >
             <div className="space-y-2">
               <Label htmlFor="password">Contraseña (opcional pero recomendado)</Label>
               <div className="flex items-center gap-2">
@@ -1558,22 +1550,19 @@ function CreateDocument({ userId, onSuccess, onPasswordCaptured }: CreateDocumen
                 con el destinatario.
               </p>
             </div>
-          </div>
+          </CqPanel>
 
           {/* Access Control */}
-          <div className="rounded-cq-xl border border-cq-line bg-white p-5 shadow-soft space-y-6 sm:p-6">
-            <h3 className="text-[15px] font-bold tracking-[-0.01em] flex items-center gap-2 text-cq-ink">
-              <Clock className="h-5 w-5 text-cq-blue" />
-              Control de Acceso
-            </h3>
-
+          <CqPanel
+            visual="magic"
+            title="Control de acceso"
+            icon={<Clock className="h-5 w-5 text-cq-blue" />}
+          >
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <Label>Descarga única</Label>
-                  <p className="text-[12.5px] text-cq-muted">
-                    Auto-destruir después de 1 descarga
-                  </p>
+                  <p className="text-[12.5px] text-cq-muted">Auto-destruir después de 1 descarga</p>
                 </div>
                 <Switch
                   checked={formData.one_time_download || false}
@@ -1631,7 +1620,7 @@ function CreateDocument({ userId, onSuccess, onPasswordCaptured }: CreateDocumen
                 </Select>
               </div>
             </div>
-          </div>
+          </CqPanel>
 
           {/* Submit Button */}
           <button
