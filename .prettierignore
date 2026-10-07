@@ -6,3 +6,14 @@ pnpm-lock.yaml
 package-lock.json
 bun.lock
 routeTree.gen.ts
+
+# --- CRIPQER_APPROVED_CHAT_LANDING_EXACT_PORT_V1 -------------------------
+# The approved conversational landing and its read-only Magic Patterns
+# source of truth are byte-controlled for exact-port parity: the ported
+# files were copied verbatim from the reference (plus 11 documented,
+# type-only edits) and their SHA-256 hashes are tracked. Running prettier
+# over them would rewrite them and break hash parity with the approved
+# reference. See CRIPQER_APPROVED_CHAT_LANDING_PORT_CLOSE_OUT_V1.md.
+src/features/approved-chat-landing
+src/features/approved-chat-landing/styles/landing.css
+.approved-chat-landing-reference

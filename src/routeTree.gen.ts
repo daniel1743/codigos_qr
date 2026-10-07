@@ -18,6 +18,8 @@ import { Route as CorreoConfirmadoRouteImport } from './routes/correo-confirmado
 import { Route as EditorRouteImport } from './routes/editor'
 import { Route as EncryptedDocumentsRouteImport } from './routes/encrypted-documents'
 import { Route as EngineLabRouteImport } from './routes/engine-lab'
+import { Route as HelpRouteImport } from './routes/help'
+import { Route as LandingChatParityRouteImport } from './routes/landing-chat-parity'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as OnboardingPreviewRouteImport } from './routes/onboarding-preview'
 import { Route as OnboardingTestRouteImport } from './routes/onboarding-test'
@@ -89,6 +91,16 @@ const EncryptedDocumentsRoute = EncryptedDocumentsRouteImport.update({
 const EngineLabRoute = EngineLabRouteImport.update({
   id: '/engine-lab',
   path: '/engine-lab',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HelpRoute = HelpRouteImport.update({
+  id: '/help',
+  path: '/help',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LandingChatParityRoute = LandingChatParityRouteImport.update({
+  id: '/landing-chat-parity',
+  path: '/landing-chat-parity',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -238,6 +250,8 @@ export interface FileRoutesByFullPath {
   '/editor': typeof EditorRoute
   '/encrypted-documents': typeof EncryptedDocumentsRoute
   '/engine-lab': typeof EngineLabRoute
+  '/help': typeof HelpRoute
+  '/landing-chat-parity': typeof LandingChatParityRoute
   '/login': typeof LoginRoute
   '/onboarding-preview': typeof OnboardingPreviewRoute
   '/onboarding-test': typeof OnboardingTestRoute
@@ -276,6 +290,8 @@ export interface FileRoutesByTo {
   '/editor': typeof EditorRoute
   '/encrypted-documents': typeof EncryptedDocumentsRoute
   '/engine-lab': typeof EngineLabRoute
+  '/help': typeof HelpRoute
+  '/landing-chat-parity': typeof LandingChatParityRoute
   '/login': typeof LoginRoute
   '/onboarding-preview': typeof OnboardingPreviewRoute
   '/onboarding-test': typeof OnboardingTestRoute
@@ -315,6 +331,8 @@ export interface FileRoutesById {
   '/editor': typeof EditorRoute
   '/encrypted-documents': typeof EncryptedDocumentsRoute
   '/engine-lab': typeof EngineLabRoute
+  '/help': typeof HelpRoute
+  '/landing-chat-parity': typeof LandingChatParityRoute
   '/login': typeof LoginRoute
   '/onboarding-preview': typeof OnboardingPreviewRoute
   '/onboarding-test': typeof OnboardingTestRoute
@@ -355,6 +373,8 @@ export interface FileRouteTypes {
     | '/editor'
     | '/encrypted-documents'
     | '/engine-lab'
+    | '/help'
+    | '/landing-chat-parity'
     | '/login'
     | '/onboarding-preview'
     | '/onboarding-test'
@@ -393,6 +413,8 @@ export interface FileRouteTypes {
     | '/editor'
     | '/encrypted-documents'
     | '/engine-lab'
+    | '/help'
+    | '/landing-chat-parity'
     | '/login'
     | '/onboarding-preview'
     | '/onboarding-test'
@@ -431,6 +453,8 @@ export interface FileRouteTypes {
     | '/editor'
     | '/encrypted-documents'
     | '/engine-lab'
+    | '/help'
+    | '/landing-chat-parity'
     | '/login'
     | '/onboarding-preview'
     | '/onboarding-test'
@@ -470,6 +494,8 @@ export interface RootRouteChildren {
   EditorRoute: typeof EditorRoute
   EncryptedDocumentsRoute: typeof EncryptedDocumentsRoute
   EngineLabRoute: typeof EngineLabRoute
+  HelpRoute: typeof HelpRoute
+  LandingChatParityRoute: typeof LandingChatParityRoute
   LoginRoute: typeof LoginRoute
   OnboardingPreviewRoute: typeof OnboardingPreviewRoute
   OnboardingTestRoute: typeof OnboardingTestRoute
@@ -555,6 +581,20 @@ declare module '@tanstack/react-router' {
       path: '/engine-lab'
       fullPath: '/engine-lab'
       preLoaderRoute: typeof EngineLabRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/help': {
+      id: '/help'
+      path: '/help'
+      fullPath: '/help'
+      preLoaderRoute: typeof HelpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/landing-chat-parity': {
+      id: '/landing-chat-parity'
+      path: '/landing-chat-parity'
+      fullPath: '/landing-chat-parity'
+      preLoaderRoute: typeof LandingChatParityRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -791,6 +831,8 @@ const rootRouteChildren: RootRouteChildren = {
   EditorRoute: EditorRoute,
   EncryptedDocumentsRoute: EncryptedDocumentsRoute,
   EngineLabRoute: EngineLabRoute,
+  HelpRoute: HelpRoute,
+  LandingChatParityRoute: LandingChatParityRoute,
   LoginRoute: LoginRoute,
   OnboardingPreviewRoute: OnboardingPreviewRoute,
   OnboardingTestRoute: OnboardingTestRoute,

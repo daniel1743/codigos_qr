@@ -1,0 +1,156 @@
+# CRIPQER_APPROVED_CHAT_LANDING_PORT_MANIFEST_V1
+# SHA-256 integrity manifest for CRIPQER_APPROVED_CHAT_LANDING_EXACT_PORT_V1
+# source of truth: .approved-chat-landing-reference/ (Magic Patterns, approved)
+# generated: 2026-10-07
+#
+# SECTION 1 — approved reference source (frozen; must never change)
+7f522b8ddb5485b6be8427c833f9760f53b519a035ac56f2500dcec7ef743a25  .approved-chat-landing-reference/src/App.tsx
+a77bbba65452d38f4fcd4afbd3336ce86307ce14818b5f244ead71941c9e40c9  .approved-chat-landing-reference/src/components/AppHeader.tsx
+58ea73aa6cbf4cdf912870cdb5cb8a3d5a4bed88f9d375f4086c362beaef1d66  .approved-chat-landing-reference/src/components/CripqerExperience.tsx
+6dbbd868eea421968fcdf71eea299f64a4ce8b6c5d60d9121e5ad26a9aaea195  .approved-chat-landing-reference/src/components/GeneratingStage.tsx
+b880f50a2bb2144ecb75aef12e544d777f41c1e357d9fa0c64f412361d9a0b0a  .approved-chat-landing-reference/src/components/TemplatePreview.tsx
+9162d7cee9fb3b607bf99bc29aff2b1f6e6424d98b4cab1acf830040d793f19d  .approved-chat-landing-reference/src/components/brand/CripqerLogo.tsx
+0df533df705202657057870b3647eff7807d32677549ee71fd4455c487ddf875  .approved-chat-landing-reference/src/components/brand/SignatureBorder.tsx
+a9926ef608cd75dcdf8b348d03eb9df7b7ace24ad77f91e0a63a11291375e00a  .approved-chat-landing-reference/src/components/catalog/TemplateCatalog.tsx
+d82b92ed62b794634fad1317dda007efdea73942d1f574d3079d0c0f7fa38e86  .approved-chat-landing-reference/src/components/catalog/TemplateSheet.tsx
+d4192cc892c9eae61b0db7824fba040c7c0dce004c7176977e39e16b986c2a72  .approved-chat-landing-reference/src/components/composer/Composer.tsx
+f7feb1bdd8202a2565cbbee1cad4519793da8cd2543359bf2f845bb8dc0a96b5  .approved-chat-landing-reference/src/components/converse/ConverseStage.tsx
+d8bca09a5581c9d5374f1dbc682c01a17a07c135434cecca8bcfa911a50e1da4  .approved-chat-landing-reference/src/components/converse/InlineTemplates.tsx
+beeefd13d44652c236eb82b3a17217c05c4503a1a321b80a404de3a427aeae1f  .approved-chat-landing-reference/src/components/converse/MessageItem.tsx
+bdbc71f1e70afb7b7e70dddf4afceb7780fc041ae34d143f55b6ea5eed7e76c2  .approved-chat-landing-reference/src/components/converse/ReadyCard.tsx
+52578cbf8b24b82092e545cb7d2fe31e895a1c918281b2121c2370e9967aa0f0  .approved-chat-landing-reference/src/components/discover/DiscoverStage.tsx
+3f5335ad4c1d0e30ece745764528242e620b4cb55359645a67ff321d52e819b6  .approved-chat-landing-reference/src/components/discover/TemplateShowcase.tsx
+0430b2947a4c56f52e01c907b90e25efeb28baae55f7199ab865a58b67ea7994  .approved-chat-landing-reference/src/components/editor/EditorBlocksPanel.tsx
+ea42021ff74354c11f06afa0643218d94adea1dbe4ff5bd86cde04c4b85804bc  .approved-chat-landing-reference/src/components/editor/MagicEditor.tsx
+4f9fcf19b3d55620d4e2d5543ca10f42fbba0c9b4d0043738eed3ecca95dab3b  .approved-chat-landing-reference/src/components/editor/RegisterDialog.tsx
+325fe0ab4d3805c96e5f2eac949b75964d06e81465fb62a523a7e180bab986ea  .approved-chat-landing-reference/src/components/templates/ScaledTemplate.tsx
+6a63f57da0c56f2526dd5ab772083289662307ab9e9e13d9b4134002c26951c2  .approved-chat-landing-reference/src/components/templates/TemplateBlock.tsx
+e22739572127ff4c3b334337710be0b0a70436d18d04906b29a7c1ce2fd60853  .approved-chat-landing-reference/src/components/templates/TemplateCard.tsx
+bd3ea5441a420a8c407997b917ddc24ba53d321c22fc19d0e000d98a85a07c29  .approved-chat-landing-reference/src/components/templates/TemplateHero.tsx
+1eb0866b5a8e115e7f16c8580d3efa0c69807d387b22abaf82d33ddf11975e60  .approved-chat-landing-reference/src/components/templates/TemplatePage.tsx
+bea7c810625593e24edacada16e8fc0ff1eacbdac68d770f4923235f37051738  .approved-chat-landing-reference/src/components/templates/serviceIcons.ts
+78ac44b39005c67d1df5d45bd53fbc2bf31149311817324cd7c8fa14afb8ee87  .approved-chat-landing-reference/src/data/business.ts
+315134eafca2c32c210d23c5ef138c1937727bf5c3f361cccb965835e0e7363d  .approved-chat-landing-reference/src/data/contentPacks.ts
+7aad0d85bd1c69bce2a8e16e39608daf801653becc01e7730b35a7c79904eb97  .approved-chat-landing-reference/src/data/familyFit.ts
+18b653d59c6d1dd8fcbcd93cc7b0b1baadd0ca94c4e174425a53ef93d2d4d9c4  .approved-chat-landing-reference/src/data/images.ts
+49ce66d9ffa1c7956a89e9f8a9fcf622d7f7e7bf77d4fe2c68c8181eeff68234  .approved-chat-landing-reference/src/data/templates.ts
+5660131649c55cb8fc1c496bc47ffed97800293c77d6788102c84ce538c40e98  .approved-chat-landing-reference/src/hooks/useCripqerSession.ts
+1e40884eb39ca897959fb51ff42f8da0c2b0ed6d6d929de30708165b6ca47348  .approved-chat-landing-reference/src/hooks/useMediaQuery.ts
+ce3516238e796c03fb05a521687fa354a7fbb9f82d755b33bac31d87968eacde  .approved-chat-landing-reference/src/hooks/useTemplateRotation.ts
+c8c2ec055205c58fe1525695eeed95554f7b8c7076147aebf0f2ce355218cd3d  .approved-chat-landing-reference/src/index.css
+961107c7abf3a898d63a28794676da760891e64dad70b179819999f1ed6e5b85  .approved-chat-landing-reference/src/index.tsx
+fadca8bb82bb8b4417eec88b27d347dc28c54ce327d15f1543f32c544c6dd744  .approved-chat-landing-reference/src/package.json
+45a32396b286de34ea208bc9651cbf18182e2491dea9cf70b136bd07cb6d8b64  .approved-chat-landing-reference/src/types/cripqer.ts
+c2378e788c5816580fabe142e47c194059eb8ff6c37d17488eb33e952b1e3a98  .approved-chat-landing-reference/src/utils/agent.ts
+ec526762ed299ec259f668abe43bcba679c225185dd9e856f9dd9b57e11923c8  .approved-chat-landing-reference/src/utils/recommend.ts
+6232998e992b3c7d5f0c549cdaf0eea299008c635fb3f3675d13994e2ba987e1  .approved-chat-landing-reference/src/utils/seed.ts
+77f2c000fb0138ca9dd41ec93c276c70bf457ac4a1c85c4214977d0dfda0818a  .approved-chat-landing-reference/src/utils/templateStyle.ts
+1aaba8d4330d0d69f2cafe67a293e8156477762e44b6e4424d8b4f00a5a93193  .approved-chat-landing-reference/src/utils/templates.ts
+#
+# SECTION 2 — approved reference assets (frozen)
+42a6416a8e54dbc77a77a7662acdd7c89a3c5bed78f35d77cf0a8a385f59b2ea  .approved-chat-landing-reference/public/08fcd094-a3a3-40ba-8775-225bb98c7123.jpg
+10b13ffd376a5039887bdc153acbd3d2fec907830ff1c942287a43d2dbf47713  .approved-chat-landing-reference/public/0a89d991-d9ce-4d7d-a7a0-c3f394388676.jpg
+47b2ec708104959047dcc4b1c6741c26ec23f45e6bb5b3b849f9406e6a77b2d0  .approved-chat-landing-reference/public/13d9dc24-a417-4f4a-ac2d-ae0531baadec.jpg
+78b489638eca61679d50a969e2a2c2b6466b0653235f263eac5eb2f7d7d6e64a  .approved-chat-landing-reference/public/23e6e597-9f20-4dc5-bb61-883f646960b3.jpg
+81bfcdd79cb1abc579f1aa55aa69d699dc6ad8f14059cccf963c2c37b357681a  .approved-chat-landing-reference/public/25c41ea0-554d-4065-8c99-c057d780f74d.jpg
+c1d168e67026b9f09c14a72954d11b06f972895554b98894cbf3f987f4f4eba0  .approved-chat-landing-reference/public/2cd66c1b-0ce2-402f-a0ce-a1a16fc39734.jpg
+c3dbda1f851cfcb3c3811227721191d48c9ff5c38d4b71a822c39c0e97ab8da6  .approved-chat-landing-reference/public/38309cd2-ab9a-43c9-8d81-166a9e9873a8.jpg
+97c2108025fe68bc54aa9e6bfaf33f2b379350b71d516757a98f8d97a50d8503  .approved-chat-landing-reference/public/408a840f-d60f-4be5-bd82-7d5a3beadbec.jpg
+67cd8812cbc5cd7ac4d2e51f38fdf8b3505d88b5c4ea2ef2fdd2b536b3ed5cfa  .approved-chat-landing-reference/public/41d9adbb-77eb-409c-bbaa-4c5612f3c01b.jpg
+2592d71a414aa5025f6fcb441e5e84dc9cf0eab4ac4530aec0bf6907c5534270  .approved-chat-landing-reference/public/44dd6d74-ca4c-417f-8ee1-4d43115400ef.jpg
+c4d33ef30a0787c342871ab720292ef301515133f19305929695c4e7dd8ec71b  .approved-chat-landing-reference/public/5cda359f-e2a9-4b2a-8f25-bc8560b800cf.jpg
+903e7337691112005564c7de049c66207059454eb166fc4a25513c51265ac457  .approved-chat-landing-reference/public/5e051c94-5666-43a4-89ef-303b54f9a3c0.jpg
+6f88dac0860181d74b72f9d5b2c2867ba882115df823549ba66cd73c0fc9b503  .approved-chat-landing-reference/public/7022cd25-0a04-430f-b91d-afa883dbc730.jpg
+a007f8037991ba4ae375a7903e9c3815616aca70ad5dfbead116d0284979fde9  .approved-chat-landing-reference/public/71e6a99e-32ca-44db-8973-f94cd27347c4.jpg
+a31676132da92e03bb196f793ff932cd77937405f00a671f5b281daa8862bde3  .approved-chat-landing-reference/public/9f912cc0-7a58-4850-9fcb-4d35978172ca.jpg
+6b87766fe0ce252d26ad8d5eb2ca83352f320c83d1bca2a12e25b82e38fd92be  .approved-chat-landing-reference/public/a47e1212-8547-4932-9ec7-8070e7c472a9.jpg
+9769efa0a57500b9d7e2a3383d569c68575a88591178e7a8c90cc22c9f324d7a  .approved-chat-landing-reference/public/a61212a8-bfd5-4fcd-be68-793b2bddf74c.jpg
+4a4dd8d0300675bacae8f32d756af5fdb9da5165a6428eb0c33c9c5eb915b31c  .approved-chat-landing-reference/public/a9de611e-7451-4d6b-a731-abf1b0be9e4a.jpg
+4def09db1774e2ba2bf104de21f00b7397fe4bc74fb39734ca16ff6beec8303e  .approved-chat-landing-reference/public/b1096a45-1f39-4f89-bbb9-bd18b7b0d888.jpg
+941c6f986cdabb12466c172f83893e2455cde109b67fb49a4eadf483bc468574  .approved-chat-landing-reference/public/b22c63dc-d99a-4dc6-a2e8-9136b2d8679d.jpg
+0b2654336a345ddff945016485775882905be3450ad21a25b7f89d3efa63ddb3  .approved-chat-landing-reference/public/b2a15d0e-f417-45d6-bdcf-b2d002267e0d.jpg
+9b59b4a36833383941ea9637bc91e2fc1f7c436fcc37e005e4bc5e3bba1d4fd0  .approved-chat-landing-reference/public/b360ac35-ddad-4142-871c-8269bdaf2451.jpg
+32e7b81dc67c9b117d36b520a6133c140d2c419b8cc87da0003d529f049dea05  .approved-chat-landing-reference/public/b5ce6858-7534-44b7-8a12-30a12eb58813.jpg
+d4b662a769113c7b2dd79e5e77479ac9eb354e9090e221a31090dac666680ae9  .approved-chat-landing-reference/public/d8336d46-a68a-4a1e-9f89-a840ec773565.jpg
+fb25317a6e553381158e11a3a0a6f3ab13defc7a31353843c290f6f5d8790833  .approved-chat-landing-reference/public/e7b01654-a24f-4a32-99de-4801f0701a95.jpg
+0dbcf76b9628dc1f4d8c70a07ebf9dbce2e37e4c0a8cb16d234191a2e43d64ca  .approved-chat-landing-reference/public/edf40ac8-4106-48b9-8052-d297b1ece50e.jpg
+7ff86cf66736c6fa7c6a044b57a9afa0cd7106569789e9a9190655451e8ccfdf  .approved-chat-landing-reference/public/f2e5381d-28d4-4752-8917-c665a001bc3b.jpg
+682bf107c10af3b5c4fd5f04db4a9372114e91a9cca429a25c7070750ccbc78e  .approved-chat-landing-reference/public/f3daa79d-b02e-4742-9481-700c730adfcd.jpg
+b4cb21a8737f59eee693ffa08b0fbca3f227f70458252f8e64287168b1b49a48  .approved-chat-landing-reference/public/f6608328-b4c0-43d5-95b6-10a571b5662c.jpg
+332f08778050f2bf43a74d8c16893f76d4252b74a765732291210538558fe60c  .approved-chat-landing-reference/public/fdbbadea-2793-45e7-94a6-c4649b09b881.jpg
+#
+# SECTION 3 — ported source (src/features/approved-chat-landing)
+#   status: IDENTICAL = byte-equal to reference | ADAPTED = documented type-only edit | HOST = host-only file
+7f522b8ddb5485b6be8427c833f9760f53b519a035ac56f2500dcec7ef743a25  src/features/approved-chat-landing/App.tsx  [IDENTICAL]
+a77bbba65452d38f4fcd4afbd3336ce86307ce14818b5f244ead71941c9e40c9  src/features/approved-chat-landing/components/AppHeader.tsx  [IDENTICAL]
+58ea73aa6cbf4cdf912870cdb5cb8a3d5a4bed88f9d375f4086c362beaef1d66  src/features/approved-chat-landing/components/CripqerExperience.tsx  [IDENTICAL]
+6dbbd868eea421968fcdf71eea299f64a4ce8b6c5d60d9121e5ad26a9aaea195  src/features/approved-chat-landing/components/GeneratingStage.tsx  [IDENTICAL]
+b880f50a2bb2144ecb75aef12e544d777f41c1e357d9fa0c64f412361d9a0b0a  src/features/approved-chat-landing/components/TemplatePreview.tsx  [IDENTICAL]
+9162d7cee9fb3b607bf99bc29aff2b1f6e6424d98b4cab1acf830040d793f19d  src/features/approved-chat-landing/components/brand/CripqerLogo.tsx  [IDENTICAL]
+0df533df705202657057870b3647eff7807d32677549ee71fd4455c487ddf875  src/features/approved-chat-landing/components/brand/SignatureBorder.tsx  [IDENTICAL]
+a9926ef608cd75dcdf8b348d03eb9df7b7ace24ad77f91e0a63a11291375e00a  src/features/approved-chat-landing/components/catalog/TemplateCatalog.tsx  [IDENTICAL]
+d82b92ed62b794634fad1317dda007efdea73942d1f574d3079d0c0f7fa38e86  src/features/approved-chat-landing/components/catalog/TemplateSheet.tsx  [IDENTICAL]
+ea561f178d6aaf518991890ccddd0ca8db86cb3d04af6f7abe53c013e8b80663  src/features/approved-chat-landing/components/composer/Composer.tsx  [ADAPTED]
+f7feb1bdd8202a2565cbbee1cad4519793da8cd2543359bf2f845bb8dc0a96b5  src/features/approved-chat-landing/components/converse/ConverseStage.tsx  [IDENTICAL]
+d8bca09a5581c9d5374f1dbc682c01a17a07c135434cecca8bcfa911a50e1da4  src/features/approved-chat-landing/components/converse/InlineTemplates.tsx  [IDENTICAL]
+beeefd13d44652c236eb82b3a17217c05c4503a1a321b80a404de3a427aeae1f  src/features/approved-chat-landing/components/converse/MessageItem.tsx  [IDENTICAL]
+bdbc71f1e70afb7b7e70dddf4afceb7780fc041ae34d143f55b6ea5eed7e76c2  src/features/approved-chat-landing/components/converse/ReadyCard.tsx  [IDENTICAL]
+2c34573b2f16c76f1b9aaa393f51645b7cbaa948284042b5c92433b1dca7cd5f  src/features/approved-chat-landing/components/discover/DiscoverStage.tsx  [ADAPTED]
+3f5335ad4c1d0e30ece745764528242e620b4cb55359645a67ff321d52e819b6  src/features/approved-chat-landing/components/discover/TemplateShowcase.tsx  [IDENTICAL]
+0430b2947a4c56f52e01c907b90e25efeb28baae55f7199ab865a58b67ea7994  src/features/approved-chat-landing/components/editor/EditorBlocksPanel.tsx  [IDENTICAL]
+ea42021ff74354c11f06afa0643218d94adea1dbe4ff5bd86cde04c4b85804bc  src/features/approved-chat-landing/components/editor/MagicEditor.tsx  [IDENTICAL]
+4f9fcf19b3d55620d4e2d5543ca10f42fbba0c9b4d0043738eed3ecca95dab3b  src/features/approved-chat-landing/components/editor/RegisterDialog.tsx  [IDENTICAL]
+2e1e1c42cfdf92de632018bf837bf3470e015d07c1f706eb4a761d7e59703bb5  src/features/approved-chat-landing/components/templates/ScaledTemplate.tsx  [ADAPTED]
+3f2ed550ea3730e5b5f8beabd36fdae0e3a7abfb6f67774d57d9e55047224652  src/features/approved-chat-landing/components/templates/TemplateBlock.tsx  [ADAPTED]
+347ab01e778f6d2073dd988511f3fa925bd0ccabbfe8e87e2f195c4e99d9ea4b  src/features/approved-chat-landing/components/templates/TemplateCard.tsx  [ADAPTED]
+bd3ea5441a420a8c407997b917ddc24ba53d321c22fc19d0e000d98a85a07c29  src/features/approved-chat-landing/components/templates/TemplateHero.tsx  [IDENTICAL]
+82efcf557a259cde5ceba4eac4d81ba9363fa7db812f95e0be0be2361303a32a  src/features/approved-chat-landing/components/templates/TemplatePage.tsx  [ADAPTED]
+bea7c810625593e24edacada16e8fc0ff1eacbdac68d770f4923235f37051738  src/features/approved-chat-landing/components/templates/serviceIcons.ts  [IDENTICAL]
+78ac44b39005c67d1df5d45bd53fbc2bf31149311817324cd7c8fa14afb8ee87  src/features/approved-chat-landing/data/business.ts  [IDENTICAL]
+315134eafca2c32c210d23c5ef138c1937727bf5c3f361cccb965835e0e7363d  src/features/approved-chat-landing/data/contentPacks.ts  [IDENTICAL]
+7aad0d85bd1c69bce2a8e16e39608daf801653becc01e7730b35a7c79904eb97  src/features/approved-chat-landing/data/familyFit.ts  [IDENTICAL]
+18b653d59c6d1dd8fcbcd93cc7b0b1baadd0ca94c4e174425a53ef93d2d4d9c4  src/features/approved-chat-landing/data/images.ts  [IDENTICAL]
+49ce66d9ffa1c7956a89e9f8a9fcf622d7f7e7bf77d4fe2c68c8181eeff68234  src/features/approved-chat-landing/data/templates.ts  [IDENTICAL]
+5660131649c55cb8fc1c496bc47ffed97800293c77d6788102c84ce538c40e98  src/features/approved-chat-landing/hooks/useCripqerSession.ts  [IDENTICAL]
+1e40884eb39ca897959fb51ff42f8da0c2b0ed6d6d929de30708165b6ca47348  src/features/approved-chat-landing/hooks/useMediaQuery.ts  [IDENTICAL]
+99787b370144abf573c80743cadf03cfa6a38d7e49e7a1d15cacb47622b96f68  src/features/approved-chat-landing/hooks/useTemplateRotation.ts  [ADAPTED]
+5c9ed0e32ae9df7137ec1fbfc03d013e732e8f03f2497fe41d097221bbc8e3b3  src/features/approved-chat-landing/index.tsx  [HOST]
+a4efab8c09ecd1be892b021b3e78e6b2ec4236f673b006f124d022191c2947b0  src/features/approved-chat-landing/styles/landing.css  [HOST]
+d61247575cd6b2ce0784a57c9638162aa492839101599d25811319401bb51410  src/features/approved-chat-landing/types/cripqer.ts  [ADAPTED]
+874424969390f8036fe86e33926dc37ee814a30cd230f45a0b6237e734d7bcef  src/features/approved-chat-landing/utils/agent.ts  [ADAPTED]
+e592fc24562563ad234ea220d2d5e6e9eb8725d78e01c24415c5d7da87a8eceb  src/features/approved-chat-landing/utils/recommend.ts  [ADAPTED]
+6232998e992b3c7d5f0c549cdaf0eea299008c635fb3f3675d13994e2ba987e1  src/features/approved-chat-landing/utils/seed.ts  [IDENTICAL]
+77f2c000fb0138ca9dd41ec93c276c70bf457ac4a1c85c4214977d0dfda0818a  src/features/approved-chat-landing/utils/templateStyle.ts  [IDENTICAL]
+1d763740d9bc14e3ca452992abe0000d25d17e13f707114e56baf9eb05fec611  src/features/approved-chat-landing/utils/templates.ts  [ADAPTED]
+#
+# SECTION 4 — approved assets deployed to the host public/ directory
+42a6416a8e54dbc77a77a7662acdd7c89a3c5bed78f35d77cf0a8a385f59b2ea  public/08fcd094-a3a3-40ba-8775-225bb98c7123.jpg  [IDENTICAL]
+10b13ffd376a5039887bdc153acbd3d2fec907830ff1c942287a43d2dbf47713  public/0a89d991-d9ce-4d7d-a7a0-c3f394388676.jpg  [IDENTICAL]
+47b2ec708104959047dcc4b1c6741c26ec23f45e6bb5b3b849f9406e6a77b2d0  public/13d9dc24-a417-4f4a-ac2d-ae0531baadec.jpg  [IDENTICAL]
+78b489638eca61679d50a969e2a2c2b6466b0653235f263eac5eb2f7d7d6e64a  public/23e6e597-9f20-4dc5-bb61-883f646960b3.jpg  [IDENTICAL]
+81bfcdd79cb1abc579f1aa55aa69d699dc6ad8f14059cccf963c2c37b357681a  public/25c41ea0-554d-4065-8c99-c057d780f74d.jpg  [IDENTICAL]
+c1d168e67026b9f09c14a72954d11b06f972895554b98894cbf3f987f4f4eba0  public/2cd66c1b-0ce2-402f-a0ce-a1a16fc39734.jpg  [IDENTICAL]
+c3dbda1f851cfcb3c3811227721191d48c9ff5c38d4b71a822c39c0e97ab8da6  public/38309cd2-ab9a-43c9-8d81-166a9e9873a8.jpg  [IDENTICAL]
+97c2108025fe68bc54aa9e6bfaf33f2b379350b71d516757a98f8d97a50d8503  public/408a840f-d60f-4be5-bd82-7d5a3beadbec.jpg  [IDENTICAL]
+67cd8812cbc5cd7ac4d2e51f38fdf8b3505d88b5c4ea2ef2fdd2b536b3ed5cfa  public/41d9adbb-77eb-409c-bbaa-4c5612f3c01b.jpg  [IDENTICAL]
+2592d71a414aa5025f6fcb441e5e84dc9cf0eab4ac4530aec0bf6907c5534270  public/44dd6d74-ca4c-417f-8ee1-4d43115400ef.jpg  [IDENTICAL]
+c4d33ef30a0787c342871ab720292ef301515133f19305929695c4e7dd8ec71b  public/5cda359f-e2a9-4b2a-8f25-bc8560b800cf.jpg  [IDENTICAL]
+903e7337691112005564c7de049c66207059454eb166fc4a25513c51265ac457  public/5e051c94-5666-43a4-89ef-303b54f9a3c0.jpg  [IDENTICAL]
+6f88dac0860181d74b72f9d5b2c2867ba882115df823549ba66cd73c0fc9b503  public/7022cd25-0a04-430f-b91d-afa883dbc730.jpg  [IDENTICAL]
+a007f8037991ba4ae375a7903e9c3815616aca70ad5dfbead116d0284979fde9  public/71e6a99e-32ca-44db-8973-f94cd27347c4.jpg  [IDENTICAL]
+a31676132da92e03bb196f793ff932cd77937405f00a671f5b281daa8862bde3  public/9f912cc0-7a58-4850-9fcb-4d35978172ca.jpg  [IDENTICAL]
+6b87766fe0ce252d26ad8d5eb2ca83352f320c83d1bca2a12e25b82e38fd92be  public/a47e1212-8547-4932-9ec7-8070e7c472a9.jpg  [IDENTICAL]
+9769efa0a57500b9d7e2a3383d569c68575a88591178e7a8c90cc22c9f324d7a  public/a61212a8-bfd5-4fcd-be68-793b2bddf74c.jpg  [IDENTICAL]
+4a4dd8d0300675bacae8f32d756af5fdb9da5165a6428eb0c33c9c5eb915b31c  public/a9de611e-7451-4d6b-a731-abf1b0be9e4a.jpg  [IDENTICAL]
+4def09db1774e2ba2bf104de21f00b7397fe4bc74fb39734ca16ff6beec8303e  public/b1096a45-1f39-4f89-bbb9-bd18b7b0d888.jpg  [IDENTICAL]
+941c6f986cdabb12466c172f83893e2455cde109b67fb49a4eadf483bc468574  public/b22c63dc-d99a-4dc6-a2e8-9136b2d8679d.jpg  [IDENTICAL]
+0b2654336a345ddff945016485775882905be3450ad21a25b7f89d3efa63ddb3  public/b2a15d0e-f417-45d6-bdcf-b2d002267e0d.jpg  [IDENTICAL]
+9b59b4a36833383941ea9637bc91e2fc1f7c436fcc37e005e4bc5e3bba1d4fd0  public/b360ac35-ddad-4142-871c-8269bdaf2451.jpg  [IDENTICAL]
+32e7b81dc67c9b117d36b520a6133c140d2c419b8cc87da0003d529f049dea05  public/b5ce6858-7534-44b7-8a12-30a12eb58813.jpg  [IDENTICAL]
+d4b662a769113c7b2dd79e5e77479ac9eb354e9090e221a31090dac666680ae9  public/d8336d46-a68a-4a1e-9f89-a840ec773565.jpg  [IDENTICAL]
+fb25317a6e553381158e11a3a0a6f3ab13defc7a31353843c290f6f5d8790833  public/e7b01654-a24f-4a32-99de-4801f0701a95.jpg  [IDENTICAL]
+0dbcf76b9628dc1f4d8c70a07ebf9dbce2e37e4c0a8cb16d234191a2e43d64ca  public/edf40ac8-4106-48b9-8052-d297b1ece50e.jpg  [IDENTICAL]
+7ff86cf66736c6fa7c6a044b57a9afa0cd7106569789e9a9190655451e8ccfdf  public/f2e5381d-28d4-4752-8917-c665a001bc3b.jpg  [IDENTICAL]
+682bf107c10af3b5c4fd5f04db4a9372114e91a9cca429a25c7070750ccbc78e  public/f3daa79d-b02e-4742-9481-700c730adfcd.jpg  [IDENTICAL]
+b4cb21a8737f59eee693ffa08b0fbca3f227f70458252f8e64287168b1b49a48  public/f6608328-b4c0-43d5-95b6-10a571b5662c.jpg  [IDENTICAL]
+332f08778050f2bf43a74d8c16893f76d4252b74a765732291210538558fe60c  public/fdbbadea-2793-45e7-94a6-c4649b09b881.jpg  [IDENTICAL]
