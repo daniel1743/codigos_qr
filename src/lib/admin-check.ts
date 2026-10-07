@@ -1,7 +1,11 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 /**
- * Verificar si un usuario es administrador
+ * Verificar si un usuario es administrador.
+ * Fuente de verdad única: la tabla `admin_users`.
+ * (El owner está sembrado como super_admin; ver migrations_legacy_prebaseline/
+ * 20260819213000_create_admin_system.sql. Policy RLS con email hardcodeado en el
+ * baseline 20260914000000:1446-1452 queda como deuda documentada, no se toca.)
  */
 export async function isUserAdmin(supabase: SupabaseClient, userId: string): Promise<boolean> {
   try {
@@ -21,16 +25,4 @@ export async function isUserAdmin(supabase: SupabaseClient, userId: string): Pro
     console.error("Error in isUserAdmin:", error);
     return false;
   }
-}
-
-/**
- * Lista de emails admin hardcoded como fallback
- */
-export const ADMIN_EMAILS = ["falcondaniel37@gmail.com", "admin@example.com"];
-
-/**
- * Verificar si un email es admin (fallback)
- */
-export function isAdminEmail(email: string): boolean {
-  return ADMIN_EMAILS.includes(email.toLowerCase());
 }
