@@ -86,7 +86,9 @@ export function MagicPublicRenderer({ document, onTrack, publicId, verificationV
       // For _blank links the browser may discard in-flight fetch requests when
       // the new tab opens. Use sendBeacon when available so the event survives;
       // otherwise fall back to a best-effort awaited call with a 300 ms cap.
-      if (navigator.sendBeacon) {
+      // `typeof` y no una comprobación de verdad: el DOM declara sendBeacon como
+      // método siempre presente, así que `if (navigator.sendBeacon)` no compila.
+      if (typeof navigator.sendBeacon === "function") {
         // sendBeacon is fire-and-forget and survives context unload.
         void Promise.resolve(track).catch(() => undefined);
       } else {

@@ -31,7 +31,7 @@ beforeEach(() => {
 
 function renderPage(templateId: TemplateId, page: Record<string, string>) {
   const state = createInitialMagicEditorState(templateId);
-  state.doc.props.page = page;
+  state.doc.props["page"] = page;
   const host = document.createElement('div');
   document.body.append(host);
   const root = createRoot(host);
@@ -131,23 +131,23 @@ describe('L1 · tokens persist and keep the document loadable', () => {
 
   it('survives serialize → hydrate with every value intact', () => {
     const state = createInitialMagicEditorState('portfolio');
-    state.doc.props.page = { ...TOKENS };
+    state.doc.props["page"] = { ...TOKENS };
 
     const serialized = serializeMagicEditorState(state);
     const reloaded = hydrateMagicEditorState(serialized);
 
-    expect(reloaded.doc.props.page).toEqual({ ...TOKENS });
+    expect(reloaded.doc.props["page"]).toEqual({ ...TOKENS });
   });
 
   it('keeps the document recognised as MAGIC_V1 on reload', () => {
     const state = createInitialMagicEditorState('portfolio');
-    state.doc.props.page = { ...TOKENS };
+    state.doc.props["page"] = { ...TOKENS };
     expect(detectDocumentKind(serializeMagicEditorState(state))).toBe('MAGIC_V1');
   });
 
   it('writes only strings, which is what the load validator requires', () => {
     const state = createInitialMagicEditorState('portfolio');
-    state.doc.props.page = { ...TOKENS };
+    state.doc.props["page"] = { ...TOKENS };
     const props = serializeMagicEditorState(state).props;
     for (const value of Object.values(props['page'] ?? {})) {
       expect(typeof value).toBe('string');

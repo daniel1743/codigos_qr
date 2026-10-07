@@ -5,9 +5,9 @@ import { imageLibrary } from '../../../data/images';
 import { cx } from '../../../utils/cx';
 
 interface ImagePickerProps {
-  value?: string;
+  value?: string | undefined;
   onChange: (src: string) => void;
-  onUpload?: (file: File) => Promise<string>;
+  onUpload?: ((file: File) => Promise<string>) | undefined;
 }
 
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024;

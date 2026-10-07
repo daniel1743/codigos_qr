@@ -1,7 +1,7 @@
 import { useEditor } from '../contexts/EditorContext';
 import { templates } from '../data/templates';
 import { visualPaletteById } from '../data/visualPresets';
-import type { ThemeTokens } from '../types/editor';
+import type { SurfaceTone, ThemeTokens } from '../types/editor';
 
 function luminance(hex: string): number {
   const match = hex.match(/^#([0-9a-f]{6})$/i);
@@ -25,7 +25,12 @@ export function useThemeTokens(): ThemeTokens {
   // in useSelectionActions.
   const activeBg = page.bgOverride || page.bg;
   const isHexTone = /^#[0-9A-F]{3,6}$/i.test(activeBg ?? '');
-  const tone = isHexTone ? {
+  // `isHexTone` no estrecha `activeBg` por sí solo (es un boolean, no un type
+  // predicate), así que el literal quedaba con `id: string | undefined` y
+  // convertía `tone` en una unión: los spreads de abajo fallaban con
+  // exactOptionalPropertyTypes. La condición es la misma — `isHexTone` solo es
+  // cierto si `activeBg` es un hex — y el tipo explícito la hace comprobable.
+  const tone: SurfaceTone = isHexTone && activeBg ? {
     id: activeBg,
     label: 'Personalizado',
     color: activeBg,
@@ -33,9 +38,9 @@ export function useThemeTokens(): ThemeTokens {
     muted: `color-mix(in srgb, ${readableOn(activeBg)} 60%, ${activeBg})`,
     surface: `color-mix(in srgb, ${activeBg} 90%, transparent)`,
     line: `color-mix(in srgb, ${readableOn(activeBg)} 15%, ${activeBg})`
-  } : (base.tones.find((t) => t.id === activeBg) ?? base.tones[0]);
-  
-  let pageTone = palette?.page ?? tone;
+  } : (base.tones.find((t) => t.id === activeBg) ?? base.tones[0]!);
+
+  let pageTone: SurfaceTone = palette?.page ?? tone;
   if (page.bgOverride) {
     pageTone = tone;
   }
@@ -54,12 +59,12 @@ export function useThemeTokens(): ThemeTokens {
    * inherit them through the same CSS custom properties they already use — the
    * renderer needs no new branch.
    */
-  if (page.mutedColor) pageTone = { ...pageTone, muted: page.mutedColor };
-  if (page.surfaceColor) pageTone = { ...pageTone, surface: page.surfaceColor };
-  if (page.lineColor) pageTone = { ...pageTone, line: page.lineColor };
+  if (page["mutedColor"]) pageTone = { ...pageTone, muted: page["mutedColor"] };
+  if (page["surfaceColor"]) pageTone = { ...pageTone, surface: page["surfaceColor"] };
+  if (page["lineColor"]) pageTone = { ...pageTone, line: page["lineColor"] };
 
-  const accent = page.accent || palette?.accent || base.accent;
-  const accentFg = page.accentFg || palette?.accentFg || base.accentFg;
+  const accent = page["accent"] || palette?.accent || base.accent;
+  const accentFg = page["accentFg"] || palette?.accentFg || base.accentFg;
 
   const font = base.fonts.find((f) => f.id === page.font) ?? base.fonts[0];
   const mediaFg = readableOn(accent);

@@ -181,10 +181,15 @@ export type TextWeight = "light" | "regular" | "medium" | "semibold" | "bold" | 
 export interface TextStyle {
   size?: number;
   bold?: boolean;
-  color?: string;
+  /**
+   * `| undefined` explícito: los escritores construyen el estilo desde props
+   * opcionales y lo pasan a `setTextStyle`, así que con
+   * `exactOptionalPropertyTypes` el tipo debe admitir `undefined` como valor.
+   */
+  color?: string | undefined;
   align?: TextAlign;
   upper?: boolean;
-  tracking?: TextTracking;
+  tracking?: TextTracking | undefined;
   typeStyle?: "sans" | "editorial" | "luxury" | "mixed" | "script";
   weight?: TextWeight;
   goldText?: boolean;
@@ -192,7 +197,7 @@ export interface TextStyle {
    * Unitless multiplier (1.35), matching how the templates' own `leading-*`
    * classes behave. Absent leaves the template's line-height untouched.
    */
-  lineHeight?: number;
+  lineHeight?: number | undefined;
   /** Adds italic. There is no way to force *off* a template's built-in italic. */
   italic?: boolean;
 }

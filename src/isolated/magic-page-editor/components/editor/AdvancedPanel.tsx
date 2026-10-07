@@ -12,6 +12,7 @@ import {
   MediaOverlayColorPicker,
   MediaOverlayPicker,
   MediaZoomPicker,
+  type MediaOverlay,
 } from "./controls/MediaTreatmentPicker";
 import { StructureRow } from "./StructureRow";
 import { HeroFusionPicker } from "./controls/HeroFusionPicker";
@@ -79,8 +80,11 @@ export function AdvancedPanel({ hideBlockNav = false }: { hideBlockNav?: boolean
               { value: "normal", label: "Normal" },
               { value: "wide", label: "Espaciado" },
             ]}
-            value={ts.tracking ?? "normal"}
-            onChange={(v) => ed.setTextStyle(id, { tracking: v })}
+            // Este segmentado solo ofrece los dos pasos con nombre, y `TextTracking`
+            // también admite un número (ajustado desde el picker de tipografía):
+            // eso se muestra aquí como «Normal» porque el control no lo expresa.
+            value={ts.tracking === "wide" ? "wide" : "normal"}
+            onChange={(v) => ed.setTextStyle(id, { tracking: v === "wide" ? "wide" : "normal" })}
           />
 
           <button
@@ -282,8 +286,12 @@ export function AdvancedPanel({ hideBlockNav = false }: { hideBlockNav?: boolean
             <PositionPad value={p.pos ?? "center"} onChange={(v) => set("pos", v)} />
           </PanelSection>
           <MediaZoomPicker value={p["zoom"] ?? "1"} onChange={(v) => set("zoom", v)} />
+          {/* «custom» es un estado de visualización —la opacidad propia está
+              activa—, no un nivel elegible: no está en `mediaOverlayOptions`, así
+              que el segmentado simplemente no marca ninguna opción. El valor es
+              el mismo que ya se renderizaba en runtime. */}
           <MediaOverlayPicker
-            value={customOverlay === undefined ? overlay : "custom"}
+            value={(customOverlay === undefined ? overlay : "custom") as MediaOverlay}
             onChange={(v) => set("overlay", v)}
           />
           <PanelSection

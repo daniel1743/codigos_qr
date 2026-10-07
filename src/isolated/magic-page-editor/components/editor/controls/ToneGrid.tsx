@@ -7,7 +7,7 @@ import { normalizeHex } from './SwatchRow';
 
 interface ToneGridProps {
   tones: SurfaceTone[];
-  value?: string;
+  value?: string | undefined;
   onChange: (id: string) => void;
   allowDefault?: boolean;
   /**
@@ -16,7 +16,7 @@ interface ToneGridProps {
    * *ids* in `Block.tsx`, so a hex picked there would silently paint nothing.
    * Rather than offer a control that does not draw, block scope sets this false.
    */
-  allowCustom?: boolean;
+  allowCustom?: boolean | undefined;
 }
 
 export function ToneGrid({ tones, value, onChange, allowDefault = true, allowCustom = true }: ToneGridProps) {

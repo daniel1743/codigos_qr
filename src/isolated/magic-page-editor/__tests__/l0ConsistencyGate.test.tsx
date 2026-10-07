@@ -79,7 +79,7 @@ describe('L0 · Block Kit renders end to end', () => {
     for (const type of BLOCK_TYPES) {
       const state = createInitialMagicEditorState(templateId);
       state.doc.blocks = [{ key: `probe_${type}`, type }];
-      if (family) state.doc.props.page = { ...(state.doc.props.page ?? {}), family };
+      if (family) state.doc.props["page"] = { ...(state.doc.props["page"] ?? {}), family };
 
       // React surfaces a render-time ReferenceError through `act`, but the
       // message alone would not say *which* block failed — collect and report.
@@ -99,7 +99,7 @@ describe('L0 · Block Kit renders end to end', () => {
     for (const { templateId, family } of COMBOS) {
       const state = createInitialMagicEditorState(templateId);
       state.doc.blocks = BLOCK_TYPES.map((type, i) => ({ key: `all_${i}_${type}`, type }));
-      if (family) state.doc.props.page = { ...(state.doc.props.page ?? {}), family };
+      if (family) state.doc.props["page"] = { ...(state.doc.props["page"] ?? {}), family };
 
       const { host, root } = mount(withDocument(state));
       expect(host.querySelector('[data-page-family]')).not.toBeNull();
@@ -112,7 +112,7 @@ describe('L0 · bgOverride is cleared without breaking the document', () => {
   it('treats an empty bgOverride as "no override" and falls back to page.bg', () => {
     const state = createInitialMagicEditorState('bio');
     // `crema` is a bio tone; the override is present but empty.
-    state.doc.props.page = { bg: 'crema', bgOverride: '' };
+    state.doc.props["page"] = { bg: 'crema', bgOverride: '' };
 
     const { host, root } = mount(withDocument(state));
     expect(host.querySelector<HTMLElement>('[data-page-family]')?.style.background).toBe('#F5F0E8');
@@ -121,7 +121,7 @@ describe('L0 · bgOverride is cleared without breaking the document', () => {
 
   it('lets a real bgOverride win over page.bg', () => {
     const state = createInitialMagicEditorState('bio');
-    state.doc.props.page = { bg: 'crema', bgOverride: '#0B1F3A' };
+    state.doc.props["page"] = { bg: 'crema', bgOverride: '#0B1F3A' };
 
     const { host, root } = mount(withDocument(state));
     // A raw hex resolves through the derived-tone branch of useThemeTokens.
@@ -132,11 +132,11 @@ describe('L0 · bgOverride is cleared without breaking the document', () => {
 
   it('round-trips a document carrying an empty bgOverride', () => {
     const state = createInitialMagicEditorState('business');
-    state.doc.props.page = { bg: 'arena', bgOverride: '' };
+    state.doc.props["page"] = { bg: 'arena', bgOverride: '' };
 
     const serialized = serializeMagicEditorState(state);
     expect(isMagicPageDocument(serialized)).toBe(true);
-    expect(hydrateMagicEditorState(serialized).doc.props.page).toEqual({ bg: 'arena', bgOverride: '' });
+    expect(hydrateMagicEditorState(serialized).doc.props["page"]).toEqual({ bg: 'arena', bgOverride: '' });
   });
 
   it('documents why the clear path must not write undefined', () => {
@@ -156,7 +156,7 @@ describe('L0 · bgOverride is cleared without breaking the document', () => {
 
   it('keeps a page loadable as MAGIC_V1 after the override is cleared', () => {
     const state = createInitialMagicEditorState('bio');
-    state.doc.props.page = { bg: 'crema', bgOverride: '' };
+    state.doc.props["page"] = { bg: 'crema', bgOverride: '' };
     expect(detectDocumentKind(serializeMagicEditorState(state))).toBe('MAGIC_V1');
   });
 });
@@ -194,6 +194,7 @@ describe('L0 · frame-shape picker stays honest without shrinking', () => {
 
   it('flags nothing for a variant that does consume the silhouette', () => {
     const variant = heroBandShapeVariants[0];
+    if (!variant) throw new Error("heroBandShapeVariants is empty");
     const { host, root } = mountShapes(variant);
     expect(shapeButtons(host)).toHaveLength(9);
     expect(host.querySelectorAll('[data-applies="false"]')).toHaveLength(0);

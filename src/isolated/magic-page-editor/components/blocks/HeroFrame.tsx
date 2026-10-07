@@ -164,7 +164,7 @@ interface HeroFrameProps {
    * added in L2.1 read this; every earlier variant ignores it, so passing it is
    * inert until a variant asks for it. See `HeroSlots`.
    */
-  slots?: HeroSlots;
+  slots?: HeroSlots | undefined;
 }
 
 const HEIGHTS: Record<HeroHeight, number> = { S: 220, M: 320, L: 460 };

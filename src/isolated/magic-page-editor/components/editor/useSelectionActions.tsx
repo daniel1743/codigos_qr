@@ -1781,13 +1781,13 @@ export function useSelectionActions(): EditorAction[] {
                 <Segmented
                   ariaLabel="Presentación social"
                   options={SOCIAL_PRESENTATIONS.map((o) => ({ value: o.value, label: o.label }))}
-                  value={resolveSocialPresentation(ed.doc.props[scope]?.socialPresentation)}
+                  value={resolveSocialPresentation(ed.doc.props[scope]?.["socialPresentation"])}
                   onChange={(v) => ed.setProp(scope, "socialPresentation", v)}
                 />
                 <p className="mt-2 text-[11.5px] leading-snug text-mute">
                   {
                     SOCIAL_PRESENTATIONS.find(
-                      (o) => o.value === resolveSocialPresentation(ed.doc.props[scope]?.socialPresentation)
+                      (o) => o.value === resolveSocialPresentation(ed.doc.props[scope]?.["socialPresentation"])
                     )?.hint
                   }
                 </p>
@@ -2518,7 +2518,7 @@ export function useSelectionActions(): EditorAction[] {
             >
               <Toggle
                 label="Mostrar avatares"
-                checked={props.showAvatars !== "off"}
+                checked={props["showAvatars"] !== "off"}
                 onChange={(v) => set("showAvatars", v ? "on" : "off")}
               />
             </PanelSection>

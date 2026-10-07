@@ -144,6 +144,9 @@ describe('priority 5 · the slots contract itself', () => {
         <EditorProvider initialTemplate="business" initialDocument={createInitialMagicEditorState('business')}>
           <HeroFrame
             id="probe"
+            media=""
+            mediaAlt=""
+            radius={0}
             defaultVariant="photoBand"
             slots={{
               title: <span data-slot="title">Título</span>,
@@ -174,6 +177,9 @@ describe('priority 5 · the slots contract itself', () => {
         <EditorProvider initialTemplate="business" initialDocument={createInitialMagicEditorState('business')}>
           <HeroFrame
             id="probe"
+            media=""
+            mediaAlt=""
+            radius={0}
             defaultVariant="photoBand"
             slots={{ title: <span data-slot="title">Título</span>, brand: <span data-slot="brand">Marca</span> }}
           >

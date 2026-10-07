@@ -4,6 +4,7 @@ import {
   AppWindowIcon,
   AtSignIcon,
   BadgeIcon,
+  BriefcaseIcon,
   EuroIcon,
   RectangleHorizontalIcon,
   CircleUserRoundIcon,
@@ -12,6 +13,7 @@ import {
   LayersIcon,
   LayoutPanelTopIcon,
   MousePointerClickIcon,
+  SeparatorHorizontalIcon,
   SquareIcon,
   StarIcon,
   TypeIcon,
@@ -33,7 +35,7 @@ export interface EditorAction {
   danger?: boolean;
   disabled?: boolean;
   showLabel?: boolean;
-  swatch?: string;
+  swatch?: string | undefined;
   mobileOnly?: boolean;
   desktopOnly?: boolean;
 }
@@ -56,4 +58,7 @@ export const kindIcons: Record<ElementKind, LucideIcon> = {
   badge: BadgeIcon,
   imageCard: ImagesIcon,
   review: StarIcon,
+  // L2 añadió dos kinds sin icono, así que el Record quedaba incompleto.
+  separator: SeparatorHorizontalIcon,
+  service: BriefcaseIcon,
 };
