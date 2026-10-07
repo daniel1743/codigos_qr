@@ -14,6 +14,7 @@ import {
 'lucide-react';
 import { useEditor } from '../../contexts/EditorContext';
 import Logo from '../../../../components/brand/Logo';
+import { PLATFORM_HOME_HREF } from '../../../../components/platform/platform-navigation';
 import { cardFamilies } from '../../data/cardFamilies';
 import { accessForIndex, isVariantLocked, miniGalleryVariants, pageFamilyVariants, templates } from '../../data/templates';
 import { cx } from '../../utils/cx';
@@ -170,13 +171,20 @@ export function TopBar() {
   return (
     <header className="relative z-50 flex min-h-14 shrink-0 flex-wrap items-center gap-2 border-b border-line bg-white px-3 py-2 md:h-14 md:flex-nowrap md:py-0 lg:gap-3 lg:px-4">
       <div className="flex min-w-0 items-center gap-3">
-        <Logo
-          variant="symbol"
-          width={32}
-          height={32}
-          title="Cripqer"
-          className="shrink-0"
-        />
+        {/* The brand mark is a way home, not decoration: on phones this toolbar
+            is the only brand on screen, since the platform bar is `lg`-only. */}
+        <a
+          href={PLATFORM_HOME_HREF}
+          aria-label="Ir a Inicio"
+          className="shrink-0 rounded-[8px] transition-opacity duration-150 hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-select/40">
+          <Logo
+            variant="symbol"
+            width={32}
+            height={32}
+            title="Cripqer"
+            className="shrink-0"
+          />
+        </a>
         <div className="hidden min-w-0 2xl:block">
           <p className="text-[13px] font-semibold leading-tight text-ink">Cripqer</p>
           <p className="truncate text-[11.5px] leading-tight text-mute">cripqer.com/{meta.slug}</p>

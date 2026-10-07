@@ -181,7 +181,34 @@ export const PLATFORM_FUTURE_NAV_ITEMS = [
   },
 ] as const satisfies readonly PlatformNavItem[];
 
+/**
+ * The subset a compact editor bar shows, derived from the canonical registry:
+ * it owns no route strings of its own, so a destination change lands here too.
+ *
+ * The `editor` entry drops out through the duplicate-destination rule — it
+ * points at `/profile`, exactly like `profile`, and a second link to Inicio
+ * inside the editor is noise, not navigation. Every other primary entry stays,
+ * which is what keeps an editor surface from becoming a dead end.
+ */
+export const PLATFORM_EDITOR_NAV_ITEMS: readonly PlatformNavItem[] = PLATFORM_NAV_ITEMS.filter(
+  (item, index, all) =>
+    item.section === "primary" &&
+    all.findIndex((candidate) => candidate.href === item.href) === index,
+);
+
+/**
+ * The platform "home" destination, for brand marks that must stay navigable.
+ *
+ * Derived rather than re-typed: the compact shell bar and the editor toolbar
+ * both point their logo here, so moving Inicio's route carries every brand link
+ * with it instead of leaving a stale literal behind in a second file.
+ */
+export const PLATFORM_HOME_HREF: string =
+  PLATFORM_NAV_ITEMS.find((item) => item.id === "profile")?.href ?? "/profile";
+
 export const PLATFORM_NAVIGATION = {
   current: PLATFORM_NAV_ITEMS,
+  editor: PLATFORM_EDITOR_NAV_ITEMS,
+  home: PLATFORM_HOME_HREF,
   future: PLATFORM_FUTURE_NAV_ITEMS,
 } as const;

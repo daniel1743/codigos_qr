@@ -34,6 +34,10 @@ vi.mock("../../isolated/magic-page-editor/MagicEditorApp", () => ({
   },
 }));
 vi.mock("../../components/app-shell/MobilePlatformNav", () => ({ default: () => null }));
+// Navigation is not this suite's subject (it pins the write boundary), and the
+// real navbar needs a router context. Its own regression test lives in
+// MagicProductionEditorHost.navigation.test.tsx.
+vi.mock("../../components/brand/PlatformNavbar", () => ({ default: () => null }));
 
 function ownedPage(templateConfig: unknown): Page {
   return {

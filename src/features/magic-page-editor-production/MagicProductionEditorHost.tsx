@@ -15,6 +15,11 @@ import { pageCanonicalService } from "../../services/page-canonical.service";
 import type { Page } from "../../types/database";
 import type { BioTemplateConfig } from "../../premium-template-studio/types";
 import MobilePlatformNav from "../../components/app-shell/MobilePlatformNav";
+import PlatformNavbar from "../../components/brand/PlatformNavbar";
+import {
+  PLATFORM_EDITOR_NAV_ITEMS,
+  PLATFORM_HOME_HREF,
+} from "../../components/platform/platform-navigation";
 
 const MEDIA_BUCKET = "avatars";
 
@@ -416,29 +421,57 @@ export function MagicProductionEditorHost({
   if (editorSession.kind === "MAGIC_V1") setLandingBotPreviewPublicId(page.public_id);
 
   return (
-    <>
-      <MagicEditorApp
-        catalog={catalog}
-        {...(catalogBackHref ? { catalogBackHref } : {})}
-        catalogAccess={catalogAccess}
-        {...(editorSession.kind === "MAGIC_V1"
-          ? {
-              initialDocument: editorSession.document,
-              onDocumentChange,
-              onPublish,
-              uploadAsset,
-              catalogConversion,
-            }
-          : {
-              canonicalDocument: canonicalSession.config,
-              canonicalIsNew: canonicalSession.kind === "NULL",
-              onCanonicalDocumentChange,
-              onCanonicalPublish,
-              uploadAsset,
-            })}
-      />
+    /*
+      One column owns the screen: the platform bar on top and the editor filling
+      the rest. Stacking them as two viewport-tall boxes is what used to leave
+      the editor without a way out — and putting them inside one flex column is
+      what stops the bar from pushing the bottom of the canvas off-screen.
+    */
+    <div className="flex h-screen w-full flex-col overflow-hidden">
+      {/*
+        Desktop platform navigation. Mobile already has MobilePlatformNav pinned
+        to the bottom of this same screen, so the bar is `lg`-only: showing both
+        would be two navigations doing one job.
+      */}
+      {!catalog && (
+        <PlatformNavbar
+          variant="editor"
+          brandHref={PLATFORM_HOME_HREF}
+          logoTheme="inverse"
+          className="sticky top-0 z-40 hidden shrink-0 border-b border-white/10 bg-[#15171c]/95 text-[#f5f2ea] backdrop-blur-xl lg:block lg:px-6"
+          innerClassName="mx-auto flex h-14 max-w-[1440px] items-center justify-between gap-4 px-3"
+          brandClassName="shrink-0 rounded-lg transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+          logoClassName="h-[34px] w-[34px] min-[420px]:w-[146px]"
+          navItems={PLATFORM_EDITOR_NAV_ITEMS}
+        />
+      )}
+
+      <div className="min-h-0 flex-1">
+        <MagicEditorApp
+          fillParent
+          catalog={catalog}
+          {...(catalogBackHref ? { catalogBackHref } : {})}
+          catalogAccess={catalogAccess}
+          {...(editorSession.kind === "MAGIC_V1"
+            ? {
+                initialDocument: editorSession.document,
+                onDocumentChange,
+                onPublish,
+                uploadAsset,
+                catalogConversion,
+              }
+            : {
+                canonicalDocument: canonicalSession.config,
+                canonicalIsNew: canonicalSession.kind === "NULL",
+                onCanonicalDocumentChange,
+                onCanonicalPublish,
+                uploadAsset,
+              })}
+        />
+      </div>
+
       {/* The catalog workspace is a focused full-screen editor: no global nav. */}
       {!catalog && <MobilePlatformNav editorPageId={pageId} />}
-    </>
+    </div>
   );
 }

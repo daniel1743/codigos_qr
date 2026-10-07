@@ -32,6 +32,11 @@ export interface MagicEditorAppProps {
   /** C3.3-B — full-screen catalog workspace (minimal header + product CRUD). */
   catalog?: boolean;
   catalogBackHref?: string;
+  /**
+   * Fill the parent instead of the viewport. Set by shells that render platform
+   * navigation above the editor; the parent then owns a definite height.
+   */
+  fillParent?: boolean;
 }
 
 /** Shared Magic-facing UI boundary for both Magic and canonical page documents. */
@@ -51,9 +56,17 @@ export function MagicEditorApp({
   onCanonicalPublish,
   catalog = false,
   catalogBackHref,
+  fillParent = false,
 }: MagicEditorAppProps) {
   return (
-    <div className="magic-editor-root h-screen w-full overflow-hidden">
+    // `h-screen` by default: the editor owns the viewport when it is the route's
+    // only chrome. A shell that renders platform navigation above the editor
+    // sets `fillParent`, gets `h-full`, and gives the parent a definite height —
+    // otherwise the editor would be a viewport tall inside a shorter box and the
+    // bottom of the canvas would fall off-screen.
+    <div
+      className={`magic-editor-root w-full overflow-hidden ${fillParent ? "h-full" : "h-screen"}`}
+    >
       <EditorProvider
         initialTemplate={defaultTemplate}
         initialDevice={defaultDevice}
