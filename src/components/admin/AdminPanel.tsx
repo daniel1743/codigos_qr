@@ -13,6 +13,7 @@ import {
   MapPin,
   Monitor,
   Globe,
+  LifeBuoy,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
@@ -24,6 +25,7 @@ import { PremiumPanel } from "./PremiumPanel";
 import { InvitationCodesPanel } from "./InvitationCodesPanel";
 import { LogosPanel } from "./LogosPanel";
 import { AnalyticsGlobalPanel } from "./AnalyticsGlobalPanel";
+import { SupportPanel } from "./support/SupportPanel";
 
 interface GlobalStats {
   totalUsers: number;
@@ -271,6 +273,10 @@ export function AdminPanel() {
             <Globe className="h-4 w-4" />
             <span className="hidden sm:inline">Analytics</span>
           </TabsTrigger>
+          <TabsTrigger value="support" className="gap-2">
+            <LifeBuoy className="h-4 w-4" />
+            <span className="hidden sm:inline">Soporte</span>
+          </TabsTrigger>
         </TabsList>
 
         {/* Dashboard Tab */}
@@ -379,6 +385,11 @@ export function AdminPanel() {
         {/* Analytics Tab */}
         <TabsContent value="analytics" className="space-y-6">
           <AnalyticsGlobalPanel />
+        </TabsContent>
+
+        {/* Support Tab */}
+        <TabsContent value="support" className="space-y-6">
+          <SupportPanel />
         </TabsContent>
       </Tabs>
     </div>
