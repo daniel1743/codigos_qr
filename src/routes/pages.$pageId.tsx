@@ -1,6 +1,16 @@
 import { createFileRoute, Link, Outlet, useMatches } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Copy, Eye, Loader2, Rocket, SearchX } from "lucide-react";
+import {
+  ArrowLeft,
+  BarChart3,
+  Check,
+  Copy,
+  Eye,
+  Loader2,
+  Rocket,
+  SearchX,
+  Share2,
+} from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "../components/app-shell/AppShell";
 import { CqEmptyState } from "../components/cq-ui/CqEmptyState";
@@ -38,6 +48,10 @@ import type { Page } from "../types/database";
  * (`pageCanonicalService.publish` / `unpublish` with the real
  * `published_revision`), the canonical envelope read, `PageQrPanel` and every
  * canonical URL helper (`getPublicPageUrl` / `getPublicPageAliasUrl`).
+ *
+ * F4.5 — information architecture: sharing (`Compartir`, only when published)
+ * and the depth hand-off to Analytics live here, because both belong to the
+ * page asset. The CTA below is pure navigation: no new query, hook or metric.
  */
 
 const PAGE_TYPE_LABELS: Record<string, string> = {
@@ -201,6 +215,7 @@ function PageDetail() {
   const [userId, setUserId] = useState<string | null>(null);
   const [showQr, setShowQr] = useState(false);
   const [publicationBusy, setPublicationBusy] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
 
   // /pages/$pageId is the parent of the nested child route /pages/$pageId/edit.
   // When the edit child is the active match we must render the outlet instead of
@@ -270,6 +285,19 @@ function PageDetail() {
     }
   };
 
+  /** F4.5 — sharing belongs to the page asset, so it lives here (not on Home). */
+  const copyPublicLink = async () => {
+    if (!page) return;
+    try {
+      await navigator.clipboard.writeText(getPublicPageUrl(page.public_id));
+      setLinkCopied(true);
+      toast.success("Enlace copiado");
+      window.setTimeout(() => setLinkCopied(false), 1800);
+    } catch {
+      toast.error("No se pudo copiar el enlace");
+    }
+  };
+
   if (hasNestedChild) {
     return <Outlet />;
   }
@@ -329,6 +357,20 @@ function PageDetail() {
                         <Eye className="h-4 w-4 text-cq-muted" aria-hidden="true" /> Abrir página
                       </a>
                     )}
+                    {page.published && (
+                      <button
+                        type="button"
+                        className={cqSecondaryButton}
+                        onClick={() => void copyPublicLink()}
+                      >
+                        {linkCopied ? (
+                          <Check className="h-4 w-4 text-cq-blue" aria-hidden="true" />
+                        ) : (
+                          <Share2 className="h-4 w-4 text-cq-muted" aria-hidden="true" />
+                        )}
+                        Compartir
+                      </button>
+                    )}
                     <button
                       type="button"
                       className={cqPrimaryButton}
@@ -348,8 +390,16 @@ function PageDetail() {
                       onClick={() => setShowQr((v) => !v)}
                       aria-expanded={showQr}
                     >
-                      QR / Compartir
+                      QR de esta página
                     </button>
+                    <Link
+                      to="/pages/$pageId/analytics"
+                      params={{ pageId: page.id }}
+                      className={`${cqSecondaryButton} no-underline`}
+                    >
+                      <BarChart3 className="h-4 w-4 text-cq-muted" aria-hidden="true" /> Ver
+                      Analytics
+                    </Link>
                   </div>
                 }
               />

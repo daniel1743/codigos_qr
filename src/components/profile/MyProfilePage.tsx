@@ -4,7 +4,6 @@ import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { getBrowserSupabaseClient } from "../../lib/supabase/client";
 import { selectLandingPage } from "../../lib/editor-routing/resolveCanonicalMagicPage";
-import { getPublicPageAliasUrl, getPublicPageUrl, getPublicProfileUrl } from "../../lib/url";
 import { magicPageService } from "../../services/magic-page.service";
 import { profileService } from "../../services/profile.service";
 import type { Page } from "../../types/database";
@@ -38,13 +37,6 @@ type PageProfile = {
 
 const ANALYTICS_DAYS = 30;
 
-function formatDay(value: string | null | undefined): string | null {
-  if (!value) return null;
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return null;
-  return date.toLocaleDateString("es-CL", { day: "numeric", month: "short", year: "numeric" });
-}
-
 /**
  * F2 - Home / Command Center (/profile).
  *
@@ -64,7 +56,6 @@ export function MyProfilePage() {
   const [stats, setStats] = useState({ totalScans: 0, totalLinks: 0 });
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
-  const [copied, setCopied] = useState(false);
   const { isAdmin } = useAdminStatus();
   useEffect(() => {
     let active = true;
@@ -161,13 +152,6 @@ export function MyProfilePage() {
   const tagline = pageProfile?.profession?.trim() || pageProfile?.bio?.trim() || null;
   const avatarUrl = pageProfile?.avatar_url || profile?.avatar_url || null;
 
-  const pageUrl = canonicalPage?.public_id ? getPublicPageUrl(canonicalPage.public_id) : null;
-  const aliasUrl =
-    canonicalPage?.published && canonicalPage.slug ? getPublicPageAliasUrl(canonicalPage.slug) : null;
-  const profileUrl = pageProfile?.public_id ? getPublicProfileUrl(pageProfile.public_id) : null;
-  const shareUrl = aliasUrl ?? pageUrl ?? profileUrl;
-  const shareLabel = shareUrl ? shareUrl.replace(/^https?:\/\//, "") : null;
-
   const summary = analytics.summary;
   const published = canonicalPage ? canonicalPage.published : (pageProfile?.published ?? false);
   const visits30d = analytics.status === "ready" && summary ? summary.visits : null;
@@ -196,18 +180,6 @@ export function MyProfilePage() {
       toast.error(error instanceof Error ? error.message : "No se pudo crear la pagina.");
     } finally {
       setCreating(false);
-    }
-  };
-
-  const copyShare = async () => {
-    if (!shareUrl) return;
-    try {
-      await navigator.clipboard.writeText(shareUrl);
-      setCopied(true);
-      toast.success("Enlace copiado");
-      window.setTimeout(() => setCopied(false), 1800);
-    } catch {
-      toast.error("No se pudo copiar el enlace");
     }
   };
 
@@ -244,15 +216,9 @@ export function MyProfilePage() {
               tagline={tagline}
               avatarUrl={avatarUrl}
               published={published}
-              publicUrl={shareUrl}
-              linkLabel={shareLabel}
-              updatedLabel={formatDay(canonicalPage.updated_at)}
-              createdLabel={formatDay(canonicalPage.created_at)}
               scans={stats.totalScans}
               links={stats.totalLinks}
               pageId={canonicalPage.id}
-              onCopyShare={() => void copyShare()}
-              copied={copied}
             />
           ) : (
             <NoPageCard onCreate={() => void createPage()} creating={creating} canCreatePage={isAdmin} />

@@ -1,48 +1,35 @@
-import { Check, Copy, ExternalLink, Pencil, QrCode } from "lucide-react";
+import { ArrowRight, QrCode } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { StatusPill } from "./StatusPill";
-import { editRouteSearch } from "./editRouteSearch";
 
 const secondaryClass =
   "inline-flex min-h-11 min-w-0 flex-1 items-center justify-center gap-2 rounded-cq-sm bg-white px-3 text-[13.5px] font-semibold text-cq-ink ring-1 ring-cq-line transition-colors hover:bg-cq-canvas focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cq-blue";
 
 /**
- * F2 — Home / Command Center: "Mi página" asset card.
+ * F2 — Home / Command Center: "presence summary" card.
  *
- * Every field is REAL: name/tagline/avatar from the `profiles` row, status from the
- * real `published` flag, URL from the canonical helpers in `lib/url.ts`, and facts
- * from existing counters (`profiles.scan_count`, `profile_links` count, `pages`
- * timestamps). No fabricated `cripqer.com/<slug>`; `profiles` and `pages` identities
- * are never collapsed.
+ * F4.5 (information architecture): this block is a SUMMARY, not the asset admin
+ * surface. It keeps only real presence signals (identity, publication state,
+ * `profiles.scan_count`, `profile_links` count) and hands every administrative
+ * action (edit, view, share, link/alias, QR, dates) to `/pages/$pageId`, which
+ * owns the asset. Nothing is fabricated and no identity is collapsed.
  */
 export function PageAssetCard({
   displayName,
   tagline,
   avatarUrl,
   published,
-  publicUrl,
-  linkLabel,
-  updatedLabel,
-  createdLabel,
   scans,
   links,
   pageId,
-  onCopyShare,
-  copied,
 }: {
   displayName: string;
   tagline: string | null;
   avatarUrl: string | null;
   published: boolean;
-  publicUrl: string | null;
-  linkLabel: string | null;
-  updatedLabel: string | null;
-  createdLabel: string | null;
   scans: number;
   links: number;
   pageId: string | null;
-  onCopyShare: () => void;
-  copied: boolean;
 }) {
   return (
     <section
@@ -57,17 +44,13 @@ export function PageAssetCard({
       </header>
 
       <div className="mt-5 flex min-w-0 flex-col gap-5 min-[480px]:flex-row min-[480px]:gap-6">
-        <div className="flex shrink-0 flex-col items-center gap-2 self-center min-[480px]:self-start">
+        <div className="flex shrink-0 items-center justify-center self-center min-[480px]:self-start">
           <span className="grid h-24 w-24 place-items-center overflow-hidden rounded-cq-xl bg-cq-blue-50 text-2xl font-bold text-cq-blue ring-1 ring-cq-line">
             {avatarUrl ? (
               <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
             ) : (
               displayName.charAt(0).toUpperCase()
             )}
-          </span>
-          <span className="inline-flex items-center gap-1 text-[11.5px] font-semibold text-cq-subtle">
-            <QrCode className="h-3.5 w-3.5" aria-hidden />
-            {scans.toLocaleString("es-CL")} escaneos
           </span>
         </div>
 
@@ -76,78 +59,31 @@ export function PageAssetCard({
             {displayName}
           </p>
           {tagline ? <p className="mt-1 text-[13px] text-cq-muted">{tagline}</p> : null}
-          {publicUrl && linkLabel ? (
-            <button
-              type="button"
-              onClick={onCopyShare}
-              aria-label={`Copiar enlace ${linkLabel}`}
-              className="group mt-4 flex w-full min-w-0 items-center justify-between gap-2 rounded-cq-sm bg-cq-canvas px-3 py-2.5 text-left ring-1 ring-cq-line transition-colors hover:ring-cq-blue-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cq-blue"
-            >
-              <span className="truncate text-[13px] font-medium text-cq-blue">{linkLabel}</span>
-              {copied ? (
-                <span className="flex shrink-0 items-center gap-1 text-[12px] font-semibold text-cq-blue">
-                  <Check className="h-4 w-4" aria-hidden /> Copiado
-                </span>
-              ) : (
-                <Copy
-                  className="h-4 w-4 shrink-0 text-cq-subtle transition-colors group-hover:text-cq-blue"
-                  aria-hidden
-                />
-              )}
-            </button>
-          ) : (
-            <p className="mt-4 rounded-cq-sm bg-cq-canvas px-3 py-2.5 text-[13px] text-cq-muted ring-1 ring-cq-line">
-              Publica tu página para obtener tu enlace público.
-            </p>
-          )}
 
-          <dl className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-[12px] text-cq-subtle">
+          <dl className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-3 text-[12px] text-cq-subtle">
+            <div className="flex items-center gap-1.5">
+              <QrCode className="h-3.5 w-3.5 text-cq-subtle" aria-hidden />
+              <dt>Escaneos</dt>
+              <dd className="font-semibold text-cq-ink">{scans.toLocaleString("es-CL")}</dd>
+            </div>
             <div className="flex items-center gap-1.5">
               <dt>Enlaces activos</dt>
               <dd className="font-semibold text-cq-ink">{links.toLocaleString("es-CL")}</dd>
             </div>
-            {updatedLabel ? (
-              <div className="flex items-center gap-1.5">
-                <dt>Actualizada</dt>
-                <dd className="font-semibold text-cq-ink">{updatedLabel}</dd>
-              </div>
-            ) : null}
-            {createdLabel ? (
-              <div className="flex items-center gap-1.5">
-                <dt>Creada</dt>
-                <dd className="font-semibold text-cq-ink">{createdLabel}</dd>
-              </div>
-            ) : null}
           </dl>
 
-          <div className="mt-5 grid grid-cols-2 gap-2 sm:flex">
-            {pageId ? (
+          {pageId ? (
+            <div className="mt-5 sm:mt-auto sm:pt-5">
               <Link
-                to="/pages/$pageId/edit"
+                to="/pages/$pageId"
                 params={{ pageId }}
-                search={editRouteSearch}
-                className={`${secondaryClass} col-span-2 sm:col-span-1`}
+                className={`${secondaryClass} w-full no-underline sm:w-auto`}
               >
-                <Pencil className="h-3.5 w-3.5 text-cq-muted" aria-hidden /> Editar
+                Administrar página
+                <ArrowRight className="h-3.5 w-3.5 text-cq-muted" aria-hidden />
               </Link>
-            ) : null}
-            {publicUrl ? (
-              <a href={publicUrl} target="_blank" rel="noreferrer" className={secondaryClass}>
-                <ExternalLink className="h-3.5 w-3.5 text-cq-muted" aria-hidden /> Ver página
-              </a>
-            ) : null}
-            {publicUrl ? (
-              <button type="button" onClick={onCopyShare} className={secondaryClass}>
-                {copied ? (
-                  <Check className="h-3.5 w-3.5 text-cq-blue" aria-hidden />
-                ) : (
-                  <Copy className="h-3.5 w-3.5 text-cq-muted" aria-hidden />
-                )}
-                Compartir
-              </button>
-            ) : null}
-          </div>
-
+            </div>
+          ) : null}
         </div>
       </div>
     </section>
