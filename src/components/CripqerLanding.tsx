@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import PlatformFooter from "./brand/PlatformFooter";
 import PlatformNavbar from "./brand/PlatformNavbar";
+import { getHelpArticle } from "../lib/help-content";
 
 /**
  * CRIPQER — Landing pública narrativa.
@@ -827,6 +828,18 @@ const SWATCHES = ["#B08D57", "#33463a", "#8c4a3c", "#262626", "#111111"];
 
 /* ------------------------------ Component ------------------------------ */
 
+/**
+ * FAQ pública de la landing: se renderiza desde la fuente canónica de ayuda
+ * (`src/lib/help-content.ts`) para no duplicar preguntas ni respuestas.
+ * Son las mismas 4 preguntas comerciales; solo cambia de dónde viene el texto.
+ */
+const LANDING_FAQ_IDS = [
+  "what_is_cripqer",
+  "need_design_or_code",
+  "edit_after_print",
+  "private_qr",
+];
+
 export default function CripqerLanding() {
   const [tplIndex, setTplIndex] = useState(0);
   const active = TEMPLATES[tplIndex] ?? TEMPLATES[0]!;
@@ -1423,34 +1436,16 @@ export default function CripqerLanding() {
           <span className="cq-eyebrow">Preguntas frecuentes</span>
           <h2 className="cq-h2">Lo que sueles querer saber.</h2>
           <div className="cq-faq" style={{ textAlign: "left" }}>
-            <details>
-              <summary>¿Cripqer es un generador de QR?</summary>
-              <p>
-                El QR es solo el punto de acceso. Lo que creas con Cripqer es la experiencia digital
-                que aparece después del escaneo: tu identidad, tus enlaces y tu presentación visual.
-              </p>
-            </details>
-            <details>
-              <summary>¿Necesito saber de diseño o programación?</summary>
-              <p>
-                No. Partes de una plantilla profesional y la personalizas en un editor visual:
-                eliges, ajustas y publicas.
-              </p>
-            </details>
-            <details>
-              <summary>¿Puedo cambiar el contenido después de imprimir el QR?</summary>
-              <p>
-                Sí. Tu presencia digital puede evolucionar — textos, enlaces, fotos, estilo —
-                mientras el QR sigue siendo el mismo punto de acceso.
-              </p>
-            </details>
-            <details>
-              <summary>¿Puedo compartir algo privado con un QR?</summary>
-              <p>
-                Sí. Además de la presencia pública, Cripqer incluye un flujo de acceso protegido con
-                contraseña para documentos y contenido que no quieres que sea público.
-              </p>
-            </details>
+            {LANDING_FAQ_IDS.map((id) => {
+              const article = getHelpArticle(id);
+              if (!article) return null;
+              return (
+                <details key={article.id}>
+                  <summary>{article.question}</summary>
+                  <p>{article.answer}</p>
+                </details>
+              );
+            })}
           </div>
         </div>
       </section>
