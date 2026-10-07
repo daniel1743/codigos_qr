@@ -129,7 +129,7 @@ function AccountPage() {
             typeof authUser.user_metadata?.avatar_url === "string"
               ? authUser.user_metadata.avatar_url
               : (profile?.avatar_url ?? null),
-          joinedAt: authUser.created_at ?? (profile?.created_at ?? null),
+          joinedAt: authUser.created_at ?? profile?.created_at ?? null,
           profile,
           publicUrl: profile?.public_id ? getPublicProfileUrl(profile.public_id) : null,
           aliasUrl: profile?.slug ? getAliasProfileUrl(profile.slug) : null,
@@ -165,11 +165,10 @@ function AccountPage() {
     }
   };
 
-
   if (loading) {
     return (
       <AppShell>
-        <main className="mx-auto w-full max-w-cq-page px-4 pb-16 pt-6 sm:px-6 lg:px-10 lg:pt-10">
+        <main className="mx-auto w-full max-w-cq-page px-4 pb-16 pt-8 sm:px-6 sm:pt-10 lg:px-10 lg:pt-14">
           <p className="text-sm text-cq-muted" role="status">
             Cargando tu cuenta…
           </p>
@@ -181,7 +180,7 @@ function AccountPage() {
   if (!data) {
     return (
       <AppShell>
-        <main className="mx-auto w-full max-w-cq-page px-4 pb-16 pt-6 sm:px-6 lg:px-10 lg:pt-10">
+        <main className="mx-auto w-full max-w-cq-page px-4 pb-16 pt-8 sm:px-6 sm:pt-10 lg:px-10 lg:pt-14">
           <CqEmptyState
             headingId="account-no-session-heading"
             icon={<UserRound className="h-6 w-6" />}
@@ -217,10 +216,11 @@ function AccountPage() {
 
   return (
     <AppShell>
-      <main className="mx-auto w-full max-w-cq-page px-4 pb-16 pt-6 sm:px-6 lg:px-10 lg:pt-10">
+      <main className="mx-auto w-full max-w-cq-page px-4 pb-16 pt-8 sm:px-6 sm:pt-10 lg:px-10 lg:pt-14">
         <CqPageHeader
           title="Cuenta"
-          description="Tu identidad, el estado real de tu página y las acciones disponibles."
+          description="Tu identidad, tus enlaces públicos y las acciones de tu cuenta."
+          visual="magic"
           pill={
             profile ? (
               <CqStatusPill
@@ -238,10 +238,10 @@ function AccountPage() {
           }
         />
 
-        <div className="mt-6 grid gap-5 sm:mt-10 lg:grid-cols-12 lg:items-start lg:gap-6">
-          <div className="min-w-0 space-y-5 lg:col-span-5">
+        <div className="mt-8 grid gap-6 sm:mt-10 lg:grid-cols-12 lg:items-start lg:gap-8">
+          <div className="min-w-0 space-y-6 lg:col-span-5">
             {/* Identity — auth user + the real profiles row. */}
-            <CqPanel headingId="account-identity-heading" title="Identidad">
+            <CqPanel headingId="account-identity-heading" title="Identidad" visual="magic">
               <div className="flex min-w-0 items-start gap-4">
                 <Avatar className="h-16 w-16 shrink-0 rounded-cq-lg border border-cq-line">
                   <AvatarImage src={data.avatarUrl ?? undefined} alt={name} />
@@ -280,6 +280,7 @@ function AccountPage() {
             <CqPanel
               headingId="account-links-heading"
               title="Presencia pública"
+              visual="magic"
               description={
                 profile
                   ? "Enlaces generados desde tu identidad en Supabase."
@@ -325,7 +326,9 @@ function AccountPage() {
                   {formatDay(profile?.updated_at) ? (
                     <div className="flex items-center gap-1.5">
                       <dt>Última edición</dt>
-                      <dd className="font-semibold text-cq-ink">{formatDay(profile?.updated_at)}</dd>
+                      <dd className="font-semibold text-cq-ink">
+                        {formatDay(profile?.updated_at)}
+                      </dd>
                     </div>
                   ) : null}
                   {formatDay(profile?.published_at) ? (
@@ -342,8 +345,8 @@ function AccountPage() {
           </div>
 
           {/* Actions — only routes and behaviour that already exist. */}
-          <div className="min-w-0 space-y-5 lg:col-span-7">
-            <CqPanel headingId="account-actions-heading" title="Acciones">
+          <div className="min-w-0 space-y-6 lg:col-span-7">
+            <CqPanel headingId="account-actions-heading" title="Acciones" visual="magic">
               <div className="grid grid-cols-1 gap-2 min-[420px]:grid-cols-2">
                 <button
                   type="button"
@@ -396,6 +399,7 @@ function AccountPage() {
             <CqPanel
               headingId="account-session-heading"
               title="Sesión"
+              visual="magic"
               description="Cierra tu sesión en este navegador."
             >
               <button
@@ -408,9 +412,7 @@ function AccountPage() {
               </button>
             </CqPanel>
 
-            <p className="px-1 text-center text-[11.5px] text-cq-subtle">
-              Cripqer versión 1.0.0
-            </p>
+            <p className="px-1 text-center text-[11.5px] text-cq-subtle">Cripqer versión 1.0.0</p>
           </div>
         </div>
       </main>
