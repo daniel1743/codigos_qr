@@ -14,8 +14,7 @@ import type { ShellPageState, ShellUser } from "./AppShell";
 
 type Props = { user: ShellUser | null; pageState: ShellPageState; isAdmin: boolean };
 
-function pageDestination(pageState: ShellPageState, isAdmin: boolean) {
-  if (pageState.count === 0 && isAdmin) return { label: "Crear página", to: "/pages/new" as const };
+function pageDestination(pageState: ShellPageState) {
   if (pageState.count === 0) return { label: "Mi página", to: "/profile" as const };
   if (pageState.count === 1 && pageState.primaryPageId) {
     return {
@@ -59,7 +58,7 @@ function NavLink({
 
 export function DesktopSidebar({ user, pageState, isAdmin }: Props) {
   const { pathname } = useLocation();
-  const page = pageDestination(pageState, isAdmin);
+  const page = pageDestination(pageState);
   return (
     <aside className="sticky top-0 hidden h-screen w-[256px] shrink-0 flex-col border-r border-cq-line bg-white px-5 py-6 lg:flex">
       <div className="shrink-0 px-2">

@@ -16,7 +16,6 @@ export function HomeHero({
   visits30d,
   onCreate,
   creating,
-  canCreatePage,
 }: {
   firstName: string;
   hasPage: boolean;
@@ -24,7 +23,6 @@ export function HomeHero({
   visits30d: number | null;
   onCreate: () => void;
   creating: boolean;
-  canCreatePage: boolean;
 }) {
   const audienceLine =
     visits30d !== null && visits30d > 0
@@ -38,7 +36,10 @@ export function HomeHero({
     <section className="relative isolate min-w-0">
       {/* Purely decorative organic shape (Magic parity) — no interaction, no data.
           Clipped by its own layer so it never affects scroll or focus rings. */}
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
+      >
         <svg
           focusable="false"
           className="absolute -right-32 -top-40 hidden w-[520px] sm:block"
@@ -63,7 +64,9 @@ export function HomeHero({
           ? "Este es el estado real de tu página: identidad pública, rendimiento y accesos rápidos."
           : "Aún no tienes una página. Créala para publicar tu identidad, tus enlaces y tu QR."}
       </p>
-      <p className="mt-2 max-w-[560px] text-[13.5px] leading-relaxed text-cq-subtle">{audienceLine}</p>
+      <p className="mt-2 max-w-[560px] text-[13.5px] leading-relaxed text-cq-subtle">
+        {audienceLine}
+      </p>
 
       <div className="mt-8 flex flex-wrap items-center gap-3">
         {editPageId ? (
@@ -74,17 +77,17 @@ export function HomeHero({
             className={primaryClass}
           >
             <Pencil className="h-[17px] w-[17px]" aria-hidden />
-            Editar página
+            Editar mi página
           </Link>
         ) : null}
-        {!editPageId && canCreatePage ? (
+        {!editPageId ? (
           <button type="button" onClick={onCreate} disabled={creating} className={primaryClass}>
             {creating ? (
               "Creando…"
             ) : (
               <>
                 <Plus className="h-4 w-4" aria-hidden />
-                Crear página
+                Crear mi página
               </>
             )}
           </button>

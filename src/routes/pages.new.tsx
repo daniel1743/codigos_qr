@@ -65,7 +65,13 @@ function CreatePage() {
   }, [supabase]);
 
   if (adminLoading || !isAdmin) {
-    return <AppShell><div className="flex min-h-[calc(100vh-68px)] items-center justify-center text-sm text-cq-subtle">Verificando permisos…</div></AppShell>;
+    return (
+      <AppShell>
+        <div className="flex min-h-[calc(100vh-68px)] items-center justify-center text-sm text-cq-subtle">
+          Verificando permisos…
+        </div>
+      </AppShell>
+    );
   }
 
   return (
@@ -174,7 +180,7 @@ function PageForm({
         </div>
         <p className="text-[13px] leading-relaxed text-cq-muted">
           La página se crea como borrador con una plantilla canónica editable. Podrás cambiar
-          plantilla, contenido, URL y publicación desde el Power Editor.
+          plantilla, contenido, URL y publicación desde el Magic Editor.
         </p>
         {error && <p className="text-[13px] font-medium text-red-600">{error}</p>}
         <div className="flex flex-wrap items-center gap-2">
@@ -186,7 +192,12 @@ function PageForm({
             )}
             Crear página
           </button>
-          <button type="button" className={cqSecondaryButton} onClick={onBack} disabled={submitting}>
+          <button
+            type="button"
+            className={cqSecondaryButton}
+            onClick={onBack}
+            disabled={submitting}
+          >
             <ArrowLeft className="h-4 w-4 text-cq-muted" aria-hidden="true" /> Volver
           </button>
         </div>

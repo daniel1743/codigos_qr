@@ -90,8 +90,12 @@ export function PageAssetCard({
   );
 }
 
-/** Honest empty state for owners without a page yet (real creation flow, no mock data). */
-export function NoPageCard({ onCreate, creating, canCreatePage }: { onCreate: () => void; creating: boolean; canCreatePage: boolean }) {
+/**
+ * Honest empty state for owners without a page yet (real creation flow, no mock
+ * data). Informational only: the single primary "Crear mi página" action lives in
+ * the Home hero above, so this card never duplicates it.
+ */
+export function NoPageCard() {
   return (
     <section
       aria-labelledby="home-no-page-heading"
@@ -106,14 +110,6 @@ export function NoPageCard({ onCreate, creating, canCreatePage }: { onCreate: ()
       <p className="mt-2 max-w-[520px] text-[14px] leading-relaxed text-cq-muted">
         Crea tu página para publicar tu identidad, tus enlaces y obtener tu QR permanente.
       </p>
-      {canCreatePage ? <button
-        type="button"
-        onClick={onCreate}
-        disabled={creating}
-        className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-cq-sm bg-cq-blue px-5 text-[14.5px] font-semibold text-white shadow-[0_10px_24px_-10px_rgba(30,86,224,0.6)] transition-colors hover:bg-cq-blue-700 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-cq-blue-200"
-      >
-        {creating ? "Creando…" : "Crear página"}
-      </button> : null}
     </section>
   );
 }

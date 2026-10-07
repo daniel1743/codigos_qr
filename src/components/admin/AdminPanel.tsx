@@ -24,7 +24,6 @@ import { PremiumPanel } from "./PremiumPanel";
 import { InvitationCodesPanel } from "./InvitationCodesPanel";
 import { LogosPanel } from "./LogosPanel";
 import { AnalyticsGlobalPanel } from "./AnalyticsGlobalPanel";
-import { isAdminEmail } from "../../lib/admin-check";
 
 interface GlobalStats {
   totalUsers: number;
@@ -73,7 +72,7 @@ export function AdminPanel() {
         .eq("user_id", user.id)
         .maybeSingle();
 
-      if (!adminData && !isAdminEmail(user.email || "")) {
+      if (!adminData) {
         navigate({ to: "/" });
         return;
       }
@@ -276,6 +275,33 @@ export function AdminPanel() {
 
         {/* Dashboard Tab */}
         <TabsContent value="dashboard" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Herramientas administrativas</CardTitle>
+              <CardDescription>
+                Acciones avanzadas para administrar y configurar Cripqer.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <button
+                type="button"
+                onClick={() => navigate({ to: "/pages/new" })}
+                className="flex w-full items-start gap-4 rounded-xl border border-border p-4 text-left transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
+                  <Sparkles className="h-5 w-5" aria-hidden />
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-sm font-semibold">Crear página avanzada</span>
+                  <span className="mt-1 block text-sm text-muted-foreground">
+                    Crea una página con los tipos y presets avanzados: Landing, Promoción, Menú,
+                    Campaña, Evento, Servicios, Catálogo y Portafolio.
+                  </span>
+                </span>
+              </button>
+            </CardContent>
+          </Card>
+
           <div className="grid gap-6 lg:grid-cols-2">
             <Card>
               <CardHeader>

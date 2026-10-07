@@ -49,7 +49,11 @@ export function AppShell({ children }: { children: ReactNode }) {
         const pages = await pageService.listOwnPages(supabase, authUser.id);
         // C3.2.1 — the shell's primary page is the landing, never the full
         // catalog child (`page_type = "catalog"`) that C3.2 made editable.
-        if (active) setPageState({ count: pages.length, primaryPageId: selectLandingPage(pages)?.id ?? null });
+        if (active)
+          setPageState({
+            count: pages.length,
+            primaryPageId: selectLandingPage(pages)?.id ?? null,
+          });
       } catch (pageError) {
         console.error("Error resolving shell pages:", pageError);
       }
@@ -76,7 +80,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         pageState={pageState}
         isAdmin={user?.isAdmin ?? false}
       />
-      <MobileBottomNav pageState={pageState} isAdmin={user?.isAdmin ?? false} onMenuClick={() => setDrawerOpen(true)} />
+      <MobileBottomNav pageState={pageState} onMenuClick={() => setDrawerOpen(true)} />
     </div>
   );
 }

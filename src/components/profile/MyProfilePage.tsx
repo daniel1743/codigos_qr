@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { getBrowserSupabaseClient } from "../../lib/supabase/client";
 import { selectLandingPage } from "../../lib/editor-routing/resolveCanonicalMagicPage";
 import { magicPageService } from "../../services/magic-page.service";
+import { pageService } from "../../services/page.service";
 import { profileService } from "../../services/profile.service";
 import type { Page } from "../../types/database";
 import { ActivityPanel } from "../home/ActivityPanel";
@@ -14,7 +15,7 @@ import { PerformancePanel } from "../home/PerformancePanel";
 import { QuickDestinations } from "../home/QuickDestinations";
 import { editRouteSearch } from "../home/editRouteSearch";
 import { useHomeAnalytics } from "../home/useHomeAnalytics";
-import { useAdminStatus } from "../../lib/use-admin-status";
+import { createInitialMagicPageDocument } from "../../features/magic-page-editor-production/magic-document";
 
 type UserProfile = {
   email: string;
@@ -56,7 +57,6 @@ export function MyProfilePage() {
   const [stats, setStats] = useState({ totalScans: 0, totalLinks: 0 });
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
-  const { isAdmin } = useAdminStatus();
   useEffect(() => {
     let active = true;
     void (async () => {
@@ -139,7 +139,8 @@ export function MyProfilePage() {
     return () => {
       active = false;
     };
-  }, [supabase]);  const analytics = useHomeAnalytics(canonicalPage?.id ?? null, ANALYTICS_DAYS);
+  }, [supabase]);
+  const analytics = useHomeAnalytics(canonicalPage?.id ?? null, ANALYTICS_DAYS);
 
   const firstName = useMemo(() => {
     const value = profile?.full_name?.trim();
@@ -157,20 +158,25 @@ export function MyProfilePage() {
   const visits30d = analytics.status === "ready" && summary ? summary.visits : null;
 
   const createPage = async () => {
-    if (!isAdmin || !user || creating) return;
+    if (!user || creating) return;
     setCreating(true);
     try {
-      const ensuredProfile = await profileService.ensurePrimaryProfileForUser(supabase, {
+      await profileService.ensurePrimaryProfileForUser(supabase, {
         userId: user.id,
         email: user.email ?? null,
         userMetadata: user.user_metadata,
       });
-      const created = await magicPageService.createPage(supabase, {
-        userId: user.id,
-        profileId: ensuredProfile.id,
-        title: ensuredProfile.display_name || displayName,
-        pageType: "landing",
-      });
+      // Server-side controlled boundary: creates AT MOST one initial landing
+      // page for this owner. General `pages` INSERT stays admin-only.
+      const created = await pageService.createInitialLandingPage(supabase);
+      // Seed the canonical Magic starter the editor already opens (same
+      // document the previous admin-only flow persisted at insert time).
+      await magicPageService.saveDraft(
+        supabase,
+        created.id,
+        user.id,
+        createInitialMagicPageDocument("bio"),
+      );
       await navigate({
         to: "/pages/$pageId/edit",
         params: { pageId: created.id },
@@ -205,7 +211,6 @@ export function MyProfilePage() {
         visits30d={visits30d}
         onCreate={() => void createPage()}
         creating={creating}
-        canCreatePage={isAdmin}
       />
 
       <div className="mt-12 grid gap-8 sm:mt-16 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,0.7fr)] xl:items-start xl:gap-10">
@@ -221,7 +226,7 @@ export function MyProfilePage() {
               pageId={canonicalPage.id}
             />
           ) : (
-            <NoPageCard onCreate={() => void createPage()} creating={creating} canCreatePage={isAdmin} />
+            <NoPageCard />
           )}
 
           <PerformancePanel
@@ -238,7 +243,7 @@ export function MyProfilePage() {
 
         <div className="flex min-w-0 flex-col gap-6">
           <ActivityPanel analyticsPageId={canonicalPage?.id ?? null} />
-          <QuickDestinations pageId={canonicalPage?.id ?? null} canCreatePage={isAdmin} />
+          <QuickDestinations pageId={canonicalPage?.id ?? null} />
         </div>
       </div>
     </div>

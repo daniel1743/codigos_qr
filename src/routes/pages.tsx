@@ -1,6 +1,5 @@
-import { createFileRoute, Link, Outlet, useMatches } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useMatches } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Plus } from "lucide-react";
 import { AppShell } from "../components/app-shell/AppShell";
 import { IdentityCard } from "../components/pages/IdentityCard";
 import { MagicPageCard } from "../components/pages/MagicPageCard";
@@ -18,7 +17,6 @@ import { pageCanonicalService } from "../services/page-canonical.service";
 import { profileService } from "../services/profile.service";
 import { toast } from "sonner";
 import type { Page, Profile } from "../types/database";
-import { useAdminStatus } from "../lib/use-admin-status";
 
 /**
  * F3 - Mi Pagina / Identity.
@@ -30,9 +28,6 @@ import { useAdminStatus } from "../lib/use-admin-status";
  */
 export const Route = createFileRoute("/pages")({ component: PagesList });
 
-const createPageCta =
-  "inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-cq-sm bg-cq-blue px-5 text-[14.5px] font-semibold text-white shadow-[0_10px_24px_-10px_rgba(30,86,224,0.6)] transition-colors hover:bg-cq-blue-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-cq-blue-200";
-
 function PagesList() {
   const supabase = getBrowserSupabaseClient();
   const [loading, setLoading] = useState(true);
@@ -42,7 +37,6 @@ function PagesList() {
   const [error, setError] = useState<string | null>(null);
   const [busyPageId, setBusyPageId] = useState<string | null>(null);
   const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
-  const { isAdmin } = useAdminStatus();
 
   // /pages is the parent of the nested child routes (/pages/$pageId, /pages/new,
   // /pages/$pageId/edit). When one of those children is the active match we must
@@ -167,9 +161,6 @@ function PagesList() {
               independientes: puedes publicar cada una por separado.
             </p>
           </div>
-          {isAdmin ? <Link to="/pages/new" className={createPageCta}>
-            <Plus className="h-4 w-4" aria-hidden /> Crear página
-          </Link> : null}
         </header>
 
         {loading ? (
@@ -214,9 +205,6 @@ function PagesList() {
                     Crea una página para publicar contenido independiente de tu identidad, con su
                     propio enlace, su QR y sus estadísticas.
                   </p>
-                  {isAdmin ? <Link to="/pages/new" className={`${createPageCta} mt-5`}>
-                    <Plus className="h-4 w-4" aria-hidden /> Crear página
-                  </Link> : null}
                 </div>
               ) : (
                 <div className="mt-3 grid gap-5 lg:grid-cols-2">

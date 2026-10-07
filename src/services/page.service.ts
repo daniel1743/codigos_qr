@@ -241,6 +241,42 @@ export const pageService = {
   },
 
   /**
+   * SECURE FIRST-PAGE CREATION — the only creation path for a NON-admin owner.
+   *
+   * Calls the narrow server-side RPC `create_initial_landing_page`, which enforces
+   * `auth.uid()` ownership, `page_type = 'landing'`, draft-only state and the
+   * "exactly one canonical (non-catalog) page" rule.
+   *
+   * General INSERT into `public.pages` remains admin-only
+   * (`admin_insert_page`); this method never widens that policy and the client
+   * cannot choose the owner, the page type or bypass the one-page rule.
+   */
+  async createInitialLandingPage(supabase: SupabaseClient): Promise<Page> {
+    const { data, error } = await supabase.rpc("create_initial_landing_page");
+
+    if (error) {
+      const message = typeof error.message === "string" ? error.message : "";
+      if (message.includes("INITIAL_PAGE_ALREADY_EXISTS")) {
+        throw new PageServiceError("Ya tienes una página. Ábrela para editarla.");
+      }
+      if (message.includes("PROFILE_REQUIRED")) {
+        throw new PageServiceError("Necesitas un perfil para crear tu página.");
+      }
+      if (message.includes("AUTH_REQUIRED")) {
+        throw new PageServiceError("Debes iniciar sesión para crear tu página.");
+      }
+      throw error;
+    }
+
+    // The RPC returns a single composite row; tolerate both shapes defensively.
+    const row = Array.isArray(data) ? data[0] : data;
+    if (!row) {
+      throw new PageServiceError("No se pudo crear tu página inicial.");
+    }
+    return row as Page;
+  },
+
+  /**
    * Resolve one PUBLISHED child page by its public_id through the safe public
    * RPC (`get_public_page_by_public_id`).
    *
