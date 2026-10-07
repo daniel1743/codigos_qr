@@ -3,7 +3,9 @@ import { PlusIcon, StarIcon } from "lucide-react";
 import { useEditor } from "../../contexts/EditorContext";
 import { useThemeTokens } from "../../hooks/useThemeTokens";
 import { Editable } from "../editor/Editable";
+import { EditableText } from "../editor/EditableText";
 import { cx } from "../../utils/cx";
+import { blockPrefix } from "../../utils/styles";
 import {
   REVIEWS_MAX,
   addReview,
@@ -54,9 +56,30 @@ export function ReviewsBlock({ block, maxWidth = 720 }: ReviewsBlockProps) {
   const order = reviewsOrder(ed.doc, block.key);
   const canAdd = order.length < REVIEWS_MAX;
   const single = order.length === 1;
+  const blockProps = ed.doc.props[`block:${block.key}`] ?? {};
+
+  /**
+   * The heading is opt-in: it renders only once a title has actually been
+   * written. The Magic Patterns targets carry one ("Lo que dicen", …), but a
+   * page that never had one must not sprout one on load.
+   */
+  const titleId = `${blockPrefix(block)}reviews.title`;
+  const title = ed.doc.texts[titleId] ?? "";
+  /** Avatars default ON so published reviews keep the bubble they already had. */
+  const showAvatars = blockProps["showAvatars"] !== "off";
 
   return (
     <div className={cx("mx-auto w-full", m ? "px-5" : "px-10")} style={{ maxWidth: maxWidth + 80 }}>
+      {title.trim() !== "" && (
+        <EditableText
+          id={titleId}
+          value={title}
+          as="h2"
+          label="Título del bloque"
+          className="cq-fg mb-5 text-[22px] leading-tight"
+          style={{ fontFamily: t.displayFont }}
+        />
+      )}
       <div
         className={cx("grid", single ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2", m ? "gap-3" : "gap-4")}
         style={single && !m ? { maxWidth: 420, marginInline: "auto" } : undefined}>
@@ -74,7 +97,7 @@ export function ReviewsBlock({ block, maxWidth = 720 }: ReviewsBlockProps) {
               className="cq-surface cq-line relative flex flex-col gap-3 border p-5"
               style={{ borderRadius: t.radius }}>
               <div className="flex items-center gap-3">
-                {review.avatar ? (
+                {showAvatars && (review.avatar ? (
                   <img
                     src={review.avatar}
                     alt={review.name}
@@ -88,7 +111,7 @@ export function ReviewsBlock({ block, maxWidth = 720 }: ReviewsBlockProps) {
                     style={{ background: t.accent, color: t.accentFg }}>
                     {initials}
                   </span>
-                )}
+                ))}
                 <div className="min-w-0 flex-1">
                   <p className="cq-fg truncate text-[15px] font-semibold" style={{ fontFamily: t.displayFont }}>
                     {review.name}

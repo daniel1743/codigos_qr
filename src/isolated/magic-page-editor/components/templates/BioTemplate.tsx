@@ -63,7 +63,24 @@ export function BioTemplate() {
   const render = (b: BlockRef) => {
     const p = blockPrefix(b);
     switch (b.type) {
-      case 'hero':
+      case 'hero': {
+        /**
+         * Bio's hero carries no CTA or socials — those are separate blocks — so
+         * only `title` and `description` have an equivalent here. A composition
+         * that asks for a missing piece falls back to `children`, never to an
+         * empty box.
+         */
+        const heroParts = (align: 'left' | 'center') => ({
+          title: <div className="flex items-center"><EditableText id={`${p}hero.name`} value={bioProfile.name} as="h1" label="Nombre" className={cx('cq-fg leading-[0.95]', m ? 'text-[42px]' : 'text-[54px]')} style={{
+                ...display,
+                fontWeight: 500
+              }} /><VerifiedNameCheck avatarId={`${p}avatar`} /></div>,
+          description: <>
+            <EditableText id={`${p}hero.role`} value={bioProfile.role} label="Subtítulo" className="cq-muted mt-3 text-[12.5px] font-medium uppercase tracking-[0.16em]" />
+            <QuickProfileInfo legacyDescription={doc.texts[`${p}hero.bio`] ?? bioProfile.bio} className={align === 'center' ? 'text-center' : 'text-left'} />
+          </>,
+        });
+        const heroSlots = heroParts('left');
         return <Block key={b.key} block={b} defaultSpacing="none">
             <HeroFrame id={`block:${b.key}`} media={images.bioHero} mediaAlt="Costa mediterránea al atardecer" defaultVariant="centered" defaultShape="curve" radius={t.radius} avatarOverlap={m ? 60 : 80} decor={<EditableText id={`${p}hero.script`} value={bioProfile.script} label="Frase" as="span" className={cx('absolute rounded-full px-3.5 py-1.5 italic', m ? 'right-4 top-4 text-[15px]' : 'right-6 top-6 text-[18px]')} style={{ ...display, background: t.page.surface, color: t.page.fg }} />} avatar={<EditableAvatar id={`${p}avatar`} src={images.bioAvatar} alt="Marina Solé" sizes={m ? {
             S: 92,
@@ -73,19 +90,14 @@ export function BioTemplate() {
             S: 116,
             M: 148,
             L: 180
-          }} ringColor={t.page.color} ringWidth={6} defaultBadge badgeColor={t.accent} />}>
-              {({
-              align
-            }) => <>
-                  <div className="flex items-center"><EditableText id={`${p}hero.name`} value={bioProfile.name} as="h1" label="Nombre" className={cx('cq-fg leading-[0.95]', m ? 'text-[42px]' : 'text-[54px]')} style={{
-                ...display,
-                fontWeight: 500
-              }} /><VerifiedNameCheck avatarId={`${p}avatar`} /></div>
-                  <EditableText id={`${p}hero.role`} value={bioProfile.role} label="Subtítulo" className="cq-muted mt-3 text-[12.5px] font-medium uppercase tracking-[0.16em]" />
-                  <QuickProfileInfo legacyDescription={doc.texts[`${p}hero.bio`] ?? bioProfile.bio} className={align === 'center' ? 'text-center' : 'text-left'} />
-                </>}
+          }} ringColor={t.page.color} ringWidth={6} defaultBadge badgeColor={t.accent} />} slots={heroSlots}>
+              {({ align }) => {
+                const q = heroParts(align);
+                return <>{q.title}{q.description}</>;
+              }}
             </HeroFrame>
           </Block>;
+      }
       case 'separator':
           return <SeparatorBlock key={b.key} block={b} mobile={m} />;
         case 'social':

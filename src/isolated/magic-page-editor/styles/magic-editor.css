@@ -1,4 +1,9 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Marcellus&family=Manrope:wght@400;500;600;700&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;1,6..96,400;1,6..96,500&family=Inter+Tight:wght@400;500;600&display=swap");
+/* L1 · Typography. The families the Magic Patterns targets use are loaded here so a
+   page can reach its intended display face. `Caveat` is included because
+   utils/styles.ts maps `typeStyle: 'script'` to it — it was referenced but never
+   loaded, so that option silently fell back to the browser's generic cursive.
+   Keep this and the index.css copy in sync. */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Marcellus&family=Manrope:wght@400;500;600;700&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;1,6..96,400;1,6..96,500&family=Inter+Tight:wght@400;500;600&family=DM+Serif+Display&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Montserrat:wght@400;500;600;700;800&family=Great+Vibes&family=Caveat:wght@400;500;600;700&display=swap");
 
 .magic-editor-root {
   max-width: 100vw;

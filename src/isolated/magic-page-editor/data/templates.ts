@@ -1,4 +1,5 @@
 import { images } from './images';
+import { sharedFontPairs } from './fontPairs';
 import type { TemplateId, TemplateMeta } from '../types/editor';
 
 export const templates: Record<TemplateId, TemplateMeta> = {
@@ -34,7 +35,8 @@ export const templates: Record<TemplateId, TemplateMeta> = {
       fonts: [
       { id: 'editorial', label: 'Editorial', display: "'Cormorant Garamond', serif", body: "'Inter', sans-serif" },
       { id: 'moderna', label: 'Moderna', display: "'Manrope', sans-serif", body: "'Manrope', sans-serif" },
-      { id: 'clasica', label: 'Clásica', display: "'Bodoni Moda', serif", body: "'Inter Tight', sans-serif" }]
+      { id: 'clasica', label: 'Clásica', display: "'Bodoni Moda', serif", body: "'Inter Tight', sans-serif" },
+      ...sharedFontPairs]
 
     },
     initialBlocks: [
@@ -78,7 +80,8 @@ export const templates: Record<TemplateId, TemplateMeta> = {
       fonts: [
       { id: 'firma', label: 'Firma', display: "'Marcellus', serif", body: "'Manrope', sans-serif" },
       { id: 'editorial', label: 'Editorial', display: "'Cormorant Garamond', serif", body: "'Inter', sans-serif" },
-      { id: 'moderna', label: 'Moderna', display: "'Inter Tight', sans-serif", body: "'Inter Tight', sans-serif" }]
+      { id: 'moderna', label: 'Moderna', display: "'Inter Tight', sans-serif", body: "'Inter Tight', sans-serif" },
+      ...sharedFontPairs]
 
     },
     initialBlocks: [
@@ -123,7 +126,8 @@ export const templates: Record<TemplateId, TemplateMeta> = {
       fonts: [
       { id: 'bodoni', label: 'Editorial', display: "'Bodoni Moda', serif", body: "'Inter Tight', sans-serif" },
       { id: 'garamond', label: 'Clásica', display: "'Cormorant Garamond', serif", body: "'Inter', sans-serif" },
-      { id: 'neutra', label: 'Neutra', display: "'Inter Tight', sans-serif", body: "'Inter Tight', sans-serif" }]
+      { id: 'neutra', label: 'Neutra', display: "'Inter Tight', sans-serif", body: "'Inter Tight', sans-serif" },
+      ...sharedFontPairs]
 
     },
     initialBlocks: [

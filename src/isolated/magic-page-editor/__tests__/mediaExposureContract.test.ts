@@ -18,8 +18,10 @@ import {
 const ACCENT = "#e11d48";
 
 describe("canonical editor exposure: hero variants + fusion", () => {
-  it("keeps all thirty hero layout variants wired to the picker", () => {
+  it("keeps every hero layout variant wired to the picker", () => {
     expect(heroVariants.map((v) => v.value)).toEqual([
+      // L2.1 appends here. This list is the contract: a new composition has to
+      // be named in it, which is what makes widening the set a deliberate act.
       "simple",
       "centered",
       "split",
@@ -50,8 +52,21 @@ describe("canonical editor exposure: hero variants + fusion", () => {
       "descriptionCard",
       "cinematic",
       "brandIdentity",
+      "cinematicTall",
+      "photoBand",
+      "imageThenText",
+      "centeredStack",
+      "identityBand",
+      "overlayBottom",
+      "masthead",
+      "minimalColumn",
+      "gridCollage",
+      "avatarOverlap",
+      "framedPlate",
     ]);
-    expect(new Set(heroVariants.map((v) => v.value)).size).toBe(30);
+    // Derived, not a magic number: adding a composition means adding it to the
+    // list above, never editing a count.
+    expect(new Set(heroVariants.map((v) => v.value)).size).toBe(heroVariants.length);
   });
 
   it("exposes every implemented fusion mode (L0) as a discoverable option", () => {

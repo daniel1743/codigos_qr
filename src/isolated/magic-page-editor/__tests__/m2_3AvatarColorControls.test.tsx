@@ -63,6 +63,27 @@ describe('M2.3 avatar identity and custom color controls', () => {
     act(() => root.unmount());
   });
 
+  it('reuses a page color through the existing SwatchRow control', () => {
+    let selected: string | undefined;
+    const { host, root } = mount(
+      <SwatchRow
+        colors={['#FFFFFF']}
+        pageColors={['#0B1F3A']}
+        value={undefined}
+        onChange={(value) => {
+          selected = value;
+        }}
+      />,
+    );
+
+    const pageSwatch = host.querySelector('button[aria-label="Color de la página #0B1F3A"]');
+    expect(pageSwatch).not.toBeNull();
+    expect(host.querySelector('button[aria-label="Color #FFFFFF"]')).not.toBeNull();
+    act(() => (pageSwatch as HTMLButtonElement).click());
+    expect(selected).toBe('#0B1F3A');
+    act(() => root.unmount());
+  });
+
   it('keeps placement and arbitrary color through Magic save/reload', () => {
     const documentState = createInitialMagicPageDocument('bio');
     documentState.props.avatar = { badgePlacement: 'name', badgeColor: '#0B1F3A' };

@@ -1,4 +1,5 @@
 import React from 'react';
+import { MapPinIcon } from 'lucide-react';
 import { useEditor } from '../../contexts/EditorContext';
 import { cx } from '../../utils/cx';
 import type { HeroVariant } from '../../types/editor';
@@ -9,6 +10,134 @@ import { useThemeTokens } from '../../hooks/useThemeTokens';
 
 export type HeroShape = 'curve' | 'straight' | 'inset' | 'curve-deep' | 'curve-up' | 'curve-up-deep' | 'wave' | 'wave-double' | 'arch';
 export const heroShapeIds: readonly HeroShape[] = ['curve', 'straight', 'inset', 'curve-deep', 'curve-up', 'curve-up-deep', 'wave', 'wave-double', 'arch'];
+
+/**
+ * Variants that spread `bandShape` — the only ones where `curve` and `inset`
+ * draw anything. In every other variant both render `{}`, so the shape picker
+ * hides them rather than offering a control that does nothing.
+ */
+export const heroBandShapeVariants: readonly HeroVariant[] = ['image', 'floating', 'bleed'];
+
+const OVERLAY_LEVELS: Record<string, number> = { none: 0, soft: 0.16, medium: 0.32, intense: 0.52 };
+
+/**
+ * L2.1 · Named pieces of the hero's content.
+ *
+ * `children` hands the hero one opaque, ordered fragment (brand, title,
+ * description, CTA, socials). That is enough for a variant that stacks
+ * everything in one place — which is every variant up to now — but it makes a
+ * composition impossible to build when the pieces have to be *distributed*: a
+ * brand row at the top with the title and CTA at the bottom, say.
+ *
+ * Templates therefore build the pieces once and hand them over twice: through
+ * `children` exactly as before, and through this map. A variant that ignores
+ * `slots` renders `children` and behaves identically — which is why all 30
+ * existing variants are unaffected by construction, not by care.
+ *
+ * Every field is optional: a variant must fall back to `children` when a piece
+ * is missing, so a template that has not been migrated still renders.
+ */
+export interface HeroSlots {
+  brand?: React.ReactNode;
+  /**
+   * The SECOND label of a hero's header or meta row (L2.5).
+   *
+   * The target's headers are two-ended — a brand on one side and a short
+   * qualifier on the other (a status pill, a discipline, a location, a year).
+   * Every header row in the new compositions was already built as a
+   * `justify-between` with a single child, waiting for this. It carries no
+   * template's content: whatever the author writes is what shows.
+   */
+  eyebrow?: React.ReactNode;
+  title?: React.ReactNode;
+  description?: React.ReactNode;
+  /**
+   * The trailing label of a hero's caption row — the "2025" or "01 / 24" beside
+   * the description. Its own slot rather than a second meaning for `eyebrow`,
+   * because the two sit in different rows and carry different kinds of text.
+   */
+  meta?: React.ReactNode;
+  cta?: React.ReactNode;
+  social?: React.ReactNode;
+}
+
+/**
+ * Resolves a hero height to pixels.
+ *
+ * `S|M|L` are unchanged: 220/320/460, scaled by 0.68 on mobile — the exact
+ * expression the original 8 variants used. A bare integer is a literal px
+ * height, which is what lets a new composition carry the target's own value
+ * (560, 420, 170 …) instead of hardcoding it.
+ *
+ * Only NEW variants call this. The 22 that ignore `height` today still ignore
+ * it, so no published page moves.
+ *
+ * What the resolved value sizes depends on the composition family, and both are
+ * intentional:
+ *  · full-bleed (`cinematicTall`, `overlayBottom`) — the root IS the media, so
+ *    it sizes the whole hero;
+ *  · band (`photoBand`, `imageThenText`, `centeredStack`, `identityBand`) — the
+ *    root is a padded column and it sizes the media band inside it, which is
+ *    what the target means by a fixed `h-[300px]` on the photo.
+ */
+export function heroHeightPx(raw: string | undefined, fallback: HeroHeight, mobile: boolean): number {
+  const scale = mobile ? 0.68 : 1;
+  if (raw && /^\d+$/.test(raw)) return Math.round(Number(raw) * scale);
+  const key = (raw as HeroHeight) ?? fallback;
+  return Math.round((HEIGHTS[key] ?? HEIGHTS[fallback]) * scale);
+}
+
+/**
+ * Literal px radius from the media-shape slot, or the composition's own default.
+ *
+ * Reuses the L1 numeric-radius capability rather than adding a second way to say
+ * the same thing. A named shape (`rounded`, `circle`, …) is deliberately NOT read
+ * here: on these compositions the media edge is part of the layout, and a legacy
+ * shape value left over on a page should not reshape a composition it predates.
+ */
+function heroMediaRadius(raw: string | undefined, fallback: number): number {
+  return raw && /^\d+$/.test(raw) ? Number(raw) : fallback;
+}
+
+/**
+ * Resolves the hero overlay to an opacity.
+ *
+ * A decimal string is a literal 0–1 opacity (clamped), so the targets' 0.40 and
+ * 0.60 veils become reachable — the four named levels top out at 0.52. The four
+ * names keep producing exactly the values they always did.
+ *
+ * Note this is the HERO's own scale. `premium-template-studio/engine/mediaTreatment`
+ * uses {0.16, 0.30, 0.50} for images and overlays elsewhere; the two tables are
+ * intentionally left as they are to avoid moving already-published pages.
+ */
+export function heroOverlayOpacity(raw: string | undefined): number {
+  if (!raw) return 0;
+  if (/^\d*\.?\d+$/.test(raw.trim())) {
+    const literal = Number(raw);
+    if (Number.isFinite(literal)) return Math.min(1, Math.max(0, literal));
+  }
+  return OVERLAY_LEVELS[raw] ?? 0;
+}
+
+/**
+ * Whether a silhouette setting changes what is rendered for a given variant.
+ *
+ * These three are the *legacy* shapes. They are not no-ops: they are the states
+ * of `bandShape`, and since every template passes `defaultShape="curve"`,
+ * picking `straight` or `inset` visibly *changes* the media edge (it removes or
+ * reshapes the default curve). What is true is narrower — they only have an
+ * effect in the variants that spread `bandShape`, and are inert in the other 27.
+ *
+ * The picker still offers all nine (that is the tested contract), but marks the
+ * ones that cannot draw for the current variant so the option is not a silent
+ * no-op. An unknown variant reports `true`: never claim "does nothing" on a guess.
+ */
+export function heroShapeAppliesTo(shape: HeroShape, variant?: string | null): boolean {
+  if (shape === 'curve' || shape === 'straight' || shape === 'inset') {
+    return variant ? heroBandShapeVariants.includes(variant as HeroVariant) : true;
+  }
+  return true;
+}
 type HeroHeight = 'S' | 'M' | 'L';
 
 interface HeroContext {
@@ -30,6 +159,12 @@ interface HeroFrameProps {
   /** Optional extra photos for the mosaic variant; falls back to alternate crops of the main image. */
   extraMedia?: string[];
   children: (ctx: HeroContext) => React.ReactNode;
+  /**
+   * The same content as `children`, addressed by name. Only the compositions
+   * added in L2.1 read this; every earlier variant ignores it, so passing it is
+   * inert until a variant asks for it. See `HeroSlots`.
+   */
+  slots?: HeroSlots;
 }
 
 const HEIGHTS: Record<HeroHeight, number> = { S: 220, M: 320, L: 460 };
@@ -68,7 +203,8 @@ export function HeroFrame({
   decor,
   radius,
   extraMedia,
-  children
+  children,
+  slots
 }: HeroFrameProps) {
   const { doc, isMobile: m } = useEditor();
   const t = useThemeTokens();
@@ -84,7 +220,7 @@ export function HeroFrame({
   const crop = useFreeImagePan(id, p['cropX'], p['cropY']);
   const isLocked = p['locked'] === 'true';
   const data = { 'data-hero': variant, 'data-shape': shape };
-  const overlayOpacity = { none: 0, soft: 0.16, medium: 0.32, intense: 0.52 }[p['overlay'] ?? 'none'] ?? 0;
+  const overlayOpacity = heroOverlayOpacity(p['overlay']);
   const overlay = overlayOpacity > 0 ? <span className="pointer-events-none absolute inset-0 z-[1]" style={{ background: p['overlayColor'] ?? 'var(--media-overlay)', opacity: overlayOpacity }} /> : null;
   const fusion = p['fusion'] ?? 'none';
   const fusionLayer = fusion !== 'none' ? <span className={cx('pointer-events-none absolute z-[2]', fusion === 'halo' ? '-inset-x-12 -bottom-20 h-64' : fusion === 'organic' ? '-inset-x-8 bottom-0 h-48' : 'inset-x-0 bottom-0', fusion === 'fade' ? 'h-48' : 'h-32')} style={{ background: fusion === 'halo' ? 'radial-gradient(ellipse at 50% 100%, var(--surface) 0%, color-mix(in oklab, var(--surface) 72%, transparent) 38%, transparent 72%)' : fusion === 'dominant' ? 'linear-gradient(to bottom, transparent 0%, color-mix(in oklab, var(--surface) 72%, transparent) 45%, var(--surface) 100%)' : fusion === 'organic' ? 'linear-gradient(160deg, transparent 30%, color-mix(in oklab, var(--surface) 42%, transparent) 48%, var(--surface) 92%)' : 'linear-gradient(to bottom, transparent 0%, transparent 15%, var(--surface) 96%)' }} /> : null;
@@ -156,6 +292,331 @@ export function HeroFrame({
       return <div {...data} {...crop.handlers} className="relative mx-auto flex aspect-[21/9] min-h-[400px] max-w-[1280px] touch-none items-end overflow-hidden">{img}<div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/70 via-black/20 to-transparent" />{decor}<div className="relative z-[3] max-w-[650px] p-12" style={onMediaVars}>{avatar && <div className="mb-5">{avatar}</div>}{children({ align: 'left', onMedia: true })}</div></div>;
     case 'brandIdentity':
       return <div {...data} {...crop.handlers} className="mx-auto max-w-[1120px] touch-none px-7 py-10"><div className="grid border-y-2 border-current py-6 md:grid-cols-[1fr_260px]"><div className="relative z-[3] flex flex-col items-start justify-center pr-10">{children({ align: 'left', onMedia: false })}</div><div className="relative aspect-square overflow-hidden rounded-full">{img}{decor}</div></div><div className="flex items-center justify-between pt-5">{avatar}<span className="text-xs uppercase tracking-[0.2em]">Identidad visual</span></div></div>;
+
+    /* ── L2.1 compositions ──────────────────────────────────────────────────
+       New branches only. Nothing above this line is touched, so a page whose
+       stored `variant` predates L2.1 cannot reach them. */
+
+    /**
+     * Cinematic, tall. A media block of its own height, a veil heavy enough to
+     * carry light text, a top row, and a foot block opened by a short accent
+     * rule.
+     *
+     * Differs from the earlier `cinematic` on every axis the target cares about:
+     * it CONSUMES `height` (S/M/L or a literal px) instead of a fixed 21/9
+     * aspect, it adds the rule and the top row, and it has no hardcoded
+     * left-to-right black gradient.
+     *
+     * `slots` lets the brand sit in the top row while the title and CTA stay at
+     * the foot — the redistribution the opaque `children` fragment cannot do.
+     * A template that supplies no slots still renders through `children`.
+     */
+    case 'cinematicTall': {
+      const h = heroHeightPx(p['height'], 'L', m);
+      const side = m ? 24 : 40;
+      const top = m ? 20 : 28;
+      const hasSlots = !!slots?.title;
+      return (
+        <div {...data} {...crop.handlers} className="relative mx-auto flex w-full max-w-[1280px] touch-none items-end overflow-hidden" style={{ height: h }}>
+          {img}
+          {overlay}
+          {decor}
+          {hasSlots && (slots?.brand || slots?.eyebrow) && (
+            <div className="pointer-events-none absolute inset-x-0 top-0 z-[3] flex items-center justify-between gap-4" style={{ padding: `${top}px ${side}px`, ...onMediaVars }}>
+              <span className="block min-w-0 truncate text-[11px] uppercase" style={{ letterSpacing: '0.3em' }}>{slots?.brand}</span>
+              <span className="block min-w-0 truncate text-[11px] uppercase" style={{ letterSpacing: '0.3em', color: 'var(--accent)' }}>{slots?.eyebrow}</span>
+            </div>
+          )}
+          <div className="relative z-[3] flex w-full flex-col items-start" style={{ padding: `${top}px ${side}px ${side}px`, ...onMediaVars }}>
+            {avatar && <div className="mb-5">{avatar}</div>}
+            <span aria-hidden="true" className="mb-5 block h-px w-12" style={{ background: 'var(--accent)' }} />
+            {hasSlots ? <>{slots?.title}{slots?.description}{slots?.cta}{slots?.social}</> : children({ align: 'left', onMedia: true })}
+          </div>
+        </div>
+      );
+    }
+
+    /**
+     * Photo band. A header row, a rounded media band of its own height, and the
+     * text underneath — in normal flow, not over the image.
+     *
+     * The target opens with brand + a small status pill. The pill has no source
+     * in the native templates (nothing supplies a short status label), so the
+     * row renders the brand alone and omits itself when there is none.
+     */
+    case 'photoBand': {
+      const h = heroHeightPx(p['height'], 'M', m);
+      const gap = m ? 20 : 28;
+      const mediaRadius = heroMediaRadius(p['mediaShape'], 28);
+      const hasSlots = !!slots?.title;
+      return (
+        <div {...data} {...crop.handlers} className="mx-auto w-full max-w-[760px] touch-none" style={{ padding: `${gap}px ${gap}px 0` }}>
+          {hasSlots && (slots?.brand || slots?.eyebrow) && (
+            <div className="flex items-center justify-between gap-4 pb-4">
+              <span className="min-w-0 truncate text-[19px] leading-tight" style={{ fontFamily: t.displayFont }}>{slots?.brand}</span>
+              {slots?.eyebrow &&
+              <span className="shrink-0 rounded-full px-3 py-1 text-[11px]" style={{ background: 'var(--surface)', color: 'var(--muted)', boxShadow: 'inset 0 0 0 1px var(--line)' }}>
+                {slots.eyebrow}
+              </span>}
+            </div>
+          )}
+          <div className="relative w-full overflow-hidden" style={{ height: h, borderRadius: mediaRadius }}>{img}{overlay}</div>
+          <div className="flex flex-col items-start pt-6">
+            {hasSlots ? <>{slots?.title}{slots?.description}{slots?.cta}{slots?.social}</> : children({ align: 'left', onMedia: false })}
+          </div>
+        </div>
+      );
+    }
+
+    /**
+     * Image, then text. A full-width media band with the copy underneath, and no
+     * header row — the plainer sibling of `photoBand`.
+     */
+    case 'imageThenText': {
+      const h = heroHeightPx(p['height'], 'M', m);
+      const hasSlots = !!slots?.title;
+      return (
+        <div {...data} {...crop.handlers} className="mx-auto w-full touch-none">
+          <div className="relative w-full overflow-hidden" style={{ height: h }}>{img}{overlay}</div>
+          <div className={cx('flex flex-col items-start', m ? 'px-5 pt-6' : 'px-8 pt-8')}>
+            {hasSlots ? <>{slots?.title}{slots?.description}{slots?.cta}{slots?.social}</> : children({ align: 'left', onMedia: false })}
+          </div>
+        </div>
+      );
+    }
+
+    /**
+     * Centered stack. Everything centered, with the media LAST — the order the
+     * target uses, and the inverse of what `editorialCenter` does (media first).
+     */
+    case 'centeredStack': {
+      const h = heroHeightPx(p['height'], 'M', m);
+      const pad = m ? 20 : 32;
+      const mediaRadius = heroMediaRadius(p['mediaShape'], 4);
+      const hasSlots = !!slots?.title;
+      return (
+        <div {...data} {...crop.handlers} className="mx-auto flex w-full max-w-[760px] touch-none flex-col items-center text-center" style={{ padding: `${pad}px ${pad}px ${pad}px` }}>
+          {hasSlots && slots?.brand && (
+            <span className="block text-[11px] uppercase" style={{ letterSpacing: '0.3em' }}>{slots.brand}</span>
+          )}
+          <span aria-hidden="true" className="mt-4 block h-px w-16" style={{ background: 'var(--accent)' }} />
+          {hasSlots && slots?.eyebrow && <div className="mt-4">{slots.eyebrow}</div>}
+          <div className="mt-8 flex w-full flex-col items-center">
+            {hasSlots ? <>{slots?.title}{slots?.description}{slots?.cta}</> : children({ align: 'center', onMedia: false })}
+          </div>
+          <div className="relative mt-9 w-full overflow-hidden" style={{ height: h, borderRadius: mediaRadius }}>{img}{overlay}</div>
+          {hasSlots && slots?.social && <div className="mt-6">{slots.social}</div>}
+        </div>
+      );
+    }
+
+    /**
+     * Identity band. The avatar leads, the name carries the page, and a wide
+     * media band closes it.
+     */
+    case 'identityBand': {
+      const h = heroHeightPx(p['height'], 'M', m);
+      const pad = m ? 20 : 28;
+      const mediaRadius = heroMediaRadius(p['mediaShape'], 24);
+      const hasSlots = !!slots?.title;
+      return (
+        <div {...data} {...crop.handlers} className="mx-auto w-full max-w-[760px] touch-none" style={{ padding: `${pad}px ${pad}px 0` }}>
+          {avatar && <div className="flex items-center gap-3">{avatar}</div>}
+          <div className="mt-8 flex flex-col items-start">
+            {hasSlots ? <>{slots?.title}{slots?.description}</> : children({ align: 'left', onMedia: false })}
+          </div>
+          <div className="relative mt-6 w-full overflow-hidden" style={{ height: h, borderRadius: mediaRadius }}>{img}{overlay}</div>
+          {hasSlots && slots?.cta && <div className="mt-6">{slots.cta}</div>}
+          {hasSlots && slots?.social && <div className="mt-6">{slots.social}</div>}
+        </div>
+      );
+    }
+
+    /**
+     * Overlay, bottom-aligned. Media carries a veil and the copy sits centered
+     * at the foot — no glass box, which is what separates it from the earlier
+     * `elegantOverlay`.
+     */
+    case 'overlayBottom': {
+      const h = heroHeightPx(p['height'], 'L', m);
+      const side = m ? 24 : 40;
+      const bottom = m ? 28 : 48;
+      const hasSlots = !!slots?.title;
+      return (
+        <div {...data} {...crop.handlers} className="relative mx-auto flex w-full max-w-[1280px] touch-none items-end justify-center overflow-hidden" style={{ height: h }}>
+          {img}
+          {overlay}
+          {decor}
+          <div className="relative z-[3] flex w-full flex-col items-center text-center" style={{ padding: `${side}px ${side}px ${bottom}px`, ...onMediaVars }}>
+            {avatar && <div className="mb-5">{avatar}</div>}
+            {hasSlots ? <>{slots?.brand}{slots?.eyebrow}{slots?.title}{slots?.description}{slots?.cta}{slots?.social}</> : children({ align: 'center', onMedia: true })}
+          </div>
+        </div>
+      );
+    }
+
+    /**
+     * Masthead. A centered title over a double rule and a meta row, the media
+     * band under it, and the descriptive line below the media.
+     *
+     * The double rule and the meta row are the elements no earlier variant has;
+     * the meta row renders the brand alone because the target's second label has
+     * no source in the native templates.
+     */
+    case 'masthead': {
+      const h = heroHeightPx(p['height'], 'L', m);
+      const pad = m ? 24 : 32;
+      const hasSlots = !!slots?.title;
+      return (
+        <div {...data} {...crop.handlers} className="mx-auto w-full max-w-[760px] touch-none text-center" style={{ padding: `${pad}px ${pad}px 0` }}>
+          <div className="flex flex-col items-center">
+            {hasSlots ? slots?.title : children({ align: 'center', onMedia: false })}
+          </div>
+          <div aria-hidden="true" className="mx-auto mt-3 flex w-full flex-col gap-[3px]">
+            <span className="block h-px w-full" style={{ background: 'currentColor' }} />
+            <span className="block h-px w-full" style={{ background: 'currentColor' }} />
+          </div>
+          {hasSlots && (slots?.brand || slots?.eyebrow) &&
+          <div className="mt-2 flex justify-between gap-4 text-[10px] uppercase" style={{ letterSpacing: '0.25em' }}>
+            <span className="min-w-0 truncate">{slots?.brand}</span>
+            <span className="cq-muted min-w-0 truncate">{slots?.eyebrow}</span>
+          </div>}
+          <div className="relative mt-5 w-full overflow-hidden" style={{ height: h }}>{img}{overlay}</div>
+          {hasSlots && slots?.description && <div className="mt-5">{slots.description}</div>}
+          {hasSlots && slots?.cta && <div className="mt-6 flex justify-center">{slots.cta}</div>}
+        </div>
+      );
+    }
+
+    /**
+     * Minimal column. One column: a small label, a statement, the media, and a
+     * caption row. No second column anywhere — which is what separates it from
+     * the earlier `minimalPremium`.
+     */
+    case 'minimalColumn': {
+      const h = heroHeightPx(p['height'], 'M', m);
+      const pad = m ? 24 : 28;
+      const hasSlots = !!slots?.title;
+      return (
+        <div {...data} {...crop.handlers} className="mx-auto w-full max-w-[860px] touch-none" style={{ padding: `${pad}px ${pad}px 0` }}>
+          {hasSlots && (slots?.brand || slots?.eyebrow) &&
+          <div className="flex items-center justify-between gap-4 text-[11px] uppercase" style={{ letterSpacing: '0.3em' }}>
+            <span className="min-w-0 truncate">{slots?.brand}</span>
+            <span className="cq-muted min-w-0 truncate">{slots?.eyebrow}</span>
+          </div>}
+          <div className={cx('flex flex-col items-start', hasSlots && (slots?.brand || slots?.eyebrow) ? 'mt-20' : 'mt-6')}>
+            {hasSlots ? <>{slots?.title}{slots?.cta}</> : children({ align: 'left', onMedia: false })}
+          </div>
+          <div className="relative mt-12 w-full overflow-hidden" style={{ height: h }}>{img}{overlay}</div>
+          {hasSlots && (slots?.description || slots?.meta) && (
+            <div className="mt-3 flex justify-between gap-4 text-[11px] uppercase" style={{ letterSpacing: '0.2em' }}>
+              <span className="min-w-0 truncate">{slots?.description}</span>
+              <span className="cq-muted min-w-0 truncate">{slots?.meta}</span>
+            </div>
+          )}
+          {hasSlots && slots?.social && <div className="mt-3">{slots.social}</div>}
+        </div>
+      );
+    }
+
+    /**
+     * Grid collage. A strict grid — one tall photo, an accent tile, one photo —
+     * with no rotation and no absolute positioning, unlike the earlier `collage`.
+     */
+    case 'gridCollage': {
+      const h = heroHeightPx(p['height'], 'M', m);
+      const pad = m ? 20 : 24;
+      const hasSlots = !!slots?.title;
+      const second = extraMedia?.[0] ?? src;
+      return (
+        <div {...data} {...crop.handlers} className="mx-auto w-full max-w-[860px] touch-none" style={{ padding: `${pad}px ${pad}px 0` }}>
+          <div className="grid grid-cols-5 grid-rows-2 gap-2" style={{ height: h }}>
+            <div className="relative col-span-3 row-span-2 overflow-hidden">{photo(src, p['pos'] ?? 'center', true)}{overlay}</div>
+            <div className="col-span-2 flex flex-col justify-end p-3" style={{ background: 'var(--accent)', color: 'var(--accent-fg)' }}>
+              {hasSlots && slots?.brand && (
+                <span className="text-[11px] font-bold uppercase tracking-wide">{slots.brand}</span>
+              )}
+            </div>
+            <div className="relative col-span-2 overflow-hidden">
+              <img src={second} alt="" className="absolute inset-0 h-full w-full object-cover" />
+            </div>
+          </div>
+          <div className="mt-6 flex flex-col items-start">
+            {hasSlots ? <>{slots?.title}{slots?.description}{slots?.cta}</> : children({ align: 'left', onMedia: false })}
+          </div>
+          {hasSlots && slots?.social && <div className="mt-5">{slots.social}</div>}
+        </div>
+      );
+    }
+
+    /**
+     * Avatar overlap. A short band, an avatar breaking out of it, and the copy
+     * below — the avatar overlaps the band rather than sitting beside the text.
+     * `height` sizes the band, as the target means by its fixed band height.
+     */
+    case 'avatarOverlap': {
+      const h = heroHeightPx(p['height'], 'S', m);
+      const pad = m ? 20 : 24;
+      const hasSlots = !!slots?.title;
+      return (
+        <div {...data} {...crop.handlers} className="mx-auto w-full max-w-[760px] touch-none">
+          <div className="relative w-full overflow-hidden" style={{ height: h, background: 'var(--accent)' }}>{img}{overlay}</div>
+          <div className="flex flex-col items-start" style={{ padding: `0 ${pad}px ${pad}px` }}>
+            {avatar && <div className="relative z-[3]" style={{ marginTop: -Math.round(avatarOverlap) }}>{avatar}</div>}
+            <div className="mt-4 flex w-full flex-col items-start">
+              {hasSlots ? <>{slots?.title}{slots?.description}{slots?.cta}</> : children({ align: 'left', onMedia: false })}
+            </div>
+            {/* The target puts its short labels UNDER the title here, as chips —
+                this composition has no header row for the avatar to sit beside. */}
+            {hasSlots && (slots?.eyebrow || slots?.meta) &&
+            <div className="mt-4 flex flex-wrap items-center gap-2 text-[12px]">
+              {slots?.eyebrow &&
+              <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-medium" style={{ background: 'var(--surface)', boxShadow: 'inset 0 0 0 1px var(--line)' }}>
+                <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full" style={{ background: 'var(--accent)' }} />
+                {slots.eyebrow}
+              </span>}
+              {slots?.meta &&
+              <span className="cq-muted inline-flex items-center gap-1 rounded-full px-3 py-1" style={{ background: 'var(--surface)', boxShadow: 'inset 0 0 0 1px var(--line)' }}>
+                <MapPinIcon className="h-3 w-3" aria-hidden="true" />
+                {slots.meta}
+              </span>}
+            </div>}
+            {hasSlots && slots?.social && <div className="mt-4">{slots.social}</div>}
+          </div>
+        </div>
+      );
+    }
+
+    /**
+     * Framed plate. The media sits in a surface frame with a caption row under
+     * it, and the title follows the frame — rather than sitting beside it.
+     */
+    case 'framedPlate': {
+      const h = heroHeightPx(p['height'], 'M', m);
+      const pad = m ? 20 : 24;
+      const hasSlots = !!slots?.title;
+      return (
+        <div {...data} {...crop.handlers} className="mx-auto w-full max-w-[860px] touch-none" style={{ padding: `${pad}px ${pad}px 0` }}>
+          {hasSlots && (slots?.brand || slots?.eyebrow) &&
+          <div className="flex items-baseline justify-between gap-4">
+            <span className="min-w-0 truncate text-[15px] font-medium">{slots?.brand}</span>
+            <span className="cq-muted min-w-0 truncate text-[11px] uppercase" style={{ letterSpacing: '0.25em' }}>{slots?.eyebrow}</span>
+          </div>}
+          <div className="mt-5 p-3" style={{ background: 'var(--surface)' }}>
+            <div className="relative w-full overflow-hidden" style={{ height: h }}>{img}{overlay}</div>
+            {hasSlots && (slots?.description || slots?.meta) &&
+            <div className="cq-muted flex justify-between gap-4 pt-3 text-[11px]">
+              <span className="min-w-0 truncate">{slots?.description}</span>
+              <span className="min-w-0 truncate">{slots?.meta}</span>
+            </div>}
+          </div>
+          <div className="mt-7 flex flex-col items-start">
+            {hasSlots ? <>{slots?.title}{slots?.cta}</> : children({ align: 'left', onMedia: false })}
+          </div>
+          {hasSlots && slots?.social && <div className="mt-5">{slots.social}</div>}
+        </div>
+      );
+    }
     case 'split':{
         const frameRadius = shape === 'curve' ? `9999px 9999px ${radius}px ${radius}px` : shape === 'inset' ? `${radius}px` : '0px';
         return (

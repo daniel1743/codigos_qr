@@ -3,6 +3,7 @@ import { ArrowLeftIcon, ArrowRightIcon, CornerLeftUpIcon, LockIcon, PlusIcon, Ro
 import { useEditor } from "../../contexts/EditorContext";
 import { useThemeTokens } from "../../hooks/useThemeTokens";
 import { PanelSection } from "./controls/PanelSection";
+import { NumberField } from "./controls/NumberField";
 import { Segmented } from "./controls/Segmented";
 import { Toggle } from "./controls/Toggle";
 import { TextField } from "./controls/TextField";
@@ -48,8 +49,15 @@ export function AdvancedPanel({ hideBlockNav = false }: { hideBlockNav?: boolean
   const id = sel.id;
   const p = ed.doc.props[id] ?? {};
   const overlay = mediaOverlayFromProps(p);
+  /** A literal 0–1 opacity in the `overlay` slot; `undefined` = one of the four named levels. */
+  const customOverlay =
+    p["overlay"] && /^\d*\.?\d+$/.test(p["overlay"].trim()) ? Number(p["overlay"]) : undefined;
+  /** Whether any veil is in effect, named or custom — the colour picker keys off this. */
+  const overlayActive = customOverlay === undefined ? overlay !== "none" : customOverlay > 0;
   const el = ed.getElement(id);
   const set = (key: string, value: string) => ed.setProp(id, key, value);
+  /** A literal px value in `spacing`; `undefined` means one of the four named steps. */
+  const customSpacing = p["spacing"] && /^\d+$/.test(p["spacing"]) ? Number(p["spacing"]) : undefined;
   const block = sel.blockKey ? ed.doc.blocks.find((b) => b.key === sel.blockKey) : undefined;
   const isContainer = sel.kind === "section" || sel.kind === "hero";
 
@@ -274,8 +282,25 @@ export function AdvancedPanel({ hideBlockNav = false }: { hideBlockNav?: boolean
             <PositionPad value={p.pos ?? "center"} onChange={(v) => set("pos", v)} />
           </PanelSection>
           <MediaZoomPicker value={p["zoom"] ?? "1"} onChange={(v) => set("zoom", v)} />
-          <MediaOverlayPicker value={overlay} onChange={(v) => set("overlay", v)} />
-          {overlay !== "none" && (
+          <MediaOverlayPicker
+            value={customOverlay === undefined ? overlay : "custom"}
+            onChange={(v) => set("overlay", v)}
+          />
+          <PanelSection
+            title="Opacidad personalizada"
+            hint="Los cuatro niveles llegan hasta 0.52. Un valor propio permite 0.40 o 0.60."
+          >
+            <NumberField
+              label="De 0 a 1"
+              value={customOverlay}
+              onChange={(n) => set("overlay", n === undefined ? "none" : String(n))}
+              step={0.05}
+              min={0}
+              max={1}
+              placeholder="0.4"
+            />
+          </PanelSection>
+          {overlayActive && (
             <MediaOverlayColorPicker
               colors={t.swatches}
               value={p["overlayColor"]}
@@ -394,9 +419,23 @@ export function AdvancedPanel({ hideBlockNav = false }: { hideBlockNav?: boolean
                 { value: "M", label: "Medio" },
                 { value: "L", label: "Amplio" },
               ]}
-              value={p.spacing ?? el?.dataset.spacing ?? "M"}
+              // A numeric value is none of the four steps, so none stays selected
+              // rather than falsely highlighting one that is not in effect.
+              value={customSpacing === undefined ? (p.spacing ?? el?.dataset.spacing ?? "M") : "custom"}
               onChange={(v) => set("spacing", v)}
             />
+            <div className="mt-2">
+              <NumberField
+                label="Personalizado"
+                value={customSpacing}
+                onChange={(n) => set("spacing", n === undefined ? "" : String(Math.round(n)))}
+                step={4}
+                min={0}
+                max={240}
+                suffix="px"
+                placeholder="48"
+              />
+            </div>
           </PanelSection>
           <PanelSection title="Enlace a esta sección">
             <TextField

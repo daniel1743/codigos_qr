@@ -1,7 +1,8 @@
 import React from 'react';
 import { cx } from '../../../utils/cx';
-import type { HeroShape } from '../../blocks/HeroFrame';
+import { heroShapeAppliesTo, type HeroShape } from '../../blocks/HeroFrame';
 
+/** All nine silhouettes. The list and its order are a tested contract — see m2_2HeroFrameShapes. */
 export const heroFrameShapes: { value: HeroShape; label: string }[] = [
   { value: 'curve', label: 'Curva abajo' },
   { value: 'straight', label: 'Recta' },
@@ -26,18 +27,36 @@ function previewStyle(shape: HeroShape): React.CSSProperties {
   return {};
 }
 
-export function HeroFrameShapePicker({ value, onChange }: { value: HeroShape; onChange: (value: HeroShape) => void }) {
+export function HeroFrameShapePicker({
+  value,
+  onChange,
+  variant,
+}: {
+  value: HeroShape;
+  onChange: (value: HeroShape) => void;
+  /** Live hero variant. Used only to flag options that cannot draw here — never to hide them. */
+  variant?: string | null;
+}) {
   return <div className="grid grid-cols-2 gap-2 md:grid-cols-3" data-testid="hero-frame-shape-grid">
-    {heroFrameShapes.map((shape) => <button
-      key={shape.value}
-      type="button"
-      aria-pressed={shape.value === value}
-      onClick={() => onChange(shape.value)}
-      className={cx('rounded-xl border p-2 text-left transition-colors', shape.value === value ? 'border-select bg-select-soft' : 'border-line hover:border-[#CDD1D7]')}>
-      <span className="block h-9 overflow-hidden rounded-md bg-[#EEF0F3] p-1">
-        <span className="block h-full bg-[#9AA1AB]" style={previewStyle(shape.value)} />
-      </span>
-      <span className="mt-1 block text-[11.5px] font-medium text-ink">{shape.label}</span>
-    </button>)}
+    {heroFrameShapes.map((shape) => {
+      // All nine stay selectable — that is the contract the tests pin. The flag
+      // only tells the user when the current variant ignores the silhouette, so
+      // the option stops being a silent no-op.
+      const applies = heroShapeAppliesTo(shape.value, variant);
+      const active = shape.value === value;
+      return <button
+        key={shape.value}
+        type="button"
+        aria-pressed={active}
+        data-applies={applies}
+        title={applies ? undefined : 'Esta variante no usa silueta: la forma no cambia el resultado.'}
+        onClick={() => onChange(shape.value)}
+        className={cx('rounded-xl border p-2 text-left transition-colors', active ? 'border-select bg-select-soft' : 'border-line hover:border-[#CDD1D7]')}>
+        <span className={cx('block h-9 overflow-hidden rounded-md bg-[#EEF0F3] p-1', !applies && 'opacity-40')}>
+          <span className="block h-full bg-[#9AA1AB]" style={previewStyle(shape.value)} />
+        </span>
+        <span className={cx('mt-1 block text-[11.5px] font-medium text-ink', !applies && 'text-mute')}>{shape.label}</span>
+      </button>;
+    })}
   </div>;
 }

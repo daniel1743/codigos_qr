@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import {
   ArrowUpIcon,
   ArrowDownIcon,
+  ArrowUpRightIcon,
   MoreHorizontalIcon,
   AlignCenterIcon,
   BoldIcon,
@@ -39,6 +40,7 @@ import {
   ArrowLeftIcon,
   ArrowRightIcon,
   CircleUserRoundIcon,
+  DivideIcon,
 } from "lucide-react";
 import { useEditor } from "../../contexts/EditorContext";
 import { useThemeTokens } from "../../hooks/useThemeTokens";
@@ -53,10 +55,14 @@ import {
   type SocialSize,
 } from "./EditableSocial";
 import { PanelSection } from "./controls/PanelSection";
+import { NumberField } from "./controls/NumberField";
+import { TextField } from "./controls/TextField";
+import { Toggle } from "./controls/Toggle";
 import { Segmented } from "./controls/Segmented";
 import { SizeStepper } from "./controls/SizeStepper";
 import { AlignGroup, alignOptions } from "./controls/AlignGroup";
 import { SwatchRow } from "./controls/SwatchRow";
+import { MediaOverlayColorPicker } from "./controls/MediaTreatmentPicker";
 import { TextColorPanel } from "./controls/TextColorPanel";
 import { ImagePicker } from "./controls/ImagePicker";
 import { FreeCropControl, PositionPad } from "./controls/PositionPad";
@@ -108,6 +114,26 @@ import {
   reviewsOrder,
 } from "../../utils/reviewsOps";
 import {
+  SERVICES_MAX,
+  canDeleteService,
+  deleteService,
+  duplicateService,
+  moveService,
+  parseServiceSlot,
+  readService,
+  serviceFieldId,
+  servicesOrder,
+  type ServiceField,
+} from "../../utils/servicesOps";
+import { ROW_TREATMENTS, resolveRowTreatment } from "../../utils/rowTreatment";
+import {
+  SOCIAL_PRESENTATIONS,
+  resolveSocialPresentation,
+} from "../../utils/socialOps";
+import { mediaOverlayFromProps } from "../../utils/styles";
+import { PANEL_SURFACES, resolvePanelSurface } from "../../utils/actionPanelOps";
+import { ACTION_PANEL_DEFAULT, CONTACT_ROWS as CONTACT_ROWS_FOR_EDITOR } from "../blocks/ActionPanelBlock";
+import {
   buttonCollectionFor,
   buttonIdentity,
   canonicalScope,
@@ -154,6 +180,21 @@ export function useSelectionActions(): EditorAction[] {
   const mediaShapeKey = isHeroImage ? "mediaShape" : "shape";
   const props = ed.doc.props[propId] ?? {};
   const el = ed.getElement(id);
+  /**
+   * Live hero variant, read from the `data-hero` the renderer already publishes.
+   * It resolves to the *effective* variant (stored value or the template default),
+   * which is what decides whether a silhouette actually draws.
+   * `closest` covers the hero-image selection (the attribute is on an ancestor),
+   * `querySelector` covers the hero block itself.
+   */
+  const liveHeroVariant =
+    (el?.closest("[data-hero]") ?? el?.querySelector("[data-hero]"))?.getAttribute("data-hero") ?? null;
+  /** A literal px radius stored in the media-shape slot; `undefined` = a named shape. */
+  const mediaShapeRaw = props[isHeroImage ? "mediaShape" : "shape"];
+  const customMediaRadius = mediaShapeRaw && /^\d+$/.test(mediaShapeRaw) ? Number(mediaShapeRaw) : undefined;
+  /** A literal px height for this media element (L2.2); `undefined` = the layout's own ratio. */
+  const customMediaHeight =
+    props["mediaHeight"] && /^\d+$/.test(props["mediaHeight"]) ? Number(props["mediaHeight"]) : undefined;
   const set = (key: string, value: string) => ed.setProp(propId, key, value);
 
   switch (sel.kind) {
@@ -309,6 +350,7 @@ export function useSelectionActions(): EditorAction[] {
             <PanelSection title="Forma de la portada">
               <HeroFrameShapePicker
                 value={(props.shape ?? "curve") as HeroShape}
+                variant={liveHeroVariant}
                 onChange={(v) => {
                   // The hero silhouette is authoritative on `shape`. Clear the
                   // legacy mediaShape so old oval/rounded values cannot mask the
@@ -330,8 +372,46 @@ export function useSelectionActions(): EditorAction[] {
                   { value: "arch", label: "Arco" },
                   { value: "bleed", label: "A sangre" },
                 ]}
-                value={props[mediaShapeKey] ?? "rounded"}
+                value={customMediaRadius === undefined ? (props[mediaShapeKey] ?? "rounded") : "custom"}
                 onChange={(v) => set(mediaShapeKey, v)}
+              />
+              <div className="mt-2">
+                <NumberField
+                  label="Radio personalizado"
+                  value={customMediaRadius}
+                  onChange={(n) => set(mediaShapeKey, n === undefined ? "" : String(Math.round(n)))}
+                  step={2}
+                  min={0}
+                  max={120}
+                  suffix="px"
+                  placeholder="14"
+                />
+              </div>
+            </PanelSection>
+          ),
+        },
+        {
+          // L2.2 · reusable: any media element whose renderer reads `mediaHeight`
+          // gets a height control here — gallery photos and the generic image
+          // today, anywhere the same prop is read later.
+          key: "media-height",
+          label: "Altura",
+          icon: ScalingIcon,
+          showLabel: true,
+          panel: (
+            <PanelSection
+              title="Altura de la imagen"
+              hint="Vacío conserva la proporción de la maqueta."
+            >
+              <NumberField
+                label="Alto"
+                value={customMediaHeight}
+                onChange={(n) => set("mediaHeight", n === undefined ? "" : String(Math.round(n)))}
+                step={10}
+                min={40}
+                max={900}
+                suffix="px"
+                placeholder="200"
               />
             </PanelSection>
           ),
@@ -606,7 +686,10 @@ export function useSelectionActions(): EditorAction[] {
       ];
     }
 
-    case "hero":
+    case "hero": {
+      /* The hero's own text ids live under the block's prefix — `hero.brand`
+         for the first hero, `hero-2/hero.brand` for the next one. */
+      const heroPrefix = sel.blockKey === "hero" ? "" : `${sel.blockKey}/`;
       return [
         {
           key: "bot",
@@ -626,7 +709,10 @@ export function useSelectionActions(): EditorAction[] {
           panel: (
             <PalettePicker
               value={ed.doc.props["page"]?.["palette"]}
-              onChange={(v) => { ed.setProp("page", "palette", v); ed.setProp("page", "bgOverride", undefined); }}
+              // Clearing the override writes `""`, never `undefined`: every value in
+              // `props` must be a string or `hasValidMagicPayload` rejects the whole
+              // document as non-MAGIC_V1 on reload. Readers treat `""` as absent.
+              onChange={(v) => { ed.setProp("page", "palette", v); ed.setProp("page", "bgOverride", ""); }}
               textColor={ed.doc.props["page"]?.["textColor"]}
               onTextColorChange={(v) => ed.setProp("page", "textColor", v || "")}
               swatches={t.swatches}
@@ -670,6 +756,41 @@ export function useSelectionActions(): EditorAction[] {
           ),
         },
         {
+          /* L2.5 · the two labels a hero header row can carry beside the brand:
+             the eyebrow (header) and the caption's trailing label (meta).
+             Both are opt-in — writing one makes it appear and become editable
+             in place, clearing it removes the element again. Nothing is
+             hardcoded per template: the text is the author's. */
+          key: "hero-labels",
+          label: "Rótulos",
+          icon: TypeIcon,
+          showLabel: true,
+          panel: (
+            <div className="space-y-4">
+              <PanelSection
+                title="Etiqueta de cabecera"
+                hint="Aparece junto a la marca, en las portadas con fila de cabecera. Vacío no muestra nada.">
+                <TextField
+                  label="Etiqueta"
+                  value={ed.doc.texts[`${heroPrefix}hero.eyebrow`] ?? ""}
+                  placeholder="Barcelona"
+                  onCommit={(v) => ed.setText(`${heroPrefix}hero.eyebrow`, v)}
+                />
+              </PanelSection>
+              <PanelSection
+                title="Línea de pie"
+                hint="Segundo rótulo de la fila de caption, bajo la imagen. Vacío no muestra nada.">
+                <TextField
+                  label="Pie"
+                  value={ed.doc.texts[`${heroPrefix}hero.meta`] ?? ""}
+                  placeholder="01 / 24"
+                  onCommit={(v) => ed.setText(`${heroPrefix}hero.meta`, v)}
+                />
+              </PanelSection>
+            </div>
+          ),
+        },
+        {
           key: "shape",
           label: "Forma",
           icon: ShapesIcon,
@@ -682,6 +803,7 @@ export function useSelectionActions(): EditorAction[] {
                     el?.querySelector("[data-hero]")?.getAttribute("data-shape") ??
                     "curve") as HeroShape
                 }
+                variant={liveHeroVariant}
                 onChange={(v) => {
                   // The hero silhouette is authoritative on `shape`. Clear the
                   // legacy mediaShape so old oval/rounded values cannot mask the
@@ -697,7 +819,8 @@ export function useSelectionActions(): EditorAction[] {
           key: "bg",
           label: "Fondo",
           icon: PaintBucketIcon,
-          panel: <ToneGrid tones={t.tones} value={props.bg} onChange={(v) => set("bg", v)} />,
+          // Block scope resolves tones by id only, so the free HEX option is not offered here.
+          panel: <ToneGrid tones={t.tones} value={props.bg} onChange={(v) => set("bg", v)} allowCustom={false} />,
         },
         {
           key: "crop",
@@ -784,10 +907,121 @@ export function useSelectionActions(): EditorAction[] {
           ),
         },
       ];
+    }
 
     case "familyCard": {
       const ctx = getCardContext(ed, id, sel.blockKey);
       return ctx ? familyCardActions(ed, ctx) : [];
+    }
+
+    case "service": {
+      const blockKey = sel.blockKey;
+      const slot = blockKey ? parseServiceSlot(blockKey, id) : null;
+      if (!blockKey || !slot) return [];
+      const order = servicesOrder(ed.doc, blockKey);
+      const index = order.indexOf(slot);
+      const view = readService(ed.doc, blockKey, slot, index < 0 ? 0 : index);
+      const atMax = order.length >= SERVICES_MAX;
+      const canRemove = canDeleteService(ed.doc, blockKey);
+      const field = (name: ServiceField) => serviceFieldId(blockKey, slot, name);
+      const rowAction =
+        "inline-flex h-10 flex-1 items-center justify-center gap-1.5 rounded-xl border border-line bg-white px-2 text-[12.5px] font-medium text-ink transition-colors duration-150 hover:bg-select-soft disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-select focus-visible:ring-offset-1";
+      return [
+        {
+          key: "title",
+          label: "Título",
+          icon: TypeIcon,
+          showLabel: true,
+          panel: (
+            <PanelSection title="Título del servicio">
+              <TextField
+                label="Título"
+                value={view.title}
+                placeholder="Consulta general"
+                onCommit={(v) => ed.setText(field("title"), v)}
+              />
+            </PanelSection>
+          ),
+        },
+        {
+          key: "detail",
+          label: "Detalle",
+          icon: ListIcon,
+          showLabel: true,
+          panel: (
+            <PanelSection title="Detalle">
+              <TextField
+                label="Detalle"
+                multiline
+                value={view.detail}
+                placeholder="Qué incluye"
+                onCommit={(v) => ed.setText(field("detail"), v)}
+              />
+            </PanelSection>
+          ),
+        },
+        {
+          key: "price",
+          label: "Precio",
+          icon: BadgeCheckIcon,
+          showLabel: true,
+          panel: (
+            <PanelSection title="Precio" hint="Texto libre: «Desde $25», «45 €», «A consultar».">
+              <TextField
+                label="Precio"
+                value={view.price}
+                placeholder="Desde $25"
+                onCommit={(v) => ed.setText(field("price"), v)}
+              />
+            </PanelSection>
+          ),
+        },
+        {
+          key: "order",
+          label: "Orden",
+          icon: MoveIcon,
+          showLabel: true,
+          panel: (
+            <PanelSection title="Orden">
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  className={rowAction}
+                  disabled={index <= 0}
+                  onClick={() => ed.updateDoc((doc) => moveService(doc, blockKey, slot, -1))}
+                >
+                  <ArrowUpIcon className="h-4 w-4" /> Subir
+                </button>
+                <button
+                  type="button"
+                  className={rowAction}
+                  disabled={index < 0 || index >= order.length - 1}
+                  onClick={() => ed.updateDoc((doc) => moveService(doc, blockKey, slot, 1))}
+                >
+                  <ArrowDownIcon className="h-4 w-4" /> Bajar
+                </button>
+              </div>
+            </PanelSection>
+          ),
+        },
+        {
+          key: "duplicate",
+          label: "Duplicar",
+          icon: CopyIcon,
+          showLabel: true,
+          disabled: atMax,
+          onClick: () => ed.updateDoc((doc) => duplicateService(doc, blockKey, slot)),
+        },
+        {
+          key: "remove",
+          label: "Eliminar",
+          icon: Trash2Icon,
+          showLabel: true,
+          danger: true,
+          disabled: !canRemove,
+          onClick: () => ed.updateDoc((doc) => deleteService(doc, blockKey, slot)),
+        },
+      ];
     }
 
     case "imageCard": {
@@ -814,6 +1048,31 @@ export function useSelectionActions(): EditorAction[] {
           ),
         },
         {
+          // L2.2 · same capability, different bag: an image card's media height
+          // lives on the card itself, because the card IS the media element.
+          key: "media-height",
+          label: "Altura",
+          icon: ScalingIcon,
+          showLabel: true,
+          panel: (
+            <PanelSection
+              title="Altura de la tarjeta"
+              hint="Vacío conserva la proporción cuadrada."
+            >
+              <NumberField
+                label="Alto"
+                value={customMediaHeight}
+                onChange={(n) => set("mediaHeight", n === undefined ? "" : String(Math.round(n)))}
+                step={10}
+                min={40}
+                max={900}
+                suffix="px"
+                placeholder="200"
+              />
+            </PanelSection>
+          ),
+        },
+        {
           key: "shape",
           label: "Forma",
           icon: ShapesIcon,
@@ -832,6 +1091,64 @@ export function useSelectionActions(): EditorAction[] {
               />
             </PanelSection>
           ),
+        },
+        {
+          // L2.4 · the same `overlay` / `overlayColor` slots every media element
+          // reads, through the same adapter — so this is the existing
+          // superposición capability reaching one more element, not a scrim that
+          // only image cards know how to draw.
+          key: "overlay",
+          label: "Superposición",
+          icon: LayersIcon,
+          showLabel: true,
+          panel: (
+            <>
+              <PanelSection title="Intensidad de la superposición">
+                <Segmented
+                  ariaLabel="Superposición de la tarjeta"
+                  options={[
+                    { value: "none", label: "Sin" },
+                    { value: "soft", label: "Suave" },
+                    { value: "medium", label: "Media" },
+                    { value: "intense", label: "Intensa" },
+                  ]}
+                  value={mediaOverlayFromProps(props)}
+                  onChange={(v) => set("overlay", v)}
+                />
+              </PanelSection>
+              {mediaOverlayFromProps(props) !== "none" &&
+              <MediaOverlayColorPicker
+                colors={t.swatches}
+                value={props["overlayColor"]}
+                onChange={(c) => set("overlayColor", c)} />
+              }
+            </>
+          ),
+        },
+        {
+          key: "caption",
+          label: "Texto",
+          icon: TypeIcon,
+          showLabel: true,
+          panel: (
+            <PanelSection
+              title="Texto sobre la imagen"
+              hint="Vacío no muestra ningún texto. Aparece abajo, sobre la foto.">
+              <TextField
+                label="Texto"
+                value={ed.doc.texts[`${id}.title`] ?? ""}
+                placeholder="Ver proyecto"
+                onCommit={(v) => ed.setText(`${id}.title`, v)}
+              />
+            </PanelSection>
+          ),
+        },
+        {
+          key: "caption-icon",
+          label: "Icono",
+          icon: ArrowUpRightIcon,
+          active: (props["captionIcon"] ?? "off") === "on",
+          onClick: () => set("captionIcon", (props["captionIcon"] ?? "off") === "on" ? "off" : "on"),
         },
         {
           key: "link",
@@ -1135,13 +1452,10 @@ export function useSelectionActions(): EditorAction[] {
                     onChange={(v) => set("variant", v)}
                   />
                 </PanelSection>
-                <PanelSection title="Color">
-                  <SwatchRow
-                    colors={t.swatches}
-                    value={props["color"]}
-                    onChange={(v) => set("color", v ?? "")}
-                  />
-                </PanelSection>
+                {/* A per-CTA `color` control was removed: the prop was written but no
+                    renderer ever read it (EditableCTA resolves colour from `variant`
+                    and the group tokens). Offering it promised a change that could
+                    not happen. The prop itself is left intact for stored documents. */}
                 <PanelSection title="Forma y tamaño">
                   <CtaTreatmentPicker
                     hideIconPosition
@@ -1461,8 +1775,26 @@ export function useSelectionActions(): EditorAction[] {
           panel: (
             <div className="space-y-4">
               <PanelSection
+                title="Presentación"
+                hint="El grupo entero cambia: burbujas con logotipo, o etiquetas de texto."
+              >
+                <Segmented
+                  ariaLabel="Presentación social"
+                  options={SOCIAL_PRESENTATIONS.map((o) => ({ value: o.value, label: o.label }))}
+                  value={resolveSocialPresentation(ed.doc.props[scope]?.socialPresentation)}
+                  onChange={(v) => ed.setProp(scope, "socialPresentation", v)}
+                />
+                <p className="mt-2 text-[11.5px] leading-snug text-mute">
+                  {
+                    SOCIAL_PRESENTATIONS.find(
+                      (o) => o.value === resolveSocialPresentation(ed.doc.props[scope]?.socialPresentation)
+                    )?.hint
+                  }
+                </p>
+              </PanelSection>
+              <PanelSection
                 title="Estilo de iconos"
-                hint="Se aplica a todos los iconos de este grupo."
+                hint="Solo en la presentación de iconos. En píldoras manda «Forma»."
               >
                 <Segmented
                   ariaLabel="Estilo de iconos"
@@ -1670,12 +2002,21 @@ export function useSelectionActions(): EditorAction[] {
           icon: LayoutGridIcon,
           showLabel: true,
           panel: (
-            <Segmented
-              ariaLabel="Diseño de galería"
-              options={galleryLayouts}
-              value={props.layout ?? (el?.dataset.layout as string) ?? "fila"}
-              onChange={(v) => set("layout", v)}
-            />
+            <PanelSection title="Diseño de la galería">
+              <Segmented
+                ariaLabel="Diseño de galería"
+                options={galleryLayouts}
+                value={props.layout ?? (el?.dataset.layout as string) ?? "fila"}
+                onChange={(v) => set("layout", v)}
+              />
+              <p className="mt-2 text-[11.5px] leading-snug text-mute">
+                {
+                  galleryLayouts.find(
+                    (option) => option.value === (props.layout ?? (el?.dataset.layout as string) ?? "fila")
+                  )?.hint
+                }
+              </p>
+            </PanelSection>
           ),
         },
         {
@@ -1874,7 +2215,7 @@ export function useSelectionActions(): EditorAction[] {
             panel: (
               <div className="space-y-4">
                 <PanelSection title="Fondo de la sección">
-                  <ToneGrid tones={t.tones} value={props["bg"]} onChange={(v) => set("bg", v)} />
+                  <ToneGrid tones={t.tones} value={props["bg"]} onChange={(v) => set("bg", v)} allowCustom={false} />
                 </PanelSection>
                 <PanelSection title="Bloque" hint="La sección que contiene los botones.">
                   <div className="flex flex-wrap gap-2">
@@ -1959,6 +2300,231 @@ export function useSelectionActions(): EditorAction[] {
           panel: <CatalogConversionPanel blockKey={key} />,
         });
       }
+      /* ----- Services: how the rows are drawn, plus its own heading -----
+         The treatment comes from `rowTreatment`, the shared vocabulary for
+         "a surface per row versus rules between rows". L2.4 checked whether
+         `social` could adopt the same vocabulary and found it could not: the
+         target's `cardStyle: 'line'` branch there sets a corner radius and is
+         shared with `sharp`, so reusing this name would give it two meanings.
+         `rowTreatment` therefore has exactly one meaning, and only here. */
+      if (block?.type === "services" && !ed.canonicalDocument) {
+        const treatment = resolveRowTreatment(props["rowTreatment"]);
+        actions.push({
+          key: "row-treatment",
+          label: "Estilo de fila",
+          icon: ListIcon,
+          showLabel: true,
+          panel: (
+            <PanelSection
+              title="Estilo de fila"
+              hint="Superficie por fila, o una lista separada por filetes."
+            >
+              <Segmented
+                ariaLabel="Estilo de fila"
+                options={ROW_TREATMENTS.map((o) => ({ value: o.value, label: o.label }))}
+                value={treatment}
+                onChange={(v) => set("rowTreatment", v)}
+              />
+              <p className="mt-2 text-[11.5px] leading-snug text-mute">
+                {ROW_TREATMENTS.find((o) => o.value === treatment)?.hint}
+              </p>
+            </PanelSection>
+          ),
+        });
+        const servicesTitleId = `${key === block.type ? "" : `${key}/`}services.title`;
+        actions.push({
+          key: "services-heading",
+          label: "Título",
+          icon: TypeIcon,
+          showLabel: true,
+          panel: (
+            <PanelSection title="Título del bloque" hint="Vacío no muestra ningún título.">
+              <TextField
+                label="Título"
+                value={ed.doc.texts[servicesTitleId] ?? ""}
+                placeholder="Servicios"
+                onCommit={(v) => ed.setText(servicesTitleId, v)}
+              />
+            </PanelSection>
+          ),
+        });
+      }
+
+      /* ----- Social: the block's own heading -----
+         Same opt-in contract as `reviews` and `services`: the text is the
+         author's, and nothing renders until one is written. The target's own
+         copy is never hardcoded — the placeholder is only a hint in the field. */
+      if (block?.type === "social" && !ed.canonicalDocument) {
+        const socialTitleId = `${key === block.type ? "" : `${key}/`}social.title`;
+        actions.push({
+          key: "social-heading",
+          label: "Título",
+          icon: TypeIcon,
+          showLabel: true,
+          panel: (
+            <PanelSection title="Título del bloque" hint="Vacío no muestra ningún título.">
+              <TextField
+                label="Título"
+                value={ed.doc.texts[socialTitleId] ?? ""}
+                placeholder="Síguenos"
+                onCommit={(v) => ed.setText(socialTitleId, v)}
+              />
+            </PanelSection>
+          ),
+        });
+      }
+
+      /* ----- CTA / WhatsApp / Contacto: one primitive, three types -----
+         Presentation and semantics are edited in separate places and compose
+         freely. `panelSurface` is how the block is painted; where it sends the
+         visitor lives on the action element's own controls (`LinkEditor`, which
+         validates the destination). Changing the look never touches the link,
+         and editing the link never restyles the block. */
+      if (
+        (block?.type === "cta" || block?.type === "whatsapp" || block?.type === "contact") &&
+        !ed.canonicalDocument
+      ) {
+        const panelType = block.type;
+        const base = key === block.type ? "" : `${key}/`;
+        const titleId = `${base}${panelType}.title`;
+        const subId = `${base}${panelType}.sub`;
+        actions.push({
+          key: "panel-surface",
+          label: "Presentación",
+          icon: PaintBucketIcon,
+          showLabel: true,
+          panel: (
+            <PanelSection
+              title="Presentación"
+              hint="Cómo se pinta el bloque. No cambia a dónde lleva su acción."
+            >
+              <Segmented
+                ariaLabel="Presentación del bloque"
+                options={PANEL_SURFACES.map((o) => ({ value: o.value, label: o.label }))}
+                value={resolvePanelSurface(props["panelSurface"], ACTION_PANEL_DEFAULT[panelType])}
+                onChange={(v) => set("panelSurface", v)}
+              />
+              <p className="mt-2 text-[11.5px] leading-snug text-mute">
+                {
+                  PANEL_SURFACES.find(
+                    (o) => o.value === resolvePanelSurface(props["panelSurface"], ACTION_PANEL_DEFAULT[panelType])
+                  )?.hint
+                }
+              </p>
+            </PanelSection>
+          ),
+        });
+        actions.push({
+          key: "panel-heading",
+          label: "Título",
+          icon: TypeIcon,
+          showLabel: true,
+          panel: (
+            <PanelSection title="Título del bloque" hint="Vacío no muestra ningún título.">
+              <TextField
+                label="Título"
+                value={ed.doc.texts[titleId] ?? ""}
+                placeholder={panelType === "whatsapp" ? "¿Hablamos?" : panelType === "cta" ? "¿Te tentamos?" : "Contacto"}
+                onCommit={(v) => ed.setText(titleId, v)}
+              />
+            </PanelSection>
+          ),
+        });
+        actions.push({
+          key: "panel-sub",
+          label: "Descripción",
+          icon: PenLineIcon,
+          showLabel: true,
+          panel: (
+            <PanelSection title="Descripción" hint="Vacío no muestra ningún texto de apoyo.">
+              <TextField
+                label="Descripción"
+                value={ed.doc.texts[subId] ?? ""}
+                placeholder="Respondemos en minutos."
+                onCommit={(v) => ed.setText(subId, v)}
+              />
+            </PanelSection>
+          ),
+        });
+        /* Contact's three labelled rows. Each is a label plus a destination, so
+           a row with a destination becomes a real link and one without stays
+           plain text — never a dead anchor. */
+        if (panelType === "contact") {
+          for (const row of CONTACT_ROWS_FOR_EDITOR) {
+            const rowId = `${base}contact.${row.key}`;
+            actions.push({
+              key: `contact-${row.key}`,
+              label: row.label,
+              icon: row.icon,
+              showLabel: true,
+              panel: (
+                <div className="space-y-4">
+                  <PanelSection title={row.label} hint="Vacío no muestra esta fila.">
+                    <TextField
+                      label={row.fieldLabel}
+                      value={ed.doc.texts[`${rowId}.label`] ?? ""}
+                      placeholder={row.placeholder}
+                      onCommit={(v) => ed.setText(`${rowId}.label`, v)}
+                    />
+                  </PanelSection>
+                  <PanelSection
+                    title="Destino"
+                    hint="Solo si hay destino la fila se convierte en un enlace."
+                  >
+                    <LinkEditor
+                      value={ed.doc.props[rowId]?.["href"] ?? ""}
+                      onChange={(v) => ed.setProp(rowId, "href", v)}
+                    />
+                  </PanelSection>
+                </div>
+              ),
+            });
+          }
+        }
+      }
+
+      /* ----- Reviews: the block's own heading, and its avatar treatment -----
+         Both are opt-in, so a page that never touches them renders exactly as
+         before: the heading appears only once a title has been written, and the
+         avatars stay on unless switched off. The Magic Patterns targets carry a
+         heading and no avatars at all, which is what these two close. */
+      if (block?.type === "reviews" && !ed.canonicalDocument) {
+        const titleId = `${key === block.type ? "" : `${key}/`}reviews.title`;
+        actions.push({
+          key: "reviews-heading",
+          label: "Título",
+          icon: TypeIcon,
+          showLabel: true,
+          panel: (
+            <PanelSection title="Título del bloque" hint="Vacío no muestra ningún título.">
+              <TextField
+                label="Título"
+                value={ed.doc.texts[titleId] ?? ""}
+                placeholder="Lo que dicen"
+                onCommit={(v) => ed.setText(titleId, v)}
+              />
+            </PanelSection>
+          ),
+        });
+        actions.push({
+          key: "reviews-avatars",
+          label: "Avatares",
+          icon: CircleUserRoundIcon,
+          showLabel: true,
+          panel: (
+            <PanelSection
+              title="Avatares"
+              hint="Muestra la foto o la inicial junto a cada reseña."
+            >
+              <Toggle
+                label="Mostrar avatares"
+                checked={props.showAvatars !== "off"}
+                onChange={(v) => set("showAvatars", v ? "on" : "off")}
+              />
+            </PanelSection>
+          ),
+        });
+      }
       actions.push({
         key: "add",
         label: "Añadir debajo",
@@ -2006,7 +2572,10 @@ export function useSelectionActions(): EditorAction[] {
           panel: (
             <PalettePicker
               value={ed.doc.props["page"]?.["palette"]}
-              onChange={(v) => { ed.setProp("page", "palette", v); ed.setProp("page", "bgOverride", undefined); }}
+              // Clearing the override writes `""`, never `undefined`: every value in
+              // `props` must be a string or `hasValidMagicPayload` rejects the whole
+              // document as non-MAGIC_V1 on reload. Readers treat `""` as absent.
+              onChange={(v) => { ed.setProp("page", "palette", v); ed.setProp("page", "bgOverride", ""); }}
               textColor={ed.doc.props["page"]?.["textColor"]}
               onTextColorChange={(v) => ed.setProp("page", "textColor", v || "")}
               swatches={t.swatches}

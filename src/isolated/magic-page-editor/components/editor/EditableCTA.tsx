@@ -2,6 +2,7 @@ import React from 'react';
 import { useEditor } from '../../contexts/EditorContext';
 import { Editable } from './Editable';
 import { EditableText } from './EditableText';
+import { iconForId } from './controls/IconPicker';
 import { cx } from '../../utils/cx';
 
 export interface CtaVariants {
@@ -25,7 +26,14 @@ export type CtaKind = 'standard' | 'card';
 interface EditableCTAProps {
   id: string;
   label: string;
-  href: string;
+  /**
+   * `undefined` renders the element WITHOUT an `href`, which is what an action
+   * with an unusable destination must be: still visible and selectable, but not
+   * a link. An empty string would render `href=""` — an anchor that reloads the
+   * current page, i.e. exactly the dead link this avoids. Existing callers all
+   * pass a string, so their output is unchanged.
+   */
+  href: string | undefined;
   variants: CtaVariants;
   defaultVariant?: CtaVariant;
   elementLabel?: string;
@@ -108,6 +116,23 @@ export function EditableCTA({
   const labelNode =
   <EditableText id={`${id}.label`} value={label} as="span" selectable={false} className={labelClassName} style={labelStyle} />;
 
+  /**
+   * A picked icon is authoritative: it replaces the template's own glyph and is
+   * drawn exactly once, on the side `iconPosition` asks for (left by default).
+   * With no `icon` prop nothing changes — the template's `leading`/`trailing`
+   * nodes render as they always did, so published pages are unaffected.
+   *
+   * This is what closes the gap the audit found: `IconPicker` was writing `icon`
+   * for CTAs and no renderer read it, so the choice had no effect.
+   */
+  const iconId = forceGroupStyles ? undefined : p['icon'];
+  const PickedIcon = iconId && iconId !== 'none' ? iconForId(iconId) : undefined;
+  const iconGlyph = PickedIcon
+    ? <PickedIcon className="h-4 w-4 shrink-0" strokeWidth={1.8} aria-hidden />
+    : undefined;
+  const resolvedLeading = iconGlyph ?? leading;
+  const resolvedTrailing = iconGlyph ? (iconPosition === 'right' ? iconGlyph : undefined) : trailing;
+
 
   return (
     <Editable
@@ -115,7 +140,11 @@ export function EditableCTA({
       kind="cta"
       label={elementLabel}
       as="a"
-      href={p['href'] ?? href}
+      // An explicit `undefined` means "this action has no usable destination",
+      // and it must win over anything stored — otherwise a stored empty string
+      // re-introduces `href=""`. Every other caller passes a string, so for them
+      // this reads exactly as `p['href'] ?? href` always did.
+      href={href === undefined ? undefined : p['href'] ?? href}
       target={p['newTab'] === 'off' ? undefined : '_blank'}
       rel="noreferrer"
       data-variant={variant}
@@ -137,9 +166,9 @@ export function EditableCTA({
       }}>
 
             {labelFill ? (
-        showLeading ? <span className="flex flex-1 justify-start min-w-0">{leading}</span> : (showTrailing ? <span className="flex flex-1 min-w-0" /> : null)
-      ) : (showLeading && leading)}
-      
+        showLeading ? <span className="flex flex-1 justify-start min-w-0">{resolvedLeading}</span> : (showTrailing ? <span className="flex flex-1 min-w-0" /> : null)
+      ) : (showLeading && resolvedLeading)}
+
       {sub !== undefined ?
       <span className={cx("flex min-w-0 flex-col", labelFill ? "shrink-0 items-center text-center" : "flex-1")}>
           {labelNode}
@@ -148,10 +177,10 @@ export function EditableCTA({
 
       labelFill ? <span className="flex min-w-0 flex-col shrink-0 items-center text-center">{labelNode}</span> : labelNode
       }
-      
+
       {labelFill ? (
-        showTrailing ? <span className="flex flex-1 justify-end min-w-0">{trailing}</span> : (showLeading ? <span className="flex flex-1 min-w-0" /> : null)
-      ) : (showTrailing && trailing)}
+        showTrailing ? <span className="flex flex-1 justify-end min-w-0">{resolvedTrailing}</span> : (showLeading ? <span className="flex flex-1 min-w-0" /> : null)
+      ) : (showTrailing && resolvedTrailing)}
     </Editable>);
 
 }

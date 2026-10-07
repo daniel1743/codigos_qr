@@ -20,7 +20,10 @@ export function useThemeTokens(): ThemeTokens {
   const base = templates[templateId].theme;
   const page = doc.props.page ?? {};
   const palette = page.palette ? visualPaletteById[page.palette] : undefined;
-  const activeBg = page.bgOverride ?? page.bg;
+  // `||`, not `??`: the editor clears the override with `""` (a legal string prop)
+  // because `undefined` would invalidate the document on reload. See the writers
+  // in useSelectionActions.
+  const activeBg = page.bgOverride || page.bg;
   const isHexTone = /^#[0-9A-F]{3,6}$/i.test(activeBg ?? '');
   const tone = isHexTone ? {
     id: activeBg,
@@ -36,15 +39,35 @@ export function useThemeTokens(): ThemeTokens {
   if (page.bgOverride) {
     pageTone = tone;
   }
-  
+
   if (page.textColor) {
     pageTone = { ...pageTone, fg: page.textColor };
   }
+
+  /**
+   * Free page-level colour tokens (L1). Each one is an OPTIONAL override that
+   * falls through to the palette, then to the template theme — so a page that
+   * never touched them renders exactly as before. Precedence, in order:
+   *   explicit prop  →  named palette  →  template theme / selected tone
+   *
+   * They are read here rather than in `toneVars` so blocks, cards and the footer
+   * inherit them through the same CSS custom properties they already use — the
+   * renderer needs no new branch.
+   */
+  if (page.mutedColor) pageTone = { ...pageTone, muted: page.mutedColor };
+  if (page.surfaceColor) pageTone = { ...pageTone, surface: page.surfaceColor };
+  if (page.lineColor) pageTone = { ...pageTone, line: page.lineColor };
+
+  const accent = page.accent || palette?.accent || base.accent;
+  const accentFg = page.accentFg || palette?.accentFg || base.accentFg;
+
   const font = base.fonts.find((f) => f.id === page.font) ?? base.fonts[0];
-  const mediaFg = readableOn(palette?.accent ?? base.accent);
+  const mediaFg = readableOn(accent);
   return {
     ...base,
-    ...(palette ? { accent: palette.accent, accentFg: palette.accentFg, swatches: palette.swatches } : {}),
+    ...(palette ? { swatches: palette.swatches } : {}),
+    accent,
+    accentFg,
     page: pageTone,
     radius: palette?.radius ?? base.radius,
     displayFont: font.display,
@@ -54,7 +77,7 @@ export function useThemeTokens(): ThemeTokens {
       muted: `color-mix(in srgb, ${mediaFg} 78%, transparent)`,
       surface: `color-mix(in srgb, ${mediaFg} 14%, transparent)`,
       line: `color-mix(in srgb, ${mediaFg} 36%, transparent)`,
-      overlay: `color-mix(in srgb, ${palette?.accent ?? base.accent} 24%, #111318)`
+      overlay: `color-mix(in srgb, ${accent} 24%, #111318)`
     }
   };
 }

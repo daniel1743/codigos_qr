@@ -3,6 +3,10 @@ import type { SocialPlatform } from '../types/editor';
 
 export const bizProfile = {
   brand: 'Áurea · estética avanzada',
+  /** Second label of the hero's header row (L2.5). Short by design. */
+  eyebrow: 'Barcelona',
+  /** Trailing label of the hero caption row (L2.5). */
+  meta: 'Desde 2016',
   title: 'Tu piel, en las mejores manos.',
   text: 'Tratamientos faciales y corporales pensados para realzar tu piel con naturalidad, criterio médico y un trato cercano.',
   cta: 'Reservar valoración',

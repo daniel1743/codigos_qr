@@ -57,7 +57,10 @@ describe("Magic page family/variant state reaches the renderer", () => {
       }
       expect(fingerprints.size, `${templateId} variants collapsed to one renderer profile`).toBe(variants.length);
     }
-  });
+    // Enumerates every page-family variant in all three templates. Explicit
+    // budget for the same reason as the hero-variant tests: under worker
+    // contention the 5s default failed it as a timeout, not as a collision.
+  }, 20000);
 
   it("renders Catalog through a dedicated page-family renderer and consumes all 8 layouts", () => {
     const outputs = new Set<string>();

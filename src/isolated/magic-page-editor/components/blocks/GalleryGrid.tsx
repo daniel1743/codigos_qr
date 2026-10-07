@@ -3,16 +3,24 @@ import { useEditor } from '../../contexts/EditorContext';
 import { Editable } from '../editor/Editable';
 import { EditableImage } from '../editor/EditableImage';
 import { cx } from '../../utils/cx';
+import { mediaHeightStyle } from '../../utils/styles';
 
-export type GalleryLayout = 'fila' | 'mosaico' | 'carrusel' | 'masonry' | 'stacked';
+export type GalleryLayout =
+  | 'fila' | 'mosaico' | 'carrusel' | 'masonry' | 'stacked'
+  // L2.5 · two compositions the target uses and the native set lacked.
+  | 'destacada' | 'bloques';
 
 /** Every gallery layout the renderer implements, in the order the picker shows them. */
-export const galleryLayouts: {value: GalleryLayout;label: string;}[] = [
-{ value: 'fila', label: 'Fila' },
-{ value: 'mosaico', label: 'Mosaico' },
-{ value: 'carrusel', label: 'Carrusel' },
-{ value: 'masonry', label: 'Editorial' },
-{ value: 'stacked', label: 'Apilada' }];
+export const galleryLayouts: {value: GalleryLayout;label: string;hint: string;}[] = [
+{ value: 'fila', label: 'Fila', hint: 'Todas las fotos en una cuadrícula pareja.' },
+{ value: 'mosaico', label: 'Mosaico', hint: 'Una foto grande y el resto alrededor.' },
+{ value: 'carrusel', label: 'Carrusel', hint: 'Se desplazan en horizontal.' },
+{ value: 'masonry', label: 'Editorial', hint: 'Columnas de altura libre.' },
+{ value: 'stacked', label: 'Apilada', hint: 'Fotos superpuestas y giradas.' },
+// Both are new ids, so a gallery that already stores one of the five above
+// cannot reach them and cannot move.
+{ value: 'destacada', label: 'Destacada', hint: 'Una foto a todo el ancho y una fila de tres debajo.' },
+{ value: 'bloques', label: 'Bloques', hint: 'Una foto ancha arriba y el resto en dos columnas.' }];
 
 interface GalleryGridProps {
   id: string;
@@ -39,7 +47,19 @@ export function GalleryGrid({ id, items, defaultLayout, radius, altPrefix, rowHe
   const layout = pageLayouts[pageVariant ?? ''] ?? p['layout'] as GalleryLayout ?? defaultLayout;
   const gap = Math.round((GAPS[p['gap'] ?? 'M'] ?? 12) * (m ? 0.7 : 1));
 
-  const photo = (src: string, i: number, cls = '', style: React.CSSProperties = {}) => {
+  /**
+   * `defaultHeight` is the HEIGHT THE LAYOUT wants, and it is deliberately
+   * applied before `mediaHeightStyle` so an authored `mediaHeight` still wins.
+   * Passing it through `style` instead would have put it last and silently
+   * overridden the L2.2 control on exactly these two layouts.
+   */
+  const photo = (
+    src: string,
+    i: number,
+    cls = '',
+    style: React.CSSProperties = {},
+    defaultHeight?: number
+  ) => {
     const photoProps = doc.props[`${id}.${i}`] ?? {};
     const href = photoProps['href'] ?? p['href'] ?? '';
     const newTab = (photoProps['newTab'] ?? p['newTab'] ?? 'on') !== 'off';
@@ -51,7 +71,14 @@ export function GalleryGrid({ id, items, defaultLayout, radius, altPrefix, rowHe
         alt={`${altPrefix} ${i + 1}`}
         label="Foto"
         className={cls}
-        style={{ borderRadius: radius, ...style }}
+        // L2.2: one insertion point covers every gallery layout. A literal
+        // `mediaHeight` replaces the layout's own ratio or height.
+        style={{
+          borderRadius: radius,
+          ...(defaultHeight === undefined ? {} : { height: defaultHeight }),
+          ...mediaHeightStyle(photoProps),
+          ...style
+        }}
         {...(href ? { href, ...(newTab ? { target: '_blank', rel: 'noreferrer' } : {}) } : {})} />
     );
   };
@@ -82,6 +109,32 @@ export function GalleryGrid({ id, items, defaultLayout, radius, altPrefix, rowHe
         if (i === 1 && cols === 4) span = 'col-span-2';
         return photo(s, i, span);
       })}
+      </div>;
+
+  } else if (layout === 'destacada') {
+    /* One photo across the full width, then a three-column row whose first
+       entry spans two — the composition the target opens its gallery with.
+       The second row is capped at three so the lead keeps the weight; extra
+       photos beyond four are not rendered rather than wrapped into a shape the
+       layout was not drawn for. */
+    const row = list.slice(1, 4);
+    const small = Math.round(rowHeight * 0.72);
+    body =
+    <div className="flex flex-col" style={{ gap }}>
+        {photo(list[0] ?? '', 0, 'w-full object-cover', {}, rowHeight)}
+        {row.length > 0 &&
+      <div className="grid grid-cols-3" style={{ gap }}>
+          {row.map((s, i) => photo(s, i + 1, cx('w-full object-cover', i === 0 && 'col-span-2'), {}, small))}
+        </div>}
+      </div>;
+
+  } else if (layout === 'bloques') {
+    /* A wide lead spanning both columns, then the rest two-up. Same cap of four
+       for the same reason. */
+    const block = Math.round(rowHeight * 0.72);
+    body =
+    <div className="grid grid-cols-2" style={{ gap }}>
+        {list.slice(0, 4).map((s, i) => photo(s, i, cx('w-full object-cover', i === 0 && 'col-span-2'), {}, i === 0 ? rowHeight : block))}
       </div>;
 
   } else {

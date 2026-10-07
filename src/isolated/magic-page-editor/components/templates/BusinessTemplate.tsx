@@ -115,7 +115,37 @@ export function BusinessTemplate() {
   const render = (b: BlockRef) => {
     const p = blockPrefix(b);
     switch (b.type) {
-      case 'hero':
+      case 'hero': {
+        /**
+         * Built once, handed over twice: `children` keeps the exact fragment it
+         * always returned, and `slots` exposes the same pieces by name for the
+         * L2.1 compositions. Only one of the two is ever rendered — a variant
+         * that reads `slots` does not also call `children` — so nothing renders
+         * twice and no existing variant changes.
+         */
+        const heroParts = (align: 'left' | 'center') => ({
+          brand: <EditableText id={`${p}hero.brand`} value={bizProfile.brand} label="Marca" className="cq-fg text-[13px] uppercase tracking-[0.26em]" style={display} />,
+          /* L2.5 · the second label of the header row, opposite the brand.
+             Opt-in: it is handed over only once it has been written, so a page
+             that already renders this header cannot sprout a label on load. The
+             compositions with no header row ignore the slot entirely. */
+          eyebrow: (doc.texts[`${p}hero.eyebrow`] ?? '').trim() !== '' ?
+            <EditableText id={`${p}hero.eyebrow`} value={bizProfile.eyebrow} label="Etiqueta" className="text-[11px] uppercase tracking-[0.24em]" /> : null,
+          /* The trailing label of the caption row, under the media. Opt-in too. */
+          meta: (doc.texts[`${p}hero.meta`] ?? '').trim() !== '' ?
+            <EditableText id={`${p}hero.meta`} value={bizProfile.meta} label="Pie" className="cq-muted text-[11px] uppercase tracking-[0.2em]" /> : null,
+          title: <div className="flex items-center"><EditableText id={`${p}hero.title`} value={bizProfile.title} as="h1" label="Título" className={cx('cq-fg mt-5 leading-[1.04]', m ? 'text-[38px]' : 'text-[62px]')} style={display} /><VerifiedNameCheck avatarId={`${p}avatar`} /></div>,
+          description: <QuickProfileInfo legacyDescription={doc.texts[`${p}hero.text`] ?? bizProfile.text} />,
+          cta: <div className={cx('mt-8 flex flex-wrap gap-3', align === 'center' && 'justify-center')}>
+                    <EditableCTA id={`${p}hero.cta`} label={bizProfile.cta} href="https://wa.me/34910000000" variants={cta} className="inline-flex h-[54px] items-center gap-2.5 whitespace-nowrap rounded-full px-7 text-[15px] font-semibold" leading={<CalendarDaysIcon className="h-[18px] w-[18px]" />} />
+                    <EditableCTA id={`${p}hero.cta2`} label={bizProfile.cta2} href="#tratamientos" variants={cta} defaultVariant="outline" className="inline-flex h-[54px] items-center whitespace-nowrap rounded-full px-7 text-[15px] font-semibold" />
+                  </div>,
+          social: <div className={cx('mt-9 flex flex-wrap items-center gap-2.5', align === 'center' && 'justify-center')}>
+                    <EditableSocialGroup className="flex flex-wrap items-center"><>{bizSocials.map((s, i) => <EditableSocial key={s.platform} id={`${p}hero.social.${i}`} platform={s.platform} href={s.href} size={40} defaultStyle="square" />)}</></EditableSocialGroup>
+                    <span><EditableText id={`${p}hero.byline`} value={bizProfile.byline} label="Firma" className="cq-muted ml-2 text-[13px]" /></span>
+                  </div>,
+        });
+        const heroSlots = heroParts('left');
         return <Block key={b.key} block={b} defaultSpacing="none">
             <HeroFrame id={`block:${b.key}`} media={images.bizClinic} mediaAlt="Recepción de Clínica Áurea" defaultVariant="split" defaultShape="curve" radius={t.radius} avatar={<EditableAvatar id={`${p}avatar`} src={images.bizPortrait} alt="Dra. Carmen Vidal" sizes={m ? {
             S: 88,
@@ -125,24 +155,14 @@ export function BusinessTemplate() {
             S: 128,
             M: 168,
             L: 204
-          }} defaultShape="arch" ringColor={t.page.color} ringWidth={6} badgeColor={t.accent} />}>
-              {({
-              align
-            }) => <>
-                  <EditableText id={`${p}hero.brand`} value={bizProfile.brand} label="Marca" className="cq-fg text-[13px] uppercase tracking-[0.26em]" style={display} />
-                  <div className="flex items-center"><EditableText id={`${p}hero.title`} value={bizProfile.title} as="h1" label="Título" className={cx('cq-fg mt-5 leading-[1.04]', m ? 'text-[38px]' : 'text-[62px]')} style={display} /><VerifiedNameCheck avatarId={`${p}avatar`} /></div>
-                  <QuickProfileInfo legacyDescription={doc.texts[`${p}hero.text`] ?? bizProfile.text} />
-                  <div className={cx('mt-8 flex flex-wrap gap-3', align === 'center' && 'justify-center')}>
-                    <EditableCTA id={`${p}hero.cta`} label={bizProfile.cta} href="https://wa.me/34910000000" variants={cta} className="inline-flex h-[54px] items-center gap-2.5 whitespace-nowrap rounded-full px-7 text-[15px] font-semibold" leading={<CalendarDaysIcon className="h-[18px] w-[18px]" />} />
-                    <EditableCTA id={`${p}hero.cta2`} label={bizProfile.cta2} href="#tratamientos" variants={cta} defaultVariant="outline" className="inline-flex h-[54px] items-center whitespace-nowrap rounded-full px-7 text-[15px] font-semibold" />
-                  </div>
-                  <div className={cx('mt-9 flex flex-wrap items-center gap-2.5', align === 'center' && 'justify-center')}>
-                    <EditableSocialGroup className="flex flex-wrap items-center"><>{bizSocials.map((s, i) => <EditableSocial key={s.platform} id={`${p}hero.social.${i}`} platform={s.platform} href={s.href} size={40} defaultStyle="square" />)}</></EditableSocialGroup>
-                    <span><EditableText id={`${p}hero.byline`} value={bizProfile.byline} label="Firma" className="cq-muted ml-2 text-[13px]" /></span>
-                  </div>
-                </>}
+          }} defaultShape="arch" ringColor={t.page.color} ringWidth={6} badgeColor={t.accent} />} slots={heroSlots}>
+              {({ align }) => {
+                const q = heroParts(align);
+                return <>{q.brand}{q.title}{q.description}{q.cta}{q.social}</>;
+              }}
             </HeroFrame>
           </Block>;
+      }
       case 'collection':
         {
           const layout = doc.props[`block:${b.key}`]?.layout ?? 'lista';
@@ -202,7 +222,7 @@ export function BusinessTemplate() {
         }
             case 'button': {
         return <Block key={b.key} block={b} defaultSpacing="S" label={buttonGroupIdentity(readButtonGroup(doc, b.key, singleButtonSeed).items.length)}>
-            <ButtonGroup blockKey={b.key} seeds={singleButtonSeed} variants={cta} maxWidth={colStyle.maxWidth as number} mobile={m} className={cx(col, 'items-stretch')} />
+            <ButtonGroup blockKey={b.key} seeds={singleButtonSeed} variants={cta} maxWidth={wrapStyle.maxWidth as number} mobile={m} className={cx(wrap, 'items-stretch')} />
           </Block>;
       }
       case 'links':

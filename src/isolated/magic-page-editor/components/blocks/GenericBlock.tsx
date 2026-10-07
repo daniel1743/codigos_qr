@@ -4,6 +4,7 @@ import { useEditor } from '../../contexts/EditorContext';
 import { useThemeTokens } from '../../hooks/useThemeTokens';
 import { Editable } from '../editor/Editable';
 import { EditableText } from '../editor/EditableText';
+import { ActionPanelBlock } from './ActionPanelBlock';
 import { EditableImage } from '../editor/EditableImage';
 import { EditableAvatar } from '../editor/EditableAvatar';
 import { type CtaVariants } from '../editor/EditableCTA';
@@ -16,10 +17,11 @@ import { LocationBlock } from './LocationBlock';
 import { CardFamilyBlock } from '../cards/CardFamilyBlock';
 import { ImageCardsBlock } from './ImageCardsBlock';
 import { ReviewsBlock } from './ReviewsBlock';
+import { ServicesBlock } from './ServicesBlock';
 import { familyForBlockType } from '../../data/cardFamilies';
 import { images } from '../../data/images';
 import { cx } from '../../utils/cx';
-import { blockPrefix } from '../../utils/styles';
+import { blockPrefix, mediaHeightStyle } from '../../utils/styles';
 import { resolveVideo, videoCover, videoHasProviderTreatment, videoStatusLabel } from '../../utils/video';
 import type { BlockRef, SocialPlatform } from '../../types/editor';
 import { useFreeImagePan } from '../editor/controls/PositionPad';
@@ -52,16 +54,29 @@ export function GenericBlock({ block, ctaVariants, maxWidth = 1080 }: GenericBlo
   if (family) return <CardFamilyBlock block={block} family={family} />;
 
   switch (block.type) {
-    case 'hero':
+    case 'hero': {
+      /** Same slots contract as the templates, for heroes added from the Block Kit. */
+      const genericHeroParts = {
+        /* L2.5 · the pair a hero header row is made of. Both are optional: a
+           composition with no header row simply ignores them, and an empty
+           label renders nothing rather than an empty box. */
+        brand: (doc.texts[`${p}hero.brand`] ?? '').trim() !== '' ?
+          <EditableText id={`${p}hero.brand`} value="Tu marca" label="Marca" className="cq-fg text-[13px] uppercase tracking-[0.26em]" style={display} /> : null,
+        eyebrow: (doc.texts[`${p}hero.eyebrow`] ?? '').trim() !== '' ?
+          <EditableText id={`${p}hero.eyebrow`} value="" label="Etiqueta" className="cq-muted text-[11px] uppercase tracking-[0.25em]" /> : null,
+        title: <EditableText id={`${p}hero.title`} value="Nueva portada" as="h2" label="Título" className={heading} style={display} />,
+        description: <EditableText id={`${p}hero.sub`} value="Toca este texto para escribir tu mensaje principal." label="Subtítulo" className="cq-muted mt-3 max-w-md text-[15px]" />,
+      };
       return (
-        <HeroFrame id={`block:${block.key}`} media={images.bioStill} mediaAlt="Imagen de portada" defaultVariant="simple" radius={t.radius}>
-          {() =>
+        <HeroFrame id={`block:${block.key}`} media={images.bioStill} mediaAlt="Imagen de portada" defaultVariant="simple" radius={t.radius} slots={genericHeroParts}>
+          {({ align: _align }) =>
           <>
-              <EditableText id={`${p}hero.title`} value="Nueva portada" as="h2" label="Título" className={heading} style={display} />
-              <EditableText id={`${p}hero.sub`} value="Toca este texto para escribir tu mensaje principal." label="Subtítulo" className="cq-muted mt-3 max-w-md text-[15px]" />
+              {genericHeroParts.title}
+              {genericHeroParts.description}
             </>
           }
         </HeroFrame>);
+    }
 
     case 'profile':
       return (
@@ -89,19 +104,54 @@ export function GenericBlock({ block, ctaVariants, maxWidth = 1080 }: GenericBlo
       );
 
     case 'separator':
-          return <SeparatorBlock key={b.key} block={b} mobile={m} />;
-        case 'social':
+          return <SeparatorBlock key={block.key} block={block} mobile={m} />;
+    /* L2.5 · `cta`, `whatsapp` and `contact` share one primitive. They are three
+       block types because that is how the target models them, but they are one
+       implementation, and the action is the project's existing CTA primitive. */
+    case 'cta':
+    case 'whatsapp':
+    case 'contact':
       return (
-        <EditableSocialGroup className={cx(wrap, 'flex flex-wrap justify-center')} style={{ maxWidth }}>
-          {genericSocials.map((pf, i) =>
-          <EditableSocial key={pf} id={`${p}social.${i}`} platform={pf} href="https://" />
-          )}
-        </EditableSocialGroup>);
+        <ActionPanelBlock
+          key={block.key}
+          block={block}
+          type={block.type}
+          ctaVariants={ctaVariants}
+          maxWidth={Math.min(maxWidth, 720)} />);
+
+        case 'social': {
+      /**
+       * The heading is opt-in, exactly like `reviews.heading`: it renders only
+       * once a title has been written, so a page that never had one cannot
+       * sprout a "Síguenos" on load. The text is the author's — nothing here
+       * hardcodes the target's copy.
+       */
+      const socialTitleId = `${p}social.title`;
+      const socialTitle = doc.texts[socialTitleId] ?? '';
+      return (
+        <>
+          {socialTitle.trim() !== '' &&
+          <div className={wrap} style={{ maxWidth }} data-block-heading="social">
+            <EditableText
+              id={socialTitleId}
+              value={socialTitle}
+              as="h2"
+              label="Título del bloque"
+              className="cq-fg mb-5 text-[22px] leading-tight"
+              style={display} />
+          </div>}
+          <EditableSocialGroup className={cx(wrap, 'flex flex-wrap justify-center')} style={{ maxWidth }}>
+            {genericSocials.map((pf, i) =>
+            <EditableSocial key={pf} id={`${p}social.${i}`} platform={pf} href="https://" />
+            )}
+          </EditableSocialGroup>
+        </>);
+    }
 
     case 'image':
       return (
         <div className={wrap} style={{ maxWidth }}>
-          <EditableImage id={`${p}image`} src={images.bizClinic} alt="Imagen destacada" className="aspect-[16/9] w-full" style={{ borderRadius: t.radius }} />
+          <EditableImage id={`${p}image`} src={images.bizClinic} alt="Imagen destacada" className="aspect-[16/9] w-full" style={{ borderRadius: t.radius, ...mediaHeightStyle(doc.props[`${p}image`]) }} />
         </div>);
 
     case 'gallery':
@@ -137,6 +187,9 @@ export function GenericBlock({ block, ctaVariants, maxWidth = 1080 }: GenericBlo
 
     case 'reviews':
       return <ReviewsBlock block={block} maxWidth={maxWidth} />;
+
+    case 'services':
+      return <ServicesBlock block={block} maxWidth={maxWidth} />;
 
     case 'collection':
       return (

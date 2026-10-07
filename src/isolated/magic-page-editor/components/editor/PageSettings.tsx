@@ -81,7 +81,7 @@ export function PageSettings({ variant }: PageSettingsProps) {
               <PanelSection title="Fondo de página">
                 <ToneGrid 
                   tones={t.tones.filter((x) => t.pageTones.includes(x.id))} 
-                  value={page.bgOverride ?? page.bg ?? t.pageTones[0]} 
+                  value={page.bgOverride || page.bg || t.pageTones[0]}
                   onChange={(v) => {
                     set('bg', v);
                     set('bgOverride', v);

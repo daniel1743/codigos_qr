@@ -64,7 +64,7 @@ describe('M2.2 Hero frame shape expansion', () => {
     act(() => root.unmount());
   });
 
-  it('renders every new frame shape across all 30 Hero variants', () => {
+  it('renders every new frame shape across every Hero variant', () => {
     const props: Record<string, Record<string, string>> = {};
     for (const shape of heroFrameShapes) {
       for (const variant of heroVariants) {
@@ -87,12 +87,15 @@ describe('M2.2 Hero frame shape expansion', () => {
         </div>
       </EditorProvider>,
     );
-    expect(host.querySelectorAll('[data-hero]')).toHaveLength(9 * 30);
+    expect(host.querySelectorAll('[data-hero]')).toHaveLength(heroFrameShapes.length * heroVariants.length);
     for (const shape of heroFrameShapes) {
-      expect(host.querySelectorAll(`[data-shape="${shape.value}"]`)).toHaveLength(30);
+      expect(host.querySelectorAll(`[data-shape="${shape.value}"]`)).toHaveLength(heroVariants.length);
     }
     act(() => root.unmount());
-  });
+    // Same explicit budget as the other variant-enumeration tests: shapes ×
+    // variants is the heaviest mount in the suite, and the 5s default turns
+    // worker contention into a failure that reads like a missing shape.
+  }, 20000);
 
   it('persists a selected frame shape and renders the same shape publicly', () => {
     const documentState = createInitialMagicPageDocument('bio');

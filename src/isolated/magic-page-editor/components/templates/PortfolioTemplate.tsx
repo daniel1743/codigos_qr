@@ -48,7 +48,30 @@ export function PortfolioTemplate() {
   const render = (b: BlockRef) => {
     const p = blockPrefix(b);
     switch (b.type) {
-      case 'hero':
+      case 'hero': {
+        /** Same contract as the other templates: built once, handed over twice. */
+        const heroParts = (align: 'left' | 'center') => ({
+          brand: <EditableText id={`${p}hero.kicker`} value={pfProfile.kicker} label="Antetítulo" className="cq-muted text-[13.5px] tracking-[0.02em]" />,
+          /* L2.5 · the second label of the header row, opposite the brand.
+             Opt-in, so an existing page cannot sprout a label on load. */
+          eyebrow: (doc.texts[`${p}hero.eyebrow`] ?? '').trim() !== '' ?
+            <EditableText id={`${p}hero.eyebrow`} value={pfProfile.eyebrow} label="Etiqueta" className="cq-muted text-[11px] uppercase tracking-[0.25em]" /> : null,
+          /* The trailing label of the caption row, under the frame. Opt-in too. */
+          meta: (doc.texts[`${p}hero.meta`] ?? '').trim() !== '' ?
+            <EditableText id={`${p}hero.meta`} value={pfProfile.meta} label="Pie" className="text-[11px]" /> : null,
+          title: <div className="flex items-center"><EditableText
+                  id={`${p}hero.title`}
+                  value={pfProfile.title}
+                  as="h1"
+                  label="Título"
+                  className={cx('cq-fg mt-4 italic leading-[0.94]', m ? 'text-[54px]' : 'text-[116px]', align === 'center' && 'text-center')}
+                  style={display} /><VerifiedNameCheck avatarId={`${p}avatar`} /></div>,
+          description: <QuickProfileInfo />,
+          cta: <div className={cx('mt-9 flex flex-wrap gap-3', align === 'center' && 'justify-center')}>
+                    <EditableCTA id={`${p}hero.cta`} label={pfProfile.cta} href="#proyectos" variants={cta} defaultVariant="outline" className={btn} trailing={<ArrowDownRightIcon className="h-4 w-4" />} />
+                  </div>,
+        });
+        const heroSlots = heroParts('left');
         return (
           <Block key={b.key} block={b} defaultSpacing="none">
             <HeroFrame
@@ -75,27 +98,15 @@ export function PortfolioTemplate() {
                 ringWidth={2}
                 badgeColor={t.accent} />
 
-              }>
-              
-              {({ align }) =>
-              <>
-                  <EditableText id={`${p}hero.kicker`} value={pfProfile.kicker} label="Antetítulo" className="cq-muted text-[13.5px] tracking-[0.02em]" />
-                  <div className="flex items-center"><EditableText
-                  id={`${p}hero.title`}
-                  value={pfProfile.title}
-                  as="h1"
-                  label="Título"
-                  className={cx('cq-fg mt-4 italic leading-[0.94]', m ? 'text-[54px]' : 'text-[116px]', align === 'center' && 'text-center')}
-                  style={display} /><VerifiedNameCheck avatarId={`${p}avatar`} /></div>
-                
-                  <QuickProfileInfo />
-                  <div className={cx('mt-9 flex flex-wrap gap-3', align === 'center' && 'justify-center')}>
-                    <EditableCTA id={`${p}hero.cta`} label={pfProfile.cta} href="#proyectos" variants={cta} defaultVariant="outline" className={btn} trailing={<ArrowDownRightIcon className="h-4 w-4" />} />
-                  </div>
-                </>
               }
+              slots={heroSlots}>
+              {({ align }) => {
+                const q = heroParts(align);
+                return <>{q.brand}{q.title}{q.description}{q.cta}</>;
+              }}
             </HeroFrame>
           </Block>);
+      }
 
       case 'text':
         return (
@@ -173,7 +184,7 @@ export function PortfolioTemplate() {
         }
             case 'button': {
         return <Block key={b.key} block={b} defaultSpacing="S" label={buttonGroupIdentity(readButtonGroup(doc, b.key, singleButtonSeed).items.length)}>
-            <ButtonGroup blockKey={b.key} seeds={singleButtonSeed} variants={cta} maxWidth={colStyle.maxWidth as number} mobile={m} className={cx(col, 'items-stretch')} />
+            <ButtonGroup blockKey={b.key} seeds={singleButtonSeed} variants={cta} maxWidth={wrapStyle.maxWidth as number} mobile={m} className={cx(wrap, 'items-stretch')} />
           </Block>;
       }
       case 'links':

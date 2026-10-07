@@ -5,6 +5,10 @@ export const pfProfile = {
   studio: 'Olmo Estudio',
   place: 'Madrid — 2026',
   kicker: 'Andrés Olmo · Fotografía de arquitectura e interiores',
+  /** Second label of the hero's header row (L2.5). Short by design. */
+  eyebrow: 'Encargos 2026',
+  /** Trailing label of the hero caption row (L2.5). */
+  meta: '01 / 24',
   title: 'Luz, materia\ny silencio.',
   cta: 'Ver proyectos'
 };

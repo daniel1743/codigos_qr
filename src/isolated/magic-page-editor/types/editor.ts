@@ -24,7 +24,8 @@ export type ElementKind =
   | "badge"
   | "imageCard"
   | "review"
-  | "separator";
+  | "separator"
+  | "service";
 
 export type BlockType =
   | "hero"
@@ -45,7 +46,18 @@ export type BlockType =
   | "cardStore"
   | "imageCards"
   | "reviews"
-  | "separator";
+  | "separator"
+  // L2.3 — a price list (title / detail / price, no image). Its own family
+  // rather than a card-family entry: `CardItem.image` is required and every
+  // card layout draws a media slot, so a no-image row has nowhere to live there.
+  | "services"
+  // L2.5 — three block types with one anatomy (panel + heading + optional rows
+  // + one action), so one implementation backs them and only the defaults
+  // differ. Kept as three types because that is how the target models them and
+  // how the audit scores them.
+  | "cta"
+  | "whatsapp"
+  | "contact";
 
 export type TextAlign = "left" | "center" | "right";
 export type HeroVariant =
@@ -78,7 +90,20 @@ export type HeroVariant =
   | "sideInfo"
   | "descriptionCard"
   | "cinematic"
-  | "brandIdentity";
+  | "brandIdentity"
+  // ── L2.1 compositions. Appended on purpose: the union only grows at the end,
+  // so no stored `variant` can ever be re-pointed at a different branch.
+  | "cinematicTall"
+  | "photoBand"
+  | "imageThenText"
+  | "centeredStack"
+  | "identityBand"
+  | "overlayBottom"
+  | "masthead"
+  | "minimalColumn"
+  | "gridCollage"
+  | "avatarOverlap"
+  | "framedPlate";
 
 /* ---------- Card families ---------- */
 
@@ -143,16 +168,33 @@ export interface CardFamilyDef {
 export type SocialPlatform =
   "instagram" | "tiktok" | "youtube" | "whatsapp" | "email" | "linkedin" | "web" | "phone";
 
+/**
+ * The three named steps keep their historic meaning; a number is a literal em
+ * value (0.18 → `0.18em`). The Magic Patterns targets use 0.08/0.1/0.18/0.2/0.25/0.3em,
+ * none of which the named steps could express.
+ */
+export type TextTracking = "tight" | "normal" | "wide" | number;
+
+/** 300 / 400 / 500 / 600 / 700 / 800. */
+export type TextWeight = "light" | "regular" | "medium" | "semibold" | "bold" | "extrabold";
+
 export interface TextStyle {
   size?: number;
   bold?: boolean;
   color?: string;
   align?: TextAlign;
   upper?: boolean;
-  tracking?: "tight" | "normal" | "wide";
+  tracking?: TextTracking;
   typeStyle?: "sans" | "editorial" | "luxury" | "mixed" | "script";
-  weight?: "regular" | "medium" | "bold";
+  weight?: TextWeight;
   goldText?: boolean;
+  /**
+   * Unitless multiplier (1.35), matching how the templates' own `leading-*`
+   * classes behave. Absent leaves the template's line-height untouched.
+   */
+  lineHeight?: number;
+  /** Adds italic. There is no way to force *off* a template's built-in italic. */
+  italic?: boolean;
 }
 
 export interface BlockRef {

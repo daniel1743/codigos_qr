@@ -4,6 +4,7 @@ import { EditableParentContext } from '../../contexts/EditableParentContext';
 import { Editable } from './Editable';
 import { SocialIcon } from '../icons/SocialIcon';
 import { socialLabel } from '../../data/socialPlatforms';
+import { resolveSocialPresentation, socialPillStyle } from '../../utils/socialOps';
 import type { SocialPlatform } from '../../types/editor';
 
 export type SocialStyle = 'circle' | 'square' | 'plain';
@@ -39,6 +40,29 @@ export function EditableSocial({ id, platform, href, size = 44, defaultStyle = '
 
   const customBubble = doc.props[scope]?.['socialBubbleColor'] as string | undefined;
   const customIcon = doc.props[scope]?.['socialIconColor'] as string | undefined;
+  const scopeProps = doc.props[scope] ?? {};
+
+  // L2.4 · the same block, a second presentation: a text pill instead of a
+  // bubble. It stays one element with one id and one href, so selection, the
+  // platform picker, the link editor and every colour control keep working.
+  if (resolveSocialPresentation(scopeProps['socialPresentation']) === 'pills') {
+    return (
+      <Editable
+        id={id}
+        kind="social"
+        label={socialLabel(pf)}
+        as="a"
+        href={p.href ?? href}
+        target="_blank"
+        rel="noreferrer"
+        aria-label={socialLabel(pf)}
+        data-presentation="pills"
+        className="inline-flex shrink-0 items-center justify-center text-[13px] font-medium transition-opacity duration-150 hover:opacity-80"
+        style={socialPillStyle(scopeProps)}
+      >
+        {socialLabel(pf)}
+      </Editable>);
+  }
 
   const shape: React.CSSProperties =
   fill === 'plain' || style === 'plain' ? { color: customIcon || 'var(--fg)' } :
@@ -60,6 +84,7 @@ export function EditableSocial({ id, platform, href, size = 44, defaultStyle = '
       rel="noreferrer"
       aria-label={socialLabel(pf)}
       data-style={style}
+      data-presentation="icons"
       className="grid shrink-0 place-items-center transition-opacity duration-150 hover:opacity-80"
       style={{ width: renderedSize, height: renderedSize, ...shape }}>
       

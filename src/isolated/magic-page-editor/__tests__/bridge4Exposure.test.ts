@@ -55,17 +55,32 @@ const REQUIRED_HERO_VARIANTS = [
   "descriptionCard",
   "cinematic",
   "brandIdentity",
+  // L2.1. Appending a composition to this list IS the contract change: the set
+  // is meant to be exact, so widening it must be deliberate and named here.
+  "cinematicTall",
+  "photoBand",
+  "imageThenText",
+  "centeredStack",
+  "identityBand",
+  "overlayBottom",
+  "masthead",
+  "minimalColumn",
+  "gridCollage",
+  "avatarOverlap",
+  "framedPlate",
 ] as const;
 
-describe("Bridge 4 · Portada > Variante exposes 30 hero variants", () => {
-  it("lists exactly the 30 required variants, in order and without duplicates", () => {
+describe("Bridge 4 · Portada > Variante exposes every required hero variant", () => {
+  it("lists exactly the required variants, in order and without duplicates", () => {
+    // `REQUIRED_HERO_VARIANTS` above is the contract; the count is derived from
+    // it so the list — not a magic number — is what has to be edited.
     expect(heroVariants.map((v) => v.value)).toEqual([...REQUIRED_HERO_VARIANTS]);
-    expect(new Set(heroVariants.map((v) => v.value)).size).toBe(30);
+    expect(new Set(heroVariants.map((v) => v.value)).size).toBe(REQUIRED_HERO_VARIANTS.length);
   });
 
-  it("gives every one of the 30 its own label and hint, so none is a dead option", () => {
-    expect(new Set(heroVariants.map((v) => v.label)).size).toBe(30);
-    expect(new Set(heroVariants.map((v) => v.hint)).size).toBe(30);
+  it("gives every one of them its own label and hint, so none is a dead option", () => {
+    expect(new Set(heroVariants.map((v) => v.label)).size).toBe(heroVariants.length);
+    expect(new Set(heroVariants.map((v) => v.hint)).size).toBe(heroVariants.length);
     for (const variant of heroVariants) {
       expect(variant.label.trim().length).toBeGreaterThan(2);
       expect(variant.hint.trim().length).toBeGreaterThan(8);
@@ -278,15 +293,24 @@ describe("Bridge 4 · card families", () => {
 /* ------------------------------------------------------------------ */
 
 describe("Bridge 4 · gallery", () => {
-  it("exposes the five gallery layouts", () => {
+  it("exposes the gallery layouts", () => {
+    // The enumeration IS the contract: every valid layout, in picker order.
+    // L2.5 appended two compositions for the target's catalog and gallery
+    // sections; the five that preceded them keep their ids, order and meaning,
+    // so a gallery that already stores one of them cannot move.
     expect(galleryLayouts.map((l) => l.value)).toEqual([
       "fila",
       "mosaico",
       "carrusel",
       "masonry",
       "stacked",
+      "destacada",
+      "bloques",
     ]);
-    expect(new Set(galleryLayouts.map((l) => l.label)).size).toBe(5);
+    // Derived from the contract, not a magic number — the count is a
+    // consequence of the list above, and hardcoding it here is how the previous
+    // version of this test became a fake failure when a layout was added.
+    expect(new Set(galleryLayouts.map((l) => l.label)).size).toBe(galleryLayouts.length);
   });
 
   /* ------------------------------------------------------------------ */

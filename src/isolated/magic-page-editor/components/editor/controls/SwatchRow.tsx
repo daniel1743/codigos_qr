@@ -6,6 +6,7 @@ import { cx } from '../../../utils/cx';
 
 interface SwatchRowProps {
   colors: string[];
+  pageColors?: string[];
   value?: string | undefined;
   onChange: (color: string | undefined) => void;
 }
@@ -19,7 +20,8 @@ export function normalizeHex(value: string): string | undefined {
   return undefined;
 }
 
-export function SwatchRow({ colors, value, onChange }: SwatchRowProps) {
+export function SwatchRow({ colors, pageColors = [], value, onChange }: SwatchRowProps) {
+  const uniquePageColors = pageColors.filter((color) => !colors.some((existing) => normalizeHex(existing)?.toLowerCase() === normalizeHex(color)?.toLowerCase()));
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState(value ?? '#000000');
   const [error, setError] = useState(false);
@@ -72,6 +74,28 @@ export function SwatchRow({ colors, value, onChange }: SwatchRowProps) {
           </button>);
 
       })}
+      {uniquePageColors.length > 0 ? (
+        <div className="flex min-w-full items-center gap-2.5">
+          <span className="text-[11px] font-medium text-mute">Colores de tu página</span>
+          {uniquePageColors.map((c) => {
+            const active = value?.toLowerCase() === c.toLowerCase();
+            const light = ['#ffffff', '#ece6db', '#f5f0e8'].includes(c.toLowerCase());
+            return (
+              <button
+                key={c}
+                type="button"
+                aria-label={`Color de la página ${c}`}
+                aria-pressed={active}
+                onClick={() => onChange(c)}
+                className={cx('grid h-9 w-9 place-items-center rounded-full border transition-transform duration-150 active:scale-95', active ? 'border-select ring-2 ring-select/30' : 'border-black/10')}
+                style={{ background: c }}
+              >
+                {active && <CheckIcon className={cx('h-4 w-4', light ? 'text-ink' : 'text-white')} strokeWidth={2.5} />}
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
       <Popover.Root open={open} onOpenChange={(isOpen) => { if (!isOpen && value && normalizeHex(draft) !== normalizeHex(value)) { onChange(value); } setOpen(isOpen); }}><Popover.Trigger asChild><button type="button" onClick={openPicker} className={cx('h-9 rounded-full border px-3 text-[12px] font-medium transition-colors duration-150', value && !colors.some((c) => c.toLowerCase() === value.toLowerCase()) ? 'border-select bg-select-soft text-select' : 'border-line text-mute hover:text-ink')}>Más colores</button></Popover.Trigger>
       <Popover.Portal><Popover.Content side="bottom" align="start" sideOffset={8} className="z-50 w-64 rounded-2xl border border-line bg-white p-3 shadow-xl">
         <div className="mb-3 flex items-center gap-3">

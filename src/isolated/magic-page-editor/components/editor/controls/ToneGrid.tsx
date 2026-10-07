@@ -10,9 +10,16 @@ interface ToneGridProps {
   value?: string;
   onChange: (id: string) => void;
   allowDefault?: boolean;
+  /**
+   * Offer the free-form HEX popover. Only the page background resolves a raw
+   * hex (via `useThemeTokens`); a section background is matched against tone
+   * *ids* in `Block.tsx`, so a hex picked there would silently paint nothing.
+   * Rather than offer a control that does not draw, block scope sets this false.
+   */
+  allowCustom?: boolean;
 }
 
-export function ToneGrid({ tones, value, onChange, allowDefault = true }: ToneGridProps) {
+export function ToneGrid({ tones, value, onChange, allowDefault = true, allowCustom = true }: ToneGridProps) {
   const items = allowDefault ? [{ id: '', label: 'Heredar', color: 'transparent', fg: '#6B7079' } as SurfaceTone, ...tones] : tones;
   const isCustomHex = value && !items.some(t => t.id === value) && value.startsWith('#');
   
@@ -55,7 +62,7 @@ export function ToneGrid({ tones, value, onChange, allowDefault = true }: ToneGr
           </button>);
       })}
 
-      <Popover.Root open={open} onOpenChange={(isOpen) => { if (!isOpen && value && normalizeHex(draft) !== normalizeHex(value) && isCustomHex) { onChange(value); } setOpen(isOpen); }}>
+      {allowCustom && <Popover.Root open={open} onOpenChange={(isOpen) => { if (!isOpen && value && normalizeHex(draft) !== normalizeHex(value) && isCustomHex) { onChange(value); } setOpen(isOpen); }}>
         <Popover.Trigger asChild>
           <button
             type="button"
@@ -102,7 +109,7 @@ export function ToneGrid({ tones, value, onChange, allowDefault = true }: ToneGr
             </div>
           </Popover.Content>
         </Popover.Portal>
-      </Popover.Root>
+      </Popover.Root>}
 
     </div>);
 }

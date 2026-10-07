@@ -7,7 +7,7 @@ import {
   safeMediaTreatment,
 } from '../../../premium-template-studio/engine/mediaTreatment';
 import type { HeroFusionMode, MediaTreatment } from '../../../premium-template-studio/types';
-import type { BlockRef, SurfaceTone, TextStyle } from '../types/editor';
+import type { BlockRef, SurfaceTone, TextStyle, TextTracking, TextWeight } from '../types/editor';
 
 export interface TextStyleCssOptions {
   /**
@@ -33,6 +33,35 @@ export interface TextStyleCssOptions {
  * (`var(--accent, #B8935A)`) and that precedence is documented and surfaced in
  * the UI (`TypographyTreatmentPicker`). Everything else follows "Unificar color".
  */
+/** 300–800. Named weights win over the legacy `bold` flag, preserving the old precedence. */
+const WEIGHT_STEPS: Record<TextWeight, number> = {
+  light: 300,
+  regular: 400,
+  medium: 500,
+  semibold: 600,
+  bold: 700,
+  extrabold: 800,
+};
+
+function fontWeightOf(ts: TextStyle): number | undefined {
+  if (ts.weight) return WEIGHT_STEPS[ts.weight];
+  if (ts.bold === true) return 700;
+  if (ts.bold === false) return 400;
+  return undefined;
+}
+
+/**
+ * A number is read as em, so the arbitrary values the Magic Patterns targets use
+ * (0.08em … 0.3em) become expressible without changing what `tight`/`wide` mean
+ * for documents that already store them.
+ */
+function letterSpacingOf(tracking: TextTracking | undefined): string | undefined {
+  if (typeof tracking === 'number') return `${tracking}em`;
+  if (tracking === 'tight') return '-0.02em';
+  if (tracking === 'wide') return '0.14em';
+  return undefined;
+}
+
 export function textStyleToCss(ts?: TextStyle, options: TextStyleCssOptions = {}): CSSProperties {
   if (!ts) return {};
   const unifyEligible = options.unifyEligible ?? true;
@@ -44,10 +73,12 @@ export function textStyleToCss(ts?: TextStyle, options: TextStyleCssOptions = {}
       : ts.color;
   const declared: CSSProperties = {
     fontSize: ts.size,
-    fontWeight: ts.weight === 'medium' ? 500 : ts.weight === 'bold' || ts.bold ? 700 : ts.bold === false || ts.weight === 'regular' ? 400 : undefined,
+    fontWeight: fontWeightOf(ts),
     textAlign: ts.align,
     textTransform: ts.upper ? 'uppercase' : undefined,
-    letterSpacing: ts.tracking === 'tight' ? '-0.02em' : ts.tracking === 'wide' ? '0.14em' : undefined,
+    letterSpacing: letterSpacingOf(ts.tracking),
+    lineHeight: ts.lineHeight,
+    fontStyle: ts.italic ? 'italic' : undefined,
     fontFamily: ts.typeStyle === 'editorial' ? "'Cormorant Garamond', serif" : ts.typeStyle === 'luxury' ? "'Bodoni Moda', serif" : ts.typeStyle === 'script' ? "'Caveat', cursive" : ts.typeStyle === 'mixed' ? "'Marcellus', serif" : undefined,
     color
   };
@@ -149,9 +180,32 @@ export function mediaPhotoStyle(
 
 export type MediaShape = 'square' | 'rounded' | 'circle' | 'oval' | 'arch' | 'bleed';
 
-/** Optional media shape treatment. Undefined intentionally preserves legacy CSS. */
+/**
+ * Literal px height for a media element, from the `mediaHeight` slot (L2.2).
+ *
+ * Returns `{}` when the slot is absent or not a bare integer, so a page that
+ * never sets it keeps its class-driven aspect ratio exactly as before — which is
+ * what makes this additive rather than a re-layout of published pages.
+ *
+ * When set, `aspectRatio: 'auto'` is part of the answer: the elements this
+ * applies to carry a Tailwind `aspect-*` utility, and without neutralising it the
+ * two declarations fight over the box and the winner depends on stylesheet order.
+ */
+export function mediaHeightStyle(props?: Record<string, string>): CSSProperties {
+  const raw = props?.['mediaHeight'];
+  if (!raw || !/^\d+$/.test(raw)) return {};
+  return { height: Number(raw), aspectRatio: 'auto' };
+}
+
+/**
+ * Optional media shape treatment. Undefined intentionally preserves legacy CSS.
+ *
+ * A bare integer is a literal px radius, so the targets' 4/10/14/16/24/28px
+ * images become reachable — none of the six named shapes could express them.
+ */
 export function mediaShapeStyle(shape?: string): CSSProperties {
   if (!shape) return {};
+  if (/^\d+$/.test(shape)) return { borderRadius: Number(shape) };
   const value = shape as MediaShape;
   if (value === 'square') return { borderRadius: 0 };
   if (value === 'rounded') return { borderRadius: 18 };

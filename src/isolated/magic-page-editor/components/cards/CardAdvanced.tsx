@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowDownIcon, ArrowUpIcon, EyeIcon, EyeOffIcon } from 'lucide-react';
 import { useEditor } from '../../contexts/EditorContext';
 import { PanelSection } from '../editor/controls/PanelSection';
+import { NumberField } from '../editor/controls/NumberField';
 import { Segmented } from '../editor/controls/Segmented';
 import { Toggle } from '../editor/controls/Toggle';
 import { DecorationPicker } from '../editor/controls/DecorationPicker';
@@ -18,6 +19,11 @@ export function CardAdvanced({ ctx }: {ctx: CardContext;}) {
   const { cardId, blockKey, family, itemId } = ctx;
   const cp = ed.doc.props[cardId] ?? {};
   const set = (k: string, v: string) => ed.setProp(cardId, k, v);
+  /** A literal px radius; `undefined` means one of the four named steps. */
+  const customRadius = cp['radius'] && /^\d+$/.test(cp['radius']) ? Number(cp['radius']) : undefined;
+  /** L2.3 · a literal px height for this card's media, on the aspect layouts. */
+  const customMediaHeight =
+    cp['mediaHeight'] && /^\d+$/.test(cp['mediaHeight']) ? Number(cp['mediaHeight']) : undefined;
   const order = cardOrder(ed.doc, blockKey, family.items.length);
   const index = order.indexOf(itemId);
   const hidden = cp.hidden === 'on';
@@ -111,9 +117,35 @@ export function CardAdvanced({ ctx }: {ctx: CardContext;}) {
           { value: 'M', label: 'Plantilla' },
           { value: 'L', label: 'Amplias' }]
           }
-          value={cp.radius ?? 'M'}
+          value={customRadius === undefined ? (cp.radius ?? 'M') : 'custom'}
           onChange={(v) => set('radius', v)} />
-
+        <div className="mt-2">
+          <NumberField
+            label="Personalizado"
+            value={customRadius}
+            onChange={(n) => set('radius', n === undefined ? '' : String(Math.round(n)))}
+            step={2}
+            min={0}
+            max={80}
+            suffix="px"
+            placeholder="14"
+          />
+        </div>
+      </PanelSection>
+      <PanelSection
+        title="Altura de imagen"
+        hint="Solo en las maquetas con proporción. Las de altura mínima la ignoran."
+      >
+        <NumberField
+          label="Alto"
+          value={customMediaHeight}
+          onChange={(n) => set('mediaHeight', n === undefined ? '' : String(Math.round(n)))}
+          step={10}
+          min={40}
+          max={900}
+          suffix="px"
+          placeholder="130"
+        />
       </PanelSection>
       <PanelSection title="Sombra">
         <Segmented

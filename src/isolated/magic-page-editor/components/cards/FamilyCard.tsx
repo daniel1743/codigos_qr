@@ -9,6 +9,7 @@ import { EditableBadge } from './EditableBadge';
 import { CardBody, type BodySize } from './CardBody';
 import { resolveCard } from '../../utils/cardLayout';
 import { cx } from '../../utils/cx';
+import { mediaHeightStyle } from '../../utils/styles';
 import type { CardFamilyDef, CardItem } from '../../types/editor';
 import { DecorationLayer } from '../editor/DecorationLayer';
 
@@ -62,7 +63,15 @@ export function FamilyCard({ id, family, item, blockProps, className, demo }: Fa
   const cardAccentFg = cardProps.cardAccentFg ?? t.accentFg;
   const cardIconBg = cardProps.cardIconBg ?? cardAccent;
   const cardIconColor = cardProps.cardIconColor ?? cardAccentFg;
-  const radius = { none: 0, S: 8, M: t.radius, L: t.radius + 14 }[cardProps.radius ?? 'M'] ?? t.radius;
+  // A bare integer is a literal px radius, so the targets' 14/20px cards are
+  // reachable; the four named steps keep their exact previous values.
+  const radiusKey = cardProps.radius ?? 'M';
+  const radius = /^\d+$/.test(radiusKey)
+    ? Number(radiusKey)
+    : radiusKey === 'none' ? 0
+    : radiusKey === 'S' ? 8
+    : radiusKey === 'L' ? t.radius + 14
+    : t.radius;
   const pad = ({ S: 12, M: 20, L: 28 }[cardProps.spacing ?? (layout === 'compact' ? 'S' : 'M')] ?? 20) - (m ? 4 : 0);
   const border = (cardProps.border ?? (surface === 'plain' ? 'off' : 'on')) === 'on' || surface === 'outline';
   const inner = Math.max(0, Math.round(radius - pad * 0.6));
@@ -90,8 +99,18 @@ export function FamilyCard({ id, family, item, blockProps, className, demo }: Fa
   <EditableBadge id={`${id}.badge`} label={item.badge} onMedia defaultStyle={sale ? 'solid' : 'soft'} className="absolute left-3 top-3 z-[1]" /> :
   null;
 
-  const media = (cls: string, style?: React.CSSProperties, imgRadius = inner) =>
-    <div data-slot="image" className={cx('relative shrink-0', cls)} style={style}>
+  /**
+   * `allowHeight` is opt-in per call site, and only the aspect-driven layouts
+   * pass it. The `min-h-*` layouts deliberately do not: there a `height` would
+   * sit underneath a `minHeight` and a value the author typed would silently do
+   * nothing — exactly the no-op this capability exists to remove.
+   */
+  const media = (cls: string, style?: React.CSSProperties, imgRadius = inner, allowHeight = false) =>
+    <div
+      data-slot="image"
+      className={cx('relative shrink-0', cls)}
+      style={{ ...(allowHeight ? mediaHeightStyle(cardProps) : {}), ...style }}
+    >
       <EditableImage
         id={`${id}.img`}
         src={item.image}
@@ -170,7 +189,7 @@ export function FamilyCard({ id, family, item, blockProps, className, demo }: Fa
   } else if (horizontal || layout === 'top') {
     content =
     <div className="flex flex-1 flex-col" style={{ gap: m ? 14 : 16 }}>
-        {media(cx('w-full', dense ? 'aspect-square' : layout === 'top' ? 'aspect-[4/3]' : 'aspect-[16/10]'))}
+        {media(cx('w-full', dense ? 'aspect-square' : layout === 'top' ? 'aspect-[4/3]' : 'aspect-[16/10]'), undefined, inner, true)}
         {body(dense ? 'sm' : 'md', 'flex-1')}
       </div>;
 
@@ -178,13 +197,13 @@ export function FamilyCard({ id, family, item, blockProps, className, demo }: Fa
     content =
     <div className="flex flex-1 flex-col" style={{ gap: 16 }}>
         {body('md', 'flex-1')}
-        {media('aspect-[4/3] w-full')}
+        {media('aspect-[4/3] w-full', undefined, inner, true)}
       </div>;
 
   } else if (layout === 'editorial') {
     content = m ?
     <div className="flex flex-1 flex-col gap-5">
-        {media('aspect-[4/5] w-full')}
+        {media('aspect-[4/5] w-full', undefined, inner, true)}
         {body('lg')}
       </div> :
 

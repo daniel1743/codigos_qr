@@ -22,6 +22,27 @@ interface BlockProps {
 }
 
 const SPACING: Record<Spacing, number> = { none: 0, S: 28, M: 60, L: 104 };
+const MOBILE_SPACING = 0.62;
+
+/**
+ * Resolves the `spacing` prop to pixels.
+ *
+ * A bare integer (e.g. `"48"`) is read as a literal px value, so the Magic
+ * Patterns targets' 40/48/56px sections become reachable. The four named steps
+ * keep their exact meaning for documents that already store them.
+ *
+ * Two behaviours worth knowing, both pre-existing and deliberately unchanged:
+ *  · `S` and `M` are also matched by `[data-spacing=...]` rules in
+ *    magic-editor.css that use `!important`, so for those two the rendered
+ *    padding comes from CSS (scaled by `--page-variant-scale`), not from here.
+ *    A numeric value matches no such rule and so renders exactly what it says.
+ *  · the 0.62 mobile factor therefore only reaches `none`, `L` and numeric values.
+ */
+export function spacingPx(raw: string | undefined, fallback: Spacing): number {
+  if (raw && /^\d+$/.test(raw)) return Number(raw);
+  const key = (raw as Spacing) ?? fallback;
+  return SPACING[key] ?? SPACING[fallback];
+}
 
 /** Every block is a tappable section: structure (move, duplicate, hide, delete), background and spacing live here. */
 export function Block({ block, className, defaultTone, defaultSpacing = 'M', label, children }: BlockProps) {
@@ -33,7 +54,7 @@ export function Block({ block, className, defaultTone, defaultSpacing = 'M', lab
 
   const tone = t.tones.find((x) => x.id === (p.bg ?? defaultTone));
   const spacing = p.spacing as Spacing ?? defaultSpacing;
-  const pad = Math.round(SPACING[spacing] * (ed.isMobile ? 0.62 : 1));
+  const pad = Math.round(spacingPx(p.spacing, defaultSpacing) * (ed.isMobile ? MOBILE_SPACING : 1));
 
   return (
     <Editable

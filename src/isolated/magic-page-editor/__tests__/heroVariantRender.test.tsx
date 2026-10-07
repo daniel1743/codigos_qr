@@ -73,7 +73,7 @@ function heroMarkupOf(variant: string): { raw: string; composition: string } {
   };
 }
 
-describe("Bridge 4 · 30/30 hero variants render a different composition", () => {
+describe("Bridge 4 · every hero variant renders a different composition", () => {
   it("mounts the hero with the variant the document selected", () => {
     const markup = heroMarkupOf("editorialCenter");
     expect(markup.raw, markup.raw.slice(0, 400)).toContain('data-hero="editorialCenter"');
@@ -89,7 +89,7 @@ describe("Bridge 4 · 30/30 hero variants render a different composition", () =>
       expect(markup.composition.length, `${variant.value} rendered nothing`).toBeGreaterThan(100);
       compositions.set(variant.value, markup.composition);
     }
-    expect(compositions.size).toBe(30);
+    expect(compositions.size).toBe(heroVariants.length);
 
     const byComposition = new Map<string, string[]>();
     for (const [variant, composition] of compositions) {
@@ -102,10 +102,15 @@ describe("Bridge 4 · 30/30 hero variants render a different composition", () =>
       collisions,
       `variants sharing one composition: ${collisions.map((c) => c.join(" = ")).join(" | ")}`,
     ).toEqual([]);
-  });
+    // Renders every hero variant and compares their markup. It runs in ~2s on an
+    // idle machine, which leaves too little headroom under Vitest's 5s default:
+    // with the workers busy it was measured at 6s and failed as a timeout — a
+    // scheduling artefact that looks exactly like a real regression. The budget
+    // is explicit so a red here always means the composition actually collided.
+  }, 20000);
 });
 
-describe("Bridge 4 · 30/30 hero variants have their own thumbnail", () => {
+describe("Bridge 4 · every hero variant has its own thumbnail", () => {
   it("renders unique thumbnail markup for each variant", () => {
     const thumbs = heroVariants.map((variant) => ({
       variant: variant.value,
@@ -121,7 +126,7 @@ describe("Bridge 4 · 30/30 hero variants have their own thumbnail", () => {
       collisions,
       `variants sharing one thumbnail: ${collisions.map((c) => c.join(" = ")).join(" | ")}`,
     ).toEqual([]);
-    expect(thumbs).toHaveLength(30);
+    expect(thumbs).toHaveLength(heroVariants.length);
     for (const thumb of thumbs) {
       expect(thumb.html.length, `${thumb.variant} thumbnail is empty`).toBeGreaterThan(40);
     }
