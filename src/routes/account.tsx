@@ -210,8 +210,20 @@ function AccountPage() {
   ];
 
   const linkRows = [
-    { key: "public", label: "Identidad pública", url: data.publicUrl },
-    { key: "alias", label: "Alias corto", url: data.aliasUrl },
+    {
+      key: "alias",
+      label: "Enlace personalizado",
+      badge: "Recomendado",
+      helper: "Más fácil de recordar y compartir.",
+      url: data.aliasUrl,
+    },
+    {
+      key: "public",
+      label: "Enlace permanente",
+      badge: null,
+      helper: "Tu enlace base de Cripqer. También abre exactamente la misma página.",
+      url: data.publicUrl,
+    },
   ].filter((row) => Boolean(row.url));
 
   return (
@@ -276,28 +288,30 @@ function AccountPage() {
               </dl>
             </CqPanel>
 
-            {/* Public presence — only URLs the app can really generate. */}
+            {/* Public links — only URLs the app can really generate. */}
             <CqPanel
               headingId="account-links-heading"
-              title="Presencia pública"
+              title="Tus enlaces de Cripqer"
               visual="magic"
-              description={
-                profile
-                  ? "Enlaces generados desde tu identidad en Supabase."
-                  : "Crea tu perfil para obtener tu enlace público."
-              }
+              description="Ambos enlaces llevan a la misma página. Puedes compartir cualquiera."
             >
               {linkRows.length > 0 ? (
                 <ul className="divide-y divide-cq-line">
                   {linkRows.map((row) => (
-                    <li key={row.key} className="flex min-w-0 items-center gap-3 py-3 first:pt-0">
+                    <li key={row.key} className="flex min-w-0 items-start gap-3 py-3.5 first:pt-0">
                       <CqIconTile size="sm">
                         <Globe2 className="h-4 w-4" />
                       </CqIconTile>
                       <div className="min-w-0 flex-1">
-                        <p className="text-[11.5px] text-cq-subtle">{row.label}</p>
-                        <p className="truncate font-mono text-[12.5px] text-cq-ink">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="text-[12.5px] font-semibold text-cq-ink">{row.label}</p>
+                          {row.badge ? <CqStatusPill tone="info" label={row.badge} /> : null}
+                        </div>
+                        <p className="mt-1 truncate font-mono text-[12.5px] text-cq-ink">
                           {row.url?.replace(/^https?:\/\//, "")}
+                        </p>
+                        <p className="mt-1 text-[12px] leading-relaxed text-cq-subtle">
+                          {row.helper}
                         </p>
                       </div>
                       <button
@@ -317,7 +331,7 @@ function AccountPage() {
                 </ul>
               ) : (
                 <p className="text-[13px] leading-relaxed text-cq-muted">
-                  Todavía no hay enlaces públicos asociados a esta cuenta.
+                  Todavía no hay enlaces de Cripqer asociados a esta cuenta.
                 </p>
               )}
 
