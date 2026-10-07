@@ -120,7 +120,12 @@ export function DesktopSidebar({ user, pageState, isAdmin }: Props) {
         </div>
         <div className="my-5 h-px bg-cq-line" />
         <div className="space-y-1">
-          <NavLink to="/account" label="Ayuda y soporte" icon={HelpCircle} isActive={false} />
+          <NavLink
+            to="/help"
+            label="Ayuda y soporte"
+            icon={HelpCircle}
+            isActive={active(pathname, ["/help"])}
+          />
         </div>
       </nav>
       <div className="shrink-0 pt-4">

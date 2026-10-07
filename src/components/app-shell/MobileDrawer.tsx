@@ -219,7 +219,7 @@ export default function MobileDrawer({
           <ul className="space-y-0.5">
             <li>
               <Link
-                to="/account"
+                to="/help"
                 onClick={onClose}
                 className="flex min-h-12 items-center gap-3 rounded-cq-lg px-3 py-2 transition-colors active:bg-cq-canvas"
               >
