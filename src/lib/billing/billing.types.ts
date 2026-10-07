@@ -36,6 +36,38 @@ export type BillingCheckoutStatus = (typeof BILLING_CHECKOUT_STATUSES)[number];
 export const BILLING_EVENT_STATUSES = ["processing", "processed", "failed"] as const;
 export type BillingEventStatus = (typeof BILLING_EVENT_STATUSES)[number];
 
+/**
+ * B0 — canonical non-subscription sources of paid access.
+ *
+ * A grant is anything that gives paid access WITHOUT a provider subscription:
+ * an invitation code, an admin action, a promotion, or a legacy `premium_users`
+ * row during the compatibility window. Grants live in `billing_grants` and are
+ * read ONLY by the entitlement resolver — never by the browser.
+ */
+export const BILLING_GRANT_SOURCES = [
+  "invitation",
+  "admin",
+  "promotion",
+  "legacy_premium",
+] as const;
+export type BillingGrantSource = (typeof BILLING_GRANT_SOURCES)[number];
+
+export interface BillingGrantRecord {
+  id: string;
+  user_id: string;
+  plan_id: BillingPlanId;
+  grant_source: BillingGrantSource;
+  /** NULL means a PERMANENT grant — a legitimate state, not a missing value. */
+  expires_at: string | null;
+  /** Soft revoke: a revoked grant stops counting but is never deleted. */
+  revoked_at: string | null;
+  granted_by: string | null;
+  invitation_code_id: string | null;
+  note: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface BillingCustomerRecord {
   id: string;
   user_id: string;

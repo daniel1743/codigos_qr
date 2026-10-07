@@ -17,12 +17,13 @@ export interface LandingBotAnswer {
 export const getLandingBotPlanFn = createServerFn({ method: "GET", strict: false }).handler(
   async (): Promise<string> => {
     try {
-      const { resolveEntitlement } = await import("../../server/billing/entitlements");
+      // B0 — the ONE decision service. It resolves both canonical sources (paid
+      // subscription and grants) instead of the subscription alone, which is what
+      // previously made an invited user look free here and Premium in the studio.
+      const { resolveUserPlan } = await import("../../server/billing/plan-service");
       const { requireBillingUser } = await import("../../server/billing/auth");
-      const { getCanonicalSubscriptionForUser } = await import("../../server/billing/persistence");
       const user = await requireBillingUser();
-      const subscription = await getCanonicalSubscriptionForUser(user.userId);
-      return resolveEntitlement(subscription).effectiveTier;
+      return (await resolveUserPlan(user.userId)).effectiveTier;
     } catch {
       return "free";
     }

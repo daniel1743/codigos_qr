@@ -26,10 +26,11 @@ export async function resolveLandingBotOwner(publicId: string): Promise<LandingB
     const ownerUserId = (pageRow as { owner_user_id?: string } | null)?.owner_user_id ?? null;
     if (!ownerUserId) return { ownerUserId: null, tier: "free" };
 
-    const { getCanonicalSubscriptionForUser } = await import("../../server/billing/persistence");
-    const { resolveEntitlement } = await import("../../server/billing/entitlements");
-    const subscription = await getCanonicalSubscriptionForUser(ownerUserId);
-    return { ownerUserId, tier: resolveEntitlement(subscription).effectiveTier };
+    // B0 — the ONE decision service, so the page owner's tier is the same answer
+    // every other surface gets (subscription OR grant), never a subscription-only
+    // view that would call an invited owner "free".
+    const { resolveUserPlan } = await import("../../server/billing/plan-service");
+    return { ownerUserId, tier: (await resolveUserPlan(ownerUserId)).effectiveTier };
   } catch (error) {
     console.warn("[landing-bot] tier resolution failed; defaulting to free.", error);
     return { ownerUserId: null, tier: "free" };

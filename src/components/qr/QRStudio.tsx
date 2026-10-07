@@ -43,7 +43,7 @@ import { Switch } from "../ui/switch";
 import { Alert, AlertDescription } from "../ui/alert";
 import { getBrowserSupabaseClient } from "../../lib/supabase/client";
 import { QRTemplateGallery } from "../editor/QRTemplateGallery";
-import { hasPremiumAccessByEmail } from "../../lib/entitlements";
+import { getMyPlanFn } from "../../lib/billing/plan-server";
 import imageCompression from "browser-image-compression";
 import { loadImageDeterministic } from "../../lib/qr-export/loadImage";
 
@@ -224,34 +224,25 @@ export function QRStudio({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [publicId]);
 
+  /**
+   * B0 — this component no longer decides Premium.
+   *
+   * It used to read the `premium_users` table straight from the browser and
+   * short-circuit on a hardcoded e-mail allowlist, which made the QR studio a
+   * second, independent authority on who is Pro. It now ASKS the canonical
+   * server boundary (`getMyPlanFn`), which resolves the single answer from the
+   * two legitimate sources — a paid subscription or a canonical grant.
+   *
+   * The browser supplies no identity and reads no table. Fail-closed: any error
+   * or absent session resolves to Free.
+   */
   useEffect(() => {
     let cancelled = false;
 
     const checkPremiumAccess = async () => {
       try {
-        const supabase = getBrowserSupabaseClient();
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-
-        if (!user) {
-          if (!cancelled) setIsPremiumUser(false);
-          return;
-        }
-
-        if (hasPremiumAccessByEmail(user.email || "")) {
-          if (!cancelled) setIsPremiumUser(true);
-          return;
-        }
-
-        const { data } = await supabase
-          .from("premium_users")
-          .select("expires_at")
-          .eq("user_id", user.id)
-          .maybeSingle();
-
-        const active = !!data && (!data.expires_at || new Date(data.expires_at) > new Date());
-        if (!cancelled) setIsPremiumUser(active);
+        const plan = await getMyPlanFn();
+        if (!cancelled) setIsPremiumUser(plan.isPro);
       } catch (error) {
         console.error("Error checking premium access:", error);
         if (!cancelled) setIsPremiumUser(false);

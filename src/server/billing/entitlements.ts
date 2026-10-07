@@ -37,10 +37,12 @@
  */
 
 import {
+  BILLING_GRANT_SOURCES,
   BILLING_PLAN_IDS,
   BILLING_SUBSCRIPTION_STATUSES,
 } from "../../lib/billing/billing.types.ts";
 import type {
+  BillingGrantRecord,
   BillingPlanId,
   BillingSubscriptionRecord,
   BillingSubscriptionStatus,
@@ -68,7 +70,10 @@ export type EntitlementReason =
   | "CANCELLED"
   | "EXPIRED"
   | "INVALID_PLAN"
-  | "UNKNOWN_STATUS";
+  | "UNKNOWN_STATUS"
+  // B0 — a non-subscription source (invitation / admin / promotion / legacy)
+  // is what grants paid access.
+  | "ACTIVE_GRANT";
 
 /**
  * Trusted billing entitlement state. Deterministic and pure: the same canonical
@@ -236,4 +241,141 @@ export function resolveEntitlement(
     currentPeriodEnd,
     reason: "ACTIVE_PAID_SUBSCRIPTION",
   };
+}
+
+/* ===================== B0 — grants as a second source ==================== */
+
+/**
+ * Canonical tier ranking, used ONLY to pick between two grants that are both
+ * valid. Enterprise > business > pro. Higher wins.
+ */
+const PLAN_RANK: Record<BillingPlanId, number> = { pro: 1, business: 2, enterprise: 3 };
+
+function isCanonicalGrantSource(value: unknown): value is BillingGrantRecord["grant_source"] {
+  return typeof value === "string" && (BILLING_GRANT_SOURCES as readonly string[]).includes(value);
+}
+
+/** Milliseconds since epoch, or null when absent/unparseable. */
+function parseInstant(value: string | null | undefined): number | null {
+  if (typeof value !== "string" || value.trim() === "") return null;
+  const ms = Date.parse(value);
+  return Number.isFinite(ms) ? ms : null;
+}
+
+/**
+ * Whether a grant is in force at `now`.
+ *
+ * A grant with `expires_at === null` is PERMANENT and therefore active. A grant
+ * whose `expires_at` is in the future is active. A revoked grant never is.
+ * Anything malformed fails closed.
+ */
+export function isGrantActive(grant: BillingGrantRecord, now: number = Date.now()): boolean {
+  if (grant == null) return false;
+  if (grant.revoked_at !== null && grant.revoked_at !== undefined) return false;
+  if (!isCanonicalPlanId(grant.plan_id)) return false;
+  if (!isCanonicalGrantSource(grant.grant_source)) return false;
+
+  const expiresAt = grant.expires_at;
+  if (expiresAt === null || expiresAt === undefined) return true; // permanent
+  const ms = parseInstant(expiresAt);
+  if (ms === null) return false; // unparseable → fail closed
+  return ms > now;
+}
+
+/**
+ * Picks the strongest active grant: highest plan rank first, then the one that
+ * runs longest (a permanent grant beats any dated one).
+ */
+export function selectStrongestActiveGrant(
+  grants: readonly BillingGrantRecord[] | null | undefined,
+  now: number = Date.now(),
+): BillingGrantRecord | null {
+  if (!Array.isArray(grants) || grants.length === 0) return null;
+
+  let best: BillingGrantRecord | null = null;
+  let bestRank = -1;
+  let bestExpiry = Number.NEGATIVE_INFINITY;
+
+  for (const grant of grants) {
+    if (!isGrantActive(grant, now)) continue;
+    const rank = PLAN_RANK[grant.plan_id as BillingPlanId] ?? -1;
+    if (rank < 0) continue;
+    // `null` expiry means permanent → treat as +Infinity for the comparison.
+    const expiry =
+      grant.expires_at == null
+        ? Number.POSITIVE_INFINITY
+        : (parseInstant(grant.expires_at) ?? Number.NEGATIVE_INFINITY);
+
+    if (rank > bestRank || (rank === bestRank && expiry > bestExpiry)) {
+      best = grant;
+      bestRank = rank;
+      bestExpiry = expiry;
+    }
+  }
+
+  return best;
+}
+
+export interface GrantAwareEntitlementInput {
+  /** The canonical paid subscription row, or null when there is none. */
+  subscription: BillingSubscriptionRecord | null | undefined;
+  /** Every grant row for the user, active or not — filtering happens here. */
+  grants?: readonly BillingGrantRecord[] | null | undefined;
+  /** Injectable clock for deterministic tests. */
+  now?: Date | string | number;
+}
+
+function toMillis(now: GrantAwareEntitlementInput["now"]): number {
+  if (now === undefined) return Date.now();
+  if (now instanceof Date) return now.getTime();
+  if (typeof now === "number") return now;
+  const ms = Date.parse(now);
+  return Number.isFinite(ms) ? ms : Date.now();
+}
+
+/**
+ * THE canonical Free/Pro decision (B0).
+ *
+ * This is the single function every consumer must use. It composes the two
+ * legitimate sources of paid access:
+ *
+ *   1. an active PAID subscription   (delegated to `resolveEntitlement`)
+ *   2. an active GRANT               (invitation / admin / promotion / legacy)
+ *
+ * Precedence: the subscription wins when it grants access, because it is the
+ * state with a real billing lifecycle behind it. Otherwise the strongest active
+ * grant decides. When neither grants, the result is `free` and the reason is the
+ * subscription's own diagnostic (PENDING / PAST_DUE / …) so the cause is not
+ * lost; with no subscription at all and no grant, the reason is NO_SUBSCRIPTION.
+ *
+ * PURE and SYNCHRONOUS. It reads no browser flag, no e-mail, no localStorage and
+ * no query string — callers pass already-fetched canonical rows.
+ */
+export function resolveEntitlementWithGrants(
+  input: GrantAwareEntitlementInput,
+): EntitlementResolution {
+  const nowMs = toMillis(input.now);
+
+  const fromSubscription = resolveEntitlement(input.subscription);
+  if (fromSubscription.hasPaidAccess) return fromSubscription;
+
+  const grant = selectStrongestActiveGrant(input.grants, nowMs);
+  if (grant) {
+    return {
+      effectiveTier: grant.plan_id,
+      hasPaidAccess: true,
+      canonicalPlanId: grant.plan_id,
+      subscriptionStatus: fromSubscription.subscriptionStatus,
+      cancelAtPeriodEnd: fromSubscription.cancelAtPeriodEnd,
+      // The grant's own end date is the meaningful horizon when there is no
+      // subscription; fall back to the subscription's period if the grant is
+      // permanent and a subscription period exists for diagnostics.
+      currentPeriodEnd: grant.expires_at ?? fromSubscription.currentPeriodEnd,
+      reason: "ACTIVE_GRANT",
+    };
+  }
+
+  // Free. Keep the subscription's diagnostic when there was one — losing it
+  // would turn "past_due" into a generic "no subscription".
+  return fromSubscription;
 }
