@@ -326,6 +326,25 @@ export function intakeMercadoPagoNotification(event: unknown): WebhookIntake {
 }
 
 /**
+ * Whether a fetched Mercado Pago resource IS a preapproval (a subscription).
+ *
+ * The lookup instruction says what the NOTIFICATION pointed at; this says what
+ * the AUTHORITATIVE FETCH actually returned. They differ in exactly one case,
+ * and it is the case that used to be a dead end: a `payment` or
+ * `authorized_payment` carries no subscription state of its own — only a
+ * `preapproval_id` — so the resource fetcher follows that relation and returns
+ * the PREAPPROVAL. Recognising it here is what lets the normalizer emit real
+ * subscription state instead of `requiresAuthoritativeLookup: true` forever.
+ *
+ * The marker is `auto_recurring`, a block every preapproval carries and no
+ * payment has. It is deliberately NOT a status heuristic: `pending` is a legal
+ * status for both resource kinds, so status cannot tell them apart.
+ */
+export function isMercadoPagoPreapprovalResource(resource: unknown): boolean {
+  return get(resource, "auto_recurring") !== undefined;
+}
+
+/**
  * Normalizes the AUTHORITATIVE resource fetched from the Mercado Pago API
  * (preapproval, authorized payment, or payment), not the webhook body.
  */
@@ -333,7 +352,10 @@ export function normalizeMercadoPagoResource(
   resource: unknown,
   lookup: WebhookLookupInstruction,
 ): NormalizedBillingEvent | null {
-  const isPreapproval = lookup.resourceType === "preapproval" || lookup.resourceType === "unknown";
+  const isPreapproval =
+    lookup.resourceType === "preapproval" ||
+    lookup.resourceType === "unknown" ||
+    isMercadoPagoPreapprovalResource(resource);
   const preapprovalId = isPreapproval
     ? str(get(resource, "id"))
     : str(get(resource, "preapproval_id"));

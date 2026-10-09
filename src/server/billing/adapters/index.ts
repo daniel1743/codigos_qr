@@ -26,6 +26,17 @@
  * The `ProviderAdapter` contract in `../providers.ts` is already written and
  * frozen. This module is the ONE place where an adapter gets registered, so the
  * next phase has an obvious seam instead of inventing a second registry.
+ *
+ * WHERE MP-M1 LEFT IT
+ * MP-M1 delivered the Mercado Pago pieces that do NOT need a checkout flow:
+ * the HTTP client (`../mercadopago/client.ts`), the authoritative resource
+ * fetcher (`../mercadopago/resource-fetcher.ts`) and the fail-closed plan
+ * resolver (`../mercadopago/plan.ts`). The adapter itself is still NOT wired —
+ * `createSession`, `cancel`, `reactivate`, `changePlan` and `verifier` are
+ * MP-M2/M3 work and depend on owner decisions (remote plan, credentials) that
+ * do not exist yet. So this function keeps returning the empty registry, and
+ * every `getAdapter()` keeps failing closed. That is still the correct answer:
+ * the pieces landed, the switch did not.
  */
 
 import {
