@@ -3,7 +3,6 @@ import "@tanstack/react-start/server-only";
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 import type { WebhookVerifier } from "../webhooks.ts";
-import type { MercadoPagoConfig } from "./types.ts";
 
 /**
  * CRIPQER BILLING — MERCADO PAGO WEBHOOK SIGNATURE VERIFIER (MP-M2)
@@ -73,7 +72,11 @@ export type MercadoPagoWebhookRejectionReason =
   /** The header carries no value for the supported signature version. */
   | "MISSING_HASH"
   /** Everything was present and well-formed, and the digest did not match. */
-  | "SIGNATURE_MISMATCH";
+  | "SIGNATURE_MISMATCH"
+  /** The digest matched, but `ts` is further from now than the tolerance allows. */
+  | "TIMESTAMP_OUT_OF_TOLERANCE"
+  /** A freshness check was requested with a tolerance this module cannot apply. */
+  | "INVALID_TOLERANCE_CONFIG";
 
 /** Discriminated so a reason exists only where there is a rejection. */
 export type MercadoPagoWebhookVerificationResult =
@@ -220,18 +223,89 @@ function digestsMatch(expectedHex: string, receivedHex: string): boolean {
   return timingSafeEqual(expected, received);
 }
 
+/* =========================== freshness / replay =========================== */
+
+/**
+ * Freshness (anti-replay) policy, mirroring the official SDK's `tolerance_seconds`.
+ *
+ * The SDK's parameter is optional and DEFAULTS TO NO CHECK, so the default here is
+ * the same: a `ts` that is old or in the future is accepted unless a caller asks
+ * for a window. Inventing a window would be inventing policy — the SDK publishes
+ * none, and the right value depends on clock skew and on how long Mercado Pago may
+ * legitimately retry a delivery, neither of which this module can know. A host that
+ * wants replay protection passes an explicit tolerance.
+ *
+ * Semantics, all taken from the SDK rather than chosen here:
+ *   · `ts` is in SECONDS and the clock is in MILLISECONDS; the drift is
+ *     `|now - ts * 1000|`. Getting that factor wrong is a 1000x error the SDK
+ *     itself has shipped a fix for, hence the explicit `* 1000` below.
+ *   · The absolute value means a FUTURE timestamp and an OLD one are treated
+ *     identically — there is no "clock skew allowance" in one direction only.
+ *   · The check runs AFTER the digest comparison. A forged `ts` cannot be used to
+ *     probe the tolerance before the signature is known to be genuine.
+ *   · The bound is inclusive: exactly `toleranceSeconds` away is still fresh.
+ */
+export interface MercadoPagoFreshnessPolicy {
+  /**
+   * Milliseconds clock. Injected so tests are deterministic; defaults to
+   * `Date.now`. Must return milliseconds, to match `ts * 1000`.
+   */
+  now?: (() => number) | undefined;
+  /**
+   * Maximum accepted `|now - ts|`, in seconds. `null`/`undefined` disables the
+   * check entirely (the SDK default). Must be a finite number `>= 0` to be
+   * applied — anything else is `INVALID_TOLERANCE_CONFIG`, never a silent pass.
+   */
+  toleranceSeconds?: number | null | undefined;
+}
+
+function isFatalTolerance(value: unknown): boolean {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0;
+}
+
+/**
+ * Applies the freshness policy to an ALREADY-VERIFIED signature.
+ *
+ * Returns null when the notification is fresh (or when no window was requested),
+ * and the rejection reason otherwise. Failure is closed in both directions: a
+ * tolerance that cannot be applied rejects rather than being ignored, so a caller
+ * who believes they configured replay protection cannot silently have none.
+ */
+function checkFreshness(
+  ts: string,
+  policy: MercadoPagoFreshnessPolicy,
+): MercadoPagoWebhookRejectionReason | null {
+  const tolerance = policy.toleranceSeconds;
+  if (tolerance === null || tolerance === undefined) return null;
+
+  if (!isFatalTolerance(tolerance)) {
+    // Configured but unusable. Rejecting is the only safe reading: quietly
+    // skipping the check would be a fail-open the caller never asked for.
+    return "INVALID_TOLERANCE_CONFIG";
+  }
+
+  const clock = policy.now ?? Date.now;
+  const driftMs = Math.abs(clock() - Number(ts) * 1000);
+
+  return driftMs > tolerance * 1000 ? "TIMESTAMP_OUT_OF_TOLERANCE" : null;
+}
+
 /* ============================== verification ============================== */
 
-export interface MercadoPagoSignatureVerificationInput {
+export interface MercadoPagoSignatureVerificationInput extends MercadoPagoFreshnessPolicy {
   /** Raw `x-signature` header value. */
   signatureHeader?: string | null | undefined;
   /** Raw `x-request-id` header value. Optional — the manifest omits it if absent. */
   requestId?: string | null | undefined;
   /**
    * The notification's `data.id`, taken from the notification URL's QUERY string.
-   * Optional: the manifest omits the `id:` pair when it is absent, which is what
-   * the official SDK does. Passing the body's `data.id` instead is a host choice
-   * the documentation calls out — see the module report.
+   *
+   * This is the parameter the host must populate from the request's query string —
+   * it is NOT a header, and this module never reads it from one. Optional: the
+   * manifest omits the `id:` pair when it is absent, which is what the official SDK
+   * does. Passing the BODY's `data.id` is not equivalent (see the module report):
+   * the body is not signed, so a value taken from it can differ from the signed one
+   * without the digest noticing.
    */
   dataId?: string | null | undefined;
   /** Signing secret. Server-side only; never returned, logged or serialized. */
@@ -243,8 +317,15 @@ export interface MercadoPagoSignatureVerificationInput {
  * never touches anything outside its arguments.
  *
  * Failure is always closed. A missing secret, a missing or unreadable header, an
- * absent or non-numeric `ts`, and a digest mismatch all return REJECTED — none of
- * them can produce a VERIFIED result, and none of them can raise.
+ * absent or non-numeric `ts`, a digest mismatch, and — when a window is configured
+ * — a `ts` outside it all return REJECTED. None of them can produce a VERIFIED
+ * result, and none of them can raise.
+ *
+ * This is the canonical primitive for Mercado Pago. The frozen two-argument
+ * `WebhookVerifier` seam cannot carry a query parameter, so a host holding the real
+ * request (MP-M2B) must call THIS function with `dataId` read from
+ * `new URL(req.url).searchParams.get("data.id")` rather than routing the value
+ * through the seam's header bag.
  */
 export function verifyMercadoPagoSignature(
   input: MercadoPagoSignatureVerificationInput,
@@ -274,10 +355,44 @@ export function verifyMercadoPagoSignature(
     .update(manifest, "utf8")
     .digest("hex");
 
-  return digestsMatch(expected, received) ? VERIFIED : reject("SIGNATURE_MISMATCH");
+  // Signature first, freshness second — the SDK's order. A caller probing the
+  // tolerance with a forged `ts` learns nothing until the digest is genuine.
+  if (!digestsMatch(expected, received)) return reject("SIGNATURE_MISMATCH");
+
+  const stale = checkFreshness(ts, input);
+  if (stale !== null) return reject(stale);
+
+  return VERIFIED;
 }
 
 /* ============================ frozen seam adapter ========================= */
+
+/**
+ * A notification as the frozen seam presents it: the raw body and the transport
+ * headers. Nothing here can carry a query parameter, which is the whole reason
+ * `resolveDataId` below exists.
+ */
+export interface MercadoPagoWebhookSeamRequest {
+  rawBody: string;
+  headers: Record<string, string>;
+}
+
+export interface MercadoPagoWebhookVerifierOptions extends MercadoPagoFreshnessPolicy {
+  /** Signing secret. Server-side only. */
+  webhookSecret: string | null;
+  /**
+   * REQUIRED. Supplies the notification's signed `data.id`, which is a query
+   * parameter and therefore is NOT in `headers`.
+   *
+   * The seam's two arguments cannot express a query string, so the caller must
+   * read it from its own request and return it here — for example
+   * `(req) => new URL(urlOf(req)).searchParams.get("data.id")`. There is
+   * deliberately no header fallback: this module will NOT look for a `data.id`
+   * header, because inventing one would mean verifying against a value that
+   * Mercado Pago never signed.
+   */
+  resolveDataId: (request: MercadoPagoWebhookSeamRequest) => string | null | undefined;
+}
 
 /**
  * Adapts the core to the frozen `WebhookVerifier` seam
@@ -293,35 +408,51 @@ export function verifyMercadoPagoSignature(
  *    ignored, and the body is never parsed.
  *
  * 2. `data.id` IS NOT A HEADER. It arrives as a query parameter, and the frozen
- *    two-argument seam has no slot for one. This adapter therefore reads it from
- *    the header bag under its canonical query name `data.id`, and a host wired to
- *    this adapter MUST forward the query value there. A host that has the real
- *    request — MP-M2B — should prefer calling `verifyMercadoPagoSignature`
- *    directly with `data.id` read from the query, and skip this bridge entirely.
- *    When the value is absent the manifest simply omits the `id:` pair, exactly
- *    as the SDK does; if Mercado Pago signed WITH an id, the digests cannot match
- *    and the notification is rejected rather than accepted.
+ *    two-argument seam has no slot for one. Rather than smuggle it through the
+ *    header bag — which would misrepresent the transport AND invite a host to
+ *    supply an unsigned value — the adapter takes a REQUIRED `resolveDataId`
+ *    callback that the host implements against its real request. When the value
+ *    is absent the manifest simply omits the `id:` pair, exactly as the SDK does;
+ *    if Mercado Pago signed WITH an id, the digests cannot match and the
+ *    notification is rejected rather than accepted.
  *
- * A missing secret does not throw here: it makes every `verify` call return
- * false. Failing closed at construction would be equally safe, but a host that
- * routes a misconfiguration into an exception can turn it into a 5xx; returning
- * false keeps the surface quiet and the access denied.
+ *    A host that already holds the request should prefer calling
+ *    `verifyMercadoPagoSignature` directly and skip this bridge entirely, since
+ *    that path can also report WHY a notification was rejected.
+ *
+ * A missing secret, a missing `resolveDataId`, or a resolver that throws does not
+ * propagate: the first makes every call return false, and the second and third are
+ * caught and treated as "no id". Failing closed at construction would be equally
+ * safe, but a host that routes a misconfiguration into an exception can turn it
+ * into a 5xx; returning false keeps the surface quiet and the access denied.
  */
 export function createMercadoPagoWebhookVerifier(
-  config: Pick<MercadoPagoConfig, "webhookSecret">,
+  options: MercadoPagoWebhookVerifierOptions,
 ): WebhookVerifier {
-  const secret = config.webhookSecret;
+  const { webhookSecret, resolveDataId, now, toleranceSeconds } = options;
+  const resolve = typeof resolveDataId === "function" ? resolveDataId : () => null;
 
   return {
     verify(rawBody: string, headers: Record<string, string>): boolean {
       void rawBody;
 
+      let dataId: string | null | undefined = null;
+      try {
+        dataId = resolve({ rawBody, headers });
+      } catch {
+        // A resolver that throws must not become a 500, and must not be read as
+        // "the id matched". Treat it as absent: the digest then decides.
+        dataId = null;
+      }
+
       return (
         verifyMercadoPagoSignature({
           signatureHeader: readHeader(headers, MERCADOPAGO_SIGNATURE_HEADER),
           requestId: readHeader(headers, MERCADOPAGO_REQUEST_ID_HEADER),
-          dataId: readHeader(headers, MERCADOPAGO_DATA_ID_QUERY_KEY),
-          secret,
+          dataId,
+          secret: webhookSecret,
+          now,
+          toleranceSeconds,
         }).outcome === "VERIFIED"
       );
     },

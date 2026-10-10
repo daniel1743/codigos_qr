@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { createHmac } from "node:crypto";
 import { join } from "node:path";
 
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -6,7 +7,6 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   buildMercadoPagoSignatureManifest,
   createMercadoPagoWebhookVerifier,
-  MERCADOPAGO_DATA_ID_QUERY_KEY,
   MERCADOPAGO_REQUEST_ID_HEADER,
   MERCADOPAGO_SIGNATURE_HEADER,
   MERCADOPAGO_SIGNATURE_VERSION,
@@ -32,6 +32,9 @@ const DATA_ID = "1234567890";
 const REQUEST_ID = "req-abc-123";
 const TS = "1700000000";
 
+/** The module under test, read as source by the structural (no-side-effect) tests. */
+const SOURCE_PATH = join(process.cwd(), "src/server/billing/mercadopago/webhook-verifier.ts");
+
 const MANIFEST_FULL = `id:${DATA_ID};request-id:${REQUEST_ID};ts:${TS};`;
 const MANIFEST_NO_DATA_ID = `request-id:${REQUEST_ID};ts:${TS};`;
 const MANIFEST_NO_REQUEST_ID = `id:${DATA_ID};ts:${TS};`;
@@ -47,6 +50,21 @@ const KAT_MIXED_CASE_ID = "5955473e8713a730436e82b81026ec303bb177568d46414fbc5be
 
 function header(digest: string, ts: string = TS): string {
   return `ts=${ts},${MERCADOPAGO_SIGNATURE_VERSION}=${digest}`;
+}
+
+/**
+ * Signs a manifest with `node:crypto`.
+ *
+ * Used ONLY by the freshness/anti-replay suite, which needs a GENUINELY valid
+ * digest at a `ts` other than the pinned one — an invalid digest would be
+ * rejected as SIGNATURE_MISMATCH before freshness is ever consulted, making
+ * those tests vacuous. The manifest FORMAT itself is not trusted from this
+ * helper: it is pinned independently by KAT_FULL, computed outside this codebase,
+ * and asserted literally in the manifest suite below.
+ */
+function sign(ts: string, dataId: string | null = DATA_ID, requestId: string | null = REQUEST_ID) {
+  const manifest = buildMercadoPagoSignatureManifest({ dataId, requestId, ts });
+  return createHmac("sha256", SECRET).update(manifest, "utf8").digest("hex");
 }
 
 function fullInput(overrides: Record<string, unknown> = {}) {
@@ -318,6 +336,90 @@ describe("MP-M2 · data.id absent", () => {
   });
 });
 
+/* ==================== data.id provenance (MP-M2A.1) ====================== */
+
+describe("MP-M2A.1 · data.id is query metadata, never a header", () => {
+  it("verifies when dataId is passed explicitly (the query value)", () => {
+    expect(
+      verifyMercadoPagoSignature({
+        signatureHeader: header(KAT_FULL),
+        requestId: REQUEST_ID,
+        dataId: DATA_ID,
+        secret: SECRET,
+      }).outcome,
+    ).toBe("VERIFIED");
+  });
+
+  it("rejects when a signed data.id is missing from the input", () => {
+    // Case 2: the sender signed WITH an id; we resolve none -> mismatch, closed.
+    expect(
+      verifyMercadoPagoSignature({
+        signatureHeader: header(KAT_FULL),
+        requestId: REQUEST_ID,
+        dataId: null,
+        secret: SECRET,
+      }),
+    ).toEqual({ outcome: "REJECTED", reason: "SIGNATURE_MISMATCH" });
+  });
+
+  it("a BODY data.id cannot substitute for the query data.id", () => {
+    // Case 3. The body is not signed material, so it is not an input at all:
+    // there is no parameter here that accepts a parsed body, and a body claiming
+    // the right id still fails when the query id is absent.
+    expect(
+      verifyMercadoPagoSignature({
+        signatureHeader: header(KAT_FULL),
+        requestId: REQUEST_ID,
+        dataId: null,
+        secret: SECRET,
+      }).outcome,
+    ).toBe("REJECTED");
+  });
+
+  it("does not case-fold the signed data.id", () => {
+    // Case (case-sensitivity): the raw value enters the HMAC. A lowercased id
+    // must NOT verify against a signature computed over the raw uppercase one.
+    const mixed = "ORD01JQ4S4KY8HWQ6NA5PXB65B3D3";
+    const digest = sign(TS, mixed, REQUEST_ID);
+
+    expect(
+      verifyMercadoPagoSignature({
+        signatureHeader: header(digest),
+        requestId: REQUEST_ID,
+        dataId: mixed,
+        secret: SECRET,
+      }).outcome,
+    ).toBe("VERIFIED");
+
+    expect(
+      verifyMercadoPagoSignature({
+        signatureHeader: header(digest),
+        requestId: REQUEST_ID,
+        dataId: mixed.toLowerCase(),
+        secret: SECRET,
+      }),
+    ).toEqual({ outcome: "REJECTED", reason: "SIGNATURE_MISMATCH" });
+  });
+
+  it("treats a whitespace-only data.id as absent, exactly as the SDK does", () => {
+    expect(
+      verifyMercadoPagoSignature({
+        signatureHeader: header(KAT_ONLY_TS),
+        requestId: "   ",
+        dataId: "   ",
+        secret: SECRET,
+      }).outcome,
+    ).toBe("VERIFIED");
+  });
+
+  it("exports no helper that reads data.id from a header bag", () => {
+    // The module's surface must not invite a host to invent a `data.id` header.
+    const source = readFileSync(SOURCE_PATH, "utf8");
+    // It may NAME the query key, but must never read it out of `headers`.
+    expect(source).not.toMatch(/readHeader\(\s*headers\s*,\s*MERCADOPAGO_DATA_ID_QUERY_KEY/);
+  });
+});
+
 /* ==================== 10. casing and whitespace behavior ================== */
 
 describe("MP-M2 · casing and whitespace", () => {
@@ -456,8 +558,6 @@ describe("MP-M2 · the secret never reaches console", () => {
 /* ================= 13/14/15. no store, no entitlement, no fetch =========== */
 
 describe("MP-M2 · the verifier has no side effects and no dependencies", () => {
-  const SOURCE_PATH = join(process.cwd(), "src/server/billing/mercadopago/webhook-verifier.ts");
-
   it("imports nothing that could persist, entitle or call a provider", () => {
     const source = readFileSync(SOURCE_PATH, "utf8");
 
@@ -605,7 +705,10 @@ describe("MP-M2 · the request body cannot substitute signed metadata", () => {
   });
 
   it("the frozen-seam adapter ignores the raw body entirely", () => {
-    const verifier = createMercadoPagoWebhookVerifier({ webhookSecret: SECRET });
+    const verifier = createMercadoPagoWebhookVerifier({
+      webhookSecret: SECRET,
+      resolveDataId: () => DATA_ID,
+    });
 
     const bodyClaimingAnotherId = JSON.stringify({ data: { id: "9999999999" } });
     const bodyClaimingTheRightId = JSON.stringify({ data: { id: DATA_ID } });
@@ -613,7 +716,6 @@ describe("MP-M2 · the request body cannot substitute signed metadata", () => {
     const headers = {
       [MERCADOPAGO_SIGNATURE_HEADER]: header(KAT_FULL),
       [MERCADOPAGO_REQUEST_ID_HEADER]: REQUEST_ID,
-      [MERCADOPAGO_DATA_ID_QUERY_KEY]: DATA_ID,
     };
 
     // Same headers, contradictory bodies: identical verdicts prove the body is
@@ -623,8 +725,12 @@ describe("MP-M2 · the request body cannot substitute signed metadata", () => {
   });
 
   it("does not let a body-supplied id rescue a missing signed id", () => {
-    const verifier = createMercadoPagoWebhookVerifier({ webhookSecret: SECRET });
-    // Signed WITH data.id, but the host forwarded no data.id: the manifest omits
+    // The resolver is the ONLY source of data.id, and here it has nothing.
+    const verifier = createMercadoPagoWebhookVerifier({
+      webhookSecret: SECRET,
+      resolveDataId: () => null,
+    });
+    // Signed WITH data.id, but the host resolved no data.id: the manifest omits
     // it and cannot match — the body is not consulted as a substitute.
     expect(
       verifier.verify(JSON.stringify({ data: { id: DATA_ID } }), {
@@ -632,6 +738,157 @@ describe("MP-M2 · the request body cannot substitute signed metadata", () => {
         [MERCADOPAGO_REQUEST_ID_HEADER]: REQUEST_ID,
       }),
     ).toBe(false);
+  });
+});
+
+/* ==================== freshness / anti-replay (MP-M2A.1) ================== */
+
+describe("MP-M2A.1 · timestamp freshness policy", () => {
+  /** A valid notification whose `ts` is `TS`, verified at an injected clock. */
+  function at(nowMs: number, overrides: Record<string, unknown> = {}) {
+    return verifyMercadoPagoSignature({
+      signatureHeader: header(sign(TS), TS),
+      requestId: REQUEST_ID,
+      dataId: DATA_ID,
+      secret: SECRET,
+      now: () => nowMs,
+      ...overrides,
+    });
+  }
+
+  const TS_MS = Number(TS) * 1000;
+
+  it("defaults to NO freshness check, matching the official SDK", () => {
+    // toleranceSeconds omitted entirely: an ancient ts still verifies.
+    expect(at(TS_MS + 10 * 365 * 24 * 3600 * 1000)).toEqual({
+      outcome: "VERIFIED",
+      reason: null,
+    });
+    expect(at(TS_MS, { toleranceSeconds: null })).toEqual({
+      outcome: "VERIFIED",
+      reason: null,
+    });
+  });
+
+  it("verifies a timestamp comfortably inside the window", () => {
+    expect(at(TS_MS + 30 * 1000, { toleranceSeconds: 60 })).toEqual({
+      outcome: "VERIFIED",
+      reason: null,
+    });
+  });
+
+  it("rejects a timestamp older than the window", () => {
+    expect(at(TS_MS + 5 * 60 * 1000, { toleranceSeconds: 60 })).toEqual({
+      outcome: "REJECTED",
+      reason: "TIMESTAMP_OUT_OF_TOLERANCE",
+    });
+  });
+
+  it("rejects a timestamp too far in the FUTURE — drift is absolute", () => {
+    // The SDK uses abs(), so a future ts is not a one-way allowance.
+    expect(at(TS_MS - 5 * 60 * 1000, { toleranceSeconds: 60 })).toEqual({
+      outcome: "REJECTED",
+      reason: "TIMESTAMP_OUT_OF_TOLERANCE",
+    });
+  });
+
+  it("treats the exact boundary as fresh, in both directions", () => {
+    // |drift| == tolerance is NOT > tolerance, so it passes. Inclusive bound.
+    expect(at(TS_MS + 60 * 1000, { toleranceSeconds: 60 }).outcome).toBe("VERIFIED");
+    expect(at(TS_MS - 60 * 1000, { toleranceSeconds: 60 }).outcome).toBe("VERIFIED");
+    // One millisecond past the bound, either way, flips it.
+    expect(at(TS_MS + 60 * 1000 + 1, { toleranceSeconds: 60 }).outcome).toBe("REJECTED");
+    expect(at(TS_MS - 60 * 1000 - 1, { toleranceSeconds: 60 }).outcome).toBe("REJECTED");
+  });
+
+  it("compares SECONDS to a MILLISECONDS clock without a 1000x error", () => {
+    // tolerance 3600s. ts is TS. A clock 1s off must be fresh; a clock 3599s off
+    // must be fresh; 3601s off must not. A units mix-up would invert all three.
+    expect(at(TS_MS + 1000, { toleranceSeconds: 3600 }).outcome).toBe("VERIFIED");
+    expect(at(TS_MS + 3599 * 1000, { toleranceSeconds: 3600 }).outcome).toBe("VERIFIED");
+    expect(at(TS_MS + 3601 * 1000, { toleranceSeconds: 3600 }).outcome).toBe("REJECTED");
+  });
+
+  it("accepts a zero tolerance as an exact-match check, not 'disabled'", () => {
+    // 0 is a legitimate, strict value: only a ts exactly equal to now passes.
+    expect(at(TS_MS, { toleranceSeconds: 0 }).outcome).toBe("VERIFIED");
+    expect(at(TS_MS + 1, { toleranceSeconds: 0 }).outcome).toBe("REJECTED");
+  });
+
+  it("fails closed on a tolerance it cannot apply (NaN/negative/Infinity)", () => {
+    for (const bad of [Number.NaN, -1, Number.POSITIVE_INFINITY, -0.5]) {
+      expect(at(TS_MS, { toleranceSeconds: bad })).toEqual({
+        outcome: "REJECTED",
+        reason: "INVALID_TOLERANCE_CONFIG",
+      });
+    }
+  });
+
+  it("checks the SIGNATURE before the timestamp", () => {
+    // A forged digest at an out-of-window ts must report the mismatch, not the
+    // freshness failure: a caller cannot probe the window without a valid sig.
+    const forged = verifyMercadoPagoSignature({
+      signatureHeader: header(
+        sign(TS).replace(/.$/, (c) => (c === "0" ? "1" : "0")),
+        TS,
+      ),
+      requestId: REQUEST_ID,
+      dataId: DATA_ID,
+      secret: SECRET,
+      toleranceSeconds: 1,
+      now: () => TS_MS + 10 * 365 * 24 * 3600 * 1000,
+    });
+    expect(forged).toEqual({ outcome: "REJECTED", reason: "SIGNATURE_MISMATCH" });
+  });
+
+  it("is deterministic under an injected clock — no hidden Date.now", () => {
+    const now = vi.fn(() => TS_MS + 10 * 1000);
+    const spy = vi.spyOn(Date, "now");
+    try {
+      const result = at(TS_MS + 10 * 1000, { toleranceSeconds: 60, now });
+      expect(result.outcome).toBe("VERIFIED");
+      expect(now).toHaveBeenCalledTimes(1);
+      // The injected clock is the ONLY clock consulted.
+      expect(spy).not.toHaveBeenCalled();
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  it("does not consult the wall clock when no window is configured", () => {
+    const spy = vi.spyOn(Date, "now");
+    try {
+      expect(at(TS_MS, { toleranceSeconds: null }).outcome).toBe("VERIFIED");
+      expect(spy).not.toHaveBeenCalled();
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  it("freshness is NOT a substitute for the signature, and vice versa", () => {
+    // Fresh but unsigned -> rejected on the signature.
+    expect(
+      verifyMercadoPagoSignature({
+        signatureHeader: null,
+        requestId: REQUEST_ID,
+        dataId: DATA_ID,
+        secret: SECRET,
+        toleranceSeconds: 300,
+        now: () => TS_MS,
+      }),
+    ).toEqual({ outcome: "REJECTED", reason: "MISSING_SIGNATURE_HEADER" });
+
+    // Correctly signed by the wrong secret -> signature decides, not freshness.
+    expect(
+      verifyMercadoPagoSignature({
+        signatureHeader: header(sign(TS)),
+        requestId: REQUEST_ID,
+        dataId: DATA_ID,
+        secret: "another-secret",
+        toleranceSeconds: 300,
+        now: () => TS_MS,
+      }),
+    ).toEqual({ outcome: "REJECTED", reason: "SIGNATURE_MISMATCH" });
   });
 });
 
@@ -658,28 +915,66 @@ describe("MP-M2 · manifest format is pinned literally", () => {
 
 describe("MP-M2 · frozen WebhookVerifier adapter", () => {
   it("satisfies the frozen seam: verify(rawBody, headers) -> boolean", () => {
-    const verifier = createMercadoPagoWebhookVerifier({ webhookSecret: SECRET });
+    const verifier = createMercadoPagoWebhookVerifier({
+      webhookSecret: SECRET,
+      resolveDataId: () => DATA_ID,
+    });
     const result = verifier.verify("{}", {
       [MERCADOPAGO_SIGNATURE_HEADER]: header(KAT_FULL),
       [MERCADOPAGO_REQUEST_ID_HEADER]: REQUEST_ID,
-      [MERCADOPAGO_DATA_ID_QUERY_KEY]: DATA_ID,
     });
     expect(result).toBe(true);
   });
 
-  it("reads header names case-insensitively", () => {
-    const verifier = createMercadoPagoWebhookVerifier({ webhookSecret: SECRET });
+  it("reads the two signed header names case-insensitively", () => {
+    const verifier = createMercadoPagoWebhookVerifier({
+      webhookSecret: SECRET,
+      resolveDataId: () => DATA_ID,
+    });
     expect(
       verifier.verify("{}", {
         "X-Signature": header(KAT_FULL),
         "X-Request-Id": REQUEST_ID,
-        "Data.Id": DATA_ID,
       }),
     ).toBe(true);
   });
 
+  it("does NOT look for a data.id header (case 11: no invented headers)", () => {
+    // A host that forwards the query value into the header bag is misrepresenting
+    // the transport. The adapter has no header fallback, so this must NOT verify:
+    // the value came from a header, and Mercado Pago never signed a header.
+    const verifier = createMercadoPagoWebhookVerifier({
+      webhookSecret: SECRET,
+      resolveDataId: () => null,
+    });
+    expect(
+      verifier.verify("{}", {
+        [MERCADOPAGO_SIGNATURE_HEADER]: header(KAT_FULL),
+        [MERCADOPAGO_REQUEST_ID_HEADER]: REQUEST_ID,
+        "data.id": DATA_ID,
+        "Data.Id": DATA_ID,
+      }),
+    ).toBe(false);
+  });
+
+  it("accepts the id ONLY from resolveDataId, whatever the headers say", () => {
+    const headers = {
+      [MERCADOPAGO_SIGNATURE_HEADER]: header(KAT_FULL),
+      [MERCADOPAGO_REQUEST_ID_HEADER]: REQUEST_ID,
+      "data.id": "9999999999",
+    };
+    const resolved = createMercadoPagoWebhookVerifier({
+      webhookSecret: SECRET,
+      resolveDataId: () => DATA_ID,
+    });
+    expect(resolved.verify("{}", headers)).toBe(true);
+  });
+
   it("returns false, never throws, when the secret is not configured", () => {
-    const verifier = createMercadoPagoWebhookVerifier({ webhookSecret: null });
+    const verifier = createMercadoPagoWebhookVerifier({
+      webhookSecret: null,
+      resolveDataId: () => DATA_ID,
+    });
     expect(() =>
       verifier.verify("{}", { [MERCADOPAGO_SIGNATURE_HEADER]: header(KAT_FULL) }),
     ).not.toThrow();
@@ -687,7 +982,60 @@ describe("MP-M2 · frozen WebhookVerifier adapter", () => {
   });
 
   it("returns false for an empty header bag", () => {
-    const verifier = createMercadoPagoWebhookVerifier({ webhookSecret: SECRET });
+    const verifier = createMercadoPagoWebhookVerifier({
+      webhookSecret: SECRET,
+      resolveDataId: () => DATA_ID,
+    });
     expect(verifier.verify("{}", {})).toBe(false);
+  });
+
+  it("treats a resolver that throws as 'no id', never as a match", () => {
+    const verifier = createMercadoPagoWebhookVerifier({
+      webhookSecret: SECRET,
+      resolveDataId: () => {
+        throw new Error("host bug");
+      },
+    });
+    expect(() =>
+      verifier.verify("{}", {
+        [MERCADOPAGO_SIGNATURE_HEADER]: header(KAT_FULL),
+        [MERCADOPAGO_REQUEST_ID_HEADER]: REQUEST_ID,
+      }),
+    ).not.toThrow();
+    // Signed WITH data.id, resolved as absent -> manifest omits it -> mismatch.
+    expect(
+      verifier.verify("{}", {
+        [MERCADOPAGO_SIGNATURE_HEADER]: header(KAT_FULL),
+        [MERCADOPAGO_REQUEST_ID_HEADER]: REQUEST_ID,
+      }),
+    ).toBe(false);
+  });
+
+  it("applies the injected clock and tolerance through the adapter", () => {
+    const stale = createMercadoPagoWebhookVerifier({
+      webhookSecret: SECRET,
+      resolveDataId: () => DATA_ID,
+      toleranceSeconds: 60,
+      now: () => (Number(TS) + 3600) * 1000,
+    });
+    expect(
+      stale.verify("{}", {
+        [MERCADOPAGO_SIGNATURE_HEADER]: header(KAT_FULL),
+        [MERCADOPAGO_REQUEST_ID_HEADER]: REQUEST_ID,
+      }),
+    ).toBe(false);
+
+    const fresh = createMercadoPagoWebhookVerifier({
+      webhookSecret: SECRET,
+      resolveDataId: () => DATA_ID,
+      toleranceSeconds: 60,
+      now: () => (Number(TS) + 30) * 1000,
+    });
+    expect(
+      fresh.verify("{}", {
+        [MERCADOPAGO_SIGNATURE_HEADER]: header(KAT_FULL),
+        [MERCADOPAGO_REQUEST_ID_HEADER]: REQUEST_ID,
+      }),
+    ).toBe(true);
   });
 });
