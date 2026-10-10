@@ -46,8 +46,8 @@ function read(path: string): string {
  */
 function sql(): string {
   return read(MIGRATION)
-    .split("\n")
-    .map((line) => line.replace(/--.*$/, ""))
+    .split(/\r?\n/)
+    .map((line) => line.replace(/--[^\r\n]*/, ""))
     .join("\n")
     .replace(/\s+/g, " ");
 }
@@ -321,8 +321,8 @@ const SEAL_MIGRATION = join(
 
 function sealSql(): string {
   return read(SEAL_MIGRATION)
-    .split("\n")
-    .map((line) => line.replace(/--.*$/, ""))
+    .split(/\r?\n/)
+    .map((line) => line.replace(/--[^\r\n]*/, ""))
     .join("\n")
     .replace(/\s+/g, " ");
 }
