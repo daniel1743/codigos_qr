@@ -47,6 +47,7 @@ import { Route as PagesPageIdEditRouteImport } from './routes/pages.$pageId.edit
 import { Route as PagesPageIdEditPrototypeRouteImport } from './routes/pages.$pageId.edit-prototype'
 import { Route as PagesPageIdFuxionDemoRouteImport } from './routes/pages.$pageId.fuxion-demo'
 import { Route as PgASlugRouteImport } from './routes/pg.a.$slug'
+import { Route as ApiBillingMercadopagoStartProRouteImport } from './routes/api.billing.mercadopago.start-pro'
 import { Route as ApiBillingMercadopagoWebhookRouteImport } from './routes/api.billing.mercadopago.webhook'
 
 const IndexRoute = IndexRouteImport.update({
@@ -240,6 +241,12 @@ const PgASlugRoute = PgASlugRouteImport.update({
   path: '/pg/a/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiBillingMercadopagoStartProRoute =
+  ApiBillingMercadopagoStartProRouteImport.update({
+    id: '/api/billing/mercadopago/start-pro',
+    path: '/api/billing/mercadopago/start-pro',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiBillingMercadopagoWebhookRoute =
   ApiBillingMercadopagoWebhookRouteImport.update({
     id: '/api/billing/mercadopago/webhook',
@@ -286,6 +293,7 @@ export interface FileRoutesByFullPath {
   '/pages/$pageId/edit-prototype': typeof PagesPageIdEditPrototypeRoute
   '/pages/$pageId/fuxion-demo': typeof PagesPageIdFuxionDemoRoute
   '/pg/a/$slug': typeof PgASlugRoute
+  '/api/billing/mercadopago/start-pro': typeof ApiBillingMercadopagoStartProRoute
   '/api/billing/mercadopago/webhook': typeof ApiBillingMercadopagoWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -327,6 +335,7 @@ export interface FileRoutesByTo {
   '/pages/$pageId/edit-prototype': typeof PagesPageIdEditPrototypeRoute
   '/pages/$pageId/fuxion-demo': typeof PagesPageIdFuxionDemoRoute
   '/pg/a/$slug': typeof PgASlugRoute
+  '/api/billing/mercadopago/start-pro': typeof ApiBillingMercadopagoStartProRoute
   '/api/billing/mercadopago/webhook': typeof ApiBillingMercadopagoWebhookRoute
 }
 export interface FileRoutesById {
@@ -369,6 +378,7 @@ export interface FileRoutesById {
   '/pages/$pageId/edit-prototype': typeof PagesPageIdEditPrototypeRoute
   '/pages/$pageId/fuxion-demo': typeof PagesPageIdFuxionDemoRoute
   '/pg/a/$slug': typeof PgASlugRoute
+  '/api/billing/mercadopago/start-pro': typeof ApiBillingMercadopagoStartProRoute
   '/api/billing/mercadopago/webhook': typeof ApiBillingMercadopagoWebhookRoute
 }
 export interface FileRouteTypes {
@@ -412,6 +422,7 @@ export interface FileRouteTypes {
     | '/pages/$pageId/edit-prototype'
     | '/pages/$pageId/fuxion-demo'
     | '/pg/a/$slug'
+    | '/api/billing/mercadopago/start-pro'
     | '/api/billing/mercadopago/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -453,6 +464,7 @@ export interface FileRouteTypes {
     | '/pages/$pageId/edit-prototype'
     | '/pages/$pageId/fuxion-demo'
     | '/pg/a/$slug'
+    | '/api/billing/mercadopago/start-pro'
     | '/api/billing/mercadopago/webhook'
   id:
     | '__root__'
@@ -494,6 +506,7 @@ export interface FileRouteTypes {
     | '/pages/$pageId/edit-prototype'
     | '/pages/$pageId/fuxion-demo'
     | '/pg/a/$slug'
+    | '/api/billing/mercadopago/start-pro'
     | '/api/billing/mercadopago/webhook'
   fileRoutesById: FileRoutesById
 }
@@ -529,6 +542,7 @@ export interface RootRouteChildren {
   QPublicIdRoute: typeof QPublicIdRoute
   VsLinktreeRoute: typeof VsLinktreeRoute
   PgASlugRoute: typeof PgASlugRoute
+  ApiBillingMercadopagoStartProRoute: typeof ApiBillingMercadopagoStartProRoute
   ApiBillingMercadopagoWebhookRoute: typeof ApiBillingMercadopagoWebhookRoute
 }
 
@@ -800,6 +814,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PgASlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/billing/mercadopago/start-pro': {
+      id: '/api/billing/mercadopago/start-pro'
+      path: '/api/billing/mercadopago/start-pro'
+      fullPath: '/api/billing/mercadopago/start-pro'
+      preLoaderRoute: typeof ApiBillingMercadopagoStartProRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/billing/mercadopago/webhook': {
       id: '/api/billing/mercadopago/webhook'
       path: '/api/billing/mercadopago/webhook'
@@ -874,6 +895,7 @@ const rootRouteChildren: RootRouteChildren = {
   QPublicIdRoute: QPublicIdRoute,
   VsLinktreeRoute: VsLinktreeRoute,
   PgASlugRoute: PgASlugRoute,
+  ApiBillingMercadopagoStartProRoute: ApiBillingMercadopagoStartProRoute,
   ApiBillingMercadopagoWebhookRoute: ApiBillingMercadopagoWebhookRoute,
 }
 export const routeTree = rootRouteImport
