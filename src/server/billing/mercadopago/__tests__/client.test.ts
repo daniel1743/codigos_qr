@@ -275,3 +275,205 @@ describe("MP-M1 · client · environment configuration", () => {
     expect(resolved.accessToken).toBeNull();
   });
 });
+
+/* ================== MP-M3B · client · POST (the one write) ================= */
+
+const POST_BODY = { reason: "Cripqer Pro", back_url: "https://cripqer.test/suscripcion" };
+
+describe("MP-M3B · client · POST", () => {
+  it("POSTs the JSON body with the Bearer token and an explicit Content-Type", async () => {
+    const fetchMock = stubFetch(async () => jsonResponse({ id: "PLAN1", status: "active" }));
+
+    const result = await createMercadoPagoClient(config()).postJson("/preapproval_plan", POST_BODY);
+
+    expect(result).toEqual({ id: "PLAN1", status: "active" });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe(`${MERCADOPAGO_API_BASE_URL}/preapproval_plan`);
+    expect(init.method).toBe("POST");
+    expect(init.body).toBe(JSON.stringify(POST_BODY));
+    const headers = init.headers as Record<string, string>;
+    expect(headers["Authorization"]).toBe(`Bearer ${TOKEN}`);
+    expect(headers["Content-Type"]).toBe("application/json");
+  });
+
+  it("leaves GET exactly as it was: no body and no Content-Type", async () => {
+    const fetchMock = stubFetch(async () => jsonResponse({ ok: true }));
+
+    await createMercadoPagoClient(config()).getJson("/preapproval/PRE1");
+
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(init.method).toBe("GET");
+    expect(init.body).toBeUndefined();
+    expect((init.headers as Record<string, string>)["Content-Type"]).toBeUndefined();
+  });
+
+  it("fails before any request when the access token is missing", async () => {
+    const fetchMock = stubFetch(async () => jsonResponse({}));
+
+    const error = await captureError(() =>
+      createMercadoPagoClient(config({ accessToken: null })).postJson(
+        "/preapproval_plan",
+        POST_BODY,
+      ),
+    );
+
+    expect(error.code).toBe("MISSING_ACCESS_TOKEN");
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("maps 401 and 403 to UNAUTHORIZED carrying the status", async () => {
+    for (const status of [401, 403]) {
+      stubFetch(async () => jsonResponse({}, status));
+
+      const error = await captureError(() =>
+        createMercadoPagoClient(config()).postJson("/preapproval_plan", POST_BODY),
+      );
+
+      expect(error.code).toBe("UNAUTHORIZED");
+      expect(error.status).toBe(status);
+    }
+  });
+
+  it("maps 404 to NOT_FOUND", async () => {
+    stubFetch(async () => jsonResponse({}, 404));
+
+    const error = await captureError(() =>
+      createMercadoPagoClient(config()).postJson("/preapproval_plan", POST_BODY),
+    );
+
+    expect(error.code).toBe("NOT_FOUND");
+    expect(error.status).toBe(404);
+  });
+
+  it("maps 409 to HTTP_ERROR carrying the status, with no invented conflict semantics", async () => {
+    stubFetch(async () => jsonResponse({}, 409));
+
+    const error = await captureError(() =>
+      createMercadoPagoClient(config()).postJson("/preapproval_plan", POST_BODY),
+    );
+
+    expect(error.code).toBe("HTTP_ERROR");
+    expect(error.status).toBe(409);
+  });
+
+  it("maps 429 to HTTP_ERROR carrying the status", async () => {
+    stubFetch(async () => jsonResponse({}, 429));
+
+    const error = await captureError(() =>
+      createMercadoPagoClient(config()).postJson("/preapproval_plan", POST_BODY),
+    );
+
+    expect(error.code).toBe("HTTP_ERROR");
+    expect(error.status).toBe(429);
+  });
+
+  it("maps 5xx to HTTP_ERROR carrying the status", async () => {
+    stubFetch(async () => jsonResponse({}, 503));
+
+    const error = await captureError(() =>
+      createMercadoPagoClient(config()).postJson("/preapproval_plan", POST_BODY),
+    );
+
+    expect(error.code).toBe("HTTP_ERROR");
+    expect(error.status).toBe(503);
+  });
+
+  it("times out explicitly instead of hanging", async () => {
+    stubFetch(
+      (_url, init) =>
+        new Promise<Response>((_resolve, reject) => {
+          init?.signal?.addEventListener("abort", () => {
+            const aborted = new Error("aborted");
+            aborted.name = "AbortError";
+            reject(aborted);
+          });
+        }),
+    );
+
+    const error = await captureError(() =>
+      createMercadoPagoClient(config({ timeoutMs: 5 })).postJson("/preapproval_plan", POST_BODY),
+    );
+
+    expect(error.code).toBe("TIMEOUT");
+    expect(error.status).toBeNull();
+  });
+
+  it("maps a transport failure to NETWORK_ERROR", async () => {
+    stubFetch(async () => {
+      throw new Error("socket closed");
+    });
+
+    const error = await captureError(() =>
+      createMercadoPagoClient(config()).postJson("/preapproval_plan", POST_BODY),
+    );
+
+    expect(error.code).toBe("NETWORK_ERROR");
+  });
+
+  it("rejects a response body that is not JSON", async () => {
+    stubFetch(async () => new Response("<html>gateway</html>", { status: 201 }));
+
+    const error = await captureError(() =>
+      createMercadoPagoClient(config()).postJson("/preapproval_plan", POST_BODY),
+    );
+
+    expect(error.code).toBe("INVALID_JSON");
+  });
+
+  it("rejects a JSON response that is not an object", async () => {
+    stubFetch(async () => jsonResponse([{ id: "PLAN1" }]));
+
+    const error = await captureError(() =>
+      createMercadoPagoClient(config()).postJson("/preapproval_plan", POST_BODY),
+    );
+
+    expect(error.code).toBe("INVALID_JSON");
+  });
+
+  it("keeps the token out of every POST error message", async () => {
+    const cases: Array<() => Promise<Response>> = [
+      async () => jsonResponse({}, 401),
+      async () => jsonResponse({}, 409),
+      async () => jsonResponse({}, 429),
+      async () => jsonResponse({}, 503),
+      async () => new Response("not json", { status: 200 }),
+    ];
+
+    for (const responder of cases) {
+      stubFetch(responder);
+      const error = await captureError(() =>
+        createMercadoPagoClient(config()).postJson("/preapproval_plan", POST_BODY),
+      );
+      expect(error.message).not.toContain(TOKEN);
+      expect(JSON.stringify({ ...error, message: error.message })).not.toContain(TOKEN);
+    }
+  });
+
+  it("does not surface the provider error body", async () => {
+    const marker = "PROVIDER_BODY_MARKER_must_not_surface";
+    stubFetch(async () => new Response(JSON.stringify({ detail: marker }), { status: 500 }));
+
+    const error = await captureError(() =>
+      createMercadoPagoClient(config()).postJson("/preapproval_plan", POST_BODY),
+    );
+
+    expect(error.message).not.toContain(marker);
+  });
+
+  it("writes nothing to the console on the POST paths", async () => {
+    const spies = (["log", "info", "warn", "error", "debug"] as const).map((method) =>
+      vi.spyOn(console, method).mockImplementation(() => undefined),
+    );
+
+    stubFetch(async () => jsonResponse({ id: "PLAN1" }));
+    await createMercadoPagoClient(config()).postJson("/preapproval_plan", POST_BODY);
+
+    stubFetch(async () => jsonResponse({}, 401));
+    await captureError(() =>
+      createMercadoPagoClient(config()).postJson("/preapproval_plan", POST_BODY),
+    );
+
+    for (const spy of spies) expect(spy).not.toHaveBeenCalled();
+  });
+});

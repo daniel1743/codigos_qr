@@ -20,6 +20,15 @@ import type { MercadoPagoConfig } from "./types.ts";
  *     through a debug line.
  *   · No error body. A non-2xx body is never read into the error: it can echo
  *     request context and none of it is needed to classify the failure.
+ *
+ * WRITES (MP-M3B)
+ * MP-M3B adds exactly one write capability: `postJson`, used to provision the
+ * remote PRO plan in a single, deliberate operator action. It is not a general
+ * mutation surface — no retry, no background caller, and nothing imports it
+ * automatically. Reads and writes share one implementation, so the token is
+ * attached in one place, the timeout armed in one place and a failure
+ * classified in one place — and a GET is the same request it was before
+ * `postJson` existed.
  */
 
 export const MERCADOPAGO_API_BASE_URL = "https://api.mercadopago.com";
@@ -32,6 +41,12 @@ export const DEFAULT_MERCADOPAGO_TIMEOUT_MS = 8000;
 export type MercadoPagoErrorCode =
   /** No access token is configured. Nothing was sent. */
   | "MISSING_ACCESS_TOKEN"
+  /**
+   * Raised LOCALLY, before any request: this adapter refuses to send what it
+   * was asked to send (e.g. a PRO plan request with no usable return URL).
+   * Never produced by a provider response.
+   */
+  | "INVALID_REQUEST"
   /** 401/403 — credentials rejected. */
   | "UNAUTHORIZED"
   /** 404 — the resource does not exist (or is not visible to this token). */
@@ -82,6 +97,25 @@ export interface MercadoPagoClient {
   getJson(path: string): Promise<unknown>;
 }
 
+/**
+ * A client that can also WRITE.
+ *
+ * Kept separate from `MercadoPagoClient` on purpose: a consumer that only needs
+ * to read keeps depending on the read-only type, so an accidental mutation in a
+ * read path is a type error rather than a production surprise. MP-M3B has
+ * exactly one consumer of this type — the PRO plan provisioning function — and
+ * nothing in the application calls it automatically.
+ */
+export interface MercadoPagoWriteClient extends MercadoPagoClient {
+  /**
+   * Authenticated POST sending `body` as JSON, returning the parsed JSON body.
+   *
+   * Same failure discipline as `getJson`. The client does not interpret the
+   * payload: it serializes what it is given and classifies what comes back.
+   */
+  postJson(path: string, body: unknown): Promise<unknown>;
+}
+
 function isAbortError(error: unknown): boolean {
   return error instanceof Error && (error.name === "AbortError" || error.name === "TimeoutError");
 }
@@ -93,93 +127,114 @@ function isAbortError(error: unknown): boolean {
  * the caller can read back, never interpolated into a message, and never
  * returned. A missing token fails BEFORE any request is attempted, so a
  * half-configured deployment cannot produce an unauthenticated call.
+ *
+ * Reads and writes run through the same `requestJson`: identical timeout,
+ * identical error classification, identical header discipline. A GET carries no
+ * body and no `Content-Type` — those appear only when a body is sent.
  */
-export function createMercadoPagoClient(config: MercadoPagoConfig): MercadoPagoClient {
+export function createMercadoPagoClient(config: MercadoPagoConfig): MercadoPagoWriteClient {
   const baseUrl = (config.baseUrl ?? MERCADOPAGO_API_BASE_URL).replace(/\/+$/, "");
   const timeoutMs = config.timeoutMs ?? DEFAULT_MERCADOPAGO_TIMEOUT_MS;
 
-  return {
-    async getJson(path: string): Promise<unknown> {
-      const token = config.accessToken;
-      if (typeof token !== "string" || token.trim() === "") {
+  async function requestJson(
+    method: "GET" | "POST",
+    path: string,
+    body?: unknown,
+  ): Promise<unknown> {
+    const token = config.accessToken;
+    if (typeof token !== "string" || token.trim() === "") {
+      throw new MercadoPagoError(
+        "MISSING_ACCESS_TOKEN",
+        "Mercado Pago access token is not configured.",
+      );
+    }
+
+    const url = `${baseUrl}${path.startsWith("/") ? path : `/${path}`}`;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    };
+    let payload: string | undefined;
+    if (body !== undefined) {
+      headers["Content-Type"] = "application/json";
+      payload = JSON.stringify(body);
+    }
+
+    try {
+      const init: RequestInit = { method, headers, signal: controller.signal };
+      if (payload !== undefined) init.body = payload;
+
+      const response = await fetch(url, init);
+
+      if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+          throw new MercadoPagoError(
+            "UNAUTHORIZED",
+            "Mercado Pago rejected the configured credentials.",
+            response.status,
+          );
+        }
+        if (response.status === 404) {
+          throw new MercadoPagoError("NOT_FOUND", "Mercado Pago resource not found.", 404);
+        }
         throw new MercadoPagoError(
-          "MISSING_ACCESS_TOKEN",
-          "Mercado Pago access token is not configured.",
+          "HTTP_ERROR",
+          `Mercado Pago responded with HTTP ${response.status}.`,
+          response.status,
         );
       }
 
-      const url = `${baseUrl}${path.startsWith("/") ? path : `/${path}`}`;
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      const text = await response.text();
 
+      let parsed: unknown;
       try {
-        const response = await fetch(url, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: "application/json",
-          },
-          signal: controller.signal,
-        });
-
-        if (!response.ok) {
-          if (response.status === 401 || response.status === 403) {
-            throw new MercadoPagoError(
-              "UNAUTHORIZED",
-              "Mercado Pago rejected the configured credentials.",
-              response.status,
-            );
-          }
-          if (response.status === 404) {
-            throw new MercadoPagoError("NOT_FOUND", "Mercado Pago resource not found.", 404);
-          }
-          throw new MercadoPagoError(
-            "HTTP_ERROR",
-            `Mercado Pago responded with HTTP ${response.status}.`,
-            response.status,
-          );
-        }
-
-        const text = await response.text();
-
-        let parsed: unknown;
-        try {
-          parsed = JSON.parse(text);
-        } catch {
-          throw new MercadoPagoError(
-            "INVALID_JSON",
-            "Mercado Pago returned a body that is not JSON.",
-            response.status,
-          );
-        }
-
-        if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
-          throw new MercadoPagoError(
-            "INVALID_JSON",
-            "Mercado Pago returned JSON that is not an object.",
-            response.status,
-          );
-        }
-
-        return parsed;
-      } catch (error) {
-        // Typed failures keep their classification; everything else is
-        // classified here so no raw fetch error escapes with a token-bearing
-        // request object attached to it.
-        if (error instanceof MercadoPagoError) throw error;
-        if (isAbortError(error)) {
-          throw new MercadoPagoError(
-            "TIMEOUT",
-            `Mercado Pago request timed out after ${timeoutMs}ms.`,
-          );
-        }
+        parsed = JSON.parse(text);
+      } catch {
         throw new MercadoPagoError(
-          "NETWORK_ERROR",
-          "Mercado Pago request failed before a response was received.",
+          "INVALID_JSON",
+          "Mercado Pago returned a body that is not JSON.",
+          response.status,
         );
-      } finally {
-        clearTimeout(timer);
       }
+
+      if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
+        throw new MercadoPagoError(
+          "INVALID_JSON",
+          "Mercado Pago returned JSON that is not an object.",
+          response.status,
+        );
+      }
+
+      return parsed;
+    } catch (error) {
+      // Typed failures keep their classification; everything else is
+      // classified here so no raw fetch error escapes with a token-bearing
+      // request object attached to it.
+      if (error instanceof MercadoPagoError) throw error;
+      if (isAbortError(error)) {
+        throw new MercadoPagoError(
+          "TIMEOUT",
+          `Mercado Pago request timed out after ${timeoutMs}ms.`,
+        );
+      }
+      throw new MercadoPagoError(
+        "NETWORK_ERROR",
+        "Mercado Pago request failed before a response was received.",
+      );
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  return {
+    getJson(path: string): Promise<unknown> {
+      return requestJson("GET", path);
+    },
+    postJson(path: string, body: unknown): Promise<unknown> {
+      return requestJson("POST", path, body);
     },
   };
 }

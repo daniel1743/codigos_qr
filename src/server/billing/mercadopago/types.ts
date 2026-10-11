@@ -86,6 +86,33 @@ export interface MercadoPagoPreapprovalResource {
 }
 
 /**
+ * `POST /preapproval_plan` (creation) and `GET /preapproval_plan/{id}`.
+ *
+ * The plan is the template a preapproval is created from, and `id` is the value
+ * `MERCADOPAGO_PRO_PLAN_ID` must hold — the same value the canonical normalizer
+ * later sees as `preapproval_plan_id`. Shape confirmed against Mercado Pago's
+ * own reference for `POST /preapproval_plan`, which documents the response as
+ * carrying `id`, `status` (example: `"active"`), `init_point` and the echoed
+ * request fields. Nothing here is parsed strictly at runtime: the creation path
+ * narrows defensively and fails closed when `id` is absent or unusable.
+ */
+export interface MercadoPagoPreapprovalPlanResource {
+  /** The id to configure as `MERCADOPAGO_PRO_PLAN_ID`. */
+  id?: string;
+  /** `active` on creation; `cancelled` once the owner deactivates the plan. */
+  status?: string;
+  /** Shown to the subscriber at checkout — Cripqer sends `"Cripqer Pro"`. */
+  reason?: string;
+  /** Subscription checkout URL derived from this plan id. */
+  init_point?: string;
+  back_url?: string;
+  auto_recurring?: MercadoPagoAutoRecurring | null;
+  external_reference?: string | null;
+  date_created?: string | null;
+  last_modified?: string | null;
+}
+
+/**
  * `GET /authorized_payments/{id}` — a charge attempt made under a preapproval.
  *
  * It carries NO subscription status of its own; `preapproval_id` is the only
