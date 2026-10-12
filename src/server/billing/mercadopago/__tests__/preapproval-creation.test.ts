@@ -6,16 +6,19 @@ import {
   type MercadoPagoWriteClient,
 } from "../client";
 import {
+  buildUserPreapprovalPath,
   buildUserPreapprovalRequestBody,
   createMercadoPagoUserPreapproval,
+  MERCADOPAGO_AUTHORIZED_STATUS,
   MERCADOPAGO_PREAPPROVAL_PATH,
-  readPreapprovalInitPoint,
+  readUserPreapprovalCheckoutUrl,
   readUserPreapprovalId,
+  readUserPreapprovalStatus,
   UserPreapprovalResponseError,
 } from "../preapproval-creation";
 
 /**
- * MP-M3C · MERCADO PAGO USER PREAPPROVAL PROVISIONING — the provider half.
+ * MP-M3C / MP-M3D.7 · MERCADO PAGO USER PREAPPROVAL PROVISIONING — the provider half.
  *
  * This module is the ONLY place in Billing that can bind a real subscription to
  * a real payer, so the properties pinned here are the ones whose failure costs a
@@ -23,11 +26,29 @@ import {
  *
  *   · the request is a PLAN subscription — the money terms live in the plan and
  *     are not restated here, and the browser can never supply one;
- *   · nothing is sent unless the plan id, the payer email and (if present) the
- *     return URL are all usable;
- *   · a response is only accepted when it yields BOTH a subscription id and an
- *     https checkout URL, and when it does not, the error CARRIES whatever id
- *     could be read so a human can find the subscription that may exist.
+ *   · the request carries the payment instrument the provider demands
+ *     (`card_token_id`) and the creation status it demands (`authorized`), and
+ *     those two are the ONLY keys this phase added;
+ *   · nothing is sent unless the plan id, the payer email, the card token and
+ *     (if present) the return URL are all usable;
+ *   · the card token never appears in a thrown error, a message or a
+ *     stringified failure;
+ *   · a response is only accepted when it yields a subscription id, and when it
+ *     does not, the error CARRIES whatever id could be read so a human can find
+ *     the subscription that may exist.
+ *
+ * WHAT MP-M3D.7 INVERTED HERE, AND WHY
+ * Two properties in this file used to assert the OPPOSITE, and they were not
+ * wrong by accident — they encoded a belief that the provider would create a
+ * `pending` subscription for a caller who sent no payment material. MP-M3D.5
+ * captured Mercado Pago answering `400 "card_token_id is required"` and MP-M3D.6
+ * established from the official guide that `status: authorized` is required with
+ * a plan. So the two tests that demanded the ABSENCE of those fields now demand
+ * their PRESENCE, and the test that treated a missing checkout URL as a critical
+ * failure now treats it as an acceptable success — because the subscription is
+ * already authorized in the browser and there is nothing left to redirect to.
+ * Each inversion is marked below with `INVERTED IN MP-M3D.7` so a reader can see
+ * exactly which beliefs changed and which ones still hold.
  *
  * NOTHING HERE TOUCHES THE NETWORK. Global fetch is replaced with a landmine for
  * the whole file, so a test that accidentally reached the provider would fail
@@ -39,10 +60,27 @@ const PAYER_EMAIL = "user@example.com";
 const BACK_URL = "https://cripqer.test/suscripcion";
 const CHECKOUT_URL = `https://www.mercadopago.cl/subscriptions/checkout?preapproval_id=SUB1`;
 
+/**
+ * A deliberately non-realistic token fixture.
+ *
+ * Mercado Pago's real tokens are short opaque alphanumerics; this string is a
+ * sentence-shaped sentinel so that no reader, scanner or secret-detector can
+ * mistake a test fixture for captured payment material.
+ */
+const CARD_TOKEN = "fixture_card_token_mp_m3d7_not_a_real_token";
+
 /** The exact body the live request must carry. A literal, on purpose. */
 const EXPECTED_BODY = {
   preapproval_plan_id: PLAN_ID,
   payer_email: PAYER_EMAIL,
+  card_token_id: CARD_TOKEN,
+  status: "authorized",
+};
+
+const CREATION_OPTIONS = {
+  preapprovalPlanId: PLAN_ID,
+  payerEmail: PAYER_EMAIL,
+  cardTokenId: CARD_TOKEN,
 };
 
 let realFetch: typeof fetch;
@@ -91,38 +129,46 @@ describe("MP-M3C · user preapproval · the body is a plan subscription", () => 
   });
 
   it("builds the exact request Mercado Pago must receive", () => {
-    expect(
-      buildUserPreapprovalRequestBody({ preapprovalPlanId: PLAN_ID, payerEmail: PAYER_EMAIL }),
-    ).toEqual(EXPECTED_BODY);
+    expect(buildUserPreapprovalRequestBody(CREATION_OPTIONS)).toEqual(EXPECTED_BODY);
   });
 
-  it("sends exactly two top-level keys, and three when a return URL is configured", () => {
-    expect(
-      Object.keys(
-        buildUserPreapprovalRequestBody({ preapprovalPlanId: PLAN_ID, payerEmail: PAYER_EMAIL }),
-      ).sort(),
-    ).toEqual(["payer_email", "preapproval_plan_id"]);
+  it("sends exactly four top-level keys, and five when a return URL is configured", () => {
+    expect(Object.keys(buildUserPreapprovalRequestBody(CREATION_OPTIONS)).sort()).toEqual([
+      "card_token_id",
+      "payer_email",
+      "preapproval_plan_id",
+      "status",
+    ]);
 
     expect(
       Object.keys(
-        buildUserPreapprovalRequestBody({
-          preapprovalPlanId: PLAN_ID,
-          payerEmail: PAYER_EMAIL,
-          backUrl: BACK_URL,
-        }),
+        buildUserPreapprovalRequestBody({ ...CREATION_OPTIONS, backUrl: BACK_URL }),
       ).sort(),
-    ).toEqual(["back_url", "payer_email", "preapproval_plan_id"]);
+    ).toEqual(["back_url", "card_token_id", "payer_email", "preapproval_plan_id", "status"]);
   });
 
-  it("never restates the money: no amount, currency, frequency, trial or status", () => {
-    const body = buildUserPreapprovalRequestBody({
-      preapprovalPlanId: PLAN_ID,
-      payerEmail: PAYER_EMAIL,
-      backUrl: BACK_URL,
-    });
+  it("carries the card token and the authorized status — the two fields MP-M3D.7 added", () => {
+    // INVERTED IN MP-M3D.7: this test used to assert that NEITHER field was
+    // present ("`status` is Mercado Pago's transition to make", "`card_token_id`
+    // would mean the server handling card data"). The provider refuses a
+    // with-plan creation without both, so their presence is now the property.
+    const body = buildUserPreapprovalRequestBody(CREATION_OPTIONS);
+
+    expect(body.card_token_id).toBe(CARD_TOKEN);
+    expect(body.status).toBe("authorized");
+    // The status is a constant, not a caller's choice: the builder accepts no
+    // status argument, and the exported constant is the only value the type
+    // admits.
+    expect(MERCADOPAGO_AUTHORIZED_STATUS).toBe("authorized");
+  });
+
+  it("never restates the money: no amount, currency, frequency or trial", () => {
+    const body = buildUserPreapprovalRequestBody({ ...CREATION_OPTIONS, backUrl: BACK_URL });
 
     // A plan subscription takes its recurring settings FROM THE PLAN, so a
     // second copy of the price here could only drift from the frozen contract.
+    // `status` is deliberately NOT on this list any more (MP-M3D.7): it is not a
+    // money term, and the provider requires it.
     for (const forbidden of [
       "auto_recurring",
       "transaction_amount",
@@ -136,39 +182,43 @@ describe("MP-M3C · user preapproval · the body is a plan subscription", () => 
     }
   });
 
-  it("never asserts a status and never touches card data or provider metadata", () => {
-    const body = buildUserPreapprovalRequestBody({
-      preapprovalPlanId: PLAN_ID,
-      payerEmail: PAYER_EMAIL,
-    });
+  it("still refuses to send provider metadata that is never an ownership authority", () => {
+    const body = buildUserPreapprovalRequestBody(CREATION_OPTIONS);
 
-    // `status` is Mercado Pago's transition to make (a subscription without a
-    // payment method is `pending`); `card_token_id` would mean the server
-    // handling card data; `external_reference` is never an ownership authority.
-    for (const forbidden of ["status", "card_token_id", "external_reference", "payer_id"]) {
+    for (const forbidden of ["external_reference", "payer_id"]) {
       expect(Object.keys(body)).not.toContain(forbidden);
     }
   });
 
   it("ignores any extra field a loose caller tries to smuggle in", () => {
+    // The builder takes named options and reads only those, so a call that ALSO
+    // passes the raw provider field names must not be able to write them into
+    // the body. This is the closest a caller can get to hand-crafting the
+    // payload, and it changes nothing.
     const smuggled = {
-      preapprovalPlanId: PLAN_ID,
-      payerEmail: PAYER_EMAIL,
+      ...CREATION_OPTIONS,
       amount: 1,
       currency: "USD",
-      status: "authorized",
-      cardTokenId: "TOKEN",
+      status: "cancelled",
+      card_token_id: "attacker_supplied_token",
+      preapproval_plan_id: "attacker_supplied_plan",
       externalReference: "user_other",
+      payer_id: "999",
       autoRecurring: { transaction_amount: 1 },
     };
 
-    expect(buildUserPreapprovalRequestBody(smuggled)).toEqual(EXPECTED_BODY);
+    const body = buildUserPreapprovalRequestBody(smuggled);
+
+    expect(body).toEqual(EXPECTED_BODY);
+    expect(JSON.stringify(body)).not.toContain("attacker_supplied");
+    expect(JSON.stringify(body)).not.toContain("USD");
   });
 
-  it("trims the plan id and the payer email, leaving nothing else to guess", () => {
+  it("trims the plan id, the payer email and the token, leaving nothing else to guess", () => {
     const body = buildUserPreapprovalRequestBody({
       preapprovalPlanId: `  ${PLAN_ID}  `,
       payerEmail: `  ${PAYER_EMAIL}  `,
+      cardTokenId: `  ${CARD_TOKEN}  `,
     });
 
     expect(body).toEqual(EXPECTED_BODY);
@@ -176,15 +226,20 @@ describe("MP-M3C · user preapproval · the body is a plan subscription", () => 
 
   it("omits the return URL when it is empty or blank", () => {
     for (const backUrl of [null, "", "   "]) {
-      expect(
-        buildUserPreapprovalRequestBody({
-          preapprovalPlanId: PLAN_ID,
-          payerEmail: PAYER_EMAIL,
-          backUrl,
-        }),
-      ).toEqual(EXPECTED_BODY);
+      expect(buildUserPreapprovalRequestBody({ ...CREATION_OPTIONS, backUrl })).toEqual(
+        EXPECTED_BODY,
+      );
     }
     // Absent entirely is the case the builder's own first test already covers.
+  });
+
+  it("builds a readback path that targets the SAME collection it creates into", () => {
+    // A readback pointed somewhere else would report the state of a resource
+    // this module never created, which is the quietest possible way to be wrong.
+    expect(buildUserPreapprovalPath("SUB1")).toBe("/preapproval/SUB1");
+    // The id comes from the provider, but "trusted origin" is not a reason to
+    // interpolate into a path unchecked.
+    expect(buildUserPreapprovalPath("a/b?c")).toBe("/preapproval/a%2Fb%3Fc");
   });
 });
 
@@ -192,10 +247,12 @@ describe("MP-M3C · user preapproval · the body is a plan subscription", () => 
 
 describe("MP-M3C · user preapproval · fails closed before any request", () => {
   const missingFields = [
-    { what: "a plan id", options: { preapprovalPlanId: "", payerEmail: PAYER_EMAIL } },
-    { what: "a plan id", options: { preapprovalPlanId: "   ", payerEmail: PAYER_EMAIL } },
-    { what: "a payer email", options: { preapprovalPlanId: PLAN_ID, payerEmail: "" } },
-    { what: "a payer email", options: { preapprovalPlanId: PLAN_ID, payerEmail: "  " } },
+    { what: "a plan id", options: { ...CREATION_OPTIONS, preapprovalPlanId: "" } },
+    { what: "a plan id", options: { ...CREATION_OPTIONS, preapprovalPlanId: "   " } },
+    { what: "a payer email", options: { ...CREATION_OPTIONS, payerEmail: "" } },
+    { what: "a payer email", options: { ...CREATION_OPTIONS, payerEmail: "  " } },
+    { what: "a card token", options: { ...CREATION_OPTIONS, cardTokenId: "" } },
+    { what: "a card token", options: { ...CREATION_OPTIONS, cardTokenId: "   " } },
   ];
 
   it.each(missingFields)("refuses a missing $what with a typed INVALID_REQUEST", ({ options }) => {
@@ -209,15 +266,42 @@ describe("MP-M3C · user preapproval · fails closed before any request", () => 
     }
   });
 
+  it("refuses a card token that is not a string, or is over the bound", () => {
+    for (const cardTokenId of [42, null, undefined, true, {}, [], "x".repeat(129)]) {
+      expect(() =>
+        buildUserPreapprovalRequestBody({
+          ...CREATION_OPTIONS,
+          cardTokenId: cardTokenId as unknown as string,
+        }),
+      ).toThrowError(MercadoPagoError);
+    }
+  });
+
+  it("NEVER echoes the card token in the error it raises for it", () => {
+    // The token is payment material on the path from an untrusted request to a
+    // log line. The one place it could leak from this module is the refusal
+    // message, so this is asserted directly rather than left to inspection.
+    const oversize = `SECRET_TOKEN_PREFIX_${"x".repeat(200)}`;
+    let caught: unknown;
+    try {
+      buildUserPreapprovalRequestBody({ ...CREATION_OPTIONS, cardTokenId: oversize });
+    } catch (error) {
+      caught = error;
+    }
+
+    expect(caught).toBeInstanceOf(MercadoPagoError);
+    const error = caught as MercadoPagoError;
+    const surface = `${error.message} ${error.name} ${JSON.stringify(error)} ${String(error)}`;
+    expect(surface).not.toContain("SECRET_TOKEN_PREFIX_");
+    // And it says what was missing, so the refusal is still diagnosable.
+    expect(error.message).toContain("card_token_id");
+  });
+
   it.each(["http://cripqer.test", "cripqer.test", "ftp://cripqer.test", "/checkout"])(
     "refuses the return URL %j",
     (backUrl) => {
       expect(() =>
-        buildUserPreapprovalRequestBody({
-          preapprovalPlanId: PLAN_ID,
-          payerEmail: PAYER_EMAIL,
-          backUrl,
-        }),
+        buildUserPreapprovalRequestBody({ ...CREATION_OPTIONS, backUrl }),
       ).toThrowError(MercadoPagoError);
     },
   );
@@ -226,16 +310,16 @@ describe("MP-M3C · user preapproval · fails closed before any request", () => 
     const { client, postJson } = fakeClient(async () => ({ id: "SUB1" }));
 
     await expect(
-      createMercadoPagoUserPreapproval(client, {
-        preapprovalPlanId: PLAN_ID,
-        payerEmail: "",
-      }),
+      createMercadoPagoUserPreapproval(client, { ...CREATION_OPTIONS, payerEmail: "" }),
+    ).rejects.toBeInstanceOf(MercadoPagoError);
+
+    await expect(
+      createMercadoPagoUserPreapproval(client, { ...CREATION_OPTIONS, cardTokenId: "" }),
     ).rejects.toBeInstanceOf(MercadoPagoError);
 
     await expect(
       createMercadoPagoUserPreapproval(client, {
-        preapprovalPlanId: PLAN_ID,
-        payerEmail: PAYER_EMAIL,
+        ...CREATION_OPTIONS,
         backUrl: "http://cripqer.test",
       }),
     ).rejects.toBeInstanceOf(MercadoPagoError);
@@ -251,12 +335,7 @@ describe("MP-M3C · user preapproval · fails closed before any request", () => 
       readMercadoPagoConfigFromEnv({ MERCADOPAGO_PRO_PLAN_ID: PLAN_ID }),
     );
 
-    const error = await captureError(() =>
-      createMercadoPagoUserPreapproval(client, {
-        preapprovalPlanId: PLAN_ID,
-        payerEmail: PAYER_EMAIL,
-      }),
-    );
+    const error = await captureError(() => createMercadoPagoUserPreapproval(client, CREATION_OPTIONS));
 
     expect(error.code).toBe("MISSING_ACCESS_TOKEN");
     expect(error.status).toBeNull();
@@ -269,22 +348,25 @@ describe("MP-M3C · user preapproval · fails closed before any request", () => 
 describe("MP-M3C · user preapproval · creation", () => {
   const CREATED = {
     id: "SUB1",
-    status: "pending",
+    status: "authorized",
     preapproval_plan_id: PLAN_ID,
     init_point: CHECKOUT_URL,
   };
 
-  it("posts the exact body once and returns the id with the checkout URL", async () => {
+  it("posts the exact body once and returns the id, the status and the checkout URL", async () => {
     const { client, postJson, getJson } = fakeClient(async () => CREATED);
 
-    const result = await createMercadoPagoUserPreapproval(client, {
-      preapprovalPlanId: PLAN_ID,
-      payerEmail: PAYER_EMAIL,
-    });
+    const result = await createMercadoPagoUserPreapproval(client, CREATION_OPTIONS);
 
-    expect(result).toEqual({ preapprovalId: "SUB1", initPoint: CHECKOUT_URL });
+    expect(result).toEqual({
+      preapprovalId: "SUB1",
+      providerStatus: "authorized",
+      checkoutUrl: CHECKOUT_URL,
+    });
     expect(postJson).toHaveBeenCalledTimes(1);
     expect(postJson).toHaveBeenCalledWith(MERCADOPAGO_PREAPPROVAL_PATH, EXPECTED_BODY);
+    // The readback belongs to the FLOW, not to this module: creating must stay
+    // exactly one provider call.
     expect(getJson).not.toHaveBeenCalled();
     expect(fetchSpy).not.toHaveBeenCalled();
   });
@@ -292,11 +374,7 @@ describe("MP-M3C · user preapproval · creation", () => {
   it("sends the configured return URL when one is given", async () => {
     const { client, postJson } = fakeClient(async () => CREATED);
 
-    await createMercadoPagoUserPreapproval(client, {
-      preapprovalPlanId: PLAN_ID,
-      payerEmail: PAYER_EMAIL,
-      backUrl: BACK_URL,
-    });
+    await createMercadoPagoUserPreapproval(client, { ...CREATION_OPTIONS, backUrl: BACK_URL });
 
     expect(postJson).toHaveBeenCalledWith(MERCADOPAGO_PREAPPROVAL_PATH, {
       ...EXPECTED_BODY,
@@ -307,23 +385,15 @@ describe("MP-M3C · user preapproval · creation", () => {
   it("accepts a numeric id without losing the subscription that was created", async () => {
     const { client } = fakeClient(async () => ({ ...CREATED, id: 123456789 }));
 
-    const result = await createMercadoPagoUserPreapproval(client, {
-      preapprovalPlanId: PLAN_ID,
-      payerEmail: PAYER_EMAIL,
-    });
+    const result = await createMercadoPagoUserPreapproval(client, CREATION_OPTIONS);
 
     expect(result.preapprovalId).toBe("123456789");
   });
 
   it("fails closed when the response carries no usable id, warning it MAY exist", async () => {
-    const { client } = fakeClient(async () => ({ status: "pending", init_point: CHECKOUT_URL }));
+    const { client } = fakeClient(async () => ({ status: "authorized", init_point: CHECKOUT_URL }));
 
-    const error = await captureError(() =>
-      createMercadoPagoUserPreapproval(client, {
-        preapprovalPlanId: PLAN_ID,
-        payerEmail: PAYER_EMAIL,
-      }),
-    );
+    const error = await captureError(() => createMercadoPagoUserPreapproval(client, CREATION_OPTIONS));
 
     expect(error).toBeInstanceOf(UserPreapprovalResponseError);
     expect((error as UserPreapprovalResponseError).preapprovalId).toBeNull();
@@ -332,25 +402,32 @@ describe("MP-M3C · user preapproval · creation", () => {
     expect(error.message).toContain("before retrying");
   });
 
-  it("fails closed when the id is present but no usable checkout URL is", async () => {
+  it("SUCCEEDS when the id is present but no usable checkout URL is", async () => {
+    // INVERTED IN MP-M3D.7. This test used to demand a critical
+    // `UserPreapprovalResponseError` carrying the id. That was right when the
+    // flow EXISTED to hand the payer a redirect: without a URL there was nothing
+    // to do. The card is now tokenized in the browser and the subscription is
+    // created authorized, so the URL is a secondary "add or modify payment
+    // method" affordance — and reporting a healthy subscription as a critical
+    // failure would send a human chasing a resource that needs no recovery.
     for (const initPoint of [undefined, "", "http://mercadopago.test/x", "/checkout", 42]) {
-      const { client } = fakeClient(async () => ({ id: "SUB1", init_point: initPoint }));
+      const { client } = fakeClient(async () => ({ id: "SUB1", status: "authorized", init_point: initPoint }));
 
-      const error = await captureError(() =>
-        createMercadoPagoUserPreapproval(client, {
-          preapprovalPlanId: PLAN_ID,
-          payerEmail: PAYER_EMAIL,
-        }),
-      );
+      const result = await createMercadoPagoUserPreapproval(client, CREATION_OPTIONS);
 
-      expect(error).toBeInstanceOf(UserPreapprovalResponseError);
-      // The id is the whole point of this failure: a human must be able to find
-      // the subscription that now EXISTS remotely.
-      expect((error as UserPreapprovalResponseError).preapprovalId).toBe("SUB1");
-      expect(error.code).toBe("INVALID_JSON");
-      expect(error.message).toContain("SUB1");
-      expect(error.message).toContain("EXISTS remotely");
-      expect(error.message).toContain("must not be retried");
+      expect(result.preapprovalId).toBe("SUB1");
+      expect(result.providerStatus).toBe("authorized");
+      expect(result.checkoutUrl).toBeNull();
+    }
+  });
+
+  it("reports a missing provider status as null rather than inventing one", async () => {
+    for (const status of [undefined, "", "   ", 42, null, { status: "authorized" }]) {
+      const { client } = fakeClient(async () => ({ id: "SUB1", status, init_point: CHECKOUT_URL }));
+
+      const result = await createMercadoPagoUserPreapproval(client, CREATION_OPTIONS);
+
+      expect(result.providerStatus).toBeNull();
     }
   });
 
@@ -359,10 +436,7 @@ describe("MP-M3C · user preapproval · creation", () => {
       const { client } = fakeClient(async () => response);
 
       const error = await captureError(() =>
-        createMercadoPagoUserPreapproval(client, {
-          preapprovalPlanId: PLAN_ID,
-          payerEmail: PAYER_EMAIL,
-        }),
+        createMercadoPagoUserPreapproval(client, CREATION_OPTIONS),
       );
 
       expect(error.code).toBe("INVALID_JSON");
@@ -371,38 +445,25 @@ describe("MP-M3C · user preapproval · creation", () => {
   });
 
   it("propagates a provider rejection unchanged, without retrying", async () => {
-    const failure = new MercadoPagoError(
-      "HTTP_ERROR",
-      "Mercado Pago responded with HTTP 500.",
-      500,
-    );
+    const failure = new MercadoPagoError("HTTP_ERROR", "Mercado Pago responded with HTTP 500.", 500);
     const { client, postJson } = fakeClient(async () => {
       throw failure;
     });
 
-    const error = await captureError(() =>
-      createMercadoPagoUserPreapproval(client, {
-        preapprovalPlanId: PLAN_ID,
-        payerEmail: PAYER_EMAIL,
-      }),
-    );
+    const error = await captureError(() => createMercadoPagoUserPreapproval(client, CREATION_OPTIONS));
 
     expect(error).toBe(failure);
     expect(postJson).toHaveBeenCalledTimes(1);
   });
 
-  it("keeps the provider's response body out of the failure message", async () => {
+  it("keeps both the provider's response body and the card token out of the failure message", async () => {
     const marker = "PROVIDER_BODY_MARKER_must_not_surface";
     const { client } = fakeClient(async () => ({ message: marker, cause: marker }));
 
-    const error = await captureError(() =>
-      createMercadoPagoUserPreapproval(client, {
-        preapprovalPlanId: PLAN_ID,
-        payerEmail: PAYER_EMAIL,
-      }),
-    );
+    const error = await captureError(() => createMercadoPagoUserPreapproval(client, CREATION_OPTIONS));
 
     expect(error.message).not.toContain(marker);
+    expect(`${error.message} ${JSON.stringify(error)}`).not.toContain(CARD_TOKEN);
   });
 
   it("writes nothing to the console", async () => {
@@ -411,20 +472,21 @@ describe("MP-M3C · user preapproval · creation", () => {
     );
 
     const { client } = fakeClient(async () => CREATED);
-    await createMercadoPagoUserPreapproval(client, {
-      preapprovalPlanId: PLAN_ID,
-      payerEmail: PAYER_EMAIL,
-    });
+    await createMercadoPagoUserPreapproval(client, CREATION_OPTIONS);
 
-    const failing = fakeClient(async () => ({ status: "pending" }));
-    await captureError(() =>
-      createMercadoPagoUserPreapproval(failing.client, {
-        preapprovalPlanId: PLAN_ID,
-        payerEmail: PAYER_EMAIL,
-      }),
-    );
+    const failing = fakeClient(async () => ({ status: "authorized" }));
+    await captureError(() => createMercadoPagoUserPreapproval(failing.client, CREATION_OPTIONS));
 
     for (const spy of spies) expect(spy).not.toHaveBeenCalled();
+  });
+
+  it("no successful result holds the card token in any field", async () => {
+    const { client } = fakeClient(async () => CREATED);
+
+    const result = await createMercadoPagoUserPreapproval(client, CREATION_OPTIONS);
+
+    expect(JSON.stringify(result)).not.toContain(CARD_TOKEN);
+    expect(Object.values(result)).not.toContain(CARD_TOKEN);
   });
 });
 
@@ -458,15 +520,31 @@ describe("MP-M3C · user preapproval · defensive reads", () => {
   });
 
   it("accepts only an absolute https checkout URL", () => {
-    expect(readPreapprovalInitPoint({ init_point: CHECKOUT_URL })).toBe(CHECKOUT_URL);
-    expect(readPreapprovalInitPoint({ init_point: `  ${CHECKOUT_URL}  ` })).toBe(CHECKOUT_URL);
-    // `init_point` is handed to a browser as a redirect target, so anything
+    expect(readUserPreapprovalCheckoutUrl({ init_point: CHECKOUT_URL })).toBe(CHECKOUT_URL);
+    expect(readUserPreapprovalCheckoutUrl({ init_point: `  ${CHECKOUT_URL}  ` })).toBe(
+      CHECKOUT_URL,
+    );
+    // The URL can be handed to a browser as a navigation target, so anything
     // that is not https is refused here rather than navigated to later.
-    expect(readPreapprovalInitPoint({ init_point: "http://mercadopago.test/x" })).toBeNull();
-    expect(readPreapprovalInitPoint({ init_point: "mercadopago.test/x" })).toBeNull();
-    expect(readPreapprovalInitPoint({ init_point: "javascript:alert(1)" })).toBeNull();
-    expect(readPreapprovalInitPoint({ init_point: 42 })).toBeNull();
-    expect(readPreapprovalInitPoint({})).toBeNull();
-    expect(readPreapprovalInitPoint(null)).toBeNull();
+    expect(readUserPreapprovalCheckoutUrl({ init_point: "http://mercadopago.test/x" })).toBeNull();
+    expect(readUserPreapprovalCheckoutUrl({ init_point: "mercadopago.test/x" })).toBeNull();
+    expect(readUserPreapprovalCheckoutUrl({ init_point: "javascript:alert(1)" })).toBeNull();
+    expect(readUserPreapprovalCheckoutUrl({ init_point: 42 })).toBeNull();
+    expect(readUserPreapprovalCheckoutUrl({})).toBeNull();
+    expect(readUserPreapprovalCheckoutUrl(null)).toBeNull();
+  });
+
+  it("reads the provider status as bounded opaque text, never as a validated enum", () => {
+    expect(readUserPreapprovalStatus({ status: "authorized" })).toBe("authorized");
+    expect(readUserPreapprovalStatus({ status: "  pending  " })).toBe("pending");
+    // An unrecognised status is passed through as text on purpose: the canonical
+    // mapping lives in `webhooks.ts`, and a second list here would be a second
+    // thing to drift.
+    expect(readUserPreapprovalStatus({ status: "some_future_status" })).toBe("some_future_status");
+
+    for (const status of [undefined, "", "   ", 42, null, {}, [], "x".repeat(65)]) {
+      expect(readUserPreapprovalStatus({ status })).toBeNull();
+    }
+    expect(readUserPreapprovalStatus(null)).toBeNull();
   });
 });

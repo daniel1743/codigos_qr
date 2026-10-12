@@ -16,6 +16,11 @@ import {
 } from "../client";
 import { createMercadoPagoPlanResolver } from "../plan";
 import {
+  CARD_TOKEN_ID_MAX_LENGTH,
+  readCardTokenFromBody,
+  START_PRO_ALLOWED_BODY_FIELDS,
+} from "../card-token";
+import {
   buildProSubscriptionOwnership,
   createCriticalPreapprovalLogSink,
   createProSubscriptionStartHandler,
@@ -33,10 +38,12 @@ import {
  * only exist for a user whose ownership correlation was written first, so the
  * tests below assert three things the directive makes non-negotiable:
  *
- *   1. the identity, the price and the plan come from the SERVER — the request
- *      body is never read, so nothing the browser sends can reach Mercado Pago;
- *   2. no checkout URL is ever handed over unless the correlation row is
- *      actually persisted, verified field by field;
+ *   1. the identity, the price and the plan come from the SERVER, and the ONE
+ *      field a browser may contribute — a `card_token_id` produced by Mercado
+ *      Pago's own client integration — cannot propose an owner, a price, a plan
+ *      or a status: a body that tries is refused whole;
+ *   2. nothing is reported as started unless the correlation row is actually
+ *      persisted, verified field by field;
  *   3. when the provider creates a subscription and the correlation cannot be
  *      written, the outcome is the critical classified state — never a retry,
  *      never a Pro grant, never a fake local row.
@@ -44,6 +51,15 @@ import {
  * The canonical cores are exercised for real: `applyNormalizedEvent` proves the
  * pending correlation resolves an OWNER, and `resolveEntitlement` proves the same
  * row grants NOTHING. Both run over doubles here, and the doubles call nothing.
+ *
+ * WHAT MP-M3D.7 CHANGED IN THIS FILE
+ * Assertion (1) used to read "the request body is never read". Mercado Pago
+ * requires `card_token_id` and `status: authorized` to attach a subscription to a
+ * plan (MP-M3D.6, confirmed by MP-M3D.5's captured `400`), so the body IS read
+ * now — but only through the frozen single-field contract in `card-token.ts`.
+ * Every place where this file used to prove "the browser cannot say anything" now
+ * proves the stronger, still-true thing: "the browser can say exactly one thing,
+ * and a body that says more is refused instead of filtered".
  *
  * Global fetch is a landmine for the whole file: no test in MP-M3C can create a
  * real subscription.
@@ -57,6 +73,18 @@ const SUBSCRIPTION_ID = "SUB1";
 const CHECKOUT_URL = `https://www.mercadopago.cl/subscriptions/checkout?preapproval_id=${SUBSCRIPTION_ID}`;
 const TOKEN_SENTINEL = "TEST_TOKEN_SENTINEL_must_not_leak";
 const SECRET_SENTINEL = "TEST_SECRET_SENTINEL_must_not_leak";
+
+/**
+ * The card token the browser is allowed to contribute — deliberately a
+ * sentence-shaped sentinel, so no reader or secret-scanner can mistake this
+ * fixture for captured payment material. The REAL flow receives this value from
+ * Mercado Pago's client integration inside the browser; here it is just the one
+ * string the contract admits.
+ */
+const CARD_TOKEN = "fixture_card_token_mp_m3d7_not_a_real_token";
+
+/** The provider status a plan subscription created with a card comes back as. */
+const PROVIDER_AUTHORIZED = "authorized";
 
 let realFetch: typeof fetch;
 let fetchSpy: ReturnType<typeof vi.fn>;
@@ -95,6 +123,17 @@ interface HarnessOptions {
   backUrl?: string | null;
   /** Inject a different client — used for the real no-token refusal. */
   client?: MercadoPagoWriteClient;
+  /**
+   * What the request body carries. `undefined` → the default single-field body
+   * with a valid token; a string → that token verbatim; `null` → no body at all.
+   */
+  cardToken?: string | null;
+  /** A raw body string, for contract violations the object form cannot express. */
+  rawBody?: string;
+  /** What the authoritative readback (`GET /preapproval/{id}`) answers with. */
+  readbackResponse?: unknown;
+  /** Raised by the readback, as a transport failure would be. */
+  readbackError?: Error | null;
 }
 
 interface HarnessState {
@@ -104,6 +143,8 @@ interface HarnessState {
   diagnostics: ProSubscriptionStartDiagnostic[];
   /** What the canonical "live subscription for this user" lookup would return. */
   live: BillingSubscriptionRecord | null;
+  /** Every path this client was asked to READ, in order. */
+  reads: string[];
 }
 
 function rowFrom(input: NormalizedSubscriptionInput): BillingSubscriptionRecord {
@@ -116,6 +157,7 @@ function makeHarness(options: HarnessOptions = {}) {
     posts: [],
     writes: [],
     diagnostics: [],
+    reads: [],
     live: options.liveSubscription ?? null,
   };
 
@@ -126,15 +168,25 @@ function makeHarness(options: HarnessOptions = {}) {
     return options.providerResponse === undefined
       ? {
           id: SUBSCRIPTION_ID,
-          status: "pending",
+          // A subscription created with a card token and `status: authorized`
+          // comes back authorized: that is what the provider was told to create.
+          status: PROVIDER_AUTHORIZED,
           preapproval_plan_id: PLAN_ID,
           init_point: CHECKOUT_URL,
         }
       : options.providerResponse;
   });
 
-  const getJson = vi.fn(async () => {
-    throw new Error("the start flow must never read from the provider");
+  // The ONE read this flow is allowed to make is the authoritative readback of
+  // the subscription it just created. Anything else reading the provider would
+  // be a second source of truth, so the default still throws and each test that
+  // wants a readback says so explicitly.
+  const getJson = vi.fn(async (path: string): Promise<unknown> => {
+    state.calls.push(`getJson:${path}`);
+    state.reads.push(path);
+    if (options.readbackError) throw options.readbackError;
+    if (options.readbackResponse !== undefined) return options.readbackResponse;
+    throw new Error("this test did not authorize a provider read");
   });
 
   const client: MercadoPagoWriteClient = options.client ?? { getJson, postJson };
@@ -183,21 +235,52 @@ function makeHarness(options: HarnessOptions = {}) {
     },
   };
 
+  // The body a REAL client build sends: exactly one field, the token Mercado
+  // Pago's own card fields produced. Tests that want a different body pass one.
+  const defaultBody =
+    options.rawBody !== undefined
+      ? options.rawBody
+      : options.cardToken === null
+        ? undefined
+        : JSON.stringify({ card_token_id: options.cardToken ?? CARD_TOKEN });
+
   return {
     deps,
     state,
     postJson,
     handler: createProSubscriptionStartHandler(deps),
-    request: (init: RequestInit = {}) =>
-      new Request("https://cripqer.test/api/billing/mercadopago/start-pro", {
-        method: PRO_SUBSCRIPTION_START_METHOD,
+    request: (init: RequestInit = {}) => {
+      const method = init.method ?? PRO_SUBSCRIPTION_START_METHOD;
+      // A GET/HEAD request cannot carry a body — `new Request` throws — and the
+      // method-gate test needs to reach the gate, not the constructor.
+      const withBody =
+        init.body === undefined && defaultBody !== undefined && method === PRO_SUBSCRIPTION_START_METHOD
+          ? { headers: { "content-type": "application/json" }, body: defaultBody }
+          : {};
+      return new Request("https://cripqer.test/api/billing/mercadopago/start-pro", {
+        method,
+        ...withBody,
         ...init,
-      }),
+      });
+    },
   };
 }
 
-/** The exact provider body the live request must carry. */
-const EXPECTED_PROVIDER_BODY = { preapproval_plan_id: PLAN_ID, payer_email: SESSION_EMAIL };
+/**
+ * The exact provider body the live request must carry.
+ *
+ * Four keys, and each one is load-bearing: the plan decides the price, the payer
+ * email decides who is charged, and — since MP-M3D.7 — the card token and the
+ * `authorized` status are what the provider requires to attach the subscription
+ * to the plan at all. A literal, on purpose: a computed expectation could drift
+ * with the code it is meant to judge.
+ */
+const EXPECTED_PROVIDER_BODY = {
+  preapproval_plan_id: PLAN_ID,
+  payer_email: SESSION_EMAIL,
+  card_token_id: CARD_TOKEN,
+  status: "authorized",
+};
 
 function billingUnauthorized(): Error {
   const error = new Error("Authentication is required.");
@@ -228,6 +311,11 @@ function firstDiagnostic(state: HarnessState): ProSubscriptionStartDiagnostic {
   const diagnostic = state.diagnostics[0];
   if (diagnostic === undefined) throw new Error("expected a diagnostic to be emitted");
   return diagnostic;
+}
+
+/** Every path the provider was asked to read. Asserted, never assumed. */
+function reads(state: HarnessState): string[] {
+  return state.reads;
 }
 
 /* ============================== 1 · identity ============================== */
@@ -261,47 +349,102 @@ describe("MP-M3C · start · the session is the only identity", () => {
     expect(unexpected.postJson).not.toHaveBeenCalled();
   });
 
-  it("2) the browser cannot choose the owner: a hostile body changes nothing", async () => {
+  it("2) the browser cannot choose the owner: a hostile body is refused whole", async () => {
+    // INVERTED IN MP-M3D.7. This test used to send this same body and expect a
+    // 200, with the extra fields silently dropped. Dropping was the friendly
+    // choice and it left the contract ambiguous: a body carrying `payer_email`
+    // was accepted, so the next reader could reasonably believe the field did
+    // something. The body is now refused ENTIRELY — including the token, which
+    // nobody gets to spend on a request that was going to be rejected anyway —
+    // so "what can the browser influence" has one auditable answer.
     const hostile = {
+      card_token_id: CARD_TOKEN,
       user_id: "user_attacker",
       payer_email: "attacker@evil.test",
       plan_id: "business",
       planId: "enterprise",
+      preapproval_plan_id: "PLAN_ATTACKER",
       amount: 1,
       currency: "USD",
       frequency: 12,
       free_trial: 0,
-      status: "authorized",
+      status: "cancelled",
       provider: "paypal",
       provider_subscription_id: "SUB_ATTACKER",
     };
+    const { handler, state, postJson, request } = makeHarness({
+      rawBody: JSON.stringify(hostile),
+    });
+
+    const response = await handler(request());
+
+    expect(response.status).toBe(400);
+    expect(await bodyOf(response)).toEqual({ status: "INVALID_REQUEST" });
+    // Nothing reached Mercado Pago, nothing was written, and the closed
+    // rejection category is on the DIAGNOSTIC rather than in the body.
+    expect(postJson).not.toHaveBeenCalled();
+    expect(state.writes).toEqual([]);
+    expect(reads(state)).toEqual([]);
+    expect(firstDiagnostic(state).reason).toBe("UNEXPECTED_FIELDS");
+    // The refusal names the category and never the set it was measured against.
+    expect(JSON.stringify(state.diagnostics)).not.toContain("attacker");
+  });
+
+  it("2a) with a valid token the owner, the plan and the price are still the server's", async () => {
+    // The complement of test 2, and the property that actually matters: when the
+    // browser sends the ONE field it is allowed to send, the request that leaves
+    // carries the session's identity and the configured plan — nothing else —
+    // and the correlation belongs to the authenticated user.
     const { handler, state, postJson, request } = makeHarness();
 
-    const response = await handler(
-      request({
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify(hostile),
-      }),
-    );
+    const response = await handler(request());
 
     expect(response.status).toBe(200);
-    // Mercado Pago receives the session's email and the configured plan, and
-    // nothing the caller sent.
     expect(postJson).toHaveBeenCalledTimes(1);
     const sent = firstPost(state).body;
     expect(sent).toEqual(EXPECTED_PROVIDER_BODY);
     expect(JSON.stringify(sent)).not.toContain("attacker");
     expect(JSON.stringify(sent)).not.toContain("USD");
-    // The correlation belongs to the authenticated user.
     expect(firstWrite(state).user_id).toBe(USER_ID);
     expect(firstWrite(state).plan_id).toBe("pro");
+    expect(firstWrite(state).currency).toBe("CLP");
   });
 
-  it("2b) the flow has nowhere to receive a request at all", () => {
-    // The canonical flow takes dependencies and nothing else: there is no
-    // parameter for a body, a query or a header, so `?user_id=…` cannot reach it
-    // even by mistake.
-    expect(startProSubscription.length).toBe(1);
+  it("2b) the flow's only browser-supplied input is the token verdict", () => {
+    // INVERTED IN MP-M3D.7. This test used to assert `length === 1` — "there is
+    // no parameter for a body, a query or a header". The flow now takes an input
+    // object, so the property is restated as what still has to hold: that object
+    // has exactly ONE key, and there is no parameter by which anything else — a
+    // session, a plan, a price, a URL — could arrive.
+    expect(startProSubscription.length).toBe(2);
+
+    const source = stripComments(readFileSync(SOURCE_PATH, "utf8"));
+    const declaration = /export interface ProSubscriptionStartInput \{[\s\S]*?\n\}/.exec(source);
+    expect(declaration, "ProSubscriptionStartInput must be declared").not.toBeNull();
+    expect(declaration?.[0].match(/readonly \w+:/g)).toEqual(["readonly cardToken:"]);
+  });
+
+  it("2e) a smuggled key on the input object changes nothing", async () => {
+    // Dependency injection is not a boundary, so the flow is called DIRECTLY
+    // here with everything a caller might hope to inject, and the provider body
+    // is still built from the session and the configuration alone.
+    const { deps, state, request } = makeHarness();
+    const smuggled = {
+      cardToken: readCardTokenFromBody({ card_token_id: CARD_TOKEN }),
+      userId: "user_attacker",
+      payerEmail: "attacker@evil.test",
+      preapprovalPlanId: "PLAN_ATTACKER",
+      status: "cancelled",
+    };
+
+    const result = await startProSubscription(deps, smuggled as never);
+
+    expect(result.status).toBe("READY");
+    expect(firstPost(state).body).toEqual(EXPECTED_PROVIDER_BODY);
+    expect(firstWrite(state).user_id).toBe(USER_ID);
+    // Nothing in the handler chain was required to make this request.
+    expect(state.calls[0]).toBe("requireUser");
+    void request;
   });
 
   it("2c) the server resolves the offer from the frozen contract, never from a caller", () => {
@@ -491,15 +634,38 @@ describe("MP-M3C · start · the provider call", () => {
     expect(firstPost(state).body).toEqual(EXPECTED_PROVIDER_BODY);
   });
 
-  it("7b) never sends a status, a card token, an amount or a provider reference", async () => {
+  it("7b) sends exactly four keys — and still no amount, no interval and no provider reference", async () => {
+    // INVERTED IN MP-M3D.7. This test used to assert the body had two keys and
+    // neither was `status` nor `card_token_id`. The provider requires both (a
+    // plan subscription "must always be created with your card_token_id and
+    // with the status Authorized"), so what survives of the old property is the
+    // part that was always about the MONEY: the recurring terms live in the plan
+    // and are still never restated here, and no ownership hint is smuggled in.
     const { handler, state, request } = makeHarness();
 
     await handler(request());
 
-    expect(Object.keys(firstPost(state).body as object).sort()).toEqual([
+    const body = firstPost(state).body as Record<string, unknown>;
+    expect(Object.keys(body).sort()).toEqual([
+      "card_token_id",
       "payer_email",
       "preapproval_plan_id",
+      "status",
     ]);
+    expect(body["status"]).toBe("authorized");
+    expect(body["card_token_id"]).toBe(CARD_TOKEN);
+    for (const forbidden of [
+      "auto_recurring",
+      "transaction_amount",
+      "currency_id",
+      "frequency",
+      "frequency_type",
+      "free_trial",
+      "external_reference",
+      "payer_id",
+    ]) {
+      expect(body).not.toHaveProperty(forbidden);
+    }
   });
 
   it("7c) forwards no return URL unless one is configured", async () => {
@@ -552,34 +718,55 @@ describe("MP-M3C · start · the provider call", () => {
     }
   });
 
-  it("9b) an id without a usable checkout URL keeps the id for recovery and writes nothing", async () => {
+  it("9b) an id without a checkout URL is a SUCCESS, and the correlation is still written", async () => {
+    // INVERTED IN MP-M3D.7. This test used to demand a critical
+    // `REMOTE_PREAPPROVAL_CREATED_CORRELATION_FAILED`. That was right while the
+    // flow EXISTED to hand the payer a redirect — an id with nothing to navigate
+    // to was a dead end. The card is now tokenized in the browser and the
+    // subscription is created `authorized`, so a missing `init_point` means only
+    // that there is no "add or modify payment method" link, and reporting a
+    // healthy subscription as a critical failure would send an operator chasing
+    // a resource that needs no recovery.
     const { handler, state, request } = makeHarness({
-      providerResponse: { id: SUBSCRIPTION_ID, status: "pending" },
+      providerResponse: { id: SUBSCRIPTION_ID, status: PROVIDER_AUTHORIZED },
     });
 
     const response = await handler(request());
 
-    expect(response.status).toBe(500);
-    expect(firstDiagnostic(state)).toMatchObject({
-      status: "REMOTE_PREAPPROVAL_CREATED_CORRELATION_FAILED",
-      reason: "PREAPPROVAL_RESPONSE_UNUSABLE",
-      preapprovalId: SUBSCRIPTION_ID,
-      userId: USER_ID,
+    expect(response.status).toBe(200);
+    expect(await bodyOf(response)).toEqual({
+      status: "READY",
+      providerSubscriptionStatus: PROVIDER_AUTHORIZED,
+      checkoutUrl: null,
     });
-    expect(state.writes).toEqual([]);
+    // The subscription exists and is now attributable: the webhook can find its
+    // owner, and the row still grants NOTHING until the webhook says so.
+    expect(state.writes).toHaveLength(1);
+    expect(firstWrite(state).status).toBe("pending");
+    expect(resolveEntitlement(rowFrom(firstWrite(state))).hasPaidAccess).toBe(false);
+    expect(state.diagnostics[0]?.status).toBe("READY");
   });
 
-  it("9c) a refused checkout URL is not handed to a browser", async () => {
+  it("9c) a refused checkout URL is neutralised, not handed to a browser", async () => {
+    // The URL can become a navigation target, so `readUserPreapprovalCheckoutUrl`
+    // admits https only. What changed in MP-M3D.7 is the CONSEQUENCE: a
+    // non-https value used to fail the whole start; now it is dropped and the
+    // start succeeds, because the subscription does not depend on it. The
+    // security property — the string never reaches the browser — is unchanged.
     for (const initPoint of ["http://mercadopago.test/x", "javascript:alert(1)", "/relative"]) {
       const { handler, state, request } = makeHarness({
-        providerResponse: { id: SUBSCRIPTION_ID, init_point: initPoint },
+        providerResponse: { id: SUBSCRIPTION_ID, status: PROVIDER_AUTHORIZED, init_point: initPoint },
       });
 
       const response = await handler(request());
+      const body = await bodyOf(response);
+      const text = JSON.stringify(body);
 
-      expect(response.status).toBe(500);
-      expect(JSON.stringify(await bodyOf(response))).not.toContain(initPoint);
-      expect(state.writes).toEqual([]);
+      expect(response.status).toBe(200);
+      expect(text).not.toContain(initPoint);
+      expect(text).not.toContain("mercadopago.test");
+      expect(body).toMatchObject({ checkoutUrl: null });
+      expect(state.writes).toHaveLength(1);
     }
   });
 });
@@ -612,7 +799,7 @@ describe("MP-M3C · start · the ownership correlation", () => {
     ]);
   });
 
-  it("10b) writes the correlation BEFORE it returns the checkout URL", async () => {
+  it("10b) writes the correlation BEFORE it reports success", async () => {
     const { handler, state, request } = makeHarness();
 
     const response = await handler(request());
@@ -620,8 +807,59 @@ describe("MP-M3C · start · the ownership correlation", () => {
     expect(response.status).toBe(200);
     const write = state.calls.indexOf("upsertNormalizedSubscription");
     expect(write).toBeGreaterThan(-1);
+    // The write lands before the readback, so a readback that fails still leaves
+    // a subscription the webhook can attribute.
+    expect(state.calls.indexOf("getJson:/preapproval/SUB1")).toBeGreaterThan(write);
     expect(state.writes).toHaveLength(1);
-    expect((await bodyOf(response))["redirectUrl"]).toBe(CHECKOUT_URL);
+    expect((await bodyOf(response))["status"]).toBe("READY");
+  });
+
+  it("10c) the authoritative readback wins over what creation reported", async () => {
+    // The creation response says what the provider said AT CREATION; the readback
+    // is the resource now. When they disagree, the readback is the truth — and
+    // the flow reports it without acting on it, because entitlement is the
+    // webhook's decision, never this flow's.
+    const { handler, state, request } = makeHarness({
+      providerResponse: { id: SUBSCRIPTION_ID, status: "pending", init_point: CHECKOUT_URL },
+      readbackResponse: { id: SUBSCRIPTION_ID, status: PROVIDER_AUTHORIZED },
+    });
+
+    const response = await handler(request());
+
+    expect(reads(state)).toEqual(["/preapproval/SUB1"]);
+    expect(await bodyOf(response)).toEqual({
+      status: "READY",
+      providerSubscriptionStatus: PROVIDER_AUTHORIZED,
+      checkoutUrl: CHECKOUT_URL,
+    });
+    // Read, reported, and NOT granted: the row is still pending.
+    expect(firstWrite(state).status).toBe("pending");
+    expect(resolveEntitlement(rowFrom(firstWrite(state))).hasPaidAccess).toBe(false);
+  });
+
+  it("10d) a failed readback falls back to the creation status instead of discarding it", async () => {
+    for (const options of [
+      { readbackError: new MercadoPagoError("TIMEOUT", "timed out") },
+      { readbackError: new MercadoPagoError("HTTP_ERROR", "HTTP 500.", 500) },
+      { readbackResponse: {} },
+      { readbackResponse: { status: 42 } },
+    ]) {
+      const { handler, request } = makeHarness({
+        providerResponse: { id: SUBSCRIPTION_ID, status: PROVIDER_AUTHORIZED, init_point: CHECKOUT_URL },
+        ...options,
+      });
+
+      const response = await handler(request());
+
+      // Still a success: the subscription exists and is correlated, and there is
+      // no retry here that could create a second one.
+      expect(response.status).toBe(200);
+      expect(await bodyOf(response)).toEqual({
+        status: "READY",
+        providerSubscriptionStatus: PROVIDER_AUTHORIZED,
+        checkoutUrl: CHECKOUT_URL,
+      });
+    }
   });
 
   it("11) the persisted row proves the OWNER through the real application core", async () => {
@@ -821,11 +1059,19 @@ describe("MP-M3C · start · the ownership correlation", () => {
 /* ============================ 7 · response hygiene ======================== */
 
 describe("MP-M3C · start · the response carries nothing but the minimum", () => {
-  it("15) the body is a status, plus the checkout URL only when ready", async () => {
+  it("15) the body is a status, plus the subscription's state only when ready", async () => {
     const ready = makeHarness();
     const readyBody = await bodyOf(await ready.handler(ready.request()));
-    expect(Object.keys(readyBody).sort()).toEqual(["redirectUrl", "status"]);
-    expect(readyBody).toEqual({ status: "READY", redirectUrl: CHECKOUT_URL });
+    expect(Object.keys(readyBody).sort()).toEqual([
+      "checkoutUrl",
+      "providerSubscriptionStatus",
+      "status",
+    ]);
+    expect(readyBody).toEqual({
+      status: "READY",
+      providerSubscriptionStatus: PROVIDER_AUTHORIZED,
+      checkoutUrl: CHECKOUT_URL,
+    });
 
     for (const options of [
       { proPlanId: null },
@@ -833,12 +1079,13 @@ describe("MP-M3C · start · the response carries nothing but the minimum", () =
       { liveSubscription: null, providerError: new MercadoPagoError("HTTP_ERROR", "x", 500) },
       { writeError: new Error("boom") },
       { providerResponse: {} },
+      { cardToken: null },
     ] as HarnessOptions[]) {
       const { handler, request } = makeHarness(options);
       const body = await bodyOf(await handler(request()));
 
       expect(Object.keys(body).sort()).toEqual(["status"]);
-      for (const leaked of [SUBSCRIPTION_ID, USER_ID, PLAN_ID, TOKEN_SENTINEL]) {
+      for (const leaked of [SUBSCRIPTION_ID, USER_ID, PLAN_ID, TOKEN_SENTINEL, CARD_TOKEN]) {
         expect(JSON.stringify(body)).not.toContain(leaked);
       }
     }
@@ -1045,5 +1292,534 @@ describe("MP-M3C · start · structure", () => {
     const source = readFileSync(SOURCE_PATH, "utf8");
 
     expect(source).toContain('import "@tanstack/react-start/server-only"');
+  });
+});
+
+/* ========================= 9 · the token boundary ========================= */
+
+/**
+ * MP-M3D.7 · the ONE field a browser may contribute.
+ *
+ * Until this phase the endpoint read no body, so "the browser cannot influence
+ * the subscription" needed no defence: there was no channel. Mercado Pago
+ * requires `card_token_id` to attach a subscription to a plan, so the channel now
+ * exists, and everything below exists to keep it one field wide.
+ *
+ * The token is treated as payment material from the moment it arrives to the
+ * moment it is spent: it is judged without being echoed, forwarded to exactly one
+ * call, never written, never read back, never logged, never measured. Each of
+ * those is asserted rather than reasoned about, because the failure mode — a
+ * single-use card token sitting in a log line — is silent and permanent.
+ */
+describe("MP-M3D.7 · start · the card token crosses once and is never kept", () => {
+  it("25) an unauthenticated caller is refused before the token is even consulted", async () => {
+    const { handler, state, postJson, request } = makeHarness({
+      sessionError: billingUnauthorized(),
+    });
+
+    const response = await handler(request());
+    const body = await bodyOf(response);
+
+    expect(response.status).toBe(401);
+    expect(body).toEqual({ status: "UNAUTHENTICATED" });
+    expect(postJson).not.toHaveBeenCalled();
+    expect(reads(state)).toEqual([]);
+    expect(state.writes).toEqual([]);
+    // Identity is checked FIRST, so an anonymous caller cannot learn the request
+    // contract by watching which refusal comes back. A valid token and no token
+    // are indistinguishable from outside.
+    expect(state.calls).toEqual(["requireUser"]);
+
+    const anonymousWithoutToken = makeHarness({
+      sessionError: billingUnauthorized(),
+      cardToken: null,
+    });
+    const noTokenResponse = await anonymousWithoutToken.handler(anonymousWithoutToken.request());
+    expect(noTokenResponse.status).toBe(response.status);
+    expect(await bodyOf(noTokenResponse)).toEqual(body);
+    expect(anonymousWithoutToken.state.calls).toEqual(["requireUser"]);
+  });
+
+  const MISSING_TOKEN_BODIES: Array<{ what: string; options: HarnessOptions }> = [
+    { what: "no body at all", options: { cardToken: null } },
+    { what: "an empty body", options: { rawBody: "" } },
+    { what: "whitespace", options: { rawBody: "   " } },
+    { what: "text that is not JSON", options: { rawBody: "card_token_id=abc" } },
+    {
+      what: "a JSON array",
+      options: { rawBody: JSON.stringify([{ card_token_id: CARD_TOKEN }]) },
+    },
+    { what: "a JSON string", options: { rawBody: JSON.stringify(CARD_TOKEN) } },
+    { what: "a JSON number", options: { rawBody: "42" } },
+    { what: "JSON null", options: { rawBody: "null" } },
+    { what: "an empty object", options: { rawBody: "{}" } },
+    { what: "an explicit null", options: { rawBody: JSON.stringify({ card_token_id: null }) } },
+    { what: "a non-string token", options: { rawBody: JSON.stringify({ card_token_id: 12345 }) } },
+    { what: "a blank token", options: { rawBody: JSON.stringify({ card_token_id: "   " }) } },
+    {
+      what: "an over-long token",
+      options: {
+        rawBody: JSON.stringify({ card_token_id: "x".repeat(CARD_TOKEN_ID_MAX_LENGTH + 1) }),
+      },
+    },
+  ];
+
+  it.each(MISSING_TOKEN_BODIES)("26) refuses $what with zero effects", async ({ options }) => {
+    const { handler, state, postJson, request } = makeHarness(options);
+
+    const response = await handler(request());
+
+    expect(response.status).toBe(400);
+    expect(await bodyOf(response)).toEqual({ status: "INVALID_REQUEST" });
+    expect(postJson).not.toHaveBeenCalled();
+    expect(reads(state)).toEqual([]);
+    expect(state.writes).toEqual([]);
+    // The category is diagnostic-only, and it is a closed word — never the value
+    // that failed, and never the list it was measured against.
+    expect(firstDiagnostic(state).reason).toMatch(/^(MALFORMED_BODY|MISSING_CARD_TOKEN|INVALID_CARD_TOKEN)$/);
+  });
+
+  it("26b) an over-long body is refused before it is read into memory", async () => {
+    const { handler, state, postJson, request } = makeHarness({
+      rawBody: JSON.stringify({ card_token_id: "x".repeat(20_000) }),
+    });
+
+    const response = await handler(request({ headers: { "content-length": "20000" } }));
+
+    expect(response.status).toBe(400);
+    expect(await bodyOf(response)).toEqual({ status: "INVALID_REQUEST" });
+    expect(postJson).not.toHaveBeenCalled();
+    expect(state.writes).toEqual([]);
+  });
+
+  const SMUGGLED_FIELDS = [
+    "payer_email",
+    "preapproval_plan_id",
+    "plan_id",
+    "planId",
+    "status",
+    "user_id",
+    "userId",
+    "amount",
+    "transaction_amount",
+    "currency",
+    "currency_id",
+    "frequency",
+    "frequency_type",
+    "free_trial",
+    "external_reference",
+    "payer_id",
+    "provider",
+    "provider_subscription_id",
+    "back_url",
+    "auto_recurring",
+  ];
+
+  it.each(SMUGGLED_FIELDS)(
+    "27) refuses a body that adds %s, even alongside a valid token",
+    async (field) => {
+      const { handler, state, postJson, request } = makeHarness({
+        rawBody: JSON.stringify({ card_token_id: CARD_TOKEN, [field]: "HOSTILE_VALUE" }),
+      });
+
+      const response = await handler(request());
+
+      expect(response.status).toBe(400);
+      expect(await bodyOf(response)).toEqual({ status: "INVALID_REQUEST" });
+      expect(firstDiagnostic(state).reason).toBe("UNEXPECTED_FIELDS");
+      // Refused, not filtered: nothing is sent, so nothing has to be trusted to
+      // have been dropped.
+      expect(postJson).not.toHaveBeenCalled();
+      expect(state.writes).toEqual([]);
+      expect(JSON.stringify(state.diagnostics)).not.toContain("HOSTILE_VALUE");
+    },
+  );
+
+  it("28) the accepted field list is a frozen single element, not a convention", () => {
+    expect(START_PRO_ALLOWED_BODY_FIELDS).toEqual(["card_token_id"]);
+    expect(Object.isFrozen(START_PRO_ALLOWED_BODY_FIELDS)).toBe(true);
+  });
+
+  it("29) the token is spent on exactly ONE provider call and never on the readback", async () => {
+    const { handler, state, postJson, request } = makeHarness();
+
+    await handler(request());
+
+    // One POST, carrying the token — and one GET of the resource it created,
+    // whose path is built from the returned ID alone.
+    expect(postJson).toHaveBeenCalledTimes(1);
+    expect(reads(state)).toEqual([`/preapproval/${SUBSCRIPTION_ID}`]);
+    for (const path of reads(state)) expect(path).not.toContain(CARD_TOKEN);
+    expect(JSON.stringify(state.posts.map((p) => p.path))).not.toContain(CARD_TOKEN);
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("30) the token is in the request body and nowhere else it could be kept", async () => {
+    const lines: string[] = [];
+    const spies = (["log", "info", "warn", "error", "debug"] as const).map((method) =>
+      vi.spyOn(console, method).mockImplementation((...args: unknown[]) => {
+        lines.push(args.map(String).join(" "));
+      }),
+    );
+
+    // Every outcome, with a token-bearing body each time.
+    const happy = makeHarness();
+    await happy.handler(happy.request());
+
+    const refused = makeHarness({
+      rawBody: JSON.stringify({ card_token_id: CARD_TOKEN, payer_email: "attacker@evil.test" }),
+    });
+    await refused.handler(refused.request());
+
+    const providerFailed = makeHarness({
+      providerError: new MercadoPagoError("HTTP_ERROR", `HTTP 500 ${CARD_TOKEN}`, 500),
+    });
+    await providerFailed.handler(providerFailed.request());
+
+    const correlationLost = makeHarness({ writeError: new Error(`boom ${CARD_TOKEN}`) });
+    await correlationLost.handler(correlationLost.request());
+
+    const scenarios = [happy, refused, providerFailed, correlationLost];
+
+    for (const { state } of scenarios) {
+      // Not in a diagnostic an operator could read out loud...
+      expect(JSON.stringify(state.diagnostics)).not.toContain(CARD_TOKEN);
+      // ...not in a persisted column, in any field...
+      expect(JSON.stringify(state.writes)).not.toContain(CARD_TOKEN);
+      // ...and not in a provider path.
+      expect(JSON.stringify(state.posts.map((p) => p.path))).not.toContain(CARD_TOKEN);
+      // The payment-method label is the one column that could plausibly have
+      // captured it. It is explicitly null.
+      for (const write of state.writes) expect(write.payment_method_label).toBeNull();
+    }
+
+    // Nothing reached any console sink either.
+    expect(lines.join("\n")).not.toContain(CARD_TOKEN);
+
+    // ...including through the production sink, which builds its line from named
+    // fields and cannot carry a value it was never handed.
+    const sinkLines: string[] = [];
+    const sink = createCriticalPreapprovalLogSink((line) => sinkLines.push(line));
+    for (const { state } of scenarios) {
+      for (const diagnostic of state.diagnostics) sink(diagnostic);
+    }
+    expect(sinkLines.join("\n")).not.toContain(CARD_TOKEN);
+
+    for (const spy of spies) spy.mockRestore();
+  });
+
+  it("30b) the persisted correlation has no free-text field the token could hide in", async () => {
+    const { handler, state, request } = makeHarness();
+    await handler(request());
+
+    const write = firstWrite(state);
+    for (const [key, value] of Object.entries(write)) {
+      if (typeof value !== "string") continue;
+      expect(value, key).not.toContain(CARD_TOKEN);
+      // The only string columns are identifiers and fixed vocabulary; a token
+      // would have to displace one of them to be stored.
+      expect(
+        [USER_ID, "pro", "mercado_pago", SUBSCRIPTION_ID, "monthly", "CLP", "pending"],
+        key,
+      ).toContain(value);
+    }
+  });
+
+  it("31) this endpoint is not wired to analytics, so a token cannot be measured", () => {
+    // The spec requires that no card token reaches an analytics payload. The
+    // strongest form of that guarantee is structural: neither the flow nor the
+    // route imports or calls a measurement API at all, so there is no payload to
+    // inspect and no future edit that could add a field to one.
+    const flow = stripComments(readFileSync(SOURCE_PATH, "utf8"));
+    const route = stripComments(readFileSync(ROUTE_PATH, "utf8"));
+
+    // The console sink is deliberately absent from this list: the flow DOES log,
+    // on exactly one path (the critical state), through
+    // `createCriticalPreapprovalLogSink`. What it never does is MEASURE. The two
+    // are different sinks with different lifetimes, and only one of them widens
+    // into a payload a field could be added to later.
+    for (const forbidden of [
+      "analytics",
+      "posthog",
+      "capture(",
+      "track(",
+      "gtag",
+      "VITE_ANALYTICS",
+      "analyticsClient",
+      "sendEvent",
+    ]) {
+      expect(flow, `flow: ${forbidden}`).not.toContain(forbidden);
+      expect(route, `route: ${forbidden}`).not.toContain(forbidden);
+    }
+
+    // The route does not log either: it has no outcome of its own to report.
+    expect(route).not.toContain("console.");
+  });
+
+  it("32) the route reads no body of its own, so the contract has one implementation", () => {
+    const route = stripComments(readFileSync(ROUTE_PATH, "utf8"));
+
+    // If the route touched the body, there would be two places that decide what
+    // crosses from the browser, and the frozen contract would be advisory.
+    for (const forbidden of [".json()", ".text()", "card_token_id", "cardToken", "headers.get"]) {
+      expect(route, forbidden).not.toContain(forbidden);
+    }
+    expect(route).toContain("handleStartProSubscription(request)");
+  });
+
+  it("33) the contract judge is total: it never throws, whatever it is handed", () => {
+    // The handler relies on this being total so it needs no try/catch that could
+    // swallow an unrelated failure. Exercised directly, with the hostile shapes
+    // JSON.parse can actually produce.
+    const hostile: unknown[] = [
+      undefined,
+      null,
+      0,
+      "",
+      "text",
+      [],
+      [1, 2],
+      {},
+      { card_token_id: {} },
+      { card_token_id: [] },
+      { card_token_id: true },
+      { card_token_id: (() => undefined) as unknown },
+      Object.create(null) as unknown,
+      { ["__proto__"]: "x" },
+      { constructor: "x" },
+    ];
+
+    for (const body of hostile) {
+      const verdict = readCardTokenFromBody(body);
+      expect(typeof verdict.ok, JSON.stringify(body) || String(body)).toBe("boolean");
+      if (!verdict.ok) expect(typeof verdict.reason).toBe("string");
+    }
+
+    // Innocent prototypal keys are still UNEXPECTED_FIELDS: `constructor` is a
+    // name a caller can type, and the contract is about names.
+    expect(readCardTokenFromBody({ constructor: "x" }).ok).toBe(false);
+  });
+});
+
+/* ============================== MP-M3D.4 ================================ */
+
+/**
+ * MP-M3D.4 · the failure that could not be diagnosed.
+ *
+ * MP-M3D.3 ran the real flow against the Preview and got one 502 with zero
+ * preapprovals created. From outside, a rejected payload, a timeout and a dead
+ * socket were the SAME event: same status, same word, same empty remote account.
+ * The next attempt would therefore have been a guess, and the only way to test a
+ * guess about the creation payload is to create another real subscription.
+ *
+ * These tests pin the property that removes the guess. The public response is
+ * unchanged — the browser still learns exactly the word `PROVIDER_ERROR` — and
+ * the operator diagnostic now says which failure it was. The flow reaches the
+ * provider ONCE per invocation: a diagnostic is evidence, never a retry.
+ *
+ * The client here is the REAL one, over this file's fetch landmine, so these
+ * exercise the whole path rather than a double that answers with the answer.
+ */
+describe("MP-M3D.4 · start · a provider failure is diagnosable without repeating it", () => {
+  function realClient(timeoutMs?: number): MercadoPagoWriteClient {
+    return createMercadoPagoClient({
+      accessToken: TOKEN_SENTINEL,
+      webhookSecret: null,
+      proPlanId: PLAN_ID,
+      ...(timeoutMs === undefined ? {} : { timeoutMs }),
+    });
+  }
+
+  function answerWith(body: unknown, status: number): void {
+    fetchSpy.mockImplementation(
+      async () =>
+        new Response(JSON.stringify(body), {
+          status,
+          headers: { "Content-Type": "application/json" },
+        }),
+    );
+  }
+
+  /** The single diagnostic the handler emitted — asserted, not assumed. */
+  function onlyDiagnostic(state: HarnessState): ProSubscriptionStartDiagnostic {
+    // Indexed directly: going through this helper here is how it would become
+    // its own recursion.
+    const diagnostic: ProSubscriptionStartDiagnostic | undefined = state.diagnostics[0];
+    if (diagnostic === undefined) throw new Error("expected exactly one diagnostic");
+    return diagnostic;
+  }
+
+  it("19) refuses a rejected payload, creates nothing, and now says why", async () => {
+    answerWith(
+      {
+        message: "Invalid preapproval_plan_id",
+        error: "bad_request",
+        cause: [{ code: 1234, description: "preapproval_plan_id does not exist" }],
+      },
+      400,
+    );
+
+    const { handler, state, request } = makeHarness({ client: realClient() });
+    const response = await handler(request());
+
+    // The browser learns nothing new — the same status, the same single word.
+    expect(response.status).toBe(502);
+    expect(await bodyOf(response)).toEqual({ status: "PROVIDER_ERROR" });
+
+    // Nothing was created anywhere, and the canonical resolution proves it.
+    expect(state.writes).toEqual([]);
+    expect(resolveEntitlement(state.live).effectiveTier).toBe("free");
+    expect(resolveEntitlement(state.live).hasPaidAccess).toBe(false);
+
+    // ...but the failure is no longer anonymous.
+    const diagnostic = onlyDiagnostic(state);
+    expect(diagnostic.status).toBe("PROVIDER_ERROR");
+    expect(diagnostic.httpStatus).toBe(502);
+    expect(diagnostic.providerErrorCode).toBe("HTTP_ERROR");
+    expect(diagnostic.providerDiagnostic?.failureCategory).toBe("PROVIDER_HTTP_ERROR");
+    expect(diagnostic.providerDiagnostic?.providerHttpStatus).toBe(400);
+    expect(diagnostic.providerDiagnostic?.operationName).toBe("POST");
+    expect(diagnostic.providerDiagnostic?.providerErrorType).toBe("bad_request");
+    expect(diagnostic.providerDiagnostic?.providerErrorCode).toBe("1234");
+    expect(diagnostic.providerDiagnostic?.providerCauseDescriptions).toEqual([
+      "preapproval_plan_id does not exist",
+    ]);
+    expect(typeof diagnostic.providerDiagnostic?.elapsedMs).toBe("number");
+
+    // One attempt. Evidence is not a retry.
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it("20) tells a timeout apart from a refusal — the absence of a status IS the signal", async () => {
+    fetchSpy.mockImplementation(
+      (_url: string, init?: RequestInit) =>
+        new Promise<Response>((_resolve, reject) => {
+          init?.signal?.addEventListener("abort", () => {
+            const aborted = new Error("aborted");
+            aborted.name = "AbortError";
+            reject(aborted);
+          });
+        }),
+    );
+
+    const { handler, state, request } = makeHarness({ client: realClient(5) });
+    const response = await handler(request());
+
+    expect(response.status).toBe(502);
+    expect(await bodyOf(response)).toEqual({ status: "PROVIDER_ERROR" });
+    expect(state.writes).toEqual([]);
+
+    const provider = onlyDiagnostic(state).providerDiagnostic;
+    expect(onlyDiagnostic(state).providerErrorCode).toBe("TIMEOUT");
+    expect(provider?.failureCategory).toBe("PROVIDER_TIMEOUT");
+    expect(provider?.timeoutMs).toBe(5);
+    // This null is the whole point: Mercado Pago never answered.
+    expect(provider?.providerHttpStatus).toBeNull();
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it("21) tells a dead socket apart from both, with no status and no retry", async () => {
+    fetchSpy.mockImplementation(async () => {
+      throw new Error("socket closed");
+    });
+
+    const { handler, state, request } = makeHarness({ client: realClient() });
+    const response = await handler(request());
+
+    expect(response.status).toBe(502);
+    expect(await bodyOf(response)).toEqual({ status: "PROVIDER_ERROR" });
+
+    const provider = onlyDiagnostic(state).providerDiagnostic;
+    expect(onlyDiagnostic(state).providerErrorCode).toBe("NETWORK_ERROR");
+    expect(provider?.failureCategory).toBe("PROVIDER_NETWORK_ERROR");
+    expect(provider?.providerHttpStatus).toBeNull();
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it("22) the sink turns a real failure into ONE line, with the reason and no secret", async () => {
+    // The provider echoes request context back, which is exactly what a real
+    // rejection does — this is the end of the path where a leak would land.
+    answerWith(
+      {
+        message: `request for ${SESSION_EMAIL} rejected`,
+        error: "bad_request",
+        cause: [
+          {
+            code: 1234,
+            description: `preapproval_plan_id is missing (auth Bearer ${TOKEN_SENTINEL})`,
+          },
+        ],
+      },
+      400,
+    );
+
+    const { handler, state, request } = makeHarness({ client: realClient() });
+    await handler(request());
+
+    const lines: string[] = [];
+    const sink = createCriticalPreapprovalLogSink((line) => lines.push(line));
+    sink(onlyDiagnostic(state));
+
+    expect(lines).toHaveLength(1);
+    const line = lines[0] ?? "";
+    expect(line).toContain("PROVIDER_ERROR");
+    expect(line).toContain("category=PROVIDER_HTTP_ERROR");
+    expect(line).toContain("http=400");
+    expect(line).toContain("providerCode=1234");
+    // The reason survives...
+    expect(line).toContain("preapproval_plan_id is missing");
+    // ...and nothing else does.
+    for (const forbidden of [TOKEN_SENTINEL, SESSION_EMAIL, SECRET_SENTINEL, "Bearer "]) {
+      expect(line).not.toContain(forbidden);
+    }
+    expect(line).not.toContain("\n");
+  });
+
+  it("23) the sink stays silent for a failure that reached nobody", async () => {
+    // A local refusal is not an observation: there is nothing an operator could
+    // act on that the 502 has not already said, so the log keeps its meaning.
+    const client = createMercadoPagoClient(
+      readMercadoPagoConfigFromEnv({ MERCADOPAGO_PRO_PLAN_ID: PLAN_ID }),
+    );
+    const { handler, state, request } = makeHarness({ client });
+
+    const response = await handler(request());
+
+    expect(response.status).toBe(502);
+    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(state.diagnostics[0]).toEqual({
+      status: "PROVIDER_ERROR",
+      httpStatus: 502,
+      providerErrorCode: "MISSING_ACCESS_TOKEN",
+    });
+    expect(onlyDiagnostic(state).providerDiagnostic).toBeUndefined();
+
+    const lines: string[] = [];
+    createCriticalPreapprovalLogSink((line) => lines.push(line))(onlyDiagnostic(state));
+    expect(lines).toEqual([]);
+  });
+
+  it("24) no diagnostic carries the token or the session email, on any path", async () => {
+    for (const status of [400, 401, 404, 422, 500]) {
+      answerWith(
+        {
+          message: `payer ${SESSION_EMAIL} with ${TOKEN_SENTINEL} was refused`,
+          error: "bad_request",
+          cause: [{ code: 1234, description: `Bearer ${TOKEN_SENTINEL} rejected` }],
+        },
+        status,
+      );
+
+      const { handler, state, request } = makeHarness({ client: realClient() });
+      await handler(request());
+
+      const text = JSON.stringify(state.diagnostics);
+      for (const forbidden of [TOKEN_SENTINEL, SESSION_EMAIL, SECRET_SENTINEL]) {
+        expect(text, `status ${status}`).not.toContain(forbidden);
+      }
+      // The classification is still worth reading.
+      expect(onlyDiagnostic(state).providerDiagnostic?.failureCategory).toBe("PROVIDER_HTTP_ERROR");
+      expect(onlyDiagnostic(state).providerDiagnostic?.providerHttpStatus).toBe(status);
+    }
   });
 });

@@ -1,20 +1,23 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 /**
- * CRIPQER BILLING — START A PRO SUBSCRIPTION (MP-M3C)
+ * CRIPQER BILLING — START A PRO SUBSCRIPTION (MP-M3C / MP-M3D.7)
  *
  *     POST /api/billing/mercadopago/start-pro
+ *     Body: { "card_token_id": "<token from Mercado Pago's client integration>" }
  *
  * This route is TRANSPORT AND NOTHING ELSE. It hands the request to the
  * sequenced flow in `src/server/billing/mercadopago/pro-subscription-start.ts`,
  * which owns every decision: who the caller is, which offer applies, whether the
  * plan is configured, whether a subscription is already in flight, the single
- * provider call, the ownership write, and the verification that the write
- * happened before any checkout URL is returned.
+ * provider call, the ownership write, and the authoritative readback.
  *
- * The route reads no body and takes no parameter. There is nothing a caller can
- * send that reaches Mercado Pago, so there is exactly one place to audit and one
- * place to test.
+ * This route still reads nothing itself — not the body, not a header, not a query
+ * parameter. A body IS read now, but by the flow, through the frozen single-field
+ * contract in `card-token.ts`. The indirection is the point: exactly one place
+ * decides what may cross from a browser to this server, so an audit of "what can
+ * a caller influence" has one file to read. If this route ever called
+ * `request.json()` there would be two.
  *
  * WHY THE IMPORT IS DYNAMIC
  * The flow module is marked `server-only` and reaches Supabase and the Mercado

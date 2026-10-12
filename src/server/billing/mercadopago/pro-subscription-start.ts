@@ -8,46 +8,105 @@ import {
 } from "../../../lib/billing/billing.types.ts";
 import type { CheckoutUserSource, ResolvedOffer } from "../checkout.ts";
 import {
+  readCardTokenFromRequest,
+  type CardTokenRejection,
+  type CardTokenReadResult,
+} from "./card-token.ts";
+import {
   createMercadoPagoClient,
+  hasProviderObservation,
   MercadoPagoError,
   readMercadoPagoConfigFromEnv,
+  type MercadoPagoDiagnostic,
   type MercadoPagoErrorCode,
   type MercadoPagoWriteClient,
 } from "./client.ts";
 import { CRIPQER_PRO_PLAN_CONTRACT } from "./plan.ts";
 import {
+  buildUserPreapprovalPath,
   createMercadoPagoUserPreapproval,
+  readUserPreapprovalStatus,
   UserPreapprovalResponseError,
 } from "./preapproval-creation.ts";
 
 /**
- * CRIPQER BILLING — START A PRO SUBSCRIPTION (MP-M3C)
+ * CRIPQER BILLING — START A PRO SUBSCRIPTION (MP-M3C / MP-M3D.7)
  *
  * The server-side flow that lets an authenticated user begin their Cripqer PRO
  * subscription, and the ONE order in which it may happen:
  *
  *     authenticated user
- *       -> server resolves the canonical PRO offer      (never the browser)
+ *       -> server resolves the canonical PRO offer          (never the browser)
  *       -> configure guard: the remote plan id must exist
+ *       -> payer identity: the session's email              (never the browser)
+ *       -> request contract: exactly one card_token_id      (the ONLY input)
  *       -> duplicate guard: no live subscription for this user
- *       -> POST /preapproval                            (one call, no retry)
- *       -> persist the ownership correlation            (billing_subscriptions)
+ *       -> POST /preapproval                                (one call, no retry)
+ *       -> persist the ownership correlation                (billing_subscriptions)
  *       -> VERIFY the correlation is really written
- *       -> ONLY THEN return the checkout URL
+ *       -> authoritative provider readback                  (GET /preapproval/{id})
+ *       -> ONLY THEN report success
  *
- * If the correlation is not established, no checkout URL is returned, nothing
- * is granted, and the outcome is reported as the critical state
- * `REMOTE_PREAPPROVAL_CREATED_CORRELATION_FAILED` — because a subscription may
- * now exist at Mercado Pago that Cripqer cannot attribute to anyone.
+ * ---------------------------------------------------------------------------
+ * WHAT CHANGED IN MP-M3D.7
+ * ---------------------------------------------------------------------------
+ * Until this phase the flow took NO request input at all, and it said so
+ * proudly: "there is no parameter for user_id, amount, currency, plan id, trial,
+ * frequency, provider or status, so a hostile body is not validated-and-rejected
+ * — it is never read."
  *
- * WHAT THE BROWSER CANNOT CHOOSE
- * The flow takes NO request input. There is no parameter for `user_id`, amount,
- * currency, plan id, trial, frequency, provider or status, so a hostile body is
- * not validated-and-rejected — it is never read. Identity comes from
- * `CheckoutUserSource.requireUser()` (the canonical seam that production wires
- * to `requireBillingUser()`), price and currency come from
- * `CRIPQER_PRO_PLAN_CONTRACT`, and the provider plan reference comes from the
- * configured `MERCADOPAGO_PRO_PLAN_ID`.
+ * That property could not survive contact with the provider. MP-M3D.5 captured
+ * Mercado Pago refusing the creation — `400 "card_token_id is required"` — and
+ * MP-M3D.6 established from the official guide that a subscription with an
+ * associated plan MUST carry a token and `status: authorized`. A subscription
+ * cannot be created without payment material, and the material can only come
+ * from the browser, because Mercado Pago's client SDK is the only thing allowed
+ * to see the card.
+ *
+ * So the browser may now contribute EXACTLY ONE value, and the guarantee that
+ * replaced "no input" is stronger than a filter would have been:
+ *
+ *   · The contract is enforced by `card-token.ts`. The allowed field list has
+ *     one entry, and a body carrying anything else is REFUSED, not ignored — so
+ *     there is no shape of request that changes the owner, the price, the
+ *     currency, the interval, the plan, the trial or the created status.
+ *   · `status` is not a parameter anywhere: it is the literal constant
+ *     `MERCADOPAGO_AUTHORIZED_STATUS`, used as a type, so a browser-supplied
+ *     status is unrepresentable rather than rejected.
+ *   · Identity, payer email, plan id, price and currency are still derived
+ *     server-side from the session and from `CRIPQER_PRO_PLAN_CONTRACT`.
+ *
+ * WHAT THE BROWSER STILL CANNOT CHOOSE
+ * A caller cannot send `user_id` (identity is `CheckoutUserSource.requireUser()`),
+ * `payer_email` (it is the session's email), `preapproval_plan_id` (it is the
+ * configured `MERCADOPAGO_PRO_PLAN_ID`), or `status` (it is a server constant).
+ * Those fields' PRESENCE is a contract violation.
+ *
+ * ORDER OF THE CHECKS, AND WHY
+ * Identity first, then the request contract, then the server's own readiness,
+ * then the duplicate guard. Two rules decide it:
+ *
+ *   · Identity is checked before the body is INTERPRETED, so an anonymous caller
+ *     is answered 401 whatever it sent and cannot probe the request contract by
+ *     watching which 4xx comes back. (The handler does parse the JSON before
+ *     calling in here — parsing is inert, and the VERDICT is not consulted until
+ *     `requireUser()` has resolved. Reading a string is not acting on it.)
+ *   · Every local check precedes the provider call, so no ordering among them
+ *     can cause a remote effect. The order only decides which refusal a caller
+ *     sees, never whether Mercado Pago is reached.
+ *
+ * WHY THERE IS STILL NO ENTITLEMENT DECISION HERE
+ * The flow writes a `pending` row, which `resolveEntitlementWithGrants` resolves
+ * to free, and it does NOT promote that row from the readback status. This is
+ * deliberate. The creation response now arrives with the subscription already
+ * `authorized`, and it is tempting to grant Pro on the spot — but the canonical
+ * authority is the VERIFIED WEBHOOK, and the trial semantics that decide whether
+ * an authorized subscription in a free-trial window means "in force" or
+ * "instrument registered, nothing charged" are documented in MP-M3D.7's
+ * deliverable rather than assumed here. Promoting the row in this module would
+ * put a SECOND, untested entitlement path behind a status this flow only
+ * half-understands. The readback is REPORTED, not acted upon: canonical state
+ * still changes in exactly one place.
  *
  * NO PARALLEL PIPELINE
  * Ownership is written with the canonical `upsertNormalizedSubscription`
@@ -58,9 +117,9 @@ import {
  * classifications — and no second way to do any of those things.
  *
  * WHAT IT DELIBERATELY DOES NOT DO
- *   · No entitlement decision and no Pro grant: it writes a `pending` row,
- *     which `resolveEntitlementWithGrants` resolves to free. Access is granted,
- *     later, only by the verified webhook applying an `active` status.
+ *   · No entitlement decision and no Pro grant: it writes a `pending` row, which
+ *     `resolveEntitlementWithGrants` resolves to free. Access is granted, later,
+ *     only by the verified webhook applying an `active` status.
  *   · No cancellation, no reactivation, no plan change, no billing customer
  *     creation, no `billing_checkouts` row: the correlation the webhook
  *     resolves later lives in `billing_subscriptions` and nowhere else.
@@ -69,14 +128,20 @@ import {
  *     are the ones that already exist: the live-subscription guard before the
  *     call, the partial unique index `billing_subscriptions_one_live_per_user_
  *     unique` as the database backstop, and a critical, manually recovered
- *     classification for the race the two cannot prevent.
+ *     classification for the race the two cannot prevent. A card token is
+ *     single-use, so a retry would be spent material as well as a second
+ *     subscription.
+ *   · No `card_token_id` anywhere but the one provider call: it is never stored,
+ *     never logged, never placed in a diagnostic, and never returned.
  */
 
 /* =============================== outcomes =============================== */
 
 export type ProSubscriptionStartStatus =
-  /** Ownership correlation persisted; the checkout URL may be handed over. */
+  /** Ownership correlation persisted; the subscription is established. */
   | "READY"
+  /** The browser's body did not satisfy the one-field request contract. */
+  | "INVALID_REQUEST"
   /** `MERCADOPAGO_PRO_PLAN_ID` is missing: there is no plan to subscribe to. */
   | "UNCONFIGURED"
   /** The session carries no email, and Mercado Pago requires `payer_email`. */
@@ -90,7 +155,7 @@ export type ProSubscriptionStartStatus =
 
 /** Why the critical state was reached. */
 export type ProSubscriptionCorrelationFailureReason =
-  /** The 2xx response carried no usable id, or no usable checkout URL. */
+  /** The 2xx response carried no usable id. */
   | "PREAPPROVAL_RESPONSE_UNUSABLE"
   /** The remote subscription was created, but ownership could not be written. */
   | "OWNERSHIP_WRITE_FAILED";
@@ -99,16 +164,55 @@ export type ProSubscriptionCorrelationFailureReason =
  * The flow's result.
  *
  * It is a closed union: every field is a decision or a recovery fact, and no
- * variant can carry a provider payload. `redirectUrl` exists only on `READY`,
- * and it is the ONLY value this module ever hands back to a caller for the
- * browser — everything else is a status word.
+ * variant can carry a provider payload. The only provider-derived values that
+ * ever reach a caller are `READY`'s two fields — the subscription's
+ * authoritative status and, when the provider offered one, its "add or modify
+ * payment method" URL — both of which are non-secret remote state the browser is
+ * entitled to know because the browser is the user's.
+ *
+ * The other provider-derived value here is `PROVIDER_ERROR`'s `providerDiagnostic`
+ * (MP-M3D.4): a sanitized, allowlisted, redacted record whose every text field
+ * has already been through `sanitizeProviderText`, and whose only consumer is
+ * the operator log below. It is never rendered, never serialized into a response
+ * body and never returned as data — a failure an operator cannot diagnose was
+ * indistinguishable from one they could, which is why it exists at all.
+ *
+ * There is no field on any variant for a card token: not on the failures, not on
+ * the successes. A caller cannot get back what it sent, and a logging edit
+ * cannot leak what no variant holds.
  */
 export type ProSubscriptionStartResult =
-  | { status: "READY"; redirectUrl: string }
+  | {
+      status: "READY";
+      /**
+       * The provider's authoritative status for the new subscription, or `null`
+       * when neither the readback nor the creation response reported a usable
+       * one. `null` is not a failure: the subscription exists and is correlated,
+       * and the webhook will settle the state. It means only "not confirmed by
+       * this call".
+       */
+      providerSubscriptionStatus: string | null;
+      /**
+       * The provider's "add or modify payment method" URL, when it returned an
+       * https one. Secondary since MP-M3D.7 — the payment instrument was already
+       * taken in the browser, so there is nothing left to authorize.
+       */
+      checkoutUrl: string | null;
+    }
+  | { status: "INVALID_REQUEST"; reason: CardTokenRejection }
   | { status: "UNCONFIGURED" }
   | { status: "PAYER_EMAIL_REQUIRED" }
   | { status: "ALREADY_IN_PROGRESS"; subscriptionStatus: BillingSubscriptionStatus }
-  | { status: "PROVIDER_ERROR"; providerErrorCode: MercadoPagoErrorCode }
+  | {
+      status: "PROVIDER_ERROR";
+      providerErrorCode: MercadoPagoErrorCode;
+      /**
+       * What the provider actually said, sanitized — or `null` when the request
+       * never left the process (a missing token is refused locally and no
+       * provider observation exists to report).
+       */
+      providerDiagnostic: MercadoPagoDiagnostic | null;
+    }
   | {
       status: "REMOTE_PREAPPROVAL_CREATED_CORRELATION_FAILED";
       reason: ProSubscriptionCorrelationFailureReason;
@@ -148,6 +252,24 @@ export interface ProSubscriptionStartConfig {
   backUrl?: string | null;
 }
 
+/**
+ * What the flow is told about the request.
+ *
+ * It carries the ALREADY-PARSED token verdict rather than the `Request` itself,
+ * so this module stays a pure function of its dependencies and remains testable
+ * without an HTTP object. The verdict is inert data: `startProSubscription`
+ * authenticates first and only then reads it, which is what keeps an anonymous
+ * caller from learning the request contract through the shape of a refusal.
+ *
+ * `cardToken` is the ONLY browser-supplied input in the whole flow. There is no
+ * field here for an identity, a plan, an amount or a status, so this interface
+ * is also the audit answer to "what can the browser reach": one verdict about
+ * one field.
+ */
+export interface ProSubscriptionStartInput {
+  readonly cardToken: CardTokenReadResult;
+}
+
 export interface ProSubscriptionStartDeps {
   /** Canonical identity seam. Production wires `requireBillingUser()`. */
   userSource: CheckoutUserSource;
@@ -161,7 +283,10 @@ export interface ProSubscriptionStartDeps {
 }
 
 export type ProSubscriptionDiagnosticStatus =
-  ProSubscriptionStartStatus | "UNAUTHENTICATED" | "METHOD_NOT_ALLOWED" | "INTERNAL_ERROR";
+  | ProSubscriptionStartStatus
+  | "UNAUTHENTICATED"
+  | "METHOD_NOT_ALLOWED"
+  | "INTERNAL_ERROR";
 
 /**
  * Closed, secret-free diagnostics.
@@ -169,14 +294,25 @@ export type ProSubscriptionDiagnosticStatus =
  * The identifiers it can carry (`preapprovalId`, `userId`) exist because the
  * critical state is recovered BY HAND and an operator cannot act on "something
  * went wrong": they need to know which remote subscription to look at and which
- * user it was meant for. There is no field for a token, an Authorization
- * header, a provider body or a stack, so no logging edit can leak one.
+ * user it was meant for. `reason` on `INVALID_REQUEST` is the closed
+ * `CardTokenRejection` — a category, never the offending value, so a diagnostic
+ * cannot become the place a card token leaks to a log.
+ *
+ * There is no field for a token, an Authorization header, a provider body or a
+ * stack, so no logging edit can leak one.
  */
 export interface ProSubscriptionStartDiagnostic {
   status: ProSubscriptionDiagnosticStatus;
   httpStatus: number;
-  reason?: ProSubscriptionCorrelationFailureReason | undefined;
+  reason?: ProSubscriptionCorrelationFailureReason | CardTokenRejection | undefined;
   providerErrorCode?: MercadoPagoErrorCode | undefined;
+  /**
+   * MP-M3D.4 — present on `PROVIDER_ERROR` ONLY when the request actually
+   * reached the provider. Sanitized at the client boundary, rendered from named
+   * fields by the sink below, and never serialized into a response body: a
+   * `PROVIDER_ERROR` response is still exactly `{"status":"PROVIDER_ERROR"}`.
+   */
+  providerDiagnostic?: MercadoPagoDiagnostic | null | undefined;
   /** Present only on the critical state: the remote subscription, if known. */
   preapprovalId?: string | null;
   /** Present only on the critical state: the user it was meant to belong to. */
@@ -229,11 +365,16 @@ function isCanonicalStatus(value: unknown): value is BillingSubscriptionStatus {
 /**
  * The ownership correlation row for a freshly created subscription.
  *
- * `status: "pending"` is the whole point: `resolveOwner` finds the row by
- * `(provider, provider_subscription_id)` regardless of status — so the webhook
- * that arrives when the payer authorizes can attribute the subscription to this
- * user — while `resolveEntitlementWithGrants` resolves `pending` to free. The
- * row proves WHO, never WHAT they may access.
+ * `status: "pending"` is the whole point, and MP-M3D.7 did NOT change it even
+ * though the provider now returns `authorized` immediately. `resolveOwner` finds
+ * the row by `(provider, provider_subscription_id)` regardless of status — so
+ * the webhook can attribute the subscription to this user — while
+ * `resolveEntitlementWithGrants` resolves `pending` to free. The row proves WHO,
+ * never WHAT they may access.
+ *
+ * Writing the provider's `authorized` here instead would grant Pro from a status
+ * observed on the creation path, which is a decision this flow is not the right
+ * place to make (see the module note on entitlement).
  */
 export function buildProSubscriptionOwnership(input: {
   userId: string;
@@ -263,8 +404,8 @@ export function buildProSubscriptionOwnership(input: {
  * A write that returns without throwing is not proof: the row could belong to
  * another user, another provider, another subscription, or already be dead. So
  * the three identity fields are compared exactly, and the status must be one of
- * the live ones — handing a payer a checkout URL for a subscription that is
- * already cancelled would be worse than refusing to hand it over at all.
+ * the live ones — handing a payer a success for a subscription that is already
+ * cancelled would be worse than refusing to report one at all.
  */
 function correlationIsEstablished(
   record: BillingSubscriptionRecord | null,
@@ -275,6 +416,41 @@ function correlationIsEstablished(
   if (record.provider !== "mercado_pago") return false;
   if (record.provider_subscription_id !== expected.providerSubscriptionId) return false;
   return isCanonicalStatus(record.status) && LIVE_SUBSCRIPTION_STATUSES.has(record.status);
+}
+
+/* ============================== the readback ============================ */
+
+/**
+ * Reads the subscription back from the provider, authoritatively.
+ *
+ * This is the same relation the webhook path uses (`GET /preapproval/{id}`, see
+ * `resource-fetcher.ts`), applied to a subscription this flow just created.
+ * It exists because the creation RESPONSE is not the same thing as the resource:
+ * a response reports what the provider decided to say at the moment of creation,
+ * while a readback reports what the subscription IS. The readback is the value
+ * this flow reports to the caller.
+ *
+ * IT NEVER FAILS THE REQUEST. A readback that fails leaves a subscription that
+ * was created, correlated and verified — a success by every measure that
+ * matters — so raising here would turn a healthy subscription into a failed
+ * request and invite a retry that the duplicate guard would then refuse. The
+ * caller receives `providerSubscriptionStatus: null`, which says exactly what
+ * happened: "not confirmed by this call". The webhook remains the authority.
+ *
+ * The id is `encodeURIComponent`-ed: it comes from the provider, but a value
+ * interpolated into a path should not be trusted to be path-safe on the strength
+ * of where it came from.
+ */
+async function readBackSubscriptionStatus(
+  client: MercadoPagoWriteClient,
+  preapprovalId: string,
+): Promise<string | null> {
+  try {
+    const resource = await client.getJson(buildUserPreapprovalPath(preapprovalId));
+    return readUserPreapprovalStatus(resource);
+  } catch {
+    return null;
+  }
 }
 
 /* ================================ flow ================================== */
@@ -288,8 +464,12 @@ function correlationIsEstablished(
  */
 export async function startProSubscription(
   deps: ProSubscriptionStartDeps,
+  input: ProSubscriptionStartInput,
 ): Promise<ProSubscriptionStartResult> {
   // 1. Identity: from the session, through the canonical seam. Never a body.
+  //    Checked BEFORE the token verdict is consulted, so an anonymous caller is
+  //    refused on identity alone and cannot read the request contract off the
+  //    shape of the refusal.
   const user = await deps.userSource.requireUser();
 
   // 2. The offer: server-side, from the frozen contract. Fails closed.
@@ -306,7 +486,14 @@ export async function startProSubscription(
     return { status: "PAYER_EMAIL_REQUIRED" };
   }
 
-  // 4. The duplicate guard, BEFORE anything is created remotely. A live row
+  // 4. The request contract. The ONLY browser-supplied input, judged by
+  //    `card-token.ts`; `reason` is a closed category and never a value.
+  if (!input.cardToken.ok) {
+    return { status: "INVALID_REQUEST", reason: input.cardToken.reason };
+  }
+  const cardTokenId = input.cardToken.cardTokenId;
+
+  // 5. The duplicate guard, BEFORE anything is created remotely. A live row
   //    (pending|active|past_due|paused) means this user already has a
   //    subscription in flight or in force — the same set the partial unique
   //    index enforces — so a second remote subscription must not be created.
@@ -318,18 +505,19 @@ export async function startProSubscription(
     };
   }
 
-  // 5. ONE provider call.
-  let created: { preapprovalId: string; initPoint: string };
+  // 6. ONE provider call.
+  let created: Awaited<ReturnType<typeof createMercadoPagoUserPreapproval>>;
   try {
     created = await createMercadoPagoUserPreapproval(deps.client, {
       preapprovalPlanId: offer.providerOfferReference,
       payerEmail,
+      cardTokenId,
       backUrl: deps.config.backUrl ?? null,
     });
   } catch (error) {
     if (error instanceof UserPreapprovalResponseError) {
       // The subscription may exist and we cannot use the answer. Nothing is
-      // persisted, no URL is returned, and no retry is attempted.
+      // persisted, no success is reported, and no retry is attempted.
       return {
         status: "REMOTE_PREAPPROVAL_CREATED_CORRELATION_FAILED",
         reason: "PREAPPROVAL_RESPONSE_UNUSABLE",
@@ -339,13 +527,27 @@ export async function startProSubscription(
     }
     if (error instanceof MercadoPagoError) {
       // The provider refused, or the transport failed, before or instead of
-      // creating anything usable. No local row is invented.
-      return { status: "PROVIDER_ERROR", providerErrorCode: error.code };
+      // creating anything usable. No local row is invented, and no field of the
+      // diagnostic can carry the token.
+      //
+      // `hasProviderObservation` keeps the diagnostic honest: only a failure
+      // whose request actually left the process has a provider outcome worth
+      // reporting, so a locally-refused start carries no provider record at all
+      // rather than a record full of nulls that reads like a real observation.
+      return {
+        status: "PROVIDER_ERROR",
+        providerErrorCode: error.code,
+        providerDiagnostic: hasProviderObservation(error.diagnostic) ? error.diagnostic : null,
+      };
     }
     throw error;
   }
+  // The token has been consumed. Nothing below this line reads it again, and the
+  // only reference to it was the local above, which goes out of scope here.
 
-  // 6. Ownership correlation, immediately — and verified, not assumed.
+  // 7. Ownership correlation, immediately — and verified, not assumed. It is
+  //    written BEFORE the readback on purpose: if the readback fails, a webhook
+  //    must still be able to attribute the subscription to this user.
   const correlation = buildProSubscriptionOwnership({
     userId: user.userId,
     offer,
@@ -375,8 +577,20 @@ export async function startProSubscription(
     };
   }
 
-  // 7. Only now is there a URL to hand over.
-  return { status: "READY", redirectUrl: created.initPoint };
+  // 8. Authoritative readback, and only now is success reportable.
+  //
+  //    The readback is preferred over the creation response because it reports
+  //    the RESOURCE rather than what the provider said at creation time. The
+  //    creation response is the fallback rather than nothing: it is still a
+  //    provider observation of this subscription, just an earlier one, and
+  //    discarding it to report `null` would throw away real information.
+  const readbackStatus = await readBackSubscriptionStatus(deps.client, created.preapprovalId);
+
+  return {
+    status: "READY",
+    providerSubscriptionStatus: readbackStatus ?? created.providerStatus,
+    checkoutUrl: created.checkoutUrl,
+  };
 }
 
 /* ================================ handler =============================== */
@@ -386,6 +600,7 @@ export const PRO_SUBSCRIPTION_START_METHOD = "POST";
 
 const STATUS_HTTP: Record<ProSubscriptionDiagnosticStatus, number> = {
   READY: 200,
+  INVALID_REQUEST: 400,
   UNCONFIGURED: 500,
   PAYER_EMAIL_REQUIRED: 422,
   ALREADY_IN_PROGRESS: 409,
@@ -408,13 +623,24 @@ function isBillingUnauthorized(error: unknown): boolean {
   return error instanceof Error && (error as { code?: unknown }).code === "BILLING_UNAUTHORIZED";
 }
 
+/** What `READY` is allowed to add to the response body. Closed on purpose. */
+interface ReadyResponsePayload {
+  providerSubscriptionStatus: string | null;
+  checkoutUrl: string | null;
+}
+
 /**
  * Builds the request handler.
  *
  * Total by construction: every failure becomes a status code and no path throws
  * out of the returned function. The response body carries ONLY a status word —
- * plus `redirectUrl` on success — so no identity, no id and no provider field
- * can reach the browser even by accident.
+ * plus, on `READY`, the subscription's provider status and the provider's
+ * checkout URL — so no identity, no id, no token and no provider payload can
+ * reach the browser even by accident.
+ *
+ * The body is read through `readCardTokenFromRequest`, which never throws and
+ * bounds the input before parsing. Its verdict is passed to the flow, which does
+ * not consult it until identity has been proven.
  */
 export function createProSubscriptionStartHandler(
   deps: ProSubscriptionStartDeps,
@@ -427,14 +653,21 @@ export function createProSubscriptionStartHandler(
     }
   };
 
-  const respond = (diagnostic: ProSubscriptionStartDiagnostic, redirectUrl?: string): Response => {
+  const respond = (
+    diagnostic: ProSubscriptionStartDiagnostic,
+    ready?: ReadyResponsePayload,
+  ): Response => {
     const httpStatus = STATUS_HTTP[diagnostic.status];
     emit(diagnostic);
 
     const body =
-      redirectUrl === undefined
+      ready === undefined
         ? { status: diagnostic.status }
-        : { status: diagnostic.status, redirectUrl };
+        : {
+            status: diagnostic.status,
+            providerSubscriptionStatus: ready.providerSubscriptionStatus,
+            checkoutUrl: ready.checkoutUrl,
+          };
 
     const headers: Record<string, string> = {
       "content-type": "application/json; charset=utf-8",
@@ -453,14 +686,20 @@ export function createProSubscriptionStartHandler(
   });
 
   return async function handle(request: Request): Promise<Response> {
-    // 0. Method gate. No body is read — there is nothing a body could say.
+    // 0. Method gate. The body is not read: a method that cannot start a
+    //    subscription should not pay to parse one.
     if (request.method.toUpperCase() !== PRO_SUBSCRIPTION_START_METHOD) {
       return respond(base("METHOD_NOT_ALLOWED"));
     }
 
+    // 1. Read the body into an inert verdict. This is the only place the
+    //    request stream is touched, and the result is a closed union — no text,
+    //    no parsed object and no token escapes this call.
+    const cardToken = await readCardTokenFromRequest(request);
+
     let result: ProSubscriptionStartResult;
     try {
-      result = await startProSubscription(deps);
+      result = await startProSubscription(deps, { cardToken });
     } catch (error) {
       if (isBillingUnauthorized(error)) {
         return respond(base("UNAUTHENTICATED"));
@@ -471,11 +710,29 @@ export function createProSubscriptionStartHandler(
 
     switch (result.status) {
       case "READY":
-        return respond(base("READY"), result.redirectUrl);
+        return respond(base("READY"), {
+          providerSubscriptionStatus: result.providerSubscriptionStatus,
+          checkoutUrl: result.checkoutUrl,
+        });
+      case "INVALID_REQUEST":
+        // The closed rejection category is carried on the DIAGNOSTIC, not in the
+        // response body: the response stays a status word, while an operator can
+        // still tell "no token" from "extra field" without reading the request.
+        return respond({ ...base("INVALID_REQUEST"), reason: result.reason });
       case "ALREADY_IN_PROGRESS":
         return respond(base("ALREADY_IN_PROGRESS"));
-      case "PROVIDER_ERROR":
-        return respond({ ...base("PROVIDER_ERROR"), providerErrorCode: result.providerErrorCode });
+      case "PROVIDER_ERROR": {
+        const diagnostic: ProSubscriptionStartDiagnostic = {
+          ...base("PROVIDER_ERROR"),
+          providerErrorCode: result.providerErrorCode,
+        };
+        // Added, never spread-in as `undefined`: a local refusal must leave the
+        // diagnostic exactly as narrow as it was before MP-M3D.4 existed.
+        if (result.providerDiagnostic !== null) {
+          diagnostic.providerDiagnostic = result.providerDiagnostic;
+        }
+        return respond(diagnostic);
+      }
       case "REMOTE_PREAPPROVAL_CREATED_CORRELATION_FAILED":
         return respond({
           ...base("REMOTE_PREAPPROVAL_CREATED_CORRELATION_FAILED"),
@@ -492,24 +749,84 @@ export function createProSubscriptionStartHandler(
 
 /* ======================= critical-state recovery log ==================== */
 
+/** Renders the sanitized provider text fields as JSON, one array per kind. */
+function causeField(label: string, values: readonly string[]): string {
+  return values.length === 0 ? `${label}=[]` : `${label}=${JSON.stringify(values)}`;
+}
+
 /**
- * Builds the sink that makes the critical state findable.
+ * Builds the provider-failure line (MP-M3D.4).
  *
- * `REMOTE_PREAPPROVAL_CREATED_CORRELATION_FAILED` is the one outcome where a
- * human must act on the Mercado Pago side: a subscription may exist that no
- * Cripqer user owns. Nothing else is worth a log line — every other outcome is
- * either a normal refusal or a failure with no remote effect — so this sink
- * writes exactly one line, and only for that state.
+ * Rendered from named fields, exactly like the critical-state line, so the only
+ * values that can appear are closed categories, numbers and strings that already
+ * passed `sanitizeProviderText`. JSON-encoding the free text keeps a stray quote
+ * from being read as log structure.
  *
- * The line is BUILT HERE from named fields, so it cannot contain a token, a
- * header or a provider body even if the caller's diagnostic carried one: the
- * only values interpolated are the closed status, the closed reason code and
- * the two ids the recovery needs.
+ * This line exists because a 502 alone was indistinguishable across causes: a
+ * rejected payload, a timeout and a dead socket all produced the same status and
+ * the same word, with zero preapprovals created, so the failure could not be
+ * diagnosed without repeating it. It records the attempt, not the request.
+ */
+function buildProviderFailureLine(
+  diagnostic: ProSubscriptionStartDiagnostic,
+  provider: MercadoPagoDiagnostic,
+): string {
+  const parts = [
+    "[billing][mercadopago] PROVIDER_ERROR: the Mercado Pago call failed; nothing was created.",
+    `category=${provider.failureCategory}`,
+    `code=${diagnostic.providerErrorCode ?? "unknown"}`,
+    `operation=${provider.operationName ?? "none"}`,
+    `http=${provider.providerHttpStatus ?? "none"}`,
+    `elapsedMs=${provider.elapsedMs ?? "none"}`,
+    `timeoutMs=${provider.timeoutMs ?? "none"}`,
+  ];
+  if (provider.providerRequestId !== null) parts.push(`requestId=${provider.providerRequestId}`);
+  if (provider.providerErrorType !== null) parts.push(`providerType=${provider.providerErrorType}`);
+  if (provider.providerErrorCode !== null) parts.push(`providerCode=${provider.providerErrorCode}`);
+  if (provider.providerMessage !== null) {
+    parts.push(`providerMessage=${JSON.stringify(provider.providerMessage)}`);
+  }
+  parts.push(causeField("causeCodes", provider.providerCauseCodes));
+  parts.push(causeField("causeDescriptions", provider.providerCauseDescriptions));
+  // Said without naming anything this module must never name (test 12b): the
+  // point is only that the failure was sterile.
+  parts.push("Nothing was created, locally or at Mercado Pago.");
+  return parts.join(" ");
+}
+
+/**
+ * Builds the sink that makes the two outcomes worth acting on findable.
+ *
+ * `REMOTE_PREAPPROVAL_CREATED_CORRELATION_FAILED` is the outcome where a human
+ * must act on the Mercado Pago side: a subscription may exist that no Cripqer
+ * user owns.
+ *
+ * `PROVIDER_ERROR` earns a line only when it carries a captured provider
+ * observation. Without one — a missing token, a hand-built error — there is
+ * nothing an operator could act on that the 502 has not already said, so the
+ * sink stays silent and the log keeps meaning "someone must look at this".
+ *
+ * `INVALID_REQUEST` is deliberately NOT logged. It is a caller's mistake on a
+ * public endpoint, so logging it would let an unauthenticated stranger write
+ * unbounded lines into the operator log — and the one value that would make the
+ * line useful is the one value this integration must never record.
+ *
+ * Both lines are BUILT HERE from named fields, so neither can contain a token, a
+ * header or a raw provider body even if a caller's diagnostic carried one: the
+ * only values interpolated are closed codes, numbers, two ids and text that was
+ * already sanitized at the client boundary.
  */
 export function createCriticalPreapprovalLogSink(
   log: (line: string) => void = console.error,
 ): (diagnostic: ProSubscriptionStartDiagnostic) => void {
   return (diagnostic) => {
+    if (diagnostic.status === "PROVIDER_ERROR") {
+      const provider = diagnostic.providerDiagnostic;
+      if (provider === null || provider === undefined) return;
+      log(buildProviderFailureLine(diagnostic, provider));
+      return;
+    }
+
     if (diagnostic.status !== "REMOTE_PREAPPROVAL_CREATED_CORRELATION_FAILED") return;
 
     log(
