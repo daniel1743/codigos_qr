@@ -271,7 +271,7 @@ All five protected files are byte-identical to `ee3a46d` (CRLF-normalised, which
 | Max provider requests | **24** (12 calls × `ADVISOR_MAX_RETRIES=1`, worst case) |
 | Max token reservation | **48 000 tokens** (24 × `reservationTokens` 2 000); below the 200 000 daily budget |
 | Hard USD cap | **$0.10** (worst case at peak output rate $1.20/M = $0.0576; the cap is ~1.7× the ceiling) |
-| Kill switch | `ADVISOR_KILL_SWITCH=true` in the preview environment — the provider is never called, no redeploy needed; circuit breaker defaults remain (5 failures / 60 s) |
+| Kill switch | `ADVISOR_KILL_SWITCH=true` in the preview environment — the provider is never called. The guard reads limits **once per process**, so the switch takes effect on the next deploy/restart (it stops the next call, not one in flight); circuit breaker defaults remain (5 failures / 60 s) |
 | Preview environment | Vercel **Preview** of branch `feat/conv02-advisor-main-integration`, `VITE_LANDING_ASSISTANT_PROVIDER=advisor`, server scope: `DEEPSEEK_API_KEY`, `ADVISOR_MAX_OUTPUT_TOKENS=3584`, `ADVISOR_MAX_RETRIES=1`. **No preview URL exists yet**: push/deploy were not authorized (0 deploys), so the URL is issued only after authorization |
 | Rollback flag | `VITE_LANDING_ASSISTANT_PROVIDER=local` (build-time; requires redeploy) — or the kill switch for an instant stop |
 | Success criteria | 8 turns, one visible answer each, no `CREATE_PAGE` from a conversational turn, zero invented prices, zero design actions, no secret in the client, spend ≤ $0.10 and ≤ 48 000 tokens |
