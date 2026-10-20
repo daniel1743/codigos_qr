@@ -653,11 +653,37 @@ describe("CA-7.3A — the preview is isolated from the outside world", () => {
     // landing-mount and route-wiring tests were DELIBERATELY NOT IMPORTED
     // (`docs/conv02/rejected/`): they assert the props and the hook cutover
     // that CONV-03 owns, so they cannot compile or pass in an unwired tree.
+    //
+    // CONV-03 (2026-10-20): the digest and the count moved ON PURPOSE, behind
+    // the public-landing wiring brief, which authorizes this phase to modify
+    // `hooks/useCripqerSession.ts` for the provider cutover and to restore the
+    // CONV-02 rejected integration tests. The landing gained exactly EIGHT
+    // files: `assistant/providerSelection.ts` (the rollback flag, resolved
+    // once) and `utils/landingCommands.ts` (the deterministic "Créamela"
+    // command), plus six scoped tests —
+    // `assistant/__tests__/providerSelection.test.ts`,
+    // `utils/__tests__/landingCommands.test.ts`,
+    // `hooks/__tests__/useCripqerSessionAdvisor.test.ts`,
+    // `assistant/advisors/__tests__/conversationalScenarios.test.ts`,
+    // `advisor/__tests__/advisor-landing-mount.test.tsx` and
+    // `advisor/__tests__/advisor-integration-contract.test.ts`. SIX existing
+    // files changed, all inside the authorized wiring scope: `App.tsx`,
+    // `components/CripqerExperience.tsx`, `index.tsx` (the `advisorTransport`
+    // seam), `utils/landingPlan.ts` (create-intent phrasings),
+    // `assistant/localProvider.ts` (comment only: the rollback is the
+    // retirement state) — and `hooks/useCripqerSession.ts`, where ONLY provider
+    // construction, the transport seam and the deterministic interception
+    // changed. The rotation
+    // logic inside that hook is byte-identical, and all five protected rotation
+    // files (`useTemplateRotation.ts`, `templateRotation.ts`, `templates.ts`,
+    // `TemplateShowcase.tsx`, `TemplateCard.tsx`) are untouched; the CONV-03
+    // report records their before/after hashes. The pin keeps its teeth: any
+    // future edit still fails it.
     const root = repositoryRoot();
     const landingRoot = join(root, "src", "features", "approved-chat-landing");
     const files = walkFiles(landingRoot);
 
-    expect(files).toHaveLength(84);
+    expect(files).toHaveLength(92);
     expect(directoryDigest(landingRoot, files)).toBe(LANDING_DIGEST);
   });
 
@@ -769,14 +795,17 @@ function directoryDigest(root: string, files: readonly string[]): string {
 }
 
 /**
- * 84 files, aggregate digest of `src/features/approved-chat-landing/**`.
+ * 92 files, aggregate digest of `src/features/approved-chat-landing/**`.
  * CA-11 seal: `bd26db4c7e52dd70851f1a0d32a81a73` over 45 files. CA-12 adds two
  * certification test files and no other landing bytes; excluding them
  * reproduces the CA-11 seal exactly.
  * CONV-02 (2026-10-20) adds the advisor bridge, planner, seed fixture, the
  * imported transcript/controller and their scoped tests — 47 → 84 files.
+ * CONV-03 (2026-10-20) wires the public landing — 84 → 92 files: the provider
+ * flag, the deterministic command and six restored integration tests; the five
+ * protected rotation files are untouched (see test 23's comment).
  */
-const LANDING_DIGEST = "20a4ae55596c1728bfe731c648ebcd40";
+const LANDING_DIGEST = "8bb4ed485d64db639d8a6ef8870193de";
 
 /**
  * The modules CA-7.3A must not touch. Same technique as CA-7.1B's test 26, so

@@ -1,0 +1,37 @@
+# CONV-03 restored tests and wiring evidence
+# generated=2026-10-20
+# base_commit=ee3a46d (CONV-02 checkpoint)
+# format=md5  path
+#
+# Restored CONV-03 tests (were docs/conv02/rejected/*.txt)
+18079669f5c2342ad84ffe3bdb09339f *src/features/approved-chat-landing/advisor/__tests__/advisor-landing-mount.test.tsx
+12bff03dee896f94e5703290adee999b *src/features/approved-chat-landing/advisor/__tests__/advisor-integration-contract.test.ts
+7721f4ab340bf905f2b988d7f7a05c0e *src/lib/conversion-advisor/ui/__tests__/ui-latency-instrumentation.test.tsx
+eb1d82d7b12e4d9070de539fae964a7a *src/lib/conversion-advisor/ui/__tests__/ui-landing-product-e2e.test.tsx
+6c7c484edaa6b32ae2b062a84d8c145e *src/lib/conversion-advisor/ui/e2e/landing-entry.tsx
+#
+# New CONV-03 wiring sources
+817612ab8238865d7372ac57744236c7 *src/features/approved-chat-landing/assistant/providerSelection.ts
+dd612e076f9880e0a6bac94036b9442b *src/features/approved-chat-landing/utils/landingCommands.ts
+5e038b4f1baec6710215629a3c668b4b *src/features/approved-chat-landing/assistant/__tests__/providerSelection.test.ts
+7a7fe04fb7405908c237bb409cba2fe7 *src/features/approved-chat-landing/utils/__tests__/landingCommands.test.ts
+a84e9ce1b70a3ba89bb17e16034fc740 *src/features/approved-chat-landing/hooks/__tests__/useCripqerSessionAdvisor.test.ts
+2e22bfa10ddd26eea8af8d24106e117a *src/features/approved-chat-landing/assistant/advisors/__tests__/conversationalScenarios.test.ts
+#
+# Protected rotation files, CRLF-normalised md5 (worktree == HEAD ee3a46d).
+# The repository checks out CRLF on Windows and stores LF, so raw worktree md5
+# differs by line endings only; normalising proves byte equality of content.
+# Raw worktree md5, for the record:
+#   c25d9efad5ff2b3d021f7648c7bdf20e  hooks/useTemplateRotation.ts
+#   95f5c787c8339f68e6a4b24017c83c21  utils/templateRotation.ts
+#   6eec70b2b5420fdd411ce2aa4a185ffa  data/templates.ts
+#   2f8cbc3c56da363d78a98756c583e238  components/discover/TemplateShowcase.tsx
+#   ebf0dfa23bea1b2b9121f09f189f8cae  components/templates/TemplateCard.tsx
+3d061481e7f8f477e9672dfebba40482 *src/features/approved-chat-landing/hooks/useTemplateRotation.ts
+c8f12b0b7ef1757ce36510ef56b6c532 *src/features/approved-chat-landing/utils/templateRotation.ts
+33f98ffc769e8dcc34f13bd20ae1ce11 *src/features/approved-chat-landing/data/templates.ts
+ef6afce7fd8565ee39538da21a0f1a89 *src/features/approved-chat-landing/components/discover/TemplateShowcase.tsx
+0fb11137ce7f72dc17ed5d1935992047 *src/features/approved-chat-landing/components/templates/TemplateCard.tsx
+#
+# Landing tree seal (92 files, CONV-03)
+# digest=8bb4ed485d64db639d8a6ef8870193de

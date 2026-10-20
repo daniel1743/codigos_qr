@@ -2,17 +2,16 @@ import { afterSelection, applySelection, runAgent } from '../utils/agent';
 import type { AssistantProvider, AssistantRequest, AssistantResponse } from './contracts';
 
 /*
- * SUPERSEDED AS A PRODUCT PROVIDER (CONV-02).
+ * RETIRED AS A PRODUCT PROVIDER (CONV-03).
  *
  * The landing's brain is the Conversion Advisor, reached through the
- * `conversion-advisor` provider in `assistant/advisors/`. This module still
- * exists because `useCripqerSession` still constructs it at mount
- * (`modify_in_conv02: false`): the provider cutover is CONV-03, and removing the
- * wiring now would half-migrate the hook.
+ * `conversion-advisor` provider in `assistant/advisors/`. This module survives
+ * ONLY as the emergency rollback selected by `VITE_LANDING_ASSISTANT_PROVIDER=local`
+ * and as the fixture that proves the service contract did not move: no normal
+ * visitor turn reaches it.
  *
- * It is kept byte-for-byte semantics-compatible on purpose, so a test can prove
- * the service contract did not move. Do not extend it: the rule set is frozen
- * and the seeds now use `utils/seedResponses.ts`.
+ * It is kept byte-for-byte semantics-compatible on purpose. Do not extend it:
+ * the rule set is frozen and the seeds use `utils/seedResponses.ts`.
  */
 
 export const LOCAL_PROVIDER_ID = 'local-rule-based';

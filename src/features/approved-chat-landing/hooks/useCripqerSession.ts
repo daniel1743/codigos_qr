@@ -4,6 +4,11 @@ import { useTemplateRotation } from './useTemplateRotation';
 import { applyAgentResponse, applyPatch, applySelection } from '../utils/agent';
 import { createAssistantService } from '../assistant/service';
 import { createLocalAssistantProvider } from '../assistant/localProvider';
+import { createConversionAdvisorProvider } from '../assistant/advisors/provider';
+import { createConversionAdvisorClient } from '../assistant/advisors/transport';
+import { resolveLandingAssistantProvider } from '../assistant/providerSelection';
+import { planDeterministicTurn } from '../utils/landingCommands';
+import type { ConversionAdvisorClient } from '../assistant/advisors/contract';
 import type { AssistantOutcome, AssistantService } from '../assistant/contracts';
 import { buildSeed } from '../utils/seed';
 import { createBusinessContextStore, type BusinessContextStore } from '../state/businessContext';
@@ -42,7 +47,17 @@ function categorySlots(typeId: string): TemplateId[] {
   return pool.slice(0, 4);
 }
 
-export function useCripqerSession(startAt: StartAt) {
+export interface CripqerSessionOptions {
+  /**
+   * CONV-03 · the Advisor transport, injectable so a test or a host can run the
+   * real landing with a scripted, zero-network conversation. Production omits
+   * it and gets the canonical server-function client. It is the CLIENT, not the
+   * provider: no presentation component ever sees a raw provider object.
+   */
+  readonly advisorTransport?: ConversionAdvisorClient | undefined;
+}
+
+export function useCripqerSession(startAt: StartAt, options: CripqerSessionOptions = {}) {
   const seed = useRef(buildSeed(startAt)).current;
   const [stage, setStage] = useState<Stage>(seed.stage);
   const [messages, setMessages] = useState<ChatMessage[]>(seed.messages);
@@ -52,7 +67,20 @@ export function useCripqerSession(startAt: StartAt) {
   const context = useSyncExternalStore(store.subscribe, store.get, store.get);
 
   const assistantRef = useRef<AssistantService | null>(null);
-  if (!assistantRef.current) assistantRef.current = createAssistantService({ provider: createLocalAssistantProvider() });
+  if (!assistantRef.current) {
+    // CONV-03 · the product provider is the Conversion Advisor. The flag is
+    // resolved ONCE, here, so a session can never hold two brains and an Advisor
+    // failure can never wake the local one (the facade answers a safe sentence).
+    const kind = resolveLandingAssistantProvider();
+    assistantRef.current =
+      kind === 'local' ?
+      createAssistantService({ provider: createLocalAssistantProvider() }) :
+      createAssistantService({
+        provider: createConversionAdvisorProvider({
+          client: options.advisorTransport ?? createConversionAdvisorClient()
+        })
+      });
+  }
   const assistant = assistantRef.current;
   const [thinking, setThinking] = useState(false);
   const [draft, setDraft] = useState('');
@@ -328,6 +356,27 @@ export function useCripqerSession(startAt: StartAt) {
       later(() => {
         push('assistant', FROZEN_SAFE_RESPONSE);
         setThinking(false);
+      }, THINK_MS);
+      return;
+    }
+    // CONV-03 · CREATE_PAGE never waits for a model. A ready landing executes
+    // the existing deterministic command (and its persistence path); a not-ready
+    // one asks for the next missing slot. Neither touches the transport, so a
+    // creation instruction costs zero provider calls and cannot be talked into
+    // happening early by model output.
+    const deterministic = planDeterministicTurn({ context: store.get(), message: clean });
+    if (deterministic) {
+      setThinking(true);
+      later(() => {
+        void respond(async () => ({
+          ok: true,
+          response: {
+            text: deterministic.response.text,
+            actions: deterministic.response.actions,
+            metadata: { provider: 'deterministic-landing', model: null, fallback: false }
+          },
+          error: null
+        }));
       }, THINK_MS);
       return;
     }

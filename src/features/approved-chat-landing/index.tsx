@@ -1,10 +1,17 @@
 import { App } from "./App";
+import type { ConversionAdvisorClient } from "./assistant/advisors/contract";
 import type { StartAt } from "./types/cripqer";
 import "./styles/landing.css";
 
 interface ApprovedChatLandingProps {
   /** Which state of the approved experience to render (review/parity helper). */
   startAt?: StartAt;
+  /**
+   * CONV-03 · optional transport seam. Production omits it and the session
+   * builds the canonical server-function client; a test or an isolated host
+   * injects a scripted one so the real landing can run with zero network.
+   */
+  advisorTransport?: ConversionAdvisorClient | undefined;
 }
 
 /**
@@ -15,10 +22,10 @@ interface ApprovedChatLandingProps {
  * (see styles/landing.css). Every component below it is the approved Magic
  * Patterns implementation, copied unchanged.
  */
-export function ApprovedChatLanding({ startAt = "discover" }: ApprovedChatLandingProps) {
+export function ApprovedChatLanding({ startAt = "discover", advisorTransport }: ApprovedChatLandingProps) {
   return (
     <div className="cripqer-chat-landing">
-      <App key={startAt} startAt={startAt} />
+      <App key={startAt} startAt={startAt} advisorTransport={advisorTransport} />
     </div>
   );
 }

@@ -47,7 +47,7 @@ import type {
 
 /** Explicit "build it now" wording. Deliberately narrow: it is an instruction, not a wish. */
 const CREATE_INTENT =
-  /(creamela|creala|crealo|hazmela|hazla|generala|crea mi pagina ya|crear ya|adelante|dale,? crea|ya,? crea|listo,? crea|vamos con|creala ya|generala ya)/;
+  /(creamela|creala|crealo|hazmela|hazla|generala|crea mi pagina ya|crear ya|adelante|dale,? crea|ya,? crea|listo,? crea|vamos con|creala ya|generala ya|quiero esta|quiero ese|quiero esa|me quedo con esta|esa misma)/;
 
 /** "Show me it" wording: preview without committing. */
 const PREVIEW_CUE = /(muestrame|muestra|verla|verlo|ver|abre|abreme|preview|ensename|como se ve|como queda|ejemplo)/;

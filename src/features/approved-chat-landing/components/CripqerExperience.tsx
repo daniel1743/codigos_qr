@@ -11,14 +11,17 @@ import { TemplatePreview } from './TemplatePreview';
 import { TemplateSheet } from './catalog/TemplateSheet';
 import { useCripqerSession } from '../hooks/useCripqerSession';
 import { useMediaQuery } from '../hooks/useMediaQuery';
+import type { ConversionAdvisorClient } from '../assistant/advisors/contract';
 import type { StartAt } from '../types/cripqer';
 
 interface CripqerExperienceProps {
   startAt: StartAt;
+  /** CONV-03 · optional scripted transport; omitted in production. */
+  advisorTransport?: ConversionAdvisorClient | undefined;
 }
 
-export function CripqerExperience({ startAt }: CripqerExperienceProps) {
-  const session = useCripqerSession(startAt);
+export function CripqerExperience({ startAt, advisorTransport }: CripqerExperienceProps) {
+  const session = useCripqerSession(startAt, { advisorTransport });
   const isDesktop = useMediaQuery('(min-width: 768px)');
   const { stage, context, previewId, setPreviewId, selectTemplate, drawerOpen, setDrawerOpen } = session;
 

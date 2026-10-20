@@ -32,3 +32,26 @@ guard and their tests — is in place. CONV-03 restores these five by:
 
 No test was deleted, weakened or skipped to reach the CONV-02 result. The
 governing `ROTATION_VISUAL_FROZEN` suites are untouched and pass 24/24.
+
+## CONV-03 · restored
+
+CONV-03 (2026-10-20) restored all five at their intended executable paths, and
+none is skipped or excluded (`vitest.config.ts` untouched for them):
+
+| Restored path |
+| --- |
+| `src/features/approved-chat-landing/advisor/__tests__/advisor-landing-mount.test.tsx` |
+| `src/features/approved-chat-landing/advisor/__tests__/advisor-integration-contract.test.ts` |
+| `src/lib/conversion-advisor/ui/__tests__/ui-latency-instrumentation.test.tsx` |
+| `src/lib/conversion-advisor/ui/__tests__/ui-landing-product-e2e.test.tsx` |
+| `src/lib/conversion-advisor/ui/e2e/landing-entry.tsx` |
+
+Two adaptations are recorded in the file headers, not hidden: the product E2E
+and its entry now drive the shipped landing through the `advisorTransport`
+seam in happy-dom instead of CA-11's chromium host, because CONV-03 mounts no
+second assistant surface and its suite must spend zero money. Every original
+assertion intent is kept — one call per turn, one visible answer, no prototype
+voice, hostile text as text, no self-navigation, zero network. The `.txt`
+snapshots above stay as CONV-02's historical record; the executable tests live
+at the paths in this table. Digests are recorded in
+`docs/conv03/restored-tests.md5`.
