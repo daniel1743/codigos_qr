@@ -90,13 +90,22 @@ export interface ReviewView {
   rating: number;
 }
 
+/** What a slot draws when it has no persisted text and no sample applies. */
+const EMPTY_REVIEW: ReviewDefaults = { name: "", text: "", rating: 5 };
+
 /**
  * The effective review shown for a slot: the persisted value when present,
  * otherwise the sample default for that position. Shared by the renderer and
  * the editor panel so both always agree.
+ *
+ * `sample` is what a slot the document never filled draws. A page made by hand
+ * keeps the sample — it is the demo its author replaces. A page generated from
+ * the Business Context declares its own rows, so its renderer passes `false` and
+ * an unfilled slot draws nothing rather than a fictional testimonial the
+ * business never received.
  */
-export function readReview(doc: PageDoc, blockKey: string, slot: string, index: number): ReviewView {
-  const fallback = defaultReviewContent(index);
+export function readReview(doc: PageDoc, blockKey: string, slot: string, index: number, sample = true): ReviewView {
+  const fallback = sample ? defaultReviewContent(index) : EMPTY_REVIEW;
   const p = doc.props[reviewId(blockKey, slot)] ?? {};
   return {
     id: reviewId(blockKey, slot),

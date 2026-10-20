@@ -6,6 +6,7 @@ import { Editable } from "../editor/Editable";
 import { EditableText } from "../editor/EditableText";
 import { cx } from "../../utils/cx";
 import { blockPrefix } from "../../utils/styles";
+import { isBusinessContextContent } from "../../utils/contentOrigin";
 import { resolveRowTreatment } from "../../utils/rowTreatment";
 import {
   SERVICES_MAX,
@@ -43,6 +44,19 @@ export function ServicesBlock({ block, maxWidth = 720 }: ServicesBlockProps) {
   const canAdd = order.length < SERVICES_MAX;
   const blockProps = ed.doc.props[`block:${block.key}`] ?? {};
   const treatment = resolveRowTreatment(blockProps["rowTreatment"]);
+  /**
+   * Microfase 3B · the sample switch, exactly as the hero applies it.
+   *
+   * A page made by hand keeps the editor's sample rows: that is the demo its
+   * author replaces, and it is what every page published before this change
+   * resolves to. A page generated from the Business Context declares its own
+   * rows — the generator writes them into `texts`, with the slot list in the
+   * block's props — so a slot it never filled draws nothing rather than the
+   * editor's generic sample. The sample stays available while editing, where it
+   * is the starting point for a row the author has just added.
+   */
+  const generated = isBusinessContextContent(ed.doc.props.page);
+  const sample = !generated || ed.mode === "edit";
 
   /** Opt-in, exactly like the reviews heading: nothing appears until it is written. */
   const titleId = `${blockPrefix(block)}services.title`;
@@ -72,7 +86,7 @@ export function ServicesBlock({ block, maxWidth = 720 }: ServicesBlockProps) {
 
       <ul className={cx(treatment === "rule" && "cq-line border-t")}>
         {order.map((slot, index) => {
-          const row = readService(ed.doc, block.key, slot, index);
+          const row = readService(ed.doc, block.key, slot, index, sample);
           return (
             <Editable
               key={slot}

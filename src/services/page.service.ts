@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Page, PageInsert, PageType } from "../types/database";
+import { selectLandingPage } from "../lib/editor-routing/resolveCanonicalMagicPage";
 
 /**
  * The only page types the `pages` table (and this service) accepts.
@@ -48,6 +49,36 @@ export interface PublicPageResult {
   published_template_config: unknown;
   slug: string | null;
   published_at: string | null;
+}
+
+/**
+ * Human-readable reason for a failed first-page creation.
+ *
+ * Supabase surfaces a PostgREST/PL-pgSQL failure as a PLAIN OBJECT
+ * (`{ message, details, hint, code }`) inside `{ error }`, not as an `Error`
+ * instance — so the previous UI collapsed every server failure into the generic
+ * "No se pudo crear la pagina." and silently discarded the real cause. This maps
+ * the known server signals to a human sentence and keeps a bounded fallback.
+ */
+export function describePageCreationError(error: unknown): string {
+  const record = (error ?? {}) as { message?: unknown; code?: unknown };
+  const code = typeof record.code === "string" ? record.code : "";
+  const message = typeof record.message === "string" ? record.message : "";
+  const signature = `${code} ${message}`;
+
+  if (signature.includes("AUTH_REQUIRED") || code === "PGRST301") {
+    return "Debes iniciar sesión para crear tu página.";
+  }
+  if (signature.includes("PROFILE_REQUIRED")) {
+    return "Necesitas un perfil para crear tu página.";
+  }
+  if (
+    signature.includes("INITIAL_PAGE_ALREADY_EXISTS") ||
+    /already exists|ya tienes una p[áa]gina/i.test(signature)
+  ) {
+    return "Ya tienes una página. Ábrela para editarla.";
+  }
+  return "No pudimos crear tu página. Inténtalo de nuevo en unos segundos.";
 }
 
 /**
@@ -274,6 +305,61 @@ export const pageService = {
       throw new PageServiceError("No se pudo crear tu página inicial.");
     }
     return row as Page;
+  },
+
+  /**
+   * Resolve the owner's canonical landing page (read-only, RLS-scoped).
+   *
+   * A `page_type = "catalog"` row is an EXTENSION of a landing and never counts
+   * as the landing itself (same rule as `selectLandingPage`), so a catalog-only
+   * owner still resolves to `null` and can create their initial landing.
+   */
+  async findOwnedLandingPage(supabase: SupabaseClient, userId: string): Promise<Page | null> {
+    if (!userId) return null;
+    const pages = await this.listOwnPages(supabase, userId);
+    return selectLandingPage(pages);
+  },
+
+  /**
+   * FIRST-PAGE ENTRY POINT — idempotent and recoverable.
+   *
+   * The secure boundary is untouched: the ONE initial landing can only be
+   * created through the server-side RPC `create_initial_landing_page` (general
+   * `pages` INSERT stays admin-only). On top of it this method:
+   *
+   *   1. resumes the owner's existing landing instead of failing when one
+   *      already exists (so an account that already has a page is never
+   *      dead-ended by "create");
+   *   2. recovers from a PARTIAL SUCCESS: if a previous attempt (or another tab
+   *      winning the race) already created the row but the client never saw the
+   *      response, the row is found and resumed instead of leaving an orphan
+   *      page plus a permanent "no se pudo crear" loop;
+   *   3. only surfaces a human error when there is genuinely no page to open.
+   */
+  async createOrResumeInitialLandingPage(
+    supabase: SupabaseClient,
+    userId: string,
+  ): Promise<{ page: Page; resumed: boolean }> {
+    if (!userId) {
+      throw new PageServiceError("Debes iniciar sesión para crear tu página.");
+    }
+
+    const existing = await this.findOwnedLandingPage(supabase, userId);
+    if (existing) return { page: existing, resumed: true };
+
+    try {
+      const created = await this.createInitialLandingPage(supabase);
+      return { page: created, resumed: false };
+    } catch (error) {
+      // Another request may have created the row between the read above and the
+      // RPC (concurrent click / other device / previous partial attempt). The
+      // RPC serializes writers, so re-reading resolves to the winning row.
+      const recovered = await this.findOwnedLandingPage(supabase, userId).catch(() => null);
+      if (recovered) return { page: recovered, resumed: true };
+
+      console.error("[pageService] create_initial_landing_page failed:", error);
+      throw new PageServiceError(describePageCreationError(error));
+    }
   },
 
   /**

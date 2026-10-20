@@ -6,6 +6,7 @@ import { Editable } from "../editor/Editable";
 import { EditableText } from "../editor/EditableText";
 import { cx } from "../../utils/cx";
 import { blockPrefix } from "../../utils/styles";
+import { isBusinessContextContent } from "../../utils/contentOrigin";
 import {
   REVIEWS_MAX,
   addReview,
@@ -67,6 +68,21 @@ export function ReviewsBlock({ block, maxWidth = 720 }: ReviewsBlockProps) {
   const title = ed.doc.texts[titleId] ?? "";
   /** Avatars default ON so published reviews keep the bubble they already had. */
   const showAvatars = blockProps["showAvatars"] !== "off";
+  /**
+   * Microfase 3C · the sample switch, exactly as the hero and the services list
+   * apply it.
+   *
+   * A page made by hand keeps the editor's sample testimonials: that is the demo
+   * its author replaces, and it is what every page published before this change
+   * resolves to. A page generated from the Business Context has no verified
+   * review from the owner — a pack's demo testimonials are not this business's
+   * customers — so a slot it never filled draws nothing rather than attributing
+   * a made-up name, rating and experience to a real business. The sample stays
+   * available while editing, where it is the starting point for a review the
+   * author has just added.
+   */
+  const generated = isBusinessContextContent(ed.doc.props.page);
+  const sample = !generated || ed.mode === "edit";
 
   return (
     <div className={cx("mx-auto w-full", m ? "px-5" : "px-10")} style={{ maxWidth: maxWidth + 80 }}>
@@ -84,7 +100,7 @@ export function ReviewsBlock({ block, maxWidth = 720 }: ReviewsBlockProps) {
         className={cx("grid", single ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2", m ? "gap-3" : "gap-4")}
         style={single && !m ? { maxWidth: 420, marginInline: "auto" } : undefined}>
         {order.map((slot, index) => {
-          const review = readReview(ed.doc, block.key, slot, index);
+          const review = readReview(ed.doc, block.key, slot, index, sample);
           const initials = review.name.trim().slice(0, 1).toUpperCase() || "★";
           return (
             <Editable

@@ -4,14 +4,20 @@ import { CripqerLogo } from './brand/CripqerLogo';
 import { COMPOSER_ID } from './composer/Composer';
 import { getBusinessType, getChannel, getTemplate } from '../utils/templates';
 import { goals } from '../data/business';
+import { isTemplateSelectionFrozen } from '../../landing-lite/flags';
+import { useStartBaseCard } from '../../landing-lite/useStartBaseCard';
 import type { BusinessContext, Stage } from '../types/cripqer';
 
 interface AppHeaderProps {
   stage: Stage;
   context: BusinessContext;
+  /** Opens the real auth flow (Phase 9). */
+  onSignIn: () => void;
 }
 
-export function AppHeader({ stage, context }: AppHeaderProps) {
+export function AppHeader({ stage, context, onSignIn }: AppHeaderProps) {
+  const { starting, start: startPersonalize } = useStartBaseCard();
+  const frozen = isTemplateSelectionFrozen();
   const type = getBusinessType(context.businessIdentity.type);
   const channel = getChannel(context.primaryChannel);
   const goal = goals.find((g) => g.id === context.primaryGoal);
@@ -57,19 +63,30 @@ export function AppHeader({ stage, context }: AppHeaderProps) {
         }
         <button
           type="button"
+          onClick={onSignIn}
           className="h-9 whitespace-nowrap rounded-full px-4 text-[13.5px] font-medium text-ink shadow-[0_0_0_1px_rgba(15,26,46,0.12)] transition-colors duration-150 hover:bg-white">
-          
+
           Iniciar sesión
         </button>
-        {stage === 'discover' &&
-        <button
-          type="button"
-          onClick={() => document.getElementById(COMPOSER_ID)?.focus()}
-          className="hidden h-9 whitespace-nowrap rounded-full bg-ink px-5 text-[13.5px] font-semibold text-white transition-colors duration-150 hover:bg-ink/90 sm:block">
-          
-            Crear mi página
-          </button>
-        }
+        {stage === 'discover' && (
+          frozen ? (
+            <button
+              type="button"
+              data-cta="personalizar-tarjeta"
+              onClick={() => void startPersonalize()}
+              disabled={starting}
+              className="inline-flex h-9 whitespace-nowrap items-center justify-center rounded-full bg-ink px-4 text-[13.5px] font-semibold text-white transition-colors duration-150 hover:bg-ink/90 disabled:opacity-60 sm:px-5">
+              {starting ? "Preparando tu tarjeta..." : "Personalizar una tarjeta"}
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => document.getElementById(COMPOSER_ID)?.focus()}
+              className="hidden h-9 whitespace-nowrap rounded-full bg-ink px-5 text-[13.5px] font-semibold text-white transition-colors duration-150 hover:bg-ink/90 sm:block">
+              Crear mi página
+            </button>
+          )
+        )}
       </div>
     </header>);
 

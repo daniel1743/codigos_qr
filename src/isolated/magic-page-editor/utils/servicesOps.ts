@@ -100,18 +100,27 @@ export interface ServiceView {
   price: string;
 }
 
+/** What a slot draws when it has no persisted text and no sample applies. */
+const EMPTY_SERVICE: ServiceDefaults = { title: "", detail: "", price: "" };
+
 /**
  * The effective row shown for a slot: the persisted text when present, otherwise
  * the sample default for that position. Shared by the renderer and the editor
  * panel so both always agree.
+ *
+ * `sample` is what a slot the document never filled draws. A page made by hand
+ * keeps the sample — it is the demo its author replaces. A page generated from
+ * the Business Context declares its own rows, so its renderer passes `false` and
+ * an unfilled slot draws nothing rather than the editor's generic sample.
  */
 export function readService(
   doc: PageDoc,
   blockKey: string,
   slot: string,
   index: number,
+  sample = true,
 ): ServiceView {
-  const fallback = defaultServiceContent(index);
+  const fallback = sample ? defaultServiceContent(index) : EMPTY_SERVICE;
   return {
     id: serviceId(blockKey, slot),
     slot,

@@ -5,6 +5,7 @@ import { TemplateCard } from '../templates/TemplateCard';
 import { moodFilters, templates } from '../../data/templates';
 import { getBusinessType, getTemplate, resolveContent } from '../../utils/templates';
 import { rankFamilies } from '../../utils/recommend';
+import { isTemplateSelectionFrozen } from '../../../landing-lite/flags';
 import type { BusinessContext, TemplateId } from '../../types/cripqer';
 
 interface TemplateCatalogProps {
@@ -15,6 +16,7 @@ interface TemplateCatalogProps {
 }
 
 export function TemplateCatalog({ context, onPreview, onSelect, onClose }: TemplateCatalogProps) {
+  const frozen = isTemplateSelectionFrozen();
   const type = getBusinessType(context.businessIdentity.type);
   const [tab, setTab] = useState<'recommended' | 'all'>('recommended');
   const [mood, setMood] = useState('all');
@@ -110,16 +112,17 @@ export function TemplateCatalog({ context, onPreview, onSelect, onClose }: Templ
                 frameClassName="h-[230px]"
                 compactLabel
                 footer={
-                <button
-                  type="button"
-                  onClick={() => onSelect(id)}
-                  disabled={selected}
-                  className={`mt-2 h-8 w-full rounded-full text-[12.5px] font-semibold transition-[background-color,color] duration-150 ${
-                  selected ? 'bg-brand-gold-soft text-ink' : 'text-ink shadow-[0_0_0_1px_rgba(15,26,46,0.12)] hover:bg-ink hover:text-white'}`
-                  }>
-                  
-                    {selected ? 'Elegida' : 'Usar este estilo'}
-                  </button>
+                  !frozen ? (
+                    <button
+                      type="button"
+                      onClick={() => onSelect(id)}
+                      disabled={selected}
+                      className={`mt-2 h-8 w-full rounded-full text-[12.5px] font-semibold transition-[background-color,color] duration-150 ${
+                      selected ? 'bg-brand-gold-soft text-ink' : 'text-ink shadow-[0_0_0_1px_rgba(15,26,46,0.12)] hover:bg-ink hover:text-white'}`
+                      }>
+                      {selected ? 'Elegida' : 'Usar este estilo'}
+                    </button>
+                  ) : undefined
                 } />);
 
 

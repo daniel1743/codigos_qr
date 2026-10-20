@@ -45,21 +45,21 @@ export function DiscoverStage({
             ease
           }
         }}>
-            <h1 className="font-display text-[27px] font-bold leading-[1.1] tracking-[-0.025em] text-ink md:text-[40px] xl:text-[44px] xl:leading-[1.06]">
+            <h1 className="font-display text-[min(26px,7vw)] font-bold leading-[1.1] tracking-[-0.025em] text-ink md:text-[40px] xl:text-[44px] xl:leading-[1.06]">
               Páginas increíbles,
               <br className="md:hidden" /> sin empezar desde cero.
             </h1>
             <p className="mt-1.5 text-[14.5px] text-muted md:mt-2 md:text-[16px]">Explora estilos o cuéntanos qué quieres crear.</p>
           </motion.div>
 
-          <div className="mt-5 h-[48vh] min-h-[320px] md:mt-[3vh] md:h-auto md:min-h-[280px] md:flex-1">
+          <div className="mt-5 min-h-[280px] flex-1 md:mt-[3vh] md:min-h-[280px] md:flex-1">
             <TemplateShowcase slots={slots} packId={null} onOpen={setPreviewId} setPaused={setRotationPaused} previewOpen={previewId !== null} />
           </div>
         </div>
       </div>
 
       {/* Creation — lower third, with clear air above the composer */}
-      <div className="shrink-0 px-4 pb-4 pt-5 md:px-10 md:pb-[3vh] md:pt-[4.5vh]">
+      <div className="shrink-0 px-4 pb-4 pt-3 md:px-10 md:pb-[3vh] md:pt-[4.5vh]">
         <div className="mx-auto w-full max-w-[860px]">
           <motion.div layoutId="composer" transition={{
           duration: 0.3,
@@ -67,7 +67,7 @@ export function DiscoverStage({
         }}>
             <Composer size="lg" value={draft} onChange={setDraft} onSubmit={send} processing={thinking} />
           </motion.div>
-          <motion.div className="no-scrollbar -mx-4 mt-2.5 flex gap-2 overflow-x-auto px-4 md:mx-0 md:mt-3 md:justify-center md:px-0" exit={{
+          <motion.div className="no-scrollbar mt-2.5 grid grid-cols-2 gap-2 md:mx-0 md:mt-3 md:flex md:justify-center md:overflow-x-auto md:px-0" exit={{
           opacity: 0,
           transition: {
             duration: 0.15
@@ -75,7 +75,7 @@ export function DiscoverStage({
         }}>
             {quickActions.map((q, i) => {
             const Icon = QUICK_ICONS[i]!;
-            return <button key={q.label} type="button" onClick={() => send(q.message)} className="inline-flex h-10 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 text-[13px] font-medium text-ink/70 transition-[background-color,color] duration-150 hover:bg-white/80 hover:text-ink md:h-9">
+            return <button key={q.label} type="button" onClick={() => send(q.message)} className="inline-flex min-h-11 w-full items-center gap-1.5 rounded-full px-3 text-left text-[13px] font-medium text-ink/70 transition-[background-color,color] duration-150 hover:bg-white/80 hover:text-ink md:h-9 md:min-h-0 md:w-auto md:shrink-0 md:whitespace-nowrap md:px-3.5">
                   <Icon className="h-3.5 w-3.5 text-muted" strokeWidth={1.75} />
                   {q.label}
                 </button>;

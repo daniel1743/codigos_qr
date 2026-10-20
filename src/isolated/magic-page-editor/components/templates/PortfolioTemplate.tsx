@@ -3,7 +3,7 @@ import { ArrowDownRightIcon, ArrowUpRightIcon } from 'lucide-react';
 import { useEditor } from '../../contexts/EditorContext';
 import { useThemeTokens } from '../../hooks/useThemeTokens';
 import { ButtonGroup } from "../blocks/ButtonGroup";
-import { buttonGroupIdentity, readButtonGroup } from "../../utils/buttonGroup";
+import { buttonGroupIdentity, normalizeDestination, readButtonGroup } from "../../utils/buttonGroup";
 import { singleButtonSeed } from "../../data/bioContent";
 import { SeparatorBlock } from '../blocks/SeparatorBlock';
 import { Block } from '../editor/Block';
@@ -22,6 +22,7 @@ import { images } from '../../data/images';
 import { pfContact, pfGallery, pfProfile, pfProjects, pfSocials, pfStatement } from '../../data/portfolioContent';
 import { cx } from '../../utils/cx';
 import { blockPrefix } from '../../utils/styles';
+import { isBusinessContextContent, sampleUnlessGenerated } from '../../utils/contentOrigin';
 import type { BlockRef } from '../../types/editor';
 import { QuickProfileInfo } from '../profile/QuickProfileInfo';
 
@@ -44,14 +45,40 @@ export function PortfolioTemplate() {
   const btn = 'inline-flex h-12 items-center gap-3 whitespace-nowrap rounded-[4px] px-6 text-[12.5px] font-medium uppercase tracking-[0.16em]';
   const wrap = cx('mx-auto w-full', m ? 'px-5' : 'px-14');
   const wrapStyle: React.CSSProperties = { maxWidth: 1240 };
+  /** Microfase 3C · the footer identity above, resolved once for the whole page. */
+  const generated = isBusinessContextContent(doc.props.page);
+  const footerOwner = generated ? (doc.texts['hero.title'] ?? '').trim() : '© 2026 Andrés Olmo — Olmo Estudio';
+  /** Generated documents link only to explicitly stored, valid destinations. */
+  const actionHref = (id: string, sample: string) => {
+    if (!generated) return sample;
+    const raw = doc.props[id]?.['href'];
+    const resolved = normalizeDestination(raw ?? '');
+    return resolved.valid ? resolved.href : undefined;
+  };
 
   const render = (b: BlockRef) => {
     const p = blockPrefix(b);
     switch (b.type) {
       case 'hero': {
+        /**
+         * Microfase 4B · the hero draws the document's own identity.
+         *
+         * `kicker`, `studio` and `place` are this template's demo author — his
+         * name, his trade, his studio and his city. A page generated from the
+         * conversational Business Context declares none of them, so drawing them
+         * would attribute another author's identity to a real page. `demo()` is
+         * the single switch 3A/3B/3C already use: a document that declares no
+         * origin resolves to exactly the string it always resolved to, so no
+         * page made by hand and nothing already published moves.
+         *
+         * All three are plain text on the media, with no background of their
+         * own, so the slot can keep rendering empty — the field has to stay
+         * reachable from the editor — without drawing anything a visitor sees.
+         */
+        const demo = (sample: string) => sampleUnlessGenerated(doc.props.page, sample);
         /** Same contract as the other templates: built once, handed over twice. */
         const heroParts = (align: 'left' | 'center') => ({
-          brand: <EditableText id={`${p}hero.kicker`} value={pfProfile.kicker} label="Antetítulo" className="cq-muted text-[13.5px] tracking-[0.02em]" />,
+          brand: <EditableText id={`${p}hero.kicker`} value={demo(pfProfile.kicker)} label="Antetítulo" className="cq-muted text-[13.5px] tracking-[0.02em]" />,
           /* L2.5 · the second label of the header row, opposite the brand.
              Opt-in, so an existing page cannot sprout a label on load. */
           eyebrow: (doc.texts[`${p}hero.eyebrow`] ?? '').trim() !== '' ?
@@ -68,7 +95,7 @@ export function PortfolioTemplate() {
                   style={display} /><VerifiedNameCheck avatarId={`${p}avatar`} /></div>,
           description: <QuickProfileInfo />,
           cta: <div className={cx('mt-9 flex flex-wrap gap-3', align === 'center' && 'justify-center')}>
-                    <EditableCTA id={`${p}hero.cta`} label={pfProfile.cta} href="#proyectos" variants={cta} defaultVariant="outline" className={btn} trailing={<ArrowDownRightIcon className="h-4 w-4" />} />
+                    <EditableCTA id={`${p}hero.cta`} label={pfProfile.cta} href={actionHref(`${p}hero.cta`, '#proyectos')} variants={cta} defaultVariant="outline" className={btn} trailing={<ArrowDownRightIcon className="h-4 w-4" />} />
                   </div>,
         });
         const heroSlots = heroParts('left');
@@ -77,22 +104,22 @@ export function PortfolioTemplate() {
             <HeroFrame
               id={`block:${b.key}`}
               media={images.pfHero}
-              mediaAlt="Muro curvo de hormigón iluminado por el sol"
+              mediaAlt={generated ? '' : 'Muro curvo de hormigón iluminado por el sol'}
               defaultVariant="image"
               defaultShape="straight"
               defaultHeight="L"
               radius={t.radius}
               decor={
               <div className={cx('absolute inset-x-0 top-0 flex items-center justify-between', m ? 'px-5 pt-5' : 'px-14 pt-8')}>
-                  <EditableText id={`${p}hero.studio`} value={pfProfile.studio} as="span" label="Marca" className={cx('italic', m ? 'text-[20px]' : 'text-[24px]')} style={{ ...display, color: t.media.fg }} />
-                  <EditableText id={`${p}hero.place`} value={pfProfile.place} as="span" label="Lugar y año" className="text-[11.5px] uppercase tracking-[0.2em]" style={{ color: t.media.muted }} />
+                  <EditableText id={`${p}hero.studio`} value={demo(pfProfile.studio)} as="span" label="Marca" className={cx('italic', m ? 'text-[20px]' : 'text-[24px]')} style={{ ...display, color: t.media.fg }} />
+                  <EditableText id={`${p}hero.place`} value={demo(pfProfile.place)} as="span" label="Lugar y año" className="text-[11.5px] uppercase tracking-[0.2em]" style={{ color: t.media.muted }} />
                 </div>
               }
               avatar={
               <EditableAvatar
                 id={`${p}avatar`}
                 src={images.pfAvatar}
-                alt="Andrés Olmo"
+                alt={generated ? (doc.texts['hero.title'] ?? '').trim() : 'Andrés Olmo'}
                 sizes={m ? { S: 44, M: 56, L: 72 } : { S: 52, M: 68, L: 88 }}
                 ringColor={t.page.color}
                 ringWidth={2}
@@ -120,17 +147,37 @@ export function PortfolioTemplate() {
             </div>
           </Block>);
 
-      case 'gallery':
+      case 'gallery': {
+        /**
+         * Microfase 3B · a generated page draws its own gallery.
+         *
+         * The photos come from the document (`props['gallery'].items`, written by
+         * the generator from the family's own pack) and the heading from the
+         * document's own text; the year range, the label and the portfolio photos
+         * below are this template's demo, and a page generated for a business
+         * that declared none of them must not present them as its own. The
+         * heading row is drawn only when it has something to say.
+         *
+         * A document that declares no origin — every page made by hand — keeps
+         * the demo, heading and photos alike, exactly as before.
+         */
+        const demo = (sample: string) => sampleUnlessGenerated(doc.props.page, sample);
+        const heading = (id: string, sample: string) => (doc.texts[id] ?? demo(sample)).trim();
+        const title = heading(`${p}gallery.title`, 'Selección 2024 — 2026');
+        const count = heading(`${p}gallery.count`, 'Galería');
+        const hasHeading = title !== '' || count !== '';
         return (
           <Block key={b.key} block={b}>
             <div className={wrap} style={wrapStyle}>
+              {hasHeading &&
               <div className="mb-7 flex items-baseline justify-between gap-4">
-                <EditableText id={`${p}gallery.title`} value="Selección 2024 — 2026" as="h2" label="Título" className={cx('cq-fg italic', m ? 'text-[28px]' : 'text-[38px]')} style={display} />
-                <EditableText id={`${p}gallery.count`} value="Galería" as="span" label="Etiqueta" className="cq-muted whitespace-nowrap text-[12px] uppercase tracking-[0.2em]" />
-              </div>
-              <GalleryGrid id={`${p}gallery`} items={pfGallery} defaultLayout="mosaico" radius={t.radius} altPrefix="Fotografía" rowHeight={250} />
+                <EditableText id={`${p}gallery.title`} value={demo('Selección 2024 — 2026')} as="h2" label="Título" className={cx('cq-fg italic', m ? 'text-[28px]' : 'text-[38px]')} style={display} />
+                <EditableText id={`${p}gallery.count`} value={demo('Galería')} as="span" label="Etiqueta" className="cq-muted whitespace-nowrap text-[12px] uppercase tracking-[0.2em]" />
+              </div>}
+              <GalleryGrid id={`${p}gallery`} items={isBusinessContextContent(doc.props.page) ? [] : pfGallery} defaultLayout="mosaico" radius={t.radius} altPrefix="Fotografía" rowHeight={250} />
             </div>
           </Block>);
+      }
 
       case 'collection':{
           const layout = doc.props[`block:${b.key}`]?.layout ?? 'lista';
@@ -199,7 +246,7 @@ export function PortfolioTemplate() {
                 <EditableCTA
                   id={`${p}links.cta`}
                   label={pfContact.cta}
-                  href="mailto:estudio@olmo.photo"
+                  href={actionHref(`${p}links.cta`, 'mailto:estudio@olmo.photo')}
                   variants={inkCta}
                   fullDefault
                   className={cx(btn, 'h-16 justify-between')}
@@ -208,7 +255,7 @@ export function PortfolioTemplate() {
                 <EditableCTA
                   id={`${p}links.cta2`}
                   label={pfContact.cta2}
-                  href="https://olmo.photo/portfolio.pdf"
+                  href={actionHref(`${p}links.cta2`, 'https://olmo.photo/portfolio.pdf')}
                   variants={inkCta}
                   defaultVariant="outline"
                   fullDefault
@@ -227,7 +274,7 @@ export function PortfolioTemplate() {
             <div className={cx(wrap, 'flex flex-wrap items-center gap-2')} style={wrapStyle}>
               <EditableText id={`${p}social.label`} value="En otros sitios" as="span" label="Etiqueta" className="cq-muted mr-3 text-[12px] uppercase tracking-[0.2em]" />
               <EditableSocialGroup className="flex flex-wrap items-center"><>{pfSocials.map((s, i) =>
-              <EditableSocial key={s.platform} id={`${p}social.${i}`} platform={s.platform} href={s.href} size={42} defaultStyle="plain" />
+              <EditableSocial key={s.platform} id={`${p}social.${i}`} platform={s.platform} href={generated ? undefined : s.href} size={42} defaultStyle="plain" />
               )}</></EditableSocialGroup>
             </div>
           </Block>);
@@ -253,7 +300,7 @@ export function PortfolioTemplate() {
         className={cx('cq-line flex border-t', m ? 'flex-col gap-2 px-5 py-8' : 'items-center justify-between px-14 py-8')}
         style={footerTone}>
         
-        <EditableText id="footer.name" value="© 2026 Andrés Olmo — Olmo Estudio" label="Aviso" className="cq-muted text-[12.5px]" />
+        <EditableText id="footer.name" value={footerOwner} label="Aviso" className="cq-muted text-[12.5px]" />
         <EditableText id="footer.brand" value="Hecho con Cripqer" label="Marca" className="cq-muted text-[12.5px]" />
       </Editable>
     </PageRoot>);

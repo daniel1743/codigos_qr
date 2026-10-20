@@ -22,6 +22,7 @@ import { familyForBlockType } from '../../data/cardFamilies';
 import { images } from '../../data/images';
 import { cx } from '../../utils/cx';
 import { blockPrefix, mediaHeightStyle } from '../../utils/styles';
+import { isBusinessContextContent } from '../../utils/contentOrigin';
 import { resolveVideo, videoCover, videoHasProviderTreatment, videoStatusLabel } from '../../utils/video';
 import type { BlockRef, SocialPlatform } from '../../types/editor';
 import { useFreeImagePan } from '../editor/controls/PositionPad';
@@ -142,7 +143,7 @@ export function GenericBlock({ block, ctaVariants, maxWidth = 1080 }: GenericBlo
           </div>}
           <EditableSocialGroup className={cx(wrap, 'flex flex-wrap justify-center')} style={{ maxWidth }}>
             {genericSocials.map((pf, i) =>
-            <EditableSocial key={pf} id={`${p}social.${i}`} platform={pf} href="https://" />
+            <EditableSocial key={pf} id={`${p}social.${i}`} platform={pf} href={isBusinessContextContent(doc.props.page) ? undefined : 'https://'} />
             )}
           </EditableSocialGroup>
         </>);
@@ -157,7 +158,12 @@ export function GenericBlock({ block, ctaVariants, maxWidth = 1080 }: GenericBlo
     case 'gallery':
       return (
         <div className={wrap} style={{ maxWidth }}>
-          <GalleryGrid id={`${p}gallery`} items={[images.bioStreet, images.bizClinic, images.pfStair]} defaultLayout="fila" radius={Math.min(t.radius, 20)} altPrefix="Foto" />
+          {/* Microfase 3B · the photos below are this renderer's demo, and one of
+              them is the clinic's. A page generated from the Business Context
+              declares its own set in `props['<id>'].items` — which `GalleryGrid`
+              prefers — so its fallback is the empty set, never another
+              industry's photos. A hand-made page keeps the demo unchanged. */}
+          <GalleryGrid id={`${p}gallery`} items={isBusinessContextContent(doc.props.page) ? [] : [images.bioStreet, images.bizClinic, images.pfStair]} defaultLayout="fila" radius={Math.min(t.radius, 20)} altPrefix="Foto" />
         </div>);
 
     case 'video':
@@ -167,17 +173,20 @@ export function GenericBlock({ block, ctaVariants, maxWidth = 1080 }: GenericBlo
       const video = resolveVideo(videoProps['href']);
       const preview = videoCover(video, videoProps['src'], images.bioHero);
       const playing = playingVideo === videoId;
+      const demoVideo = videoProps['demo'] === 'true';
+      const demoOwner = (videoProps['demoOwner'] ?? 'CRIPQER').trim() || 'CRIPQER';
+      const emptyMessage = video.source === 'none' ? 'Añade tu vídeo' : 'Enlace de vídeo no compatible';
       return (
         <div className={wrap} style={{ maxWidth }}>
           <EditableText id={`${p}video.title`} value="Mira el vídeo" as="h2" label="Título" className={cx(heading, 'mb-6')} style={display} />
           <Editable id={videoId} kind="card" label="Vídeo" className="relative aspect-video w-full overflow-hidden" style={{ borderRadius: t.radius }}>
-            {playing && video.embed ? <iframe className="absolute inset-0 h-full w-full" src={video.embed} title="Reproductor de vídeo" allow="autoplay; fullscreen; picture-in-picture" allowFullScreen /> : <><img src={preview} alt="Portada del vídeo" draggable={false} {...videoCrop.handlers} className="absolute inset-0 h-full w-full touch-none object-cover" style={{ objectPosition: videoProps['cropX'] || videoProps['cropY'] ? videoCrop.objectPosition : videoProps['pos'] ?? 'center', transform: `scale(${videoProps['zoom'] ?? '1'})` }} />{videoHasProviderTreatment(video) && <div className="pointer-events-none absolute inset-0 bg-black/30"><span className="absolute left-5 top-5 text-[13px] font-semibold uppercase tracking-[0.16em] text-white">Vimeo</span></div>}</>}
-            {!playing && <button type="button" aria-label="Reproducir vídeo" onClick={(event) => { event.stopPropagation(); setPlayingVideo(video.embed ? videoId : null); }} className="absolute inset-0 z-[2] grid place-items-center">
+            {!video.embed ? <div className="absolute inset-0 grid place-items-center border border-dashed border-[color:var(--line)] bg-[color:var(--surface)] px-6 text-center text-[13px] text-[color:var(--muted)]"><span>{emptyMessage}</span></div> : playing && video.embed ? <iframe className="absolute inset-0 h-full w-full" src={video.embed} title="Reproductor de vídeo" allow="autoplay; fullscreen; picture-in-picture" allowFullScreen /> : <><img src={preview} alt={demoVideo ? `Vídeo demo de ${demoOwner}` : 'Portada del vídeo'} draggable={false} {...videoCrop.handlers} className="absolute inset-0 h-full w-full touch-none object-cover" style={{ objectPosition: videoProps['cropX'] || videoProps['cropY'] ? videoCrop.objectPosition : videoProps['pos'] ?? 'center', transform: `scale(${videoProps['zoom'] ?? '1'})` }} />{videoHasProviderTreatment(video) && <div className="pointer-events-none absolute inset-0 bg-black/30"><span className="absolute left-5 top-5 text-[13px] font-semibold uppercase tracking-[0.16em] text-white">Vimeo</span></div>}</>}
+            {video.embed && !playing && <button type="button" aria-label="Reproducir vídeo" onClick={(event) => { event.stopPropagation(); setPlayingVideo(videoId); }} className="absolute inset-0 z-[2] grid place-items-center">
               <span className="grid h-16 w-16 place-items-center rounded-full bg-white text-[#15171C] shadow-lg">
                 <PlayIcon className="ml-1 h-6 w-6" fill="currentColor" />
               </span>
             </button>}
-            {!playing && <span className="pointer-events-none absolute bottom-4 left-4 rounded-md bg-black/60 px-2 py-1 text-[12px] font-medium text-white">{videoStatusLabel(video)}</span>}
+            {video.embed && !playing && <span className="pointer-events-none absolute bottom-4 left-4 rounded-md bg-black/60 px-2 py-1 text-[12px] font-medium text-white">{demoVideo ? `Demo · ${demoOwner}` : videoStatusLabel(video)}</span>}
           </Editable>
         </div>);
       }

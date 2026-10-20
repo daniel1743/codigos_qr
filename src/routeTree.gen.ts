@@ -20,6 +20,7 @@ import { Route as EncryptedDocumentsRouteImport } from './routes/encrypted-docum
 import { Route as EngineLabRouteImport } from './routes/engine-lab'
 import { Route as HelpRouteImport } from './routes/help'
 import { Route as LandingChatParityRouteImport } from './routes/landing-chat-parity'
+import { Route as LandingLegacyRouteImport } from './routes/landing-legacy'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as OnboardingPreviewRouteImport } from './routes/onboarding-preview'
 import { Route as OnboardingTestRouteImport } from './routes/onboarding-test'
@@ -101,6 +102,11 @@ const HelpRoute = HelpRouteImport.update({
 const LandingChatParityRoute = LandingChatParityRouteImport.update({
   id: '/landing-chat-parity',
   path: '/landing-chat-parity',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LandingLegacyRoute = LandingLegacyRouteImport.update({
+  id: '/landing-legacy',
+  path: '/landing-legacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -252,6 +258,7 @@ export interface FileRoutesByFullPath {
   '/engine-lab': typeof EngineLabRoute
   '/help': typeof HelpRoute
   '/landing-chat-parity': typeof LandingChatParityRoute
+  '/landing-legacy': typeof LandingLegacyRoute
   '/login': typeof LoginRoute
   '/onboarding-preview': typeof OnboardingPreviewRoute
   '/onboarding-test': typeof OnboardingTestRoute
@@ -292,6 +299,7 @@ export interface FileRoutesByTo {
   '/engine-lab': typeof EngineLabRoute
   '/help': typeof HelpRoute
   '/landing-chat-parity': typeof LandingChatParityRoute
+  '/landing-legacy': typeof LandingLegacyRoute
   '/login': typeof LoginRoute
   '/onboarding-preview': typeof OnboardingPreviewRoute
   '/onboarding-test': typeof OnboardingTestRoute
@@ -333,6 +341,7 @@ export interface FileRoutesById {
   '/engine-lab': typeof EngineLabRoute
   '/help': typeof HelpRoute
   '/landing-chat-parity': typeof LandingChatParityRoute
+  '/landing-legacy': typeof LandingLegacyRoute
   '/login': typeof LoginRoute
   '/onboarding-preview': typeof OnboardingPreviewRoute
   '/onboarding-test': typeof OnboardingTestRoute
@@ -375,6 +384,7 @@ export interface FileRouteTypes {
     | '/engine-lab'
     | '/help'
     | '/landing-chat-parity'
+    | '/landing-legacy'
     | '/login'
     | '/onboarding-preview'
     | '/onboarding-test'
@@ -415,6 +425,7 @@ export interface FileRouteTypes {
     | '/engine-lab'
     | '/help'
     | '/landing-chat-parity'
+    | '/landing-legacy'
     | '/login'
     | '/onboarding-preview'
     | '/onboarding-test'
@@ -455,6 +466,7 @@ export interface FileRouteTypes {
     | '/engine-lab'
     | '/help'
     | '/landing-chat-parity'
+    | '/landing-legacy'
     | '/login'
     | '/onboarding-preview'
     | '/onboarding-test'
@@ -496,6 +508,7 @@ export interface RootRouteChildren {
   EngineLabRoute: typeof EngineLabRoute
   HelpRoute: typeof HelpRoute
   LandingChatParityRoute: typeof LandingChatParityRoute
+  LandingLegacyRoute: typeof LandingLegacyRoute
   LoginRoute: typeof LoginRoute
   OnboardingPreviewRoute: typeof OnboardingPreviewRoute
   OnboardingTestRoute: typeof OnboardingTestRoute
@@ -595,6 +608,13 @@ declare module '@tanstack/react-router' {
       path: '/landing-chat-parity'
       fullPath: '/landing-chat-parity'
       preLoaderRoute: typeof LandingChatParityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/landing-legacy': {
+      id: '/landing-legacy'
+      path: '/landing-legacy'
+      fullPath: '/landing-legacy'
+      preLoaderRoute: typeof LandingLegacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -833,6 +853,7 @@ const rootRouteChildren: RootRouteChildren = {
   EngineLabRoute: EngineLabRoute,
   HelpRoute: HelpRoute,
   LandingChatParityRoute: LandingChatParityRoute,
+  LandingLegacyRoute: LandingLegacyRoute,
   LoginRoute: LoginRoute,
   OnboardingPreviewRoute: OnboardingPreviewRoute,
   OnboardingTestRoute: OnboardingTestRoute,

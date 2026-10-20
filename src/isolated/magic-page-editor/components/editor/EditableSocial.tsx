@@ -5,6 +5,8 @@ import { Editable } from './Editable';
 import { SocialIcon } from '../icons/SocialIcon';
 import { socialLabel } from '../../data/socialPlatforms';
 import { resolveSocialPresentation, socialPillStyle } from '../../utils/socialOps';
+import { normalizeDestination } from '../../utils/buttonGroup';
+import { isBusinessContextContent } from '../../utils/contentOrigin';
 import type { SocialPlatform } from '../../types/editor';
 
 export type SocialStyle = 'circle' | 'square' | 'plain';
@@ -16,7 +18,8 @@ export type SocialSize = 'sm' | 'md' | 'lg';
 interface EditableSocialProps {
   id: string;
   platform: SocialPlatform;
-  href: string;
+  /** Undefined keeps the social control visible and editable without creating a dead link. */
+  href?: string;
   size?: number;
   defaultStyle?: SocialStyle;
 }
@@ -37,6 +40,10 @@ export function EditableSocial({ id, platform, href, size = 44, defaultStyle = '
   const renderedSize = socialSize === 'sm' ? Math.round(size * 0.82) : socialSize === 'lg' ? Math.round(size * 1.18) : size;
   const p = doc.props[id] ?? {};
   const pf = p.platform as SocialPlatform ?? platform;
+  const rawHref = p.href ?? href;
+  const resolvedHref = isBusinessContextContent(doc.props.page)
+    ? (normalizeDestination(rawHref ?? '').valid ? normalizeDestination(rawHref ?? '').href : undefined)
+    : rawHref;
 
   const customBubble = doc.props[scope]?.['socialBubbleColor'] as string | undefined;
   const customIcon = doc.props[scope]?.['socialIconColor'] as string | undefined;
@@ -52,7 +59,7 @@ export function EditableSocial({ id, platform, href, size = 44, defaultStyle = '
         kind="social"
         label={socialLabel(pf)}
         as="a"
-        href={p.href ?? href}
+        href={resolvedHref}
         target="_blank"
         rel="noreferrer"
         aria-label={socialLabel(pf)}
@@ -79,7 +86,7 @@ export function EditableSocial({ id, platform, href, size = 44, defaultStyle = '
       kind="social"
       label={socialLabel(pf)}
       as="a"
-      href={p.href ?? href}
+      href={resolvedHref}
       target="_blank"
       rel="noreferrer"
       aria-label={socialLabel(pf)}

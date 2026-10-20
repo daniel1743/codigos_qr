@@ -5,6 +5,8 @@ import { ScaledTemplate } from './templates/ScaledTemplate';
 import { TemplatePage } from './templates/TemplatePage';
 import { blockLabels, layoutLabels, pageFamilyLabels } from '../data/templates';
 import { contentForPack, getTemplate, resolveContent } from '../utils/templates';
+import { isTemplateSelectionFrozen } from '../../landing-lite/flags';
+import { useStartBaseCard } from '../../landing-lite/useStartBaseCard';
 import type { BusinessContext, TemplateId } from '../types/cripqer';
 
 interface TemplatePreviewProps {
@@ -69,27 +71,41 @@ function PreviewBody({ id, context, packId, isDesktop, onClose, onUse }: Preview
   const content = personalised ? resolveContent(t, context) : contentForPack(t, packId);
   const selected = context.template.selectedTemplateId === id;
   const swatches = [t.palette.bg, t.palette.surface, t.palette.text, t.palette.accent];
+  const frozen = isTemplateSelectionFrozen();
+  const { starting, start: startPersonalize } = useStartBaseCard();
 
-  const actions =
-  <div className="flex flex-col gap-2">
-      <button
-      type="button"
-      onClick={() => onUse(id)}
-      disabled={selected}
-      className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-brand-blue text-[15px] font-semibold text-white transition-[background-color,transform] duration-150 ease-out hover:bg-brand-blue-deep active:scale-[0.98] disabled:bg-brand-gold-soft disabled:text-ink">
-      
-        {selected ?
-      <>
-            <CheckIcon className="h-4 w-4" strokeWidth={2.5} /> Es tu estilo actual
-          </> :
-
-      'Usar este estilo'
-      }
-      </button>
+  const actions = (
+    <div className="flex flex-col gap-2">
+      {frozen ? (
+        <button
+          type="button"
+          data-cta="personalizar-tarjeta"
+          onClick={() => void startPersonalize()}
+          disabled={starting}
+          className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-brand-gold text-[15px] font-semibold text-ink transition-[background-color,transform] duration-150 ease-out hover:bg-brand-gold/90 active:scale-[0.98] disabled:opacity-60"
+        >
+          {starting ? "Preparando tu tarjeta..." : "Personalizar una tarjeta"}
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={() => onUse(id)}
+          disabled={selected}
+          className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-brand-blue text-[15px] font-semibold text-white transition-[background-color,transform] duration-150 ease-out hover:bg-brand-blue-deep active:scale-[0.98] disabled:bg-brand-gold-soft disabled:text-ink">
+          {selected ? (
+            <>
+              <CheckIcon className="h-4 w-4" strokeWidth={2.5} /> Es tu estilo actual
+            </>
+          ) : (
+            'Usar este estilo'
+          )}
+        </button>
+      )}
       <button type="button" onClick={onClose} className="h-11 w-full rounded-full text-[14px] font-medium text-muted transition-colors duration-150 hover:text-ink">
         Seguir explorando
       </button>
-    </div>;
+    </div>
+  );
 
 
   return (
