@@ -12,10 +12,18 @@ import type {
 '../types/cripqer';
 
 /*
- * PROTOTYPE-ONLY local agent. Not connected to any LLM.
- * Production: Conversational UI → Cripqer Assistant Service → LLM provider (provider-independent).
- * The service must return the same structured AgentResponse (text + AgentAction[] + context patch);
- * it never returns JSX or mutates the UI directly. Do not extend this file with more rules.
+ * FIXTURE-ONLY local agent (CONV-02). NOT a product provider any more.
+ *
+ * Since CONV-02 the landing's brain is the Conversion Advisor. This module is
+ * kept for its PURE primitives — extraction, patch/selection application, the
+ * ordinal and reference resolvers, the ranking helpers — which the deterministic
+ * planner (`utils/landingPlan.ts`) reuses. `runAgent` itself survives only to
+ * build the seeded prototype conversations (`utils/seed.ts`), so its rule set
+ * must not grow: new conversational behaviour belongs to the advisor.
+ *
+ * Production: Conversational UI → Assistant Service → Conversion Advisor.
+ * The service returns the same structured AgentResponse (text + AgentAction[]);
+ * it never returns JSX or mutates the UI directly.
  */
 export function normalize(s: string): string {
   return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -83,7 +91,7 @@ export function applySelection(ctx: BusinessContext, id: TemplateId): BusinessCo
 
 const REFERENCE_CUES = ['vi', 'arriba', 'principio', 'inicio', 'gusto', 'gusta', 'plantilla', 'estilo', 'pagina', 'esa', 'quiero la', 'usa la', 'elijo'];
 
-function resolveTemplateReference(t: string, ctx: BusinessContext): TemplateId | null {
+export function resolveTemplateReference(t: string, ctx: BusinessContext): TemplateId | null {
   const hasCue = REFERENCE_CUES.some((c) => new RegExp(`\\b${c}`).test(t));
   if (!hasCue) return null;
   const named = templates.find((tpl) => t.includes(normalize(tpl.name)));
@@ -106,7 +114,7 @@ const ORDINALS: [RegExp, number][] = [
 [/\b(ultima)\b/, -1]];
 
 
-function resolveOrdinal(t: string, ctx: BusinessContext): TemplateId | null {
+export function resolveOrdinal(t: string, ctx: BusinessContext): TemplateId | null {
   const list = ctx.session.lastShownTemplates;
   if (!list.length || !/\b(quiero|elijo|me quedo|usa|dame|esa|la)\b/.test(t)) return null;
   for (const [re, idx] of ORDINALS) {
@@ -115,7 +123,7 @@ function resolveOrdinal(t: string, ctx: BusinessContext): TemplateId | null {
   return null;
 }
 
-function recommendByTags(words: string[], exclude: TemplateId[] = []): TemplateId[] {
+export function recommendByTags(words: string[], exclude: TemplateId[] = []): TemplateId[] {
   const scored = templates.
   map((tpl) => ({ id: tpl.id, score: tpl.tags.filter((tag) => words.includes(tag)).length })).
   filter((s) => s.score > 0 && !exclude.includes(s.id)).
@@ -123,7 +131,7 @@ function recommendByTags(words: string[], exclude: TemplateId[] = []): TemplateI
   return scored.slice(0, 3).map((s) => s.id);
 }
 
-function similarTo(ctx: BusinessContext): {base: TemplateId;ids: TemplateId[];} | null {
+export function similarTo(ctx: BusinessContext): {base: TemplateId;ids: TemplateId[];} | null {
   const base = ctx.template.selectedTemplateId ?? ctx.session.lastShownTemplates[0] ?? null;
   if (!base) return null;
   const seen = ctx.session.lastShownTemplates;

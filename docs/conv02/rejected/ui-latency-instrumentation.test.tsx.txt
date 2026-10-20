@@ -1,0 +1,160 @@
+// @vitest-environment happy-dom
+/**
+ * CRIPQER Conversion Advisor — CA-12 · the visitor-facing latency breakdown.
+ *
+ * Measures, against the REAL mounted landing with a SCRIPTED transport:
+ *
+ *   submit → PROCESSING visible   the surface acknowledges the click (render)
+ *   submit → ANSWERED visible     the whole turn as the visitor experiences it
+ *   provider-equivalent           the delay the scripted transport was told to take
+ *   CRIPQER-side render overhead  the difference (event handling, projection,
+ *                                 state, commit) — separated from the provider
+ *
+ * It also checks that a turn logs NOTHING that carries the visitor's text or a
+ * credential: the advisor stack has no console call at all, and this run keeps
+ * it that way.
+ *
+ * These are local happy-dom numbers, not production timings; the assertions are
+ * wide and the printed line is the measurement. ZERO real calls, zero spend.
+ */
+
+import { act, type ReactElement } from "react";
+import { createRoot } from "react-dom/client";
+
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+import { ApprovedChatLanding } from "../../../../features/approved-chat-landing";
+import type { AdvisorTransport } from "../types";
+
+(
+  globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
+
+vi.setConfig({ testTimeout: 30_000 });
+
+const PROVIDER_MS = 80;
+const VISITOR_TEXT = "consulta privada CA12-ABC";
+
+function response(message: string): unknown {
+  return {
+    version: 1,
+    status: "ANSWERED",
+    message,
+    notice: null,
+    actions: [],
+    conversation: { turns_used: 1, turns_remaining: 2 },
+  };
+}
+
+const transport: AdvisorTransport = async () => {
+  await new Promise((resolve) => setTimeout(resolve, PROVIDER_MS));
+  return response("Respuesta verificada del asesor.");
+};
+
+const mounted: Array<() => void> = [];
+
+function mount(node: ReactElement): HTMLElement {
+  const host = document.createElement("div");
+  document.body.append(host);
+  const root = createRoot(host);
+  act(() => {
+    root.render(node);
+  });
+  mounted.push(() => {
+    act(() => root.unmount());
+    host.remove();
+  });
+  return host;
+}
+
+function field(host: HTMLElement): HTMLTextAreaElement {
+  const elements = host.querySelectorAll("#cripqer-composer");
+  const element = elements[elements.length - 1];
+  if (!(element instanceof HTMLTextAreaElement)) throw new Error("CA12_TEST: no composer");
+  return element;
+}
+
+function sendButton(host: HTMLElement): HTMLButtonElement {
+  const buttons = host.querySelectorAll('button[aria-label="Enviar"]');
+  const button = buttons[buttons.length - 1];
+  if (!(button instanceof HTMLButtonElement)) throw new Error("CA12_TEST: no send button");
+  return button;
+}
+
+function statuses(host: HTMLElement): Array<string | null> {
+  return [...host.querySelectorAll("[data-status]")].map((node) => node.getAttribute("data-status"));
+}
+
+async function until(host: HTMLElement, predicate: () => boolean, budgetMs: number): Promise<number> {
+  const startedAt = performance.now();
+  while (performance.now() - startedAt < budgetMs && !predicate()) {
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 5));
+    });
+  }
+  return performance.now() - startedAt;
+}
+
+afterEach(() => {
+  while (mounted.length > 0) mounted.pop()?.();
+  document.body.innerHTML = "";
+  vi.restoreAllMocks();
+});
+
+describe("CA-12 — measurement of the real surface", () => {
+  it("1 · acknowledges the submit, then settles, with the provider term separated", async () => {
+    const logged: unknown[][] = [];
+    for (const method of ["log", "info", "warn", "error", "debug"] as const) {
+      vi.spyOn(console, method).mockImplementation((...args: unknown[]) => {
+        logged.push(args);
+      });
+    }
+
+    const host = mount(<ApprovedChatLanding advisorTransport={transport} />);
+
+    const textarea = field(host);
+    const setter = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, "value")?.set;
+    if (setter === undefined) throw new Error("CA12_TEST: no native value setter");
+    act(() => {
+      setter.call(textarea, VISITOR_TEXT);
+      textarea.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+
+    const submittedAt = performance.now();
+    act(() => {
+      sendButton(host).click();
+    });
+    const acknowledgementMs = performance.now() - submittedAt;
+
+    // The click is acknowledged before the provider answers: PROCESSING is
+    // already on screen when the handler returns.
+    expect(statuses(host)).toContain("PROCESSING");
+    expect(acknowledgementMs).toBeLessThan(250);
+
+    const settleMs = await until(host, () => statuses(host).includes("ANSWERED"), 5_000);
+    const totalMs = performance.now() - submittedAt;
+    const crIpqerOverheadMs = Math.max(0, totalMs - PROVIDER_MS);
+
+    expect(statuses(host)).toContain("ANSWERED");
+    expect(totalMs).toBeGreaterThanOrEqual(PROVIDER_MS);
+    // Wide on purpose: happy-dom commit + polling granularity, not a benchmark.
+    expect(crIpqerOverheadMs).toBeLessThan(1_500);
+    expect(settleMs).toBeLessThan(5_000);
+
+    const summary =
+      `[CA-12 latency] surface: submit→PROCESSING=${acknowledgementMs.toFixed(1)}ms ` +
+      `provider(scripted)=${PROVIDER_MS}ms total=${totalMs.toFixed(1)}ms ` +
+      `cripqer+render≈${crIpqerOverheadMs.toFixed(1)}ms`;
+
+    // Nothing logged a payload: no visitor text, no credential-shaped string.
+    // (The advisor stack has no console call at all; this proves it under a turn.)
+    const loggedText = logged
+      .flat()
+      .map((entry) => String(entry))
+      .join("\n");
+    vi.restoreAllMocks();
+    expect(loggedText).not.toContain(VISITOR_TEXT);
+    expect(loggedText).not.toMatch(/sk-[A-Za-z0-9]/);
+    console.log(summary);
+  });
+});

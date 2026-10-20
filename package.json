@@ -14,7 +14,9 @@
     "typecheck:gate": "node scripts/check-undeclared.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
-    "verify": "npm run typecheck:gate && npm run lint && npm run test"
+    "verify": "npm run typecheck:gate && npm run lint && npm run test",
+    "test:advisor": "vitest run src/lib/conversion-advisor src/features/approved-chat-landing",
+    "test:advisor:eval": "vitest run src/lib/conversion-advisor/evaluation"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

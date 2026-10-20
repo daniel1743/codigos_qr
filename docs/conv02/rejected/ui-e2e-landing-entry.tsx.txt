@@ -1,0 +1,74 @@
+/**
+ * CRIPQER CA-11 · the browser entry of the PRODUCT E2E.
+ *
+ * It mounts what the product mounts: `ApprovedChatLanding`, with its real input,
+ * its real stages and the real `useCripqerSession` — which now owns the
+ * Advisor's canonical controller. The only thing this file supplies is the
+ * transport and the trusted navigation callback, exactly the two seams a host
+ * owns in production.
+ *
+ * The transport is the same shape as CA-7.4-C's (`/api/session` and `/api/turn`
+ * against the ephemeral host), so the pipeline behind it is real and only the
+ * provider's `fetchImpl` is scripted. It returns `unknown`: the landing's
+ * controller validates it, not this file.
+ *
+ * Navigation is recorded, not performed. `onNavigate` is the host boundary CA-10B
+ * defined; recording the call is how the test distinguishes "the visitor clicked
+ * once" from "something navigated by itself".
+ */
+
+import { createRoot } from "react-dom/client";
+
+import { ApprovedChatLanding } from "../../../../features/approved-chat-landing";
+import type { AdvisorTransport } from "../types";
+
+declare global {
+  interface Window {
+    __ca11_navigations?: string[];
+  }
+}
+
+const params = new URLSearchParams(window.location.search);
+const scenario = params.get("scenario") ?? "answered";
+
+window.__ca11_navigations = [];
+
+async function newSession(): Promise<string> {
+  const response = await fetch("/api/session", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ scenario }),
+  });
+  if (!response.ok) throw new Error("CA11_E2E: could not start a session");
+  const body = (await response.json()) as { handle?: unknown };
+  return String(body.handle);
+}
+
+function makeTransport(): AdvisorTransport {
+  let handle: Promise<string> | null = null;
+
+  return async ({ text, signal }) => {
+    handle ??= newSession();
+    const session = await handle;
+    const response = await fetch("/api/turn", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ text, scenario, handle: session }),
+      signal,
+    });
+    if (!response.ok) throw new Error("CA11_E2E: transport failed");
+    return (await response.json()) as unknown;
+  };
+}
+
+const root = document.getElementById("root");
+if (root === null) throw new Error("CA11_E2E: no #root");
+
+createRoot(root).render(
+  <ApprovedChatLanding
+    advisorTransport={makeTransport()}
+    onNavigate={(destination: string) => {
+      window.__ca11_navigations?.push(destination);
+    }}
+  />,
+);

@@ -2,15 +2,17 @@ import { afterSelection, applySelection, runAgent } from '../utils/agent';
 import type { AssistantProvider, AssistantRequest, AssistantResponse } from './contracts';
 
 /*
- * PROTOTYPE-ONLY provider: the local rule-based agent that shipped with the
- * approved landing. It is the ONLY module that calls runAgent/afterSelection.
+ * SUPERSEDED AS A PRODUCT PROVIDER (CONV-02).
  *
- * It is synchronous on purpose (the prototype answers instantly); the async
- * surface exists so a remote provider can replace it without changing the
- * service, the session or the UI.
+ * The landing's brain is the Conversion Advisor, reached through the
+ * `conversion-advisor` provider in `assistant/advisors/`. This module still
+ * exists because `useCripqerSession` still constructs it at mount
+ * (`modify_in_conv02: false`): the provider cutover is CONV-03, and removing the
+ * wiring now would half-migrate the hook.
  *
- * Do not extend this file with more conversational rules: provider logic will
- * move behind a real LLM provider in a later phase.
+ * It is kept byte-for-byte semantics-compatible on purpose, so a test can prove
+ * the service contract did not move. Do not extend it: the rule set is frozen
+ * and the seeds now use `utils/seedResponses.ts`.
  */
 
 export const LOCAL_PROVIDER_ID = 'local-rule-based';

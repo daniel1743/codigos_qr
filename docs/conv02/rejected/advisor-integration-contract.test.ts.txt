@@ -1,0 +1,116 @@
+/**
+ * CRIPQER CA-11 · the integration CONTRACT, read from the source.
+ *
+ * A mounted capability is easy to fake: a second local answer path, a duplicated
+ * composer, a hard-coded destination. This file asserts the shape that makes the
+ * mount real rather than a lookalike, on comment-stripped source (a regex over
+ * raw text matches prose — this project has recorded that false edge before):
+ *
+ *  1. the landing's transport delegates to the canonical server functions, and
+ *     the server entry runs ONE `runConversationalTurn` and projects its result;
+ *  2. the landing's session uses the canonical controller/hook, not a local
+ *     conversation implementation;
+ *  3. the turns are rendered by the canonical `AdvisorEntryView`, so the
+ *     execution boundary is the CA-10B one;
+ *  4. the product route supplies its own router as `onNavigate`, and nothing in
+ *     the integration reaches `window.location` or `history` by itself.
+ */
+
+import { readFileSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
+import { describe, expect, it } from "vitest";
+
+const HERE = dirname(fileURLToPath(import.meta.url));
+const LANDING = resolve(HERE, "..", "..");
+const REPO = resolve(LANDING, "..", "..", "..");
+
+function read(relativePath: string): string {
+  return readFileSync(join(REPO, relativePath), "utf8");
+}
+
+/** Removes block and line comments so prose cannot satisfy a source assertion. */
+function stripComments(source: string): string {
+  const withoutBlocks = source.replace(/\/\*[\s\S]*?\*\//g, "");
+  return withoutBlocks
+    .split("\n")
+    .map((line) => {
+      const index = line.indexOf("//");
+      return index === -1 ? line : line.slice(0, index);
+    })
+    .join("\n");
+}
+
+const transport = stripComments(read("src/features/approved-chat-landing/advisor/transport.ts"));
+const hook = stripComments(
+  read("src/features/approved-chat-landing/hooks/useCripqerSession.ts"),
+);
+const converse = stripComments(
+  read("src/features/approved-chat-landing/components/converse/ConverseStage.tsx"),
+);
+const server = stripComments(read("src/lib/conversion-advisor/integration/server.ts"));
+const route = stripComments(read("src/routes/landing-chat-parity.tsx"));
+
+describe("CA-11 · one canonical Advisor path", () => {
+  it("the landing transport calls the canonical server functions", () => {
+    expect(transport).toContain("startAdvisorSessionFn");
+    expect(transport).toContain("askAdvisorUiTurnFn");
+    expect(transport).toContain("lib/conversion-advisor/integration/server");
+    // No provider, no credential, no second protocol.
+    expect(transport).not.toContain("fetch(");
+    expect(transport).not.toContain("process.env");
+    expect(transport).not.toContain("deepseek");
+  });
+
+  it("the server entry runs the real orchestrator and projects it", () => {
+    expect(server).toContain("askAdvisorUiTurnFn");
+    expect(server).toContain("runConversationalTurn(");
+    expect(server).toContain("projectAdvisorTurn(");
+    // The browser never receives a TurnOutcome, and the server never calls a
+    // provider itself: CA-7.1B owns that.
+    expect(server).not.toContain("fetch(");
+    expect(server).not.toContain("process.env");
+  });
+
+  it("the landing session runs on the canonical controller, not a local one", () => {
+    expect(hook).toContain("useAdvisorConversation");
+    expect(hook).toContain("lib/conversion-advisor/ui/useAdvisorConversation");
+    expect(hook).toContain("advisor.send(");
+    expect(hook).toContain("createLandingAdvisorTransport");
+    // A second, parallel conversation implementation would have to be created
+    // somewhere; neither of these belongs here.
+    expect(hook).not.toContain("createAdvisorConversation");
+    expect(hook).not.toContain("fetch(");
+  });
+
+  it("the transcript renders the canonical entry view and its execution boundary", () => {
+    expect(converse).toContain("AdvisorEntryView");
+    expect(converse).toContain("lib/conversion-advisor/ui/AdvisorConversation");
+    expect(converse).toContain("onNavigate={onNavigate}");
+    // No hand-rolled status labels or navigation constants in the landing.
+    expect(converse).not.toContain("NAVIGATE_INTERNAL");
+    expect(converse).not.toContain('"/help"');
+  });
+});
+
+describe("CA-11 · navigation belongs to the host", () => {
+  it("the route injects its router, and only as a callback", () => {
+    expect(route).toContain("useNavigate");
+    expect(route).toContain("navigate({ to: destination })");
+    expect(route).toContain("onNavigate=");
+  });
+
+  it("no integration file navigates by itself", () => {
+    for (const [name, source] of [
+      ["transport", transport],
+      ["hook", hook],
+      ["converse", converse],
+    ] as const) {
+      expect(source, name).not.toContain("window.location");
+      expect(source, name).not.toContain("location.href");
+      expect(source, name).not.toContain("history.push");
+      expect(source, name).not.toContain("window.open");
+    }
+  });
+});

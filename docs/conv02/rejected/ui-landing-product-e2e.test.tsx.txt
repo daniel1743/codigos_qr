@@ -1,0 +1,338 @@
+// @vitest-environment node
+/**
+ * CRIPQER CA-11 · PRODUCT E2E — the real landing, in a real browser, against the
+ * real pipeline.
+ *
+ * WHAT IS REAL: chromium; the approved landing (`ApprovedChatLanding` →
+ * `useCripqerSession` → the large composer → the conversational stages);
+ * CA-7.4-B's controller and hook; CA-10B's execution boundary; CA-7.1B's
+ * `runConversationalTurn`; CA-8 reservations over a real ledger; CA-3, CA-4,
+ * CA-6; CA-7.4-A's projection and validator.
+ *
+ * WHAT IS NOT: the provider's `fetchImpl` only. The scenario chooses which real
+ * pipeline condition the turn meets; nothing is canned in the browser.
+ *
+ * The host is CA-7.4-C's own ephemeral harness, started with CA-11's landing
+ * entry. No production route is served, no application `index.html` is used, and
+ * the provider key in the pipeline is fictional and points at `.invalid`.
+ */
+
+import { chromium, type Browser, type Page } from "@playwright/test";
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+
+import { startTestHost, type TestHost } from "../e2e/test-host";
+
+vi.setConfig({ testTimeout: 120_000, hookTimeout: 240_000 });
+
+const LANDING_ENTRY = "/src/lib/conversion-advisor/ui/e2e/landing-entry.tsx";
+const SAFE_REPLY =
+  "CRIPQER reúne tu información y tus enlaces en una sola página con QR. ¿Quieres que te cuente cómo se ve?";
+
+let host: TestHost;
+let browser: Browser;
+
+beforeAll(async () => {
+  host = await startTestHost({ entry: LANDING_ENTRY });
+  browser = await chromium.launch({ headless: true });
+
+  // COLD START IS NOT THE SUBJECT. Vite discovers and pre-bundles the landing's
+  // dependency graph (framer-motion, lucide, …) on the first page load, and a
+  // reload follows the optimization. So the harness warms the graph once, here,
+  // before any test measures the product.
+  const warm = await browser.newContext();
+  const page = await warm.newPage();
+  await page.goto(`${host.url}/?scenario=answered`, { waitUntil: "domcontentloaded" });
+  await page.waitForSelector("#cripqer-composer", { timeout: 150_000 });
+  await warm.close();
+}, 240_000);
+
+afterAll(async () => {
+  await browser?.close();
+  await host?.close();
+});
+
+beforeEach(() => {
+  host.pipeline.resetHost();
+});
+
+/* ============================== the harness ============================= */
+
+async function open(scenario: string): Promise<Page> {
+  const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  const page = await context.newPage();
+  const query = new URLSearchParams({ scenario });
+  await page.goto(`${host.url}/?${query.toString()}`, { waitUntil: "domcontentloaded" });
+  await page.waitForSelector("#cripqer-composer", { timeout: 30_000 });
+  return page;
+}
+
+const activeField = (page: Page) => page.locator("#cripqer-composer").last();
+const activeSend = (page: Page) => page.locator('button[aria-label="Enviar"]').last();
+
+/**
+ * Waits until the landing can accept the text currently in the field.
+ *
+ * The button is disabled for TWO independent reasons — an empty draft and a
+ * turn in progress — so the field must hold text before its state can say
+ * anything about `thinking`.
+ */
+async function waitForEnabled(page: Page): Promise<void> {
+  await page.waitForFunction(
+    () => {
+      const buttons = [...document.querySelectorAll('button[aria-label="Enviar"]')];
+      const last = buttons[buttons.length - 1];
+      return last instanceof HTMLButtonElement && !last.disabled;
+    },
+    undefined,
+    { timeout: 30_000 },
+  );
+}
+
+async function send(page: Page, text: string): Promise<void> {
+  await activeField(page).fill(text);
+  // The composer closes while the prototype agent is thinking; filling alone
+  // does not reopen it. Waiting for the ENABLED state after the text is in
+  // proves the turn is really accepted, not merely typed.
+  await waitForEnabled(page);
+  await activeSend(page).click();
+}
+
+async function statuses(page: Page): Promise<readonly (string | null)[]> {
+  return page.$$eval("[data-status]", (nodes) =>
+    nodes.map((node) => (node as HTMLElement).dataset["status"] ?? null),
+  );
+}
+
+async function waitForStatusCount(page: Page, status: string, count: number): Promise<void> {
+  await page.waitForFunction(
+    ({ status, count }) =>
+      document.querySelectorAll(`[data-status="${status}"]`).length >= count,
+    { status, count },
+    { timeout: 30_000 },
+  );
+}
+
+/** For scenarios where CA-4 may legitimately answer, degrade or fall back. */
+async function waitForAnyStatus(page: Page): Promise<void> {
+  await page.waitForFunction(
+    () => document.querySelectorAll("[data-status]").length > 0,
+    undefined,
+    { timeout: 30_000 },
+  );
+}
+
+async function navigations(page: Page): Promise<readonly string[]> {
+  return page.evaluate(() => window.__ca11_navigations ?? []);
+}
+
+/* ============================== the product ============================= */
+
+describe("P01 · the real landing mounts, and does nothing by itself", () => {
+  it("shows the approved landing and opens no conversation before input", async () => {
+    const page = await open("answered");
+
+    expect(await page.locator("text=Páginas increíbles").count()).toBeGreaterThan(0);
+    // ONE input, and it is the landing's own: no hidden second field exists.
+    expect(await page.locator("#cripqer-composer").count()).toBe(1);
+    expect(await page.locator("textarea").count()).toBe(1);
+    expect(await statuses(page)).toEqual([]);
+    expect(await navigations(page)).toEqual([]);
+    expect(host.pipeline.hostStats().turnsStarted).toBe(0);
+    expect(host.pipeline.hostStats().sessions).toBe(0);
+  });
+});
+
+describe("P02 · one real turn through the mounted landing", () => {
+  it("renders PROCESSING then ANSWERED, and the Advisor's validated text", async () => {
+    const page = await open("slow");
+
+    await send(page, "quiero una página con QR");
+    await waitForStatusCount(page, "PROCESSING", 1);
+
+    expect(await page.locator("text=quiero una página con QR").count()).toBeGreaterThan(0);
+    expect(await activeSend(page).isDisabled()).toBe(true);
+    expect(host.pipeline.hostStats().turnsStarted).toBe(1);
+
+    // The real pipeline does not answer a `slow` turn; the assertion here is
+    // that the surface is genuinely in flight and the input is closed.
+    expect(await navigations(page)).toEqual([]);
+  });
+
+  it("accepts the keyboard path exactly like the button", async () => {
+    const page = await open("answered");
+
+    await activeField(page).fill("hola por teclado");
+    await waitForEnabled(page);
+    await activeField(page).press("Enter");
+    await waitForStatusCount(page, "ANSWERED", 1);
+
+    expect(await page.locator("text=hola por teclado").count()).toBeGreaterThan(0);
+    expect(host.pipeline.hostStats().records.map((record) => record.text)).toContain(
+      "hola por teclado",
+    );
+  });
+
+  it("settles ANSWERED on the healthy scenario, with one assistant voice", async () => {
+    const page = await open("answered");
+
+    await send(page, "hola");
+    await waitForStatusCount(page, "ANSWERED", 1);
+
+    expect(await page.locator(`text=${SAFE_REPLY}`).count()).toBeGreaterThan(0);
+    expect(await page.locator("text=quiero una página").count()).toBe(0);
+    // The prototype's greeting must not be a second answer beside the Advisor's.
+    expect(await page.locator("text=¿Qué quieres crear hoy?").count()).toBe(0);
+    expect(await navigations(page)).toEqual([]);
+  });
+});
+
+describe("P02b · the other contract states render in the mounted landing", () => {
+  it("renders DEGRADED, REFUSED and FALLBACK, and none of them offers an action", async () => {
+    for (const [scenario, status] of [
+      ["degraded", "DEGRADED"],
+      ["refused", "REFUSED"],
+      ["fallback", "FALLBACK"],
+    ] as const) {
+      const page = await open(scenario);
+      await send(page, "hola");
+      await waitForStatusCount(page, status, 1);
+
+      expect(await statuses(page)).toEqual([status]);
+      // No state without a confirmed, grounded turn may execute anything.
+      expect(await page.locator("[data-action-id]").count()).toBe(0);
+      expect(await navigations(page)).toEqual([]);
+      await page.context().close();
+    }
+  });
+});
+
+describe("P03 · multi-turn continuity in one conversation", () => {
+  it("keeps three turns in one session and shows all three answers", async () => {
+    const page = await open("answered");
+
+    // `send` itself waits for the landing to accept again, so the three turns
+    // follow the product's own rhythm rather than a fixed timer.
+    await send(page, "uno");
+    await waitForStatusCount(page, "ANSWERED", 1);
+
+    await send(page, "dos");
+    await waitForStatusCount(page, "ANSWERED", 2);
+
+    await send(page, "tres");
+    await waitForStatusCount(page, "ANSWERED", 3);
+
+    const stats = host.pipeline.hostStats();
+    expect(stats.records.map((record) => record.text)).toEqual(["uno", "dos", "tres"]);
+    // ONE conversation: the transport created a single session and reused it.
+    expect(stats.sessions).toBe(1);
+    expect(await page.locator(`text=${SAFE_REPLY}`).count()).toBe(3);
+  });
+});
+
+describe("P04 · OPEN_HELP is inert until the visitor clicks", () => {
+  it("navigates exactly once, on the explicit click, with no extra provider call", async () => {
+    const page = await open("help");
+
+    await send(page, "¿dónde encuentro ayuda?");
+    await waitForStatusCount(page, "ANSWERED", 1);
+
+    const action = page.locator('[data-action-id="OPEN_HELP"]');
+    await action.waitFor({ state: "visible", timeout: 20_000 });
+    expect(await action.isEnabled()).toBe(true);
+
+    // Rendering, settling and time passing are not an execution.
+    await page.waitForTimeout(750);
+    expect(await navigations(page)).toEqual([]);
+    const before = host.pipeline.hostStats().providerCalls;
+
+    await action.click();
+
+    expect(await navigations(page)).toEqual(["/help"]);
+    expect(host.pipeline.hostStats().providerCalls).toBe(before);
+  });
+});
+
+describe("P05 · failure recovery in the product", () => {
+  it("shows ERROR, keeps the failed turn, and recovers through the explicit retry", async () => {
+    const page = await open("recover");
+
+    await send(page, "hola");
+    await waitForStatusCount(page, "ERROR", 1);
+    expect(await page.locator("text=Reintentar").count()).toBeGreaterThan(0);
+    expect(await navigations(page)).toEqual([]);
+
+    // The input is usable again; the visitor may retry or type something else.
+    await activeField(page).fill("otra pregunta");
+    await waitForEnabled(page);
+
+    await page.locator("text=Reintentar").click();
+    await waitForStatusCount(page, "ANSWERED", 1);
+
+    expect(await statuses(page)).toEqual(["ERROR", "ANSWERED"]);
+    expect(host.pipeline.hostStats().records).toHaveLength(2);
+    expect(await navigations(page)).toEqual([]);
+  });
+
+  it("turns an out-of-contract payload into ERROR, never into text", async () => {
+    const page = await open("malformed");
+
+    await send(page, "hola");
+    await waitForStatusCount(page, "ERROR", 1);
+
+    expect(await page.locator("text=Esta carga no cumple el contrato").count()).toBe(0);
+    expect(await page.locator('[href*="evil.invalid"]').count()).toBe(0);
+    expect(await navigations(page)).toEqual([]);
+  });
+});
+
+describe("P06 · rapid submission cannot open a second turn", () => {
+  it("accepts one turn when the visitor presses send twice", async () => {
+    const page = await open("slow");
+
+    await activeField(page).fill("hola");
+    await page.locator('button[aria-label="Enviar"]').last().click();
+    // A keyboard repeat in the same moment is the realistic double submit.
+    await activeField(page).press("Enter");
+    await page.waitForTimeout(250);
+
+    expect(host.pipeline.hostStats().turnsStarted).toBe(1);
+    expect(await statuses(page)).toEqual(["PROCESSING"]);
+  });
+});
+
+describe("P07 · the landing survives the Advisor being mounted", () => {
+  it("keeps the approved content available around the conversation", async () => {
+    const page = await open("answered");
+
+    // The approved landing is there before the Advisor is used at all.
+    expect(await page.locator("text=Páginas increíbles").count()).toBeGreaterThan(0);
+    await send(page, "hola");
+    await waitForStatusCount(page, "ANSWERED", 1);
+
+    // The composer survives the turn, and so do the landing's own controls.
+    expect(await page.locator("#cripqer-composer").count()).toBeGreaterThan(0);
+    expect(await page.locator("text=Plantillas").count()).toBeGreaterThan(0);
+    expect(await page.locator("text=Ideas").count()).toBeGreaterThan(0);
+  });
+
+  it("renders hostile model text as characters, not as markup or a link", async () => {
+    const page = await open("hostile");
+
+    await send(page, "hola");
+    // Whatever CA-4 decided (accept or fall back), the surface renders TEXT.
+    await waitForAnyStatus(page);
+
+    expect(await page.locator('img[onerror*="__ca74c_xss"]').count()).toBe(0);
+    expect(await page.locator('a[href*="evil.invalid"]').count()).toBe(0);
+    expect(await page.evaluate(() => (window as { __ca74c_xss?: number }).__ca74c_xss)).toBeUndefined();
+    const advisor = page.locator('[data-role="ADVISOR"]');
+    expect(await advisor.count()).toBeGreaterThan(0);
+    expect(await advisor.locator("img, a, b, script, iframe, svg").count()).toBe(0);
+    const childElements = await page.$$eval(
+      '[data-role="ADVISOR"] p',
+      (nodes) => nodes.map((node) => node.children.length),
+    );
+    expect(childElements.length).toBeGreaterThan(0);
+    expect(childElements.every((count) => count === 0)).toBe(true);
+  });
+});

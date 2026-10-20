@@ -1,6 +1,6 @@
 import { initialTemplateIds } from '../data/templates';
 import { applyAgentResponse, applySelection, emptyContext } from './agent';
-import { respondLocal } from '../assistant/localProvider';
+import { respondSeed } from './seedResponses';
 import type { BusinessContext, ChatMessage, Stage, StartAt } from '../types/cripqer';
 
 interface Seed {
@@ -18,7 +18,7 @@ export function buildSeed(startAt: StartAt): Seed {
 
   if (startAt === 'converse') {
     const userText = 'Tengo una pastelería. Hago tortas personalizadas y quiero que me contacten por WhatsApp.';
-    const res = respondLocal({ intent: { kind: 'message', text: userText }, context: ctx, history: [] });
+    const res = respondSeed({ intent: { kind: 'message', text: userText }, context: ctx, history: [] });
     const applied = applyAgentResponse(ctx, res);
     return {
       stage: 'converse',
@@ -31,7 +31,7 @@ export function buildSeed(startAt: StartAt): Seed {
   }
 
   const userText = 'Tengo una barbería llamada Santos. Quiero conseguir reservas por WhatsApp y me gusta la página negra que vi arriba.';
-  const res = respondLocal({ intent: { kind: 'message', text: userText }, context: ctx, history: [] });
+  const res = respondSeed({ intent: { kind: 'message', text: userText }, context: ctx, history: [] });
   const applied = applyAgentResponse(ctx, res);
   ctx = applySelection(applied.context, 'dark_craft');
   return {
