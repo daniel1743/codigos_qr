@@ -20,9 +20,33 @@ interface PublicProfileViewProps {
 export function resolvePublicProfileCanonicalConfig(profile: Partial<Profile>) {
   const config = resolveCanonicalEditorConfig(profile.published_template_config);
   if (!config) return null;
+
+  let resolvedConfig = config;
+  if (profile.banner_url && !resolvedConfig.profile.banner?.imageUrl) {
+    resolvedConfig = {
+      ...resolvedConfig,
+      profile: {
+        ...resolvedConfig.profile,
+        banner: {
+          ...resolvedConfig.profile.banner,
+          imageUrl: profile.banner_url,
+        },
+      },
+    };
+  }
+  if (profile.avatar_url && !resolvedConfig.profile.avatarUrl) {
+    resolvedConfig = {
+      ...resolvedConfig,
+      profile: {
+        ...resolvedConfig.profile,
+        avatarUrl: profile.avatar_url,
+      },
+    };
+  }
+
   // The trusted DB `verification_variant` is the verification authority — never
   // the published snapshot. Revoking gold in the DB takes effect immediately.
-  return applyTrustedVerificationVariant(config, profile.verification_variant);
+  return applyTrustedVerificationVariant(resolvedConfig, profile.verification_variant);
 }
 
 function normalizeBannerFusionStrength(value: unknown) {

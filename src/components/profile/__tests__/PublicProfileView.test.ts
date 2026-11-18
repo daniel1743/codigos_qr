@@ -64,4 +64,41 @@ describe("PublicProfileView canonical render bridge", () => {
       }),
     ).toBeNull();
   });
+
+  it("bridges database banner_url into canonical config when banner imageUrl is empty", () => {
+    const publishedConfig = {
+      ...createDemoConfig(),
+      profile: {
+        ...createDemoConfig().profile,
+        banner: {
+          ...createDemoConfig().profile.banner,
+          imageUrl: undefined,
+        },
+      },
+    };
+
+    const resolved = resolvePublicProfileCanonicalConfig({
+      banner_url: "https://example.com/db-cover.jpg",
+      published_template_config: createCanonicalPageEnvelope(publishedConfig),
+    });
+
+    expect(resolved?.profile.banner.imageUrl).toBe("https://example.com/db-cover.jpg");
+  });
+
+  it("bridges database avatar_url into canonical config when avatarUrl is empty", () => {
+    const publishedConfig = {
+      ...createDemoConfig(),
+      profile: {
+        ...createDemoConfig().profile,
+        avatarUrl: undefined,
+      },
+    };
+
+    const resolved = resolvePublicProfileCanonicalConfig({
+      avatar_url: "https://example.com/db-avatar.jpg",
+      published_template_config: createCanonicalPageEnvelope(publishedConfig),
+    });
+
+    expect(resolved?.profile.avatarUrl).toBe("https://example.com/db-avatar.jpg");
+  });
 });

@@ -1,5 +1,7 @@
 import React from "react";
 import { useEditor } from "../../../contexts/EditorContext";
+import { useThemeTokens } from "../../../hooks/useThemeTokens";
+import { extractPageColorSwatches } from "../../../data/pageColorSwatches";
 import { PanelSection } from "./PanelSection";
 import { SwatchRow } from "./SwatchRow";
 
@@ -19,19 +21,33 @@ interface TextColorPanelProps {
  */
 export function TextColorPanel({ id, swatches }: TextColorPanelProps) {
   const ed = useEditor();
+  const t = useThemeTokens();
   const current = ed.doc.textStyles[id]?.color;
   const unified = ed.doc.props["page"]?.["textColor"] ?? "";
   const applyAll = !!unified;
+  const pageColors = extractPageColorSwatches(t, ed.doc.props["page"] ?? {}, swatches);
 
   return (
     <div className="space-y-3">
       <SwatchRow
         colors={swatches}
+        pageColors={pageColors}
         value={current}
         onChange={(color) => {
-          ed.setTextStyle(id, { color });
+          if (color === undefined) {
+            ed.updateDoc((doc) => {
+              const textStyles = { ...doc.textStyles };
+              const next = { ...textStyles[id] };
+              delete next.color;
+              if (Object.keys(next).length === 0) delete textStyles[id];
+              else textStyles[id] = next;
+              return { ...doc, textStyles };
+            });
+          } else {
+            ed.setTextStyle(id, { color });
+          }
           // Keep the page-wide colour in sync while "aplicar a todos" is on.
-          if (applyAll) ed.setProp("page", "textColor", color);
+          if (applyAll) ed.setProp("page", "textColor", color ?? "");
         }}
       />
       <PanelSection

@@ -120,7 +120,7 @@ export function ProfileBanner({
   const fadeStrength = blendFade?.strength ?? 1;
   const fadeAlpha = Math.round((1 - fadeStrength) * 1000) / 1000;
 
-  if (!banner.imageUrl && mode !== "edit") return null;
+  if (!banner.enabled) return null;
 
   const selectCover = () => {
     if (onSelectProfileTarget) {
@@ -180,29 +180,31 @@ export function ProfileBanner({
             backgroundImage: `linear-gradient(120deg, ${theme.colors.primary}, ${theme.colors.accent})`,
           }}
         >
-          <button
-            type="button"
-            onClick={(event) => {
-              event.stopPropagation();
-              selectCover();
-            }}
-            style={{
-              position: "absolute",
-              inset: 0,
-              margin: "auto",
-              width: "fit-content",
-              height: "fit-content",
-              border: "1px solid rgba(255,255,255,.55)",
-              borderRadius: 999,
-              padding: "8px 14px",
-              background: "rgba(0,0,0,.24)",
-              color: "#fff",
-              fontSize: 12,
-              cursor: "pointer",
-            }}
-          >
-            + Añadir banner
-          </button>
+          {mode === "edit" ? (
+            <button
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation();
+                selectCover();
+              }}
+              style={{
+                position: "absolute",
+                inset: 0,
+                margin: "auto",
+                width: "fit-content",
+                height: "fit-content",
+                border: "1px solid rgba(255,255,255,.55)",
+                borderRadius: 999,
+                padding: "8px 14px",
+                background: "rgba(0,0,0,.24)",
+                color: "#fff",
+                fontSize: 12,
+                cursor: "pointer",
+              }}
+            >
+              + Añadir banner
+            </button>
+          ) : null}
         </div>
       )}
       <div
@@ -412,9 +414,11 @@ export function ProfileHeader({
     </div>
   );
 
+  const hasContainedBanner = banner.enabled && !fullBleed;
+
   return (
     <header style={{ position: "relative" }}>
-      {banner.enabled && !fullBleed ? <ProfileBanner banner={banner} /> : null}
+      {hasContainedBanner ? <ProfileBanner banner={banner} /> : null}
 
       <div
         style={{
@@ -426,11 +430,11 @@ export function ProfileHeader({
           gap: inline ? 16 : 14,
           marginTop: fullBleed
             ? 0
-            : banner.enabled && layout.header === "overlap"
+            : hasContainedBanner && layout.header === "overlap"
               ? showAvatar
                 ? -profile.avatar.overlap
                 : 0
-              : banner.enabled
+              : hasContainedBanner
                 ? 18
                 : 0,
         }}

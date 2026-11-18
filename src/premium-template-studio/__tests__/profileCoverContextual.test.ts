@@ -475,3 +475,46 @@ describe("Profile Avatar Rim Thickness (Phase 5C6D)", () => {
     });
   });
 });
+
+describe("Profile Cover public rendering and avatar overlap geometry contract", () => {
+  const renderWithMode = (cfg: ReturnType<typeof createDemoConfig>, mode: "public" | "edit") =>
+    renderToStaticMarkup(
+      createElement(TemplateRenderer, {
+        config: cfg,
+        breakpoint: "mobile" as const,
+        mode,
+      }),
+    );
+
+  it("renders theme gradient cover in public mode even if imageUrl is absent when banner is enabled", () => {
+    const cfg = createDemoConfig();
+    cfg.profile.banner.enabled = true;
+    cfg.profile.banner.imageUrl = undefined;
+    const markup = renderWithMode(cfg, "public");
+
+    // The cover container must be present with theme gradient
+    expect(markup).toContain("linear-gradient");
+    // Public mode MUST NOT show the internal "+ Añadir banner" edit button
+    expect(markup).not.toContain("+ Añadir banner");
+  });
+
+  it("renders + Añadir banner button in edit mode when imageUrl is absent", () => {
+    const cfg = createDemoConfig();
+    cfg.profile.banner.enabled = true;
+    cfg.profile.banner.imageUrl = undefined;
+    const markup = renderWithMode(cfg, "edit");
+
+    expect(markup).toContain("+ Añadir banner");
+  });
+
+  it("does not apply negative avatar overlap when banner is disabled", () => {
+    const cfg = createDemoConfig();
+    cfg.profile.banner.enabled = false;
+    cfg.layout.header = "overlap";
+    cfg.profile.avatar.overlap = 56;
+    const markup = renderWithMode(cfg, "public");
+
+    // Negative margin must NOT be applied to profile container or avatar
+    expect(markup).not.toContain("margin-top:-56px");
+  });
+});

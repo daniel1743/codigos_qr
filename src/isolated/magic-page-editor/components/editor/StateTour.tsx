@@ -21,6 +21,36 @@ const steps: {id: TourStep;label: string;mobileOnly?: boolean;}[] = [
 { id: 'keyboard', label: 'Teclado', mobileOnly: true }];
 
 
+/**
+ * QA activation check for StateTour:
+ * - Production: ALWAYS false.
+ * - Development: HIDDEN by default.
+ * - Explicit opt-in only in DEV via localStorage ("cripqer_qa_tour" === "true" | "1")
+ *   or window.__CRIPQER_QA_TOUR__ === true.
+ * - Never enabled via public URL params (like `?debug=true`).
+ */
+export function isStateTourActive(): boolean {
+  if (!import.meta.env.DEV) return false;
+  if (typeof window === "undefined") return false;
+  try {
+    return (
+      window.localStorage.getItem("cripqer_qa_tour") === "true" ||
+      window.localStorage.getItem("cripqer_qa_tour") === "1" ||
+      Boolean((window as unknown as { __CRIPQER_QA_TOUR__?: boolean }).__CRIPQER_QA_TOUR__)
+    );
+  } catch {
+    return false;
+  }
+}
+
+if (import.meta.env.DEV && typeof window !== "undefined") {
+  (window as unknown as { toggleCripqerQaTour?: () => void }).toggleCripqerQaTour = () => {
+    const next = !(window.localStorage.getItem("cripqer_qa_tour") === "true");
+    window.localStorage.setItem("cripqer_qa_tour", next.toString());
+    console.info(`[CRIPQER QA] StateTour ${next ? "ACTIVADA" : "DESACTIVADA"}. Recarga para aplicar.`);
+  };
+}
+
 /** Review aid: jumps straight to each required editing state so the system can be evaluated quickly. */
 export function StateTour() {
   const ed = useEditor();
@@ -34,6 +64,7 @@ export function StateTour() {
     if (!ed.selection && !ed.picker.open) setActive((a) => a === 'add' ? a : 'normal');
   }, [ed.selection, ed.picker.open]);
 
+  if (!isStateTourActive()) return null;
   if (ed.mode !== 'edit') return null;
 
   const run = (step: TourStep) => {
@@ -73,8 +104,17 @@ export function StateTour() {
 
   return (
     <div className="flex h-11 shrink-0 items-center gap-3 border-b border-line bg-white/90 px-3 lg:px-4">
-      <span className="hidden shrink-0 items-center gap-1.5 text-[12px] font-medium text-mute sm:flex">
-        <RouteIcon className="h-3.5 w-3.5" /> Estados
+      {/*
+        The bar keeps a visible identifier at every width. Below 640px the word
+        does not fit next to the chips, so the icon stays and carries the
+        accessible name "Estados" (measured: label hidden, steps still present).
+      */}
+      <span
+        className="flex shrink-0 items-center gap-1.5 text-[12px] font-medium text-mute"
+        aria-label="Estados"
+        title="Estados">
+        <RouteIcon className="h-3.5 w-3.5" aria-hidden="true" />
+        <span className="hidden sm:inline" aria-hidden="true">Estados</span>
       </span>
       <div className="cq-scroll-none flex min-w-0 items-center gap-1.5 overflow-x-auto">
         {steps.
