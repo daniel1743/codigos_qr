@@ -24,7 +24,7 @@ export function respondLocal(request: AssistantRequest): AssistantResponse {
   afterSelection(
     applySelection(request.context, request.intent.templateId),
     request.intent.templateId) :
-  runAgent(request.intent.text, request.context);
+  runAgent(request.intent.text, request.context, request.history);
   return {
     ...base,
     metadata: { provider: LOCAL_PROVIDER_ID, model: null, fallback: false }

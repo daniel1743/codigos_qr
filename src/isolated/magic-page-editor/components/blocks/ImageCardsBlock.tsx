@@ -6,7 +6,6 @@ import { EditableText } from "../editor/EditableText";
 import { cx } from "../../utils/cx";
 import { mediaHeightStyle, mediaOverlayStyleFromProps } from "../../utils/styles";
 import { images } from "../../data/images";
-import { isBusinessContextContent } from "../../utils/contentOrigin";
 import {
   IMAGE_CARD_RADIUS,
   IMAGE_CARDS_MAX,
@@ -22,19 +21,7 @@ interface ImageCardsBlockProps {
   maxWidth?: number;
 }
 
-/**
- * Placeholder photos used by brand-new slots until the author replaces them.
- *
- * They belong to the editor, not to any one page: four photos from four
- * different trades. A page made by hand draws them, which is the demo the author
- * replaces card by card. A page generated from the Business Context is a
- * different case — its photos are already in the document, written by the
- * generator from the family's own pack — so a card this page never filled must
- * draw *nothing* rather than another trade's photo. That is the same switch the
- * services block uses, read once for the whole block. A block with no image at
- * all keeps the frame and the caption but no `<img>`: an empty, still-editable
- * card rather than a foreign picture.
- */
+/** Placeholder photos used by brand-new slots until the author replaces them. */
 const DEFAULT_IMAGES = [
   images.bizProducts,
   images.pfArch,
@@ -60,12 +47,6 @@ export function ImageCardsBlock({ block, maxWidth = 720 }: ImageCardsBlockProps)
   const order = imageCardsOrder(ed.doc, block.key);
   const canAdd = order.length < IMAGE_CARDS_MAX;
   const single = order.length === 1;
-  /**
-   * The placeholder photo is a *sample*, so it follows the same rule as the
-   * service rows: a generated page never draws it, the editor still does — so a
-   * card the author just added is not born as an invisible box.
-   */
-  const sample = !isBusinessContextContent(ed.doc.props.page) || ed.mode === "edit";
 
   return (
     <div className={cx("mx-auto w-full", m ? "px-5" : "px-10")} style={{ maxWidth: maxWidth + 80 }}>
@@ -78,7 +59,7 @@ export function ImageCardsBlock({ block, maxWidth = 720 }: ImageCardsBlockProps)
           const href = (cp["href"] ?? "").trim();
           const newTab = (cp["newTab"] ?? "on") !== "off";
           const radius = IMAGE_CARD_RADIUS[resolveImageCardShape(cp["shape"])];
-          const src = cp["src"] ?? (sample ? DEFAULT_IMAGES[index % DEFAULT_IMAGES.length] : "");
+          const src = cp["src"] ?? DEFAULT_IMAGES[index % DEFAULT_IMAGES.length];
           const alt = cp["alt"] ?? "";
           // The same overlay adapter every other media element uses, so the
           // superposición is one capability with one vocabulary rather than an
@@ -106,12 +87,11 @@ export function ImageCardsBlock({ block, maxWidth = 720 }: ImageCardsBlockProps)
               // L2.2: a literal `mediaHeight` replaces the square ratio; unset
               // leaves the class exactly as it was.
               style={{ borderRadius: radius, ...mediaHeightStyle(cp) }}>
-              {src !== "" &&
               <img
                 src={src}
                 alt={alt}
                 draggable={false}
-                className="absolute inset-0 h-full w-full object-cover" />}
+                className="absolute inset-0 h-full w-full object-cover" />
               {overlay && <div aria-hidden data-media-overlay={cp["overlay"]} style={overlay} />}
               {(hasCaption || showIcon) &&
               <div className="absolute inset-x-0 bottom-0 z-[3] flex items-center justify-between gap-3 p-3 text-white">

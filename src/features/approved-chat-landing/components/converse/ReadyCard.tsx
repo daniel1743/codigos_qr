@@ -4,8 +4,6 @@ import { ArrowRightIcon } from 'lucide-react';
 import { ScaledTemplate } from '../templates/ScaledTemplate';
 import { getBusinessType, getChannel, getTemplate, resolveContent } from '../../utils/templates';
 import { goals } from '../../data/business';
-import { isTemplateSelectionFrozen } from '../../../landing-lite/flags';
-import { useStartBaseCard } from '../../../landing-lite/useStartBaseCard';
 import type { BusinessContext } from '../../types/cripqer';
 
 interface ReadyCardProps {
@@ -16,8 +14,6 @@ interface ReadyCardProps {
 }
 
 export function ReadyCard({ context, active, onCreate, onChangeStyle }: ReadyCardProps) {
-  const frozen = isTemplateSelectionFrozen();
-  const { starting, start: startPersonalize } = useStartBaseCard();
   const tplId = context.template.selectedTemplateId;
   if (!tplId) return null;
   const tpl = getTemplate(tplId);
@@ -52,38 +48,24 @@ export function ReadyCard({ context, active, onCreate, onChangeStyle }: ReadyCar
           )}
         </dl>
         <div className="mt-5 flex flex-wrap gap-2">
-          {frozen ? (
-            <button
-              type="button"
-              data-cta="personalizar-tarjeta"
-              onClick={() => void startPersonalize()}
-              disabled={starting}
-              className="inline-flex h-10 items-center gap-2 rounded-full bg-brand-gold px-4 text-[13.5px] font-semibold text-ink transition-[background-color,transform] duration-150 ease-out hover:bg-brand-gold/90 active:scale-[0.97] disabled:opacity-50">
-              {starting ? "Preparando tu tarjeta..." : "Personalizar una tarjeta"}
-              <ArrowRightIcon className="h-4 w-4" />
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={onCreate}
-              disabled={!active}
-              className="inline-flex h-10 items-center gap-2 rounded-full bg-brand-blue px-4 text-[13.5px] font-semibold text-white transition-[background-color,transform] duration-150 ease-out hover:bg-brand-blue-deep active:scale-[0.97] disabled:opacity-50">
-              Crear mi página
-              <ArrowRightIcon className="h-4 w-4" />
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={onCreate}
+            disabled={!active}
+            className="inline-flex h-10 items-center gap-2 rounded-full bg-brand-blue px-4 text-[13.5px] font-semibold text-white transition-[background-color,transform] duration-150 ease-out hover:bg-brand-blue-deep active:scale-[0.97] disabled:opacity-50">
+            
+            Crear mi página
+            <ArrowRightIcon className="h-4 w-4" />
+          </button>
           <button
             type="button"
             onClick={onChangeStyle}
             className="inline-flex h-10 items-center rounded-full px-3 text-[13.5px] font-medium text-muted transition-colors duration-150 hover:text-ink">
+            
             Cambiar estilo
           </button>
         </div>
-        <p className="mt-3 text-[12px] text-muted">
-          {frozen
-            ? "Sin registro. Podrás editar todo después."
-            : "Crea tu cuenta para guardar tu página. Podrás editar todo después."}
-        </p>
+        <p className="mt-3 text-[12px] text-muted">Sin registro. Podrás editar todo después.</p>
       </div>
     </motion.div>);
 

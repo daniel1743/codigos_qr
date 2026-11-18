@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { useStartBaseCard } from "../features/landing-lite/useStartBaseCard";
-import { SampleCardPreview } from "../features/landing-lite/SampleCardPreview";
 import PlatformFooter from "./brand/PlatformFooter";
 import PlatformNavbar from "./brand/PlatformNavbar";
 import { getHelpArticle } from "../lib/help-content";
@@ -253,9 +251,8 @@ const css = `
 /* ---------- TEMPLATES (preparado para screenshots reales) ---------- */
 .cq-tpl-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 40px; }
 @media (min-width: 760px) { .cq-tpl-grid { grid-template-columns: repeat(4, 1fr); gap: 18px; } }
-.cq-tpl { border-radius: 16px; overflow: hidden; aspect-ratio: 9/15; position: relative; box-shadow: 0 14px 30px rgba(9,9,9,.14); transition: transform .22s ease, box-shadow .22s ease; cursor: pointer; padding: 0; border: 0; font: inherit; color: inherit; text-align: inherit; display: block; width: 100%; }
+.cq-tpl { border-radius: 16px; overflow: hidden; aspect-ratio: 9/15; position: relative; box-shadow: 0 14px 30px rgba(9,9,9,.14); transition: transform .22s ease, box-shadow .22s ease; cursor: default; }
 .cq-tpl:hover { transform: translateY(-5px); box-shadow: 0 22px 44px rgba(9,9,9,.22); }
-.cq-tpl:focus-visible { outline: 2px solid var(--cq-accent); outline-offset: 3px; }
 /* Screenshot real: cubre todo el tile, crop cover */
 .cq-tpl-shot { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .cq-tpl-label { position: absolute; left: 10px; bottom: 10px; z-index: 2; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; background: rgba(250,248,243,.94); color: var(--cq-ink); padding: 5px 10px; border-radius: 999px; }
@@ -844,12 +841,8 @@ const LANDING_FAQ_IDS = [
 ];
 
 export default function CripqerLanding() {
-  const { starting, start: startPersonalize } = useStartBaseCard();
   const [tplIndex, setTplIndex] = useState(0);
-  /** Sample card whose read-only preview is open, by label. Never a selection. */
-  const [previewLabel, setPreviewLabel] = useState<string | null>(null);
   const active = TEMPLATES[tplIndex] ?? TEMPLATES[0]!;
-  const previewSample = TEMPLATES.find((t) => t.label === previewLabel) ?? null;
 
   return (
     <div className="cq">
@@ -954,15 +947,14 @@ export default function CripqerLanding() {
               recurrente. QR + Biolink + Analytics + Gestión en una sola plataforma.
             </p>
             <div className="cq-hero-actions">
-              <button
-                type="button"
+              <Link
+                to="/login"
+                search={{ mode: "register" }}
                 className="cq-btn cq-btn-accent"
-                data-cta="personalizar-tarjeta"
-                onClick={() => void startPersonalize()}
-                disabled={starting}
+                data-cta="crear-qr"
               >
-                {starting ? "Preparando tu tarjeta..." : "Personalizar una tarjeta"} {Icon.arrow}
-              </button>
+                Crear mi QR {Icon.arrow}
+              </Link>
               <a href="#disenos" className="cq-btn cq-btn-ghost" data-cta="ver-disenos">
                 Ver diseños
               </a>
@@ -1226,29 +1218,21 @@ export default function CripqerLanding() {
           </p>
           {/* Grid preparado para screenshots reales: asignar URL en TEMPLATE_SHOTS
               y cada tile mostrará la captura real (crop cover, ratio 9/15). */}
-          <p className="cq-lead" style={{ margin: "18px auto 0" }}>
-            Explora nuestros diseños de ejemplo. Comienza personalizando tu propia tarjeta digital.
-          </p>
           <div className="cq-tpl-grid">
             {TEMPLATES.map((t) => {
               const shot = TEMPLATE_SHOTS[t.label];
               return (
-                <button
+                <div
                   key={t.label}
-                  type="button"
                   className="cq-tpl"
                   style={shot ? undefined : { background: t.bg }}
                   data-template={t.label}
-                  data-cta="ver-muestra"
-                  aria-label={`Ver muestra de diseño ${t.label}`}
-                  aria-haspopup="dialog"
-                  onClick={() => setPreviewLabel(t.label)}
                 >
                   {shot ? (
                     <img
                       className="cq-tpl-shot"
                       src={shot}
-                      alt={`Muestra de diseño ${t.label}`}
+                      alt={`Plantilla ${t.label}`}
                       loading="lazy"
                     />
                   ) : (
@@ -1267,26 +1251,13 @@ export default function CripqerLanding() {
                     </div>
                   )}
                   <span className="cq-tpl-label">{t.label}</span>
-                </button>
+                </div>
               );
             })}
           </div>
           <p className="cq-tpl-count">La biblioteca actual incluye 14 diseños base — y crece.</p>
         </div>
       </section>
-
-      {previewSample ? (
-        <SampleCardPreview
-          label={previewSample.label}
-          shot={TEMPLATE_SHOTS[previewSample.label] ?? null}
-          bg={previewSample.bg}
-          av={previewSample.av}
-          avc={previewSample.avc}
-          bar={previewSample.bar}
-          nameColor={previewSample.name}
-          onClose={() => setPreviewLabel(null)}
-        />
-      ) : null}
 
       {/* ============ 8. EDITOR ============ */}
       <section className="cq-section">
@@ -1488,15 +1459,14 @@ export default function CripqerLanding() {
               Construye la experiencia que quieres que las personas descubran cuando escanean tu QR.
             </p>
             <div className="cq-hero-actions" style={{ justifyContent: "center" }}>
-              <button
-                type="button"
+              <Link
+                to="/login"
+                search={{ mode: "register" }}
                 className="cq-btn cq-btn-accent"
-                data-cta="personalizar-tarjeta"
-                onClick={() => void startPersonalize()}
-                disabled={starting}
+                data-cta="crear-qr"
               >
-                {starting ? "Preparando tu tarjeta..." : "Personalizar una tarjeta"} {Icon.arrow}
-              </button>
+                Crear mi QR {Icon.arrow}
+              </Link>
               <a href="#disenos" className="cq-btn cq-btn-ghost" data-cta="ver-disenos">
                 Ver diseños
               </a>

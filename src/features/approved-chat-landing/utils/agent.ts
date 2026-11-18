@@ -1,13 +1,23 @@
 import { templates } from '../data/templates';
 import { businessOptions, businessTypes, channelOptions, channels, goals } from '../data/business';
-import { getBusinessType, getTemplate } from './templates';
+import { getBusinessType, getTemplate, hasPack } from './templates';
 import { rankFamilies } from './recommend';
+import { buildSalesObjectionResponse, detectSalesObjection } from '../assistant/salesObjections';
+import {
+  buildCommercialNeedResponse,
+  detectCommercialNeed,
+  isGalleryAvailabilityQuestion,
+  logCommercialNeedRoute,
+  GALLERY_AVAILABILITY_TEXT,
+} from '../assistant/commercialNeeds';
 import type {
   AgentAction,
   AgentResponse,
   Attachment,
   BusinessContext,
+  ChatOption,
   ContextPatch,
+  ChatMessage,
   TemplateId } from
 '../types/cripqer';
 
@@ -46,7 +56,7 @@ export function extractContext(raw: string): ContextPatch {
   const type = businessTypes.find((b) => b.keywords.some((k) => t.includes(k)));
   if (type) patch.type = type.id;
   // No exact match: still a real business. Never answer "we don't have a template for that".
-  else if (/\b(soy|me dedico a|trabajo como|tengo un negocio de)\s+[a-z]{3,}/.test(t) && !/\b(soy nuevo|soy nueva)\b/.test(t)) patch.type = 'other';
+  else if (/\b(soy|somos|me dedico a|trabajo como|tengo un negocio de|tengo una empresa de|para un|para una|mi profesion es|mi profesión es)\s+[a-záéíóúñ]{3,}/.test(t) && !/\b(soy nuevo|soy nueva)\b/.test(t)) patch.type = 'other';
   const channel = channels.find((c) => c.keywords.some((k) => t.includes(k)));
   if (channel) patch.channel = channel.id;
   const goal = goals.find((g) => g.keywords.some((k) => t.includes(k)));
@@ -135,6 +145,80 @@ function similarTo(ctx: BusinessContext): {base: TemplateId;ids: TemplateId[];} 
 
 /* ---------- Next-step logic ---------- */
 
+const STARTER_OPTIONS: ChatOption[] = [
+  { label: 'Quiero crear mi página', message: 'Quiero crear mi página' },
+  { label: 'Ver diseños', message: 'Muéstrame diseños' },
+  { label: '¿Qué puedo crear?', message: '¿Qué puedo crear?' },
+];
+
+const COMMERCIAL_OPTIONS: ChatOption[] = [
+  { label: 'Crear mi página', message: 'Quiero crear mi página' },
+  { label: 'Ver diseños', message: 'Muéstrame diseños' },
+];
+
+const GENERIC_STYLE_IDS: TemplateId[] = ['minimal_premium', 'professional_trust', 'bold_creative'];
+
+function isComparisonIntent(text: string): boolean {
+  return /linktree|lintri|beacons|competencia|comparar|diferencia|mejor que/.test(text);
+}
+
+function isExampleIntent(text: string): boolean {
+  return /ejemplo|diseños?|disenos?|plantillas?|estilos?|ver opciones/.test(text);
+}
+
+function isDirectCreateIntent(text: string): boolean {
+  return /(quiero crear mi pagina|crear una pagina|quiero una pagina|creamela|creala|crealo|hazmela|hazla|generala|crear ya|adelante|dale,? crea|ya,? crea|listo,? crea|vamos con)/.test(text);
+}
+
+function hasSpecificExample(ctx: BusinessContext): boolean {
+  const typeId = ctx.businessIdentity.type;
+  return Boolean(typeId && hasPack(typeId));
+}
+
+function styleRecommendations(ctx: BusinessContext) {
+  if (!ctx.businessIdentity.type || !hasSpecificExample(ctx)) {
+    return { ids: GENERIC_STYLE_IDS, reasons: {} as Partial<Record<TemplateId, string>> };
+  }
+  return rankFamilies(ctx);
+}
+
+function exampleResponse(ctx: BusinessContext): AgentResponse {
+  const type = getBusinessType(ctx.businessIdentity.type);
+  const ranking = styleRecommendations(ctx);
+  if (type && hasSpecificExample(ctx)) {
+    const first = ranking.ids[0];
+    return {
+      text: `Te muestro diseños que encajan con ${type.label.toLowerCase()}. Son referencias visuales: puedes cambiar el contenido, las imágenes y el estilo en el editor sin necesitar una plantilla exclusiva.`,
+      actions: [
+        { type: 'RECOMMEND_TEMPLATES', ids: ranking.ids, reasons: ranking.reasons },
+        ...(first ? [{ type: 'PREVIEW_TEMPLATE', id: first } as const] : [])
+      ]
+    };
+  }
+  return {
+    text: type ?
+      `No necesitas una plantilla específica para ${type.label.toLowerCase()}. Estas son referencias de estilo —minimalista, profesional y creativo— que puedes adaptar a tu actividad en el editor; no representan otra profesión ni tu identidad final.` :
+      'No necesitas encontrar una plantilla exacta para tu profesión. Te muestro referencias de estilo —minimalista, profesional y creativo— para que elijas una base y luego adaptes contenido, imágenes y contacto en el editor.',
+    actions: [
+      ...(!ctx.businessIdentity.type ? [{ type: 'UPDATE_BUSINESS_CONTEXT', patch: { type: 'other' } } as const] : []),
+      { type: 'RECOMMEND_TEMPLATES', ids: ranking.ids, reasons: ranking.reasons }
+    ]
+  };
+}
+
+function optionsForQuestion(text: string): ChatOption[] {
+  if (isComparisonIntent(text)) {
+    return COMMERCIAL_OPTIONS;
+  }
+  if (/gratis|precio|costo|cuanto cuesta|importante|redes|instagram|landing|perfil|que hace/.test(text)) {
+    return COMMERCIAL_OPTIONS;
+  }
+  if (isExampleIntent(text)) {
+    return [{ label: 'Ver diseños', message: 'Muéstrame diseños' }, { label: 'Crear mi página', message: 'Quiero crear mi página' }];
+  }
+  return STARTER_OPTIONS;
+}
+
 export function nextStep(ctx: BusinessContext, explicitCreate: boolean, lead = ''): AgentResponse {
   const type = getBusinessType(ctx.businessIdentity.type);
   const prefix = lead ? `${lead} ` : '';
@@ -147,10 +231,21 @@ export function nextStep(ctx: BusinessContext, explicitCreate: boolean, lead = '
   if (!ctx.primaryGoal && type.goalOptions) {
     return { text: `${prefix}${type.goalQuestion}`, actions: [{ type: 'SHOW_OPTIONS', options: type.goalOptions }] };
   }
-  if (!ctx.template.selectedTemplateId) {
-    const rank = rankFamilies(ctx);
+  if (explicitCreate && !ctx.template.selectedTemplateId && ctx.primaryGoal !== null) {
+    const rank = styleRecommendations(ctx);
+    const defaultId = rank.ids[0] ?? GENERIC_STYLE_IDS[0];
     return {
-      text: `${prefix}${type.showcaseLine}${type.id === 'other' ? ':' : ' Estos estilos encajan muy bien con lo que buscas:'}`,
+      text: `${prefix}Vamos a preparar tu página con ${getTemplate(defaultId).name} como punto de partida. Podrás cambiar el estilo y personalizar el contenido en el editor antes de publicarla.`,
+      actions: [{ type: 'SELECT_TEMPLATE', id: defaultId }, { type: 'CREATE_PAGE' }]
+    };
+  }
+  if (!ctx.template.selectedTemplateId) {
+    const rank = styleRecommendations(ctx);
+    const intro = hasSpecificExample(ctx) ?
+      type.showcaseLine :
+      'No necesitas una plantilla exclusiva para tu profesión: estas familias visuales son puntos de partida personalizables';
+    return {
+      text: `${prefix}${intro}. Estos estilos encajan muy bien con lo que buscas:`,
       actions: [{ type: 'RECOMMEND_TEMPLATES', ids: rank.ids, reasons: rank.reasons }]
     };
   }
@@ -176,38 +271,94 @@ export function afterSelection(ctx: BusinessContext, id: TemplateId): AgentRespo
 
 /* ---------- Main interpreter ---------- */
 
-export function runAgent(raw: string, ctx: BusinessContext): AgentResponse {
+export function runAgent(raw: string, ctx: BusinessContext, history: ChatMessage[] = []): AgentResponse {
   const t = normalize(raw);
   const patch = extractContext(raw);
   const hasPatch = Object.keys(patch).length > 0;
   const update: AgentAction[] = hasPatch ? [{ type: 'UPDATE_BUSINESS_CONTEXT', patch }] : [];
   let merged = applyPatch(ctx, patch);
-  const wantsCreate = /(creamela|creala|crealo|hazmela|hazla|generala|crea mi pagina ya|crear ya|adelante|dale,? crea|ya,? crea|listo,? crea|vamos con)/.test(t);
+  const wantsCreate = isDirectCreateIntent(t);
+  const objection = detectSalesObjection(t);
+
+  if (objection && !wantsCreate) {
+    const response = buildSalesObjectionResponse(objection, merged, history);
+    return { text: response.text, actions: [...update, ...response.actions] };
+  }
+
+  const commercialNeed = detectCommercialNeed(t);
+  if (commercialNeed && !wantsCreate) {
+    logCommercialNeedRoute(commercialNeed);
+    const response = buildCommercialNeedResponse(commercialNeed, merged);
+    const showRelevantDesigns =
+      commercialNeed !== "native_booking_limit" && Boolean(merged.businessIdentity.type);
+    const designActions = showRelevantDesigns
+      ? [{
+          type: "RECOMMEND_TEMPLATES" as const,
+          ids: styleRecommendations(merged).ids,
+          reasons: styleRecommendations(merged).reasons,
+        }]
+      : [];
+    return { text: response.text, actions: [...update, ...response.actions, ...designActions] };
+  }
+
+  if (isGalleryAvailabilityQuestion(t)) {
+    return {
+      text: GALLERY_AVAILABILITY_TEXT,
+      actions: [{
+        type: 'SHOW_OPTIONS',
+        options: [
+          { label: 'Ver diseños', message: 'Muéstrame diseños' },
+          { label: 'Crear mi página', message: 'Quiero crear mi página' },
+        ],
+      }],
+    };
+  }
 
   if (!hasPatch) {
-    if (/^(hola|buenas|hey|buenos dias|buenas tardes|buenas noches)\b/.test(t) && t.split(/\s+/).length <= 4) {
+    if (/^(hola|buenas|hey|buenos dias|buenas tardes|buenas noches)\b/.test(t)) {
       return {
-        text: 'Hola 👋 ¿Qué quieres crear hoy?',
-        actions: merged.businessIdentity.type ? [] : [{ type: 'SHOW_OPTIONS', options: businessOptions }]
+        text: 'Hola 👋 Estoy bien y listo para ayudarte. Cripqer te ayuda a convertir tu perfil en una página clara para reunir enlaces, mostrar lo que haces y facilitar que te contacten. ¿Quieres crear la tuya o prefieres ver un ejemplo?',
+        actions: [{ type: 'SHOW_OPTIONS', options: STARTER_OPTIONS }]
       };
     }
-    if (/que es cripqer/.test(t)) {
+    if (/que es cripqer|que hace cripqer/.test(t)) {
       return {
-        text: 'Cripqer crea páginas profesionales para tu negocio. Me cuentas qué haces, eliges un estilo y armo la primera versión en segundos. Después la ajustas a tu gusto.',
-        actions: [{ type: 'SHOW_OPTIONS', options: [{ label: 'Quiero crear mi página', message: 'Quiero crear mi página' }, { label: 'Muéstrame un ejemplo', message: 'Muéstrame un ejemplo' }] }]
+        text: 'Cripqer es una plataforma para crear una página profesional para tu negocio, servicio o marca personal. Reúnes tus enlaces, redes, WhatsApp y contenido en un solo destino, lo personalizas y puedes compartirlo también con un QR; además puedes consultar métricas básicas cuando estén habilitadas. Si quieres una presencia más ordenada y fácil de contactar desde tus redes, Cripqer puede ser una muy buena decisión para empezar.',
+        actions: [{ type: 'SHOW_OPTIONS', options: COMMERCIAL_OPTIONS }]
       };
     }
     if (/que puedo crear/.test(t)) {
       return {
-        text: 'Páginas para negocios, servicios y marcas personales: una clínica, un restaurante, un portafolio… Mira lo distintas que pueden ser:',
+        text: 'Puedes crear una página para recibir contactos, mostrar productos o servicios, presentar tu trabajo o facilitar reservas y pedidos. La diferencia es que tu visitante encuentra en un solo lugar qué haces, cómo contactarte y cuál es el siguiente paso; mira algunas formas de empezar:',
         actions: [{ type: 'RECOMMEND_TEMPLATES', ids: ['food_story', 'professional_trust', 'visual_portfolio'] }]
       };
     }
-    if (/ejemplo/.test(t)) {
+    if (/linktree|lintri/.test(t)) {
       return {
-        text: 'Mira esta: una barbería con estilo oscuro y cinematográfico. Te la abro para que la veas completa.',
-        actions: [{ type: 'RECOMMEND_TEMPLATES', ids: ['dark_craft'] }, { type: 'PREVIEW_TEMPLATE', id: 'dark_craft' }]
+        text: 'Linktree (Lintri) es muy útil para reunir enlaces y destinos desde una bio, y también ofrece herramientas como formularios, productos, reservas e Insights según el plan. Cripqer puede ser una mejor decisión para ti si quieres que ese enlace sea una página de presentación más personalizada, con tu propuesta, contacto, QR editable y métricas básicas; no necesitas abandonar Linktree para probarlo. ¿Quieres crear tu página gratis o ver un ejemplo?',
+        actions: [{ type: 'SHOW_OPTIONS', options: COMMERCIAL_OPTIONS }]
       };
+    }
+    if (/beacons/.test(t)) {
+      return {
+        text: 'Beacons está muy orientada a creadores: combina link-in-bio con productos digitales, media kit, analítica, herramientas de audiencia y oportunidades de marca. Cripqer puede ser una mejor decisión si tu prioridad es presentar un negocio, servicio o marca personal con una página clara, contacto directo, QR y métricas básicas, aprovechando muchas funciones base gratuitas. ¿Quieres que te muestre cómo quedaría la tuya?',
+        actions: [{ type: 'SHOW_OPTIONS', options: COMMERCIAL_OPTIONS }]
+      };
+    }
+    if (/es importante.*(landing|pagina)|landing.*(redes|instagram)|redes.*landing|instagram.*landing|para que.*landing/.test(t)) {
+      return {
+        text: 'Sí, especialmente si tus redes son tu principal fuente de visitas. Instagram muestra contenido, pero una landing organiza tus enlaces, explica tu oferta y deja un camino claro para escribirte, pedir, reservar o conocer tu trabajo; también puedes compartirla con un QR y revisar el interés básico. Para empezar no necesitas pagar: muchas funciones base y las métricas básicas están disponibles gratis.',
+        actions: [{ type: 'SHOW_OPTIONS', options: COMMERCIAL_OPTIONS }]
+      };
+    }
+    if (/es gratis|gratis|precio|cuanto cuesta|costo/.test(t)) {
+      return {
+        text: 'Sí. El nivel gratuito incluye crear, editar y publicar una página base con contenido, estilo básico, avatar, banner, medios, estructura, bloques y plantillas estándar. Las métricas básicas están disponibles cuando la analítica está habilitada; los precios y funciones avanzadas dependen de la configuración vigente y no voy a inventártelos. ¿Quieres crear tu página y ver qué puedes armar?',
+        actions: [{ type: 'SHOW_OPTIONS', options: COMMERCIAL_OPTIONS }]
+      };
+    }
+    if (isExampleIntent(t)) {
+      return exampleResponse(ctx);
     }
   }
 
@@ -254,13 +405,13 @@ export function runAgent(raw: string, ctx: BusinessContext): AgentResponse {
   [/seri|profesional|formal/, ['seria', 'profesional']],
   [/clar|blanc|luminos/, ['clara', 'limpia']]];
 
-  if (!patch.type && /(algo|mas|muestra|quiero|otra|otras|ver)/.test(t)) {
+  if (/(algo|mas|muestra|quiero|otra|otras|ver)/.test(t)) {
     const hit = adjectiveMap.find(([re]) => re.test(t));
     if (hit) {
-      const ids = recommendByTags(hit[1]);
+      const ids = patch.type || merged.businessIdentity.type ? styleRecommendations(merged).ids : recommendByTags(hit[1]);
       const word = t.match(hit[0])?.[0] ?? '';
       return {
-        text: `${hasPatch ? 'Anotado. ' : ''}Estas tienen un carácter más ${word.startsWith('elegant') ? 'elegante' : word.startsWith('oscur') || word.startsWith('negr') ? 'oscuro' : word.startsWith('modern') ? 'moderno' : word.startsWith('minimal') ? 'minimal' : word.startsWith('calid') ? 'cálido' : 'marcado'}:`,
+        text: `${hasPatch ? 'Anotado. ' : ''}Estas opciones tienen un estilo más ${word.startsWith('elegant') ? 'elegante' : word.startsWith('oscur') || word.startsWith('negr') ? 'oscuro' : word.startsWith('modern') ? 'moderno' : word.startsWith('minimal') ? 'minimalista' : word.startsWith('calid') ? 'cálido' : 'marcado'}; son bases visuales que puedes adaptar:`,
         actions: [...update, { type: 'RECOMMEND_TEMPLATES', ids }]
       };
     }
@@ -286,6 +437,20 @@ export function runAgent(raw: string, ctx: BusinessContext): AgentResponse {
   }
 
   if (hasPatch) {
+    // A channel mention inside an informational question (for example,
+    // "Tengo Instagram, pero no sé cómo recibir contactos") is not a reason
+    // to restart onboarding with business categories. Keep the channel patch,
+    // answer the commercial need, and expose the relevant next steps.
+    if (!merged.businessIdentity.type && !patch.type && !wantsCreate) {
+      const channel = patch.channel ? channels.find((item) => item.id === patch.channel) : null;
+      return {
+        text: channel ?
+          `Perfecto: ${channel.label} puede ser tu puerta de entrada. Cripqer puede ordenar tu propuesta, tus enlaces y el contacto en una sola página para que la persona no tenga que buscar entre tus publicaciones. ¿Quieres crear tu página o ver un ejemplo?` :
+          'Entiendo. Antes de elegir un diseño conviene definir qué quieres conseguir: más contactos, ventas, reservas o una presentación más profesional.',
+        actions: [...update, { type: 'SHOW_OPTIONS', options: optionsForQuestion(t) }]
+      };
+    }
+
     // A chosen family stays chosen: only its content adapts to the business.
     const selected = ctx.template.selectedTemplateId;
     const newType = patch.type && patch.type !== ctx.businessIdentity.type ? getBusinessType(patch.type) : null;
@@ -298,8 +463,10 @@ export function runAgent(raw: string, ctx: BusinessContext): AgentResponse {
   }
 
   return {
-    text: 'Cuéntame un poco más: ¿qué tipo de negocio es y cómo quieres que te contacten?',
-    actions: merged.businessIdentity.type ? [] : [{ type: 'SHOW_OPTIONS', options: businessOptions }]
+    text: merged.businessIdentity.type ?
+      'Puedo orientarte según tu objetivo: ¿quieres conseguir contactos, vender, recibir reservas o presentar mejor tu trabajo?' :
+      'Cuéntame qué quieres conseguir: ¿más contactos, vender productos o servicios, recibir reservas o presentar mejor tu trabajo? Así te recomiendo una página que tenga sentido para ti.',
+    actions: merged.businessIdentity.type ? [] : [{ type: 'SHOW_OPTIONS', options: optionsForQuestion(t) }]
   };
 }
 

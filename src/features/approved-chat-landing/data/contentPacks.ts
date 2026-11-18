@@ -70,6 +70,37 @@ export const contentPacks: ContentPack[] = [
   }
 },
 {
+  id: 'hair_salon',
+  label: 'Peluquería',
+  content: {
+    name: 'Studio Forma',
+    role: 'Peluquería y color',
+    eyebrow: 'Agenda abierta · Reserva tu hora',
+    tagline: 'Tu estilo, cuidado con intención.',
+    about: 'Cortes, color y peinados pensados para ti, con una atención cercana desde la primera consulta.',
+    cta: 'Reservar por WhatsApp',
+    services: [
+    { title: 'Corte y brushing', detail: 'Asesoría según tu estilo', price: 'Consultar', icon: 'scissors' },
+    { title: 'Coloración', detail: 'Color y cuidado del cabello', price: 'Consultar', icon: 'sparkles' },
+    { title: 'Peinado de evento', detail: 'Prueba y acabado', price: 'Consultar', icon: 'flower' }],
+
+    reviews: [
+    { quote: 'Me entendieron desde la primera consulta y salí feliz con el resultado.', author: 'Cliente de ejemplo' },
+    { quote: 'El equipo fue puntual y me explicó cada paso.', author: 'Opinión de ejemplo' }],
+
+    links: ['Reservar por WhatsApp', 'Ver servicios', 'Consultar disponibilidad'],
+    imageCards: [
+    { title: 'Cortes', detail: 'A tu medida', image: IMG.beauty },
+    { title: 'Color', detail: 'Cuidado y técnica', image: IMG.barberPortrait },
+    { title: 'Peinados', detail: 'Para tus momentos', image: IMG.barber }],
+
+    location: { address: 'Dirección de ejemplo', hours: 'Horario de ejemplo' },
+    social: ['Instagram', 'WhatsApp'],
+    videoTitle: 'Conoce nuestro trabajo',
+    images: { hero: IMG.beauty, portrait: IMG.beauty, gallery: [IMG.beauty, IMG.barberPortrait, IMG.barber] }
+  }
+},
+{
   id: 'beauty',
   label: 'Salón de belleza',
   content: {

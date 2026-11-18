@@ -56,6 +56,27 @@ export const businessTypes: BusinessType[] = [
   tagline: 'Cuidamos a tu mejor amigo como parte de la familia.'
 },
 {
+  // Detected automatically when the visitor trains dogs; it intentionally has
+  // no dedicated content pack so the assistant presents adaptable styles
+  // instead of showing veterinary content as if it belonged to the visitor.
+  id: 'dog_trainer',
+  label: 'Adiestramiento canino',
+  keywords: ['adiestrador', 'adiestramiento canino', 'entrenador de perros', 'educador canino'],
+  goal: 'appointments',
+  recommended: ['professional_trust', 'warm_care', 'personal_brand'],
+  showcaseLine: 'Para adiestramiento canino priorizaría confianza, método y un contacto claro para coordinar una evaluación.',
+  tagline: 'Acompañamiento claro para cada proceso.'
+},
+{
+  id: 'hair_salon',
+  label: 'Peluquería',
+  keywords: ['peluqueria', 'peluquero', 'peluquera', 'estilista', 'corte de pelo', 'cortes de pelo', 'cabello', 'coloracion', 'coloración', 'tinte', 'peinado'],
+  goal: 'appointments',
+  recommended: ['soft_beauty', 'editorial_luxury', 'minimal_premium'],
+  showcaseLine: 'Para una peluquería priorizaría cortes, color, peinados y un botón visible para reservar por WhatsApp.',
+  tagline: 'Tu estilo, cuidado con intención.'
+},
+{
   id: 'beauty',
   label: 'Belleza',
   keywords: ['belleza', 'salon', 'manicur', 'estetica', 'maquillaje', 'spa', 'peluqueria', 'cejas', 'pestanas'],

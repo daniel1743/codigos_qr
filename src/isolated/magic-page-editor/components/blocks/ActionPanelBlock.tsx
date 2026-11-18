@@ -13,7 +13,6 @@ import {
   resolvePanelSurface,
   type PanelSurface,
 } from "../../utils/actionPanelOps";
-import { isBusinessContextContent } from "../../utils/contentOrigin";
 import type { BlockRef, BlockType } from "../../types/editor";
 
 /** The three blocks this primitive backs. They differ only in their defaults. */
@@ -89,7 +88,6 @@ export function ActionPanelBlock({ block, type, ctaVariants, maxWidth = 720 }: A
   const t = useThemeTokens();
   const p = blockPrefix(block);
   const fallback = DEFAULTS[type];
-  const generated = isBusinessContextContent(ed.doc.props.page);
   const blockProps = ed.doc.props[`block:${block.key}`] ?? {};
   const surface = resolvePanelSurface(blockProps["panelSurface"], fallback.surface);
   const onAccent = surface === "accent";
@@ -101,13 +99,13 @@ export function ActionPanelBlock({ block, type, ctaVariants, maxWidth = 720 }: A
   const heading = ed.doc.texts[headingId] ?? fallback.heading;
   const sub = ed.doc.texts[subId] ?? fallback.sub;
   const label = ed.doc.texts[`${actionId}.label`] ?? fallback.action;
-  // Business Context carries only the chosen channel, never a phone number or
-  // email address. Generated pages therefore get no seed destination; an
-  // explicit value saved on the document remains authoritative.
-  const rawHref = actionProps["href"] ?? (generated ? "" : ACTION_SEEDS[fallback.kind]);
+  // `??` and not `||`: a destination the author deliberately cleared stays
+  // cleared. Only a block that has never stored one gets the seed, so a new
+  // block is never born with a dead link.
+  const rawHref = actionProps["href"] ?? ACTION_SEEDS[fallback.kind];
   /** `undefined` — not `''` — so an unusable destination yields no `href` at all. */
   const href = actionHref(rawHref) || undefined;
-  const kind = rawHref === "" ? fallback.kind : actionKindOf(rawHref);
+  const kind = actionKindOf(rawHref);
   const ActionIcon = ICON_FOR_KIND[kind as keyof typeof ICON_FOR_KIND];
 
   const panelStyle: React.CSSProperties =

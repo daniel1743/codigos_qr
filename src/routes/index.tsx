@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ApprovedChatLanding } from "../features/approved-chat-landing";
+import CripqerLanding from "../components/CripqerLanding";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -83,7 +83,7 @@ function Index() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
-      <ApprovedChatLanding />
+      <CripqerLanding />
     </>
   );
 }

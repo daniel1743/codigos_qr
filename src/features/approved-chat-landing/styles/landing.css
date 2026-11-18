@@ -55,20 +55,54 @@ html:has(.cripqer-chat-landing) {
 }
 /* ---------- Cripqer signature border ---------- */
 
-/* [SIGNATURE V4] One brush per colour, circulating the whole border.
- *
- * The geometry and the timing both live in SignatureBorder.tsx now: the outline
- * has to be rebuilt as the brush bends around each corner, so this component has
- * no CSS animation left. What stays here is the state machine -- which stream is
- * visible in which state, and the crossfade -- plus the state-driven opacity of
- * the soft aura. The class names stay because SignatureBorder.tsx marks the two
- * streams with them. */
+@keyframes sig-travel-blue {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: -100;
+  }
+}
+@keyframes sig-travel-gold {
+  from {
+    stroke-dashoffset: -50;
+  }
+  to {
+    stroke-dashoffset: -150;
+  }
+}
+.sig-seg {
+  stroke-dasharray: 7 93;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+.sig-long {
+  stroke-dasharray: 13 87;
+}
+.sig-blue {
+  stroke-dashoffset: 0;
+  animation-name: sig-travel-blue;
+}
+.sig-gold {
+  stroke-dashoffset: -50;
+  animation-name: sig-travel-gold;
+}
+.sig-calm .sig-seg {
+  animation-duration: 11s;
+}
+.sig-busy .sig-seg {
+  animation-duration: 3.6s;
+}
 .sig-calm,
 .sig-busy {
   opacity: 0;
   transition: opacity 280ms cubic-bezier(0.23, 1, 0.32, 1);
 }
-.sig-glow {
+.sig-calm .sig-seg,
+.sig-busy .sig-seg {
+  animation-play-state: paused;
+}
+.sig-halo {
   opacity: 0.16;
 }
 [data-sig='hover'] .sig-calm {
@@ -78,33 +112,21 @@ html:has(.cripqer-chat-landing) {
 [data-sig='finish'] .sig-busy {
   opacity: 1;
 }
+[data-sig='listening'] .sig-calm .sig-seg,
+[data-sig='finish'] .sig-busy .sig-seg,
+[data-sig='processing'] .sig-busy .sig-seg {
+  animation-play-state: running;
+}
 [data-sig='processing'] .sig-busy {
   opacity: 1;
 }
-[data-sig='processing'] .sig-busy .sig-glow {
+[data-sig='processing'] .sig-busy .sig-halo {
   opacity: 0.24;
 }
-
-/* ---------------------------------------------------------------------------
- * [DESKTOP 4-UP] Approved desktop refinement.
- *
- * The showcase keeps five rotation slots so the mobile carousel is untouched,
- * but the desktop row shows only the first four, each frozen at the width it had
- * in the previous five-up row. The row therefore reads narrower and optically
- * centred instead of filling the whole stage, and the composer below regains
- * visual priority. The override needs [row] > [card] specificity (0,3,0) to beat
- * the `md:flex-1` utility emitted by the generated block further down.
- * ------------------------------------------------------------------------- */
-@media (min-width: 768px) {
-  .cripqer-chat-landing [data-showcase-row] {
-    justify-content: center;
-  }
-  .cripqer-chat-landing [data-showcase-row] > [data-showcase-card] {
-    width: calc((100% - 4rem) / 5);
-    flex: 0 0 auto;
-  }
-  .cripqer-chat-landing [data-showcase-row] > [data-showcase-card][data-slot-hidden] {
-    display: none;
+@media (prefers-reduced-motion: reduce) {
+  .sig-seg {
+    animation: none !important;
+    stroke-dasharray: 16 84;
   }
 }
 
@@ -147,11 +169,7 @@ html:has(.cripqer-chat-landing) {
     --color-brand-gold-soft: #F7EDCB;
     --font-display: Montserrat, system-ui, sans-serif;}
 
-.cripqer-chat-landing .pointer-events-auto {pointer-events: auto;}
-
 .cripqer-chat-landing .pointer-events-none {pointer-events: none;}
-
-.cripqer-chat-landing .visible {visibility: visible;}
 
 .cripqer-chat-landing .sr-only {position: absolute;
     width: 1px;
@@ -201,8 +219,6 @@ html:has(.cripqer-chat-landing) {
 
 .cripqer-chat-landing .bottom-3 {bottom: calc(var(--spacing) * 3);}
 
-.cripqer-chat-landing .bottom-5 {bottom: calc(var(--spacing) * 5);}
-
 .cripqer-chat-landing .bottom-12 {bottom: calc(var(--spacing) * 12);}
 
 .cripqer-chat-landing .left-0 {left: 0px;}
@@ -230,8 +246,6 @@ html:has(.cripqer-chat-landing) {
 .cripqer-chat-landing .z-40 {z-index: 40;}
 
 .cripqer-chat-landing .z-50 {z-index: 50;}
-
-.cripqer-chat-landing .z-\[60\] {z-index: 60;}
 
 .cripqer-chat-landing .col-span-2 {grid-column: span 2 / span 2;}
 
@@ -311,8 +325,6 @@ html:has(.cripqer-chat-landing) {
 .cripqer-chat-landing .ml-1\.5 {margin-left: calc(var(--spacing) * 1.5);}
 
 .cripqer-chat-landing .ml-2 {margin-left: calc(var(--spacing) * 2);}
-
-.cripqer-chat-landing .ml-auto {margin-left: auto;}
 
 .cripqer-chat-landing .block {display: block;}
 
@@ -408,15 +420,13 @@ html:has(.cripqer-chat-landing) {
 
 .cripqer-chat-landing .min-h-0 {min-height: 0px;}
 
-.cripqer-chat-landing .min-h-11 {min-height: calc(var(--spacing) * 11);}
-
 .cripqer-chat-landing .min-h-\[30px\] {min-height: 30px;}
 
 .cripqer-chat-landing .min-h-\[56px\] {min-height: 56px;}
 
 .cripqer-chat-landing .min-h-\[112px\] {min-height: 112px;}
 
-.cripqer-chat-landing .min-h-\[280px\] {min-height: 280px;}
+.cripqer-chat-landing .min-h-\[320px\] {min-height: 320px;}
 
 .cripqer-chat-landing .w-1 {width: var(--spacing);}
 
@@ -458,9 +468,9 @@ html:has(.cripqer-chat-landing) {
 
 .cripqer-chat-landing .w-\[48px\] {width: 48px;}
 
-.cripqer-chat-landing .w-\[72\%\] {width: 72%;}
+.cripqer-chat-landing .w-\[64vw\] {width: 64vw;}
 
-.cripqer-chat-landing .w-\[84vw\] {width: 84vw;}
+.cripqer-chat-landing .w-\[72\%\] {width: 72%;}
 
 .cripqer-chat-landing .w-\[112px\] {width: 112px;}
 
@@ -484,19 +494,17 @@ html:has(.cripqer-chat-landing) {
 
 .cripqer-chat-landing .max-w-\[85\%\] {max-width: 85%;}
 
+.cripqer-chat-landing .max-w-\[260px\] {max-width: 260px;}
+
 .cripqer-chat-landing .max-w-\[280px\] {max-width: 280px;}
 
 .cripqer-chat-landing .max-w-\[300px\] {max-width: 300px;}
 
 .cripqer-chat-landing .max-w-\[340px\] {max-width: 340px;}
 
-.cripqer-chat-landing .max-w-\[390px\] {max-width: 390px;}
-
 .cripqer-chat-landing .max-w-\[406px\] {max-width: 406px;}
 
 .cripqer-chat-landing .max-w-\[420px\] {max-width: 420px;}
-
-.cripqer-chat-landing .max-w-\[440px\] {max-width: 440px;}
 
 .cripqer-chat-landing .max-w-\[540px\] {max-width: 540px;}
 
@@ -520,8 +528,6 @@ html:has(.cripqer-chat-landing) {
 .cripqer-chat-landing .-translate-y-1\/2 {--tw-translate-y: calc(calc(1 / 2 * 100%) * -1);
     translate: var(--tw-translate-x) var(--tw-translate-y);}
 
-.cripqer-chat-landing .scale-\[var\(--focus-scale\)\] {scale: var(--focus-scale);}
-
 .cripqer-chat-landing .rotate-45 {rotate: 45deg;}
 
 .cripqer-chat-landing .transform {transform: var(--tw-rotate-x,) var(--tw-rotate-y,) var(--tw-rotate-z,) var(--tw-skew-x,) var(--tw-skew-y,);}
@@ -533,8 +539,6 @@ html:has(.cripqer-chat-landing) {
 .cripqer-chat-landing .cursor-text {cursor: text;}
 
 .cripqer-chat-landing .touch-none {touch-action: none;}
-
-.cripqer-chat-landing .resize {resize: both;}
 
 .cripqer-chat-landing .resize-none {resize: none;}
 
@@ -575,8 +579,6 @@ html:has(.cripqer-chat-landing) {
 .cripqer-chat-landing .justify-center {justify-content: center;}
 
 .cripqer-chat-landing .justify-end {justify-content: flex-end;}
-
-.cripqer-chat-landing .gap-0 {gap: 0px;}
 
 .cripqer-chat-landing .gap-0\.5 {gap: calc(var(--spacing) * 0.5);}
 
@@ -837,8 +839,6 @@ html:has(.cripqer-chat-landing) {
 
 .cripqer-chat-landing .px-10 {padding-inline: calc(var(--spacing) * 10);}
 
-.cripqer-chat-landing .px-\[8vw\] {padding-inline: 8vw;}
-
 .cripqer-chat-landing .py-0\.5 {padding-block: calc(var(--spacing) * 0.5);}
 
 .cripqer-chat-landing .py-1 {padding-block: var(--spacing);}
@@ -973,6 +973,8 @@ html:has(.cripqer-chat-landing) {
 
 .cripqer-chat-landing .text-\[26px\] {font-size: 26px;}
 
+.cripqer-chat-landing .text-\[27px\] {font-size: 27px;}
+
 .cripqer-chat-landing .text-\[30px\] {font-size: 30px;}
 
 .cripqer-chat-landing .text-\[32px\] {font-size: 32px;}
@@ -990,8 +992,6 @@ html:has(.cripqer-chat-landing) {
 .cripqer-chat-landing .text-\[46px\] {font-size: 46px;}
 
 .cripqer-chat-landing .text-\[48px\] {font-size: 48px;}
-
-.cripqer-chat-landing .text-\[min\(26px\,7vw\)\] {font-size: min(26px, 7vw);}
 
 .cripqer-chat-landing .leading-\[1\.1\] {--tw-leading: 1.1;
     line-height: 1.1;}
@@ -1223,10 +1223,6 @@ html:has(.cripqer-chat-landing) {
     transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
     transition-duration: var(--tw-duration, var(--default-transition-duration));}
 
-.cripqer-chat-landing .transition-\[scale\] {transition-property: scale;
-    transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
-    transition-duration: var(--tw-duration, var(--default-transition-duration));}
-
 .cripqer-chat-landing .transition-\[transform\,box-shadow\] {transition-property: transform,box-shadow;
     transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
     transition-duration: var(--tw-duration, var(--default-transition-duration));}
@@ -1248,12 +1244,6 @@ html:has(.cripqer-chat-landing) {
 
 .cripqer-chat-landing .duration-200 {--tw-duration: 200ms;
     transition-duration: 200ms;}
-
-.cripqer-chat-landing .duration-\[350ms\] {--tw-duration: 350ms;
-    transition-duration: 350ms;}
-
-.cripqer-chat-landing .ease-\[cubic-bezier\(0\.23\,1\,0\.32\,1\)\] {--tw-ease: cubic-bezier(0.23,1,0.32,1);
-    transition-timing-function: cubic-bezier(0.23,1,0.32,1);}
 
 .cripqer-chat-landing .ease-out {--tw-ease: var(--ease-out);
     transition-timing-function: var(--ease-out);}
@@ -1381,12 +1371,6 @@ color: var(--color-white);
   .cripqer-chat-landing .sm\:block {
 display: block;
   }
-  .cripqer-chat-landing .sm\:hidden {
-display: none;
-  }
-  .cripqer-chat-landing .sm\:inline {
-display: inline;
-  }
 }
 
 @media (width >= 48rem) {
@@ -1429,8 +1413,8 @@ height: 280px;
   .cripqer-chat-landing .md\:h-\[min\(620px\,72vh\)\] {
 height: min(620px, 72vh);
   }
-  .cripqer-chat-landing .md\:min-h-0 {
-min-height: 0px;
+  .cripqer-chat-landing .md\:h-auto {
+height: auto;
   }
   .cripqer-chat-landing .md\:min-h-\[124px\] {
 min-height: 124px;
@@ -1465,12 +1449,6 @@ max-width: none;
   .cripqer-chat-landing .md\:flex-1 {
 flex: 1;
   }
-  .cripqer-chat-landing .md\:shrink-0 {
-flex-shrink: 0;
-  }
-  .cripqer-chat-landing .md\:scale-none {
-scale: none;
-  }
   .cripqer-chat-landing .md\:\[transform\:var\(--tilt\)\] {
 transform: var(--tilt);
   }
@@ -1494,9 +1472,6 @@ gap: calc(var(--spacing) * 16);
   }
   .cripqer-chat-landing .md\:overflow-visible {
 overflow: visible;
-  }
-  .cripqer-chat-landing .md\:overflow-x-auto {
-overflow-x: auto;
   }
   .cripqer-chat-landing .md\:overflow-y-auto {
 overflow-y: auto;
@@ -1529,9 +1504,6 @@ padding: calc(var(--spacing) * 8);
   }
   .cripqer-chat-landing .md\:px-0 {
 padding-inline: 0px;
-  }
-  .cripqer-chat-landing .md\:px-3\.5 {
-padding-inline: calc(var(--spacing) * 3.5);
   }
   .cripqer-chat-landing .md\:px-5 {
 padding-inline: calc(var(--spacing) * 5);
@@ -1583,9 +1555,6 @@ font-size: 28px;
   }
   .cripqer-chat-landing .md\:text-\[40px\] {
 font-size: 40px;
-  }
-  .cripqer-chat-landing .md\:whitespace-nowrap {
-white-space: nowrap;
   }
   .cripqer-chat-landing .md\:\[perspective\:1800px\] {
 perspective: 1800px;

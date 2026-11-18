@@ -1,16 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
-import { initialTemplateIds } from '../data/templates';
-import { createTemplateRotation, rotationCandidates, rotateSlot } from '../utils/templateRotation';
+import { initialTemplateIds, rotationQueue } from '../data/templates';
 import type { TemplateId } from '../types/cripqer';
 
-export const INTERVAL_MS = 3200;
-const SLOT_ORDER = [1, 3, 0, 2];
+const INTERVAL_MS = 5200;
+const SLOT_ORDER = [1, 3, 0, 4, 2];
 
-/** Ambient rotation: one slot at a time swaps in the next family from the pool. */
+/** Ambient rotation: one slot at a time swaps in the next family from the queue. */
 export function useTemplateRotation(active: boolean) {
-  const state = useRef(createTemplateRotation(initialTemplateIds, rotationCandidates()));
-  const [slots, setSlots] = useState<TemplateId[]>(state.current.slots);
+  const [slots, setSlots] = useState<TemplateId[]>(initialTemplateIds);
   const [paused, setPaused] = useState(false);
+  const queue = useRef<TemplateId[]>([...rotationQueue]);
   const cursor = useRef(0);
 
   useEffect(() => {
@@ -20,11 +19,12 @@ export function useTemplateRotation(active: boolean) {
       if (document.hidden) return;
       const slot = SLOT_ORDER[cursor.current % SLOT_ORDER.length]!;
       cursor.current += 1;
-      // Rotate outside the state updater: React may invoke an updater twice
-      // (StrictMode), and mutating the pool there used to duplicate a template
-      // across two visible slots.
-      state.current = rotateSlot(state.current, slot);
-      setSlots(state.current.slots);
+      setSlots((prev) => {
+        const incoming = queue.current.shift();
+        if (!incoming) return prev;
+        queue.current.push(prev[slot]!);
+        return prev.map((tid, i) => i === slot ? incoming : tid);
+      });
     }, INTERVAL_MS);
     return () => window.clearInterval(id);
   }, [active, paused]);

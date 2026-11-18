@@ -11,10 +11,6 @@
 const YOUTUBE_URL = /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([^?&/]+)/;
 const VIMEO_URL = /vimeo\.com\/(?:video\/)?([0-9]+)/;
 
-/** Demo content shown in the editor/template preview, never published. */
-export const MAGIC_VIDEO_DEMO_URL = "https://youtu.be/nzCwupoMcDI";
-export const MAGIC_VIDEO_DEMO_OWNER = "CRIPQER";
-
 export type VideoSource = "youtube" | "vimeo" | "external" | "none";
 
 export interface VideoResolution {

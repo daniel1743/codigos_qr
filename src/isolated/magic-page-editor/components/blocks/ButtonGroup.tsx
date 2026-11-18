@@ -4,7 +4,6 @@ import { useEditor } from '../../contexts/EditorContext';
 import { EditableCTA, type CtaVariants } from '../editor/EditableCTA';
 import { iconForId } from '../editor/controls/IconPicker';
 import { buttonIdentity, normalizeButtonIcon, readButtonGroup, suggestButtonIcon, type LegacyButtonSeed } from '../../utils/buttonGroup';
-import { actionHref } from '../../utils/actionPanelOps';
 import { cx } from '../../utils/cx';
 
 interface ButtonGroupProps {
@@ -34,7 +33,7 @@ const PRIMARY_STYLE: React.CSSProperties = {
 
 /** Shared link/button collection. Legacy links.N are adapted without being rewritten. */
 export function ButtonGroup({ blockKey, seeds, variants, maxWidth = 640, className, mobile = false, semanticContext = '' }: ButtonGroupProps) {
-  const { doc, mode } = useEditor();
+  const { doc } = useEditor();
   const group = readButtonGroup(doc, blockKey, seeds);
   const groupVariant = group.groupProps['groupCardCtaVariant'] ?? 'soft';
   const groupShape = group.groupProps['groupCardCtaShape'] ?? 'pill';
@@ -66,9 +65,7 @@ export function ButtonGroup({ blockKey, seeds, variants, maxWidth = 640, classNa
 
   return (
     <div className={cx('mx-auto flex w-full flex-col', gap, align, className)} style={{ maxWidth }} data-button-group={blockKey} data-button-group-canonical={group.canonical ? 'true' : 'false'}>
-      {/* A group with nothing to show is an authoring state, not page copy: the
-          visitor gets no dashed "Sin botones" note over a published page. */}
-      {group.items.length === 0 && mode === 'edit' &&
+      {group.items.length === 0 &&
       <div
         role="note"
         className="flex w-full flex-col items-center gap-1 rounded-2xl border border-dashed border-line/80 px-4 py-6 text-center"
@@ -84,14 +81,6 @@ export function ButtonGroup({ blockKey, seeds, variants, maxWidth = 640, classNa
         const showIcon = !!Icon && iconPosition !== 'none';
         /* Removing the icon must actually remove it: no implicit arrow afterwards. */
         const showArrow = explicitIcon !== 'none';
-        /**
-         * The destination the visitor actually gets, through the same validation
-         * the action panels use. A label with nothing usable behind it — empty,
-         * half-typed, or a placeholder — renders as a button without an `href`
-         * rather than as `href=""`, `href="#"` or a destination the business
-         * never declared. A valid one is handed over verbatim, exactly as before.
-         */
-        const destination = actionHref(item.href);
         const iconBubble = (content: React.ReactNode) => (
           <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-current/30 bg-black/5 shadow-[inset_0_0_0_1px_rgb(255_255_255_/_8%)]">
             {content}
@@ -112,7 +101,7 @@ export function ButtonGroup({ blockKey, seeds, variants, maxWidth = 640, classNa
             elementLabel={identity.identity}
             label={item.label}
             sub={item.sub}
-            href={destination === '' ? undefined : destination}
+            href={item.href}
             variants={variants}
             defaultVariant={groupVariant as any}
             defaultProps={{ variant: groupVariant, shape: groupShape, size: groupSize, iconPosition, kind: groupKind }}

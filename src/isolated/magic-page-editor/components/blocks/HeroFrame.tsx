@@ -256,16 +256,8 @@ export function HeroFrame({
       return <div {...data} {...crop.handlers} className="mx-auto grid max-w-[1160px] touch-none grid-rows-[minmax(260px,1fr)_auto]"><div className="relative overflow-hidden">{img}{decor}</div><div className="flex items-start gap-8 px-10 py-8">{avatar}<div className="relative z-[3] flex flex-1 flex-col items-start">{children({ align: 'left', onMedia: false })}</div></div></div>;
     case 'splitVertical':
       return <div {...data} {...crop.handlers} className={cx('mx-auto grid max-w-[1180px] touch-none', m ? 'grid-cols-1' : 'grid-cols-2')}><div className="relative min-h-[480px] overflow-hidden">{img}{decor}</div><div className="relative z-[3] flex flex-col items-start justify-center border-y border-line p-12">{avatar && <div className="mb-7">{avatar}</div>}{children({ align: 'left', onMedia: false })}</div></div>;
-    case 'fullBleed': {
-      /**
-       * Microfase 2A · a generated hero that asks for `contentAlign: 'center'`
-       * centers the copy block, and the same `align` reaches the CTA and social
-       * rows through `children`. A document that declares nothing keeps the
-       * exact markup it had, so no published page moves.
-       */
-      const centered = p['contentAlign'] === 'center';
-      return <div {...data} {...crop.handlers} className="relative flex min-h-[640px] touch-none items-end overflow-hidden">{img}{decor}<div className={centered ? 'relative z-[3] mx-auto flex w-full max-w-[760px] flex-col items-center p-12' : 'relative z-[3] flex w-full max-w-[760px] flex-col items-start p-12'} style={onMediaVars}>{avatar && <div className="mb-6">{avatar}</div>}{children({ align: centered ? 'center' : 'left', onMedia: true })}</div></div>;
-    }
+    case 'fullBleed':
+      return <div {...data} {...crop.handlers} className="relative flex min-h-[640px] touch-none items-end overflow-hidden">{img}{decor}<div className="relative z-[3] flex w-full max-w-[760px] flex-col items-start p-12" style={onMediaVars}>{avatar && <div className="mb-6">{avatar}</div>}{children({ align: 'left', onMedia: true })}</div></div>;
     case 'photoCard':
       return <div {...data} {...crop.handlers} className="relative mx-auto min-h-[590px] max-w-[1120px] touch-none overflow-hidden p-8">{img}<div className="cq-surface relative z-[3] mt-56 max-w-[500px] p-9 shadow-xl" style={{ borderRadius: radius }}>{avatar && <div className="mb-5">{avatar}</div>}{children({ align: 'left', onMedia: false })}</div></div>;
     case 'avatarBand':
