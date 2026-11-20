@@ -15,11 +15,13 @@ import { Route as AccountRouteImport } from './routes/account'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AnalyticsVisualQaRouteImport } from './routes/analytics-visual-qa'
 import { Route as CorreoConfirmadoRouteImport } from './routes/correo-confirmado'
+import { Route as CrearTarjetaRouteImport } from './routes/crear-tarjeta'
 import { Route as EditorRouteImport } from './routes/editor'
 import { Route as EncryptedDocumentsRouteImport } from './routes/encrypted-documents'
 import { Route as EngineLabRouteImport } from './routes/engine-lab'
 import { Route as HelpRouteImport } from './routes/help'
 import { Route as LandingChatParityRouteImport } from './routes/landing-chat-parity'
+import { Route as LandingLegacyRouteImport } from './routes/landing-legacy'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as OnboardingPreviewRouteImport } from './routes/onboarding-preview'
 import { Route as OnboardingTestRouteImport } from './routes/onboarding-test'
@@ -78,6 +80,11 @@ const CorreoConfirmadoRoute = CorreoConfirmadoRouteImport.update({
   path: '/correo-confirmado',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CrearTarjetaRoute = CrearTarjetaRouteImport.update({
+  id: '/crear-tarjeta',
+  path: '/crear-tarjeta',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EditorRoute = EditorRouteImport.update({
   id: '/editor',
   path: '/editor',
@@ -101,6 +108,11 @@ const HelpRoute = HelpRouteImport.update({
 const LandingChatParityRoute = LandingChatParityRouteImport.update({
   id: '/landing-chat-parity',
   path: '/landing-chat-parity',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LandingLegacyRoute = LandingLegacyRouteImport.update({
+  id: '/landing-legacy',
+  path: '/landing-legacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -247,11 +259,13 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/analytics-visual-qa': typeof AnalyticsVisualQaRoute
   '/correo-confirmado': typeof CorreoConfirmadoRoute
+  '/crear-tarjeta': typeof CrearTarjetaRoute
   '/editor': typeof EditorRoute
   '/encrypted-documents': typeof EncryptedDocumentsRoute
   '/engine-lab': typeof EngineLabRoute
   '/help': typeof HelpRoute
   '/landing-chat-parity': typeof LandingChatParityRoute
+  '/landing-legacy': typeof LandingLegacyRoute
   '/login': typeof LoginRoute
   '/onboarding-preview': typeof OnboardingPreviewRoute
   '/onboarding-test': typeof OnboardingTestRoute
@@ -287,11 +301,13 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/analytics-visual-qa': typeof AnalyticsVisualQaRoute
   '/correo-confirmado': typeof CorreoConfirmadoRoute
+  '/crear-tarjeta': typeof CrearTarjetaRoute
   '/editor': typeof EditorRoute
   '/encrypted-documents': typeof EncryptedDocumentsRoute
   '/engine-lab': typeof EngineLabRoute
   '/help': typeof HelpRoute
   '/landing-chat-parity': typeof LandingChatParityRoute
+  '/landing-legacy': typeof LandingLegacyRoute
   '/login': typeof LoginRoute
   '/onboarding-preview': typeof OnboardingPreviewRoute
   '/onboarding-test': typeof OnboardingTestRoute
@@ -328,11 +344,13 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/analytics-visual-qa': typeof AnalyticsVisualQaRoute
   '/correo-confirmado': typeof CorreoConfirmadoRoute
+  '/crear-tarjeta': typeof CrearTarjetaRoute
   '/editor': typeof EditorRoute
   '/encrypted-documents': typeof EncryptedDocumentsRoute
   '/engine-lab': typeof EngineLabRoute
   '/help': typeof HelpRoute
   '/landing-chat-parity': typeof LandingChatParityRoute
+  '/landing-legacy': typeof LandingLegacyRoute
   '/login': typeof LoginRoute
   '/onboarding-preview': typeof OnboardingPreviewRoute
   '/onboarding-test': typeof OnboardingTestRoute
@@ -370,11 +388,13 @@ export interface FileRouteTypes {
     | '/admin'
     | '/analytics-visual-qa'
     | '/correo-confirmado'
+    | '/crear-tarjeta'
     | '/editor'
     | '/encrypted-documents'
     | '/engine-lab'
     | '/help'
     | '/landing-chat-parity'
+    | '/landing-legacy'
     | '/login'
     | '/onboarding-preview'
     | '/onboarding-test'
@@ -410,11 +430,13 @@ export interface FileRouteTypes {
     | '/admin'
     | '/analytics-visual-qa'
     | '/correo-confirmado'
+    | '/crear-tarjeta'
     | '/editor'
     | '/encrypted-documents'
     | '/engine-lab'
     | '/help'
     | '/landing-chat-parity'
+    | '/landing-legacy'
     | '/login'
     | '/onboarding-preview'
     | '/onboarding-test'
@@ -450,11 +472,13 @@ export interface FileRouteTypes {
     | '/admin'
     | '/analytics-visual-qa'
     | '/correo-confirmado'
+    | '/crear-tarjeta'
     | '/editor'
     | '/encrypted-documents'
     | '/engine-lab'
     | '/help'
     | '/landing-chat-parity'
+    | '/landing-legacy'
     | '/login'
     | '/onboarding-preview'
     | '/onboarding-test'
@@ -491,11 +515,13 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   AnalyticsVisualQaRoute: typeof AnalyticsVisualQaRoute
   CorreoConfirmadoRoute: typeof CorreoConfirmadoRoute
+  CrearTarjetaRoute: typeof CrearTarjetaRoute
   EditorRoute: typeof EditorRoute
   EncryptedDocumentsRoute: typeof EncryptedDocumentsRoute
   EngineLabRoute: typeof EngineLabRoute
   HelpRoute: typeof HelpRoute
   LandingChatParityRoute: typeof LandingChatParityRoute
+  LandingLegacyRoute: typeof LandingLegacyRoute
   LoginRoute: typeof LoginRoute
   OnboardingPreviewRoute: typeof OnboardingPreviewRoute
   OnboardingTestRoute: typeof OnboardingTestRoute
@@ -562,6 +588,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CorreoConfirmadoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/crear-tarjeta': {
+      id: '/crear-tarjeta'
+      path: '/crear-tarjeta'
+      fullPath: '/crear-tarjeta'
+      preLoaderRoute: typeof CrearTarjetaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/editor': {
       id: '/editor'
       path: '/editor'
@@ -595,6 +628,13 @@ declare module '@tanstack/react-router' {
       path: '/landing-chat-parity'
       fullPath: '/landing-chat-parity'
       preLoaderRoute: typeof LandingChatParityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/landing-legacy': {
+      id: '/landing-legacy'
+      path: '/landing-legacy'
+      fullPath: '/landing-legacy'
+      preLoaderRoute: typeof LandingLegacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -828,11 +868,13 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   AnalyticsVisualQaRoute: AnalyticsVisualQaRoute,
   CorreoConfirmadoRoute: CorreoConfirmadoRoute,
+  CrearTarjetaRoute: CrearTarjetaRoute,
   EditorRoute: EditorRoute,
   EncryptedDocumentsRoute: EncryptedDocumentsRoute,
   EngineLabRoute: EngineLabRoute,
   HelpRoute: HelpRoute,
   LandingChatParityRoute: LandingChatParityRoute,
+  LandingLegacyRoute: LandingLegacyRoute,
   LoginRoute: LoginRoute,
   OnboardingPreviewRoute: OnboardingPreviewRoute,
   OnboardingTestRoute: OnboardingTestRoute,
