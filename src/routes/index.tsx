@@ -1,5 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { ApprovedChatLanding } from "../features/approved-chat-landing";
+import { ClientOnly, createFileRoute } from "@tanstack/react-router";
+import { lazy } from "react";
+
+const ApprovedChatLanding = lazy(async () => {
+  const module = await import("../features/approved-chat-landing");
+  return { default: module.ApprovedChatLanding };
+});
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -77,13 +82,27 @@ const structuredData = [
 ];
 
 function Index() {
+  const landing = <ApprovedChatLanding />;
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
-      <ApprovedChatLanding />
+      {import.meta.env.DEV ? (
+        <ClientOnly
+          fallback={
+            <div className="flex min-h-screen items-center justify-center bg-canvas text-sm text-ink/60">
+              Cargando Cripqer…
+            </div>
+          }
+        >
+          {landing}
+        </ClientOnly>
+      ) : (
+        landing
+      )}
     </>
   );
 }
