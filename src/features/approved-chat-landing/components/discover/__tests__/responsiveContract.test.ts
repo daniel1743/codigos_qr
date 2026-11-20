@@ -111,11 +111,16 @@ describe('mobile responsive contract (approved chat landing)', () => {
   });
 
   it('D) lets the gallery own the free height so the composer sits under it', () => {
+    // The gallery owns the free height at every breakpoint, but it must be able to
+    // shrink below its content so the composer keeps its approved size on short
+    // viewports (1280x600, 360x640). A 280px floor let the showcase overflow behind
+    // the input. `flex-1` below is the single base token that now carries the
+    // desktop guarantee too; `md:flex-1` was redundant and was dropped with the floor.
     expect(galleryClass.includes('flex-1')).toBe(true);
-    expect(galleryClass.includes('min-h-[280px]')).toBe(true);
+    expect(galleryClass.includes('min-h-0')).toBe(true);
     expect(galleryClass.includes('h-[48vh]')).toBe(false);
-    expect(galleryClass.includes('md:flex-1')).toBe(true);
-    expect(galleryClass.includes('md:min-h-[280px]')).toBe(true);
+    expect(galleryClass.includes('min-h-[280px]')).toBe(false);
+    expect(galleryClass.includes('md:min-h-[280px]')).toBe(false);
   });
 
   it('E) keeps quick actions fully visible without horizontal scrolling', () => {
@@ -175,7 +180,7 @@ describe('mobile responsive contract (approved chat landing)', () => {
     ['md:mx-0', 'md:px-0', 'md:gap-4', 'md:overflow-visible', 'md:[perspective:1800px]'].forEach((token) => {
       expect(stripClass.includes(token)).toBe(true);
     });
-    ['md:mt-[3vh]', 'md:min-h-[280px]'].forEach((token) => {
+    ['md:mt-[3vh]'].forEach((token) => {
       expect(galleryClass.includes(token)).toBe(true);
     });
     ['md:text-[40px]', 'xl:text-[44px]', 'xl:leading-[1.06]'].forEach((token) => {

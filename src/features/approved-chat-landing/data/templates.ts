@@ -293,17 +293,19 @@ export const templates: TemplateFamily[] = [
 }];
 
 
-export const initialTemplateIds: TemplateId[] = ['warm_care', 'dark_craft', 'food_story', 'personal_brand', 'editorial_luxury'];
+export const initialTemplateIds: TemplateId[] = ['warm_care', 'dark_craft', 'food_story', 'personal_brand'];
 
-/** Families that rotate in, one card at a time. */
+/** Families that rotate in, one card at a time. Total: 4 visible + 8 rotation pool = 12 master models. */
 export const rotationQueue: TemplateId[] = [
-'soft_beauty',
-'professional_trust',
-'product_spotlight',
-'bold_creative',
-'minimal_premium',
-'local_friendly',
-'visual_portfolio'];
+  'editorial_luxury',
+  'soft_beauty',
+  'professional_trust',
+  'product_spotlight',
+  'bold_creative',
+  'minimal_premium',
+  'local_friendly',
+  'visual_portfolio'
+];
 
 
 export const moodFilters: {id: string;label: string;tags: string[];}[] = [

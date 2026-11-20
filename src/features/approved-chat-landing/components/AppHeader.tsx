@@ -4,14 +4,20 @@ import { CripqerLogo } from './brand/CripqerLogo';
 import { COMPOSER_ID } from './composer/Composer';
 import { getBusinessType, getChannel, getTemplate } from '../utils/templates';
 import { goals } from '../data/business';
+import { isTemplateSelectionFrozen } from '../../landing-lite/flags';
+import { useStartBaseCard } from '../../landing-lite/useStartBaseCard';
 import type { BusinessContext, Stage } from '../types/cripqer';
 
 interface AppHeaderProps {
   stage: Stage;
   context: BusinessContext;
+  /** Opens the real auth flow (Phase 9). */
+  onSignIn: () => void;
 }
 
-export function AppHeader({ stage, context }: AppHeaderProps) {
+export function AppHeader({ stage, context, onSignIn }: AppHeaderProps) {
+  const { starting, start: startPersonalize } = useStartBaseCard();
+  const frozen = isTemplateSelectionFrozen();
   const type = getBusinessType(context.businessIdentity.type);
   const channel = getChannel(context.primaryChannel);
   const goal = goals.find((g) => g.id === context.primaryGoal);
@@ -25,15 +31,15 @@ export function AppHeader({ stage, context }: AppHeaderProps) {
   filter(Boolean) as {key: string;label: string;gold?: boolean;}[];
 
   return (
-    <header className="relative z-20 flex h-14 shrink-0 items-center justify-between gap-4 px-5 md:h-16 md:px-10">
-      <div className="flex min-w-0 items-center gap-5">
+    <header className="relative z-20 flex h-14 shrink-0 items-center justify-between gap-2 px-3 sm:gap-4 sm:px-5 md:h-16 md:px-10">
+      <div className="flex shrink-0 items-center gap-3 sm:gap-5">
         <CripqerLogo />
         {stage === 'discover' &&
         <span className="hidden truncate text-[13.5px] text-muted lg:block">Crea tu presencia digital con nosotros.</span>
         }
       </div>
 
-      <div className="flex min-w-0 items-center gap-3">
+      <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
         {stage !== 'discover' && pills.length > 0 &&
         <div className="hidden min-w-0 items-center gap-2 md:flex" aria-live="polite">
             <span className="text-[12px] text-muted">Tu página</span>
@@ -57,19 +63,40 @@ export function AppHeader({ stage, context }: AppHeaderProps) {
         }
         <button
           type="button"
-          className="h-9 whitespace-nowrap rounded-full px-4 text-[13.5px] font-medium text-ink shadow-[0_0_0_1px_rgba(15,26,46,0.12)] transition-colors duration-150 hover:bg-white">
-          
+          onClick={onSignIn}
+          className="h-8 whitespace-nowrap rounded-full px-2.5 text-[12px] font-medium text-ink shadow-[0_0_0_1px_rgba(15,26,46,0.12)] transition-colors duration-150 hover:bg-white sm:h-9 sm:px-4 sm:text-[13.5px]">
+
           Iniciar sesión
         </button>
-        {stage === 'discover' &&
-        <button
-          type="button"
-          onClick={() => document.getElementById(COMPOSER_ID)?.focus()}
-          className="hidden h-9 whitespace-nowrap rounded-full bg-ink px-5 text-[13.5px] font-semibold text-white transition-colors duration-150 hover:bg-ink/90 sm:block">
-          
-            Crear mi página
-          </button>
-        }
+        {stage === 'discover' && (
+          frozen ? (
+            <button
+              type="button"
+              data-cta="personalizar-tarjeta"
+              onClick={() => void startPersonalize()}
+              disabled={starting}
+              className="inline-flex h-8 whitespace-nowrap items-center justify-center rounded-full bg-ink px-3 text-[12.5px] font-semibold text-white transition-colors duration-150 hover:bg-ink/90 disabled:opacity-60 sm:h-9 sm:px-5 sm:text-[13.5px]">
+              {starting ? (
+                <>
+                  <span className="sm:hidden">Preparando...</span>
+                  <span className="hidden sm:inline">Preparando tu tarjeta...</span>
+                </>
+              ) : (
+                <>
+                  <span className="sm:hidden">Personalizar</span>
+                  <span className="hidden sm:inline">Personalizar una tarjeta</span>
+                </>
+              )}
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => document.getElementById(COMPOSER_ID)?.focus()}
+              className="hidden h-9 whitespace-nowrap rounded-full bg-ink px-5 text-[13.5px] font-semibold text-white transition-colors duration-150 hover:bg-ink/90 sm:block">
+              Crear mi página
+            </button>
+          )
+        )}
       </div>
     </header>);
 

@@ -17,9 +17,9 @@ export function CripqerMark({ size = 28, className = '' }: CripqerMarkProps) {
 
 export function CripqerLogo() {
   return (
-    <span className="inline-flex shrink-0 items-center gap-2.5" aria-label="Cripqer">
-      <CripqerMark size={30} />
-      <span className="font-display text-[19px] font-bold leading-none tracking-[0.02em] text-brand-blue">
+    <span className="inline-flex shrink-0 items-center gap-2 sm:gap-2.5" aria-label="Cripqer">
+      <CripqerMark size={28} className="h-7 w-7 sm:h-[30px] sm:w-[30px]" />
+      <span className="font-display text-[17px] font-bold leading-none tracking-[0.02em] text-brand-blue sm:text-[19px]">
         CRIP<span className="text-brand-gold">Q</span>ER
       </span>
     </span>);

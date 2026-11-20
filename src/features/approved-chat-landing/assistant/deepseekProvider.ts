@@ -62,7 +62,14 @@ export function createDeepSeekAssistantProvider(): AssistantProvider {
           ),
           metadata: { provider: DEEPSEEK_PROVIDER_ID, model: remote.model, fallback: false },
         };
-      } catch {
+      } catch (error) {
+        // Diagnostic only: keep production debugging useful without exposing
+        // prompts, conversation history, provider keys, or request payloads.
+        console.error('[landing-assistant] remote request failed', {
+          provider: DEEPSEEK_PROVIDER_ID,
+          name: error instanceof Error ? error.name : 'UnknownError',
+          message: error instanceof Error ? error.message : String(error),
+        });
         return {
           ...deterministic,
           text: ensureLandingValue(

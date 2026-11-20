@@ -257,7 +257,7 @@ describe('Phase F2 — Granular template selection freeze', () => {
     const lastMsg = result.current.messages[result.current.messages.length - 1];
     expect(lastMsg?.role).toBe('assistant');
     expect(lastMsg?.text).toContain(
-      'Esa función estará disponible próximamente. Por ahora puedes personalizar tu propia tarjeta.',
+      'Estos diseños son demostraciones y no se aplican directamente desde la conversación.',
     );
     unmount();
   });
@@ -272,7 +272,7 @@ describe('Phase F2 — Granular template selection freeze', () => {
     expect(h.navigate).not.toHaveBeenCalled();
     const lastMsg = result.current.messages[result.current.messages.length - 1];
     expect(lastMsg?.text).toContain(
-      'Esa función estará disponible próximamente. Por ahora puedes personalizar tu propia tarjeta.',
+      'Estos diseños son demostraciones y no se aplican directamente desde la conversación.',
     );
 
     await act(async () => {
