@@ -8,6 +8,10 @@
  * whole editor.
  */
 
+/** Demo content used only by preview generation; it is never starter content. */
+export const MAGIC_VIDEO_DEMO_URL = "https://youtu.be/nzCwupoMcDI";
+export const MAGIC_VIDEO_DEMO_OWNER = "CRIPQER";
+
 const YOUTUBE_URL = /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([^?&/]+)/;
 const VIMEO_URL = /vimeo\.com\/(?:video\/)?([0-9]+)/;
 
